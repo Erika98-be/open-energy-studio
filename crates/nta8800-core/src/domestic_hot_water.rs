@@ -4707,9 +4707,10 @@ mod tests {
                 .collect::<Vec<_>>()
         };
         let blank = chp(declared(0.80, 0.12, " "), dhw_chp_class());
-        assert!(codes(&blank).iter().any(|(code, path)| *code
-            == "source_reference_required"
-            && path.ends_with("declaredEfficiencies.declarationReference")));
+        assert!(codes(&blank)
+            .iter()
+            .any(|(code, path)| *code == "source_reference_required"
+                && path.ends_with("declaredEfficiencies.declarationReference")));
         let invalid = chp(declared(0.80, 0.30, "declaration"), dhw_chp_class());
         assert!(codes(&invalid)
             .iter()
@@ -5544,14 +5545,13 @@ mod tests {
 
         // 13.27 and 13.29 fix h_a at 8,0 W/(m²·K) for hot water (p. 551):
         // an own surface coefficient is refused, the default calculates.
-        let in_air = |surface_coefficient| {
-            crate::heating_distribution::PipeGeometry::InsulatedInAir {
+        let in_air =
+            |surface_coefficient| crate::heating_distribution::PipeGeometry::InsulatedInAir {
                 pipe_outer_diameter_m: 0.015,
                 insulated_diameter_m: 0.045,
                 insulation_lambda: 0.035,
                 surface_coefficient,
-            }
-        };
+            };
         input.circulation = Some(circulation(None, Some(in_air(Some(10.0)))));
         let codes: Vec<String> = validate_hot_water(&input, context(), "w")
             .iter()
@@ -5585,7 +5585,10 @@ mod tests {
             .map(|issue| issue.code)
             .collect();
         assert!(codes.contains(&"pipe_dimension_not_in_metres"), "{codes:?}");
-        assert!(!codes.contains(&"hot_water_pipe_geometry_invalid"), "{codes:?}");
+        assert!(
+            !codes.contains(&"hot_water_pipe_geometry_invalid"),
+            "{codes:?}"
+        );
     }
 
     #[test]

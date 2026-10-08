@@ -7449,7 +7449,12 @@ mod tests {
             declaration_reference: "declaration".into(),
         }));
         let declared = assess_space_heating_chain(&input);
-        assert_eq!(declared.generation_efficiency, Some(0.8), "{:?}", declared.issues);
+        assert_eq!(
+            declared.generation_efficiency,
+            Some(0.8),
+            "{:?}",
+            declared.issues
+        );
         input.generator = empty_row(None);
         let refused = assess_space_heating_chain(&input);
         assert!(refused
