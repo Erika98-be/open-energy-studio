@@ -5,7 +5,11 @@ import type { NtaEvidenceItem, NtaEvidenceKind, NtaRelabelProof } from '../../..
 
 /** Roles of a file in a relabel (BRL 9500-W §4.2.3, p. 23). */
 const RELABEL_PROOFS: NtaRelabelProof[] = ['quote_with_order', 'specified_invoice', 'production_photo', 'review'];
-import { createEvidenceItem, EVIDENCE_KINDS, EVIDENCE_REFERENCE_PREFIX } from '../../../core/nta/Evidence';
+import {
+  checkEvidenceFile, createEvidenceItem, EVIDENCE_ACCEPT, EVIDENCE_KINDS, EVIDENCE_REFERENCE_PREFIX,
+  forgetSessionEvidence, releaseEvidenceIds,
+} from '../../../core/nta/Evidence';
+import { evidenceErrorText } from '../../EvidenceLink/EvidenceLink';
 
 interface EvidenceRegisterProps {
   evidence: NtaEvidenceItem[];
@@ -53,14 +57,18 @@ export function EvidenceRegister({ evidence, onChange }: EvidenceRegisterProps) 
     setBusy(true);
     setError(null);
     try {
+      const chosen = Array.from(files);
+      // Size and type first, so a huge or unsupported file is never read.
+      for (const file of chosen) checkEvidenceFile({ name: file.name, size: file.size });
       let next = [...evidence];
-      for (const file of Array.from(files)) {
+      for (const file of chosen) {
         const bytes = new Uint8Array(await file.arrayBuffer());
         next = [...next, await createEvidenceItem({ name: file.name, bytes, lastModified: file.lastModified }, next)];
       }
       onChange(next);
+      releaseEvidenceIds(next.slice(evidence.length).map((item) => item.id));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : String(reason));
+      setError(evidenceErrorText(reason, t));
     } finally {
       setBusy(false);
     }
@@ -71,7 +79,7 @@ export function EvidenceRegister({ evidence, onChange }: EvidenceRegisterProps) 
       <p className="dialog-hint">{t('evidence.hint', { prefix: EVIDENCE_REFERENCE_PREFIX })}</p>
       <div className="dialog-field">
         <label htmlFor="evidence-add">{t('evidence.add')}</label>
-        <FileButton id="evidence-add" multiple disabled={busy}
+        <FileButton id="evidence-add" multiple disabled={busy} accept={EVIDENCE_ACCEPT}
           onChange={(event) => { void addFiles(event.target.files); event.target.value = ''; }} />
       </div>
       {error && <p role="alert">{error}</p>}
@@ -125,7 +133,12 @@ export function EvidenceRegister({ evidence, onChange }: EvidenceRegisterProps) 
           </div>
           <GpsField id={`evidence-${item.id}-gps`} label={t('evidence.gps')} value={item.gps}
             onChange={(gps) => update(index, { gps })} />
-          <button type="button" onClick={() => onChange(evidence.filter((_, i) => i !== index))}>{t('evidence.remove')}</button>
+          <button type="button" onClick={() => {
+            const next = evidence.filter((_, i) => i !== index);
+            onChange(next);
+            // The removed file's bytes are no longer needed in this session.
+            forgetSessionEvidence(item.sha256, next);
+          }}>{t('evidence.remove')}</button>
         </fieldset>
       ))}
     </div>

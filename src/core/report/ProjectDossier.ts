@@ -1,4 +1,4 @@
-import { strToU8, zipSync } from 'fflate';
+import { strToU8, zipSync, type Zippable, type ZippableFile } from 'fflate';
 import type { IProject } from '../energy/types';
 import type {
   NtaEvidenceItem, NtaEvidenceKind, NtaRegistration, OpnameAssessment, ProjectPerformanceAssessment, RelabelAssessment,
@@ -344,11 +344,15 @@ export async function buildProjectDossier(
   const usage = evidenceUsage(project);
   for (const item of project.registration?.evidence ?? []) {
     const bytes = await loadEvidenceBytes(item);
-    if (bytes) files[evidenceArchiveName(item)] = bytes;
+    // Two entries can map to the same name (a repeated id, or ids that
+    // differ only in characters safeName drops): the second gets a suffix,
+    // so no file overwrites another and the manifest hash stays true.
+    const archivePath = bytes ? uniqueArchivePath(evidenceArchiveName(item), files) : null;
+    if (bytes && archivePath) files[archivePath] = bytes;
     else missingEvidence.push({ id: item.id, fileName: item.fileName, reason: 'bestand niet beschikbaar of hash wijkt af' });
     evidenceEntries.push({
       id: item.id, kind: item.kind, fileName: item.fileName, sha256: item.sha256, date: item.date ?? null,
-      archivePath: bytes ? evidenceArchiveName(item) : null, checkedBy: item.checkedBy ?? null,
+      archivePath, checkedBy: item.checkedBy ?? null,
       supports: usage.get(item.id) ?? [],
     });
   }
@@ -372,9 +376,56 @@ export async function buildProjectDossier(
   return { files, manifest };
 }
 
+/** `path`, or `name-2.ext`, `name-3.ext` … when `path` is already taken (case-insensitively). */
+export function uniqueArchivePath(path: string, taken: Record<string, unknown>): string {
+  const used = new Set(Object.keys(taken).map((key) => key.toLowerCase()));
+  if (!used.has(path.toLowerCase())) return path;
+  const slash = path.lastIndexOf('/');
+  const dot = path.lastIndexOf('.');
+  const split = dot > slash + 1 ? dot : path.length;
+  const base = path.slice(0, split);
+  const extension = path.slice(split);
+  let index = 2;
+  while (used.has(`${base}-${index}${extension}`.toLowerCase())) index += 1;
+  return `${base}-${index}${extension}`;
+}
+
+/**
+ * Largest dossier written as one ZIP. fflate writes no ZIP64 records, so an
+ * archive over 4 GiB would be corrupt; and every byte sits in memory twice
+ * while zipping. Above this limit the export stops with a clear message.
+ */
+export const MAX_DOSSIER_BYTES = 2 * 1024 * 1024 * 1024;
+
+/** Thrown when a dossier would exceed `MAX_DOSSIER_BYTES`. */
+export class DossierTooLargeError extends Error {
+  constructor(readonly totalBytes: number) {
+    super(`dossier_too_large: ${totalBytes} bytes`);
+    this.name = 'DossierTooLargeError';
+  }
+}
+
+/** File types that are already compressed: stored, not deflated again. */
+const STORED_EXTENSIONS = new Set([
+  'jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'pdf', 'zip', 'docx', 'xlsx', 'odt', 'ods',
+  'mp4', 'mov', 'm4v', 'mp3', 'gz', '7z',
+]);
+
+function alreadyCompressed(path: string): boolean {
+  const dot = path.lastIndexOf('.');
+  return dot > path.lastIndexOf('/') && STORED_EXTENSIONS.has(path.slice(dot + 1).toLowerCase());
+}
+
 /** The bundle as one ZIP archive. */
 export function zipProjectDossier(bundle: DossierBundle): Uint8Array {
+  const total = Object.values(bundle.files).reduce((sum, data) => sum + data.byteLength, 0);
+  if (total > MAX_DOSSIER_BYTES) throw new DossierTooLargeError(total);
   // Copy into this realm so zipSync treats each value as a file (see UNIEC3Exporter).
-  const copies = Object.fromEntries(Object.entries(bundle.files).map(([path, data]) => [path, new Uint8Array(data)]));
+  // Photos, PDFs and other compressed files are stored (level 0): deflating
+  // them again only costs time and memory.
+  const copies: Zippable = Object.fromEntries(Object.entries(bundle.files).map(([path, data]): [string, ZippableFile] => [
+    path,
+    alreadyCompressed(path) ? [new Uint8Array(data), { level: 0 }] : new Uint8Array(data),
+  ]));
   return zipSync(copies, { level: 6 });
 }
