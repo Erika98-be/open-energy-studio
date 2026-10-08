@@ -1064,6 +1064,7 @@ pub fn derive_envelope_zone(
                 SurfaceBoundary::UnheatedSpace { .. }
             ),
             renovation: renovation.clone(),
+            survey_table_8_10: true,
         };
         let result = if let Some(reed) = surface.reed_thickness_mm {
             match thatch_rc(surface, reed, &path, recorder) {
@@ -1510,6 +1511,7 @@ mod tests {
             r_si_override: None,
             towards_unheated_space: false,
             renovation: None,
+            survey_table_8_10: true,
         }
         .calculate();
         assert!(hull.is_object());
@@ -1595,6 +1597,7 @@ mod tests {
             r_si_override: None,
             towards_unheated_space: false,
             renovation: None,
+            survey_table_8_10: true,
         }
         .calculate();
         assert_eq!(derived.direct_elements.len(), 1);
@@ -2027,6 +2030,7 @@ mod tests {
             r_si_override: None,
             towards_unheated_space: false,
             renovation: None,
+            survey_table_8_10: true,
         }
         .calculate();
         assert_eq!(r_bw, facade.r_c);
@@ -2076,6 +2080,7 @@ mod tests {
             r_si_override: Some(0.17),
             towards_unheated_space: false,
             renovation: None,
+            survey_table_8_10: true,
         }
         .calculate();
         let overhang = derived
