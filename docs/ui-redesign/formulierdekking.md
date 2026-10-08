@@ -12,6 +12,7 @@ Stand 9 oktober 2026. Elke keuze die de rekenkern kent, moet de gebruiker in een
 
   Een optie die zo niet gedekt is, staat in `FORM_COVERAGE_EXEMPTIONS` met de reden en een soort: `form` (wel een formulier, niet op naam te zien), `json` (bewust alleen JSON), `missing` (nog geen formulier, te bouwen) of `parallel` (formulier in een parallelle wijziging). Een vrijstelling die inmiddels wel gedekt is, laat de test falen, zodat de lijst niet veroudert.
 - **Grens van de check.** Het blijft tekstanalyse, geen render-test per veld. Wat de check als gedekt telt, schrijft wel echt die naam onder die ouder; of het veld op elke plek (elke zone, elk systeem) staat, toetsen de formuliertests (`nta-form-coverage-forms.test.tsx`).
+- **Wat de formulieren schrijven, door de kern.** Dekking zegt niet dat de kern leest wat een formulier schrijft. Dat bewaakt het vangnet voor de projectformulieren: `src/__tests__/nta-project-form-guard.test.tsx` bedient elke getoonde NTA-sectie op het kantoor, de rijwoning en het kantoor met twee zones (elke keuze door al haar opties, elk vinkje, elke knop "toevoegen", daarna alles leeg) en legt elke toestand vast zoals "Toepassen" en de projectroute hem doorgeven. In de gate rekent `crates/nta8800-core/tests/project_form_guard.rs` ze door de kern en weigert een onleesbare vorm, een melding zonder route en een achtergebleven toestand uit `LEFTOVER_STATE`. Voor de opname doet `survey-null-paths.test.tsx` met `survey_form_shapes.rs` hetzelfde voor de lege waarden.
 
 ## Dekking
 
