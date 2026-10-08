@@ -1802,7 +1802,10 @@ pub(crate) fn forfait_partition_elements(
             }
             if opaque_area > 1e-9 {
                 let construction_id = surface.get("constructionId")?.as_str()?;
-                let u_value = constructions.get(construction_id)?.get("uValue")?.as_f64()?;
+                let u_value = constructions
+                    .get(construction_id)?
+                    .get("uValue")?
+                    .as_f64()?;
                 if !u_value.is_finite() || u_value <= 0.0 {
                     return None;
                 }

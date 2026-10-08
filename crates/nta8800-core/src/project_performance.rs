@@ -659,9 +659,8 @@ fn forfait_bridge_route(
     // H_U;for = 0 and a partition to an unheated space is an external
     // construction with U_iu;equi = U_C·b_U (C.10), so it also counts here.
     if surfaces().any(|surface| boundary(surface) == Some(ThermalBoundary::UnheatedSpace)) {
-        let partitions = crate::unheated_reduction_factors(project).and_then(|factors| {
-            crate::forfait_partition_elements(project, None, &factors)
-        });
+        let partitions = crate::unheated_reduction_factors(project)
+            .and_then(|factors| crate::forfait_partition_elements(project, None, &factors));
         match partitions {
             Some(elements) => {
                 for (element, opaque) in elements {
@@ -3275,7 +3274,9 @@ fn derive_input(
     let delta_u_forfait = forfait_bridge_route(&project, &nta, &constructions, gaps);
     // b_U per unheated space for the forfait route (8.4.1 note 5, C.10).
     let partition_factors = match delta_u_forfait {
-        Some(_) if !project.unheated_spaces.is_empty() => crate::unheated_reduction_factors(&project),
+        Some(_) if !project.unheated_spaces.is_empty() => {
+            crate::unheated_reduction_factors(&project)
+        }
         _ => None,
     };
     let mut used_ground = HashSet::new();
@@ -3500,25 +3501,34 @@ fn derive_input(
                             .and_then(Value::as_str)
                             .and_then(orientation)
                             .flatten();
-                        let tilt = tilts.get(id).copied().unwrap_or(match (side, surface_type) {
-                            (Some(_), _) => 90.0,
-                            (None, "floor") => 180.0,
-                            (None, _) => 0.0,
-                        });
-                        let mut push = |element_id: String, area: f64, u_value: f64, reference: String| {
-                            opaque.push(OpaqueElement {
-                                id: element_id,
-                                area_m2: area,
-                                orientation: side.unwrap_or(Orientation::South),
-                                tilt_deg: tilt,
-                                u_value_w_per_m2k: u_value * factor,
-                                forfait_delta_u_w_per_m2k: delta_u_forfait,
-                                behind_unheated_space: true,
-                                source_reference: reference,
-                            })
-                        };
+                        let tilt = tilts
+                            .get(id)
+                            .copied()
+                            .unwrap_or(match (side, surface_type) {
+                                (Some(_), _) => 90.0,
+                                (None, "floor") => 180.0,
+                                (None, _) => 0.0,
+                            });
+                        let mut push =
+                            |element_id: String, area: f64, u_value: f64, reference: String| {
+                                opaque.push(OpaqueElement {
+                                    id: element_id,
+                                    area_m2: area,
+                                    orientation: side.unwrap_or(Orientation::South),
+                                    tilt_deg: tilt,
+                                    u_value_w_per_m2k: u_value * factor,
+                                    forfait_delta_u_w_per_m2k: delta_u_forfait,
+                                    behind_unheated_space: true,
+                                    source_reference: reference,
+                                })
+                            };
                         let mut window_area = 0.0;
-                        for window in surface.get("windows").and_then(Value::as_array).map(Vec::as_slice).unwrap_or_default() {
+                        for window in surface
+                            .get("windows")
+                            .and_then(Value::as_array)
+                            .map(Vec::as_slice)
+                            .unwrap_or_default()
+                        {
                             let (Some(window_id), Some(area), Some(u_value)) = (
                                 window.get("id").and_then(Value::as_str),
                                 window.get("area").and_then(Value::as_f64),
@@ -3527,15 +3537,35 @@ fn derive_input(
                                 continue;
                             };
                             window_area += area;
-                            push(format!("window:{window_id}"), area, u_value, format!("project:window:{window_id}.uValue · b_U (C.10)"));
+                            push(
+                                format!("window:{window_id}"),
+                                area,
+                                u_value,
+                                format!("project:window:{window_id}.uValue · b_U (C.10)"),
+                            );
                         }
-                        let opaque_area = surface.get("area").and_then(Value::as_f64).unwrap_or(0.0) - window_area;
-                        let construction_id = surface.get("constructionId").and_then(Value::as_str).unwrap_or("");
+                        let opaque_area =
+                            surface.get("area").and_then(Value::as_f64).unwrap_or(0.0)
+                                - window_area;
+                        let construction_id = surface
+                            .get("constructionId")
+                            .and_then(Value::as_str)
+                            .unwrap_or("");
                         if let (true, Some(u_value)) = (
                             opaque_area > 1e-9,
-                            constructions.get(construction_id).and_then(|item| item.get("uValue")).and_then(Value::as_f64),
+                            constructions
+                                .get(construction_id)
+                                .and_then(|item| item.get("uValue"))
+                                .and_then(Value::as_f64),
                         ) {
-                            push(format!("surface:{id}:opaque"), opaque_area, u_value, format!("project:construction:{construction_id}.uValue · b_U (C.10)"));
+                            push(
+                                format!("surface:{id}:opaque"),
+                                opaque_area,
+                                u_value,
+                                format!(
+                                    "project:construction:{construction_id}.uValue · b_U (C.10)"
+                                ),
+                            );
                         }
                     }
                     continue;
@@ -5817,8 +5847,7 @@ mod tests {
         let partition = 0.21 * 0.6;
         let mean = (98.0 * 0.21 + 52.0 * 0.16 + 10.0 * partition) / 160.0;
         let delta = 0.1 - 0.25 * (mean - 0.4);
-        let expected =
-            98.0 * 0.21 + 52.0 * 0.16 + 12.0 * 1.1 + 10.0 * partition + 172.0 * delta;
+        let expected = 98.0 * 0.21 + 52.0 * 0.16 + 12.0 * 1.1 + 10.0 * partition + 172.0 * delta;
         let transmission = result
             .performance
             .as_ref()

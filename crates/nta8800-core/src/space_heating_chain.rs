@@ -6505,7 +6505,11 @@ mod tests {
             input.emission.balancing = HydronicBalancing::NotApplicable;
             input.emission.air_heaters = Some(heaters);
             let result = assess_space_heating_chain(&input);
-            assert_eq!(result.status, "calculated_unverified", "{:?}", result.issues);
+            assert_eq!(
+                result.status, "calculated_unverified",
+                "{:?}",
+                result.issues
+            );
             result.monthly[0].emission_fan_electricity_kwh
         };
         let ratio = run(mixed.clone()) / run(single);
@@ -6522,8 +6526,11 @@ mod tests {
             ..mixed
         });
         let result = assess_space_heating_chain(&input);
-        assert!(result.issues.iter().any(|item| item.code == "air_heater_count_invalid"
-            && item.path.ends_with("emission.airHeaters.further[0].count")));
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "air_heater_count_invalid"
+                && item.path.ends_with("emission.airHeaters.further[0].count")));
     }
 
     #[test]
