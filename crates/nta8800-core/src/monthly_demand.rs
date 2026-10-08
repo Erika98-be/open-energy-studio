@@ -2050,8 +2050,7 @@ fn resolve_transmission(
                 // A utility zone gives the building height H of 7.17a
                 // instead of storeys, so a missing or too large H is
                 // reported at that field (the form shows no storeys there).
-                let height_route =
-                    !input.usage_function.is_residential() && pipe.storeys == 0;
+                let height_route = !input.usage_function.is_residential() && pipe.storeys == 0;
                 if height_route
                     && !matches!(pipe.building_height_m, Some(height) if height <= 1000.0)
                 {

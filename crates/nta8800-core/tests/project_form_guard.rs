@@ -71,25 +71,36 @@ fn every_project_form_state_is_read_by_the_kernel() {
         .filter(|line| !line.trim().is_empty())
         .map(|line| serde_json::from_str(line).unwrap())
         .collect();
-    assert!(docs.len() > 500, "only {} form states collected", docs.len());
+    assert!(
+        docs.len() > 500,
+        "only {} form states collected",
+        docs.len()
+    );
 
     let threads = std::thread::available_parallelism().map_or(4, |n| n.get());
     let chunk = docs.len().div_ceil(threads);
     let outcomes: Vec<(Vec<String>, BTreeMap<String, usize>)> = std::thread::scope(|scope| {
         let handles: Vec<_> = docs
             .chunks(chunk)
-            .map(|part| scope.spawn(move || part.iter().map(check_doc).fold(
-                (Vec::new(), BTreeMap::new()),
-                |(mut failures, mut seen), (failure, codes)| {
-                    failures.extend(failure);
-                    for code in codes {
-                        *seen.entry(code).or_insert(0) += 1;
-                    }
-                    (failures, seen)
-                },
-            )))
+            .map(|part| {
+                scope.spawn(move || {
+                    part.iter().map(check_doc).fold(
+                        (Vec::new(), BTreeMap::new()),
+                        |(mut failures, mut seen), (failure, codes)| {
+                            failures.extend(failure);
+                            for code in codes {
+                                *seen.entry(code).or_insert(0) += 1;
+                            }
+                            (failures, seen)
+                        },
+                    )
+                })
+            })
             .collect();
-        handles.into_iter().map(|handle| handle.join().unwrap()).collect()
+        handles
+            .into_iter()
+            .map(|handle| handle.join().unwrap())
+            .collect()
     });
     let mut failures = Vec::new();
     let mut seen = BTreeMap::<String, usize>::new();
@@ -126,7 +137,12 @@ fn check_doc(doc: &Value) -> (Option<String>, BTreeSet<String>) {
     let project = &doc["project"];
     let result = match std::panic::catch_unwind(|| assess_project_performance(project)) {
         Ok(result) => result,
-        Err(panic) => return (Some(format!("{label}: panic {}", panic_message(&*panic))), BTreeSet::new()),
+        Err(panic) => {
+            return (
+                Some(format!("{label}: panic {}", panic_message(&*panic))),
+                BTreeSet::new(),
+            )
+        }
     };
     let value = match checked(&result) {
         Ok(value) => value,
@@ -141,7 +157,10 @@ fn check_doc(doc: &Value) -> (Option<String>, BTreeSet<String>) {
         if codes.contains(*code) {
             let mut detail = Vec::new();
             entries(&value, code, &mut detail);
-            return (Some(format!("{label}: {code} {}", detail.join("; "))), codes);
+            return (
+                Some(format!("{label}: {code} {}", detail.join("; "))),
+                codes,
+            );
         }
     }
     (None, codes)
