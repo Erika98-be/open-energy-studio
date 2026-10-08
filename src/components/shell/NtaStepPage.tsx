@@ -318,7 +318,7 @@ function useIssueMarks(ref: React.RefObject<HTMLElement | null>, issues: Array<S
  * and not only coloured (WCAG 1.3.1, 1.4.1). Unmarks fields without a finding.
  */
 export function applyIssueMarks(container: HTMLElement, issues: Array<{ kind: 'error' | 'warning'; code: string; focus: string }>,
-  t: (key: string, params?: Record<string, string>) => string) {
+  t: (key: string, options?: Record<string, unknown>) => string) {
   const marked = new Map<HTMLElement, { kind: 'error' | 'warning'; codes: string[] }>();
   const elements = Array.from(container.querySelectorAll<HTMLElement>('label[data-path]'));
   for (const issue of issues) {
