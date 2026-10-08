@@ -13,6 +13,10 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — openbare rapporten onder 2025+C1 gezocht (geen rekenwijziging)
+
+- Opnieuw gezocht naar openbare BENG-rapporten uit de periode van NTA 8800:2025+C1 (Uniec 3.4, rekendatum vanaf 29 mei 2026), voor woningen en utiliteitsgebouwen. Er is er nog geen gevonden; de zoekopdrachten en de gevonden, niet bruikbare rapporten staan in `docs/nta8800-vergelijking-openbare-rapporten.md`.
+
 ### 9 oktober 2026 — bewijskoppelingen op id bij de registratiecontrole (tiende review)
 
 - **Bewijskoppeling.** De app schrijft een koppeling naar een bouwdeel op id (`/zones/@z1/surfaces/@gevel-n`, sinds 7 oktober), maar de registratiecontrole van de kern kon die vorm niet lezen. Elk zo gekoppeld bewijsstuk gaf `evidence_link_path_unknown`, en het project werd daardoor nooit klaar voor registratie (`readyForRegistration` onwaar). De kern lost `@id`-delen nu op zoals de app: het ene element met die id, anders onbekend (ontbrekend of dubbel). De oude vorm met posities blijft werken.

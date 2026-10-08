@@ -392,3 +392,17 @@ Gezocht op repository.officiele-overheidspublicaties.nl, planviewer.nl, gemeente
 | [Rijksstraatweg, BENG en MPG, 24-01-2022](https://www.planviewer.nl/imro/files/NL.IMRO.0531.pb25Rijksstrwg52-3001/b_NL.IMRO.0531.pb25Rijksstrwg52-3001_bd10.pdf) | 2020+A1 | niet nagebouwd: niet in een van de gezochte edities |
 
 Geen openbaar rapport uit de periode van 2025+C1 gevonden; de uitgave is pas sinds 29 mei 2026 aangewezen. Een utiliteitsgebouw onder 2024 is ook niet gevonden.
+
+### Gezochte rapporten onder 2025+C1 (9 oktober 2026, tweede ronde)
+
+Sinds 29 mei 2026 moet elke berekening die in EP-Online wordt geregistreerd met Uniec 3.4 zijn gemaakt ([Uniec 3](https://uniec3.nl/wanneer-moet-ik-uniec-versie-3-4-gebruiken/)); de meest recente versie is 3.4.4.0 van 12 juli 2026. Een openbaar rapport in de periode van 2025+C1 herken je dus aan "Uniec 3.4" in de voetregel en een rekendatum vanaf 29 mei 2026.
+
+Gezocht op repository.officiele-overheidspublicaties.nl (ter-inzage-leggingen 2026), planviewer.nl, gemeentesites en websites van adviseurs, met onder meer "Uniec 3.4", "NTA 8800:2025+C1", "Rapportage Energieprestatie (NTA 8800)" met 2026, en naar utiliteitsgebouwen (kantoor, school).
+
+| Gevonden | Periode | Uitkomst |
+|---|---|---|
+| [The View 2, installaties bij aanvraag (ter inzage 2026)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2026/til-2026-16676/1/bijlage/0.062_VII-ARC-RP-ME-0100-Toelichting_en_berekeningen_installaties.pdf.pdf) | rapport van 15-12-2022 | geen BENG-uitdraai uit de periode van 2025+C1 |
+| [Krimpenerwaard, woongebouw met bedrijfsruimte, Uniec 3.0.19.4, 07-04-2022](https://www.krimpenerwaard.nl/sites/default/files/2024-10/15.%202022068_beng_svds_a0_pdf%20(geanonimiseerd)_0.pdf) | 2020+A1 | niet in de gezochte uitgave |
+| [Seafarm, kantoor in bedrijfspand, Uniec 3.0.9.3, 01-04-2021](https://www.noord-beveland.nl/sites/noord_beveland/files/2022-02/Rapportage_BENG_berekening_Geredigeerd_0.pdf) | 2020+A1 | niet in de gezochte uitgave; een kandidaat voor een tweede utiliteitsgeval onder 2020+A1 |
+
+Geen openbaar rapport met Uniec 3.4 gevonden. Bij een omgevingsvergunning wordt de BENG-berekening meestal pas na het besluit ter inzage gelegd; vier maanden na 29 mei 2026 is dat voor de meeste aanvragen nog niet gebeurd. De acceptatie onder 2025+C1 blijft daarom voorlopig de berekening van A–C in 2025+C1 naast hun eigen uitgave (zie hierboven) en de referentiesuites. Opnieuw zoeken als er ter-inzage-leggingen met Uniec 3.4 verschijnen.
