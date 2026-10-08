@@ -5929,6 +5929,7 @@ mod tests {
             delivery_sets: None,
             boiling_water_tap: false,
             generator: HotWaterGenerator::Chp(Box::new(HotWaterChp {
+                declared_efficiencies: None,
                 chp: None,
                 method1: Some(product.clone()),
                 also_space_heating: true,
@@ -6124,6 +6125,7 @@ mod tests {
             delivery_sets: None,
             boiling_water_tap: false,
             generator: HotWaterGenerator::Chp(Box::new(HotWaterChp {
+                declared_efficiencies: None,
                 chp: Some(crate::space_cooling::ChpClass {
                     power_kw: 50.0,
                     built_after_2006: true,

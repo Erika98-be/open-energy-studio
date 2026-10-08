@@ -824,13 +824,22 @@ pub struct HotWaterChp {
     /// (9.91/9.92) per 9.6.6.2.2.3.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub auxiliary: Option<crate::space_heating_chain::OtherGeneratorAuxiliary>,
+    /// Method 2 with ε_chp;th and ε_chp;el from a quality declaration
+    /// instead of table 9.31 (§9.1, 2025+C1 p. 285; table 9.31 p. 343, which
+    /// §13.8.4.7.4 references).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub declared_efficiencies: Option<crate::space_heating_chain::DeclaredChpEfficiencies>,
     pub equipment_reference: String,
 }
 
 impl HotWaterChp {
-    /// Table 9.31 HT factors (ε_chp;th, ε_chp;el) for method 2.
+    /// Method 2 factors (ε_chp;th, ε_chp;el): the declared values when
+    /// given (§9.1), otherwise the table 9.31 HT row.
     fn forfait_factors(&self) -> Option<(f64, f64)> {
         let mut class = self.chp.clone()?;
+        if let Some(declared) = &self.declared_efficiencies {
+            return declared.factors();
+        }
         class.low_temperature = false;
         class.factors()
     }
@@ -2507,12 +2516,34 @@ fn generator_issues(generator: &HotWaterGenerator, prefix: &str) -> Vec<(&'stati
             ));
         }
         match (&chp.chp, &chp.method1) {
-            (Some(_), None) => {
-                if chp.forfait_factors().is_none() {
-                    issues.push(("chp_class_invalid", format!("{prefix}.chp")));
+            (Some(_), None) => match &chp.declared_efficiencies {
+                Some(declared) => {
+                    if declared.declaration_reference.trim().is_empty() {
+                        issues.push((
+                            "source_reference_required",
+                            format!("{prefix}.declaredEfficiencies.declarationReference"),
+                        ));
+                    }
+                    if declared.factors().is_none() {
+                        issues.push((
+                            "chp_declared_efficiency_invalid",
+                            format!("{prefix}.declaredEfficiencies"),
+                        ));
+                    }
                 }
-            }
+                None => {
+                    if chp.forfait_factors().is_none() {
+                        issues.push(("chp_class_invalid", format!("{prefix}.chp")));
+                    }
+                }
+            },
             (None, Some(product)) => {
+                if chp.declared_efficiencies.is_some() {
+                    issues.push((
+                        "chp_declared_efficiency_method1",
+                        format!("{prefix}.declaredEfficiencies"),
+                    ));
+                }
                 for item in
                     crate::micro_chp::validate_micro_chp(product, &format!("{prefix}.method1"))
                 {
@@ -4583,6 +4614,7 @@ mod tests {
     #[test]
     fn hot_water_chp_method_2_uses_the_ht_conversion_factors() {
         let input = system(HotWaterGenerator::Chp(Box::new(HotWaterChp {
+            declared_efficiencies: None,
             chp: Some(dhw_chp_class()),
             method1: None,
             also_space_heating: true,
@@ -4599,6 +4631,7 @@ mod tests {
         assert!((jan.chp_electricity_kwh - jan.generator_output_kwh * 0.30 / 0.49).abs() < 1e-9);
         // No method or both methods are rejected.
         let neither = system(HotWaterGenerator::Chp(Box::new(HotWaterChp {
+            declared_efficiencies: None,
             chp: None,
             method1: None,
             also_space_heating: false,
@@ -4608,6 +4641,69 @@ mod tests {
         assert!(validate_hot_water(&neither, context(), "hotWater")
             .iter()
             .any(|item| item.code == "hot_water_chp_method_required"));
+    }
+
+    /// §9.1 (2025+C1 p. 285): a quality declaration replaces the table 9.31
+    /// row that §13.8.4.7.4 references (p. 343), so hot water uses the
+    /// declared ε_chp;th 0,80 and ε_chp;el 0,12 (16.13), also on a row
+    /// without a table value. Method 1, a blank reference and an invalid
+    /// pair are refused.
+    #[test]
+    fn hot_water_chp_uses_declared_efficiencies() {
+        use crate::space_heating_chain::DeclaredChpEfficiencies;
+        let declared = |thermal: f64, electric: f64, reference: &str| {
+            Some(DeclaredChpEfficiencies {
+                thermal,
+                electric,
+                declaration_reference: reference.into(),
+            })
+        };
+        let chp = |declared_efficiencies, class: crate::space_cooling::ChpClass| {
+            system(HotWaterGenerator::Chp(Box::new(HotWaterChp {
+                declared_efficiencies,
+                chp: Some(class),
+                method1: None,
+                also_space_heating: true,
+                auxiliary: None,
+                equipment_reference: "CHP plate".into(),
+            })))
+        };
+        let input = chp(declared(0.809, 0.12, "BCRG declaration"), dhw_chp_class());
+        assert!(validate_hot_water(&input, context(), "hotWater").is_empty());
+        let result = assess_hot_water(&input, context()).unwrap();
+        let jan = &result.months[0];
+        // Rounded down to two decimals: 0,809 → 0,80.
+        assert!((jan.natural_gas_kwh - jan.generator_output_kwh / 0.80).abs() < 1e-9);
+        assert!((jan.chp_electricity_kwh - jan.generator_output_kwh * 0.12 / 0.80).abs() < 1e-9);
+
+        // A table row without a value ("n.v.t."): the declaration still
+        // calculates, without it the class is refused.
+        let mut empty_row = dhw_chp_class();
+        empty_row.power_kw = 2.0;
+        empty_row.built_after_2006 = false;
+        assert!(empty_row.factors().is_none());
+        let with = chp(declared(0.80, 0.12, "declaration"), empty_row.clone());
+        assert!(validate_hot_water(&with, context(), "hotWater").is_empty());
+        assert!(assess_hot_water(&with, context()).is_ok());
+        let without = chp(None, empty_row);
+        assert!(validate_hot_water(&without, context(), "hotWater")
+            .iter()
+            .any(|item| item.code == "chp_class_invalid"));
+
+        let codes = |input: &HotWaterSystem| {
+            validate_hot_water(input, context(), "hotWater")
+                .into_iter()
+                .map(|item| (item.code, item.path))
+                .collect::<Vec<_>>()
+        };
+        let blank = chp(declared(0.80, 0.12, " "), dhw_chp_class());
+        assert!(codes(&blank).iter().any(|(code, path)| *code
+            == "source_reference_required"
+            && path.ends_with("declaredEfficiencies.declarationReference")));
+        let invalid = chp(declared(0.80, 0.30, "declaration"), dhw_chp_class());
+        assert!(codes(&invalid)
+            .iter()
+            .any(|(code, _)| *code == "chp_declared_efficiency_invalid"));
     }
 
     #[test]
@@ -4644,6 +4740,7 @@ mod tests {
             test_report_reference: "EN 50465 report".into(),
         };
         let input = system(HotWaterGenerator::Chp(Box::new(HotWaterChp {
+            declared_efficiencies: None,
             chp: None,
             method1: Some(product.clone()),
             also_space_heating: false,
@@ -4675,6 +4772,7 @@ mod tests {
         let mut unmeasured = product;
         unmeasured.full_load.auxiliary_power_kw = None;
         let mut fallback = HotWaterChp {
+            declared_efficiencies: None,
             chp: None,
             method1: Some(unmeasured),
             also_space_heating: false,

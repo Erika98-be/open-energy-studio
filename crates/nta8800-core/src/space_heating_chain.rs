@@ -4370,13 +4370,17 @@ fn generate(
             match (&generator.chp, &generator.method1) {
                 (Some(class), None) => {
                     validate_other_auxiliary(generator.auxiliary.as_ref(), true, issues);
-                    let Some(table) = class.factors() else {
-                        issues.push(issue("chp_class_invalid", "generator.chp"));
-                        return None;
-                    };
-                    // §9.1: a quality declaration replaces the table row.
+                    // §9.1: a quality declaration replaces the table row, so
+                    // a row without a table value ("n.v.t.") only matters
+                    // without a declaration.
                     let (thermal, electric) = match &generator.declared_efficiencies {
-                        None => table,
+                        None => {
+                            let Some(table) = class.factors() else {
+                                issues.push(issue("chp_class_invalid", "generator.chp"));
+                                return None;
+                            };
+                            table
+                        }
                         Some(declared) => {
                             if declared.declaration_reference.trim().is_empty() {
                                 issues.push(issue(
@@ -7367,6 +7371,30 @@ mod tests {
         input.generator = chp(None);
         let table = assess_space_heating_chain(&input);
         assert_eq!(table.generation_efficiency, Some(0.83));
+
+        // A row without a table value (≤ 2 kW built up to 2006, "n.v.t."):
+        // the declaration replaces the table, so it still calculates;
+        // without one the class is refused.
+        let empty_row = |declared: Option<DeclaredChpEfficiencies>| {
+            let Generator::Chp(mut generator) = chp(declared) else {
+                unreachable!()
+            };
+            generator.chp.as_mut().unwrap().built_after_2006 = false;
+            Generator::Chp(generator)
+        };
+        input.generator = empty_row(Some(DeclaredChpEfficiencies {
+            thermal: 0.8,
+            electric: 0.12,
+            declaration_reference: "declaration".into(),
+        }));
+        let declared = assess_space_heating_chain(&input);
+        assert_eq!(declared.generation_efficiency, Some(0.8), "{:?}", declared.issues);
+        input.generator = empty_row(None);
+        let refused = assess_space_heating_chain(&input);
+        assert!(refused
+            .issues
+            .iter()
+            .any(|issue| issue.code == "chp_class_invalid"));
     }
 
     fn other_aux(devices: u32, power: Option<f64>) -> Option<OtherGeneratorAuxiliary> {
