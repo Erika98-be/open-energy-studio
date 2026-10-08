@@ -211,7 +211,7 @@ describe('basisopname panel', () => {
     // §7.1.7, p. 65 and afb. 6.6.
     await user.selectOptions(screen.getByLabelText('Fossil-fuel installations on the plot (§7.1.7)'), 'true');
     await user.type(screen.getByLabelText('Sport halls without the swimming-pool room, A_g m² (p. 65)'), '450');
-    await user.click(screen.getByLabelText('Residence areas openly connected (afb. 6.6)'));
+    await user.click(screen.getByLabelText('Residence areas openly connected (fig. 6.6)'));
     // Tables 11.9–11.13 and §11.4.1.
     await user.selectOptions(screen.getByLabelText('Heat recovery (table 11.9)'), 'cold_storage_with_ahu');
     await user.selectOptions(screen.getByLabelText('Duct airtightness (table 11.13; unknown: 1,1)'), 'luka_d');

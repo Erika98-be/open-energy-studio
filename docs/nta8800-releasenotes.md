@@ -13,6 +13,15 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — toegankelijkheid en taal van de formulieren (geen rekenwijziging)
+
+- **Lijstonderdelen als benoemde groep.** Elk vlak, raam, deur, opwekker, vat, lichtzone, functie, verticale leiding, randisolatie, armaturengroep en elk deel van een E.1-systeem is een groep met een eigen naam. De groep heet naar het onderdeel (bijvoorbeeld "gevel-2" of "Opwekker 1"), zodat een schermlezer de velden van verschillende onderdelen uit elkaar kan houden.
+- **Eenheden.** Een eenheid in een invoerveld wordt voorgelezen na een scheiding ("Lampvermogen, W"), niet vastgeplakt ("LampvermogenW").
+- **Bevindingen op het veld.** Een veld met een fout of aandachtspunt van de rekenkern krijgt naast de rode of gele rand een zichtbaar teken (⚠). Het invoerelement krijgt `aria-invalid` (bij een fout) en de melding als `aria-description`, zodat een schermlezer haar voorleest. Fouten en aandachtspunten in de werkstroom verschillen ook in teken, niet alleen in kleur.
+- **Decimale komma.** De maandvelden (dynamische ramen, maandwaarden), de terugwinbare tapwaterwarmte, de constante ventilatie en de getallen in Registratie (bouwjaar, WLC-GWP, gebruiksoppervlakte) gebruiken nu het getalveld van de app: een komma of een punt werkt overal.
+- **Labels.** Dubbele namen binnen één groep zijn opgeheven: de bron van de leidinglengtes van tapwater, de opstelling en de toestelbron van de WTW, en in het Engels "System arrangement" naast "Heat recovery layout". Engelse teksten met Nederlandse normtermen ("afb.", "Bijlage 6a") zijn vertaald ("fig.", "BRL 9500 annex 6a").
+- **Test.** `src/__tests__/nta-form-accessibility.test.tsx` rendert elke NTA-sectie op het voorbeeldkantoor en de tussenwoning en beide opnames. Hij eist een naam voor elk invoerelement en elke knop, een legenda voor elke fieldset en geen dubbele naam binnen één groep. Verder toetst hij de eenheid in de naam, de decimale komma, de aankondiging van bevindingen en dat er geen Nederlandse normtermen in Engelse teksten staan (en omgekeerd).
+
 ### 9 oktober 2026 — tapwaterwarmtepomp: opgegeven klasse zonder kwaliteitsverklaring
 
 - **Klasse alleen bij een opgegeven rendement.** Een forfaitaire tapwaterwarmtepomp met een toepassingsklasse maar zonder kwaliteitsverklaring kreeg nog c_W;gen van tabel 13.27, en bij klasse 1 boven 1 805 kWh de fout `hot_water_heat_pump_class_exceeded`. Een forfaitaire waarde heeft geen gemeten klasse (tabel 13.25 en 13.8.4.7.3 c); 2025+C1 p. 641/643, 2020+A1 p. 612/615, 2022 p. 617/620, 2023 p. 627/630, 2024 p. 625/627). De kern corrigeert nu alleen een opgegeven rendement met de klasse waarbij het is gemeten. De klasse blijft gelden voor de douche (13.30).
