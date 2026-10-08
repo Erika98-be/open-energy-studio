@@ -101,6 +101,15 @@ fn isso54_routes() -> Vec<(&'static str, Value)> {
         "auxiliary": {"electricallyConnectedDevices": 1, "nominalPowerKw": 5.0, "sourceReference": "plate"},
         "equipmentReference": "micro-CHP"
     });
+    // The same declaration on the hot-water side (§13.8.4.7.4 references
+    // table 9.31, which a §9.1 declaration replaces).
+    chp["ntaCalculation"]["hotWater"]["generator"] = serde_json::json!({
+        "kind": "chp",
+        "chp": {"powerKw": 1.0, "builtAfter2006": true, "hreDeclared": true},
+        "declaredEfficiencies": {"thermal": 0.8, "electric": 0.12, "declarationReference": "EP-W204h"},
+        "alsoSpaceHeating": true,
+        "equipmentReference": "micro-CHP"
+    });
     // A CHP's 9.91 auxiliary energy excludes the pump; the pipes are
     // embedded in the construction (9.34, EP-W202e).
     let mut embedded_heating = embedded.clone();
@@ -670,6 +679,7 @@ fn every_number_at_its_edges_calculates_plausibly_or_refuses_with_a_routed_gap()
         "/ntaCalculation/windowGlazings/*/glazing/diffusing/gAltitude45",
         "/ntaCalculation/generator/declaredAuxiliaryConstants/c",
         "/ntaCalculation/generator/declaredEfficiencies/thermal",
+        "/ntaCalculation/hotWater/generator/declaredEfficiencies/thermal",
         "/ntaCalculation/hotWater/circulation/calculatedPsi/depthM",
         "/ntaCalculation/cooling/distribution/pipe/geometry/depthM",
         "/ntaCalculation/distributionSystem/pipeTransmittance/depthM",

@@ -2014,8 +2014,20 @@ fn calculate_distribution(
         .unwrap_or(&system.pipe_transmittance)
         .value(connected_area_m2, shared);
     let (Some(psi_zone), Some(psi_unheated)) = (psi_zone, psi_unheated) else {
+        let in_millimetres = [
+            Some(&system.pipe_transmittance),
+            system.unheated_pipe_transmittance.as_ref(),
+        ]
+        .into_iter()
+        .flatten()
+        .filter_map(PipeTransmittance::geometry)
+        .any(|geometry| geometry.dimension_above_one_metre());
         issues.push(issue(
-            "pipe_transmittance_invalid",
+            if in_millimetres {
+                "pipe_dimension_not_in_metres"
+            } else {
+                "pipe_transmittance_invalid"
+            },
             "distributionSystem.pipeTransmittance",
         ));
         return result;
@@ -4384,13 +4396,17 @@ fn generate(
             match (&generator.chp, &generator.method1) {
                 (Some(class), None) => {
                     validate_other_auxiliary(generator.auxiliary.as_ref(), true, issues);
-                    let Some(table) = class.factors() else {
-                        issues.push(issue("chp_class_invalid", "generator.chp"));
-                        return None;
-                    };
-                    // §9.1: a quality declaration replaces the table row.
+                    // §9.1: a quality declaration replaces the table row, so
+                    // a row without a table value ("n.v.t.") only matters
+                    // without a declaration.
                     let (thermal, electric) = match &generator.declared_efficiencies {
-                        None => table,
+                        None => {
+                            let Some(table) = class.factors() else {
+                                issues.push(issue("chp_class_invalid", "generator.chp"));
+                                return None;
+                            };
+                            table
+                        }
                         Some(declared) => {
                             if declared.declaration_reference.trim().is_empty() {
                                 issues.push(issue(
@@ -4566,8 +4582,12 @@ fn generate(
                     match auxiliary_constants(measurements, "generator.auxiliaryMeasurements") {
                         Ok(constants) => {
                             for row in monthly.iter_mut() {
+                                // E_H;ci is the boiler's carrier input,
+                                // gas or oil (9.85, 2025+C1 p. 359), taken
+                                // before the pilot flame below.
+                                let carrier = row.natural_gas_kwh + row.oil_kwh;
                                 row.auxiliary_electricity_kwh =
-                                    Some(monthly_auxiliary_kwh(&constants, row.natural_gas_kwh));
+                                    Some(monthly_auxiliary_kwh(&constants, carrier));
                             }
                         }
                         Err(found) => {
@@ -4595,8 +4615,12 @@ fn generate(
                     ) {
                         Ok(constants) => {
                             for row in monthly.iter_mut() {
+                                // E_H;ci is the boiler's carrier input,
+                                // gas or oil (9.85, 2025+C1 p. 359), taken
+                                // before the pilot flame below.
+                                let carrier = row.natural_gas_kwh + row.oil_kwh;
                                 row.auxiliary_electricity_kwh =
-                                    Some(monthly_auxiliary_kwh(&constants, row.natural_gas_kwh));
+                                    Some(monthly_auxiliary_kwh(&constants, carrier));
                             }
                         }
                         Err(found) => {
@@ -7223,6 +7247,118 @@ mod tests {
         assert!((jan.auxiliary_electricity_kwh.unwrap() - expected).abs() < 1e-9);
     }
 
+    /// 9.33–9.35 (2025+C1 p. 311–312) take diameters and depth in metres;
+    /// values above 1 m are almost certainly millimetres and are refused
+    /// with a units hint instead of giving a plausible Ψ from the ratios.
+    #[test]
+    fn pipe_geometry_in_millimetres_is_refused() {
+        let mut input = boiler_chain();
+        input.distribution_system = Some(system(calculated_pump()));
+        input
+            .distribution_system
+            .as_mut()
+            .unwrap()
+            .pipe_transmittance = PipeTransmittance::InsulatedInAir {
+            pipe_outer_diameter_m: 28.0,
+            insulated_diameter_m: 68.0,
+            insulation_lambda: 0.035,
+            surface_coefficient: None,
+        };
+        let result = assess_space_heating_chain(&input);
+        let codes: Vec<(&str, &str)> = result
+            .issues
+            .iter()
+            .map(|issue| (issue.code, issue.path.as_str()))
+            .collect();
+        assert!(
+            codes.contains(&(
+                "pipe_dimension_not_in_metres",
+                "distributionSystem.pipeTransmittance"
+            )),
+            "{codes:?}"
+        );
+        // The same pipe in metres calculates.
+        input
+            .distribution_system
+            .as_mut()
+            .unwrap()
+            .pipe_transmittance = PipeTransmittance::InsulatedInAir {
+            pipe_outer_diameter_m: 0.028,
+            insulated_diameter_m: 0.068,
+            insulation_lambda: 0.035,
+            surface_coefficient: None,
+        };
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+    }
+
+    /// 9.85 (2025+C1 p. 359): E_H;ci is the boiler's carrier input, so an
+    /// oil boiler's declared constants and annex O measurements both use
+    /// the oil input for the B term, as the forfait route does.
+    #[test]
+    fn oil_boiler_auxiliary_uses_the_oil_input() {
+        let mut input = boiler_chain();
+        let Generator::GasBoiler(boiler) = &mut input.generator else {
+            unreachable!()
+        };
+        boiler.boiler.fuel = "oil".into();
+        boiler.boiler.kind = crate::boiler_forfait_draft::BoilerKind::Conventional;
+        boiler.declared_auxiliary_constants = Some(
+            serde_json::from_value(json!({
+                "aKwh": 10.0, "bKw": 0.12, "c": 0.3, "nominalLoadKw": 20.0,
+                "declarationReference": "oil boiler declaration"
+            }))
+            .unwrap(),
+        );
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        assert!(result.monthly.iter().any(|row| row.oil_kwh > 0.0));
+        for row in &result.monthly {
+            assert_eq!(row.natural_gas_kwh, 0.0);
+            let expected = 10.0 / 12.0 + 0.12 * row.oil_kwh / (0.3 * 20.0);
+            assert!((row.auxiliary_electricity_kwh.unwrap() - expected).abs() < 1e-9);
+        }
+
+        let Generator::GasBoiler(boiler) = &mut input.generator else {
+            unreachable!()
+        };
+        boiler.declared_auxiliary_constants = None;
+        boiler.auxiliary_measurements = Some(
+            serde_json::from_value(json!({
+                "nominalLoadKw": 24.0, "standbyElectronicsW": 2.0, "gasValveW": 5.0,
+                "fan": {"method": "single_speed", "powerW": 20.0},
+                "pump": {"method": "staged", "operationW": 40.0, "prePostRunW": 30.0},
+                "pumpPostRunS": 60.0,
+                "loadCurve": [{"timeS": 200.0, "meanLoad": 0.5}, {"timeS": 300.0, "meanLoad": 0.5}],
+                "sourceReference": "test report"
+            }))
+            .unwrap(),
+        );
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        let Generator::GasBoiler(boiler) = &input.generator else {
+            unreachable!()
+        };
+        let constants =
+            auxiliary_constants(boiler.auxiliary_measurements.as_ref().unwrap(), "a").unwrap();
+        let jan = &result.monthly[0];
+        assert!(jan.oil_kwh > 0.0);
+        let expected = monthly_auxiliary_kwh(&constants, jan.oil_kwh);
+        assert!((jan.auxiliary_electricity_kwh.unwrap() - expected).abs() < 1e-9);
+    }
+
     /// §9.1 (2025+C1 p. 285) with 9.85 (p. 359–360): the ISSO 54 EP-W203j
     /// declaration A 10 kWh, B 0,12 kW, C 0,3 and B_nom 20 kW replaces the
     /// forfait constants: W = A/12 + B·E/(C·B_nom).
@@ -7379,6 +7515,35 @@ mod tests {
         input.generator = chp(None);
         let table = assess_space_heating_chain(&input);
         assert_eq!(table.generation_efficiency, Some(0.83));
+
+        // A row without a table value (≤ 2 kW built up to 2006, "n.v.t."):
+        // the declaration replaces the table, so it still calculates;
+        // without one the class is refused.
+        let empty_row = |declared: Option<DeclaredChpEfficiencies>| {
+            let Generator::Chp(mut generator) = chp(declared) else {
+                unreachable!()
+            };
+            generator.chp.as_mut().unwrap().built_after_2006 = false;
+            Generator::Chp(generator)
+        };
+        input.generator = empty_row(Some(DeclaredChpEfficiencies {
+            thermal: 0.8,
+            electric: 0.12,
+            declaration_reference: "declaration".into(),
+        }));
+        let declared = assess_space_heating_chain(&input);
+        assert_eq!(
+            declared.generation_efficiency,
+            Some(0.8),
+            "{:?}",
+            declared.issues
+        );
+        input.generator = empty_row(None);
+        let refused = assess_space_heating_chain(&input);
+        assert!(refused
+            .issues
+            .iter()
+            .any(|issue| issue.code == "chp_class_invalid"));
     }
 
     fn other_aux(devices: u32, power: Option<f64>) -> Option<OtherGeneratorAuxiliary> {

@@ -552,7 +552,7 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
     {kind === 'heat_pump_en16147' && <En16147Fields draft={draft} change={change} base={base} />}
     {kind === 'heating_system' && <p className="nta-form-note">{t('nta.form.dhwGen.heatingSystemNote')}</p>}
     {kind === 'chp' && <>
-      <ChpClassFields draft={draft} change={change} base={base} />
+      <ChpClassFields draft={draft} change={change} base={base} declared />
       <CheckField {...field} path={[...base, 'alsoSpaceHeating']} label={t('nta.form.chp.alsoHeating')} />
     </>}
   </>;
