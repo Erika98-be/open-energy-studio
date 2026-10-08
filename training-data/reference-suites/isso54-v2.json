@@ -13465,6 +13465,104 @@
       }
     },
     {
+      "caseId": "isso54-v2-EPW006f",
+      "normVersion": "2022",
+      "projectFile": "../isso54/EPW001.json",
+      "projectPatch": [
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/2/area",
+          "value": 39.2
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/3/area",
+          "value": 39.2
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/4/area",
+          "value": 29.4
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/5/area",
+          "value": 29.4
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/groundFloors/0/constructionResistanceM2kPerW",
+          "value": 0.32
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/groundFloors/0/sourceReference",
+          "value": "ISSO 54 v2.0 EP-W006f p. 9: vloer Rc 0,15 boven kruipruimte Rbf 6, ventilatieopeningen 0,0012 m2/m, maaiveld op 0,5 m (8.39 met 8.43, U_x;T = 0)"
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/groundFloors/0/below",
+          "value": {
+            "kind": "crawlspace",
+            "floorResistanceM2kPerW": 6.0,
+            "depthClass": "other",
+            "wallResistanceM2kPerW": 6.0,
+            "wallUValueWPerM2k": 0.162,
+            "ventilationOpeningM2PerM": 0.0012
+          }
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/groundFloors/0/heatedBasement",
+          "value": {
+            "depthM": 0.5,
+            "wallResistanceM2kPerW": 6.0
+          }
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/ventilation/floorAboveCrawlspace",
+          "value": true
+        }
+      ],
+      "source": {
+        "publisher": "ISSO / InstallQ (CCvD)",
+        "documentId": "ISSO 54 versie 2.0, Energie Prestatie Rekenprogramma's, testen voor het deelgebied EDR attest energieprestatie (CCvD InstallQ, 12-05-2022), test EPW-006f, p. 9",
+        "edition": "versie 2.0, 12-05-2022 (NTA 8800 januari 2022)",
+        "usePermission": "openbaar document; alleen de invoer is in eigen woorden gecodeerd, geen tekst overgenomen",
+        "independentReviewer": "geen: verwachte uitkomsten (bijlage 2) niet in bezit"
+      },
+      "pending": {
+        "reason": "De verwachte uitkomsten staan in bijlage 2 van ISSO 54 (apart resultatendocument), niet in bezit; de deeltest wordt doorgerekend zonder oordeel.",
+        "metrics": [
+          {
+            "path": "beng1",
+            "unit": "kWh/m2.year",
+            "normReference": "EP1 / BENG 1, energiebehoefte (5.3); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng2",
+            "unit": "kWh/m2.year",
+            "normReference": "EP2 / BENG 2, primair fossiel energiegebruik (5.2); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng3",
+            "unit": "%",
+            "normReference": "EP3 / BENG 3, aandeel hernieuwbare energie (5.4); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "tojuliMax",
+            "unit": "K",
+            "normReference": "TOjuli;max (5.7); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          }
+        ]
+      }
+    },
+    {
       "caseId": "isso54-v2-EPW006g",
       "normVersion": "2022",
       "projectFile": "../isso54/EPW001.json",
