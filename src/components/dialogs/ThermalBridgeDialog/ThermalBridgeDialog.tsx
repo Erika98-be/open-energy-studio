@@ -3,6 +3,7 @@ import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
 import { IThermalBridge, ThermalBoundary } from '../../../core/energy/types';
 import { DialogShell } from '../DialogShell';
+import { DecimalInput } from '../../ui';
 
 interface ThermalBridgeDialogProps {
   editId?: string | null;
@@ -104,8 +105,7 @@ export function ThermalBridgeDialog({ editId, onClose }: ThermalBridgeDialogProp
 
         <div className="dialog-field">
           <label>{t('dialog.thermalBridge.psiValue')}</label>
-          <input
-            type="number"
+          <DecimalInput
             step={0.001}
             value={psiValue}
             onChange={(e) => setPsiValue(parseFloat(e.target.value) || 0)}
@@ -126,8 +126,7 @@ export function ThermalBridgeDialog({ editId, onClose }: ThermalBridgeDialogProp
 
         <div className="dialog-field">
           <label>{t('dialog.thermalBridge.length')}</label>
-          <input
-            type="number"
+          <DecimalInput
             min={0}
             step={0.1}
             value={length}

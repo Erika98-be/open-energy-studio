@@ -67,22 +67,17 @@ export const de: Record<string, string> = {
   'ribbon.exportReport': 'Bericht exportieren',
 
   // Project Browser
-  'browser.project': 'Projekt',
   'browser.zones': 'Zonen',
-  'browser.zone': 'Zone',
   'browser.surfaces': 'Flächen',
   'browser.windows': 'Fenster',
   'browser.thermalBridges': 'Wärmebrücken',
   'browser.constructions': 'Konstruktionen',
-  'browser.installations': 'Anlagentechnik',
   'browser.heating': 'Heizung',
   'browser.ventilation': 'Lüftung',
   'browser.cooling': 'Kühlung',
   'browser.hotWater': 'Warmwasser',
-  'browser.renewables': 'Erneuerbare',
   'browser.solarPV': 'Photovoltaik',
   'browser.solarThermal': 'Solarthermie',
-  'browser.airTightness': 'Luftdichtheit',
 
   // Properties Panel
   'properties.title': 'Eigenschaften',
@@ -417,7 +412,6 @@ export const de: Record<string, string> = {
   'theme.system': 'System (Automatische Erkennung)',
   'theme.dark': 'Dunkel',
   'theme.light': 'Hell',
-  'theme.blue': 'Blau',
   'theme.highContrast': 'Hoher Kontrast',
   'settings.general.autoSave': 'Automatisch speichern',
   'settings.general.autoSaveDesc': 'Projekt automatisch in regelmäßigen Abständen speichern',

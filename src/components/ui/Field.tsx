@@ -1,6 +1,6 @@
 import {
   cloneElement, isValidElement, useEffect, useId, useRef, useState,
-  type InputHTMLAttributes, type KeyboardEvent, type MutableRefObject, type ReactElement, type ReactNode,
+  type ChangeEvent, type InputHTMLAttributes, type KeyboardEvent, type MutableRefObject, type ReactElement, type ReactNode,
   type SelectHTMLAttributes,
 } from 'react';
 import { useI18n } from '../../i18n/i18n';
@@ -191,6 +191,112 @@ export function NumberInput({
       />
       {unit && <><span className="visually-hidden">, {unit}</span><span className="ui-input__unit" aria-hidden="true">{unit}</span></>}
     </span>
+  );
+}
+
+// ── DecimalInput ─────────────────────────────────────────────────────
+
+export interface DecimalInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'defaultValue' | 'step'> {
+  /** The value as a raw `type="number"` input took it: a number or a point-decimal string. */
+  value?: number | string | null;
+  step?: number | string;
+}
+
+function decimalText(value: number | string | null | undefined, locale: string): string {
+  if (value == null || value === '') return '';
+  const number = typeof value === 'number' ? value : parseDecimal(String(value));
+  if (number == null || Number.isNaN(number) || !Number.isFinite(number)) return String(value);
+  return display(number, locale);
+}
+
+/**
+ * Drop-in for a raw `<input type="number">` with the same `value`/`onChange`
+ * contract, but accepting a decimal comma (Dutch users type "0,35"). The
+ * handler receives an event whose `target.value` is the point-decimal string
+ * ("0.35"), or "" when the field is cleared; text that is not a number is
+ * marked invalid and not passed on. Keeps the spinbutton role.
+ */
+export function DecimalInput({
+  value, onChange, step, className, onBlur, onFocus, onKeyDown, readOnly, ...rest
+}: DecimalInputProps) {
+  const { locale } = useI18n();
+  const [text, setText] = useState(() => decimalText(value, locale));
+  const [invalid, setInvalid] = useState(false);
+  const editing = useRef(false);
+  // The number last passed to onChange (null for a cleared field). Like a
+  // controlled native input, the field shows the parent's value again when
+  // the parent does not take it (a rejected negative, a clamp, a reset).
+  const emitted = useRef<{ number: number | null } | undefined>(undefined);
+
+  useEffect(() => {
+    if (!editing.current) {
+      setText(decimalText(value, locale));
+      setInvalid(false);
+    }
+  }, [value, locale]);
+
+  useEffect(() => {
+    const sent = emitted.current;
+    if (!sent) return;
+    emitted.current = undefined;
+    const current = value == null || value === '' ? null
+      : typeof value === 'number' ? value : parseDecimal(String(value));
+    const taken = sent.number === null ? current === null : current === sent.number;
+    if (!taken) setText(decimalText(value, locale));
+  });
+
+  const pass = (event: ChangeEvent<HTMLInputElement>, normalized: string) => {
+    emitted.current = { number: normalized === '' ? null : Number(normalized) };
+    if (!onChange) return;
+    const target = { value: normalized, name: event.target.name, id: event.target.id };
+    onChange({ ...event, target, currentTarget: target } as unknown as ChangeEvent<HTMLInputElement>);
+  };
+
+  const stepValue = Number(step) > 0 ? Number(step) : 1;
+  return (
+    <input
+      role="spinbutton"
+      {...rest}
+      className={cx(className, invalid && 'ui-input--invalid')}
+      type="text"
+      inputMode="decimal"
+      autoComplete="off"
+      value={text}
+      readOnly={readOnly}
+      aria-invalid={invalid || rest['aria-invalid'] ? true : undefined}
+      onFocus={(event) => { editing.current = true; onFocus?.(event); }}
+      onBlur={(event) => {
+        editing.current = false;
+        if (!invalid) setText(decimalText(value, locale));
+        onBlur?.(event);
+      }}
+      onChange={(event) => {
+        const raw = event.target.value;
+        setText(raw);
+        const parsed = parseDecimal(raw);
+        if (parsed === null) { setInvalid(false); pass(event, ''); return; }
+        if (Number.isNaN(parsed)) { setInvalid(true); return; }
+        setInvalid(false);
+        pass(event, String(parsed));
+      }}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (event.defaultPrevented || readOnly || rest.disabled) return;
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+        event.preventDefault();
+        const current = parseDecimal(text);
+        const base = current == null || Number.isNaN(current) ? Number(value) || 0 : current;
+        const decimals = Math.max(0, (String(stepValue).split('.')[1] ?? '').length);
+        const next = Number((base + (event.key === 'ArrowUp' ? 1 : -1) * stepValue * (event.shiftKey ? 10 : 1)).toFixed(decimals));
+        setText(display(next, locale));
+        setInvalid(false);
+        if (onChange) {
+          const target = { value: String(next), name: event.currentTarget.name, id: event.currentTarget.id };
+          onChange({ target, currentTarget: target } as unknown as ChangeEvent<HTMLInputElement>);
+        }
+      }}
+    />
   );
 }
 

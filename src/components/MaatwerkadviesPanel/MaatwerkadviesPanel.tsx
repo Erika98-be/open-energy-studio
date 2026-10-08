@@ -30,6 +30,7 @@ import {
   LabelPathChart, MeasureCard, PackageComparison, PackageInspector, labelPathBars, measureProblems,
 } from '../shell/pages/existing/MwaViews';
 import '../shell/pages/existing/existing.css';
+import { DecimalInput } from '../ui';
 
 const CATEGORIES: MwaMeasureCategory[] = [
   'insulation', 'glazing', 'airtightness', 'ventilation', 'heat_recovery', 'heating', 'heat_pump',
@@ -248,7 +249,7 @@ function MeasureEditor({ project, measure, onChange, onRemove }: {
         </select>
       </label>
       <label>{t('mwa.measure.investment')}
-        <input type="number" value={measure.investmentEur} onChange={(e) => onChange({ ...measure, investmentEur: Number(e.target.value) })} />
+        <DecimalInput value={measure.investmentEur} onChange={(e) => onChange({ ...measure, investmentEur: Number(e.target.value) })} />
       </label>
       {measure.investmentEur === 0 && <p className="mwa-wide nta-form-note" data-testid={`mwa-investment-zero-${measure.id}`}>
         {t('mwa.measure.investmentZero')}</p>}
@@ -256,13 +257,13 @@ function MeasureEditor({ project, measure, onChange, onRemove }: {
         <input value={measure.costSource} onChange={(e) => onChange({ ...measure, costSource: e.target.value })} />
       </label>
       <label>{t('mwa.measure.lifetime')}
-        <input type="number" value={measure.lifetimeYears} onChange={(e) => onChange({ ...measure, lifetimeYears: Number(e.target.value) })} />
+        <DecimalInput value={measure.lifetimeYears} onChange={(e) => onChange({ ...measure, lifetimeYears: Number(e.target.value) })} />
       </label>
       <label>{t('mwa.measure.maintenance')}
-        <input type="number" value={measure.maintenanceEurPerYear ?? ''} onChange={(e) => onChange({ ...measure, maintenanceEurPerYear: num(e.target.value) })} />
+        <DecimalInput value={measure.maintenanceEurPerYear ?? ''} onChange={(e) => onChange({ ...measure, maintenanceEurPerYear: num(e.target.value) })} />
       </label>
       <label>{t('mwa.measure.phaseYear')}
-        <input type="number" value={measure.phaseYear ?? ''} onChange={(e) => onChange({ ...measure, phaseYear: num(e.target.value) })} />
+        <DecimalInput value={measure.phaseYear ?? ''} onChange={(e) => onChange({ ...measure, phaseYear: num(e.target.value) })} />
       </label>
       <label className="mwa-wide">{t('mwa.measure.specialist')}
         <input value={measure.specialistNote ?? ''} onChange={(e) => onChange({ ...measure, specialistNote: e.target.value || undefined })} />
@@ -459,19 +460,19 @@ export function MaatwerkadviesPanel({ tab }: { tab?: MwaTab } = {}) {
         </select>
       </label>
       <label>{t('mwa.occupants')}
-        <input type="number" value={use.occupants ?? ''}
+        <DecimalInput value={use.occupants ?? ''}
           onChange={(e) => update({ ...definition, currentUse: { ...use, occupants: e.target.value === '' ? undefined : Number(e.target.value) } })} />
       </label>
       <label>{t('mwa.heatingSetpoint')}
-        <input type="number" value={use.heatingSetpointC ?? ''}
+        <DecimalInput value={use.heatingSetpointC ?? ''}
           onChange={(e) => update({ ...definition, currentUse: { ...use, heatingSetpointC: e.target.value === '' ? undefined : Number(e.target.value) } })} />
       </label>
       <label>{t('mwa.persons')}
-        <input type="number" value={use.persons ?? ''}
+        <DecimalInput value={use.persons ?? ''}
           onChange={(e) => update({ ...definition, currentUse: { ...use, persons: e.target.value === '' ? undefined : Number(e.target.value) } })} />
       </label>
       <label>{t('mwa.lightingHours')}
-        <input type="number" step="0.05" value={use.lightingHoursFactor ?? ''}
+        <DecimalInput step="0.05" value={use.lightingHoursFactor ?? ''}
           onChange={(e) => update({ ...definition, currentUse: { ...use, lightingHoursFactor: e.target.value === '' ? undefined : Number(e.target.value) } })} />
       </label>
       <label className="mwa-wide">{t('mwa.source')}
@@ -483,23 +484,23 @@ export function MaatwerkadviesPanel({ tab }: { tab?: MwaTab } = {}) {
   const tariffsBlock = block(t('mwa.tariffs'), true, <>
     <div className="mwa-grid">
       <label>{t('mwa.tariff.gas')}
-        <input type="number" step="0.01" value={definition.tariffs.gasEurPerM3}
+        <DecimalInput step="0.01" value={definition.tariffs.gasEurPerM3}
           onChange={(e) => update({ ...definition, tariffs: { ...definition.tariffs, gasEurPerM3: Number(e.target.value) } })} />
       </label>
       <label>{t('mwa.tariff.electricity')}
-        <input type="number" step="0.01" value={definition.tariffs.electricityEurPerKwh}
+        <DecimalInput step="0.01" value={definition.tariffs.electricityEurPerKwh}
           onChange={(e) => update({ ...definition, tariffs: { ...definition.tariffs, electricityEurPerKwh: Number(e.target.value) } })} />
       </label>
       <label>{t('mwa.tariff.export')}
-        <input type="number" step="0.01" value={definition.tariffs.electricityExportEurPerKwh ?? 0}
+        <DecimalInput step="0.01" value={definition.tariffs.electricityExportEurPerKwh ?? 0}
           onChange={(e) => update({ ...definition, tariffs: { ...definition.tariffs, electricityExportEurPerKwh: Number(e.target.value) } })} />
       </label>
       <label>{t('mwa.tariff.heat')}
-        <input type="number" step="0.01" value={definition.tariffs.districtHeatEurPerKwh ?? 0}
+        <DecimalInput step="0.01" value={definition.tariffs.districtHeatEurPerKwh ?? 0}
           onChange={(e) => update({ ...definition, tariffs: { ...definition.tariffs, districtHeatEurPerKwh: Number(e.target.value) } })} />
       </label>
       <label>{t('mwa.discount')}
-        <input type="number" step="0.005" value={definition.economics?.discountRate ?? 0.03}
+        <DecimalInput step="0.005" value={definition.economics?.discountRate ?? 0.03}
           onChange={(e) => update({ ...definition, economics: { ...definition.economics, discountRate: Number(e.target.value) } })} />
       </label>
       <label className="mwa-wide">{t('mwa.source')}
@@ -512,15 +513,15 @@ export function MaatwerkadviesPanel({ tab }: { tab?: MwaTab } = {}) {
   const measuredBlock = block(t('mwa.measured'), false, <>
     <div className="mwa-grid">
       <label>{t('mwa.measured.gas')}
-        <input type="number" value={measuredUse.annualGasM3 ?? ''}
+        <DecimalInput value={measuredUse.annualGasM3 ?? ''}
           onChange={(e) => setMeasured({ annualGasM3: e.target.value === '' ? undefined : Number(e.target.value) })} />
       </label>
       <label>{t('mwa.measured.electricity')}
-        <input type="number" value={measuredUse.annualElectricityKwh ?? ''}
+        <DecimalInput value={measuredUse.annualElectricityKwh ?? ''}
           onChange={(e) => setMeasured({ annualElectricityKwh: e.target.value === '' ? undefined : Number(e.target.value) })} />
       </label>
       <label>{t('mwa.measured.heat')}
-        <input type="number" value={measuredUse.annualHeatKwh ?? ''}
+        <DecimalInput value={measuredUse.annualHeatKwh ?? ''}
           onChange={(e) => setMeasured({ annualHeatKwh: e.target.value === '' ? undefined : Number(e.target.value) })} />
       </label>
       <label className="mwa-wide">{t('mwa.measured.monthlyGas')}

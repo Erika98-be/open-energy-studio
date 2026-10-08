@@ -67,22 +67,17 @@ export const ar: Record<string, string> = {
   'ribbon.exportReport': 'تصدير التقرير',
 
   // Project Browser
-  'browser.project': 'المشروع',
   'browser.zones': 'المناطق',
-  'browser.zone': 'منطقة',
   'browser.surfaces': 'الأسطح',
   'browser.windows': 'النوافذ',
   'browser.thermalBridges': 'الجسور الحرارية',
   'browser.constructions': 'الإنشاءات',
-  'browser.installations': 'التركيبات',
   'browser.heating': 'التدفئة',
   'browser.ventilation': 'التهوية',
   'browser.cooling': 'التبريد',
   'browser.hotWater': 'الماء الساخن',
-  'browser.renewables': 'الطاقة المتجددة',
   'browser.solarPV': 'الطاقة الشمسية',
   'browser.solarThermal': 'الحرارة الشمسية',
-  'browser.airTightness': 'إحكام الهواء',
 
   // Properties Panel
   'properties.title': 'الخصائص',
@@ -417,7 +412,6 @@ export const ar: Record<string, string> = {
   'theme.system': 'النظام (كشف تلقائي)',
   'theme.dark': 'داكن',
   'theme.light': 'فاتح',
-  'theme.blue': 'أزرق',
   'theme.highContrast': 'تباين عالٍ',
   'settings.general.autoSave': 'حفظ تلقائي',
   'settings.general.autoSaveDesc': 'حفظ المشروع تلقائيًا على فترات منتظمة',
