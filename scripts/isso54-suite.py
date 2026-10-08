@@ -2950,7 +2950,44 @@ def w206b(project):
     ]
 
 
+# EP-W203o: a local gas-fired air heater HR104 of 5 kW (table 9.25), no
+# distribution system, air heating with 4 heaters: one with an axial and three
+# with a radial recirculation fan (p. 25). Their fans and controls are the
+# table 9.12 auxiliary energy of 9.23, which is part of the emission (2022
+# p. 282), so the generator itself has no electrically connected device
+# (9.92 would count it twice). Room control as the reference (per room).
+W203O = [
+    setp(
+        GEN,
+        {
+            "kind": "forfait_heater",
+            "heaterKind": "air_heater_hr104",
+            "fuel": "natural_gas",
+            "equipmentReference": "ISSO 54 v2.0 EP-W203o p. 25: lokale gasgestookte luchtverwarmer HR104, 5 kW",
+            "auxiliary": {"electricallyConnectedDevices": 0, "nominalPowerKw": 5.0, "sourceReference": "ISSO 54 v2.0 EP-W203o: hulpenergie van ventilatoren en regeling in de afgifte (9.23, tabel 9.12)"},
+        },
+    ),
+    setp(
+        f"{NTA}/emission",
+        {
+            "system": "air_heating",
+            "balancing": "not_applicable",
+            "control": "individual_room_thermostats",
+            "airHeaters": {
+                "kind": {"kind": "direct", "radialFan": False},
+                "count": 1,
+                "further": [{"kind": {"kind": "direct", "radialFan": True}, "count": 3}],
+                "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: 4 luchtverwarmers, 1 met axiale en 3 met radiale recirculatieluchtventilator; Q_h;b geschat (tabel 9.12)",
+            },
+            "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: luchtverwarming, regeling per ruimte als de referentie",
+        },
+    ),
+    remove(f"{NTA}/distributionSystem"),
+    setp(f"{NTA}/distribution", {"method": "declared", "monthlyLossKwh": [0.0] * 12, "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: geen distributiesysteem"}),
+]
+
 CASES += [
+    ("EPW203o", 25, W203O),
     ("EPW206a", 29, variant(w206a)),
     ("EPW206b", 29, variant(w206b)),
     ("EPW206c", 30, variant(w206c)),

@@ -18170,6 +18170,117 @@
       }
     },
     {
+      "caseId": "isso54-v2-EPW203o",
+      "normVersion": "2022",
+      "projectFile": "../isso54/EPW001.json",
+      "projectPatch": [
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/generator",
+          "value": {
+            "kind": "forfait_heater",
+            "heaterKind": "air_heater_hr104",
+            "fuel": "natural_gas",
+            "equipmentReference": "ISSO 54 v2.0 EP-W203o p. 25: lokale gasgestookte luchtverwarmer HR104, 5 kW",
+            "auxiliary": {
+              "electricallyConnectedDevices": 0,
+              "nominalPowerKw": 5.0,
+              "sourceReference": "ISSO 54 v2.0 EP-W203o: hulpenergie van ventilatoren en regeling in de afgifte (9.23, tabel 9.12)"
+            }
+          }
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/emission",
+          "value": {
+            "system": "air_heating",
+            "balancing": "not_applicable",
+            "control": "individual_room_thermostats",
+            "airHeaters": {
+              "kind": {
+                "kind": "direct",
+                "radialFan": false
+              },
+              "count": 1,
+              "further": [
+                {
+                  "kind": {
+                    "kind": "direct",
+                    "radialFan": true
+                  },
+                  "count": 3
+                }
+              ],
+              "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: 4 luchtverwarmers, 1 met axiale en 3 met radiale recirculatieluchtventilator; Q_h;b geschat (tabel 9.12)"
+            },
+            "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: luchtverwarming, regeling per ruimte als de referentie"
+          }
+        },
+        {
+          "op": "remove",
+          "pointer": "/ntaCalculation/distributionSystem"
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/distribution",
+          "value": {
+            "method": "declared",
+            "monthlyLossKwh": [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: geen distributiesysteem"
+          }
+        }
+      ],
+      "source": {
+        "publisher": "ISSO / InstallQ (CCvD)",
+        "documentId": "ISSO 54 versie 2.0, Energie Prestatie Rekenprogramma's, testen voor het deelgebied EDR attest energieprestatie (CCvD InstallQ, 12-05-2022), test EPW-203o, p. 25",
+        "edition": "versie 2.0, 12-05-2022 (NTA 8800 januari 2022)",
+        "usePermission": "openbaar document; alleen de invoer is in eigen woorden gecodeerd, geen tekst overgenomen",
+        "independentReviewer": "geen: verwachte uitkomsten (bijlage 2) niet in bezit"
+      },
+      "pending": {
+        "reason": "De verwachte uitkomsten staan in bijlage 2 van ISSO 54 (apart resultatendocument), niet in bezit; de deeltest wordt doorgerekend zonder oordeel.",
+        "metrics": [
+          {
+            "path": "beng1",
+            "unit": "kWh/m2.year",
+            "normReference": "EP1 / BENG 1, energiebehoefte (5.3); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng2",
+            "unit": "kWh/m2.year",
+            "normReference": "EP2 / BENG 2, primair fossiel energiegebruik (5.2); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng3",
+            "unit": "%",
+            "normReference": "EP3 / BENG 3, aandeel hernieuwbare energie (5.4); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "tojuliMax",
+            "unit": "K",
+            "normReference": "TOjuli;max (5.7); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          }
+        ]
+      }
+    },
+    {
       "caseId": "isso54-v2-EPW206a",
       "normVersion": "2022",
       "projectFile": "../isso54/EPW001.json",
