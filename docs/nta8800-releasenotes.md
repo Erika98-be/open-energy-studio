@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — verwarmde vloer onder maaiveld boven een kruipruimte
+
+- **Vloer onder maaiveld boven een kruipruimte of onverwarmde kelder rekent.** Een vloer met zowel `below` als `heatedBasement` gaf `ground_floor_below_and_heated_basement`. De norm staat de combinatie toe: 8.39 met U_fl van 8.43 en U_x;T = 0 (2025+C1 p. 255, 256 en 262; 2022 p. 229, 230 en 236; gelijk in alle uitgaven). De wanden onder maaiveld tellen met z·P·U_bw. Bijlage D heeft voor de combinatie geen formule; de vloer wordt in een vloerdeel (D.13/D.14, of D.15/D.16 zonder h·P·U_xw) en een wanddeel (wandtermen van D.10/D.11) gesplitst, elk met de faseverschuiving van tabel D.1. De meldcode `ground_floor_below_and_heated_basement` vervalt. h van (8.47) wordt bij deze vloer niet gebruikt: in 2022 is hij daar niet verplicht, vanaf 2023 wordt een opgegeven h geweigerd (`route_not_in_edition`).
+- **ISSO 54 EP-W006f** is gecodeerd: 240 van de 266 deeltesten.
+- **Dekking.** Een afgeleid geval C met de kruipruimtevloer 0,5 m onder maaiveld loopt mee in de numerieke fuzz; de fuzz faalt als hij `heatedBasement/depthM` niet meer bereikt.
+
 ### 9 oktober 2026 — forfaitaire koudebruggen met een onverwarmde ruimte, luchtverwarmers van meer typen; ISSO 54: 239 deeltesten gecodeerd
 
 - **Forfaitaire thermische bruggen met een aangrenzende onverwarmde ruimte.** De kern weigerde deze combinatie (`forfait_thermal_bridges_unheated_space_unsupported`); die code vervalt. Volgens 8.4.1 opmerking 5 (2025+C1 p. 266, 2022 p. 240) telt de onverwarmde ruimte dan als buitenlucht en is H_U;for = 0. De scheiding hoort in H_D;for met U_iu;equi = U_C·b_U (C.10), en krijgt ΔU_for zoals elk element van H_D.

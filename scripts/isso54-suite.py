@@ -2229,6 +2229,33 @@ def crawlspace(test_id, rbf, height=0.0, opening=0.0012):
     return variant(change)
 
 
+# EP-W006f: the floor above the crawlspace of EP-W006a (R_c 0,15, R_bf 6,
+# openings 0,0012 m2/m) with the ground level at 0,5 m (p. 9). The heated
+# floor lies 0,5 m below ground level: 8.39 with U_fl of 8.43 and U_x;T = 0
+# (2022 p. 229, 230, 236), so h of (8.47) is not given. The lower 0,5 m of
+# every facade borders the ground and is the wall term z·P·U_bw of 8.39
+# (z = 0,5, R_c of the facade 6,0); the outdoor facade areas (gross) lose
+# 0,5 m x their length. The windows of the lower storey start at 0,5 m and
+# stay outdoor.
+def sunken_crawlspace(project):
+    floor = project["ntaCalculation"]["groundFloors"][0]
+    floor["constructionResistanceM2kPerW"] = 0.32
+    floor["below"] = {
+        "kind": "crawlspace",
+        "floorResistanceM2kPerW": 6.0,
+        "depthClass": "other",
+        "wallResistanceM2kPerW": 6.0,
+        "wallUValueWPerM2k": 0.162,
+        "ventilationOpeningM2PerM": 0.0012,
+    }
+    floor["heatedBasement"] = {"depthM": 0.5, "wallResistanceM2kPerW": 6.0}
+    floor["sourceReference"] = "ISSO 54 v2.0 EP-W006f p. 9: vloer Rc 0,15 boven kruipruimte Rbf 6, ventilatieopeningen 0,0012 m2/m, maaiveld op 0,5 m (8.39 met 8.43, U_x;T = 0)"
+    project["ntaCalculation"]["ventilation"]["floorAboveCrawlspace"] = True
+    for surface_id, length in [("gevel-zuid", 8.0), ("gevel-noord", 8.0), ("gevel-oost", 6.0), ("gevel-west", 6.0)]:
+        item = surface(project, surface_id)
+        item["area"] = round(item["area"] - 0.5 * length, 2)
+
+
 # EP-W006g: a dike dwelling, the floor and the whole north facade against the
 # ground (p. 8). Modelled as a heated room below ground level (8.3.3.2,
 # 8.42/D.12): the north wall part (8 m) 5,4 m deep, the other parts at
@@ -2363,6 +2390,7 @@ CASES += [
     ("EPW006c", 8, crawlspace("EP-W006c", 0.0)),
     ("EPW006d", 8, crawlspace("EP-W006d", 6.0, height=0.25)),
     ("EPW006e", 9, crawlspace("EP-W006e", 6.0, height=0.25, opening=0.0006)),
+    ("EPW006f", 9, variant(sunken_crawlspace)),
     ("EPW006g", 9, variant(dike)),
     ("EPW013a", 16, variant(double)),
     ("EPW013b", 16, variant(four_dwellings)),

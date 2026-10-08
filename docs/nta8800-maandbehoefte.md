@@ -132,6 +132,12 @@ De vloerconstructie zelf krijgt aan de onderzijde R_se = 0,04 (8.43 via 8.2.2.2.
 - forfaitair volgens 8.38: 0,5·P plus ΔU_for over de wandoppervlakte z·P (ΔU_for opgeven);
 - maandwaarden volgens D.10/D.11.
 
+Een verwarmde ruimte met de vloer onder maaiveld boven een kruipruimte of onverwarmde kelder krijgt `below` én `heatedBasement` (ISSO 54 EP-W006f):
+
+- H_g volgens 8.39 met U_fl uit 8.43 (8.3.4.2). Voor zo'n vloer geldt U_x;T = 0 (2025+C1 p. 262; 2022 p. 236), dus U_x = U_x;V en h van (8.47) doet niet mee. In 2022 is h daar niet verplicht; vanaf 2023 wordt een opgegeven h geweigerd.
+- De wanden onder maaiveld: z·P·U_bw met de werkelijke diepte z, en d_1 van 8.45 tegen d_bf;equi van de kruipruimte- of keldervloer.
+- Bijlage D geeft voor deze combinatie geen formule. De vloer wordt gesplitst in een vloerdeel (D.13/D.14, tabel D.1 (0, 0); bij een onverwarmde kelder D.15/D.16 zonder h·P·U_xw, (0, 1)) en een wanddeel (de wandtermen van D.10/D.11, (0, 1)). Basis: de opbouw van 8.39 en opmerking 3 van 8.3.2 (een deels verzonken vloer gesplitst en elk deel apart gerekend). Randtermen horen bij het vloerdeel, ΔU_for van 8.38 over z·P bij het wanddeel.
+
 ## Rekenzone met meerdere gebruiksfuncties (§6.5.3)
 
 `functionAreas` geeft de gebruiksfuncties met hun oppervlakte. De volgende rekenwaarden worden dan naar gebruiksoppervlakte gewogen:
