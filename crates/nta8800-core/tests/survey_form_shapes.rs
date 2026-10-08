@@ -22,7 +22,8 @@ fn residential_fixture() -> Value {
 }
 
 fn utility(value: Value) -> (UtilitySurvey, Vec<String>) {
-    let survey: UtilitySurvey = serde_json::from_value(value).expect("the kernel reads the form JSON");
+    let survey: UtilitySurvey =
+        serde_json::from_value(value).expect("the kernel reads the form JSON");
     let codes = assess_utility_survey(&survey)
         .issues
         .iter()
@@ -50,8 +51,10 @@ fn utility_survey_form_shapes_are_read() {
     // Fix 1: unchecking the last solar-control window writes an empty list.
     value["solarControlWindowIds"] = json!([]);
     // Fix 2: an unheated space from the list and a surface bordering it.
-    value["envelope"]["unheatedSpaces"] = json!([{ "id": "onverwarmd-1", "description": "berging" }]);
-    value["envelope"]["surfaces"][1]["boundary"] = json!({ "kind": "unheated_space", "spaceId": "onverwarmd-1" });
+    value["envelope"]["unheatedSpaces"] =
+        json!([{ "id": "onverwarmd-1", "description": "berging" }]);
+    value["envelope"]["surfaces"][1]["boundary"] =
+        json!({ "kind": "unheated_space", "spaceId": "onverwarmd-1" });
     // Fix 3: a door with a glass share and its glass type.
     value["envelope"]["doors"][0]["glassFraction"] = json!(0.4);
     value["envelope"]["doors"][0]["glass"] = json!("hr_plus_plus");
@@ -88,7 +91,10 @@ fn utility_survey_form_shapes_are_read() {
 fn residential_survey_form_shapes_are_read() {
     let mut value = residential_fixture();
     value["ventilation"]["declaredVariant"] = json!("c4a");
-    if value["envelope"]["doors"].as_array().map_or(true, Vec::is_empty) {
+    if value["envelope"]["doors"]
+        .as_array()
+        .map_or(true, Vec::is_empty)
+    {
         let surface = value["envelope"]["surfaces"][0]["id"].clone();
         value["envelope"]["doors"] = json!([{ "id": "deur-1", "surfaceId": surface, "areaM2": 2.0,
             "frame": "wood_or_plastic", "sourceReference": "" }]);
