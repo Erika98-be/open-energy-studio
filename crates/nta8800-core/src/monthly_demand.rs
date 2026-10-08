@@ -17,7 +17,7 @@
 
 use crate::climate::{self, Orientation, CLIMATE_SOURCE, MONTH_HOURS, OUTDOOR_TEMPERATURE_C};
 use crate::direct_transmission::{assess_direct_transmission, DirectTransmissionInput};
-use crate::ground::{ground_monthly, slab_coefficients, EdgeThermalBridges, SlabOnGround};
+use crate::ground::{ground_monthly, slab_coefficient_parts, EdgeThermalBridges, SlabOnGround};
 use crate::solar_shading::{
     movable_shading_factor, obstruction_factor, validate_obstruction, Balance, MovableShading,
     Obstruction,
@@ -2098,8 +2098,8 @@ fn resolve_transmission(
                         issues,
                     );
                 }
-                match slab_coefficients(slab) {
-                    Some(value) => slabs.push(value),
+                match slab_coefficient_parts(slab) {
+                    Some(parts) => slabs.extend(parts),
                     None => issues.push(issue(
                         crate::ground::combination_issue(slab).unwrap_or("ground_floor_invalid"),
                         path,

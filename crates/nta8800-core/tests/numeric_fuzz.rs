@@ -60,6 +60,7 @@ fn fixtures() -> Vec<(&'static str, Value)> {
     .into_iter()
     .map(|(name, json)| (name, serde_json::from_str(json).unwrap()))
     .chain(std::iter::once(declared_window_shading()))
+    .chain(std::iter::once(sunken_crawlspace_floor()))
     .chain(isso54_routes())
     .collect()
 }
@@ -128,6 +129,83 @@ fn isso54_routes() -> Vec<(&'static str, Value)> {
         ("example-terraced-dwelling (ISSO 54 declared CHP)", chp),
         ("public-comparison-c (calculated cooling-pipe Ψ)", cooling),
     ]
+}
+
+/// Case C with its floor above the crawlspace 0,5 m below ground level
+/// (8.39 with 8.43 and U_x;T = 0, ISSO 54 EP-W006f), so the two-part ground
+/// route and its numeric leaves are fuzzed too.
+fn sunken_crawlspace_floor() -> (&'static str, Value) {
+    let mut value: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-c.json"
+    ))
+    .unwrap();
+    value["ntaCalculation"]["groundFloors"][0]["heatedBasement"] =
+        serde_json::json!({"depthM": 0.5, "wallResistanceM2kPerW": 5.32});
+    (
+        "public-comparison-c (floor below ground above crawlspace)",
+        value,
+    )
+}
+
+/// The largest number under `key` anywhere in `value`.
+fn find_number(value: &Value, key: &str) -> Option<f64> {
+    let mut found: Option<f64> = None;
+    let mut visit = |number: f64| found = Some(found.map_or(number, |max| max.max(number)));
+    fn walk(value: &Value, key: &str, visit: &mut dyn FnMut(f64)) {
+        match value {
+            Value::Object(map) => {
+                if let Some(number) = map.get(key).and_then(Value::as_f64) {
+                    visit(number);
+                }
+                map.values().for_each(|item| walk(item, key, visit));
+            }
+            Value::Array(items) => items.iter().for_each(|item| walk(item, key, visit)),
+            _ => {}
+        }
+    }
+    walk(value, key, &mut visit);
+    found
+}
+
+/// The sunken crawlspace floor calculates in every edition where case C
+/// does, and loses more to the ground than the same floor at ground level.
+#[test]
+fn sunken_crawlspace_floor_calculates() {
+    let base: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-c.json"
+    ))
+    .unwrap();
+    let (_, sunken) = sunken_crawlspace_floor();
+    let mut checked = 0;
+    for edition in ["2025+C1", "2024", "2023", "2022", "2020+A1"] {
+        let run = |value: &Value| {
+            let mut input = value.clone();
+            input["ntaCalculation"]["normVersion"] = Value::from(edition);
+            serde_json::to_value(
+                nta8800_core::project_performance::assess_project_performance(&input),
+            )
+            .unwrap()
+        };
+        let plain = run(&base);
+        if !plain["status"].as_str().unwrap().starts_with("calculated") {
+            continue;
+        }
+        let result = run(&sunken);
+        assert!(
+            result["status"].as_str().unwrap().starts_with("calculated"),
+            "{edition}: {} {}",
+            result["status"],
+            result["gaps"]
+        );
+        let key = "groundSteadyConductanceWPerK";
+        let (plain, sunken) = (
+            find_number(&plain, key).unwrap(),
+            find_number(&result, key).unwrap(),
+        );
+        assert!(sunken > plain, "{edition}: {sunken} <= {plain}");
+        checked += 1;
+    }
+    assert!(checked >= 1);
 }
 
 /// Case G with its roof-window screen given as a declared `F_c` instead of
@@ -673,6 +751,7 @@ fn every_number_at_its_edges_calculates_plausibly_or_refuses_with_a_routed_gap()
         "/ntaCalculation/hotWater/circulation/calculatedPsi/depthM",
         "/ntaCalculation/cooling/distribution/pipe/geometry/depthM",
         "/ntaCalculation/distributionSystem/pipeTransmittance/depthM",
+        "/ntaCalculation/groundFloors/*/heatedBasement/depthM",
     ] {
         assert!(
             occurrences.contains_key(required),
