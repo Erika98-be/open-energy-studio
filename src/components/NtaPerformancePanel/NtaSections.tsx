@@ -15,7 +15,7 @@ import type { StepId } from '../../core/navigation/routes';
 import { HeatingEmission2023Fields } from './NtaEdition2023Fields';
 import { useI18n } from '../../i18n/i18n';
 import {
-  CheckField, NumberField, read, SelectField, TextField, TriStateField, useFieldPath, type Draft, type Path,
+  CheckField, NumberField, read, SelectField, TextField, TriStateField, useFieldPath, write, type Draft, type Path,
 } from './NtaFormFields';
 import { PvSystemFields } from './NtaPvFields';
 import {
@@ -294,7 +294,12 @@ function GeneralSection(props: NtaSectionProps) {
       options={[['residential', t('nta.form.scope.residential')], ['utility', t('nta.form.scope.utility')]]} />
     <TextField {...f} path={['areaSourceReference']} label={t('nta.form.areaSource')} />
     <SelectField {...f} path={['usageFunction']} label={t('nta.form.usageFunction')}
-      options={USAGE_FUNCTIONS.map((key) => [key, t(`nta.form.usage.${key}`)])} />
+      options={USAGE_FUNCTIONS.map((key) => [key, t(`nta.form.usage.${key}`)])}
+      // The dwelling type only applies to a residential use (dwelling_type_not_applicable otherwise).
+      onChange={(_, value) => props.update((current) => {
+        const next = write(current, ['usageFunction'], value);
+        return value === 'residential' ? next : write(next, ['dwellingType'], undefined);
+      })} />
     {read(draft, ['usageFunction']) === 'residential' && <SelectField {...f} path={['dwellingType']}
       label={t('nta.form.dwellingType')} options={[
         ['apartment_building', t('nta.form.dwellingType.apartment')], ['other', t('nta.form.dwellingType.other')]]} />}
@@ -588,6 +593,9 @@ function VentilationModeSection(props: NtaSectionProps) {
   </>;
 }
 
+/** Air heating and local heaters have no hydronic balancing (table 9.3 footnote a). */
+const nonHydronicEmission = (system: unknown) => system === 'air_heating' || system === 'local_heater';
+
 function EmissionSection(props: NtaSectionProps) {
   const { t } = useI18n();
   const { draft, change } = props;
@@ -596,7 +604,14 @@ function EmissionSection(props: NtaSectionProps) {
     <SelectField {...f} path={['emission', 'system']} label={t('nta.form.emissionSystem')} options={[
       ['radiators_or_convectors', t('nta.form.emission.radiators')], ['floor_heating', t('nta.form.emission.floor')],
       ['fan_assisted_radiators_or_convectors', t('nta.form.emission.fanAssisted')],
-      ['air_heating', t('nta.form.emission.air')], ['local_heater', t('nta.form.emission.local')], ['other_or_unknown', t('nta.form.unknown')]]} />
+      ['air_heating', t('nta.form.emission.air')], ['local_heater', t('nta.form.emission.local')], ['other_or_unknown', t('nta.form.unknown')]]}
+      // Table 9.3 footnote a: hydronic balancing applies to a water system only (emission_balancing_inconsistent).
+      onChange={(_, value) => props.update((current) => {
+        const next = write(current, ['emission', 'system'], value);
+        const balancing = read(current, ['emission', 'balancing']);
+        if (nonHydronicEmission(value)) return write(next, ['emission', 'balancing'], 'not_applicable');
+        return balancing === 'not_applicable' ? write(next, ['emission', 'balancing'], 'none_or_unknown') : next;
+      })} />
     {(read(draft, ['emission', 'system']) === 'air_heating' || read(draft, ['emission', 'airHeaters']) != null) &&
       <AirHeatersFields draft={draft} change={change} />}
     <HeatingEmission2023Fields draft={draft} change={change} />
@@ -630,9 +645,12 @@ function EmissionControlSection(props: NtaSectionProps) {
   const { t } = useI18n();
   const f = fieldOf(props);
   return <>
-    <SelectField {...f} path={['emission', 'balancing']} label={t('nta.form.balancing')} options={[
-      ['none_or_unknown', t('nta.form.unknown')], ['static', t('nta.form.balancing.static')],
-      ['dynamic', t('nta.form.balancing.dynamic')], ['not_applicable', t('nta.form.balancing.na')]]} />
+    <SelectField {...f} path={['emission', 'balancing']} label={t('nta.form.balancing')}
+      // Only the choices table 9.3 allows for this emission system (footnote a).
+      options={nonHydronicEmission(read(props.draft, ['emission', 'system']))
+        ? [['not_applicable', t('nta.form.balancing.na')]]
+        : [['none_or_unknown', t('nta.form.unknown')], ['static', t('nta.form.balancing.static')],
+          ['dynamic', t('nta.form.balancing.dynamic')]]} />
     <SelectField {...f} path={['emission', 'control']} label={t('nta.form.control')} options={[
       ['main_room_thermostat', t('nta.form.control.main')], ['central_with_room_valves', t('nta.form.control.central')],
       ['individual_room_thermostats', t('nta.form.control.individual')], ['other_or_unknown', t('nta.form.unknown')]]} />

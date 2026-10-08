@@ -217,6 +217,6 @@ describe('NTA project input forms', () => {
       sourceBelow20C: true, exhaustAirSource: false, combinedOutdoorAndExhaustAir: false, sourceReference: '',
     });
     expect(draft.declaredUses).toEqual([{ id: 'gebruik-1', service: 'lighting', carrier: 'el', monthlyKwh: [40], sourceReference: '' }]);
-    expect(draft.onSiteProduction).toEqual([{ id: 'opwekking-1', kind: 'pv', monthlyKwh: [], sourceReference: '' }]);
+    expect(draft.onSiteProduction).toEqual([{ id: 'opwekking-1', kind: 'pv', monthlyKwh: Array(12).fill(null), sourceReference: '' }]);
   }, 60000);
 });

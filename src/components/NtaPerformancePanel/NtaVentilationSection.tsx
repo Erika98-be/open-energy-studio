@@ -39,6 +39,9 @@ export function VentilationUnitFields(props: SectionProps & { path: Path }) {
   return <UnitFields {...props} />;
 }
 
+/** Variants of table 11.5 with an f_ctrl for dwellings only. */
+const RESIDENTIAL_ONLY_VARIANTS = new Set<string>(['c4a', 'c5a', 'c5b', 'd5c']);
+
 function UnitFields({ draft, change, path }: SectionProps & { path: Path }) {
   const { t } = useI18n();
   const field = { draft, onChange: change };
@@ -52,7 +55,10 @@ function UnitFields({ draft, change, path }: SectionProps & { path: Path }) {
   const insulation = read(draft, [...path, 'heatRecovery', 'supplyDuctInsulation', 'kind']);
   return <>
     <SelectField {...field} path={[...path, 'variant']} label={t('nta.vent.variant')}
-      options={VENTILATION_VARIANTS.map(({ variant }) => [variant, t(`nta.vent.variant.${variant}`)])}
+      // Table 11.5 has no f_ctrl for C4a, C5a, C5b and D5c in utility buildings (variant_not_applicable_to_category).
+      options={VENTILATION_VARIANTS
+        .filter(({ variant }) => read(draft, ['calculationScope']) !== 'utility' || !RESIDENTIAL_ONLY_VARIANTS.has(variant))
+        .map(({ variant }) => [variant, t(`nta.vent.variant.${variant}`)])}
       onChange={(_, value) => change(path, ventilationUnit((value as VentilationSystemVariant | null) ?? null, unit))} />
     {op && op !== 'natural' && <SelectField {...field} path={[...path, 'ducts']} label={t('nta.vent.ducts')} options={[
       ['unknown', t('nta.vent.ducts.unknown')], ['luka_a_b_c', t('nta.vent.ducts.abc')], ['luka_d', t('nta.vent.ducts.d')],

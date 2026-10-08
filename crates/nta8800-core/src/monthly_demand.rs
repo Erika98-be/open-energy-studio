@@ -2047,7 +2047,19 @@ fn resolve_transmission(
                 }
                 // Upper bounds are program choices (no building has more
                 // than 200 storeys or is higher than 1000 m).
-                if (pipe.storeys == 0 && pipe.building_height_m.is_none())
+                // A utility zone gives the building height H of 7.17a
+                // instead of storeys, so a missing or too large H is
+                // reported at that field (the form shows no storeys there).
+                let height_route =
+                    !input.usage_function.is_residential() && pipe.storeys == 0;
+                if height_route
+                    && !matches!(pipe.building_height_m, Some(height) if height <= 1000.0)
+                {
+                    issues.push(issue(
+                        "vertical_pipe_building_height_invalid",
+                        format!("{path}.buildingHeightM"),
+                    ));
+                } else if (pipe.storeys == 0 && pipe.building_height_m.is_none())
                     || pipe.storeys > MAX_STOREYS
                     || pipe.building_height_m.is_some_and(|height| height > 1000.0)
                 {
@@ -3840,6 +3852,25 @@ mod tests {
             .collect();
         assert!(codes.contains(&"vertical_pipe_building_height_invalid"));
         assert!(codes.contains(&"vertical_pipe_area_share_requires_building_height"));
+
+        // A utility pipe without H (the form's blank) is reported at H, the
+        // field the utility form shows, not at the storeys of a dwelling.
+        let mut value = serde_json::to_value(&input).unwrap();
+        value["usageFunction"] = json!("office");
+        value["transmission"]["verticalPipes"] = json!([
+            {"id": "blank", "insulated": false, "sourceReference": "x"}
+        ]);
+        let input: MonthlyDemandInput = serde_json::from_value(value).unwrap();
+        let paths: Vec<_> = assess_monthly_demand(&input)
+            .issues
+            .iter()
+            .filter(|issue| issue.code.starts_with("vertical_pipe_"))
+            .map(|issue| format!("{} {}", issue.code, issue.path))
+            .collect();
+        assert_eq!(
+            paths,
+            ["vertical_pipe_building_height_invalid transmission.verticalPipes[0].buildingHeightM"]
+        );
     }
 
     #[test]

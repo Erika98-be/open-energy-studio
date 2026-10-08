@@ -1,7 +1,7 @@
 import { regenerateTemplatePatches, type LegacyTemplate, type MwaMeasureTemplate } from './MwaTemplates';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import type { IProject, INtaHeatPumpInput } from '../energy/types';
-import { kernelProject } from './KernelInput';
+import { kernelProject, projectRouteInput } from './KernelInput';
 
 /** Annex T Gaskeur test report (gas water heaters and combi appliances). */
 export type NtaAnnexTTest =
@@ -5140,7 +5140,9 @@ export interface NtaLabelStatements {
 }
 
 export async function calculateProjectPerformanceWithRust(input: IProject): Promise<ProjectPerformanceAssessment> {
-  const project = kernelProject(input);
+  // The project route gets the blanks as null: its blank search names each one as `nta_value_missing`
+  // at its own path, where an absent member only gave `nta_calculation_block_invalid` for the whole block.
+  const project = projectRouteInput(input);
   if (isTauri()) {
     return invoke<ProjectPerformanceAssessment>('calculate_project_performance', { project });
   }

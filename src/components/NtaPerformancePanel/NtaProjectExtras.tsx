@@ -347,7 +347,9 @@ export function DeclaredFlowsFields({ draft, change }: SectionProps) {
       <legend>{t('nta.form.declaredUse')} {index + 1}</legend>
       <TextField {...field} path={['declaredUses', index, 'id']} label={t('nta.form.declared.id')} />
       <SelectField {...field} path={['declaredUses', index, 'service']} label={t('nta.form.declaredUse.service')}
-        options={SERVICES.map((key) => [key, t(`nta.form.service.${key}`)])} />
+        // §5.5: dwellings leave lighting out of the calculation (residential_lighting_must_be_omitted).
+        options={SERVICES.filter((key) => key !== 'lighting' || read(draft, ['calculationScope']) === 'utility')
+          .map((key) => [key, t(`nta.form.service.${key}`)])} />
       <SelectField {...field} path={['declaredUses', index, 'carrier']} label={t('nta.form.declaredUse.carrier')} options={carriers} />
       <MonthlyValues draft={draft} change={change} path={['declaredUses', index, 'monthlyKwh']} label={t('nta.form.declared.monthly')} />
       <TextField {...field} path={['declaredUses', index, 'sourceReference']} label={t('nta.form.source')} />
