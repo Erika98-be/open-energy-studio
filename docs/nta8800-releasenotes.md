@@ -28,6 +28,14 @@ Na de zevende review. Elk punt hieronder liet de kern de hele opname weigeren of
 - **Gebouwautomatisering:** het veld heet nu *Nominaal vermogen van het grootste verwarmings- of koelsysteem (opgeteld)*.
 - Een gesloten of verlaagd plafond blijft alleen bij utiliteit: de kern weigert het in de woningopname (`closed_ceiling_not_in_dwelling_survey`, ISSO 82.1 tabel 7.4 kent die kolom niet).
 
+### 9 oktober 2026 — formulierdekking eerlijk geteld, buffervat en nieuwe formulieren (geen rekenwijziging)
+
+- **Buffervat in de distributie.** Het formulier bood het buffervat aan bij elke installatie met een forfaitaire Ψ, terwijl de kern het alleen accepteert bij een collectieve installatie met een berekende Ψ (tabel 9.16 opmerking 2: de forfaitaire Ψ bevat het bufferverlies al). Daardoor was een buffervat uit het formulier nooit geldig. Nu biedt de distributie de keuze "Ψ forfaitair of berekend uit de leidinggegevens (9.33–9.35)", en verschijnt het buffervat pas bij een collectieve installatie met een berekende Ψ. De afleverset per woning staat alleen nog bij een collectieve installatie.
+- **Warmtepompen in serie** bieden de bron "bodem of grondwater onbekend" niet meer aan: tabel 9.29 heeft daarvoor geen waarde bij 65–70 °C.
+- **Eigen labels** voor de bronvelden van het buffervat, de koelpomp, de afleversets en de collectieve opwekker van de boosterwarmtepomp, en duidelijkere teksten voor het stilstandsverlies van het buffervat, het woningaandeel per zone en de onderbouwing van het bronsysteem.
+- **Formuliercheck.** Telt een optie alleen nog als gedekt als een formulier van haar eigen route haar schrijft, met de ouder-sleutel erbij; lezingen, vergelijkingen en commentaar tellen niet. De echte dekking is 95,2 % (was als 99,1 % gemeld); de rest staat met een reden in `formCoverage.ts` (zie `docs/ui-redesign/formulierdekking.md`).
+- **Nieuwe formulieren:** douche-WTW per douche, kokendwaterkraan, gasgestookt voorraadtoestel en de ontbrekende Bbl-functies.
+
 ### 9 oktober 2026 — formulieren voor alle gewone invoer; bewaakte formulierdekking (geen rekenwijziging)
 
 - **Formulierdekking bewaakt.** De kern levert een catalogus van elke keuzewaarde en elk optioneel veld van de projectinvoer en beide basisopnamen (`training-data/nta8800-input-options.json`, bijgehouden door een test in `option_coverage.rs`). Een nieuwe test (`nta-form-coverage.test.ts`) faalt als een optie geen formulier heeft en ook niet als bewust-JSON met reden is vastgelegd. Dekking op naam: van 1 651 naar 1 807 van de 1 823 opties; de overige 16 staan met reden in [Formulierdekking](ui-redesign/formulierdekking.md).

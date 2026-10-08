@@ -219,7 +219,7 @@ export function CoolingSystemFields({ draft, change, base, allowNone }: SectionP
           <NumberField {...field} path={at('distribution', 'pump', 'labelPowerKw')} label={t('nta.form.coolDist.labelPower')} optional unit="kW" />
           <NumberField {...field} path={at('distribution', 'pump', 'energyEfficiencyIndex')} label={t('nta.dist.pump.eei')} optional />
           <NumberField {...field} path={at('distribution', 'pump', 'maxPipeLengthM')} label={t('nta.dist.pump.maxLength')} optional unit="m" />
-          <TextField {...field} path={at('distribution', 'pump', 'sourceReference')} label={t('nta.form.source')} />
+          <TextField {...field} path={at('distribution', 'pump', 'sourceReference')} label={t('nta.form.coolDist.pumpSource')} />
         </div>}
         <TextField {...field} path={at('distribution', 'sourceReference')} label={t('nta.form.source')} />
       </>}

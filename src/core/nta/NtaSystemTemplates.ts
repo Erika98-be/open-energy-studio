@@ -209,6 +209,7 @@ export function hotWaterGeneratorTemplate(kind: string): Block {
     heatSource: boosterHeatSourceTemplate('external_heat'), sourceReference: '' };
   // §13.8.4.5.4 other directly heated storage (gas above 150 kW).
   if (kind === 'large_direct_storage') return { kind, gasFired: true };
+  if (kind === 'gas_storage_heater') return { kind, volumeL: null, before1985: false, inHeatedZone: true };
   // §13.8.4.6 table 13.22 solid-biomass combi appliance.
   if (kind === 'biomass_combi') return { kind, insulation: 'at_least20_mm', insideBoundary: true };
   // §13.8.4.10 heat pumps in series: the source of the last one.
