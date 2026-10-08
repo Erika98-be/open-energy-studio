@@ -82,11 +82,17 @@ De indeling volgt W bijlage 6a/6b (p. 67–68) en U bijlage 6a/6b (p. 58–60):
 |---|---|---|
 | Geometrie, thermische grens, gebruiksoppervlakte | 6b | 6b |
 | Ander systeemtype | 6b | 6b |
+| Koeling aangebracht of verwijderd (ISSO 82.1 bijlage A, cluster 6, p. 210; ISSO 75.1 p. 216) | 6b | 6b |
 | Isolatie en installaties, één op één | 6a | 6a |
+| Gasgestookt warmwatertoestel vervangen door een elektrische boiler (ISSO 82.1 bijlage A, cluster 1, p. 209; ISSO 75.1 p. 215) | 6a | 6a |
+| Energielabel van een voorraadvat of buffervat | 6a | 6a |
 | Distributie, afgifte, regeling | volgt 6a per functie | 6b |
 | PV of zonthermie: grootte, helling, oriëntatie | beoordelen | beoordelen |
 | g-waarde van beglazing | 6a | 6a |
+| Luchtdichtheid of infiltratie (q<sub>v10</sub>; staat in geen van de bijlagen) | beoordelen | beoordelen |
 | Verlichting (staat in geen van de bijlagen) | beoordelen | beoordelen |
+
+Een andere wissel van tapwatertoestel, bijvoorbeeld een gastoestel door een warmtepomp, blijft een systeemwijziging (6b). Een naam of omschrijving die alleen ter weergave dient, telt niet als wijziging; het energielabel van een vat wel, want dat bepaalt het stilstandsverlies.
 
 **Bewaren.** De vergelijking en het originele bestand worden bij de registratie bewaard (`registration.relabelComparison`). Na een latere projectwijziging staat er een melding dat de vergelijking verouderd is; vergelijk dan opnieuw.
 
