@@ -1354,7 +1354,6 @@ export const en: Record<string, string> = {
   'nta.gap.vertical_pipes_conflicting': 'Zone "no vertical pipes" conflicts with the project pipes (7.3.3)',
   'nta.gap.basement_forfait_delta_u_conflict': 'Basement ΔU_for differs from the derived ΔU_for (8.38, 8.3)',
   'nta.gap.thermal_bridge_methods_mixed': 'Forfait and detailed thermal bridges mixed (8.2.1)',
-  'nta.gap.forfait_thermal_bridges_unheated_space_unsupported': 'Forfait thermal bridges with an unheated space: H_U;for not derived (8.4, C.1.3)',
   'nta.gap.ground_floor_below_and_heated_basement': 'Floor has both a crawlspace/unheated basement and a heated basement (8.3.3.2, 8.3.4.2)',
   'nta.gap.ground_floor_edge_insulation_slab_only': 'Edge insulation applies to a slab on ground only (D.7/D.8, table D.1)',
   'nta.performance.warnings': 'Plausibility (the calculation continues):',

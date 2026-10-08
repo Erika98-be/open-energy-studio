@@ -653,16 +653,27 @@ fn forfait_bridge_route(
             .and_then(|value| serde_json::from_value::<ThermalBoundary>(value.clone()).ok())
     };
     let surfaces = || project.zones.iter().flat_map(|zone| &zone.surfaces);
-    // 8.4: in the forfait route H_U;for = 0 and the partition joins H_D;for
-    // with U_iu;equi of C.1.3, which this route does not derive.
-    if surfaces().any(|surface| boundary(surface) == Some(ThermalBoundary::UnheatedSpace)) {
-        gaps.push(gap(
-            "forfait_thermal_bridges_unheated_space_unsupported",
-            "ntaCalculation.groundFloors",
-        ));
-    }
-    // 8.3: area-weighted U of the opaque parts bordering outdoor air.
+    // 8.3: area-weighted U of the opaque external parts.
     let (mut sum_au, mut sum_a) = (0.0, 0.0);
+    // 8.4.1 note 5 (2025+C1 p. 266; 2022 p. 240): in the forfait route
+    // H_U;for = 0 and a partition to an unheated space is an external
+    // construction with U_iu;equi = U_C·b_U (C.10), so it also counts here.
+    if surfaces().any(|surface| boundary(surface) == Some(ThermalBoundary::UnheatedSpace)) {
+        let partitions = crate::unheated_reduction_factors(project).and_then(|factors| {
+            crate::forfait_partition_elements(project, None, &factors)
+        });
+        match partitions {
+            Some(elements) => {
+                for (element, opaque) in elements {
+                    if opaque {
+                        sum_au += element.area_m2 * element.u_value_w_per_m2k;
+                        sum_a += element.area_m2;
+                    }
+                }
+            }
+            None => gaps.push(gap("unheated_transmission_unresolved", "unheatedSpaces")),
+        }
+    }
     for surface in surfaces().filter(|surface| boundary(surface) == Some(ThermalBoundary::Outdoor))
     {
         let windows: f64 = surface
@@ -3262,6 +3273,11 @@ fn derive_input(
         .map(|item| (item.surface_id.as_str(), item))
         .collect();
     let delta_u_forfait = forfait_bridge_route(&project, &nta, &constructions, gaps);
+    // b_U per unheated space for the forfait route (8.4.1 note 5, C.10).
+    let partition_factors = match delta_u_forfait {
+        Some(_) if !project.unheated_spaces.is_empty() => crate::unheated_reduction_factors(&project),
+        _ => None,
+    };
     let mut used_ground = HashSet::new();
     let mut window_shadings: HashMap<&str, (usize, &ProjectWindowShading)> = HashMap::new();
     for (index, item) in nta.window_shadings.iter().enumerate() {
@@ -3469,6 +3485,61 @@ fn derive_input(
                     continue;
                 }
                 ThermalBoundary::Outdoor => {}
+                ThermalBoundary::UnheatedSpace if delta_u_forfait.is_some() => {
+                    // 8.4.1 note 5 with C.10: the partition is in H_D;for
+                    // (added with the direct elements below); the TOjuli
+                    // split (§5.7.2) takes it on its own orientation, without
+                    // solar gain behind the unheated space.
+                    let factor = surface
+                        .get("unheatedSpaceId")
+                        .and_then(Value::as_str)
+                        .and_then(|space| partition_factors.as_ref()?.get(space).copied());
+                    if let Some(factor) = factor {
+                        let side = surface
+                            .get("orientation")
+                            .and_then(Value::as_str)
+                            .and_then(orientation)
+                            .flatten();
+                        let tilt = tilts.get(id).copied().unwrap_or(match (side, surface_type) {
+                            (Some(_), _) => 90.0,
+                            (None, "floor") => 180.0,
+                            (None, _) => 0.0,
+                        });
+                        let mut push = |element_id: String, area: f64, u_value: f64, reference: String| {
+                            opaque.push(OpaqueElement {
+                                id: element_id,
+                                area_m2: area,
+                                orientation: side.unwrap_or(Orientation::South),
+                                tilt_deg: tilt,
+                                u_value_w_per_m2k: u_value * factor,
+                                forfait_delta_u_w_per_m2k: delta_u_forfait,
+                                behind_unheated_space: true,
+                                source_reference: reference,
+                            })
+                        };
+                        let mut window_area = 0.0;
+                        for window in surface.get("windows").and_then(Value::as_array).map(Vec::as_slice).unwrap_or_default() {
+                            let (Some(window_id), Some(area), Some(u_value)) = (
+                                window.get("id").and_then(Value::as_str),
+                                window.get("area").and_then(Value::as_f64),
+                                window.get("uValue").and_then(Value::as_f64),
+                            ) else {
+                                continue;
+                            };
+                            window_area += area;
+                            push(format!("window:{window_id}"), area, u_value, format!("project:window:{window_id}.uValue · b_U (C.10)"));
+                        }
+                        let opaque_area = surface.get("area").and_then(Value::as_f64).unwrap_or(0.0) - window_area;
+                        let construction_id = surface.get("constructionId").and_then(Value::as_str).unwrap_or("");
+                        if let (true, Some(u_value)) = (
+                            opaque_area > 1e-9,
+                            constructions.get(construction_id).and_then(|item| item.get("uValue")).and_then(Value::as_f64),
+                        ) {
+                            push(format!("surface:{id}:opaque"), opaque_area, u_value, format!("project:construction:{construction_id}.uValue · b_U (C.10)"));
+                        }
+                    }
+                    continue;
+                }
                 _ => continue,
             }
             // Outdoor surface: solar gains for windows and the opaque rest.
@@ -3639,6 +3710,7 @@ fn derive_input(
                         tilt_deg: tilt,
                         u_value_w_per_m2k: u_value,
                         forfait_delta_u_w_per_m2k: delta_u_forfait,
+                        behind_unheated_space: false,
                         source_reference: format!("project:construction:{construction_id}.uValue"),
                     }),
                     None => gaps.push(gap(
@@ -3664,6 +3736,25 @@ fn derive_input(
             gaps.push(gap("direct_transmission_unresolved", zone_path.clone()));
         }
         let unheated = if project.unheated_spaces.is_empty() {
+            None
+        } else if let Some(delta) = delta_u_forfait {
+            // 8.4.1 note 5 with C.10: H_U;for = 0; the partitions join H_D;for
+            // as U_C·b_U with ΔU_for like every other H_D element.
+            let partitions = crate::unheated_reduction_factors(&project).and_then(|factors| {
+                crate::forfait_partition_elements(&project, Some(&zone.id), &factors)
+            });
+            match (partitions, direct.as_mut()) {
+                (Some(elements), Some(direct)) => {
+                    for (mut element, _) in elements {
+                        element.u_value_w_per_m2k += delta;
+                        element.source_reference =
+                            format!("{} + ΔU_for {delta:.3}", element.source_reference);
+                        direct.elements.push(element);
+                    }
+                }
+                (None, _) => gaps.push(gap("unheated_transmission_unresolved", zone_path.clone())),
+                (Some(_), None) => {}
+            }
             None
         } else {
             let resolved = unheated_zone_input(&project, Some(&zone.id));
@@ -5699,7 +5790,10 @@ mod tests {
                 && gap.path
                     == "ntaCalculation.groundFloors[0].heatedBasement.forfaitDeltaUWPerM2k"));
 
-        // H_U;for = 0 with U_iu;equi (C.1.3) is not derived here.
+        // 8.4.1 note 5 with C.10 (2025+C1 p. 266; 2022 p. 240 and p. 748):
+        // H_U;for = 0 and the partition to an unheated space is an external
+        // construction with U_iu;equi = U_C·b_U, in Ū of 8.3 and in H_D;for
+        // with ΔU_for. Without a b_U for the space the route stays open.
         value["zones"][0]["surfaces"]
             .as_array_mut()
             .unwrap()
@@ -5709,10 +5803,60 @@ mod tests {
                 "area": 10.0, "orientation": "E", "constructionId": "c-wall",
                 "zoneId": "z1", "windows": []
             }));
+        value["unheatedSpaces"] = serde_json::json!([{
+            "id": "garage", "name": "Garage"
+        }]);
         assert!(assess_project_performance(&value)
             .gaps
             .iter()
-            .any(|gap| gap.code == "forfait_thermal_bridges_unheated_space_unsupported"));
+            .any(|gap| gap.code == "unheated_transmission_unresolved"));
+        value["unheatedSpaces"][0]["reductionFactor"] = Value::from(0.6);
+        value["unheatedSpaces"][0]["factorSourceReference"] = Value::from("8.4.1");
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        let partition = 0.21 * 0.6;
+        let mean = (98.0 * 0.21 + 52.0 * 0.16 + 10.0 * partition) / 160.0;
+        let delta = 0.1 - 0.25 * (mean - 0.4);
+        let expected =
+            98.0 * 0.21 + 52.0 * 0.16 + 12.0 * 1.1 + 10.0 * partition + 172.0 * delta;
+        let transmission = result
+            .performance
+            .as_ref()
+            .unwrap()
+            .space_heating
+            .demand
+            .transmission
+            .clone()
+            .unwrap();
+        assert!(
+            (transmission.direct_conductance_w_per_k.unwrap() - expected).abs() < 1e-9,
+            "{transmission:?}"
+        );
+        // H_U;for = 0: no separate unheated-space term remains.
+        let demand = &result.derived_input.as_ref().unwrap().space_heating.demand;
+        let crate::monthly_demand::Transmission::Components(components) = &demand.transmission
+        else {
+            panic!("component transmission");
+        };
+        assert!(components.unheated.is_none());
+        // The TOjuli split takes the partition on its orientation (east),
+        // shielded from the sun by the unheated space.
+        let partition = demand
+            .opaque_elements
+            .iter()
+            .find(|item| item.id == "surface:garage-wall:opaque")
+            .unwrap();
+        assert!(partition.behind_unheated_space);
+        assert!((partition.u_value_w_per_m2k - partition_u()).abs() < 1e-12);
+        assert_eq!(crate::monthly_demand::opaque_solar_kwh(partition, 7), 0.0);
+        let performance = result.performance.as_ref().unwrap();
+        assert!(performance
+            .tojuli
+            .iter()
+            .all(|item| item.status != "invalid"));
+        fn partition_u() -> f64 {
+            0.21 * 0.6
+        }
     }
 
     #[test]

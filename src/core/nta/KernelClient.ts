@@ -1617,6 +1617,15 @@ export interface SpaceHeatingChainInput {
       kind:
         | { kind: 'direct'; radialFan?: boolean | null }
         | { kind: 'indirect'; roomHeightAbove8M?: boolean | null; warmAirReturn?: boolean | null; ecMotor?: boolean | null };
+      /** Number of heaters of `kind`; absent means all heaters of the zone. */
+      count?: number | null;
+      /** Heaters of other types in the same zone (9.23 sums per type). */
+      further?: {
+        kind:
+          | { kind: 'direct'; radialFan?: boolean | null }
+          | { kind: 'indirect'; roomHeightAbove8M?: boolean | null; warmAirReturn?: boolean | null; ecMotor?: boolean | null };
+        count: number;
+      }[];
       /** Q_h;b per EN 12831-1, W; absent means the table 9.12 estimate. */
       designHeatLoadW?: number | null;
       sourceReference: string;

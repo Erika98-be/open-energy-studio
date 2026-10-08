@@ -698,6 +698,11 @@ pub struct OpaqueElement {
     /// 7.33/7.39 keep `U_c` and only the TOjuli orientation split adds it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub forfait_delta_u_w_per_m2k: Option<f64>,
+    /// A partition to an unheated space in the forfait route (8.4.1 note 5,
+    /// C.10): part of H_D;for and of the TOjuli split on its orientation,
+    /// but shielded from the sun, so without the 7.33/7.39 solar terms.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub behind_unheated_space: bool,
     pub source_reference: String,
 }
 
@@ -1338,6 +1343,9 @@ pub(crate) fn window_solar_kwh(window: &Window, month: u8, balance: Balance) -> 
 
 /// 7.33 and 7.39: net solar gain of one opaque element in kWh.
 pub(crate) fn opaque_solar_kwh(element: &OpaqueElement, month: u8) -> f64 {
+    if element.behind_unheated_space {
+        return 0.0;
+    }
     let hours = MONTH_HOURS[usize::from(month - 1)];
     let irradiance = climate::irradiance_w_per_m2(element.orientation, element.tilt_deg, month)
         .expect("validated tilt");

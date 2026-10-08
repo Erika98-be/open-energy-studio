@@ -18170,6 +18170,127 @@
       }
     },
     {
+      "caseId": "isso54-v2-EPW006h",
+      "normVersion": "2022",
+      "projectFile": "../isso54/EPW001.json",
+      "projectPatch": [
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/2/constructionId",
+          "value": "c-gevel-035"
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/3/constructionId",
+          "value": "c-gevel-035"
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/4/thermalBoundary",
+          "value": "unheated_space"
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/4/constructionId",
+          "value": "c-gevel-035"
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/4/unheatedSpaceId",
+          "value": "aor-oost"
+        },
+        {
+          "op": "set",
+          "pointer": "/zones/0/surfaces/5/constructionId",
+          "value": "c-gevel-035"
+        },
+        {
+          "op": "set",
+          "pointer": "/unheatedSpaces",
+          "value": [
+            {
+              "id": "aor-oost",
+              "name": "Aangrenzende onverwarmde ruimte oost",
+              "outside": {
+                "transmission": {
+                  "elements": [
+                    {
+                      "id": "aor-buiten",
+                      "areaM2": 46.656,
+                      "uValueWPerM2k": 3.2,
+                      "sourceReference": "ISSO 54 v2.0 EP-W006h p. 9: AOR zonder specificatie; bijlage I.2.4 opmerking 1 (2022 p. 815): A_T;ue 1,44 x A_T;iu, U 3,2"
+                    }
+                  ]
+                },
+                "ventilation": {
+                  "method": "flow",
+                  "airflowM3PerH": 48.6,
+                  "sourceReference": "bijlage I.2.4 opmerking 1: q_ve;ue 1,5 x A_T;iu m3/h"
+                },
+                "otherZonesConductanceWPerK": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "op": "set",
+          "pointer": "/constructions",
+          "value": [
+            {
+              "id": "c-rc6",
+              "name": "Dichte constructie Rc 6,0 (tabel 1, p. 5)",
+              "layers": [],
+              "rcValue": 6.0,
+              "uValue": 0.162
+            },
+            {
+              "id": "c-gevel-035",
+              "name": "Gevel Rc 0,35",
+              "layers": [],
+              "rcValue": 0.35,
+              "uValue": 1.923
+            }
+          ]
+        }
+      ],
+      "source": {
+        "publisher": "ISSO / InstallQ (CCvD)",
+        "documentId": "ISSO 54 versie 2.0, Energie Prestatie Rekenprogramma's, testen voor het deelgebied EDR attest energieprestatie (CCvD InstallQ, 12-05-2022), test EPW-006h, p. 9",
+        "edition": "versie 2.0, 12-05-2022 (NTA 8800 januari 2022)",
+        "usePermission": "openbaar document; alleen de invoer is in eigen woorden gecodeerd, geen tekst overgenomen",
+        "independentReviewer": "geen: verwachte uitkomsten (bijlage 2) niet in bezit"
+      },
+      "pending": {
+        "reason": "De verwachte uitkomsten staan in bijlage 2 van ISSO 54 (apart resultatendocument), niet in bezit; de deeltest wordt doorgerekend zonder oordeel.",
+        "metrics": [
+          {
+            "path": "beng1",
+            "unit": "kWh/m2.year",
+            "normReference": "EP1 / BENG 1, energiebehoefte (5.3); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng2",
+            "unit": "kWh/m2.year",
+            "normReference": "EP2 / BENG 2, primair fossiel energiegebruik (5.2); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng3",
+            "unit": "%",
+            "normReference": "EP3 / BENG 3, aandeel hernieuwbare energie (5.4); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "tojuliMax",
+            "unit": "K",
+            "normReference": "TOjuli;max (5.7); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          }
+        ]
+      }
+    },
+    {
       "caseId": "isso54-v2-EPW203o",
       "normVersion": "2022",
       "projectFile": "../isso54/EPW001.json",

@@ -2986,7 +2986,38 @@ W203O = [
     setp(f"{NTA}/distribution", {"method": "declared", "monthlyLossKwh": [0.0] * 12, "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: geen distributiesysteem"}),
 ]
 
+# EP-W006h: the east facade borders an unheated space (AOR) without further
+# specification; every facade R_c 0,35, the rest as EP-W001, floor on ground
+# (p. 9). The reference uses the forfait thermal bridges, so 8.4.1 note 5
+# with C.10 applies (2022 p. 240, 748): the partition joins H_D;for as
+# U_C.b_U. The AOR is not specified; b_U is derived with 8.53 from the
+# defaults that annex I.2.4 note 1 (2022 p. 815) gives for an adjacent
+# unheated space: A_T;ue 1,44 x A_T;iu at U 3,2 and 1,5 x A_T;iu m3/h, with
+# A_T;iu the east facade of 32,4 m2.
+def aor_east(project):
+    project["constructions"].append({"id": "c-gevel-035", "name": "Gevel Rc 0,35", "layers": [], "rcValue": 0.35, "uValue": u_from_rc(0.35, 0.17)})
+    for item in project["zones"][0]["surfaces"]:
+        if item["type"] == "wall":
+            item["constructionId"] = "c-gevel-035"
+    east = surface(project, "gevel-oost")
+    east["thermalBoundary"] = "unheated_space"
+    east["unheatedSpaceId"] = "aor-oost"
+    area = east["area"]
+    project["unheatedSpaces"] = [
+        {
+            "id": "aor-oost",
+            "name": "Aangrenzende onverwarmde ruimte oost",
+            "outside": {
+                "transmission": {"elements": [{"id": "aor-buiten", "areaM2": round(1.44 * area, 3), "uValueWPerM2k": 3.2, "sourceReference": "ISSO 54 v2.0 EP-W006h p. 9: AOR zonder specificatie; bijlage I.2.4 opmerking 1 (2022 p. 815): A_T;ue 1,44 x A_T;iu, U 3,2"}]},
+                "ventilation": {"method": "flow", "airflowM3PerH": round(1.5 * area, 3), "sourceReference": "bijlage I.2.4 opmerking 1: q_ve;ue 1,5 x A_T;iu m3/h"},
+                "otherZonesConductanceWPerK": 0.0,
+            },
+        }
+    ]
+
+
 CASES += [
+    ("EPW006h", 9, variant(aor_east)),
     ("EPW203o", 25, W203O),
     ("EPW206a", 29, variant(w206a)),
     ("EPW206b", 29, variant(w206b)),
