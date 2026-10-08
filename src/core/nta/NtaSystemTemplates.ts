@@ -205,7 +205,15 @@ export function hotWaterGeneratorTemplate(kind: string): Block {
     exhaustAirSource: false, storageWithoutLegionellaCycle: false, outdoorAirFraction: null, smartControlFactor: null,
     maxTestTemperatureC: null, designSetTemperatureC: null, sourceReference: '' };
   if (kind === 'chp') return { kind, chp: chpClassTemplate(), alsoSpaceHeating: false, equipmentReference: '' };
+  if (kind === 'booster_heat_pump_forfait') return { kind, designSupplyTemperatureC: null,
+    heatSource: boosterHeatSourceTemplate('external_heat'), sourceReference: '' };
   return { kind };
+}
+
+/** Figure W.1: where a booster heat pump takes its source heat from. */
+export function boosterHeatSourceTemplate(kind: string): Block {
+  if (kind === 'collective_generator') return { kind, generationEfficiency: null, carrier: 'gas', sourceReference: '' };
+  return { kind: kind === 'heating_system' ? 'heating_system' : 'external_heat' };
 }
 
 /** §13.8.4.2: appliance tested at two tapping profiles (i1 = M, i2 = L). */

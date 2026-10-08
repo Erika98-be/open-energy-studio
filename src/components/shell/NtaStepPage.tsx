@@ -12,6 +12,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './ntaStep.css';
 import { ArrowLeft, ArrowRight, FileText, Paperclip, Undo2 } from 'lucide-react';
 import { useI18n } from '../../i18n/i18n';
+import { kernelCodeLabel } from '../../i18n/format';
 import { useKernel } from '../../context/KernelProvider';
 import { useNtaDraft, type NtaDraftState } from '../../context/NtaDraftProvider';
 import { isPathWithin, parseKernelPath, formatKernelPath } from '../../core/nta/pathUtil';
@@ -329,7 +330,9 @@ function useIssueMarks(ref: React.RefObject<HTMLElement | null>, issues: Array<S
     }
     for (const [element, mark] of marked) {
       element.dataset.issue = mark.kind;
-      element.title = `${t(`ui.severity.${mark.kind}`)}: ${mark.codes.join(', ')}`;
+      // The human text of each code (gap, issue or warning), never the bare key.
+      const texts = [...new Set(mark.codes)].map((code) => kernelCodeLabel(t, code).text);
+      element.title = `${t(`ui.severity.${mark.kind}`)}: ${texts.join('; ')}`;
     }
   }, [ref, issues, draft, mode, part, t]);
 }

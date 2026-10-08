@@ -4,7 +4,7 @@ import { ElectricBoilerInsulatedPipe2022Field } from './NtaEdition2022Fields';
 import { HeatPumpInstallationYear2020Field } from './NtaEdition2020Fields';
 import type { IProject } from '../../core/energy/types';
 import {
-  additionalHotWaterGeneratorTemplate, calculatedSolarMethod, collectorObstructionTemplate, coolingPerformanceTemplate,
+  additionalHotWaterGeneratorTemplate, boosterHeatSourceTemplate, calculatedSolarMethod, collectorObstructionTemplate, coolingPerformanceTemplate,
   chpClassTemplate, declaredShareTemplate, en14825PointTemplate, exhaustAirUseTemplate, hotWaterGeneratorTemplate,
   hotWaterStorageTemplate, microChpStorageTemplate, microChpTemplate, preferredGeneratorTemplate, regenerationTemplate, solarRegenerationTemplate, solarWaterHeaterTemplate,
   spaceGeneratorTemplate, storageLossTemplate, testedSolarMethod, windowObstructionTemplate,
@@ -340,7 +340,35 @@ function hotWaterGeneratorOptions(t: Translate): Array<[string, string]> {
     ['electric_instantaneous', t('nta.form.dhwGen.instantaneous')], ['electric_boiler', t('nta.form.dhwGen.electricBoiler')],
     ['indirect_boiler', t('nta.form.dhwGen.indirectBoiler')], ['external_heat', t('nta.form.dhwGen.external')],
     ['measured_two_profiles', t('nta.form.dhwGen.twoProfiles')], ['heat_pump_en16147', t('nta.form.dhwGen.en16147')], ['heating_system', t('nta.form.dhwGen.heatingSystem')],
-    ['chp', t('nta.form.generator.chp')]];
+    ['chp', t('nta.form.generator.chp')], ['booster_heat_pump_forfait', t('nta.form.dhwGen.boosterForfait')]];
+}
+
+/**
+ * §13.8.4.4 booster heat pump with the forfait values of 13.162/13.163: the design supply
+ * temperature of the heating system that feeds it (empty when unknown) and the source of its
+ * heat (figure W.1).
+ */
+function BoosterForfaitFields({ draft, change, base }: SectionProps & { base: Path }) {
+  const { t } = useI18n();
+  const field = { draft, onChange: change };
+  const at = (...rest: Path): Path => [...base, ...rest];
+  const source = read(draft, at('heatSource', 'kind'));
+  return <div className="nta-form-subsection">
+    <NumberField {...field} path={at('designSupplyTemperatureC')} label={t('nta.form.booster.supplyTemperature')} optional unit="°C" />
+    <p className="nta-form-note">{t('nta.form.booster.supplyTemperatureNote')}</p>
+    <SelectField {...field} path={at('heatSource', 'kind')} label={t('nta.form.booster.heatSource')} options={[
+      ['external_heat', t('nta.form.booster.source.external')], ['heating_system', t('nta.form.booster.source.heatingSystem')],
+      ['collective_generator', t('nta.form.booster.source.collective')]]}
+      onChange={(_, value) => change(at('heatSource'), boosterHeatSourceTemplate(String(value ?? '')))} />
+    {source === 'collective_generator' && <>
+      <NumberField {...field} path={at('heatSource', 'generationEfficiency')} label={t('nta.form.booster.sourceEfficiency')} />
+      <SelectField {...field} path={at('heatSource', 'carrier')} label={t('nta.form.booster.sourceCarrier')} options={[
+        ['gas', t('nta.form.booster.carrier.gas')], ['oil', t('nta.form.booster.carrier.oil')],
+        ['electricity', t('nta.form.booster.carrier.electricity')]]} />
+      <TextField {...field} path={at('heatSource', 'sourceReference')} label={t('nta.form.source')} />
+    </>}
+    <TextField {...field} path={at('sourceReference')} label={t('nta.form.booster.reference')} />
+  </div>;
 }
 
 const PROFILES: Array<[string, string]> = ['s', 'm', 'l', 'xl', 'xxl', '3xl', '4xl'].map((key) => [key, key.toUpperCase()]);
@@ -551,6 +579,7 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
     {kind === 'measured_two_profiles' && <TwoProfileFields draft={draft} change={change} base={base} />}
     {kind === 'heat_pump_en16147' && <En16147Fields draft={draft} change={change} base={base} />}
     {kind === 'heating_system' && <p className="nta-form-note">{t('nta.form.dhwGen.heatingSystemNote')}</p>}
+    {kind === 'booster_heat_pump_forfait' && <BoosterForfaitFields draft={draft} change={change} base={base} />}
     {kind === 'chp' && <>
       <ChpClassFields draft={draft} change={change} base={base} declared />
       <CheckField {...field} path={[...base, 'alsoSpaceHeating']} label={t('nta.form.chp.alsoHeating')} />
