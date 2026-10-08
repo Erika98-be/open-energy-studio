@@ -1745,6 +1745,104 @@ pub(crate) fn unheated_zone_input(
     Some(UnheatedTransmissionInput { spaces })
 }
 
+/// 8.4.1 note 5 with C.10 (2025+C1 p. 266 and annex C; 2022 p. 240 and
+/// p. 748): with the forfait treatment of linear thermal bridges an
+/// unheated space counts as outside air (H_U;for = 0) and its partitions
+/// join H_D;for with U_iu;equi = U_C·b_U, where U_C is the project U-value
+/// with R_se 0,04 (not the R_si of 8.4.2.1) and b_U that of the space
+/// (8.4.1). Returns the elements and, per element, whether it is opaque.
+pub(crate) fn forfait_partition_elements(
+    project: &ProjectInput,
+    zone_id: Option<&str>,
+    factors: &HashMap<String, f64>,
+) -> Option<Vec<(DirectElement, bool)>> {
+    let constructions: HashMap<&str, &Value> = project
+        .constructions
+        .iter()
+        .filter_map(|item| Some((item.get("id")?.as_str()?, item)))
+        .collect();
+    let mut out = Vec::new();
+    for zone in project
+        .zones
+        .iter()
+        .filter(|zone| zone_id.map_or(true, |id| zone.id == id))
+    {
+        for surface in &zone.surfaces {
+            let boundary: ThermalBoundary =
+                serde_json::from_value(surface.get("thermalBoundary")?.clone()).ok()?;
+            if boundary != ThermalBoundary::UnheatedSpace {
+                continue;
+            }
+            let space_id = surface.get("unheatedSpaceId")?.as_str()?;
+            let factor = *factors.get(space_id)?;
+            let surface_id = surface.get("id")?.as_str()?;
+            let note = format!(" · b_U {factor:.3} (C.10, 8.4.1 opmerking 5)");
+            let mut window_area = 0.0;
+            for window in surface.get("windows")?.as_array()? {
+                let window_id = window.get("id")?.as_str()?;
+                let area = window.get("area")?.as_f64()?;
+                let u_value = window.get("uValue")?.as_f64()?;
+                if !area.is_finite() || area <= 0.0 || !u_value.is_finite() || u_value <= 0.0 {
+                    return None;
+                }
+                window_area += area;
+                out.push((
+                    DirectElement {
+                        id: format!("window:{window_id}"),
+                        area_m2: area,
+                        u_value_w_per_m2k: u_value * factor,
+                        source_reference: format!("project:window:{window_id}.uValue{note}"),
+                    },
+                    false,
+                ));
+            }
+            let opaque_area = surface.get("area")?.as_f64()? - window_area;
+            if !opaque_area.is_finite() || opaque_area < -1e-9 {
+                return None;
+            }
+            if opaque_area > 1e-9 {
+                let construction_id = surface.get("constructionId")?.as_str()?;
+                let u_value = constructions
+                    .get(construction_id)?
+                    .get("uValue")?
+                    .as_f64()?;
+                if !u_value.is_finite() || u_value <= 0.0 {
+                    return None;
+                }
+                out.push((
+                    DirectElement {
+                        id: format!("surface:{surface_id}:opaque"),
+                        area_m2: opaque_area,
+                        u_value_w_per_m2k: u_value * factor,
+                        source_reference: format!(
+                            "project:construction:{construction_id}.uValue{note}"
+                        ),
+                    },
+                    true,
+                ));
+            }
+        }
+    }
+    Some(out)
+}
+
+/// b_U of every project unheated space (8.4.1), declared or derived; `None`
+/// when one cannot be determined.
+pub(crate) fn unheated_reduction_factors(project: &ProjectInput) -> Option<HashMap<String, f64>> {
+    let input = unheated_zone_input(project, None)?;
+    let assessed = unheated_transmission::assess_unheated_transmission(&input);
+    if assessed.status != "input_valid" || assessed.spaces.len() != input.spaces.len() {
+        return None;
+    }
+    Some(
+        assessed
+            .spaces
+            .into_iter()
+            .map(|space| (space.id, space.reduction_factor))
+            .collect(),
+    )
+}
+
 /// Optional `orientations` of a project thermal bridge (project codes
 /// N, NE, …, NW, horizontal) for the TOjuli split of §5.7.2 step 2.
 fn bridge_sides(bridge: &Value) -> Option<Vec<direct_transmission::EnvelopeSide>> {

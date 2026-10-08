@@ -1542,6 +1542,20 @@ fn zone_terms(
                 format!("{prefix}emission.airHeaters.sourceReference"),
             ));
         }
+        if heaters.count == Some(0) {
+            issues.push(issue(
+                "air_heater_count_invalid",
+                format!("{prefix}emission.airHeaters.count"),
+            ));
+        }
+        for (index, unit) in heaters.further.iter().enumerate() {
+            if unit.count == 0 {
+                issues.push(issue(
+                    "air_heater_count_invalid",
+                    format!("{prefix}emission.airHeaters.further[{index}].count"),
+                ));
+            }
+        }
     }
     // 9.21/9.22: room fans need their count and type (table 9.11).
     match &emission.fans {
@@ -1719,7 +1733,7 @@ fn zone_terms(
                         demand_input.usable_floor_area_m2,
                     )
                 });
-                heaters.kind.factor() * design
+                heaters.factor().unwrap_or(0.0) * design
             }),
     })
 }
@@ -6436,6 +6450,8 @@ mod tests {
             kind: AirHeaterKind::Direct {
                 radial_fan: Some(false),
             },
+            count: None,
+            further: Vec::new(),
             design_heat_load_w: Some(10_000.0),
             source_reference: "EN 12831-1".into(),
         });
@@ -6448,6 +6464,73 @@ mod tests {
         let jan = &result.monthly[0];
         let hours = jan.emission_fan_electricity_kwh * 1000.0 / (0.014 * 10_000.0);
         assert!(hours > 0.0 && hours <= 744.0 + 1e-9);
+    }
+
+    #[test]
+    fn air_heaters_of_several_types_sum_per_9_23() {
+        use crate::heating_emission::{AirHeaterAuxiliary, AirHeaterKind, AirHeaterUnit};
+        // 9.23 (2022 p. 282): Σ P_H,aux;i·n_H,aux;i with table 9.12
+        // P_H,aux = factor·Q_h;b/n_H,aux, n_H,aux all heaters in the zone.
+        // One axial (0,014) and three radial (0,022) heaters (ISSO 54
+        // EP-W203o): (0,014 + 3·0,022)/4 = 0,020.
+        let axial = AirHeaterKind::Direct {
+            radial_fan: Some(false),
+        };
+        let radial = AirHeaterKind::Direct {
+            radial_fan: Some(true),
+        };
+        let mixed = AirHeaterAuxiliary {
+            kind: axial,
+            count: Some(1),
+            further: vec![AirHeaterUnit {
+                kind: radial,
+                count: 3,
+            }],
+            design_heat_load_w: Some(10_000.0),
+            source_reference: "EN 12831-1".into(),
+        };
+        assert!((mixed.factor().unwrap() - 0.020).abs() < 1e-12);
+        // One type alone keeps its own factor, whatever its count.
+        let single = AirHeaterAuxiliary {
+            further: Vec::new(),
+            count: Some(4),
+            ..mixed.clone()
+        };
+        assert_eq!(single.factor(), Some(0.014));
+        // In the chain the mixed factor replaces the single one: the fan
+        // energy scales by 0,020/0,014.
+        let run = |heaters: AirHeaterAuxiliary| {
+            let mut input = boiler_chain();
+            input.emission.system = EmissionSystem::AirHeating;
+            input.emission.balancing = HydronicBalancing::NotApplicable;
+            input.emission.air_heaters = Some(heaters);
+            let result = assess_space_heating_chain(&input);
+            assert_eq!(
+                result.status, "calculated_unverified",
+                "{:?}",
+                result.issues
+            );
+            result.monthly[0].emission_fan_electricity_kwh
+        };
+        let ratio = run(mixed.clone()) / run(single);
+        assert!((ratio - 0.020 / 0.014).abs() < 1e-9, "{ratio}");
+        // A count of 0 is refused.
+        let mut input = boiler_chain();
+        input.emission.system = EmissionSystem::AirHeating;
+        input.emission.balancing = HydronicBalancing::NotApplicable;
+        input.emission.air_heaters = Some(AirHeaterAuxiliary {
+            further: vec![AirHeaterUnit {
+                kind: radial,
+                count: 0,
+            }],
+            ..mixed
+        });
+        let result = assess_space_heating_chain(&input);
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "air_heater_count_invalid"
+                && item.path.ends_with("emission.airHeaters.further[0].count")));
     }
 
     #[test]

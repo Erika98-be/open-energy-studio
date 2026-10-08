@@ -2731,6 +2731,300 @@ CASES += [
     ),
 ]
 
+# --- Routes added for ISSO 54 (EP-W011a, W203j, W204h, W202e, W302e, W402f) ---
+# EP-W011a: closed horizontal louvres on every window; g_gl from 7.41 with
+# g_gl;alt;wi 0,045 at 45 degrees solar altitude and g_gl;dif;wi 0,2 (p. 14;
+# 2022 7.6.6.1.3). The rest of the window is as EP-W001.
+W011A = [
+    setp(
+        f"{NTA}/windowGlazings",
+        [
+            {
+                "windowId": f"raam-zuid-{k}",
+                "glazing": {
+                    "diffusing": {
+                        "gAltitude45": 0.045,
+                        "gDiffuse": 0.2,
+                        "sourceReference": "ISSO 54 v2.0 EP-W011a p. 14: gesloten horizontale lamellen, g_gl;alt 0,045 en g_gl;dif 0,2 (7.41)",
+                    }
+                },
+                "sourceReference": "ISSO 54 v2.0 EP-W011a p. 14: alle ramen",
+            }
+            for k in range(1, 5)
+        ],
+    )
+]
+
+# EP-W202e, W302e, W402f: insulated pipes embedded in the construction (p. 24,
+# 32, 34). The test's "binnendiameter 0,02 m" is taken as d_i of 9.34/10.25/
+# 13.28, which those formulas define as the pipe diameter excluding the
+# insulation; d_a 0,04 m, depth 0,03 m, lambda insulation 0,04, lambda
+# construction 2 W/(m.K).
+EMBEDDED = {
+    "method": "insulated_embedded",
+    "pipeOuterDiameterM": 0.02,
+    "insulatedDiameterM": 0.04,
+    "insulationLambdaWPerMK": 0.04,
+    "embeddingLambdaWPerMK": 2.0,
+    "depthM": 0.03,
+}
+
+CASES += [
+    ("EPW011a", 14, W011A),
+    # EP-W203j: the HR107 with a quality declaration (p. 25): efficiency
+    # 0,975 and fraction 1, equal to the 2022 table 9.25 value of an HR107
+    # inside the envelope at 45/40 (so not entered); A 10 kWh, B 0,12 kW,
+    # C 0,3 and B_nom 20 kW replace the 9.85 constants (§9.1). The test's
+    # W;H;aux of 106,48/111,55 kWh is an expected result.
+    (
+        "EPW203j",
+        25,
+        [
+            setp(
+                f"{GEN}/declaredAuxiliaryConstants",
+                {"aKwh": 10.0, "bKw": 0.12, "c": 0.3, "nominalLoadKw": 20.0, "declarationReference": "ISSO 54 v2.0 EP-W203j p. 25: kwaliteitsverklaring HR107, A 10 kWh, B 0,12 kW, C 0,3, B_nom 20 kW"},
+            )
+        ],
+    ),
+    # EP-W204h: as EP-W204g (micro-CHP below 2 kW, LT, 45/40) but with an HRe
+    # label and a quality declaration eps_th 0,8 and eps_el 0,12 (p. 28;
+    # method 2 with §9.1 instead of table 9.31).
+    (
+        "EPW204h",
+        28,
+        micro_chp("EP-W204h", True, True, "ISSO 54 v2.0 EP-W204h p. 28: micro-WKK < 2 kW met HRe-label, LT, kwaliteitsverklaring")
+        + [
+            setp(f"{GEN}/declaredEfficiencies", {"thermal": 0.8, "electric": 0.12, "declarationReference": "ISSO 54 v2.0 EP-W204h p. 28: kwaliteitsverklaring eps_th 0,8, eps_el 0,12"}),
+            temperature_class("45_40"),
+        ],
+    ),
+    (
+        "EPW202e",
+        24,
+        [setp(f"{NTA}/distributionSystem/pipeTransmittance", EMBEDDED)],
+    ),
+    (
+        "EPW302e",
+        32,
+        W301A + [setp(f"{COOL}/distribution/pipe", {"kind": "calculated", "geometry": EMBEDDED, "sourceReference": "ISSO 54 v2.0 EP-W302e p. 32: geisoleerde leidingen in de constructie (10.25)"})],
+    ),
+    (
+        "EPW402f",
+        34,
+        W402A + [setp(f"{HW}/circulation/calculatedPsi", EMBEDDED)],
+    ),
+]
+
+
+# EP-W011b: all glass replaced by glass with a quality declaration (figure 7,
+# p. 15): g_gl;n 0,63 and U_gl 1,1, in a wooden frame U_f 2,4, psi_g 0,08.
+# U_W with the simplified 8.15 as EP-W003a: max(0,7.1,1 + 0,3.2,4;
+# 0,8.1,1 + 0,2.2,4) + 2,5.0,08 = 1,69 -> 1,7 (8.2.2.1). The declared
+# g_gl;n is the window's own g-value (no 7.41 data).
+CASES += [("EPW011b", 15, windows("gValue", 0.63) + windows("uValue", 1.7))]
+
+
+# --- EP-W206: generation in an apartment building (p. 29-30) ---
+# 48 apartments: 8 reference modules side by side and 6 above each other,
+# 12 storeys, 32,4 m; roof and ground floor 384 m2, facades as the table
+# (south 921,6 m2 net + 1152 m2 glazing = 2073,6 gross, north 2073,6,
+# east = west 194,4), perimeter 140 m, A_g 4608 m2, volume 64 x 6 x 32,4.
+# R_c as EP-W001. A new-build calculation for the whole building (6.2b),
+# individual ventilation per apartment (the reference system, scaled), hot
+# water an individual electric instantaneous heater per apartment with the
+# draw-off lengths of EP-W001.
+BUILDING48 = 48 * 96.0
+
+
+def building48(project):
+    scale(project, area=BUILDING48, volume=12441.6, height=32.4, roof=384.0, floor=384.0, south=2073.6, north=2073.6, east_west=194.4, windows_=192, perimeter=140.0, storeys=12, building_height=32.4)
+    dwellings(project, 48)
+    nta = project["ntaCalculation"]
+    nta["dwellingType"] = "apartment_building"
+    nta["areaSourceReference"] = "ISSO 54 v2.0 EP-W206 p. 29: 48 appartementen, Ag 4608 m2"
+    vent = nta["ventilation"]
+    vent["apartmentBuilding"] = True
+    vent["infiltration"]["buildingType"] = "multi_storey_whole_building"
+    nta["hotWater"]["generator"] = {"kind": "electric_instantaneous"}
+
+
+def collective48(project, test_id, connected_area, storeys):
+    """A collective HR107 of 10 kW; pipes through unheated spaces of unknown
+    length, insulated, valves insulated; pump power unknown, no control, no
+    heat meter (p. 29). The boiler location is not given: the reference
+    location (inside the envelope) is kept; for a collective boiler the
+    table 9.25 row does not depend on it."""
+    nta = project["ntaCalculation"]
+    nta["generator"]["boiler"]["role"] = "collective"
+    nta["generator"]["boiler"]["equipmentReference"] = f"ISSO 54 v2.0 {test_id} p. 29: gemeenschappelijke HR107-ketel, 10 kW"
+    nta["generator"]["auxiliary"] = {"electricallyConnectedDevices": 1, "nominalPowerKw": 10.0, "sourceReference": f"ISSO 54 v2.0 {test_id} p. 29: HR107, 10 kW"}
+    nta["collectiveConnection"] = {"connectedUsableAreaM2": connected_area, "sourceReference": f"ISSO 54 v2.0 {test_id} p. 29: aangesloten gebruiksoppervlakte"}
+    system = nta["distributionSystem"]
+    system["installation"] = "collective"
+    system["connectedStoreys"] = storeys
+    del system["unheatedPipeLengthM"]
+    system["pump"] = {"method": "calculated", "heatMeterPresent": False, "sourceReference": f"ISSO 54 v2.0 {test_id} p. 29: pompvermogen onbekend, geen regeling, geen warmtemeter"}
+    system["sourceReference"] = f"ISSO 54 v2.0 {test_id} p. 29: leidingen door onverwarmde ruimte, lengte onbekend (9.36), geisoleerd, kleppen en beugels geisoleerd"
+
+
+def w206a(project):
+    building48(project)
+    collective48(project, "EP-W206a", BUILDING48, 12)
+
+
+# EP-W206c: one collective boiler per 4 adjacent apartments, 12 boilers of
+# 10 kW, each serving 2 storeys (p. 29-30): 12 identical systems (§9.1) that
+# together serve the whole building (the kernel's connected area covers the
+# calculated zone; each appliance is one twelfth).
+def w206c(project):
+    building48(project)
+    collective48(project, "EP-W206c", BUILDING48, 2)
+    project["ntaCalculation"]["identicalSystems"] = 12
+
+
+# EP-W206b: the 32 apartments of the lower four apartment layers (8 storeys)
+# on the collective boiler, the upper 16 (4 storeys) with an individual HR107
+# each, no pipes through unheated spaces (p. 29). Two calculation zones: the
+# lower zone takes 2/3 of the facades (as the test states), the floor and 128
+# of the 192 windows; the upper zone the roof, 1/3 of the facades and 64
+# windows. The upper zone is served by 16 identical individual HR107 as an
+# additional heating system (§9.2); each zone has its own ventilation and
+# internal-gains input for its apartments.
+UPPER48 = "w206-boven"
+
+
+def w206b(project):
+    w206a(project)
+    zone = project["zones"][0]
+    upper = copy.deepcopy(zone)
+    zone.update(floorArea=32 * 96.0, volume=8294.4, height=21.6)
+    upper.update(id=UPPER48, name="Bovenste vier bouwlagen", floorArea=16 * 96.0, volume=4147.2, height=10.8)
+    lower_surfaces, upper_surfaces = [], []
+    for item in zone["surfaces"]:
+        if item["id"] == "dak":
+            upper_surfaces.append(dict(item, zoneId=UPPER48))
+            continue
+        if item["id"] == "bg-vloer":
+            lower_surfaces.append(item)
+            continue
+        below = dict(item, area=round(item["area"] * 2 / 3, 1))
+        above = dict(item, id=f"{item['id']}-boven", area=round(item["area"] / 3, 1), zoneId=UPPER48)
+        if item["id"] == "gevel-zuid":
+            below["windows"] = item["windows"][:128]
+            above["windows"] = [dict(w, surfaceId="gevel-zuid-boven") for w in item["windows"][128:]]
+        lower_surfaces.append(below)
+        upper_surfaces.append(above)
+    zone["surfaces"] = lower_surfaces
+    upper["surfaces"] = upper_surfaces
+    project["zones"].append(upper)
+    nta = project["ntaCalculation"]
+    nta["collectiveConnection"]["connectedUsableAreaM2"] = 32 * 96.0
+    nta["distributionSystem"]["connectedStoreys"] = 8
+    ventilation = nta.pop("ventilation")
+    vertical = nta.pop("verticalPipes")[0]
+    entries = []
+    for zone_id, count, storeys in ((zone["id"], 32, 8), (UPPER48, 16, 4)):
+        zone_ventilation = copy.deepcopy(ventilation)
+        zone_ventilation.update(zoneId=zone_id, usableFloorAreaM2=count * 96.0, dwellingCount=count, functions=[{"function": "residential", "areaM2": count * 96.0}])
+        entries.append(
+            {
+                "zoneId": zone_id,
+                "verticalPipes": [dict(vertical, id=f"{zone_id}-leiding", storeys=storeys)],
+                "ventilationFlows": [],
+                "ventilation": zone_ventilation,
+                "internalGains": dict(nta["internalGains"], dwellingCount=count, sourceReference=f"{count} appartementen"),
+            }
+        )
+    nta["zoneData"] = entries
+    individual = copy.deepcopy(REFERENCE["ntaCalculation"])
+    individual["generator"]["boiler"]["generatorId"] = "hr107-boven"
+    individual["generator"]["boiler"]["equipmentReference"] = "ISSO 54 v2.0 EP-W206b p. 29: individuele HR107 per appartement in de bovenste vier bouwlagen"
+    individual["distributionSystem"]["sourceReference"] = "ISSO 54 v2.0 EP-W206b p. 29: individuele ketel, geen leidingen door onverwarmde ruimten"
+    nta["additionalHeatingSystems"] = [
+        {
+            "zoneIds": [UPPER48],
+            "generator": individual["generator"],
+            "distributionSystem": individual["distributionSystem"],
+            "identicalSystems": 16,
+        }
+    ]
+
+
+# EP-W203o: a local gas-fired air heater HR104 of 5 kW (table 9.25), no
+# distribution system, air heating with 4 heaters: one with an axial and three
+# with a radial recirculation fan (p. 25). Their fans and controls are the
+# table 9.12 auxiliary energy of 9.23, which is part of the emission (2022
+# p. 282), so the generator itself has no electrically connected device
+# (9.92 would count it twice). Room control as the reference (per room).
+W203O = [
+    setp(
+        GEN,
+        {
+            "kind": "forfait_heater",
+            "heaterKind": "air_heater_hr104",
+            "fuel": "natural_gas",
+            "equipmentReference": "ISSO 54 v2.0 EP-W203o p. 25: lokale gasgestookte luchtverwarmer HR104, 5 kW",
+            "auxiliary": {"electricallyConnectedDevices": 0, "nominalPowerKw": 5.0, "sourceReference": "ISSO 54 v2.0 EP-W203o: hulpenergie van ventilatoren en regeling in de afgifte (9.23, tabel 9.12)"},
+        },
+    ),
+    setp(
+        f"{NTA}/emission",
+        {
+            "system": "air_heating",
+            "balancing": "not_applicable",
+            "control": "individual_room_thermostats",
+            "airHeaters": {
+                "kind": {"kind": "direct", "radialFan": False},
+                "count": 1,
+                "further": [{"kind": {"kind": "direct", "radialFan": True}, "count": 3}],
+                "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: 4 luchtverwarmers, 1 met axiale en 3 met radiale recirculatieluchtventilator; Q_h;b geschat (tabel 9.12)",
+            },
+            "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: luchtverwarming, regeling per ruimte als de referentie",
+        },
+    ),
+    remove(f"{NTA}/distributionSystem"),
+    setp(f"{NTA}/distribution", {"method": "declared", "monthlyLossKwh": [0.0] * 12, "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: geen distributiesysteem"}),
+]
+
+# EP-W006h: the east facade borders an unheated space (AOR) without further
+# specification; every facade R_c 0,35, the rest as EP-W001, floor on ground
+# (p. 9). The reference uses the forfait thermal bridges, so 8.4.1 note 5
+# with C.10 applies (2022 p. 240, 748): the partition joins H_D;for as
+# U_C.b_U. The AOR is not specified; b_U is derived with 8.53 from the
+# defaults that annex I.2.4 note 1 (2022 p. 815) gives for an adjacent
+# unheated space: A_T;ue 1,44 x A_T;iu at U 3,2 and 1,5 x A_T;iu m3/h, with
+# A_T;iu the east facade of 32,4 m2.
+def aor_east(project):
+    project["constructions"].append({"id": "c-gevel-035", "name": "Gevel Rc 0,35", "layers": [], "rcValue": 0.35, "uValue": u_from_rc(0.35, 0.17)})
+    for item in project["zones"][0]["surfaces"]:
+        if item["type"] == "wall":
+            item["constructionId"] = "c-gevel-035"
+    east = surface(project, "gevel-oost")
+    east["thermalBoundary"] = "unheated_space"
+    east["unheatedSpaceId"] = "aor-oost"
+    area = east["area"]
+    project["unheatedSpaces"] = [
+        {
+            "id": "aor-oost",
+            "name": "Aangrenzende onverwarmde ruimte oost",
+            "outside": {
+                "transmission": {"elements": [{"id": "aor-buiten", "areaM2": round(1.44 * area, 3), "uValueWPerM2k": 3.2, "sourceReference": "ISSO 54 v2.0 EP-W006h p. 9: AOR zonder specificatie; bijlage I.2.4 opmerking 1 (2022 p. 815): A_T;ue 1,44 x A_T;iu, U 3,2"}]},
+                "ventilation": {"method": "flow", "airflowM3PerH": round(1.5 * area, 3), "sourceReference": "bijlage I.2.4 opmerking 1: q_ve;ue 1,5 x A_T;iu m3/h"},
+                "otherZonesConductanceWPerK": 0.0,
+            },
+        }
+    ]
+
+
+CASES += [
+    ("EPW006h", 9, variant(aor_east)),
+    ("EPW203o", 25, W203O),
+    ("EPW206a", 29, variant(w206a)),
+    ("EPW206b", 29, variant(w206b)),
+    ("EPW206c", 30, variant(w206c)),
+]
+
+
 def case(test_id, page, patch):
     utility = test_id.startswith("EPU")
     metrics = UTILITY_METRICS if utility else RESIDENTIAL_METRICS
