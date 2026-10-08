@@ -18314,16 +18314,16 @@
                   "elements": [
                     {
                       "id": "aor-buiten",
-                      "areaM2": 46.656,
-                      "uValueWPerM2k": 3.2,
-                      "sourceReference": "ISSO 54 v2.0 EP-W006h p. 9: AOR zonder specificatie; bijlage I.2.4 opmerking 1 (2022 p. 815): A_T;ue 1,44 x A_T;iu, U 3,2"
+                      "areaM2": 32.4,
+                      "uValueWPerM2k": 5.0,
+                      "sourceReference": "ISSO 54 v2.0 EP-W006h p. 9: AOR zonder specificatie; formule I.8 (2025+C1 p. 841): H_ue = 5 x A_T;iu (aanname, zie docs/nta8800-isso54-voorbereiding.md)"
                     }
                   ]
                 },
                 "ventilation": {
                   "method": "flow",
-                  "airflowM3PerH": 48.6,
-                  "sourceReference": "bijlage I.2.4 opmerking 1: q_ve;ue 1,5 x A_T;iu m3/h"
+                  "airflowM3PerH": 0.0,
+                  "sourceReference": "formule I.8: H_ue = 5 x A_T;iu omvat transmissie en ventilatie"
                 },
                 "otherZonesConductanceWPerK": 0.0
               }
