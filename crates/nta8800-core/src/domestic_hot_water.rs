@@ -2131,10 +2131,20 @@ pub fn validate_hot_water(
             }
         }
         if let Some(geometry) = &circulation.calculated_psi {
-            if geometry.psi().is_none() {
+            if geometry.dimension_above_one_metre() {
+                push("pipe_dimension_not_in_metres", "circulation.calculatedPsi");
+            } else if geometry.psi().is_none() {
                 push(
                     "hot_water_pipe_geometry_invalid",
                     "circulation.calculatedPsi",
+                );
+            }
+            // 13.27 and 13.29 fix h_a at 8,0 W/(m²·K) for hot water
+            // (2025+C1 p. 551), unlike heating (p. 311) and cooling (p. 385).
+            if geometry.surface_coefficient().is_some() {
+                push(
+                    "hot_water_pipe_surface_coefficient_fixed",
+                    "circulation.calculatedPsi.surfaceCoefficientWPerM2K",
                 );
             }
             if circulation.declared_psi_w_per_mk.is_some() {
@@ -5531,6 +5541,51 @@ mod tests {
             codes.contains(&"hot_water_pipe_geometry_invalid"),
             "{codes:?}"
         );
+
+        // 13.27 and 13.29 fix h_a at 8,0 W/(m²·K) for hot water (p. 551):
+        // an own surface coefficient is refused, the default calculates.
+        let in_air = |surface_coefficient| {
+            crate::heating_distribution::PipeGeometry::InsulatedInAir {
+                pipe_outer_diameter_m: 0.015,
+                insulated_diameter_m: 0.045,
+                insulation_lambda: 0.035,
+                surface_coefficient,
+            }
+        };
+        input.circulation = Some(circulation(None, Some(in_air(Some(10.0)))));
+        let codes: Vec<String> = validate_hot_water(&input, context(), "w")
+            .iter()
+            .map(|issue| format!("{} {}", issue.code, issue.path))
+            .collect();
+        assert!(
+            codes.contains(
+                &"hot_water_pipe_surface_coefficient_fixed w.circulation.calculatedPsi.surfaceCoefficientWPerM2K"
+                    .to_string()
+            ),
+            "{codes:?}"
+        );
+        input.circulation = Some(circulation(None, Some(in_air(None))));
+        assert!(validate_hot_water(&input, context(), "w")
+            .iter()
+            .all(|issue| !issue.path.contains("calculatedPsi")));
+
+        // Diameters typed in millimetres into the metre fields: the
+        // formulas mostly use ratios, so 15/35 "m" would give a plausible
+        // Ψ; above 1 m is refused with a units hint.
+        let millimetres = crate::heating_distribution::PipeGeometry::InsulatedInAir {
+            pipe_outer_diameter_m: 15.0,
+            insulated_diameter_m: 35.0,
+            insulation_lambda: 0.035,
+            surface_coefficient: None,
+        };
+        assert!(millimetres.psi().is_none());
+        input.circulation = Some(circulation(None, Some(millimetres)));
+        let codes: Vec<&str> = validate_hot_water(&input, context(), "w")
+            .iter()
+            .map(|issue| issue.code)
+            .collect();
+        assert!(codes.contains(&"pipe_dimension_not_in_metres"), "{codes:?}");
+        assert!(!codes.contains(&"hot_water_pipe_geometry_invalid"), "{codes:?}");
     }
 
     #[test]

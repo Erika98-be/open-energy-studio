@@ -1748,6 +1748,8 @@ export interface SpaceHeatingChainInput {
         chp?: { powerKw: number; builtAfter2006: boolean; hreDeclared?: boolean; lowTemperature?: boolean } | null;
         /** Method 1 (9.6.6.2): micro-CHP with NEN-EN 50465 test values. */
         method1?: NtaMicroChp | null;
+        /** Method 2 with ε_chp;th and ε_chp;el from a quality declaration (§9.1) instead of table 9.31. */
+        declaredEfficiencies?: NtaDeclaredChpEfficiencies | null;
         auxiliary?: NtaOtherGeneratorAuxiliary | null;
         equipmentReference: string;
       }
@@ -4046,6 +4048,8 @@ export type NtaHotWaterGenerator =
     | { kind: 'heating_system' }
     /** §13.8.4.7.4/§13.8.4.8 building CHP: method 2 (`chp`) or method 1 (`method1`), exclusive. */
     | { kind: 'chp'; chp?: NtaChpClass | null; method1?: NtaMicroChp | null; alsoSpaceHeating?: boolean;
+        /** Method 2 with ε_chp;th and ε_chp;el from a quality declaration (§9.1) instead of table 9.31 (§13.8.4.7.4). */
+        declaredEfficiencies?: NtaDeclaredChpEfficiencies | null;
         /** Method 1 without NEN-EN 50465 auxiliary powers: 9.6.8 (9.91/9.92), per 9.6.6.2.2.3. */
         auxiliary?: NtaOtherGeneratorAuxiliary | null; equipmentReference: string };
 
@@ -5189,6 +5193,13 @@ export interface NtaHotWaterAssessment {
 }
 
 /** 9.6.6.2 test point (table 9.33); omitted efficiencies take table 9.37. */
+/** §9.1 quality declaration of a CHP: ε_chp;th and ε_chp;el, rounded down to two decimals by the kernel. */
+export interface NtaDeclaredChpEfficiencies {
+  thermal: number;
+  electric: number;
+  declarationReference: string;
+}
+
 export interface NtaChpTestPoint {
   thermalPowerKw: number;
   electricPowerKw?: number | null;

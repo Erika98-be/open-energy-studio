@@ -2000,8 +2000,20 @@ fn calculate_distribution(
         .unwrap_or(&system.pipe_transmittance)
         .value(connected_area_m2, shared);
     let (Some(psi_zone), Some(psi_unheated)) = (psi_zone, psi_unheated) else {
+        let in_millimetres = [
+            Some(&system.pipe_transmittance),
+            system.unheated_pipe_transmittance.as_ref(),
+        ]
+        .into_iter()
+        .flatten()
+        .filter_map(PipeTransmittance::geometry)
+        .any(|geometry| geometry.dimension_above_one_metre());
         issues.push(issue(
-            "pipe_transmittance_invalid",
+            if in_millimetres {
+                "pipe_dimension_not_in_metres"
+            } else {
+                "pipe_transmittance_invalid"
+            },
             "distributionSystem.pipeTransmittance",
         ));
         return result;
@@ -7150,6 +7162,55 @@ mod tests {
         let jan = &result.monthly[0];
         let expected = monthly_auxiliary_kwh(&constants, jan.natural_gas_kwh);
         assert!((jan.auxiliary_electricity_kwh.unwrap() - expected).abs() < 1e-9);
+    }
+
+    /// 9.33–9.35 (2025+C1 p. 311–312) take diameters and depth in metres;
+    /// values above 1 m are almost certainly millimetres and are refused
+    /// with a units hint instead of giving a plausible Ψ from the ratios.
+    #[test]
+    fn pipe_geometry_in_millimetres_is_refused() {
+        let mut input = boiler_chain();
+        input.distribution_system = Some(system(calculated_pump()));
+        input
+            .distribution_system
+            .as_mut()
+            .unwrap()
+            .pipe_transmittance = PipeTransmittance::InsulatedInAir {
+            pipe_outer_diameter_m: 28.0,
+            insulated_diameter_m: 68.0,
+            insulation_lambda: 0.035,
+            surface_coefficient: None,
+        };
+        let result = assess_space_heating_chain(&input);
+        let codes: Vec<(&str, &str)> = result
+            .issues
+            .iter()
+            .map(|issue| (issue.code, issue.path.as_str()))
+            .collect();
+        assert!(
+            codes.contains(&(
+                "pipe_dimension_not_in_metres",
+                "distributionSystem.pipeTransmittance"
+            )),
+            "{codes:?}"
+        );
+        // The same pipe in metres calculates.
+        input
+            .distribution_system
+            .as_mut()
+            .unwrap()
+            .pipe_transmittance = PipeTransmittance::InsulatedInAir {
+            pipe_outer_diameter_m: 0.028,
+            insulated_diameter_m: 0.068,
+            insulation_lambda: 0.035,
+            surface_coefficient: None,
+        };
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
     }
 
     /// 9.85 (2025+C1 p. 359): E_H;ci is the boiler's carrier input, so an

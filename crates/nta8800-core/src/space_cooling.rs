@@ -1158,7 +1158,12 @@ pub fn validate_cooling(system: &CoolingSystem, path: &str) -> Vec<CoolingIssue>
             source_reference,
         } = &distribution.pipe
         {
-            if geometry.psi().is_none() {
+            if geometry.dimension_above_one_metre() {
+                push(
+                    "pipe_dimension_not_in_metres",
+                    "distribution.pipe.geometry".into(),
+                );
+            } else if geometry.psi().is_none() {
                 push(
                     "cooling_pipe_geometry_invalid",
                     "distribution.pipe.geometry".into(),
@@ -3052,6 +3057,32 @@ mod tests {
             "{codes:?}"
         );
         assert!(codes.contains(&"source_reference_required"), "{codes:?}");
+
+        // Depth and diameters typed in millimetres: refused with a units
+        // hint instead of a plausible Ψ. Cooling keeps its own h_a
+        // (p. 385), so a surface coefficient alone is no issue.
+        let (issues, _) = run(CoolingPipe::Calculated {
+            geometry: crate::heating_distribution::PipeGeometry::InsulatedEmbedded {
+                pipe_outer_diameter_m: 20.0,
+                insulated_diameter_m: 40.0,
+                insulation_lambda: 0.04,
+                embedding_lambda: 2.0,
+                depth_m: 30.0,
+            },
+            source_reference: "design".into(),
+        });
+        let codes: Vec<&str> = issues.iter().map(|issue| issue.code).collect();
+        assert_eq!(codes, ["pipe_dimension_not_in_metres"]);
+        let (issues, _) = run(CoolingPipe::Calculated {
+            geometry: crate::heating_distribution::PipeGeometry::InsulatedInAir {
+                pipe_outer_diameter_m: 0.015,
+                insulated_diameter_m: 0.045,
+                insulation_lambda: 0.035,
+                surface_coefficient: Some(10.0),
+            },
+            source_reference: "design".into(),
+        });
+        assert!(issues.is_empty(), "{issues:?}");
     }
 
     #[test]
