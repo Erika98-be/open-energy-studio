@@ -10,6 +10,18 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
 
+/// Object members whose explicit `null` the kernel reads differently from an
+/// absent member: a BACS generator's `nominalThermalCapacityKw` is `null`
+/// when the capacity is genuinely undeterminable, and must not be omitted.
+/// Every other null member means the same as an absent one (the input
+/// fingerprint and the project route both follow this rule).
+pub const EXPLICIT_NULL_MEMBERS: &[&str] = &["nominalThermalCapacityKw"];
+
+/// Whether a member's explicit `null` is kept (see [`EXPLICIT_NULL_MEMBERS`]).
+pub fn is_explicit_null_member(key: &str) -> bool {
+    EXPLICIT_NULL_MEMBERS.contains(&key)
+}
+
 pub mod annex_a;
 pub mod annex_aa;
 pub mod annex_b;
@@ -3585,16 +3597,4 @@ mod tests {
             2
         );
     }
-}
-
-/// Object members whose explicit `null` the kernel reads differently from an
-/// absent member: a BACS generator's `nominalThermalCapacityKw` is `null`
-/// when the capacity is genuinely undeterminable, and must not be omitted.
-/// Every other null member means the same as an absent one (the input
-/// fingerprint and the project route both follow this rule).
-pub const EXPLICIT_NULL_MEMBERS: &[&str] = &["nominalThermalCapacityKw"];
-
-/// Whether a member's explicit `null` is kept (see [`EXPLICIT_NULL_MEMBERS`]).
-pub fn is_explicit_null_member(key: &str) -> bool {
-    EXPLICIT_NULL_MEMBERS.contains(&key)
 }
