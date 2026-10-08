@@ -30,16 +30,25 @@ const ORIENTATIONS = ['north', 'north_east', 'east', 'south_east', 'south', 'sou
 
 /**
  * A list of numbers as text ("1; 0,9; …"): one value or twelve monthly values (§17.3). Decimal commas
- * are read as points; a part that is not a number is dropped, so the kernel reports a wrong count.
+ * are read as points; an empty part (an emptied field or a trailing ";") is dropped, not read as 0,
+ * and a part that is not a number is dropped, so the kernel reports a wrong count. An empty field
+ * leaves the list out.
  */
+export function parseNumberList(text: string): number[] | undefined {
+  const numbers = text.split(';')
+    .map((part) => part.trim())
+    .filter((part) => part !== '')
+    .map((part) => Number(part.replace(',', '.')))
+    .filter((number) => Number.isFinite(number));
+  return numbers.length > 0 ? numbers : undefined;
+}
+
 function NumberListField({ draft, change, path, label, hint }: { draft: Draft; change: Change; path: Path; label: string; hint: string }) {
   const value = read(draft, path);
   const text = Array.isArray(value) ? (value as unknown[]).map((item) => String(item).replace('.', ',')).join('; ') : '';
   return <label>{label}
     <input type="text" defaultValue={text} key={text} placeholder={hint}
-      onBlur={(event) => change(path, event.target.value.split(';')
-        .map((part) => Number(part.trim().replace(',', '.')))
-        .filter((number) => Number.isFinite(number)))} />
+      onBlur={(event) => change(path, parseNumberList(event.target.value))} />
   </label>;
 }
 
@@ -57,8 +66,11 @@ export function SurveyGeneralCoverageFields({ draft, change, t }: Props) {
       {t('opname.storage')}
     </label>}
     {storage != null && <>
-      <NumberField {...field} path={['storage', 'electricalKwh']} label={t('opname.storage.electrical')} unit="kWh" />
-      <NumberField {...field} path={['storage', 'thermalKwh']} label={t('opname.storage.thermal')} unit="kWh" />
+      {/* §15.5: both capacities default to 0 in the kernel, so an empty field is left out. */}
+      <NumberField {...field} path={['storage', 'electricalKwh']} label={t('opname.storage.electrical')} unit="kWh"
+        optional onChange={omitEmpty(change)} />
+      <NumberField {...field} path={['storage', 'thermalKwh']} label={t('opname.storage.thermal')} unit="kWh"
+        optional onChange={omitEmpty(change)} />
       <TextField {...field} path={['storage', 'sourceReference']} label={t('opname.storage.source')} />
     </>}
   </>;
@@ -93,7 +105,8 @@ export function SurveyPanelsFields({ draft, change, t }: Props) {
       return <div key={index} className="opname-item">
         <strong>{String(panel.id ?? index + 1)}</strong>
         <SelectField {...field} path={[...base, 'surfaceId']} label={t('opname.panel.surface')}
-          options={surfaces.map((surface) => [String(surface.id), String(surface.id)])} />
+          options={surfaces.map((surface) => [String(surface.id), String(surface.id)])}
+          fallback={surfaces[0] == null ? undefined : String(surfaces[0].id)} />
         <NumberField {...field} path={[...base, 'areaM2']} label={t('opname.panel.area')} unit="m²" />
         <label>{t('opname.panel.insulation')}
           <select value={typeof insulation === 'string' ? insulation : 'absent_or_unknown'}
@@ -107,7 +120,8 @@ export function SurveyPanelsFields({ draft, change, t }: Props) {
           <NumberField {...field} path={[...base, 'insulation', 'thicknessMm']} label={t('opname.panel.thickness')} unit="mm" />}
         <CheckField {...field} path={[...base, 'cavity']} label={t('opname.panel.cavity')} />
         <SelectField {...field} path={[...base, 'frame']} label={t('opname.panel.frame')}
-          options={opts(t, 'opname.window.frameKind', ['wood_or_plastic', 'metal_with_thermal_break', 'metal', 'none'])} />
+          options={opts(t, 'opname.window.frameKind', ['wood_or_plastic', 'metal_with_thermal_break', 'metal', 'none'])}
+          fallback="wood_or_plastic" />
         <TextField {...field} path={[...base, 'sourceReference']} label={t('opname.panel.source')} />
         <button type="button" onClick={() => change(['envelope', 'panels'], panels.filter((__, other) => other !== index))}>
           {t('opname.remove')}</button>
@@ -179,9 +193,15 @@ export function PvMountingFields({ draft, change, t, base }: Props & { base: Pat
   </>;
 }
 
-/** ISSO 82.1/75.1 §11: a bypass on the heat recovery (table 11.13). */
+/**
+ * ISSO 82.1/75.1 §11: a bypass on the heat recovery (table 11.13). Shown for balanced ventilation and
+ * for a combined system (E), whose heat recovery the kernel also reads it for, including
+ * `passive_cooling_requires_bypass` (opname/ventilation.rs).
+ */
 export function VentilationBypassField({ draft, change, t }: Props) {
-  if (read(draft, ['ventilation', 'principle']) !== 'balanced') return null;
+  const balanced = read(draft, ['ventilation', 'principle']) === 'balanced';
+  const combined = read(draft, ['ventilation', 'combined']) != null;
+  if (!balanced && !combined) return null;
   return <TriStateField draft={draft} onChange={change} yes={t('opname.yes')} no={t('opname.no')}
     path={['ventilation', 'bypassPresent']} label={t('opname.ventilation.bypass')} />;
 }
@@ -208,18 +228,23 @@ export function SurveyShowerHeatRecoveryField({ draft, change, t }: Props) {
     options={opts(t, 'opname.hotWater.showerHeatRecoveryKind', ['none', 'vertical', 'horizontal', 'unknown'])} />;
 }
 
-/** ISSO 75.1 §10: design temperature, control and pipe insulation of the cooling (tables 10.5–10.7). */
+/**
+ * ISSO 75.1 §10: design temperature, control and pipe insulation of the cooling (tables 10.5–10.7).
+ * The design temperature and the pipe insulation belong to a water distribution; the kernel reads them
+ * only for water-based cooling (opname/utility.rs), so they are shown only then.
+ */
 export function UtilityCoolingCoverageFields({ draft, change, t }: Props) {
   const field = { draft, onChange: change };
+  const waterBased = read(draft, ['cooling', 'waterBased']) === true;
   return <>
-    <SelectField {...field} path={['cooling', 'designTemperature']} label={t('opname.cooling.designTemperature')}
+    {waterBased && <SelectField {...field} path={['cooling', 'designTemperature']} label={t('opname.cooling.designTemperature')}
       options={opts(t, 'opname.cooling.designTemperatureKind', ['t6_to12', 't12_to16', 't12_to18', 't17_to21'])}
-      onChange={omitEmpty(change)} />
+      onChange={omitEmpty(change)} />}
     <SelectField {...field} path={['cooling', 'control']} label={t('opname.cooling.control')}
       options={opts(t, 'opname.cooling.controlKind', ['standalone', 'central_with_room_control', 'other_or_unknown'])}
       onChange={omitEmpty(change)} />
-    <TriStateField {...field} yes={t('opname.yes')} no={t('opname.no')} path={['cooling', 'pipesInsulated']}
-      label={t('opname.cooling.pipesInsulated')} />
+    {waterBased && <TriStateField {...field} yes={t('opname.yes')} no={t('opname.no')} path={['cooling', 'pipesInsulated']}
+      label={t('opname.cooling.pipesInsulated')} />}
   </>;
 }
 

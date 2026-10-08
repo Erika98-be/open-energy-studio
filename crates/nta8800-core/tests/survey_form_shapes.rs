@@ -195,3 +195,94 @@ fn form_coverage_answers_are_read_by_both_surveys() {
         );
     }
 }
+
+/// Sets `null` at a path like `hotWater.storage[].inHeatedZone`, creating the
+/// missing objects on the way. A `[]` step uses the first element of the list,
+/// which is created from `item` when the list is empty or absent.
+fn set_null(value: &mut Value, path: &str, item: &Value) {
+    let mut current = value;
+    let steps: Vec<&str> = path.split('.').collect();
+    for (index, step) in steps.iter().enumerate() {
+        let last = index + 1 == steps.len();
+        let (key, list) = match step.strip_suffix("[]") {
+            Some(key) => (key, true),
+            None => (*step, false),
+        };
+        if !current.is_object() {
+            *current = json!({});
+        }
+        if last && !list {
+            current[key] = Value::Null;
+            return;
+        }
+        if list {
+            let empty = current[key]
+                .as_array()
+                .map_or(true, |items| items.is_empty());
+            if empty {
+                current[key] = json!([item.clone()]);
+            }
+            current = &mut current[key][0];
+        } else {
+            if current[key].is_null() {
+                current[key] = json!({});
+            }
+            current = &mut current[key];
+        }
+    }
+}
+
+/// Review 8: the survey forms may write `null` only where the kernel reads it as
+/// "not answered". training-data/nta8800-survey-null-tolerant-paths.json lists
+/// those answers; src/__tests__/survey-null-paths.test.tsx requires every other
+/// null to be named by `emptyRequiredSurveyFields` first.
+#[test]
+fn null_tolerant_survey_answers_are_accepted() {
+    let tolerant: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-survey-null-tolerant-paths.json"
+    ))
+    .unwrap();
+    let vessel = json!({ "id": "vat-1", "volumeL": 150, "sourceReference": "" });
+    for path in tolerant["residentialSurvey"].as_array().unwrap() {
+        let mut value = residential_fixture();
+        set_null(&mut value, path.as_str().unwrap(), &vessel);
+        let survey: Result<ResidentialSurvey, _> = serde_json::from_value(value);
+        assert!(survey.is_ok(), "residential {path}: {:?}", survey.err());
+    }
+    for path in tolerant["utilitySurvey"].as_array().unwrap() {
+        let mut value = utility_fixture();
+        if path.as_str().unwrap().starts_with("cooling.") && value["cooling"].is_null() {
+            // The office fixture has no cooling; the form's water-based template.
+            value["cooling"] = json!({
+                "generator": "compression", "emitter": "ceiling_cooling",
+                "fanCoilCount": 1, "waterBased": true, "sourceReference": "",
+            });
+        }
+        set_null(&mut value, path.as_str().unwrap(), &vessel);
+        let survey: Result<UtilitySurvey, _> = serde_json::from_value(value);
+        assert!(survey.is_ok(), "utility {path}: {:?}", survey.err());
+    }
+}
+
+/// The other side of the list: a required number refuses null, which is why
+/// `emptyRequiredSurveyFields` must name it before the survey is calculated.
+#[test]
+fn required_survey_numbers_refuse_null() {
+    let vessel = json!({ "id": "vat-1", "volumeL": 150, "sourceReference": "" });
+    let mut value = utility_fixture();
+    set_null(&mut value, "hotWater.storage[].volumeL", &vessel);
+    assert!(serde_json::from_value::<UtilitySurvey>(value).is_err());
+    let mut value = residential_fixture();
+    value["storage"] = json!({ "electricalKwh": null, "sourceReference": "" });
+    assert!(serde_json::from_value::<ResidentialSurvey>(value).is_err());
+}
+
+/// Review 8: storage left out by the form (both capacities empty) is read with
+/// the kernel's default of 0 kWh.
+#[test]
+fn storage_without_capacities_is_read() {
+    let mut value = residential_fixture();
+    value["storage"] = json!({ "sourceReference": "" });
+    let survey: Result<ResidentialSurvey, _> = serde_json::from_value(value);
+    assert!(survey.is_ok(), "{:?}", survey.err());
+}
