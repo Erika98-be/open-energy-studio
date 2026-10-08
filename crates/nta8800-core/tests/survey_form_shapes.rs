@@ -114,7 +114,11 @@ fn residential_survey_form_shapes_are_read() {
 fn coverage_answers(value: &mut Value, utility: bool) {
     value["areaSourceReference"] = json!("NEN 2580 meetrapport");
     // §15.5 storage counts only with PV (storage_requires_pv); the form offers it only then.
-    if value.get("pv").and_then(Value::as_array).is_some_and(|pv| !pv.is_empty()) {
+    if value
+        .get("pv")
+        .and_then(Value::as_array)
+        .is_some_and(|pv| !pv.is_empty())
+    {
         value["storage"] =
             json!({ "electricalKwh": 5.0, "thermalKwh": 0.0, "sourceReference": "factuur" });
     }
@@ -154,7 +158,10 @@ fn coverage_answers(value: &mut Value, utility: bool) {
             value["cooling"]["control"] = json!("central_with_room_control");
             value["cooling"]["pipesInsulated"] = json!(true);
         }
-        if value["ventilation"].get("ahu").is_some_and(Value::is_object) {
+        if value["ventilation"]
+            .get("ahu")
+            .is_some_and(Value::is_object)
+        {
             value["ventilation"]["ahu"]["insideThermalZone"] = json!(true);
         }
     } else {

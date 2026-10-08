@@ -95,7 +95,9 @@ fn collective_pv_swimming_pool_and_lighting_zone_are_read() {
         json!({ "function": "sport", "areaM2": 400.0, "swimmingPool": true });
     let (_, codes) = gap_codes(&sport);
     assert!(
-        !codes.iter().any(|code| code.starts_with("swimming_pool_requires_sport_function")),
+        !codes
+            .iter()
+            .any(|code| code.starts_with("swimming_pool_requires_sport_function")),
         "{codes:?}"
     );
 }

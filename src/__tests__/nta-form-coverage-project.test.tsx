@@ -102,7 +102,8 @@ describe('project forms that had no form', () => {
     expect(system.series).toEqual({ kind: 'hotfill_electric_boiler' });
     // Removing the only further generator also removes the series, which needs exactly one.
     const extra = [...document.querySelectorAll('legend')].find((legend) => legend.textContent === 'Additional hot-water generator 1');
-    const remove = [...(extra?.parentElement?.querySelectorAll(':scope > button') ?? [])].at(-1) as HTMLElement;
+    const buttons = [...(extra?.parentElement?.querySelectorAll(':scope > button') ?? [])];
+    const remove = buttons[buttons.length - 1] as HTMLElement;
     fireEvent.click(remove);
     expect(draft().additionalHotWaterSystems[0].additionalGenerators).toEqual([]);
     expect(draft().additionalHotWaterSystems[0].series).toBeNull();
