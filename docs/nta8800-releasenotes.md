@@ -13,6 +13,20 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — HTTP-API en MCP-server na de veertiende review (geen rekenwijziging)
+
+Geen uitkomst van een berekening verandert; wel het gedrag van de service bij grote, verkeerde of onbekende verzoeken.
+
+- **Geheugen per verzoek begrensd.** Een verzoek van 16 MiB met alleen nullen kostte ongeveer 1 GB, omdat de body twee keer werd gekopieerd en elke JSON-waarde tientallen bytes kost; acht tegelijk liepen op tot 8,6 GB. Nu kopieert geen route de body meer (het invoerlid gaat in zijn geheel naar de kern), en de service telt de JSON-waarden voordat ze de body inleest: boven `--max-json-values` (standaard 500 000) volgt 413 `payload_too_large`. Een ingelezen body kost zo hoogstens ongeveer 70 MB; de documentatie geeft de gemeten bytes per waarde en de grens voor alle toegelaten verzoeken samen.
+- **Referentiegevallen in hun eigen uitgave.** `reference/compare` en `reference/audit` stempelden de uitkomst altijd met 2025+C1, ook bij een geval in 2024. Nu krijgt de uitkomst de uitgave van `case.normVersion`; een afwijkende `normVersion` in het verzoek geeft `norm_version_conflict`.
+- **Herlabelen en label-hash** weigeren iets anders dan een projectobject (400 `invalid_project_shape` met het pad), in plaats van `{"original":1,"current":2}` als toegestaan te beoordelen.
+- **De verouderde route `/v1/nta8800/calculate`** geeft bij een ongeldig project de beoordeling zelf als 422-body, zoals de andere routes; de code `invalid_project_input` vervalt.
+- **Onbekende leden in een verzoek** worden geweigerd (400 `invalid_request_shape`), zodat een verschreven `normversion` niet ongemerkt in 2025+C1 rekent. De schema's in het OpenAPI-document hebben `additionalProperties: false`.
+- **MCP-server antwoordt altijd.** Ongeldige of afgebroken JSON, JSON dieper dan 128 niveaus, een regel langer dan 64 MiB (`OES_MCP_MAX_LINE_BYTES`) en `tools/call` met verkeerde `arguments` bleven onbeantwoord; nu volgt een JSON-RPC-fout (−32700, −32600 of −32602) en antwoordt de server daarna gewoon verder.
+- **`capabilities`** noemt de huidige reikwijdte: de projectberekening met meer rekenzones, de basisopnames, maatwerkadvies, herlabelen en registratie, `projectCalculationAvailable` en de uitgaven (`supportedNormVersions`). `calculationAvailable` gaat alleen over de verouderde route.
+- **Hostcontrole.** Op een loopback-adres beantwoordt de API alleen `localhost`, `127.0.0.1` en `::1` (plus `--allowed-host`); een andere `Host` krijgt 403 `host_not_allowed`. Dit houdt een webpagina met DNS rebinding buiten.
+- **Kleiner:** elk CORS-antwoord heeft `Vary: Origin`, ook een geweigerde preflight; `energy-by-service` geeft dezelfde identiteitsvelden als de andere projectdelen (`registrationEligible`, `attestStatus`, `warnings`, `normVersion`); het OpenAPI-document noemt 422 alleen waar die kan voorkomen, heeft een relatieve `servers`-regel en noemt 403; `validate` antwoordt bewust altijd 200 (de app leest de beoordeling ook bij `invalid`). Nieuwe meldcodes met Nederlandse en Engelse tekst: `invalid_json`, `payload_too_large`, `unsupported_media_type`, `host_not_allowed`.
+
 ### 9 oktober 2026 — basisopname en maatwerkadvies na de dertiende review
 
 - **Renovatie met onbekende isolatiedikte (ISSO §8.7.2.1).** "De klasse ervóór" en "de klasse erna" tellen nu op de klassen van ISSO-tabel 8.10 (82.1 p. 90, 75.1 p. 89). Bij gewone gevels is dat één klasse "van 1975 tot 1988"; de kern telde op de splitsing bij 1983 uit NTA-tabel I.5. Gevolgen: gebouwd 1970 en gerenoveerd 1985 zonder bewijs geeft R_c 0,43 (was 1,3); gebouwd 1978 met onbekend renovatiejaar geeft 2,0 (was 1,3). Vloeren en daken hebben in beide tabellen de splitsing bij 1983 en veranderen niet.

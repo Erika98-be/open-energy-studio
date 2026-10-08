@@ -265,7 +265,7 @@ async fn read_json_body(request: Request, max_values: usize) -> Result<Value, Ou
     Ok(body)
 }
 
-fn busy(code: &'static str, message: String, retry_after_secs: u64) -> Response {
+fn refuse_busy(code: &'static str, message: String, retry_after_secs: u64) -> Response {
     let mut response = respond(Outcome {
         status: 503,
         body: error_body(code, message, None, Value::Null),
@@ -282,7 +282,7 @@ async fn dispatch(op: &'static Operation, limits: Arc<Limits>, request: Request)
     // Admission comes before the body is read, so the queue of waiting
     // requests (each holding its body) stays bounded.
     let Ok(_admitted) = limits.admission.clone().try_acquire_owned() else {
-        return busy(
+        return refuse_busy(
             "server_busy",
             "Too many requests are waiting for a calculation slot; try again later".to_string(),
             limits.retry_after_secs,
@@ -300,7 +300,7 @@ async fn dispatch(op: &'static Operation, limits: Arc<Limits>, request: Request)
     {
         Ok(Ok(slot)) => slot,
         _ => {
-            return busy(
+            return refuse_busy(
                 "server_busy",
                 format!(
                     "No calculation slot became free within {} s; try again later",
@@ -321,7 +321,7 @@ async fn dispatch(op: &'static Operation, limits: Arc<Limits>, request: Request)
     let joined = match tokio::time::timeout(limits.calculation_timeout, work).await {
         Ok(joined) => joined,
         Err(_) => {
-            return busy(
+            return refuse_busy(
                 "calculation_timeout",
                 format!(
                     "The calculation took longer than {} s; the result is withheld",
