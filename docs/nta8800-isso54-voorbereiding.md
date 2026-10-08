@@ -24,7 +24,7 @@ De pdf wordt niet in de repository opgenomen. De invoer is in eigen woorden geco
 | Referentiekantoor EP-U001 (EP-W001 als kantoor met koeling) | `training-data/isso54/EPU001.json` |
 | Deeltesten als patch op de referentie | `training-data/reference-suites/isso54-v2.json`, gegenereerd door `scripts/isso54-suite.py` |
 | Uitvoering in elke gate | `reference_gate` via `scripts/verify-nta.sh` (alle suites in `training-data/reference-suites/`) |
-| Oordeel zonder verwachtingen | Een run met alleen deze suite vergelijkt niets: het rapport zegt "geen vergelijking (0 vergeleken, 239 zonder verwachting)" en de afsluitcode is 3, niet 0. In de gate lopen de openbare gevallen en de RVO-woningen mee; die vergelijken wel. |
+| Oordeel zonder verwachtingen | Een run met alleen deze suite vergelijkt niets: het rapport zegt "geen vergelijking (0 vergeleken, 240 zonder verwachting)" en de afsluitcode is 3, niet 0. In de gate lopen de openbare gevallen en de RVO-woningen mee; die vergelijken wel. |
 
 - **Patches.** Een deeltest verandert een of enkele kenmerken van de referentie. De suite geeft daarom per deeltest een `projectPatch` (`set`/`remove` op een JSON-pointer) op het referentieproject, in plaats van een volledig projectbestand. Een patch waarvan het doel ontbreekt, laat de gate falen, dus een wijziging van de referentie kan een deeltest niet stilletjes leegmaken.
 - **Zonder verwachting.** Zonder bijlage 2 heeft elke deeltest een blok `pending` in plaats van `expected`:
@@ -130,15 +130,19 @@ Deze keuzes volgen uit de testbeschrijving of uit NTA 8800:2022. Ze zijn het eer
 
 ## Stand van de codering
 
-239 van de 266 deeltesten uit bijlage 1 zijn gecodeerd: 184 voor woningen en 55 voor utiliteit (9 oktober 2026; eerst 52, daarna 115, 199 en 227). Elke gecodeerde deeltest rekent in de gate. Bij de open deeltesten heeft de kern in vrijwel alle gevallen de route al. Ze zijn nog niet gecodeerd, omdat geometrie of productgegevens uit de beschrijving moeten worden afgeleid.
+240 van de 266 deeltesten uit bijlage 1 zijn gecodeerd: 185 voor woningen en 55 voor utiliteit (9 oktober 2026; eerst 52, daarna 115, 199, 227 en 239). Elke gecodeerde deeltest rekent in de gate. Bij de open deeltesten heeft de kern in vrijwel alle gevallen de route al. Ze zijn nog niet gecodeerd, omdat geometrie of productgegevens uit de beschrijving moeten worden afgeleid.
 
 EP-W003c (rolluik met extra warmteweerstand) en EP-W016 (deuren) waren te controleren. Beide routes bestaan: `window_u` rekent U_W+shut (8.22/8.23) en de deur (8.20, 8.18/8.19) als rekenhulp, en het project neemt de uitkomst als U-waarde van het raam of de deur. Ze zijn gecodeerd.
 
 Niet te coderen met de huidige kern of de norm:
 - **EP-W204d** (pelletkachel die niet aan bijlage R voldoet): tabel 9.30 (2022 p. 337) geeft alleen rendementen voor toestellen die aan bijlage R voldoen. Voor andere toestellen is er geen forfaitaire route; de kern weigert met `biomass_class_unsupported`.
 - **EP-U602g/h**: de daglichtfactoren worden direct gegeven, zonder sectorgeometrie (zie de tabel).
-- **EP-W006f** (vloer 0,5 m onder maaiveld boven een kruipruimte): de kern weigert de combinatie (`ground_floor_below_and_heated_basement`), maar de norm staat haar toe. 8.38/8.39 (2022 p. 229–230) nemen voor een vloer onder maaiveld U_fl volgens 8.3.4, dus ook een vloer boven een kruipruimte (8.3.4.2), met de kelderwanden z·ℓ·U_bw. Voor zo'n vloer onder maaiveld geldt U_x;T = 0 (2022 p. 236). Open punt voor de kern: de periodieke coëfficiënten van bijlage D. Voor de vloer horen D.13/D.14 (kruipruimte), voor de wanden onder maaiveld D.10/D.11; de combinatie is nog niet uitgewerkt. Tot die tijd blijft de weigering staan.
 - **EP-W406j** (booster met COP 3,5 en P_ls 0,03 kW): 13.8.4.4 (2022 p. 607) kent meetgegevens volgens bijlage W of de forfaitaire waarden van 13.162/13.163. Bijlage W leidt de COP-lijn af uit twee meetpunten bij 24 (of 16) °C en 40 °C (W.11–W.13, 2022 p. 1089–1090). Met één COP is er geen route; het forfait kent geen opgegeven COP. De kern weigert terecht.
+
+**EP-W006f (vloer onder maaiveld boven een kruipruimte).** De kern weigerde deze combinatie (`ground_floor_below_and_heated_basement`); de norm staat haar toe en de kern rekent haar nu:
+- **Stationair.** 8.39 (2022 p. 229; 2025+C1 p. 255) neemt U_fl "volgens 8.3.4", voor een vloer boven een kruipruimte dus 8.43 (2022 p. 230; 2025+C1 p. 256). Voor een vloer boven een kruipruimte of onverwarmde kelder die zelf onder maaiveld ligt, geldt U_x;T = 0 (2022 p. 236; 2025+C1 p. 262): U_x is alleen U_x;V, en h van (8.47) wordt niet gebruikt. De wanden van de verwarmde ruimte onder maaiveld geven z·P·U_bw met de werkelijke diepte z (8.3.3.2); d_1 van 8.45 vergelijkt met d_bf;equi van de kruipruimtevloer (8.33), zoals 8.45 die noemt. Dezelfde tekst staat in 2020+A1, 2023 en 2024: geen schakelpunt.
+- **Bijlage D.** Bijlage D heeft geen formule voor deze combinatie. Beslissing: de vloer wordt in twee delen gerekend, naar de opbouw van 8.39 (vloer- en wandterm opgeteld) en opmerking 3 van 8.3.2 (een deels onder maaiveld gelegen vloer wordt gesplitst en elk deel apart gerekend). Het vloerdeel volgt D.13/D.14 (kruipruimte, tabel D.1 (0, 0)) of D.15/D.16 zonder de term h·P·U_xw (onverwarmde kelder, (0, 1)), met U_x zonder U_x;T. Het wanddeel volgt de wandtermen van D.10 en D.11 (2022 p. 766; 2025+C1 p. 794), tabel D.1 "alle overige gevallen" (0, 1), zoals bij een verwarmde kelder. De randtermen van 8.36/8.37/8.38 horen bij het vloerdeel, ΔU_for van 8.38 over z·P bij het wanddeel. De vloerterm e^(−z/δ) van D.11 vervalt: de kruipruimtevloer staat al in D.14.
+- **Codering.** De vloer van EP-W006a (R_c 0,15, R_bf 6, openingen 0,0012 m²/m) met `heatedBasement` z = 0,5 m en R_c 6,0 van de gevel. De onderste 0,5 m van elke gevel grenst aan grond en zit in de wandterm; de bruto geveloppervlakken worden 0,5 m × de gevellengte kleiner. De ramen van de onderste bouwlaag beginnen op 0,5 m en blijven buitenlucht.
 
 De 11 realistische gebouwen (EPWRealB01 tot en met EPWRealD05 en EPURealB01) zijn niet te coderen zolang de bijlagen 3A–3K niet in bezit zijn.
 
@@ -149,7 +153,7 @@ De 11 realistische gebouwen (EPWRealB01 tot en met EPWRealD05 en EPURealB01) zij
 | EPW003 | Raameigenschappen | 3 | a, b, c | – |  |
 | EPW004 | Oriëntatie | 7 | a, b, c, d, e, f, g | – |  |
 | EPW005 | Thermische massa | 3 | a, b, c | – |  |
-| EPW006 | Begrenzing begane grondvloer | 8 | a, b, c, d, e, g, h | f | f: vloer onder maaiveld boven een kruipruimte; de norm staat het toe, de kern nog niet (zie boven) |
+| EPW006 | Begrenzing begane grondvloer | 8 | a, b, c, d, e, f, g, h | – |  |
 | EPW007 | Infiltratie | 3 | a, b, c | – |  |
 | EPW008 | Overstek | 5 | a, b, c, d, e | – |  |
 | EPW009 | Zijbelemmeringen | 6 | a, b, c, d, e, f | – |  |
