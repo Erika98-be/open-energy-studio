@@ -56,9 +56,25 @@ Herstart daarna Claude Desktop.
     - Bij een ontbrekend of verkeerd invoerlid krijg je de foutenvelop met `code` en `path`, bijvoorbeeld `missing_request_member` met pad `project`.
     - Bij een weigering van de kern krijg je de beoordeling, met `status`, `gaps` en `issues`.
     - Een onbekende tool geeft `unknown_tool`.
+    - Een onbekend lid naast het invoerlid en `normVersion` geeft `invalid_request_shape` met het pad van dat lid, zoals bij de HTTP-API.
 - **`resources/list` en `resources/read`:** zie hieronder. Een onbekende URI geeft de JSON-RPC-fout *resource not found*.
 
 Een tool die lang rekent, draait buiten de protocol-lus, zodat de server bereikbaar blijft.
+
+### Grenzen en foutregels
+
+Elke regel op stdin gaat eerst door een poortwachter. Die beantwoordt de regels waar de MCP-bibliotheek anders geen antwoord op geeft, zodat een client nooit blijft wachten:
+
+| Regel | Antwoord |
+|---|---|
+| Geen geldige JSON, of afgebroken | JSON-RPC-fout `-32700` (*parse error*), met het `id` als dat nog te lezen is, anders `null` |
+| Dieper genest dan 128 niveaus | `-32600` (*invalid request*), met het `id` |
+| Langer dan de regelgrens | `-32600`, met `id` `null`; de rest van de regel wordt gelezen en weggegooid, niet bewaard |
+| `tools/call` met `params` of `arguments` die geen object zijn | `-32602` (*invalid params*), met het `id` |
+
+- **Regelgrens:** 64 MiB per bericht. `OES_MCP_MAX_LINE_BYTES` (in bytes, minimaal 1024) stelt een andere grens in.
+- Een melding (een bericht zonder `id`) krijgt nooit een antwoord, ook niet als hij ongeldig is.
+- Na zo'n fout blijft de server gewoon antwoorden.
 
 ## Resources
 
@@ -86,8 +102,11 @@ Een tool die lang rekent, draait buiten de protocol-lus, zodat de server bereikb
 - **Eenheidstests** in `crates/nta8800-service/src/bin/mcp.rs`:
   - elke bewerking is een tool met een objectschema;
   - elke resource is leesbaar, en JSON-resources zijn geldige JSON;
-  - fouten worden `isError`.
-- **`crates/nta8800-service/tests/mcp_stdio.rs`:** start het binary en doorloopt het protocol: `initialize` met protocol 2025-06-18, `tools/list`, drie `tools/call` (versie, berekening van het voorbeeldproject, ontbrekend lid), `resources/list` en `resources/read`.
+  - fouten worden `isError`;
+  - de poortwachter: ongeldige, afgebroken en te diepe JSON, verkeerde `arguments`, de regelgrens en het lezen van het `id`.
+- **`crates/nta8800-service/tests/mcp_stdio.rs`:**
+  - start het binary en doorloopt het protocol: `initialize` met protocol 2025-06-18, `tools/list`, drie `tools/call` (versie, berekening van het voorbeeldproject, ontbrekend lid), `resources/list` en `resources/read`;
+  - stuurt ongeldige, afgebroken, te diepe en te lange regels en verkeerde `arguments`, controleert elk foutantwoord en dat de server daarna gewoon antwoordt.
 
 ## Build
 
