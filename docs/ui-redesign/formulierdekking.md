@@ -20,11 +20,11 @@ Tot 9 oktober 2026 telde de check een optie als gedekt zodra haar naam ergens in
 | Route | Opties | Door een formulier geschreven | Vrijstelling `form` | `json` | `missing` | `parallel` |
 |---|---|---|---|---|---|---|
 | Projectinvoer | 1 098 | 1 061 | 8 | 16 | 13 | 0 |
-| Woningopname | 316 | 288 | 0 | 0 | 25 | 3 |
-| Utiliteitsopname | 409 | 379 | 0 | 0 | 29 | 1 |
-| **Totaal** | **1 823** | **1 728 (94,8 %)** | **8** | **16** | **67** | **4** |
+| Woningopname | 316 | 291 | 0 | 0 | 25 | 0 |
+| Utiliteitsopname | 409 | 380 | 0 | 0 | 29 | 0 |
+| **Totaal** | **1 823** | **1 732 (95,0 %)** | **8** | **16** | **67** | **0** |
 
-Met de vrijstellingen van soort `form` erbij heeft **1 736 / 1 823 (95,2 %)** een formulier. 16 opties zijn bewust alleen JSON. 67 opties hebben nog geen formulier (`missing`): vooral velden per rekenzone in `zoneData`, onderdelen van een verder tapwatersysteem en opnamevragen naar schildelen, PV en tapwater (lijst in `formCoverage.ts`). 4 krijgen een formulier in de parallelle opnamewijziging (glas van een deur, onverwarmde ruimten).
+Met de vrijstellingen van soort `form` erbij heeft **1 740 / 1 823 (95,4 %)** een formulier. 16 opties zijn bewust alleen JSON. 67 opties hebben nog geen formulier (`missing`): vooral velden per rekenzone in `zoneData`, onderdelen van een verder tapwatersysteem en opnamevragen naar schildelen, PV en tapwater (lijst in `formCoverage.ts`). De 4 opties van de parallelle opnamewijziging (glas van een deur, onverwarmde ruimten) zijn sinds de merge van 9 oktober 2026 gedekt.
 
 In deze ronde kregen een formulier: de douche-WTW (§13.5.3, per douche met verbinding en opgegeven rendement), de kokendwaterkraan, het gasgestookte voorraadtoestel (13.165–13.175), de ontbrekende Bbl-functies (woonwagen, drijvende bouwwerken, logies in een logiesgebouw) en de berekende Ψ van de verwarmingsleidingen (9.33–9.35).
 

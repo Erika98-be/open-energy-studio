@@ -163,10 +163,6 @@ export const FORM_COVERAGE_EXEMPTIONS: CoverageExemption[] = [
     reason: 'Per rekenzone alleen via Geavanceerd (JSON); de projectbrede waarde heeft een formulier. Te bouwen voor meerzonige projecten.',
   },
   {
-    route: 'residentialSurvey', path: '/envelope/doors/[]', options: ['glass'], kind: 'parallel',
-    reason: 'Formulier in parallelle wijziging (zevende review, opname); deze uitzondering vervalt bij die merge.',
-  },
-  {
     route: 'residentialSurvey', path: '/hotWater/showerHeatRecovery', options: ['vertical', 'horizontal'], kind: 'missing',
     reason: 'Nog geen veld in de opname; alleen via Geavanceerd (JSON). Te bouwen.',
   },
@@ -207,10 +203,6 @@ export const FORM_COVERAGE_EXEMPTIONS: CoverageExemption[] = [
     reason: 'Nog geen veld in de opname; alleen via Geavanceerd (JSON). Te bouwen.',
   },
   {
-    route: 'utilitySurvey', path: '/envelope/doors/[]', options: ['glass'], kind: 'parallel',
-    reason: 'Formulier in parallelle wijziging (zevende review, opname); deze uitzondering vervalt bij die merge.',
-  },
-  {
     route: 'utilitySurvey', path: '/hotWater/showerHeatRecovery', options: ['vertical', 'horizontal'], kind: 'missing',
     reason: 'Nog geen veld in de opname; alleen via Geavanceerd (JSON). Te bouwen.',
   },
@@ -249,10 +241,6 @@ export const FORM_COVERAGE_EXEMPTIONS: CoverageExemption[] = [
   {
     route: 'utilitySurvey', path: '/ventilation', options: ['bypassPresent'], kind: 'missing',
     reason: 'Nog geen veld in de opname; alleen via Geavanceerd (JSON). Te bouwen.',
-  },
-  {
-    route: 'residentialSurvey', path: '/envelope/unheatedSpaces/[]', options: ['id', 'description'], kind: 'parallel',
-    reason: 'Formulier in parallelle wijziging (zevende review, opname); deze uitzondering vervalt bij die merge.',
   },
   {
     route: 'residentialSurvey', path: '/hotWater/served', options: ['kitchen_and_bathroom', 'bathroom_only', 'kitchen_only'], kind: 'missing',
