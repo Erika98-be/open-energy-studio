@@ -81,7 +81,7 @@ export function ConstructionExtrasFields({ draft, change, t, utility }: Props & 
     {measured != null && <>
       <NumberField {...field} path={['measuredInfiltration', 'qv10Dm3PerSM2']} label={t('opname.measuredInfiltration.qv10')}
         unit="dm³/(s·m²)" />
-      <TextField {...field} path={['measuredInfiltration', 'sourceReference']} label={t('opname.sourceReference')} />
+      <TextField {...field} path={['measuredInfiltration', 'sourceReference']} label={t('opname.measuredInfiltration.source')} />
     </>}
   </>;
 }
@@ -177,7 +177,7 @@ export function UtilityLightingFields({ draft, change, t }: Props) {
           options={opts(t, 'opname.lighting.daylightKind', ['none', 'switching', 'dimming', 'unknown'])} />
         <CheckField {...field} path={[...base, 'largeOfficeGroup']} label={t('opname.lighting.largeOfficeGroup')} />
         <CheckField {...field} path={[...base, 'extractedLuminaires']} label={t('opname.lighting.extracted')} />
-        <TextField {...field} path={[...base, 'sourceReference']} label={t('opname.sourceReference')} />
+        <TextField {...field} path={[...base, 'sourceReference']} label={t('opname.lighting.source')} />
         <button type="button" onClick={() => change(['lighting'], zones.filter((__, other) => other !== index))}>
           {t('opname.remove')}</button>
       </div>;
@@ -226,7 +226,7 @@ export function UtilityInstallationExtrasFields({ draft, change, t }: Props) {
       <SelectField {...field} path={['humidification', 'humidifier']} label={t('opname.humidification.kind')}
         options={opts(t, 'opname.humidification.kindKind', ['electric_steam', 'non_electric_steam', 'adiabatic'])} />
       <CheckField {...field} path={['humidification', 'absorptionWheel']} label={t('opname.humidification.wheel')} />
-      <TextField {...field} path={['humidification', 'sourceReference']} label={t('opname.sourceReference')} />
+      <TextField {...field} path={['humidification', 'sourceReference']} label={t('opname.humidification.source')} />
     </>}
     <TriStateField {...field} {...yesNo} path={['bacs', 'present']} label={t('opname.bacs.present')} />
     {read(draft, ['bacs', 'present']) === true && <>
@@ -234,7 +234,7 @@ export function UtilityInstallationExtrasFields({ draft, change, t }: Props) {
       <NumberField {...field} path={['bacs', 'servedAreaM2']} label={t('opname.bacs.area')} optional unit="m²" />
       <TriStateField {...field} {...yesNo} path={['bacs', 'automationClassCOrBetter']} label={t('opname.bacs.automationC')} />
       <TriStateField {...field} {...yesNo} path={['bacs', 'managementClassBOrBetter']} label={t('opname.bacs.managementB')} />
-      <TextField {...field} path={['bacs', 'evidenceReference']} label={t('opname.sourceReference')} />
+      <TextField {...field} path={['bacs', 'evidenceReference']} label={t('opname.bacs.source')} />
     </>}
     <CheckField {...field} path={['heatingInstallation', 'collective']} label={t('opname.heatingInstallation.collective')} />
     <NumberField {...field} path={['heatingInstallation', 'capacityKw']} label={t('opname.heatingInstallation.capacity')} optional unit="kW" />
@@ -277,7 +277,7 @@ export function SurveyDoorsFields({ draft, change, t }: Props) {
         <NumberField {...field} path={[...base, 'glassFraction']} label={t('opname.door.glassFraction')} optional />
         <SelectField {...field} path={[...base, 'frame']} label={t('opname.window.frame')}
           options={opts(t, 'opname.window.frameKind', ['wood_or_plastic', 'metal_with_thermal_break', 'metal', 'none'])} />
-        <TextField {...field} path={[...base, 'sourceReference']} label={t('opname.sourceReference')} />
+        <TextField {...field} path={[...base, 'sourceReference']} label={t('opname.door.source')} />
         <button type="button" onClick={() => change(['envelope', 'doors'], doors.filter((__, other) => other !== index))}>
           {t('opname.remove')}</button>
       </div>;

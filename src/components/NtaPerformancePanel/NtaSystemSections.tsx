@@ -145,7 +145,7 @@ export function SpaceGeneratorFields({ draft, change, base, project, allowMultip
       <SelectField {...field} path={at('sourceSystem')} label={t('nta.form.hpSourceSystem')} options={[
         ['individual', t('nta.form.hpSourceSystem.individual')], ['collective_ground', t('nta.form.hpSourceSystem.collective_ground')],
         ['collective_groundwater_surface_or_at_least15_c', t('nta.form.hpSourceSystem.collective_groundwater_surface_or_at_least15_c')]]} />
-      <TextField {...field} path={at('sourceSystemReference')} label={t('nta.form.source')} />
+      <TextField {...field} path={at('sourceSystemReference')} label={t('nta.form.hpSourceSystem.source')} />
     </>}
     {kind === 'heat_pump_forfait' && <RegenerationFields draft={draft} change={change} base={at('regeneration')} />}
     {kind === 'heat_pump_forfait' && <HeatPumpDeclarationFields draft={draft} change={change} base={at('forfait', 'qualityDeclaration')} />}
