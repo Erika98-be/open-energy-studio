@@ -307,8 +307,16 @@ pub struct KernelCapabilities {
     pub kernel_language: &'static str,
     pub kernel_version: &'static str,
     pub target_norm_version: &'static str,
+    /// Whether the legacy `/v1/nta8800/calculate` route (`calculate_beng`)
+    /// calculates; it does not, it validates and refers to the project
+    /// calculation. Kept for older clients; see `project_calculation_available`.
     pub calculation_available: bool,
+    /// Whether the project calculation (`calculate_project_performance`)
+    /// calculates BENG, TOjuli and the indicative label: unverified, no attest.
+    pub project_calculation_available: bool,
     pub attest_status: &'static str,
+    /// The NTA 8800 editions the kernel knows, as `GET /v1/version` lists them.
+    pub supported_norm_versions: Vec<crate::norm_versions::EditionInfo>,
     pub implemented: &'static [&'static str],
 }
 
@@ -318,8 +326,19 @@ pub fn capabilities() -> KernelCapabilities {
         kernel_version: KERNEL_VERSION,
         target_norm_version: crate::norm_versions::current_label(),
         calculation_available: false,
+        project_calculation_available: true,
         attest_status: "unattested",
+        supported_norm_versions: crate::norm_versions::supported_editions(),
         implemented: &[
+            "unverified_project_performance_multi_zone",
+            "unverified_project_performance_editions_2020a1_2022_2023_2024_2025c1",
+            "unverified_isso_75_1_basisopname_utility",
+            "unverified_maatwerkadvies_isso_82_2_75_2",
+            "relabel_comparison_brl_9500_annex_6a_6b",
+            "registration_readiness_brl_9500_omgevingsregeling",
+            "label_data_omgevingsregeling_5_13_5_13a",
+            "unverified_annex_aa_cooling_capacity_per_zone",
+            "reference_case_audit_and_comparison",
             "legacy_project_structural_validation",
             "envelope_geometry_input_audit",
             "diagnostic_direct_outdoor_conductance",
@@ -346,17 +365,16 @@ pub fn capabilities() -> KernelCapabilities {
             "diagnostic_direct_transmission_reference_comparison",
             "unverified_chapter_7_monthly_heating_cooling_need_single_zone",
             "unverified_space_heating_chain_emission_distribution_single_generator",
-            "unverified_single_zone_primary_energy_and_indicators_chapter_5_draft",
+            "unverified_primary_energy_and_indicators_chapter_5",
             "unverified_space_heating_distribution_9_26_to_9_51_and_auxiliary_9_85_9_91",
             "unverified_storage_correction_5_14a_and_co2_emission_5_5_6_1",
             "unverified_pv_yield_chapter_16_tables_16_1_to_16_3",
             "unverified_space_cooling_chapter_10_method_3_with_emission_distribution_priority",
             "indicative_label_class_omgevingsregeling_annex_ix_x",
-            "bbl_4_149_beng_requirement_check_single_function",
+            "bbl_4_149_beng_requirement_check_mixed_use",
             "unverified_tojuli_per_orientation_5_7_with_capacity_evidence",
             "unverified_domestic_hot_water_chapter_13_generators_and_solar_13_7",
             "unverified_utility_lighting_chapter_14",
-            "unverified_project_performance_adapter_single_zone",
             "unverified_ventilation_chapter_11_pressure_balance_and_c1",
             "unverified_humidification_dehumidification_chapter_12",
             "schematisation_checks_6_4_and_6_5_2",
