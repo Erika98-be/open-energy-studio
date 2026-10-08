@@ -663,7 +663,8 @@ pub enum HotWaterGenerator {
         )]
         annex_t_conditions: Option<AnnexTConditions>,
     },
-    /// Table 13.25 individual heat pump, 1,4·c_source with table 13.27.
+    /// Table 13.25 individual heat pump: 1,4 or 1,4·c_source, without
+    /// c_W;gen. A declared value with a measured class takes table 13.27.
     HeatPump {
         #[serde(rename = "exhaustAirSource")]
         exhaust_air_source: bool,
@@ -2990,15 +2991,13 @@ fn generation_values(
             // p. 612) carry no c_W;gen, unlike the gas rows: 13.8.4.7.3 c)
             // (2025+C1 p. 643, 2020+A1 p. 615) takes c_W;gen from the class
             // "waarbij het rendement van de warmtepomp is gemeten", so only
-            // a measured class corrects.
-            let correction = if measured_class.is_none() {
-                1.0
-            } else {
-                heat_pump_class_correction(
-                    measured_class.unwrap_or(ApplicationClass::Class4),
-                    annual_output_kwh,
-                )
-                .ok_or("hot_water_heat_pump_class_exceeded")?
+            // a declared value with its measured class corrects. A forfait
+            // value has no measured class: a class given next to it is
+            // ignored here (it still sets the shower class, 13.30).
+            let correction = match (declared, measured_class) {
+                (Some(_), Some(class)) => heat_pump_class_correction(*class, annual_output_kwh)
+                    .ok_or("hot_water_heat_pump_class_exceeded")?,
+                _ => 1.0,
             };
             // 13.152 (p. 616–617): f_prac;gi = 1,0 only for the forfait
             // values of 13.8.4.5–13.8.4.7; a declared value is not a forfait
@@ -5850,10 +5849,37 @@ mod tests {
         }
     }
 
+    /// A forfait value has no measured class (13.8.4.7.3 c), 2025+C1 p. 643,
+    /// 2020+A1 p. 615): a class given next to it neither corrects 1,4 nor
+    /// fails on a larger demand.
+    #[test]
+    fn forfait_heat_pump_ignores_a_measured_class() {
+        for class in [ApplicationClass::Class1, ApplicationClass::Class3] {
+            let input = system(HotWaterGenerator::HeatPump {
+                declared: None,
+                same_ground_source: false,
+                exhaust_air_source: false,
+                source_correction: None,
+                measured_class: Some(class),
+                outdoor_air_fraction: None,
+            });
+            let result = assess_hot_water(&input, context()).unwrap();
+            for month in &result.months {
+                assert!((month.generation_efficiency - 1.4).abs() < 1e-12);
+            }
+        }
+    }
+
     #[test]
     fn heat_pump_classes_and_ambient_heat() {
+        let declared = || {
+            Some(DeclaredEfficiency {
+                value: 3.0,
+                source_reference: "BCRG 0000/01".into(),
+            })
+        };
         let mut input = system(HotWaterGenerator::HeatPump {
-            declared: None,
+            declared: declared(),
             same_ground_source: false,
             exhaust_air_source: false,
             source_correction: None,
@@ -5864,7 +5890,8 @@ mod tests {
         let annual = result.annual_generator_output_kwh;
         let correction = heat_pump_class_correction(ApplicationClass::Class3, annual).unwrap();
         let jan = &result.months[0];
-        let eta = 1.4 * correction;
+        // 13.152: a declared value takes f_prac 0,95.
+        let eta = 3.0 * correction * 0.95;
         assert!((jan.generation_efficiency - eta).abs() < 1e-12);
         if eta >= 1.0 {
             let ambient = jan.generator_output_kwh * (1.0 - 1.0 / eta);
@@ -5872,7 +5899,7 @@ mod tests {
         }
         // A class-1 measurement cannot serve a larger demand.
         input.generator = HotWaterGenerator::HeatPump {
-            declared: None,
+            declared: declared(),
             same_ground_source: false,
             exhaust_air_source: false,
             source_correction: None,
