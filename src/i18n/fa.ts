@@ -67,22 +67,17 @@ export const fa: Record<string, string> = {
   'ribbon.exportReport': 'صدور گزارش',
 
   // Project Browser
-  'browser.project': 'پروژه',
   'browser.zones': 'مناطق',
-  'browser.zone': 'منطقه',
   'browser.surfaces': 'سطوح',
   'browser.windows': 'پنجره‌ها',
   'browser.thermalBridges': 'پل‌های حرارتی',
   'browser.constructions': 'ساختارها',
-  'browser.installations': 'تأسیسات',
   'browser.heating': 'گرمایش',
   'browser.ventilation': 'تهویه',
   'browser.cooling': 'سرمایش',
   'browser.hotWater': 'آب گرم',
-  'browser.renewables': 'انرژی تجدیدپذیر',
   'browser.solarPV': 'برق خورشیدی',
   'browser.solarThermal': 'حرارت خورشیدی',
-  'browser.airTightness': 'نفوذناپذیری هوا',
 
   // Properties Panel
   'properties.title': 'ویژگی‌ها',
@@ -417,7 +412,6 @@ export const fa: Record<string, string> = {
   'theme.system': 'سیستم (تشخیص خودکار)',
   'theme.dark': 'تیره',
   'theme.light': 'روشن',
-  'theme.blue': 'آبی',
   'theme.highContrast': 'کنتراست بالا',
   'settings.general.autoSave': 'ذخیره خودکار',
   'settings.general.autoSaveDesc': 'ذخیره خودکار پروژه در فواصل منظم',

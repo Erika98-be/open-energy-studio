@@ -328,7 +328,8 @@ body {
   box-shadow: var(--focus-ring);
 }
 
-.dialog-field input[type="number"] {
+.dialog-field input[type="number"],
+.dialog-field input[inputmode="decimal"] {
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -425,7 +426,8 @@ h4, h5, h6 {
 
 /* ── Code / monospace ── */
 code, pre, .monospace,
-input[type="number"] {
+input[type="number"],
+input[inputmode="decimal"] {
   font-family: 'JetBrains Mono', monospace;
 }
 

@@ -96,22 +96,17 @@ export const nl: Record<string, string> = {
   'ribbon.exportReport': 'Rapport exporteren',
 
   // Project Browser
-  'browser.project': 'Project',
   'browser.zones': 'Zones',
-  'browser.zone': 'Zone',
   'browser.surfaces': 'Oppervlakken',
   'browser.windows': 'Ramen',
   'browser.thermalBridges': 'Koudebruggen',
   'browser.constructions': 'Constructies',
-  'browser.installations': 'Installaties',
   'browser.heating': 'Verwarming',
   'browser.ventilation': 'Ventilatie',
   'browser.cooling': 'Koeling',
   'browser.hotWater': 'Warm water',
-  'browser.renewables': 'Hernieuwbaar',
   'browser.solarPV': 'Zonnepanelen',
   'browser.solarThermal': 'Zonneboiler',
-  'browser.airTightness': 'Luchtdichtheid',
   'browser.airTightnessAssumed': "Aangenomen standaardwaarde (ontbrak in het bestand); controleer en vul de werkelijke waarde in.",
 
   // Properties Panel
@@ -596,7 +591,6 @@ export const nl: Record<string, string> = {
   'theme.system': 'Systeem (Automatische detectie)',
   'theme.dark': 'Donker',
   'theme.light': 'Licht',
-  'theme.blue': 'Blauw',
   'theme.highContrast': 'Hoog contrast',
   'settings.general.autoSave': 'Automatisch opslaan',
   'settings.general.autoSaveDesc': 'Sla het project automatisch op met regelmatige intervallen',
@@ -2473,7 +2467,6 @@ export const nl: Record<string, string> = {
   "mwa.template.problem.peakPowerRequired": "Vul het piekvermogen van elk PV-systeem in.",
   "mwa.template.problem.obstructionEvidenceRequired": "Minimale belemmering (situatie a) vraagt een onderbouwing.",
   "mwa.template.problem.ventilationSystemRequired": "Deze ventilatiemaatregel is in een eerdere vorm bewaard zonder ventilatiesysteem. Kies het nieuwe systeem opnieuw.",
-  "mwa.template.pvMinimalEvidence": "PV {id}: belemmeringssituatie a) (minimaal, tabel 17.3) — onderbouwing: {source}",
   "relabel.migrationNotice": "Dit herlabelproject is bewaard vóór de nieuwe herlabeleisen (BRL 9500-W §4.2.3–4.2.4). Facturen gemarkeerd voor beoordeling als herlabelbewijs: {count}; kies hun rol in het bewijsregister. Vul nog in: {fields}.",
   "relabel.migrationField.originalCertificateNumber": "certificaatnummer van het oorspronkelijke label",
   "relabel.migrationField.originalEpOnlineNumber": "EP-Online-nummer van het oorspronkelijke label",
