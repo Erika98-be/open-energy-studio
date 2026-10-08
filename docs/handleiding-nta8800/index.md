@@ -11,7 +11,7 @@ Deze handleiding beschrijft het NTA 8800-deel van Open Energy Studio:
 - herlabelen;
 - het projectdossier.
 
-Ze is geschreven als programmadocumentatie voor een softwareattest (BRL 9501). Ze volgt de code van de branch `nta8800-kernel` per 8 oktober 2026, na het UI-herontwerp (werkstappen in plaats van het lint) en met de oudere uitgaven van NTA 8800 in de kern.
+Ze is geschreven als programmadocumentatie voor een softwareattest (BRL 9501). Ze volgt de code van de branch `nta8800-kernel` per 9 oktober 2026, na het UI-herontwerp (werkstappen in plaats van het lint) en met de oudere uitgaven van NTA 8800 in de kern.
 
 De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-documenten. Verwijzingen noemen alleen paragraaf-, formule-, tabel- en paginanummers. Houd de bronnen zelf bij de hand.
 
@@ -45,4 +45,10 @@ Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. Ze zijn g
 - *Gebouw › Schil & ramen* met de tabel *Belemmering per raam*;
 - *Installaties › Koeling* met het formulier van bijlage AA;
 - de basisopname met de voortgangslijst en *Overnemen in projectmodel*;
-- het blok *Bron & bewijs* in het contextpaneel.
+- het blok *Bron & bewijs* in het contextpaneel;
+- *Gebouw › Schil & ramen* met de tabellen *Zonwering per raam* en *Glas per raam*;
+- het blok *ψ uit de leidinggegevens* bij distributie, koeling en circulatie;
+- de ketelhulpenergie en de WKK-omzettingsgetallen uit een kwaliteitsverklaring, en de gedeclareerde f_ctrl bij de ventilatie;
+- *Verklaringen voor het energielabel* (elementen k en l) in de stap Registratie;
+- de uitkomst bovenaan een onderdeel van de basisopname na **Opname doorrekenen**;
+- het venster *Handleiding* in de app.
