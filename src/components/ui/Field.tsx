@@ -72,7 +72,7 @@ export function TextInput({ unit, className, ...rest }: TextInputProps) {
   return (
     <span className={cx('ui-input', rest.disabled && 'ui-input--disabled', className)}>
       <input className="ui-input__control" {...rest} />
-      {unit && <span className="ui-input__unit">{unit}</span>}
+      {unit && <><span className="visually-hidden">, {unit}</span><span className="ui-input__unit" aria-hidden="true">{unit}</span></>}
     </span>
   );
 }
@@ -189,7 +189,7 @@ export function NumberInput({
         onChange={(event) => { setText(event.target.value); emit(event.target.value); }}
         onKeyDown={handleKeyDown}
       />
-      {unit && <span className="ui-input__unit">{unit}</span>}
+      {unit && <><span className="visually-hidden">, {unit}</span><span className="ui-input__unit" aria-hidden="true">{unit}</span></>}
     </span>
   );
 }

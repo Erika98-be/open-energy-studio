@@ -363,7 +363,8 @@ export function BuildingFunctionFields({ draft, change, t }: { draft: Draft; cha
   return <div className="nta-form-subsection" role="group" aria-label={t('opname.functions')}>
     <strong>{t('opname.functions')}</strong>
     <p className="nta-form-note">{t('opname.functions.note')}</p>
-    {functions.map((_, index) => <div key={index} className="opname-served">
+    {functions.map((_, index) => <div key={index} className="opname-served" role="group"
+      aria-label={`${t('opname.zones.function')} ${index + 1}`}>
       <SelectField {...field} path={['functions', index, 'function']} label={t('opname.zones.function')}
         options={opts(t, 'opname.functionKind', UTILITY_FUNCTIONS)} />
       <NumberField {...field} path={['functions', index, 'areaM2']} label={t('opname.functions.area')} />
@@ -455,7 +456,7 @@ export function UtilityCoolingFields({ draft, change, t }: { draft: Draft; chang
     </>}
     {extras.map((_, index) => {
       const base: Path = ['cooling', 'additionalGenerators', index];
-      return <div key={index} className="opname-item">
+      return <div key={index} className="opname-item" role="group" aria-label={`${t('opname.additionalGenerator')} ${index + 1}`}>
         <strong>{t('opname.additionalGenerator')} {index + 1}</strong>
         <SelectField {...field} path={[...base, 'generator']} label={t('opname.cooling.generator')}
           options={opts(t, 'opname.cooling.generatorKind', COOLING_GENERATORS)} />
@@ -900,7 +901,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       {surfaces.map((surface, index) => {
         const base: Path = ['envelope', 'surfaces', index];
         const insulation = read(draft, [...base, 'insulation', 'kind']);
-        return <div key={index} className="opname-item">
+        return <div key={index} className="opname-item" role="group" aria-label={String(surface.id ?? index)}>
           <strong>{String(surface.id ?? index)}</strong>
           <SelectField {...field} path={[...base, 'element']} label={t('opname.surface.element')}
             options={opts(t, 'opname.surface.elementKind', ['facade', 'roof', 'floor'])} />
@@ -942,7 +943,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       {windows.map((window, index) => {
         const base: Path = ['envelope', 'windows', index];
         const situation = read(draft, [...base, 'shading', 'situation']);
-        return <div key={`w${index}`} className="opname-item">
+        return <div key={`w${index}`} className="opname-item" role="group" aria-label={String(window.id ?? index)}>
           <strong>{String(window.id ?? index)}</strong>
           <SelectField {...field} path={[...base, 'surfaceId']} label={t('opname.window.surface')}
             options={surfaces.map((surface) => [String(surface.id), String(surface.id)])} />
@@ -981,7 +982,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       <SurveyPanelsFields draft={draft} change={change} t={t} />
       {rooflights.map((rooflight, index) => {
         const base: Path = ['envelope', 'rooflights', index];
-        return <div key={`r${index}`} className="opname-item">
+        return <div key={`r${index}`} className="opname-item" role="group" aria-label={String(rooflight.id ?? index)}>
           <strong>{String(rooflight.id ?? index)}</strong>
           <SelectField {...field} path={[...base, 'surfaceId']} label={t('opname.window.surface')}
             options={surfaces.filter((surface) => surface.element === 'roof').map((surface) => [String(surface.id), String(surface.id)])} />
@@ -1024,7 +1025,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
         <NumberField {...field} path={['heating', 'collective', 'connectedDwellings']} label={t('opname.connectedDwellings')} step="1" />
         <NumberField {...field} path={['heating', 'collective', 'connectedUsableAreaM2']} label={t('opname.connectedArea')} />
       </>}
-      {heatingExtras.map((_, index) => <div key={index} className="opname-item">
+      {heatingExtras.map((_, index) => <div key={index} className="opname-item" role="group" aria-label={`${t('opname.additionalGenerator')} ${index + 1}`}>
         <strong>{t('opname.additionalGenerator')} {index + 1}</strong>
         <HeatingGeneratorFields draft={draft} path={['heating', 'additionalGenerators', index, 'generator']} change={change} t={t} />
         <NumberField {...field} path={['heating', 'additionalGenerators', index, 'nominalPowerKw']} label={t('opname.nominalPowerKw')} />
@@ -1057,7 +1058,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
           <NumberField {...field} path={['hotWater', 'boilerVessel', 'manufactureYear']} label={t('opname.manufactureYear')} step="1" />
         </>}
       </>}
-      {hotWaterExtras.map((_, index) => <div key={index} className="opname-item">
+      {hotWaterExtras.map((_, index) => <div key={index} className="opname-item" role="group" aria-label={`${t('opname.additionalGenerator')} ${index + 1}`}>
         <strong>{t('opname.additionalGenerator')} {index + 1}</strong>
         <HotWaterGeneratorFields draft={draft} path={['hotWater', 'additionalGenerators', index, 'generator']} kind={kind} change={change} t={t} />
         <NumberField {...field} path={['hotWater', 'additionalGenerators', index, 'nominalPowerKw']} label={t('opname.nominalPowerKw')} />
@@ -1068,7 +1069,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
         onAdd={() => change(['hotWater', 'additionalGenerators'], [...hotWaterExtras, { id: freshItemId(hotWaterExtras, 'tapwateropwekker'), generator: hotWaterGeneratorTemplate('electric_instantaneous'), nominalPowerKw: 10 }])} />
       {solar.map((_, index) => {
         const base: Path = ['hotWater', 'solar', index];
-        return <div key={`s${index}`} className="opname-item">
+        return <div key={`s${index}`} className="opname-item" role="group" aria-label={`${t('opname.solar')} ${index + 1}`}>
           <strong>{t('opname.solar')} {index + 1}</strong>
           <SelectField {...field} path={[...base, 'collector']} label={t('opname.solar.collector')}
             options={opts(t, 'opname.solar.collectorKind', ['unglazed', 'glazed', 'evacuated_tube', 'unknown'])} />
@@ -1089,7 +1090,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       {kind === 'utility' && hotWaterSystems.map((_, index) => {
         const base: Path = ['additionalHotWaterSystems', index];
         const served = list(draft, [...base, 'servedAreas']);
-        return <div key={`h${index}`} className="opname-item">
+        return <div key={`h${index}`} className="opname-item" role="group" aria-label={`${t('opname.hotWater.system')} ${index + 2}`}>
           <strong>{t('opname.hotWater.system')} {index + 2}</strong>
           <HotWaterGeneratorFields draft={draft} path={[...base, 'generator']} kind={kind} change={change} t={t} />
           <NumberField {...field} path={[...base, 'nominalPowerKw']} label={t('opname.nominalPowerKw')} />
@@ -1196,7 +1197,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       {pv.map((_, index) => {
         const base: Path = ['pv', index];
         const method = read(draft, [...base, 'shading', 'method']);
-        return <div key={index} className="opname-item">
+        return <div key={index} className="opname-item" role="group" aria-label={String(pv[index].id ?? index)}>
           <strong>{String(pv[index].id ?? index)}</strong>
           <NumberField {...field} path={[...base, 'panelAreaM2']} label={t('opname.pv.area')} />
           <SelectField {...field} path={[...base, 'moduleType']} label={t('opname.pv.moduleType')}

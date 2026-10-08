@@ -81,7 +81,7 @@ export function NtaLightingSection({ draft, change, project, measureOnly = false
         ['healthcare_without_beds', t('nta.form.label.healthcare')], ['healthcare_with_beds', t('nta.form.label.healthcareBeds')]]}
         disabled={measureOnly} />
       <NumberField {...field} path={['lighting', 0, 'functions', 0, 'areaM2']} label={t('nta.form.area')} disabled={measureOnly} />
-      {zones.map((zone, index) => <div key={String(zone.id)} className="nta-form-row">
+      {zones.map((zone, index) => <div key={String(zone.id)} className="nta-form-row" role="group" aria-label={String(zone.id)}>
         <NumberField {...field} path={['lighting', 0, 'lightingZones', index, 'areaM2']} label={`${String(zone.id)} — ${t('nta.form.area')}`}
           disabled={measureOnly} />
         <SelectField {...field} path={['lighting', 0, 'lightingZones', index, 'power', 'method']} label={t('nta.light.power')}

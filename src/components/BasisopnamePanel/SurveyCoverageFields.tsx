@@ -102,7 +102,7 @@ export function SurveyPanelsFields({ draft, change, t }: Props) {
     {panels.map((panel, index) => {
       const base: Path = ['envelope', 'panels', index];
       const insulation = read(draft, [...base, 'insulation', 'kind']);
-      return <div key={index} className="opname-item">
+      return <div key={index} className="opname-item" role="group" aria-label={String(panel.id ?? index + 1)}>
         <strong>{String(panel.id ?? index + 1)}</strong>
         <SelectField {...field} path={[...base, 'surfaceId']} label={t('opname.panel.surface')}
           options={surfaces.map((surface) => [String(surface.id), String(surface.id)])}
@@ -258,7 +258,7 @@ export function UtilityHotWaterStorageFields({ draft, change, t }: Props) {
     <fieldset className="nta-form-row"><legend>{t('opname.hotWater.vessels')}</legend>
       {vessels.map((vessel, index) => {
         const base: Path = ['hotWater', 'storage', index];
-        return <div key={index} className="opname-item">
+        return <div key={index} className="opname-item" role="group" aria-label={String(vessel.id ?? index + 1)}>
           <strong>{String(vessel.id ?? index + 1)}</strong>
           <NumberField {...field} path={[...base, 'volumeL']} label={t('opname.vessel.volume')} unit="l" />
           <SelectField {...field} path={[...base, 'label']} label={t('opname.vessel.energyLabel')}

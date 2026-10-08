@@ -34,7 +34,8 @@ export function FunctionAreasFields({ draft, change, base, functions, prefix }: 
   const field = { draft, onChange: change };
   const rows = list(draft, [base]);
   return <>
-    {rows.map((_, index) => <div key={index} className="nta-form-row">
+    {rows.map((_, index) => <div key={index} className="nta-form-row" role="group"
+      aria-label={`${t(`nta.form.${base}`)} ${index + 1}`}>
       <SelectField {...field} path={[base, index, 'function']} label={t(`nta.form.${base}`)}
         options={functions.map((key) => [key, t(`${prefix}.${key}`)])} />
       <NumberField {...field} path={[base, index, 'areaM2']} label={t('nta.form.functionArea')} />
@@ -172,7 +173,8 @@ export function BacsFields({ draft, change }: SectionProps) {
         <SelectField {...field} path={at('service')} label={t('nta.form.bacs.service')} options={[
           ['heating', t('nta.form.bacs.service.heating')], ['cooling', t('nta.form.bacs.service.cooling')]]} />
         <TextField {...field} path={at('sourceReference')} label={t('nta.form.source')} />
-        {generators.map((_, generator) => <div key={generator} className="nta-form-row">
+        {generators.map((_, generator) => <div key={generator} className="nta-form-row" role="group"
+          aria-label={`${t('nta.form.bacs.generator')} ${generator + 1}`}>
           <TextField {...field} path={at('generators', generator, 'id')} label={t('nta.form.bacs.generatorId')} />
           <NumberField {...field} path={at('generators', generator, 'nominalThermalCapacityKw')} label={t('nta.form.bacs.capacity')} />
           <TextField {...field} path={at('generators', generator, 'sourceReference')} label={t('nta.form.source')} />

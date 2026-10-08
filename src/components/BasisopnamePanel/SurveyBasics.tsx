@@ -160,7 +160,7 @@ export function UtilityLightingFields({ draft, change, t }: Props) {
       const base: Path = ['lighting', index];
       const method = read(draft, [...base, 'power', 'method']);
       const parts = items(draft, [...base, 'power', method === 'lamps' ? 'lamps' : 'luminaires']);
-      return <div key={index} className="opname-item">
+      return <div key={index} className="opname-item" role="group" aria-label={String(zone.id ?? index + 1)}>
         <strong>{String(zone.id ?? index + 1)}</strong>
         <NumberField {...field} path={[...base, 'areaM2']} label={t('opname.lighting.area')} unit="m²" />
         <SelectField {...field} path={[...base, 'power', 'method']} label={t('opname.lighting.power')}
@@ -170,7 +170,8 @@ export function UtilityLightingFields({ draft, change, t }: Props) {
             : value === 'luminaires' ? { method: 'luminaires', luminaires: [{ count: 1, powerW: null }] }
               : { method: 'unknown', ledFrom2017: false })} />
         {method === 'unknown' && <CheckField {...field} path={[...base, 'power', 'ledFrom2017']} label={t('opname.lighting.ledFrom2017')} />}
-        {(method === 'lamps' || method === 'luminaires') && parts.map((_, part) => <div key={part} className="nta-form-row">
+        {(method === 'lamps' || method === 'luminaires') && parts.map((_, part) => <div key={part} className="nta-form-row" role="group"
+          aria-label={`${t('opname.lighting.part')} ${part + 1}`}>
           <NumberField {...field} path={[...base, 'power', method, part, 'count']} label={t('opname.lighting.count')} step="1" />
           {method === 'lamps' ? <>
             <NumberField {...field} path={[...base, 'power', 'lamps', part, 'lampPowerW']} label={t('opname.lighting.lampPower')} unit="W" />
@@ -287,7 +288,7 @@ export function SurveyDoorsFields({ draft, change, t }: Props) {
   return <>
     {doors.map((door, index) => {
       const base: Path = ['envelope', 'doors', index];
-      return <div key={index} className="opname-item">
+      return <div key={index} className="opname-item" role="group" aria-label={String(door.id ?? index + 1)}>
         <strong>{String(door.id ?? index + 1)}</strong>
         <SelectField {...field} path={[...base, 'surfaceId']} label={t('opname.window.surface')}
           options={surfaces.map((surface) => [String(surface.id), String(surface.id)])} />
@@ -364,7 +365,7 @@ export function SurveyUnheatedSpacesFields({ draft, change, t }: Props) {
     });
   };
   return <fieldset className="nta-form-row"><legend>{t('opname.unheatedSpaces')}</legend>
-    {spaces.map((space, index) => <div key={index} className="opname-item">
+    {spaces.map((space, index) => <div key={index} className="opname-item" role="group" aria-label={String(space.id ?? index + 1)}>
       <strong>{String(space.id ?? index + 1)}</strong>
       <TextField {...field} path={['envelope', 'unheatedSpaces', index, 'description']} label={t('opname.unheatedSpaces.description')} />
       <button type="button" onClick={() => remove(index)}>{t('opname.remove')}</button>
