@@ -2303,8 +2303,7 @@ fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
                         && (is_blank_error(message)
                             || (leaf.removed
                                 && missing_field(message).is_some_and(|field| {
-                                    leaf.steps.last()
-                                        == Some(&PathStep::Key(field.to_string()))
+                                    leaf.steps.last() == Some(&PathStep::Key(field.to_string()))
                                 })))
                         && (*at == leaf.path || is_under(&leaf.path, at))
                 }
@@ -3232,9 +3231,9 @@ fn derive_input(
             // A null object member means the same as an absent one, as in the
             // input fingerprint: a cleared field with a kernel default keeps
             // its default instead of stopping the calculation.
-            match serde_path_to_error::deserialize::<_, NtaCalculationInput>(
-                without_null_members(value),
-            ) {
+            match serde_path_to_error::deserialize::<_, NtaCalculationInput>(without_null_members(
+                value,
+            )) {
                 Ok(block) => Some(block),
                 Err(error) => {
                     // A blank value (null) where the kernel needs a number,

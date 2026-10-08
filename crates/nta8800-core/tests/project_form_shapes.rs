@@ -224,7 +224,10 @@ fn hidden_blank_storeys_on_the_utility_route_reads_as_absent() {
     let (after_status, after) = gap_codes(&value);
     assert_eq!(after_status, status);
     assert_eq!(after, before);
-    assert!(!after.iter().any(|gap| gap.contains("storeys")), "{after:?}");
+    assert!(
+        !after.iter().any(|gap| gap.contains("storeys")),
+        "{after:?}"
+    );
 }
 
 /// Review 9: the form syncs a utility pipe to `buildingHeightM` (blank when

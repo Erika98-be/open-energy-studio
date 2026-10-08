@@ -14,7 +14,10 @@ fn outcome(project: &Value) -> (String, String, String) {
     let result = serde_json::to_value(assess_project_performance(project)).unwrap();
     (
         result["status"].as_str().unwrap_or("").to_string(),
-        result["inputFingerprint"].as_str().unwrap_or("").to_string(),
+        result["inputFingerprint"]
+            .as_str()
+            .unwrap_or("")
+            .to_string(),
         result["performance"]["indicators"].to_string(),
     )
 }
@@ -52,11 +55,18 @@ fn remove(project: &mut Value, pointer: &str) {
 }
 
 fn check(fixture: &str) {
-    let path = format!("{}/../../training-data/{fixture}", env!("CARGO_MANIFEST_DIR"));
+    let path = format!(
+        "{}/../../training-data/{fixture}",
+        env!("CARGO_MANIFEST_DIR")
+    );
     let project: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
     let base = outcome(&project);
     let mut members = Vec::new();
-    scalar_members(&project["ntaCalculation"], "/ntaCalculation".into(), &mut members);
+    scalar_members(
+        &project["ntaCalculation"],
+        "/ntaCalculation".into(),
+        &mut members,
+    );
     let mut checked = 0;
     let mut differ = Vec::new();
     for (pointer, key) in members {
@@ -120,10 +130,15 @@ const REVIEW9_LEAVES: [&str; 12] = [
 #[test]
 fn review9_defaulted_leaves_read_as_absent() {
     let mut checked = 0;
-    for fixture in ["nta8800-example-office.json", "nta8800-example-terraced-dwelling.json"] {
-        let path = format!("{}/../../training-data/{fixture}", env!("CARGO_MANIFEST_DIR"));
-        let project: Value =
-            serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+    for fixture in [
+        "nta8800-example-office.json",
+        "nta8800-example-terraced-dwelling.json",
+    ] {
+        let path = format!(
+            "{}/../../training-data/{fixture}",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let project: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
         for pointer in REVIEW9_LEAVES {
             let (parent, key) = pointer.rsplit_once('/').unwrap();
             if !project.pointer(parent).is_some_and(Value::is_object) {

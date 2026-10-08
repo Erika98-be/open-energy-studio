@@ -516,7 +516,10 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
                     }
                 }
             }
-        } else if construction.get("layers").is_some_and(|value| !value.is_null()) {
+        } else if construction
+            .get("layers")
+            .is_some_and(|value| !value.is_null())
+        {
             issues.push(issue(
                 Severity::Error,
                 "construction_layers_invalid",
@@ -978,7 +981,10 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
     for (index, system) in project.heating_systems.iter().enumerate() {
         let system_type = system.get("type").and_then(Value::as_str);
         if !matches!(system_type, Some("heat_pump_air" | "heat_pump_ground")) {
-            if system.get("ntaHeatPump").is_some_and(|value| !value.is_null()) {
+            if system
+                .get("ntaHeatPump")
+                .is_some_and(|value| !value.is_null())
+            {
                 issues.push(issue(
                     Severity::Error,
                     "heat_pump_metadata_on_other_system",
@@ -1128,7 +1134,9 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
     }
     for (index, system) in project.hot_water_systems.iter().enumerate() {
         if system.get("type").and_then(Value::as_str) != Some("heat_pump")
-            && system.get("ntaHeatPump").is_some_and(|value| !value.is_null())
+            && system
+                .get("ntaHeatPump")
+                .is_some_and(|value| !value.is_null())
         {
             issues.push(issue(
                 Severity::Error,
