@@ -117,7 +117,13 @@ export function syncVentilation(block: Block, project: IProject): Block {
     zoneId: zone?.id ?? ventilation.zoneId,
     usableFloorAreaM2: area,
     category: residential ? 'residential' : 'utility',
-    functions: fn ? [{ function: fn, areaM2: area }] : ventilation.functions ?? [],
+    // 11.57: the swimming-pool flag of a sport function survives the sync.
+    functions: fn ? [{
+      function: fn,
+      areaM2: area,
+      ...(fn === 'sport' && (ventilation.functions as Block[] | undefined)?.[0]?.swimmingPool === true
+        ? { swimmingPool: true } : {}),
+    }] : ventilation.functions ?? [],
     heatingSetpointC: setpoints.heatingC ?? null,
     coolingSetpointC: setpoints.coolingC ?? null,
     dwellingCount: residential ? (gains?.dwellingCount ?? ventilation.dwellingCount ?? 1) : 0,

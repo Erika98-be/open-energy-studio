@@ -723,7 +723,11 @@ export function HotWaterExtraGeneratorsFields({ draft, change, base }: SectionPr
         if (rest.length !== 1 && series != null) change([...base, 'series'], null);
       }} />
     </fieldset>)}
-    <button type="button" onClick={() => change([...base, 'additionalGenerators'], [...extra, additionalHotWaterGeneratorTemplate()])}>
+    <button type="button" onClick={() => {
+      change([...base, 'additionalGenerators'], [...extra, additionalHotWaterGeneratorTemplate()]);
+      // A second further generator ends the series arrangement (13.141a–d needs exactly one).
+      if (series != null) change([...base, 'series'], null);
+    }}>
       {t('nta.form.dhwExtraAdd')}
     </button>
     {extra.length === 1 && <label>{t('nta.form.dhwSeries')}

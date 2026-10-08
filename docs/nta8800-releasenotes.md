@@ -13,6 +13,20 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — projectformulieren na de achtste review (geen rekenwijziging)
+
+De kern is ongewijzigd; de formulieren schrijven nu invoer die de kern leest.
+
+- **Zwembad bij sportfunctie.** "Toepassen" bouwde de ventilatiefuncties opnieuw op en liet `swimmingPool` vallen, zodat het vinkje nooit werd bewaard (11.57). De vlag blijft nu staan zolang de functie sport blijft.
+- **Serieschakeling.** Een tweede verdere opwekker toevoegen liet de serieschakeling staan terwijl de keuze verdween; de kern weigerde met `hot_water_series_requires_two_generators`. Toevoegen haalt de serieschakeling nu weg, voor het hoofdsysteem en voor verdere systemen.
+- **Eigen gegevens per rekenzone.**
+  - De kopie van de ventilatie van het blok kreeg de oppervlakte van zone 1 (`ventilation_area_mismatch`). Ze krijgt nu de id en de gebruiksoppervlakte van de eigen zone.
+  - Zonder interne warmte in het blok schreef het sjabloon `{}`; nu een geldige standaard (woonfunctie of utiliteit).
+  - Een eigen woonfunctie neemt het woningtype van het blok over; een andere functie haalt een achtergebleven woningtype weg (`dwelling_type_not_applicable`).
+  - Delen met een andere functie bieden geen woonfunctie meer en verdwijnen bij een woonzone (`function_areas_residential_mixed`).
+  - De toelichting zegt nu dat met meer zones elke zone eigen gegevens nodig heeft; verwijderen vraagt dan eerst om bevestiging.
+- **Kleiner.** "Ga naar" vindt de berekende Ψ van de circulatie van een verder tapwatersysteem (`additionalHotWaterSystems[0]…`). Bij meerdere koelsystemen staat het collectieve aandeel per systeem.
+
 ### 9 oktober 2026 — formulieren voor de laatste invoer die alleen via JSON kon (geen rekenwijziging)
 
 De formulierdekking ([formulierdekking](ui-redesign/formulierdekking.md)) telt geen open opties meer: 1 799 van de 1 823 kernopties schrijft een formulier, 8 zet een formulier op een manier die de check niet op naam ziet, 16 blijven bewust JSON. De kern en zijn uitkomsten zijn ongewijzigd; `crates/nta8800-core/tests/survey_form_shapes.rs` en `project_form_shapes.rs` laten de kern de nieuwe formuliervormen lezen en doorrekenen zonder nieuwe meldingen.

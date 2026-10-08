@@ -28,10 +28,10 @@ export function CollectiveShareFields({ draft, change, base, label }: SectionPro
 }
 
 /** Cooling installed collectively for the building (`cooling.collective`). */
-export function CollectiveCoolingField({ draft, change }: SectionProps) {
+export function CollectiveCoolingField({ draft, change, system = ['cooling'] }: SectionProps & { system?: Path }) {
   const { t } = useI18n();
-  if (read(draft, ['cooling']) == null) return null;
-  return <CollectiveShareFields draft={draft} change={change} base={['cooling', 'collective']} label={t('nta.form.cooling.collective')} />;
+  if (read(draft, system) == null) return null;
+  return <CollectiveShareFields draft={draft} change={change} base={[...system, 'collective']} label={t('nta.form.cooling.collective')} />;
 }
 
 /** A PV system shared by the building (`pvSystems[i].collective`, 6.6.7). */

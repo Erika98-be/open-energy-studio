@@ -270,6 +270,7 @@ export function CoolingSystemsFields({ draft, change, project }: SectionProps & 
             {zone.name || zone.id}
           </label>)}
           <CoolingSystemFields draft={draft} change={change} base={['coolingSystems', index, 'system']} allowNone={false} />
+          <CollectiveCoolingField draft={draft} change={change} system={['coolingSystems', index, 'system']} />
           <RemoveButton label={t('nta.form.remove')}
             onClick={() => change(['coolingSystems'], systems.filter((__, other) => other !== index))} />
         </fieldset>;

@@ -1,5 +1,5 @@
 import { useI18n } from '../../i18n/i18n';
-import { CheckField, NumberField, read, SelectField, TextField, type Draft, type Path } from './NtaFormFields';
+import { CheckField, NumberField, read, SelectField, TextField, useFieldPath, type Draft, type Path } from './NtaFormFields';
 
 // Ψ of distribution pipes from their geometry: 9.33–9.35 (heating),
 // 10.24–10.26 (cooling) and 13.27–13.29 (hot water) are the same three
@@ -72,8 +72,10 @@ export function CirculationPsiFields({ draft, change, system = ['hotWater'] }: O
   if (circulation == null) return null;
   const base: Path = [...system, 'circulation', 'calculatedPsi'];
   const calculated = read(draft, base) != null;
+  // Kernel path in dot/bracket form (additionalHotWaterSystems[0]…) so "Ga naar" finds it.
+  const dataPath = useFieldPath(base) ?? undefined;
   return <>
-    <label className="nta-form-check" data-path={`ntaCalculation.${system.join('.')}.circulation.calculatedPsi`}>
+    <label className="nta-form-check" data-path={dataPath}>
       <input type="checkbox" checked={calculated}
         onChange={(event) => change(base, event.target.checked ? pipeGeometryTemplate() : null)} />
       {t('nta.form.pipeGeometry.circulation')}
