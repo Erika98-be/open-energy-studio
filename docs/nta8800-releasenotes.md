@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — correcties na de vijfde review: glastype per raam, oliehulpenergie, WKK-verklaring voor tapwater, leidinggegevens
+
+- **Glastype per raam rekent.** Een glastype uit tabel 7.4 in `windowGlazings` gaf altijd `window_g_declared_and_table`, omdat het raam ook zijn eigen g-waarde meegaf. g_gl;n komt uit NEN-EN 410 óf tabel 7.4 (2025+C1 p. 190): het gekozen glastype vervangt nu de g-waarde van dat raam.
+- **Hulpenergie van een oliegestookte ketel.** Met opgegeven constanten (§9.1) of metingen volgens bijlage O nam 9.85 alleen het gasverbruik als E_H;ci, bij olie dus 0: alleen A/12 telde. Nu telt de olie-invoer mee, zoals in de forfaitaire route (p. 359).
+- **WKK-verklaring ook voor tapwater.** ε_chp;th en ε_chp;el uit een kwaliteitsverklaring (§9.1) golden alleen voor ruimteverwarming. Ze vervangen nu ook voor tapwater de rij van tabel 9.31 (§13.8.4.7.4, p. 343), met invoerveld, bronverwijzing en dezelfde controles; bij methode 1 geweigerd. Met een verklaring geeft een rij zonder tabelwaarde ("n.v.t.") niet meer `chp_class_invalid`.
+- **ψ van tapwaterleidingen: h_a ligt vast.** 13.27 en 13.29 rekenen voor tapwater met h_a = 8,0 W/(m²·K) (p. 551). Een eigen warmteovergangscoëfficiënt wordt geweigerd (`hot_water_pipe_surface_coefficient_fixed`); verwarming (p. 311) en koeling (p. 385) staan een andere waarde wel toe.
+- **Leidingmaten in meters.** Een diameter of diepte boven 1 m geeft `pipe_dimension_not_in_metres`, met een eenhedenhint, in plaats van een aannemelijke ψ uit de verhoudingen (millimeters in een meterveld).
+
 ### 9 oktober 2026 — routes uit ISSO 54: glas per raam, opgegeven hulpenergie- en WKK-waarden, ψ uit de leidinggegevens
 
 Het coderen van de ISSO 54-deeltesten liet vier invoerroutes zien die de rekenkern kende maar de projectinvoer niet doorgaf, of die ontbraken. Ze gelden in alle uitgaven. Projecten zonder deze invoer rekenen gelijk.
