@@ -103,19 +103,38 @@ describe('heating generator and distribution details', () => {
   it('enters the pump, a buffer vessel and the combined pipes of a calculated distribution', () => {
     renderWithProviders(<Harness initial={{
       distribution: { method: 'calculated', sourceReference: '' },
-      distributionSystem: { installation: 'individual', connectedStoreys: 1, pipeTransmittance: { method: 'forfait', insulation: { state: 'unknown' } },
+      distributionSystem: { installation: 'individual', usageFunction: 'residential', connectedStoreys: 1, pipeTransmittance: { method: 'forfait', insulation: { state: 'unknown' } },
         valvesInsulated: false, pump: { method: 'calculated', heatMeterPresent: false, sourceReference: '' }, sourceReference: '' },
     }}>{(d, change) => <NtaDistributionFields draft={d} change={change} />}</Harness>);
     setNumber(/Energy efficiency index/, '0.23');
     setNumber(/One-pipe system/, '6');
     fireEvent.click(screen.getByLabelText('The pipes also carry hot water (combined pipes)'));
-    fireEvent.click(screen.getByLabelText('Buffer vessel in the distribution system'));
+    // An individual installation has neither a delivery set (9.2.6) nor a
+    // buffer vessel, and a forfait Ψ already includes buffer losses
+    // (table 9.16 note 2): the kernel refuses both, so the form hides them.
+    expect(screen.queryByLabelText(t('nta.dist.deliverySet'))).toBeNull();
+    expect(screen.queryByLabelText(t('nta.dist.buffer'))).toBeNull();
+    select(t('nta.dist.installation'), 'collective');
+    expect(screen.getByLabelText(t('nta.dist.deliverySet'))).toBeTruthy();
+    expect(screen.queryByLabelText(t('nta.dist.buffer'))).toBeNull();
+    select(t('nta.dist.psiRoute'), 'calculated');
+    setNumber(t('nta.form.pipeGeometry.pipeDiameter'), '0.022');
+    setNumber(t('nta.form.pipeGeometry.insulatedDiameter'), '0.062');
+    setNumber(t('nta.form.pipeGeometry.insulationLambda'), '0.035');
+    fireEvent.click(screen.getByLabelText(t('nta.dist.buffer')));
     setNumber(/Buffer vessel volume/, '200');
     select('Energy label of the vessel', 'b');
     const system = draft().distributionSystem;
+    expect(system.installation).toBe('collective');
+    expect(system.pipeTransmittance).toEqual({ method: 'insulated_in_air', pipeOuterDiameterM: 0.022,
+      insulatedDiameterM: 0.062, insulationLambdaWPerMK: 0.035 });
     expect(system.pump).toMatchObject({ method: 'calculated', energyEfficiencyIndex: 0.23, onePipeEmitterCount: 6 });
     expect(system.pipesAlsoForHotWater).toBe(true);
     expect(system.bufferVessel).toMatchObject({ volumeL: 200, label: 'b', producedFrom2018: false, inHeatedSpace: true });
+    // Back to the forfait Ψ: the buffer vessel fields disappear again.
+    select(t('nta.dist.psiRoute'), 'forfait');
+    expect(draft().distributionSystem.pipeTransmittance.method).toBe('forfait');
+    expect(screen.queryByLabelText(t('nta.dist.buffer'))).toBeNull();
   });
 
   it('enters the circulation pump of a water-based cooling system', () => {
