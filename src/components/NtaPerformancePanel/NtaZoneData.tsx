@@ -2,6 +2,7 @@ import { useI18n } from '../../i18n/i18n';
 import type { IProject } from '../../core/energy/types';
 import { CheckField, NumberField, read, SelectField, TextField, type Draft, type Path } from './NtaFormFields';
 import { SunroomsFields } from './NtaProjectExtras';
+import { utilityInternalGains } from '../../core/nta/NtaFormModels';
 
 // Kernel input that only the JSON view reached before (form coverage,
 // docs/ui-redesign/formulierdekking.md): per calculation zone its own use
@@ -20,6 +21,8 @@ function list(draft: Draft, path: Path): Draft[] {
 
 const USAGE_FUNCTIONS = ['residential', 'office', 'education', 'retail', 'other_assembly', 'assembly_child_care',
   'other_healthcare', 'healthcare_with_beds', 'lodging', 'cell', 'sport'];
+/** Function areas (§6.5.3) split a utility zone; a residential part is refused (function_areas_residential_mixed). */
+const FUNCTION_AREA_FUNCTIONS = USAGE_FUNCTIONS.filter((key) => key !== 'residential');
 
 /** The ventilation functions of a block (`base`: `['ventilation']` or a zone's): a swimming pool in a sport function doubles q_usi;spec. */
 export function SwimmingPoolFields({ draft, change, base }: SectionProps & { base: Path }) {
@@ -44,24 +47,47 @@ const copy = (value: unknown) => JSON.parse(JSON.stringify(value)) as unknown;
 /**
  * A zone's own data starts as a copy of the block's internal gains, ventilation flows and chapter 11
  * ventilation: with a `zoneData` entry the kernel takes these from the zone only (no fallback to the
- * block), and every entry needs internal gains.
+ * block), and every entry needs internal gains. The block's chapter 11 ventilation is mirrored on the
+ * first zone (`syncVentilation`), so the copy gets this zone's id and floor area: the kernel requires
+ * `ventilation.usableFloorAreaM2` to equal the zone's area (`ventilation_area_mismatch`).
  */
-export function zoneDataTemplate(draft: Draft, zoneId: string): Draft {
+export function zoneDataTemplate(draft: Draft, zone: { id: string; floorArea?: number | null }): Draft {
   const gains = read(draft, ['internalGains']);
   const flows = read(draft, ['ventilationFlows']);
-  const ventilation = read(draft, ['ventilation']);
+  const ventilation = read(draft, ['ventilation']) as Draft | null | undefined;
+  const residential = read(draft, ['calculationScope']) !== 'utility';
   return {
-    zoneId,
-    internalGains: gains == null ? {} : copy(gains),
+    zoneId: zone.id,
+    internalGains: gains != null && typeof gains === 'object' && 'method' in (gains as Draft) ? copy(gains)
+      : residential ? { method: 'residential', dwellingCount: 1, sourceReference: '' } : utilityInternalGains(),
     ...(Array.isArray(flows) ? { ventilationFlows: copy(flows) } : {}),
-    ...(ventilation != null ? { ventilation: copy(ventilation) } : {}),
+    ...(ventilation != null ? { ventilation: zoneVentilation(ventilation, zone) } : {}),
   };
+}
+
+/** The block's chapter 11 ventilation for another zone: its id, its area, and function areas scaled to it. */
+function zoneVentilation(ventilation: Draft, zone: { id: string; floorArea?: number | null }): Draft {
+  const result = copy(ventilation) as Draft;
+  const area = typeof zone.floorArea === 'number' ? zone.floorArea : null;
+  const previous = typeof ventilation.usableFloorAreaM2 === 'number' ? ventilation.usableFloorAreaM2 : null;
+  result.zoneId = zone.id;
+  result.usableFloorAreaM2 = area;
+  if (Array.isArray(result.functions)) {
+    const functions = result.functions as Draft[];
+    result.functions = functions.map((item) => ({
+      ...item,
+      areaM2: area == null ? null
+        : functions.length === 1 || previous == null || previous <= 0 || typeof item.areaM2 !== 'number'
+          ? area : item.areaM2 * area / previous,
+    }));
+  }
+  return result;
 }
 
 /**
  * Per calculation zone (§6.3): its own use function, dwelling type, function areas (§6.5.3),
- * thermal mass (table 7.10) and sunrooms (7.30b), instead of the block's. A zone without its
- * own data uses the block.
+ * thermal mass (table 7.10) and sunrooms (7.30b), instead of the block's. With one zone the
+ * block's data apply; with several, every zone needs its own entry (zone_data_missing).
  */
 export function ZoneDataFields({ draft, change, project }: SectionProps & { project: IProject }) {
   const { t } = useI18n();
@@ -75,7 +101,7 @@ export function ZoneDataFields({ draft, change, project }: SectionProps & { proj
       const title = zone.name ? `${zone.name} (${zone.id})` : zone.id;
       if (index < 0) {
         return <fieldset key={zone.id} className="nta-form-row"><legend>{title}</legend>
-          <button type="button" onClick={() => change(['zoneData'], [...zoneData, zoneDataTemplate(draft, zone.id)])}>
+          <button type="button" onClick={() => change(['zoneData'], [...zoneData, zoneDataTemplate(draft, zone)])}>
             {t('nta.zoneData.add')}</button>
         </fieldset>;
       }
@@ -86,19 +112,30 @@ export function ZoneDataFields({ draft, change, project }: SectionProps & { proj
       return <fieldset key={zone.id} className="nta-form-row"><legend>{title}</legend>
         <SelectField {...field} path={[...base, 'usageFunction']} label={t('nta.zoneData.usageFunction')}
           options={USAGE_FUNCTIONS.map((key) => [key, t(`nta.form.usage.${key}`)])}
-          onChange={(path, value) => change(path, value ?? undefined)} />
+          onChange={(path, value) => {
+            change(path, value ?? undefined);
+            // With its own use function the zone no longer takes the block's dwelling type
+            // (dwelling_type_required / dwelling_type_not_applicable).
+            const own = read(draft, [...base, 'dwellingType']);
+            if (value === 'residential') {
+              if (own == null) change([...base, 'dwellingType'], read(draft, ['dwellingType']) ?? undefined);
+            } else if (own != null) change([...base, 'dwellingType'], undefined);
+            // A residential zone has no function areas (function_areas_residential_mixed).
+            if (value === 'residential' && areas.length > 0) change([...base, 'functionAreas'], undefined);
+          }} />
         {usage === 'residential' && <SelectField {...field} path={[...base, 'dwellingType']} label={t('nta.zoneData.dwellingType')}
           options={[['apartment_building', t('nta.form.dwellingType.apartment')], ['other', t('nta.form.dwellingType.other')]]}
           onChange={(path, value) => change(path, value ?? undefined)} />}
         {areas.map((_, area) => <div key={area} className="nta-form-row">
           <SelectField {...field} path={[...base, 'functionAreas', area, 'function']} label={t('nta.zoneData.functionArea.function')}
-            options={USAGE_FUNCTIONS.map((key) => [key, t(`nta.form.usage.${key}`)])} />
+            options={FUNCTION_AREA_FUNCTIONS.map((key) => [key, t(`nta.form.usage.${key}`)])} />
           <NumberField {...field} path={[...base, 'functionAreas', area, 'areaM2']} label={t('nta.zoneData.functionArea.area')} unit="m²" />
           <button type="button" className="nta-form-remove"
             onClick={() => change([...base, 'functionAreas'], areas.filter((__, other) => other !== area))}>{t('nta.form.remove')}</button>
         </div>)}
-        <button type="button" onClick={() => change([...base, 'functionAreas'],
-          [...areas, { function: typeof usage === 'string' ? usage : 'office', areaM2: null }])}>{t('nta.zoneData.functionArea.add')}</button>
+        {usage !== 'residential' && <button type="button" onClick={() => change([...base, 'functionAreas'],
+          [...areas, { function: typeof usage === 'string' && usage !== 'residential' ? usage : 'office', areaM2: null }])}>
+          {t('nta.zoneData.functionArea.add')}</button>}
         <label className="nta-form-check">
           <input type="checkbox" checked={mass != null} onChange={(event) => change([...base, 'thermalMass'], event.target.checked
             ? { floor: 'heavy', wall: 'heavy', ceiling: 'open_or_none', sourceReference: '' } : undefined)} />
@@ -115,7 +152,12 @@ export function ZoneDataFields({ draft, change, project }: SectionProps & { proj
         {read(draft, [...base, 'ventilation']) != null &&
           <SwimmingPoolFields draft={draft} change={change} base={[...base, 'ventilation']} />}
         <button type="button" className="nta-form-remove"
-          onClick={() => change(['zoneData'], zoneData.filter((__, other) => other !== index))}>{t('nta.zoneData.remove')}</button>
+          onClick={() => {
+            // With several zones every zone needs its own data (zone_data_missing).
+            if (project.zones.length > 1 && typeof window !== 'undefined' && typeof window.confirm === 'function'
+              && !window.confirm(t('nta.zoneData.removeConfirm'))) return;
+            change(['zoneData'], zoneData.filter((__, other) => other !== index));
+          }}>{t('nta.zoneData.remove')}</button>
       </fieldset>;
     })}
   </div>;

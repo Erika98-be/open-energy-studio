@@ -1,11 +1,13 @@
 import { useState, type ReactElement } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
-import { write, type Draft, type Path } from '../components/NtaPerformancePanel/NtaFormFields';
+import { FieldPathPrefixProvider, write, type Draft, type Path } from '../components/NtaPerformancePanel/NtaFormFields';
 import { LightingZoneField, SwimmingPoolFields, ZoneDataFields } from '../components/NtaPerformancePanel/NtaZoneData';
 import { CollectiveCoolingField, CollectivePvField } from '../components/NtaPerformancePanel/NtaCollectiveShare';
-import { HotWaterCirculationFields } from '../components/NtaPerformancePanel/NtaPipeGeometry';
-import { AdditionalHotWaterSystemsFields } from '../components/NtaPerformancePanel/NtaSystemSections';
+import { CirculationPsiFields, HotWaterCirculationFields } from '../components/NtaPerformancePanel/NtaPipeGeometry';
+import { AdditionalHotWaterSystemsFields, HotWaterExtraGeneratorsFields } from '../components/NtaPerformancePanel/NtaSystemSections';
+import { CoolingSystemsFields } from '../components/NtaPerformancePanel/NtaProjectExtras';
+import { syncVentilation } from '../core/nta/NtaFormModels';
 import type { IProject } from '../core/energy/types';
 import { renderWithProviders } from './test-utils';
 
@@ -27,7 +29,8 @@ function Harness({ initial, children }: {
 const draft = () => JSON.parse(screen.getByTestId('draft').textContent ?? '{}');
 const select = (label: RegExp | string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
 const setNumber = (label: RegExp | string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
-const project = (ids: string[]) => ({ zones: ids.map((id) => ({ id, name: id === 'z1' ? 'Begane grond' : 'Verdieping' })) }) as unknown as IProject;
+const project = (ids: string[]) => ({ zones: ids.map((id) => ({ id, name: id === 'z1' ? 'Begane grond' : 'Verdieping',
+  floorArea: id === 'z1' ? 400 : 200 })) }) as unknown as IProject;
 
 describe('project forms that had no form', () => {
   it('starts zone data as a copy of the block and writes the zone answers', () => {
@@ -41,8 +44,9 @@ describe('project forms that had no form', () => {
       {(d, change) => <ZoneDataFields draft={d} change={change} project={project(['z1', 'z2'])} />}</Harness>);
     fireEvent.click(screen.getAllByText('Own data for this calculation zone')[1]);
     let zone = draft().zoneData[0];
+    // The copied chapter 11 ventilation gets this zone's id and area (ventilation_area_mismatch otherwise).
     expect(zone).toEqual({ zoneId: 'z2', internalGains: block.internalGains, ventilationFlows: block.ventilationFlows,
-      ventilation: block.ventilation });
+      ventilation: { zoneId: 'z2', usableFloorAreaM2: 200, functions: [{ function: 'sport', areaM2: 200, swimmingPool: false }] } });
     select(/Use function of the calculation zone/, 'retail');
     fireEvent.click(screen.getByText(/Add a part with another use function/));
     setNumber(/Usable floor area of this part/, '80');
@@ -58,8 +62,75 @@ describe('project forms that had no form', () => {
     // The block stays as it was.
     expect(draft().usageFunction).toBe('office');
     expect(draft().ventilation.functions[0].swimmingPool).toBe(false);
+    // With several zones removal asks first (zone_data_missing).
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
+    fireEvent.click(screen.getByText("Remove this calculation zone's own data"));
+    expect(draft().zoneData).toHaveLength(1);
     fireEvent.click(screen.getByText("Remove this calculation zone's own data"));
     expect(draft().zoneData).toEqual([]);
+    confirm.mockRestore();
+  });
+
+  it('starts zone data with valid internal gains when the block has none', () => {
+    renderWithProviders(<Harness initial={{ calculationScope: 'utility', usageFunction: 'office' }}>
+      {(d, change) => <ZoneDataFields draft={d} change={change} project={project(['z1', 'z2'])} />}</Harness>);
+    fireEvent.click(screen.getAllByText('Own data for this calculation zone')[0]);
+    expect(draft().zoneData[0].internalGains.method).toBe('utility');
+  });
+
+  it('keeps the zone dwelling type and function areas consistent with the zone use', () => {
+    renderWithProviders(<Harness initial={{ usageFunction: 'office', dwellingType: 'apartment_building', internalGains: { method: 'utility' } }}>
+      {(d, change) => <ZoneDataFields draft={d} change={change} project={project(['z1', 'z2'])} />}</Harness>);
+    fireEvent.click(screen.getAllByText('Own data for this calculation zone')[0]);
+    fireEvent.click(screen.getByText(/Add a part with another use function/));
+    // No residential part: the kernel refuses it (function_areas_residential_mixed).
+    const functionSelect = screen.getByLabelText(/Use function of this part/) as HTMLSelectElement;
+    expect([...functionSelect.options].map((option) => option.value)).not.toContain('residential');
+    // Residential: the block's dwelling type is prefilled, the parts go and no part can be added.
+    select(/Use function of the calculation zone/, 'residential');
+    expect(draft().zoneData[0].dwellingType).toBe('apartment_building');
+    expect(draft().zoneData[0].functionAreas).toBeUndefined();
+    expect(screen.queryByText(/Add a part with another use function/)).toBeNull();
+    // Back to a utility use: no stale dwelling type (dwelling_type_not_applicable).
+    select(/Use function of the calculation zone/, 'office');
+    expect('dwellingType' in draft().zoneData[0]).toBe(false);
+  });
+
+  it('keeps the block swimming pool when Apply syncs the ventilation', () => {
+    const block = { usageFunction: 'sport', calculationScope: 'utility', setpoints: { heatingC: 20, coolingC: 24 },
+      ventilation: { functions: [{ function: 'sport', areaM2: 400 }] } };
+    renderWithProviders(<Harness initial={block}>
+      {(d, change) => <SwimmingPoolFields draft={d} change={change} base={['ventilation']} />}</Harness>);
+    fireEvent.click(screen.getByLabelText(/Room with a swimming pool/));
+    // NtaDraftProvider.apply dispatches syncVentilation(draft, project).
+    const applied = syncVentilation(draft(), project(['z1'])) as { ventilation: { functions: Draft[] } };
+    expect(applied.ventilation.functions).toEqual([{ function: 'sport', areaM2: 400, swimmingPool: true }]);
+  });
+
+  it('ends the series when a second further generator is added', () => {
+    renderWithProviders(<Harness initial={{ hotWater: { additionalGenerators: [{}], series: { kind: 'hotfill_electric_boiler' } } }}>
+      {(d, change) => <HotWaterExtraGeneratorsFields draft={d} change={change} base={['hotWater']} />}</Harness>);
+    fireEvent.click(screen.getByText('Add hot-water generator (13.8.2)'));
+    expect(draft().hotWater.additionalGenerators).toHaveLength(2);
+    expect(draft().hotWater.series).toBeNull();
+  });
+
+  it('shows the collective share per cooling system', () => {
+    renderWithProviders(<Harness initial={{ coolingSystems: [{ zoneIds: ['z1'], system: { generators: [] } },
+      { zoneIds: ['z2'], system: { generators: [] } }] }}>
+      {(d, change) => <CoolingSystemsFields draft={d} change={change} project={project(['z1', 'z2'])} />}</Harness>);
+    const boxes = screen.getAllByLabelText(/Cooling collective for the building/);
+    expect(boxes).toHaveLength(2);
+    fireEvent.click(boxes[1]);
+    expect(draft().coolingSystems[1].system.collective).toEqual({ buildingUsableFloorAreaM2: null, sourceReference: '' });
+  });
+
+  it('gives the calculated Ψ of a further system a kernel path for "Ga naar"', () => {
+    const { container } = renderWithProviders(<FieldPathPrefixProvider value="ntaCalculation">
+      <Harness initial={{ additionalHotWaterSystems: [{ circulation: {} }] }}>
+        {(d, change) => <CirculationPsiFields draft={d} change={change} system={['additionalHotWaterSystems', 0]} />}</Harness>
+    </FieldPathPrefixProvider>);
+    expect(container.querySelector('[data-path="ntaCalculation.additionalHotWaterSystems[0].circulation.calculatedPsi"]')).not.toBeNull();
   });
 
   it('offers the swimming pool only for a sport function', () => {

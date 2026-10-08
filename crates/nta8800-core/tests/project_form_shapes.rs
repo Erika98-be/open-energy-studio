@@ -101,3 +101,112 @@ fn collective_pv_swimming_pool_and_lighting_zone_are_read() {
         "{codes:?}"
     );
 }
+
+/// The office with a second calculation zone of 200 m² (no windows).
+fn two_zone_office() -> Value {
+    let mut value = office();
+    let mut z2 = value["zones"][0].clone();
+    z2["id"] = json!("z2");
+    z2["floorArea"] = json!(200.0);
+    z2["volume"] = json!(700.0);
+    let mut wall = z2["surfaces"][0].clone();
+    wall["id"] = json!("wall-N2");
+    wall["zoneId"] = json!("z2");
+    wall["windows"] = json!([]);
+    z2["surfaces"] = json!([wall]);
+    value["zones"].as_array_mut().unwrap().push(z2);
+    value["ntaCalculation"]
+        .as_object_mut()
+        .unwrap()
+        .remove("verticalPipes");
+    value
+}
+
+/// `zoneDataTemplate(draft, zone)`: the block's gains and flows, and its
+/// chapter 11 ventilation with this zone's id and floor area (one function
+/// gets the zone area).
+fn zone_template(value: &Value, zone: &str, area: f64) -> Value {
+    let n = &value["ntaCalculation"];
+    let mut out = json!({ "zoneId": zone, "internalGains": n["internalGains"].clone() });
+    if n["ventilationFlows"].is_array() {
+        out["ventilationFlows"] = n["ventilationFlows"].clone();
+    }
+    if !n["ventilation"].is_null() {
+        let mut ventilation = n["ventilation"].clone();
+        ventilation["zoneId"] = json!(zone);
+        ventilation["usableFloorAreaM2"] = json!(area);
+        if let Some(functions) = ventilation["functions"].as_array_mut() {
+            for item in functions {
+                item["areaM2"] = json!(area);
+            }
+        }
+        out["ventilation"] = ventilation;
+    }
+    out
+}
+
+#[test]
+fn zone_data_copies_get_the_zone_area() {
+    let value = two_zone_office();
+    let z1_area = value["zones"][0]["floorArea"].as_f64().unwrap();
+    let mut with = value.clone();
+    with["ntaCalculation"]["zoneData"] = json!([
+        zone_template(&value, "z1", z1_area),
+        zone_template(&value, "z2", 200.0)
+    ]);
+    let (_, gaps) = gap_codes(&with);
+    for gap in &gaps {
+        assert!(
+            !gap.starts_with("ventilation_area_mismatch")
+                && !gap.starts_with("nta_calculation_block_invalid"),
+            "{gaps:?}"
+        );
+    }
+}
+
+#[test]
+fn zone_usage_switch_leaves_no_stale_dwelling_type() {
+    let house: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-example-terraced-dwelling.json"
+    ))
+    .unwrap();
+    let area = house["zones"][0]["floorArea"].as_f64().unwrap();
+    let mut base = house.clone();
+    base["ntaCalculation"]["zoneData"] = json!([zone_template(&house, "z1", area)]);
+    let (status, before) = gap_codes(&base);
+    // Own residential use: the form prefills the block's dwelling type.
+    let mut own = base.clone();
+    own["ntaCalculation"]["zoneData"][0]["usageFunction"] = json!("residential");
+    own["ntaCalculation"]["zoneData"][0]["dwellingType"] =
+        house["ntaCalculation"]["dwellingType"].clone();
+    let (own_status, after) = gap_codes(&own);
+    assert_eq!(own_status, status, "{after:?}");
+    assert!(
+        after
+            .iter()
+            .all(|gap| !gap.starts_with("dwelling_type_") && before.contains(gap)),
+        "{after:?}"
+    );
+}
+
+#[test]
+fn a_second_further_generator_ends_the_series() {
+    let base = office();
+    let (status, _) = gap_codes(&base);
+    let mut value = base;
+    value["ntaCalculation"]["hotWater"]["nominalPowerKw"] = json!(3.0);
+    value["ntaCalculation"]["hotWater"]["additionalGenerators"] = json!([
+        { "generator": { "kind": "electric_boiler" }, "nominalPowerKw": 2.0, "equipmentReference": "x" },
+        { "generator": { "kind": "electric_boiler" }, "nominalPowerKw": 2.0, "equipmentReference": "y" }
+    ]);
+    // The add handler clears the series (`series: null`).
+    value["ntaCalculation"]["hotWater"]["series"] = Value::Null;
+    let (after_status, after) = gap_codes(&value);
+    assert_eq!(after_status, status, "{after:?}");
+    assert!(
+        after
+            .iter()
+            .all(|gap| !gap.starts_with("hot_water_series_requires_two_generators")),
+        "{after:?}"
+    );
+}
