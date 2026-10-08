@@ -6002,20 +6002,22 @@ mod tests {
             "{:?}",
             unreferenced.gaps
         );
-        assert!((unreferenced
-            .performance
-            .as_ref()
-            .unwrap()
-            .space_heating
-            .demand
-            .transmission
-            .as_ref()
-            .unwrap()
-            .direct_conductance_w_per_k
-            .unwrap()
-            - expected)
-            .abs()
-            < 1e-9);
+        assert!(
+            (unreferenced
+                .performance
+                .as_ref()
+                .unwrap()
+                .space_heating
+                .demand
+                .transmission
+                .as_ref()
+                .unwrap()
+                .direct_conductance_w_per_k
+                .unwrap()
+                - expected)
+                .abs()
+                < 1e-9
+        );
         fn partition_u() -> f64 {
             0.21 * 0.6
         }
