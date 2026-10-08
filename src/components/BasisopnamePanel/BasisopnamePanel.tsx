@@ -17,7 +17,8 @@ import { KernelCode } from '../KernelCode/KernelCode';
 import { EvidenceAttach } from '../EvidenceLink/EvidenceLink';
 import { SurveyTakeoverAction } from './SurveyTakeoverAction';
 import {
-  BuildingTypeFields, ConstructionExtrasFields, DwellingTypeFields, HeatingControlFields, HotWaterTapsFields, VentilationBasicsFields,
+  BuildingTypeFields, ConstructionExtrasFields, DwellingTypeFields, HeatingControlFields, HotWaterTapsFields, SolarControlWindowsFields,
+  SurfaceExtrasFields, SurveyDoorsFields, UtilityInstallationExtrasFields, UtilityLightingFields, VentilationBasicsFields,
 } from './SurveyBasics';
 import { freshItemId, jsonPointer, linksAfterRemoval } from '../../core/nta/EvidenceLinks';
 import { formatNumber } from '../../i18n/format';
@@ -858,6 +859,9 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
 
     {show('zones') && <>{kind === 'utility' && <Section title={t('opname.zones')}>
       <CalculationZoneFields draft={draft} change={change} replace={(next) => save({ kind, survey: next })} t={t} />
+    </Section>}
+    {kind === 'utility' && <Section title={t('opname.lighting')}>
+      <UtilityLightingFields draft={draft} change={change} t={t} />
     </Section>}</>}
 
     {show('envelope') && <><Section title={t('opname.envelope')}>
@@ -882,7 +886,8 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
           <label>{t('opname.surface.boundary')}
             <select value={String(read(draft, [...base, 'boundary', 'kind']) ?? '')}
               onChange={(event) => change([...base, 'boundary'], { kind: event.target.value })}>
-              {['outdoor', 'ground', 'crawlspace', 'adjacent_heated', 'unheated_cellar', 'strongly_ventilated', 'sunroom', 'water'].map((key) =>
+              {['outdoor', 'ground', 'crawlspace', 'adjacent_heated', 'unheated_cellar', 'strongly_ventilated', 'sunroom', 'water',
+                'unheated_space'].map((key) =>
                 <option key={key} value={key}>{t(`opname.surface.boundaryKind.${key}`)}</option>)}
             </select>
           </label>
@@ -899,6 +904,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
             </select>
           </label>
           {insulation === 'thickness' && <NumberField {...field} path={[...base, 'insulation', 'thicknessMm']} label={t('opname.surface.thicknessMm')} />}
+          <SurfaceExtrasFields draft={draft} change={change} t={t} base={base} />
           <CheckField {...field} path={[...base, 'thermalCushions']} label={t('opname.surface.thermalCushions')} />
           {insulation === 'present_unknown_thickness' && <>
             <NumberField {...field} path={[...base, 'renovation', 'year']} label={t('opname.surface.renovationYear')} step="1" />
@@ -943,6 +949,8 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       })}
       <ListControls label={t('opname.addWindow')}
         onAdd={() => change(['envelope', 'windows'], [...windows, windowTemplate(windows.length, String(surfaces[0]?.id ?? ''))])} />
+      {kind === 'utility' && <SolarControlWindowsFields draft={draft} change={change} t={t} />}
+      <SurveyDoorsFields draft={draft} change={change} t={t} />
       {rooflights.map((rooflight, index) => {
         const base: Path = ['envelope', 'rooflights', index];
         return <div key={`r${index}`} className="opname-item">
@@ -1090,6 +1098,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
     {kind === 'utility' && <Section title={t('opname.ventilation')}>
       <VentilationBasicsFields draft={draft} change={change} t={t} />
       <UtilityVentilationFields draft={draft} change={change} t={t} />
+      <UtilityInstallationExtrasFields draft={draft} change={change} t={t} />
       <SurveyPhotos path={['ventilation']} />
     </Section>}
 
