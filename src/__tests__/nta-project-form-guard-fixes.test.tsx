@@ -117,6 +117,7 @@ describe('project-form guard findings', () => {
   it('offers no blank PV mounting', () => {
     renderWithProviders(<Section id="pv" project={officeProject} />);
     const mountings = screen.queryAllByLabelText(/Mounting \(table 16.2\)/);
+    expect(mountings.length).toBeGreaterThan(0);
     for (const select of mountings) {
       expect([...(select as HTMLSelectElement).options].map((option) => option.value)).not.toContain('');
     }
