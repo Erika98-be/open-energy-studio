@@ -94,7 +94,7 @@ function ProjectProbe() {
   const project = state.project;
   return <output data-testid="project">{JSON.stringify({
     zones: project.zones.map((zone) => ({ name: zone.name, floorArea: zone.floorArea })),
-    construction: project.constructions.at(-1)?.layers,
+    construction: project.constructions[project.constructions.length - 1]?.layers,
     heating: project.heatingSystems.map((system) => system.cop),
     mwa: project.maatwerkadvies?.tariffs,
   })}</output>;
@@ -112,7 +112,8 @@ describe('dialogs take a decimal comma', () => {
     fireEvent.change(volume, { target: { value: '' } });
     expect(volume).toHaveValue('0');
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-    expect(stored().zones.at(-1).floorArea).toBe(12.5);
+    const zones = stored().zones;
+    expect(zones[zones.length - 1].floorArea).toBe(12.5);
   });
 
   it('stores a layer thickness typed with a comma in the construction editor', () => {
@@ -127,7 +128,8 @@ describe('dialogs take a decimal comma', () => {
     renderWithProviders(<><HeatingSystemDialog onClose={() => {}} /><ProjectProbe /></>);
     fireEvent.change(screen.getByLabelText('COP / Efficiency (-)'), { target: { value: '3,85' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-    expect(stored().heating.at(-1)).toBe(3.85);
+    const heating = stored().heating;
+    expect(heating[heating.length - 1]).toBe(3.85);
   });
 
   it('stores a gas tariff typed with a comma in the tailored advice', async () => {
