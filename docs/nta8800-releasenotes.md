@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — decimale komma in alle getalvelden, ongebruikte vertaalsleutels (geen rekenwijziging)
+
+- **Decimale komma overal.** De 81 resterende kale getalvelden (`type="number"`) buiten de NTA-formulieren accepteren nu een komma: de oudere dialogen (zone, schildeel, raam, constructie, koudebruggen, installaties, luchtdichtheid), het maatwerkadvies, de rekenhulpen en de diagnosepanelen voor warmtepompen. Een kaal getalveld weigerde "0,35" zonder melding. Ze gebruiken het nieuwe `DecimalInput`. Dat neemt de waarde en de afhandeling van het veld ongewijzigd over (leeg, minimum, afwijzen van een negatief getal) en geeft de waarde met een punt door. Tekst die geen getal is, wordt gemarkeerd en niet doorgegeven.
+- **Geen nieuwe kale getalvelden.** `src/__tests__/decimal-input.test.tsx` faalt als `type="number"` weer in `src/components` verschijnt. Hij toetst ook de komma, het lege veld en het terugzetten van een geweigerde waarde, en de invoer met een komma in de zonedialoog, de constructiedialoog, de verwarmingsdialoog en het maatwerkadvies.
+- **Vertaalsleutels.** 14 sleutels die nergens meer werden gebruikt zijn uit alle talen verwijderd, onder meer `theme.blue` en oude teksten van de projectverkenner en de bewijskoppeling. `src/__tests__/i18n-orphan-keys.test.ts` faalt bij een sleutel die de code niet gebruikt. Sleutels die de code opbouwt, zoals `kernel.issue.${code}` of `options(t, 'nta.annexP.carrier', …)`, tellen als gebruikt.
+
 ### 9 oktober 2026 — toegankelijkheid en taal van de formulieren (geen rekenwijziging)
 
 - **Lijstonderdelen als benoemde groep.** Elk vlak, raam, deur, opwekker, vat, lichtzone, functie, verticale leiding, randisolatie, armaturengroep en elk deel van een E.1-systeem is een groep met een eigen naam. De groep heet naar het onderdeel (bijvoorbeeld "gevel-2" of "Opwekker 1"), zodat een schermlezer de velden van verschillende onderdelen uit elkaar kan houden.
