@@ -2816,6 +2816,147 @@ CASES += [
 ]
 
 
+# EP-W011b: all glass replaced by glass with a quality declaration (figure 7,
+# p. 15): g_gl;n 0,63 and U_gl 1,1, in a wooden frame U_f 2,4, psi_g 0,08.
+# U_W with the simplified 8.15 as EP-W003a: max(0,7.1,1 + 0,3.2,4;
+# 0,8.1,1 + 0,2.2,4) + 2,5.0,08 = 1,69 -> 1,7 (8.2.2.1). The declared
+# g_gl;n is the window's own g-value (no 7.41 data).
+CASES += [("EPW011b", 15, windows("gValue", 0.63) + windows("uValue", 1.7))]
+
+
+# --- EP-W206: generation in an apartment building (p. 29-30) ---
+# 48 apartments: 8 reference modules side by side and 6 above each other,
+# 12 storeys, 32,4 m; roof and ground floor 384 m2, facades as the table
+# (south 921,6 m2 net + 1152 m2 glazing = 2073,6 gross, north 2073,6,
+# east = west 194,4), perimeter 140 m, A_g 4608 m2, volume 64 x 6 x 32,4.
+# R_c as EP-W001. A new-build calculation for the whole building (6.2b),
+# individual ventilation per apartment (the reference system, scaled), hot
+# water an individual electric instantaneous heater per apartment with the
+# draw-off lengths of EP-W001.
+BUILDING48 = 48 * 96.0
+
+
+def building48(project):
+    scale(project, area=BUILDING48, volume=12441.6, height=32.4, roof=384.0, floor=384.0, south=2073.6, north=2073.6, east_west=194.4, windows_=192, perimeter=140.0, storeys=12, building_height=32.4)
+    dwellings(project, 48)
+    nta = project["ntaCalculation"]
+    nta["dwellingType"] = "apartment_building"
+    nta["areaSourceReference"] = "ISSO 54 v2.0 EP-W206 p. 29: 48 appartementen, Ag 4608 m2"
+    vent = nta["ventilation"]
+    vent["apartmentBuilding"] = True
+    vent["infiltration"]["buildingType"] = "multi_storey_whole_building"
+    nta["hotWater"]["generator"] = {"kind": "electric_instantaneous"}
+
+
+def collective48(project, test_id, connected_area, storeys):
+    """A collective HR107 of 10 kW; pipes through unheated spaces of unknown
+    length, insulated, valves insulated; pump power unknown, no control, no
+    heat meter (p. 29). The boiler location is not given: the reference
+    location (inside the envelope) is kept; for a collective boiler the
+    table 9.25 row does not depend on it."""
+    nta = project["ntaCalculation"]
+    nta["generator"]["boiler"]["role"] = "collective"
+    nta["generator"]["boiler"]["equipmentReference"] = f"ISSO 54 v2.0 {test_id} p. 29: gemeenschappelijke HR107-ketel, 10 kW"
+    nta["generator"]["auxiliary"] = {"electricallyConnectedDevices": 1, "nominalPowerKw": 10.0, "sourceReference": f"ISSO 54 v2.0 {test_id} p. 29: HR107, 10 kW"}
+    nta["collectiveConnection"] = {"connectedUsableAreaM2": connected_area, "sourceReference": f"ISSO 54 v2.0 {test_id} p. 29: aangesloten gebruiksoppervlakte"}
+    system = nta["distributionSystem"]
+    system["installation"] = "collective"
+    system["connectedStoreys"] = storeys
+    del system["unheatedPipeLengthM"]
+    system["pump"] = {"method": "calculated", "heatMeterPresent": False, "sourceReference": f"ISSO 54 v2.0 {test_id} p. 29: pompvermogen onbekend, geen regeling, geen warmtemeter"}
+    system["sourceReference"] = f"ISSO 54 v2.0 {test_id} p. 29: leidingen door onverwarmde ruimte, lengte onbekend (9.36), geisoleerd, kleppen en beugels geisoleerd"
+
+
+def w206a(project):
+    building48(project)
+    collective48(project, "EP-W206a", BUILDING48, 12)
+
+
+# EP-W206c: one collective boiler per 4 adjacent apartments, 12 boilers of
+# 10 kW, each serving 2 storeys (p. 29-30): 12 identical systems (§9.1) that
+# together serve the whole building (the kernel's connected area covers the
+# calculated zone; each appliance is one twelfth).
+def w206c(project):
+    building48(project)
+    collective48(project, "EP-W206c", BUILDING48, 2)
+    project["ntaCalculation"]["identicalSystems"] = 12
+
+
+# EP-W206b: the 32 apartments of the lower four apartment layers (8 storeys)
+# on the collective boiler, the upper 16 (4 storeys) with an individual HR107
+# each, no pipes through unheated spaces (p. 29). Two calculation zones: the
+# lower zone takes 2/3 of the facades (as the test states), the floor and 128
+# of the 192 windows; the upper zone the roof, 1/3 of the facades and 64
+# windows. The upper zone is served by 16 identical individual HR107 as an
+# additional heating system (§9.2); each zone has its own ventilation and
+# internal-gains input for its apartments.
+UPPER48 = "w206-boven"
+
+
+def w206b(project):
+    w206a(project)
+    zone = project["zones"][0]
+    upper = copy.deepcopy(zone)
+    zone.update(floorArea=32 * 96.0, volume=8294.4, height=21.6)
+    upper.update(id=UPPER48, name="Bovenste vier bouwlagen", floorArea=16 * 96.0, volume=4147.2, height=10.8)
+    lower_surfaces, upper_surfaces = [], []
+    for item in zone["surfaces"]:
+        if item["id"] == "dak":
+            upper_surfaces.append(dict(item, zoneId=UPPER48))
+            continue
+        if item["id"] == "bg-vloer":
+            lower_surfaces.append(item)
+            continue
+        below = dict(item, area=round(item["area"] * 2 / 3, 1))
+        above = dict(item, id=f"{item['id']}-boven", area=round(item["area"] / 3, 1), zoneId=UPPER48)
+        if item["id"] == "gevel-zuid":
+            below["windows"] = item["windows"][:128]
+            above["windows"] = [dict(w, surfaceId="gevel-zuid-boven") for w in item["windows"][128:]]
+        lower_surfaces.append(below)
+        upper_surfaces.append(above)
+    zone["surfaces"] = lower_surfaces
+    upper["surfaces"] = upper_surfaces
+    project["zones"].append(upper)
+    nta = project["ntaCalculation"]
+    nta["collectiveConnection"]["connectedUsableAreaM2"] = 32 * 96.0
+    nta["distributionSystem"]["connectedStoreys"] = 8
+    ventilation = nta.pop("ventilation")
+    vertical = nta.pop("verticalPipes")[0]
+    entries = []
+    for zone_id, count, storeys in ((zone["id"], 32, 8), (UPPER48, 16, 4)):
+        zone_ventilation = copy.deepcopy(ventilation)
+        zone_ventilation.update(zoneId=zone_id, usableFloorAreaM2=count * 96.0, dwellingCount=count, functions=[{"function": "residential", "areaM2": count * 96.0}])
+        entries.append(
+            {
+                "zoneId": zone_id,
+                "verticalPipes": [dict(vertical, id=f"{zone_id}-leiding", storeys=storeys)],
+                "ventilationFlows": [],
+                "ventilation": zone_ventilation,
+                "internalGains": dict(nta["internalGains"], dwellingCount=count, sourceReference=f"{count} appartementen"),
+            }
+        )
+    nta["zoneData"] = entries
+    individual = copy.deepcopy(REFERENCE["ntaCalculation"])
+    individual["generator"]["boiler"]["generatorId"] = "hr107-boven"
+    individual["generator"]["boiler"]["equipmentReference"] = "ISSO 54 v2.0 EP-W206b p. 29: individuele HR107 per appartement in de bovenste vier bouwlagen"
+    individual["distributionSystem"]["sourceReference"] = "ISSO 54 v2.0 EP-W206b p. 29: individuele ketel, geen leidingen door onverwarmde ruimten"
+    nta["additionalHeatingSystems"] = [
+        {
+            "zoneIds": [UPPER48],
+            "generator": individual["generator"],
+            "distributionSystem": individual["distributionSystem"],
+            "identicalSystems": 16,
+        }
+    ]
+
+
+CASES += [
+    ("EPW206a", 29, variant(w206a)),
+    ("EPW206b", 29, variant(w206b)),
+    ("EPW206c", 30, variant(w206c)),
+]
+
+
 def case(test_id, page, patch):
     utility = test_id.startswith("EPU")
     metrics = UTILITY_METRICS if utility else RESIDENTIAL_METRICS
