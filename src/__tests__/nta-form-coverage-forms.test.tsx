@@ -81,6 +81,36 @@ describe('hot-water generators without a form before', () => {
     setNumber(/Reduction factor b_U of the unheated space with pipes/, '0.6');
     expect(draft().hotWater).toEqual({ deliverySets: { count: 24, sourceReference: '' }, unheatedReductionFactor: 0.6 });
   });
+
+  // The kernel accepts these shapes: a project probe calculated each one
+  // (`calculated_unverified`, no gaps) when the forms were added.
+  it('enters a boiling-water tap and shower heat recovery per shower', () => {
+    renderWithProviders(<Harness initial={{ hotWater: { need: { method: 'residential' } } }}>{(d, change) =>
+      <HotWaterSystemExtrasFields draft={d} change={change} base={['hotWater']} />}</Harness>);
+    fireEvent.click(screen.getByLabelText(t('nta.form.dhwBoilingWaterTap')));
+    fireEvent.click(screen.getByLabelText(t('nta.form.shower')));
+    // Residential systems have no "which shower on which unit" question (utility only).
+    expect(screen.queryByLabelText(t('nta.form.shower.assignmentUnknown'))).toBeNull();
+    fireEvent.click(screen.getByText(t('nta.form.shower.add')));
+    const units = screen.getAllByLabelText(t('nta.form.shower.unitKind'));
+    fireEvent.change(units[1], { target: { value: 'declared' } });
+    setNumber(t('nta.form.shower.efficiency'), '0.55');
+    select(t('nta.form.shower.connection'), 'mixer_only');
+    expect(draft().hotWater).toMatchObject({
+      boilingWaterTap: true,
+      showerHeatRecovery: { connection: 'mixer_only', sourceReference: '',
+        showers: [{ unit: 'vertical' }, { unit: 'declared', efficiency: 0.55, sourceReference: '' }] },
+    });
+  });
+
+  it('builds the gas-fired storage heater of 13.165–13.175', () => {
+    renderWithProviders(<Harness initial={{ hotWater: { generator: { kind: 'electric_boiler' } } }}>{(d, change) =>
+      <HotWaterGeneratorFields draft={d} change={change} base={['hotWater', 'generator']} />}</Harness>);
+    select('Hot-water generator', 'gas_storage_heater');
+    setNumber(/Volume of the storage vessel/, '120');
+    fireEvent.click(screen.getByLabelText(/Appliance from before 1985/));
+    expect(draft().hotWater.generator).toEqual({ kind: 'gas_storage_heater', volumeL: 120, before1985: true, inHeatedZone: true });
+  });
 });
 
 describe('heating generator and distribution details', () => {

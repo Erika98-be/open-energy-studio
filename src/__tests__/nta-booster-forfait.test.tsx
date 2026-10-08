@@ -42,7 +42,7 @@ describe('forfait booster heat pump (13.162/13.163)', () => {
     await user.selectOptions(screen.getByLabelText('Source of the heat (figure W.1)'), 'collective_generator');
     await user.type(screen.getByLabelText('Generation efficiency of the collective generator (chapter 9)'), '0.9');
     await user.selectOptions(screen.getByLabelText('Energy carrier of the collective generator'), 'oil');
-    await user.type(screen.getByLabelText('Source'), 'ketel');
+    await user.type(screen.getByLabelText('Source of the collective generator'), 'ketel');
     await user.type(screen.getByLabelText('Source (product sheet or survey of the booster heat pump)'), 'opname');
     expect(generator()).toEqual({
       kind: 'booster_heat_pump_forfait', designSupplyTemperatureC: 35,
