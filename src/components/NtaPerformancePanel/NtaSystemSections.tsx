@@ -1,4 +1,5 @@
 import { DeclaredAuxiliaryConstantsFields, DeclaredChpEfficienciesFields, HotWaterCirculationFields } from './NtaPipeGeometry';
+import { NumberInput } from '../ui/Field';
 import { useI18n } from '../../i18n/i18n';
 import { ShowerHeatRecoveryFields } from './NtaShowerHeatRecovery';
 import { ElectricBoilerInsulatedPipe2022Field } from './NtaEdition2022Fields';
@@ -856,9 +857,9 @@ export function AdditionalHeatingSystemsFields({ draft, change, project }: Secti
 export function MonthlyValues({ draft, change, path, label }: SectionProps & { path: Path; label: string }) {
   const values = list(draft, path) as unknown as Array<number | null>;
   return <fieldset className="nta-form-months"><legend>{label}</legend>
-    {Array.from({ length: 12 }, (_, index) => <input key={index} type="number" step="any" aria-label={`${label} ${index + 1}`}
-      value={typeof values[index] === 'number' ? values[index] as number : ''}
-      onChange={(event) => change([...path, index], event.target.value === '' ? null : Number(event.target.value))} />)}
+    {Array.from({ length: 12 }, (_, index) => <NumberInput key={index} aria-label={`${label} ${index + 1}`}
+      value={typeof values[index] === 'number' ? values[index] as number : null}
+      onChange={(next) => change([...path, index], next ?? null)} />)}
   </fieldset>;
 }
 

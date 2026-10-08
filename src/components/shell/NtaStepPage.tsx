@@ -307,34 +307,58 @@ function useIssueMarks(ref: React.RefObject<HTMLElement | null>, issues: Array<S
   draft: Draft | null, mode: FieldMode, part: string | undefined) {
   const { t } = useI18n();
   useEffect(() => {
-    const container = ref.current;
-    if (!container) return;
-    const marked = new Map<HTMLElement, { kind: 'error' | 'warning'; codes: string[] }>();
-    const elements = Array.from(container.querySelectorAll<HTMLElement>('label[data-path]'));
-    for (const issue of issues) {
-      let best: HTMLElement | null = null;
-      let bestLength = -1;
-      for (const element of elements) {
-        const candidate = element.dataset.path ?? '';
-        if (isPathWithin(issue.focus, candidate) && candidate.length > bestLength) { best = element; bestLength = candidate.length; }
-      }
-      if (!best) continue;
-      const current = marked.get(best);
-      marked.set(best, {
-        kind: current?.kind === 'error' || issue.kind === 'error' ? 'error' : 'warning',
-        codes: [...(current?.codes ?? []), issue.code],
-      });
-    }
-    for (const element of Array.from(container.querySelectorAll<HTMLElement>('[data-issue]'))) {
-      if (!marked.has(element)) { element.removeAttribute('data-issue'); element.removeAttribute('title'); }
-    }
-    for (const [element, mark] of marked) {
-      element.dataset.issue = mark.kind;
-      // The human text of each code (gap, issue or warning), never the bare key.
-      const texts = [...new Set(mark.codes)].map((code) => kernelCodeLabel(t, code).text);
-      element.title = `${t(`ui.severity.${mark.kind}`)}: ${texts.join('; ')}`;
-    }
+    if (ref.current) applyIssueMarks(ref.current, issues, t);
   }, [ref, issues, draft, mode, part, t]);
+}
+
+/**
+ * Marks the field (`label[data-path]`) closest to each finding: a red or yellow
+ * edge, a visible marker (CSS) and, on its controls, `aria-invalid` for an
+ * error and `aria-description` with the message, so the finding is announced
+ * and not only coloured (WCAG 1.3.1, 1.4.1). Unmarks fields without a finding.
+ */
+export function applyIssueMarks(container: HTMLElement, issues: Array<{ kind: 'error' | 'warning'; code: string; focus: string }>,
+  t: (key: string, params?: Record<string, string>) => string) {
+  const marked = new Map<HTMLElement, { kind: 'error' | 'warning'; codes: string[] }>();
+  const elements = Array.from(container.querySelectorAll<HTMLElement>('label[data-path]'));
+  for (const issue of issues) {
+    let best: HTMLElement | null = null;
+    let bestLength = -1;
+    for (const element of elements) {
+      const candidate = element.dataset.path ?? '';
+      if (isPathWithin(issue.focus, candidate) && candidate.length > bestLength) { best = element; bestLength = candidate.length; }
+    }
+    if (!best) continue;
+    const current = marked.get(best);
+    marked.set(best, {
+      kind: current?.kind === 'error' || issue.kind === 'error' ? 'error' : 'warning',
+      codes: [...(current?.codes ?? []), issue.code],
+    });
+  }
+  const controls = (label: HTMLElement) =>
+    Array.from(label.querySelectorAll<HTMLElement>('input:not([type=hidden]), select, textarea'));
+  for (const element of Array.from(container.querySelectorAll<HTMLElement>('[data-issue]'))) {
+    if (!marked.has(element)) {
+      element.removeAttribute('data-issue');
+      element.removeAttribute('title');
+      for (const control of controls(element)) {
+        control.removeAttribute('aria-invalid');
+        control.removeAttribute('aria-description');
+      }
+    }
+  }
+  for (const [element, mark] of marked) {
+    element.dataset.issue = mark.kind;
+    // The human text of each code (gap, issue or warning), never the bare key.
+    const texts = [...new Set(mark.codes)].map((code) => kernelCodeLabel(t, code).text);
+    const message = `${t(`ui.severity.${mark.kind}`)}: ${texts.join('; ')}`;
+    element.title = message;
+    for (const control of controls(element)) {
+      if (mark.kind === 'error') control.setAttribute('aria-invalid', 'true');
+      else control.removeAttribute('aria-invalid');
+      control.setAttribute('aria-description', message);
+    }
+  }
 }
 
 /** Changed field names for the apply bar: the last member of each path. */

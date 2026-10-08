@@ -7,6 +7,7 @@
  * order; the step pages render the entries of their own page. Fields and paths
  * are unchanged.
  */
+import { NumberInput } from '../ui/Field';
 import { ThermalMassPerM22022Field } from './NtaEdition2022Fields';
 import type { ComponentType } from 'react';
 import { DEFAULT_NORM_VERSION, IMPLEMENTED_NORM_VERSIONS } from '../../core/nta/KernelClient';
@@ -579,14 +580,13 @@ function VentilationModeSection(props: NtaSectionProps) {
     </label>
     {!chapter11 && <>
       <label data-path="ntaCalculation.ventilationFlows">{t('nta.form.ventilationConstant')}
-        <input type="number" step="any" value={typeof constantConductance === 'number' ? constantConductance : ''}
-          onChange={(event) => setConstantVentilation(event.target.value === '' ? null : Number(event.target.value))} />
+        <NumberInput value={typeof constantConductance === 'number' ? constantConductance : null}
+          onChange={(next) => setConstantVentilation(next ?? null)} />
       </label>
       <label>{t('nta.form.ventilationFlow')}
-        <input type="number" step="any" value={typeof constantConductance === 'number'
-          ? Math.round((constantConductance / AIR_HEAT_CAPACITY_W_PER_M3H_K) * 100) / 100 : ''}
-          onChange={(event) => setConstantVentilation(event.target.value === ''
-            ? null : Number(event.target.value) * AIR_HEAT_CAPACITY_W_PER_M3H_K)} />
+        <NumberInput value={typeof constantConductance === 'number'
+          ? Math.round((constantConductance / AIR_HEAT_CAPACITY_W_PER_M3H_K) * 100) / 100 : null}
+          onChange={(next) => setConstantVentilation(next == null ? null : next * AIR_HEAT_CAPACITY_W_PER_M3H_K)} />
       </label>
       <TextField {...f} path={['ventilationFlows', 0, 'sourceReference']} label={t('nta.form.source')} />
       <p className="nta-form-note">{t('nta.form.ventilationNote')}</p>

@@ -1,4 +1,5 @@
 import { DistributionShell2023Field } from './NtaEdition2023Fields';
+import { NumberInput } from '../ui/Field';
 import { PipeGeometryFields, pipeGeometryTemplate } from './NtaPipeGeometry';
 import { ConstantIlluminance2022Field } from './NtaEdition2022Fields';
 import { LightingZoneField } from './NtaZoneData';
@@ -36,11 +37,11 @@ export function NtaUtilityGainsFields({ draft, change }: SectionProps) {
         ['other', t('nta.gains.recovery.other')]]} />
     </>}
     <label>{t('nta.gains.hotWaterRbl')}
-      <input type="number" step="any" value={(() => {
+      <NumberInput value={(() => {
         const values = read(draft, ['internalGains', 'hotWaterRecoverableKwh']) as number[] | undefined;
-        return values && values.length === 12 && values.every((value) => value === values[0]) ? values[0] : '';
-      })()} onChange={(event) => change(['internalGains', 'hotWaterRecoverableKwh'],
-        event.target.value === '' ? [] : Array(12).fill(Number(event.target.value)))} />
+        return values && values.length === 12 && values.every((value) => value === values[0]) ? values[0] : null;
+      })()} onChange={(next) => change(['internalGains', 'hotWaterRecoverableKwh'],
+        next == null ? [] : Array(12).fill(next))} />
     </label>
     <p className="nta-form-note">{t('nta.gains.note')}</p>
   </>;
