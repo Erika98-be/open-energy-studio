@@ -931,7 +931,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
             </select>
           </label>
           {insulation === 'thickness' && <NumberField {...field} path={[...base, 'insulation', 'thicknessMm']} label={t('opname.surface.thicknessMm')} />}
-          <SurfaceExtrasFields draft={draft} change={change} t={t} base={base} />
+          <SurfaceExtrasFields draft={draft} change={change} t={t} base={base} edition={edition} />
           <SurfaceGeometryFields draft={draft} change={change} t={t} base={base} />
           <CheckField {...field} path={[...base, 'thermalCushions']} label={t('opname.surface.thermalCushions')} />
           {insulation === 'present_unknown_thickness' && <>

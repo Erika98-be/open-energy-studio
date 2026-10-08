@@ -2871,6 +2871,7 @@ export const en: Record<string, string> = {
   'opname.cooling.pipeInsulationYear': "Year of the cooling pipe insulation",
   'opname.surface.reed': "Thickness of the reed roof",
   'opname.surface.crawlspaceBottom': "Crawlspace bottom insulated",
+  'opname.surface.floorHeightAboveGround': "Height H2: top of the ground floor to ground level (NTA 8800:2022 and 2020+A1)",
   'opname.surface.proven': "Thickness proven (evidence)",
   'opname.surface.space': "Unheated space",
   'opname.surface.boundaryKind.unheated_space': "unheated space (from the list)",

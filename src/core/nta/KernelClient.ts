@@ -2684,6 +2684,8 @@ export interface ResidentialSurvey {
       reedThicknessMm?: number | null;
       exposedPerimeterM?: number;
       crawlspaceBottomInsulated?: boolean | null;
+      /** H2 (ISSO 82.1 4e druk p. 73): top of the ground floor to ground level, m; used by NTA 8800:2022 and 2020+A1 (8.47). */
+      floorHeightAboveGroundM?: number | null;
       /** §8.7.2.1: insulated at a renovation or extension (with present_unknown_thickness). */
       renovation?: { year?: number | null; meetsRequirementsOfYear?: boolean } | null;
       /** Utility survey with `zones`: the calculation zone; absent: split over the zones by A_g. */
