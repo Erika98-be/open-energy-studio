@@ -18,7 +18,8 @@ import { EvidenceAttach } from '../EvidenceLink/EvidenceLink';
 import { SurveyTakeoverAction } from './SurveyTakeoverAction';
 import {
   BuildingTypeFields, ConstructionExtrasFields, DwellingTypeFields, HeatingControlFields, HotWaterTapsFields, SolarControlWindowsFields,
-  SurfaceExtrasFields, SurveyDoorsFields, UtilityInstallationExtrasFields, UtilityLightingFields, VentilationBasicsFields,
+  SurfaceExtrasFields, SurveyDoorsFields, SurveyUnheatedSpacesFields, SURVEY_GLASS_KINDS, UtilityInstallationExtrasFields,
+  UtilityLightingFields, VentilationBasicsFields, emptyRequiredSurveyFields,
 } from './SurveyBasics';
 import { freshItemId, jsonPointer, linksAfterRemoval } from '../../core/nta/EvidenceLinks';
 import { formatNumber } from '../../i18n/format';
@@ -58,10 +59,7 @@ const EMITTERS = ['radiators', 'low_temperature_radiators', 'floor_heating', 'fl
   'local_heaters'];
 const AIR_HEATING_KINDS = ['direct', 'indirect', 'via_air_handling_unit'];
 const ORIENTATIONS = ['north', 'north_east', 'east', 'south_east', 'south', 'south_west', 'west', 'north_west'];
-/** ISSO 82.1 table 7.8 / 75.1 table 7.9 glass kinds. */
-const GLASS_KINDS = ['triple_hr', 'hr_plus_plus', 'hr_plus', 'hr', 'coated_type_unknown', 'double', 'double_with_coating',
-  'double_with_secondary', 'hr_with_secondary', 'hr_plus_plus_with_secondary', 'secondary_window', 'single', 'leaded_light',
-  'glass_blocks'];
+const GLASS_KINDS = SURVEY_GLASS_KINDS;
 
 function opts(t: T, prefix: string, keys: string[]): Array<[string, string]> {
   return keys.map((key) => [key, t(`${prefix}.${key}`)]);
@@ -729,7 +727,14 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
   // Removes a survey item and keeps the photo links of the other items on their item
   // (items without an id are linked by position, so the ones after it move up).
   const removeAt = (path: Path, index: number) => {
-    const next: StoredSurvey = { kind, survey: write(draft, path, list(draft, path).filter((_, item) => item !== index)) };
+    let survey = write(draft, path, list(draft, path).filter((_, item) => item !== index));
+    // A removed window leaves no id in the solar-control list (`solar_control_window_unknown`).
+    const removedId = list(draft, path)[index]?.id;
+    const solarControl = read(survey, ['solarControlWindowIds']);
+    if (path.join('.') === 'envelope.windows' && Array.isArray(solarControl) && removedId != null) {
+      survey = write(survey, ['solarControlWindowIds'], solarControl.filter((id) => id !== removedId));
+    }
+    const next: StoredSurvey = { kind, survey };
     const registration = state.project.registration;
     const evidence = registration?.evidence ?? [];
     save(next);
@@ -742,6 +747,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
   };
   const field = { draft, onChange: change };
   const surfaces = list(draft, ['envelope', 'surfaces']);
+  const unheatedSpaces = list(draft, ['envelope', 'unheatedSpaces']);
   const windows = list(draft, ['envelope', 'windows']);
   const rooflights = list(draft, ['envelope', 'rooflights']);
   const buildingKind = read(draft, ['envelope', 'buildingKind', 'kind']);
@@ -757,9 +763,17 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
 
   const run = async () => {
     const current = ++requestId.current;
+    setResult(null);
+    // An empty required number would make the kernel refuse the whole survey with a bare
+    // deserialization message; name the fields instead.
+    const empty = emptyRequiredSurveyFields(stored.survey);
+    if (empty.length > 0) {
+      setBusy(false);
+      setError(t('opname.requiredEmpty', { fields: empty.join(', ') }));
+      return;
+    }
     setBusy(true);
     setError(null);
-    setResult(null);
     try {
       // The survey is calculated in the project's edition (`ntaCalculation.normVersion`).
       const assessment = kind === 'residential'
@@ -876,6 +890,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       </label>}
       {buildingKind === 'floating' &&
         <CheckField {...field} path={['envelope', 'buildingKind', 'newBerthSince2018']} label={t('opname.buildingKind.newBerth')} />}
+      <SurveyUnheatedSpacesFields draft={draft} change={change} t={t} />
       {surfaces.map((surface, index) => {
         const base: Path = ['envelope', 'surfaces', index];
         const insulation = read(draft, [...base, 'insulation', 'kind']);
@@ -885,9 +900,13 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
             options={opts(t, 'opname.surface.elementKind', ['facade', 'roof', 'floor'])} />
           <label>{t('opname.surface.boundary')}
             <select value={String(read(draft, [...base, 'boundary', 'kind']) ?? '')}
-              onChange={(event) => change([...base, 'boundary'], { kind: event.target.value })}>
+              onChange={(event) => change([...base, 'boundary'], event.target.value === 'unheated_space'
+                ? { kind: 'unheated_space', spaceId: String(unheatedSpaces[0]?.id ?? '') }
+                : { kind: event.target.value })}>
               {['outdoor', 'ground', 'crawlspace', 'adjacent_heated', 'unheated_cellar', 'strongly_ventilated', 'sunroom', 'water',
-                'unheated_space'].map((key) =>
+                // An unheated space boundary needs a space from the list below (`spaceId`).
+                ...(unheatedSpaces.length > 0 || read(draft, [...base, 'boundary', 'kind']) === 'unheated_space'
+                  ? ['unheated_space'] : [])].map((key) =>
                 <option key={key} value={key}>{t(`opname.surface.boundaryKind.${key}`)}</option>)}
             </select>
           </label>
