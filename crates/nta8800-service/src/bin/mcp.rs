@@ -226,8 +226,7 @@ enum LineAction {
 }
 
 fn error_line(id: Value, code: i64, message: &str) -> String {
-    json!({ "jsonrpc": "2.0", "id": id, "error": { "code": code, "message": message } })
-        .to_string()
+    json!({ "jsonrpc": "2.0", "id": id, "error": { "code": code, "message": message } }).to_string()
 }
 
 /// The top-level `"id"` of a JSON object text, found without parsing the

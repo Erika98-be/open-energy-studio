@@ -132,8 +132,12 @@ fn respond(outcome: Outcome) -> Response {
     (status, Json(outcome.body)).into_response()
 }
 
+fn outcome(status: u16, body: Value) -> Outcome {
+    Outcome { status, body }
+}
+
 fn refusal(status: u16, body: Value) -> Response {
-    respond(Outcome { status, body })
+    respond(outcome(status, body))
 }
 
 /// Whether the request declares a JSON body (`application/json` or an
@@ -190,9 +194,9 @@ pub fn json_value_count(bytes: &[u8], limit: usize) -> Option<usize> {
 /// Reads and parses a request body: JSON content type, at most the body
 /// limit in bytes (the [`DefaultBodyLimit`] layer) and at most
 /// `max_values` JSON values, a JSON object.
-async fn read_json_body(request: Request, max_values: usize) -> Result<Value, Response> {
+async fn read_json_body(request: Request, max_values: usize) -> Result<Value, Outcome> {
     if !is_json_content_type(request.headers()) {
-        return Err(refusal(
+        return Err(outcome(
             415,
             error_body(
                 "unsupported_media_type",
@@ -205,7 +209,7 @@ async fn read_json_body(request: Request, max_values: usize) -> Result<Value, Re
     let bytes = match Bytes::from_request(request, &()).await {
         Ok(bytes) => bytes,
         Err(rejection) if rejection.status() == StatusCode::PAYLOAD_TOO_LARGE => {
-            return Err(refusal(
+            return Err(outcome(
                 413,
                 error_body(
                     "payload_too_large",
@@ -216,14 +220,14 @@ async fn read_json_body(request: Request, max_values: usize) -> Result<Value, Re
             ))
         }
         Err(rejection) => {
-            return Err(refusal(
+            return Err(outcome(
                 400,
                 error_body("invalid_json", rejection.body_text(), None, Value::Null),
             ))
         }
     };
     if json_value_count(&bytes, max_values).is_none() {
-        return Err(refusal(
+        return Err(outcome(
             413,
             error_body(
                 "payload_too_large",
@@ -236,7 +240,7 @@ async fn read_json_body(request: Request, max_values: usize) -> Result<Value, Re
     let body: Value = match serde_json::from_slice(&bytes) {
         Ok(body) => body,
         Err(error) => {
-            return Err(refusal(
+            return Err(outcome(
                 400,
                 error_body(
                     "invalid_json",
@@ -248,7 +252,7 @@ async fn read_json_body(request: Request, max_values: usize) -> Result<Value, Re
         }
     };
     if !body.is_object() {
-        return Err(refusal(
+        return Err(outcome(
             400,
             error_body(
                 "invalid_request_shape",
@@ -286,7 +290,7 @@ async fn dispatch(op: &'static Operation, limits: Arc<Limits>, request: Request)
     };
     let body = match read_json_body(request, limits.max_json_values).await {
         Ok(body) => body,
-        Err(response) => return response,
+        Err(outcome) => return respond(outcome),
     };
     let slot = match tokio::time::timeout(
         limits.queue_timeout,
@@ -445,12 +449,16 @@ async fn cors(State(config): State<Arc<HttpConfig>>, request: Request, next: Nex
     response
 }
 
-/// The host name of a `Host` header: without its port, IPv6 without its
-/// brackets, in lower case.
+/// The host name of a `Host` header or an allowed-host entry: without its
+/// port, an IPv6 address without its brackets (`[::1]:3007` and `::1` are
+/// both `::1`), in lower case.
 fn host_name(host: &str) -> String {
     let host = host.trim();
     let name = if let Some(rest) = host.strip_prefix('[') {
         rest.split(']').next().unwrap_or("")
+    } else if host.matches(':').count() > 1 {
+        // A bare IPv6 address has no port.
+        host
     } else {
         host.split(':').next().unwrap_or("")
     };
@@ -460,7 +468,11 @@ fn host_name(host: &str) -> String {
 /// Refuses a request whose `Host` is not an allowed host (DNS rebinding):
 /// a page that points its own name at 127.0.0.1 still sends that name.
 /// A request without `Host` (not a browser) passes.
-async fn host_check(State(config): State<Arc<HttpConfig>>, request: Request, next: Next) -> Response {
+async fn host_check(
+    State(config): State<Arc<HttpConfig>>,
+    request: Request,
+    next: Next,
+) -> Response {
     if config.allowed_hosts.is_empty() {
         return next.run(request).await;
     }
@@ -479,7 +491,10 @@ async fn host_check(State(config): State<Arc<HttpConfig>>, request: Request, nex
                 403,
                 error_body(
                     "host_not_allowed",
-                    format!("Host {name} is not served; allowed: {}", config.allowed_hosts.join(", ")),
+                    format!(
+                        "Host {name} is not served; allowed: {}",
+                        config.allowed_hosts.join(", ")
+                    ),
                     None,
                     Value::Null,
                 ),

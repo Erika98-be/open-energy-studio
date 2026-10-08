@@ -54,9 +54,8 @@ fn parse(args: Vec<String>) -> Result<Options, String> {
     let mut origins = list(env("OES_API_CORS_ORIGINS"));
     let mut hosts = list(env("OES_API_ALLOWED_HOSTS"));
     let mut limit = env("OES_API_BODY_LIMIT_MB").unwrap_or_else(|| "16".into());
-    let mut values = env("OES_API_MAX_JSON_VALUES").unwrap_or_else(|| {
-        nta8800_service::http::DEFAULT_MAX_JSON_VALUES.to_string()
-    });
+    let mut values = env("OES_API_MAX_JSON_VALUES")
+        .unwrap_or_else(|| nta8800_service::http::DEFAULT_MAX_JSON_VALUES.to_string());
     let mut calculations = env("OES_API_MAX_CALCULATIONS").unwrap_or_else(|| {
         nta8800_service::http::default_max_concurrent_calculations().to_string()
     });
