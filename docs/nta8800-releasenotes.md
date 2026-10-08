@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — luchtverwarmers, onverwarmde ruimten en EP-W006h na review 6
+
+- **Luchtverwarmers van meer typen vragen het aantal van het eerste type.** Met `emission.airHeaters.further` en zonder `count` nam de kern 1 aan. 9.23 met tabel 9.12/9.13 telt in n_H,aux alle luchtverwarmers in de zone (2025+C1 p. 299–301; 2022 p. 282), dus het aantal is dan nodig: nieuw invoergat `air_heater_count_required` op `emission.airHeaters.count`. Eén type zonder `count` blijft "alle luchtverwarmers in de zone".
+- **Forfaitaire thermische bruggen met een onverwarmde ruimte die geen vlak raakt.** Sinds de forfaitaire route met een aangrenzende onverwarmde ruimte (8.4.1 opmerking 5, C.10) moest elke onverwarmde ruimte van het project een b_U hebben, ook een ruimte waar geen vlak aan grenst; zonder die b_U kwam `unheated_transmission_unresolved`. Nu bepaalt de kern b_U alleen voor ruimten waar een vlak aan grenst, en een zone zonder scheidingsvlak naar een onverwarmde ruimte vraagt er geen. Zo'n project rekent weer zoals voorheen.
+- **Vlak zonder lijst `windows`.** Een vlak zonder `windows` heeft geen ramen. Bij een scheiding naar een onverwarmde ruimte gaf dat `unheated_transmission_unresolved`, bij een buitenvlak `direct_transmission_unresolved`; nu rekent het vlak zonder ramen.
+- **ISSO 54 EP-W006h** gebruikt de normatieve H_ue = 5 × A_T;iu van formule I.8 (2025+C1 p. 841) in plaats van een opbouw uit opmerking 1 van I.2.4 (≈ 5,11 × A_T;iu). Aanname, zie [ISSO 54-voorbereiding](nta8800-isso54-voorbereiding.md).
+- **Interface.** Bij luchtverwarmers zijn het aantal en de andere typen nu in te voeren; een ander eerste type kiezen bewaart het aantal, de andere typen, Q_h;b en de bron.
+
 ### 9 oktober 2026 — verwarmde vloer onder maaiveld boven een kruipruimte
 
 - **Vloer onder maaiveld boven een kruipruimte of onverwarmde kelder rekent.** Een vloer met zowel `below` als `heatedBasement` gaf `ground_floor_below_and_heated_basement`. De norm staat de combinatie toe: 8.39 met U_fl van 8.43 en U_x;T = 0 (2025+C1 p. 255, 256 en 262; 2022 p. 229, 230 en 236; gelijk in alle uitgaven). De wanden onder maaiveld tellen met z·P·U_bw. Bijlage D heeft voor de combinatie geen formule; de vloer wordt in een vloerdeel (D.13/D.14, of D.15/D.16 zonder h·P·U_xw) en een wanddeel (wandtermen van D.10/D.11) gesplitst, elk met de faseverschuiving van tabel D.1. De meldcode `ground_floor_below_and_heated_basement` vervalt. h van (8.47) wordt bij deze vloer niet gebruikt: in 2022 is hij daar niet verplicht, vanaf 2023 wordt een opgegeven h geweigerd (`route_not_in_edition`).
