@@ -16,13 +16,15 @@ De opname heeft deze onderdelen:
 
 | Onderdeel | Inhoud | Bron |
 |---|---|---|
-| Algemeen | bouwjaar, woningtype en ligging (ook appartement met dak en vloer), gebruiksoppervlakte, bouwlagen | ISSO 82.1 hoofdstuk 6 |
+| Algemeen | bouwjaar, woningtype (eengezinswoning of appartement), ligging en daktype of positie in het bouwblok, gebruiksoppervlakte, bouwlagen, vloer- en wandconstructie (licht, zwaar, zeer zwaar), lichter plafond, een gemeten q_v10 (NEN 2686) | ISSO 82.1 hoofdstuk 6 en 7 |
 | Thermische schil | vlakken met isolatie (aanwezig, dikte, renovatiejaar), ramen en deuren met beglazing, zonwerende beglazing met productgegevens | hoofdstuk 8, tabellen 8.9–8.17 |
 | Verwarming | opwekker (ketel, warmtepomp, lokale verwarming, luchtverwarmer, collectief), ontwerpklasse (tabel 9.9), distributie (leidingisolatie, eenpijps), afgifte. Bij een ketel en een warmtepomp het **Fabricagejaar** en **Installatiejaar**: onder 2020+A1 bepalen ze de hulpenergie van 9.85 (fabricagejaar, anders installatiejaar, anders het bouwjaar; ISSO 82.1 p. 28). Onder de latere uitgaven heeft het jaar van de warmtepomp geen invloed | hoofdstuk 9 |
 | Ventilatie | systeem (A–E), regelingen (tabellen 11.4–11.6), WTW met bypass, ventilatoren, roosterverwarming, passieve koeling. Is het fabricagejaar van de ventilatoren onbekend, dan neemt de opname het bouwjaar, en voor een gebouw van vóór 1900 het jaar 1900 (de oudste rijen van tabel 11.20 en 11.23 gelden toch al voor alle eerdere jaren). Een opgegeven fabricagejaar buiten 1900–2100 geeft een melding | hoofdstuk 11 |
-| Warm tapwater | toestel, opslag, douche-WTW | hoofdstuk 13 |
+| Warm tapwater | toestel, opslag, douche-WTW, aantal douches, aangesloten badkamers en keukens (13.19a) | hoofdstuk 13 |
 | Ruimtekoeling | opwekker en afgifte | hoofdstuk 10 |
 | Zonnestroom (PV) | panelen, oriëntatie, helling | ISSO-hoofdstuk over zonne-energie; NTA hoofdstuk 16 |
+
+**Nieuwe vragen in het formulier (9 oktober 2026).** Wat eerder alleen via de JSON-weergave kon, staat nu in de wizard: het ventilatieprincipe (A–D) met zelfregelende roosters, drukklasse, installatie- en fabricagejaar, motor en een aangetoonde variant van tabel 11.5; de ruimtetemperatuurregeling en de leidingen in onverwarmde ruimten (afb. 9.1); deuren met isolatie, glasaandeel en kozijn; alle glassoorten van tabel 7.8 (ook gecoat, met voorzetraam, glas-in-lood en glazen bouwstenen); bij een vlak de dikte van een rieten dak, een geïsoleerde kruipruimtebodem, aangetoonde isolatiedikte en een onverwarmde ruimte als grens.
 
 **Standaardwaarden.** Een vraag zonder antwoord krijgt de standaardwaarde uit de ISSO-tabel. Elke toegepaste standaardwaarde verschijnt onder Uitkomst & forfaitair in de lijst "Toegepaste standaardwaarden". Leg per regel de reden vast in het veld **Reden inklappen**. Het projectdossier toetst die redenen; zie [hoofdstuk 7](07-herlabelen-registratie-dossier.md).
 
@@ -46,8 +48,9 @@ De overige onderdelen volgen ISSO 75.1:
 - ventilatie met luchtbehandelingskast;
 - koeling;
 - warm tapwater;
-- verlichting, met een oppervlakte per verlichtingszone;
-- bevochtiging;
+- verlichting: per verlichtingszone het oppervlak, het vermogen per armatuur of per lamp (met lamptype), of onbekend met "LED vanaf 2017", de aanwezigheids- en daglichtregeling, grote kantoortuin en afgezogen armaturen;
+- bevochtiging (soort bevochtiger, sorptiewiel), en bij de ventilatie recirculatie, volumestroomregeling, LUKA-klasse van de kanalen en de kanalen van de luchtbehandelingskast;
+- gebouwautomatisering (GBS) met klasse C/B, collectieve verwarmingsinstallatie, ramen met zonwerend glas en het gebouwtype (één of meer bouwlagen, deel van een gebouw);
 - PV.
 
 ### Rekenzones (§6.5, afb. 6.6 met tabel 6.4)
