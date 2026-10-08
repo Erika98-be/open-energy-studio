@@ -2153,6 +2153,33 @@ thread_local! {
 /// Cost: phase 1 is bounded by a few deserializations per null leaf and per
 /// filled location (guarded), phase 2 by about 2·k·log2(n) deserializations
 /// for k blanks among n nulls.
+/// The value with every null object member taken out, at any depth. Array
+/// elements keep their position (a null element stays a null).
+pub(crate) fn without_null_members(value: &Value) -> Value {
+    match value {
+        Value::Object(map) => Value::Object(
+            map.iter()
+                .filter(|(key, item)| !item.is_null() || crate::is_explicit_null_member(key))
+                .map(|(key, item)| (key.clone(), without_null_members(item)))
+                .collect(),
+        ),
+        Value::Array(items) => Value::Array(items.iter().map(without_null_members).collect()),
+        other => other.clone(),
+    }
+}
+
+/// Puts a null leaf back into the repaired copy the way the kernel reads it.
+/// A null object member means the same as an absent one (the input
+/// fingerprint follows the same rule), so it is taken out: only a required
+/// member then fails. A null array element stays a null.
+fn put_back(trial: &mut Value, leaf: &NullLeaf) {
+    if leaf.removed {
+        remove_member(trial, &leaf.steps);
+    } else {
+        set_at(trial, &leaf.steps, Value::Null);
+    }
+}
+
 fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
     let first_error = |candidate: &Value| -> FirstError {
         #[cfg(test)]
@@ -2171,7 +2198,7 @@ fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
     let leaves: Vec<NullLeaf> = raw
         .into_iter()
         .map(|(path, steps)| NullLeaf {
-            removed: matches!(steps.last(), Some(PathStep::Key(_))),
+            removed: matches!(steps.last(), Some(PathStep::Key(key)) if !crate::is_explicit_null_member(key)),
             path,
             steps,
         })
@@ -2248,7 +2275,7 @@ fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
             }
             let mut trial = work.clone();
             for &index in &group {
-                set_at(&mut trial, &leaves[index].steps, Value::Null);
+                put_back(&mut trial, &leaves[index]);
             }
             if first_error(&trial).is_none() {
                 continue;
@@ -2267,13 +2294,18 @@ fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
         let baseline = first_error(&work);
         for (index, leaf) in leaves.iter().enumerate() {
             let mut trial = work.clone();
-            set_at(&mut trial, &leaf.steps, Value::Null);
+            put_back(&mut trial, leaf);
             let error = first_error(&trial);
             blank[index] = match &error {
                 None => false,
                 Some((at, message)) => {
                     error != baseline
-                        && is_blank_error(message)
+                        && (is_blank_error(message)
+                            || (leaf.removed
+                                && missing_field(message).is_some_and(|field| {
+                                    leaf.steps.last()
+                                        == Some(&PathStep::Key(field.to_string()))
+                                })))
                         && (*at == leaf.path || is_under(&leaf.path, at))
                 }
             };
@@ -3131,7 +3163,7 @@ fn collect_nulls(
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 enum PathStep {
     Key(String),
     Index(usize),
@@ -3197,7 +3229,12 @@ fn derive_input(
             None
         }
         Some(value) => {
-            match serde_path_to_error::deserialize::<_, NtaCalculationInput>(value.clone()) {
+            // A null object member means the same as an absent one, as in the
+            // input fingerprint: a cleared field with a kernel default keeps
+            // its default instead of stopping the calculation.
+            match serde_path_to_error::deserialize::<_, NtaCalculationInput>(
+                without_null_members(value),
+            ) {
                 Ok(block) => Some(block),
                 Err(error) => {
                     // A blank value (null) where the kernel needs a number,
@@ -5374,7 +5411,7 @@ mod tests {
         let result = assess_project_performance(&value);
         let detail = result.gaps[0].detail.as_deref().unwrap();
         assert!(
-            detail.contains("ventilationFlows[0].months[3].conductanceWPerK"),
+            detail.contains("ventilationFlows[0].months[3]") && detail.contains("conductanceWPerK"),
             "{detail}"
         );
         // A blank number is a missing input at its own path.
@@ -5568,7 +5605,8 @@ mod tests {
             }
         );
 
-        // A blank `#[serde(default)]` member that is not an Option.
+        // A blank `#[serde(default)]` member that is not an Option is the
+        // same as an absent one: it keeps its default and is no blank.
         #[derive(serde::Deserialize)]
         #[serde(rename_all = "camelCase")]
         #[allow(dead_code)]
@@ -5579,7 +5617,18 @@ mod tests {
             note: Option<String>,
         }
         let block = serde_json::json!({"otherLossKwh": null, "note": null});
-        assert_eq!(blank_paths::<Defaults>(&block).paths, ["otherLossKwh"]);
+        assert!(blank_paths::<Defaults>(&block).paths.is_empty());
+        // A required member next to it is still a blank.
+        #[derive(serde::Deserialize)]
+        #[serde(rename_all = "camelCase")]
+        #[allow(dead_code)]
+        struct Mixed {
+            #[serde(default)]
+            other_loss_kwh: f64,
+            power_kw: f64,
+        }
+        let block = serde_json::json!({"otherLossKwh": null, "powerKw": null});
+        assert_eq!(blank_paths::<Mixed>(&block).paths, ["powerKw"]);
 
         // A truly absent required field next to an optional null with the
         // same name elsewhere: the absent field is not a blank, the other
@@ -6796,7 +6845,8 @@ mod blank_fuzz {
             .map(|(path, pointer, _)| {
                 let mut trial = block.clone();
                 *trial.pointer_mut(pointer).unwrap() = Value::Null;
-                (path.clone(), !deserializes(&trial))
+                // A null member means the same as an absent one.
+                (path.clone(), !deserializes(&without_null_members(&trial)))
             })
             .collect();
         let tags = tags(&block, &all_nodes);

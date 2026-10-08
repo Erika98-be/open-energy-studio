@@ -10,7 +10,9 @@
 //! null the kernel types do not allow), a gap without a route in
 //! `gapRoutes.ts`, and a code from `LEFTOVER_STATE`: state a form left behind
 //! that no field on the page can clear (reviews 7 and 8). A gap that only
-//! asks for a value is the expected outcome of an emptied field.
+//! asks for a value is the expected outcome of an emptied field, but only for
+//! a member the kernel needs: a null member reads as absent (review 9), so a
+//! `nta_value_missing` on a member with a kernel default is refused too.
 
 mod support;
 
@@ -153,6 +155,9 @@ fn check_doc(doc: &Value) -> (Option<String>, BTreeSet<String>) {
         Ok((_, codes)) => codes,
         Err(error) => return (Some(format!("{label}: {error}")), BTreeSet::new()),
     };
+    if let Some(failure) = defaulted_blank(project, &value) {
+        return (Some(format!("{label}: {failure}")), codes);
+    }
     for code in SHAPE_REFUSALS.iter().chain(LEFTOVER_STATE.iter()) {
         if codes.contains(*code) {
             let mut detail = Vec::new();
@@ -164,4 +169,61 @@ fn check_doc(doc: &Value) -> (Option<String>, BTreeSet<String>) {
         }
     }
     (None, codes)
+}
+
+/// A null object member means the same as an absent one (review 9). A
+/// `nta_value_missing` is only right for a member the kernel needs: when the
+/// same project without that member raises no gap at its path, a field with a
+/// kernel default was reported as missing.
+fn defaulted_blank(project: &Value, value: &Value) -> Option<String> {
+    let gaps = value["gaps"].as_array()?;
+    for gap in gaps {
+        if gap["code"] != "nta_value_missing" {
+            continue;
+        }
+        let path = gap["path"].as_str()?;
+        let pointer = pointer_of(path);
+        let (parent, key) = pointer.rsplit_once('/')?;
+        if !project.pointer(&pointer).is_some_and(Value::is_null)
+            || !project.pointer(parent).is_some_and(Value::is_object)
+        {
+            continue;
+        }
+        let mut absent = project.clone();
+        absent
+            .pointer_mut(parent)
+            .and_then(Value::as_object_mut)?
+            .remove(key);
+        let result = serde_json::to_value(assess_project_performance(&absent)).ok()?;
+        let still = result["gaps"].as_array().is_some_and(|gaps| {
+            gaps.iter().any(|other| {
+                other["path"].as_str() == Some(path)
+                    || other["code"] == "nta_calculation_block_invalid"
+            })
+        });
+        if !still {
+            return Some(format!(
+                "nta_value_missing at {path}, but the kernel accepts the member absent (a default)"
+            ));
+        }
+    }
+    None
+}
+
+/// `a.b[0].c` as a JSON pointer `/a/b/0/c`.
+fn pointer_of(path: &str) -> String {
+    let mut pointer = String::new();
+    for part in path.split('.') {
+        let mut rest = part;
+        let key_end = rest.find('[').unwrap_or(rest.len());
+        pointer.push('/');
+        pointer.push_str(&rest[..key_end]);
+        rest = &rest[key_end..];
+        while let Some(close) = rest.find(']') {
+            pointer.push('/');
+            pointer.push_str(&rest[1..close]);
+            rest = &rest[close + 1..];
+        }
+    }
+    pointer
 }
