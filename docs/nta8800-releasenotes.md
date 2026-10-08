@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — basisopname rekent in NTA 8800:2022 en 2020+A1
+
+- **Hoogte H2 bij een kruipruimte.** NTA 8800:2022 en 2020+A1 rekenen in (8.47) met de werkelijke hoogte h van de kruipruimtewand boven het maaiveld (2022 p. 236); vanaf 2023 is h vast 0,125 m (p. 240). De basisopname vulde h nooit in, dus een woning- of utiliteitsopname met een vloer boven een kruipruimte of onverwarmde kelder werd in die uitgaven geweigerd met `ground_floor_wall_height_required`, op een veld dat de opname niet kon zetten. De opname vraagt nu H2, de hoogte van de bovenkant van de begane grondvloer tot het maaiveld (ISSO 82.1 4e druk afb. 8.23, p. 73; ISSO 75.1 4e druk dezelfde paragraaf), als `floorHeightAboveGroundM` op die vloer. In 2022 en 2020+A1 gaat de waarde door als h; zonder antwoord meldt de opname `floor_height_above_ground_required` op het opnameveld. Een forfaitaire waarde voor een onbekende hoogte geven de bronnen niet. Vanaf 2023 wordt H2 niet gebruikt en verandert er niets. Het veld staat in de opname alleen bij die twee uitgaven.
+- **f_BACS in de utiliteitsopname.** De opname gaf f_BACS 1,05 door in uitgaven zonder 5.5.8 (2024 en ouder), waar de kern dat weigert (`route_not_in_edition` op `bacsFactor`). De opname houdt daar nu 1,0 aan, met de regel `bacs_factor_not_in_edition`.
+- **Test.** `crates/nta8800-core/tests/survey_editions.rs` rekent de zes opnamevoorbeelden in alle vijf uitgaven: met H2 rekenen ze overal, zonder H2 alleen in 2022 en 2020+A1 een melding op het opnameveld; vanaf 2023 verandert H2 niets.
+
 ### 9 oktober 2026 — basisopname en maatwerkadvies na de dertiende review
 
 - **Renovatie met onbekende isolatiedikte (ISSO §8.7.2.1).** "De klasse ervóór" en "de klasse erna" tellen nu op de klassen van ISSO-tabel 8.10 (82.1 p. 90, 75.1 p. 89). Bij gewone gevels is dat één klasse "van 1975 tot 1988"; de kern telde op de splitsing bij 1983 uit NTA-tabel I.5. Gevolgen: gebouwd 1970 en gerenoveerd 1985 zonder bewijs geeft R_c 0,43 (was 1,3); gebouwd 1978 met onbekend renovatiejaar geeft 2,0 (was 1,3). Vloeren en daken hebben in beide tabellen de splitsing bij 1983 en veranderen niet.

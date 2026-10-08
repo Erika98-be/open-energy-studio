@@ -61,7 +61,7 @@ Dat wijkt bewust af van "alle parameters doorgeven". De kern rekent synchroon op
 
 | # | Onderwerp | 2024 (pagina) | 2025+C1 (pagina) | Kern |
 | --- | --- | --- | --- | --- |
-| 1 | 5.5.8/15.3 f_BACS 1,05 | bestaat niet (p. 87–88) | p. 89–91, 99–101, 676 | `bacsFactor` ≠ 1 → `route_not_in_edition`; projectroute zet 1,0 |
+| 1 | 5.5.8/15.3 f_BACS 1,05 | bestaat niet (p. 87–88) | p. 89–91, 99–101, 676 | `bacsFactor` ≠ 1 → `route_not_in_edition`; projectroute en utiliteitsopname zetten 1,0 (opname: regel `bacs_factor_not_in_edition`) |
 | 2 | 5.14a/b opslagcorrectie | geen (5.10, p. 84–86) | p. 85–87 | `storage_correction_factor` = 0 |
 | 3 | Tabel 5.3 K_CO2 el/gas/olie/biomassa/externe warmte | 0,34 / 0,183 / 0,260 / 0,372 / 0,17 (p. 94–95) | 0,268 / 0,218 / 0,326 / 0,104 / 0,09 (p. 96–98) | `NormProfile`; ook koude-forfait K_el/3 |
 | 4 | Tabel 5.6 AVI | 0,113 (p. 117) | 0,138 (p. 125) | `SystemCarrier::co2` |
@@ -135,7 +135,7 @@ Bovenop de punten 1–48. Pagina's links uit NTA 8800:2022, rechts uit NTA 8800:
 | 56 | Ventilatorvermogen getest volgens NEN-EN 16430 | bestaat niet (p. 282) | p. 286 | `emission.fans.testedPowerW` → `route_not_in_edition` |
 | 57 | Tabel 7.5 "onbekende kleur" | bestaat niet (p. 176) | p. 180 | `colour: unknown` → `route_not_in_edition` |
 | 58 | Tabel 7.10 specifieke interne warmtecapaciteit | naar massa per m² (< 250, 250–500, 500–750, > 750 kg/m²) (p. 181–182) | naar vloer- en wandtype, tabellen 7.10–7.12 (p. 185–186) | `thermalMass.massKgPerM2` (alleen 2022); zonder die invoer de vloer/wandklassen (zelfde D_m-waarden; interpretatie) |
-| 59 | (8.47) hoogte h boven maaiveld | werkelijke hoogte (p. 236) | vast 0,125 m (p. 240) | `wallHeightAboveGroundM` op kruipruimte/onverwarmde kelder: verplicht in 2022 (`ground_floor_wall_height_required`), daarna `route_not_in_edition` |
+| 59 | (8.47) hoogte h boven maaiveld | werkelijke hoogte (p. 236) | vast 0,125 m (p. 240) | `wallHeightAboveGroundM` op kruipruimte/onverwarmde kelder: verplicht in 2022 (`ground_floor_wall_height_required`), daarna `route_not_in_edition`. De basisopname vraagt H2 (ISSO 82.1 4e druk afb. 8.23, p. 73; ISSO 75.1 4e druk dezelfde §) als `floorHeightAboveGroundM` en geeft die in 2022 en 2020+A1 door; zonder antwoord `floor_height_above_ground_required` op dat opnameveld. Er is geen forfaitaire waarde. |
 | 60 | Tabel E.5 minerale-wolvlokken F_A;iso | 1,05 (p. 775) | 1,00 (p. 785) | `mineral_wool_flakes_ageing` |
 | 61 | (I.2) λ_equi;ntr | 0,06 (p. 805) | 0,045 of een bekende hogere λ (p. 814) | `knownLambdaEquivalent` → `route_not_in_edition` |
 | 62 | Zwembad in (11.57) | bestaat niet (p. 451) | q_usi;spec sport × 2 (p. 459) | `swimmingPool` → `route_not_in_edition` |
