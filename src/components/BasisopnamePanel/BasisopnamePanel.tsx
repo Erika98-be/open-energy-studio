@@ -32,6 +32,7 @@ import { dutchDefaultValue, dutchSource, snakeCase } from '../../core/nta/Opname
 import '../NtaPerformancePanel/NtaPerformancePanel.css';
 import './BasisopnamePanel.css';
 import '../shell/pages/existing/existing.css';
+import { DecimalInput } from '../ui';
 
 // ISSO 82.1 (dwellings) and 75.1 (utility) basisopname: structured fields for
 // the main survey sections, a JSON view for the rest, and the kernel route
@@ -872,7 +873,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
         </select>
       </label>
       {Array.isArray(verticalPipes) && verticalPipes.length > 0 && <label>{t('opname.verticalPipes.number')}
-        <input type="number" step="1" min="1" value={verticalPipes.length}
+        <DecimalInput step="1" min="1" value={verticalPipes.length}
           onChange={(event) => change(['verticalPipes'], Array.from({ length: Math.max(1, Number(event.target.value) || 1) },
             (_, index) => (verticalPipes as unknown[])[index] ?? { insulated: false }))} />
       </label>}

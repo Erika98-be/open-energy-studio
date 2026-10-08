@@ -4,6 +4,7 @@ import { useEnergy } from '../../../context/EnergyContext';
 import { IConstruction, IConstructionLayer } from '../../../core/energy/types';
 import { DialogShell } from '../DialogShell';
 import { NtaConstructionSection, type NtaConstructionResult } from './NtaConstructionSection';
+import { DecimalInput } from '../../ui';
 
 interface ConstructionEditorDialogProps {
   editId?: string | null;
@@ -152,8 +153,7 @@ export function ConstructionEditorDialog({ editId, onClose }: ConstructionEditor
                     />
                   </td>
                   <td style={{ padding: '2px 4px' }}>
-                    <input
-                      type="number"
+                    <DecimalInput
                       min={0}
                       step={0.001}
                       aria-label={`${t('dialog.construction.thickness')} ${i + 1}`}
@@ -163,8 +163,7 @@ export function ConstructionEditorDialog({ editId, onClose }: ConstructionEditor
                     />
                   </td>
                   <td style={{ padding: '2px 4px' }}>
-                    <input
-                      type="number"
+                    <DecimalInput
                       min={0.001}
                       step={0.001}
                       aria-label={`${t('dialog.construction.lambda')} ${i + 1}`}

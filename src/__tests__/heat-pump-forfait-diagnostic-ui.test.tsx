@@ -50,7 +50,7 @@ describe('draft COP table UI', () => {
     view.unmount();
     renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: input }}
       buildingFunction="residential" onSave={vi.fn()} />);
-    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue(35);
+    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('35');
     expect(screen.getByText(/Table input saved in this project/)).toBeInTheDocument();
   });
 

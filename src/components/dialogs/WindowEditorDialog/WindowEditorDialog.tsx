@@ -3,6 +3,7 @@ import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
 import { IWindow, Orientation } from '../../../core/energy/types';
 import { DialogShell } from '../DialogShell';
+import { DecimalInput } from '../../ui';
 
 interface WindowEditorDialogProps {
   editId?: string | null;
@@ -116,8 +117,7 @@ export function WindowEditorDialog({ editId, onClose }: WindowEditorDialogProps)
 
         <div className="dialog-field">
           <label htmlFor={`${fieldId}-2`}>{t('dialog.window.area')}</label>
-          <input id={`${fieldId}-2`}
-            type="number"
+          <DecimalInput id={`${fieldId}-2`}
             min={0}
             step={0.01}
             value={area}
@@ -127,8 +127,7 @@ export function WindowEditorDialog({ editId, onClose }: WindowEditorDialogProps)
 
         <div className="dialog-field">
           <label htmlFor={`${fieldId}-3`}>{t('dialog.window.uValue')}</label>
-          <input id={`${fieldId}-3`}
-            type="number"
+          <DecimalInput id={`${fieldId}-3`}
             min={0}
             step={0.01}
             value={uValue}
@@ -138,8 +137,7 @@ export function WindowEditorDialog({ editId, onClose }: WindowEditorDialogProps)
 
         <div className="dialog-field">
           <label htmlFor={`${fieldId}-4`}>{t('dialog.window.gValue')}</label>
-          <input id={`${fieldId}-4`}
-            type="number"
+          <DecimalInput id={`${fieldId}-4`}
             min={0}
             max={1}
             step={0.01}

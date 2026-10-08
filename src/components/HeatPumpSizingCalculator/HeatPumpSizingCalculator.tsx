@@ -8,6 +8,7 @@ import {
   type ZoneSizingResult,
 } from '../../core/energy/HeatPumpSizingCalc';
 import './HeatPumpSizingCalculator.css';
+import { DecimalInput } from '../ui';
 
 export function HeatPumpSizingCalculator() {
   const { t } = useI18n();
@@ -111,8 +112,7 @@ export function HeatPumpSizingCalculator() {
           <div className="hp-input-row">
             <div className="hp-input-group">
               <span className="hp-input-label">{t('hp.outdoorTemp')}</span>
-              <input
-                type="number"
+              <DecimalInput
                 className="hp-input"
                 aria-label={t('hp.outdoorTemp')}
                 value={designOutdoorTemp}
@@ -122,8 +122,7 @@ export function HeatPumpSizingCalculator() {
             </div>
             <div className="hp-input-group">
               <span className="hp-input-label">{t('hp.indoorTemp')}</span>
-              <input
-                type="number"
+              <DecimalInput
                 className="hp-input"
                 aria-label={t('hp.indoorTemp')}
                 value={customIndoorTemp ?? params.thetaInt}
@@ -136,8 +135,7 @@ export function HeatPumpSizingCalculator() {
             </div>
             <div className="hp-input-group">
               <span className="hp-input-label">{t('hp.safetyMargin')}</span>
-              <input
-                type="number"
+              <DecimalInput
                 className="hp-input"
                 aria-label={t('hp.safetyMargin')}
                 value={safetyMargin}

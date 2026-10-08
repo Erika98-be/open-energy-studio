@@ -66,7 +66,7 @@ describe('standalone NTA heat pump inventory', () => {
     }));
     await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
     await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
-    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue(35);
+    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('35');
     expect(screen.getByText(/Table input saved in this project/)).toBeInTheDocument();
     expect(document.querySelector('.preview-energy-label')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Remove table input' }));

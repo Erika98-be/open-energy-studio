@@ -3,6 +3,7 @@ import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
 import { ISurface, SurfaceType, Orientation, ThermalBoundary } from '../../../core/energy/types';
 import { DialogShell } from '../DialogShell';
+import { DecimalInput } from '../../ui';
 
 interface SurfaceEditorDialogProps {
   editId?: string | null;
@@ -136,8 +137,7 @@ export function SurfaceEditorDialog({ editId, onClose }: SurfaceEditorDialogProp
 
         <div className="dialog-field">
           <label htmlFor={`${fieldId}-3`}>{t('dialog.surface.area')}</label>
-          <input id={`${fieldId}-3`}
-            type="number"
+          <DecimalInput id={`${fieldId}-3`}
             min={0}
             step={0.1}
             value={area}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
 import { DialogShell } from '../DialogShell';
+import { DecimalInput } from '../../ui';
 
 interface AirTightnessDialogProps {
   editId?: string | null;
@@ -74,8 +75,7 @@ export function AirTightnessDialog({ editId, onClose }: AirTightnessDialogProps)
 
         <div className="dialog-field">
           <label>{t('dialog.airTightness.qv10')}</label>
-          <input
-            type="number"
+          <DecimalInput
             min={0}
             step={0.01}
             value={qv10}
