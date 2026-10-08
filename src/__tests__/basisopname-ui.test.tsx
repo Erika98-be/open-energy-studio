@@ -295,7 +295,8 @@ describe('basisopname panel', () => {
     await user.click(screen.getByRole('button', { name: 'Calculate survey' }));
     expect(await screen.findByText('ISSO 82.1 p. 113 (table 9.7)')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith('/api/v1/nta8800/opname/utility', expect.anything());
-    expect(screen.getByText('C')).toBeInTheDocument();
+    // The indicative label class (the utility vessel's energy-label select also lists 'C').
+    expect(screen.getAllByText('C').some((element) => element.tagName !== 'OPTION')).toBe(true);
     await user.type(screen.getByLabelText('Reason for the forfait heating.generator.engine'), 'plate missing');
     expect(stored()!.survey.inklapRedenen).toEqual({ 'heating.generator.engine': 'plate missing' });
     // The result stays while the reason is typed.
