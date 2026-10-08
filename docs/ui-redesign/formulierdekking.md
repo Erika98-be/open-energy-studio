@@ -5,22 +5,28 @@ Stand 9 oktober 2026. Elke keuze die de rekenkern kent, moet de gebruiker in een
 ## Hoe de dekking wordt bewaakt
 
 - **De catalogus.** `training-data/nta8800-input-options.json` bevat elke keuzewaarde (enum-variant) en elk optioneel veld van de projectinvoer (`ntaCalculation` en het projectmodel) en van beide basisopnamen. Serde levert de lijst, niet een handlijst: de test `input_option_catalogue_is_current` in `crates/nta8800-core/tests/option_coverage.rs` leidt hem af met dezelfde probe als de optiedekking. Komt er in de kern een variant of veld bij, dan faalt die test tot de catalogus is bijgewerkt (`UPDATE_INPUT_OPTIONS=1`).
-- **De formuliercheck.** `src/__tests__/nta-form-coverage.test.ts` telt een optie als gedekt wanneer haar naam als letterlijke waarde, objectsleutel of eigenschap voorkomt in de formuliercode (`FORM_SOURCES` in `src/core/nta/formCoverage.ts`). Een optie die zo niet te vinden is, moet in `FORM_COVERAGE_EXEMPTIONS` staan met de reden. Een vrijstelling die inmiddels wel een formulier heeft, laat de test ook falen, zodat de lijst niet veroudert.
-- **Grens van de check.** De check zoekt op naam, niet op pad. Een veld met een algemene naam (`sourceReference`, `areaM2`) telt als gedekt zodra die naam ergens in een formulier staat. De check vangt dus nieuwe, ontbrekende keuzes, maar bewijst niet dat elke plek in elke zone een eigen veld heeft. Velden per rekenzone in `zoneData` (behalve setpoints en verticale leidingen) gaan in de praktijk via de projectbrede blokken.
+- **De formuliercheck.** `src/__tests__/nta-form-coverage.test.ts` telt een optie alleen als gedekt wanneer de formulieren van **haar eigen route** haar **schrijven** (`FORM_SOURCES` in `src/core/nta/formCoverage.ts`, per route: project, woningopname, utiliteitsopname):
+  - de naam staat op een schrijfplek: een keuzewaarde, een padelement of een sjabloonsleutel. Een lezing (`read(`), een vergelijking (`=== 'x'`, `case 'x'`) of commentaar telt niet; commentaar wordt eerst verwijderd;
+  - bij een veld staat de ouder-sleutel bij die schrijfplek: binnen een paar regels, of in de definitie van de padvariabele (`const base = ['envelope', 'doors', index]`), of de component krijgt die padvariabele van zijn aanroeper. Zo dekt het `glass` van een raam niet het `glass` van een deur in hetzelfde bestand;
+  - weergavepagina's (de shell) tellen niet mee; alleen het projectinfo-venster en de gebouwpagina staan erin. Het warmtepomppaneel staat erin omdat het de forfaitaire warmtepomp van het project invult (`FORM_BUILDERS`: het bouwt het hele object in één keer).
+
+  Een optie die zo niet gedekt is, staat in `FORM_COVERAGE_EXEMPTIONS` met de reden en een soort: `form` (wel een formulier, niet op naam te zien), `json` (bewust alleen JSON), `missing` (nog geen formulier, te bouwen) of `parallel` (formulier in een parallelle wijziging). Een vrijstelling die inmiddels wel gedekt is, laat de test falen, zodat de lijst niet veroudert.
+- **Grens van de check.** Het blijft tekstanalyse, geen render-test per veld. Wat de check als gedekt telt, schrijft wel echt die naam onder die ouder; of het veld op elke plek (elke zone, elk systeem) staat, toetsen de formuliertests (`nta-form-coverage-forms.test.tsx`).
 
 ## Dekking
 
-| | Voor deze ronde | Na deze ronde |
-|---|---|---|
-| Projectinvoer, varianten | 569 / 586 | 583 / 586 |
-| Projectinvoer, velden | 476 / 512 | 499 / 512 |
-| Woningopname, varianten | 148 / 176 | 176 / 176 |
-| Woningopname, velden | 120 / 140 | 140 / 140 |
-| Utiliteitsopname, varianten | 154 / 194 | 194 / 194 |
-| Utiliteitsopname, velden | 184 / 215 | 215 / 215 |
-| **Totaal op naam gevonden** | **1 651 / 1 823 (90,6 %)** | **1 807 / 1 823 (99,1 %)** |
+Tot 9 oktober 2026 telde de check een optie als gedekt zodra haar naam ergens in een formulierbestand stond, ook in een lezing, commentaar of een formulier van een andere route. Dat gaf 1 807 / 1 823 (99,1 %), te hoog: de zevende review vond opties die geen formulier aanbiedt (onder meer het glas van een deur, onverwarmde ruimten in de opname, en `bblFunction`-waarden die alleen in de lijst voor meerdere functies stonden). Met de strengere check:
 
-De 16 overige opties staan in de vrijstellingen hieronder: 2 hebben wel een formulier (de check ziet ze niet), 14 zijn bewust alleen JSON.
+| Route | Opties | Door een formulier geschreven | Vrijstelling `form` | `json` | `missing` | `parallel` |
+|---|---|---|---|---|---|---|
+| Projectinvoer | 1 098 | 1 061 | 8 | 16 | 13 | 0 |
+| Woningopname | 316 | 288 | 0 | 0 | 25 | 3 |
+| Utiliteitsopname | 409 | 379 | 0 | 0 | 29 | 1 |
+| **Totaal** | **1 823** | **1 728 (94,8 %)** | **8** | **16** | **67** | **4** |
+
+Met de vrijstellingen van soort `form` erbij heeft **1 736 / 1 823 (95,2 %)** een formulier. 16 opties zijn bewust alleen JSON. 67 opties hebben nog geen formulier (`missing`): vooral velden per rekenzone in `zoneData`, onderdelen van een verder tapwatersysteem en opnamevragen naar schildelen, PV en tapwater (lijst in `formCoverage.ts`). 4 krijgen een formulier in de parallelle opnamewijziging (glas van een deur, onverwarmde ruimten).
+
+In deze ronde kregen een formulier: de douche-WTW (§13.5.3, per douche met verbinding en opgegeven rendement), de kokendwaterkraan, het gasgestookte voorraadtoestel (13.165–13.175), de ontbrekende Bbl-functies (woonwagen, drijvende bouwwerken, logies in een logiesgebouw) en de berekende Ψ van de verwarmingsleidingen (9.33–9.35).
 
 ## Waar de invoer staat
 
@@ -29,8 +35,8 @@ De 16 overige opties staan in de vrijstellingen hieronder: 2 hebben wel een form
 | Functie, berekeningsgebied, woningtype (`labelFunction`, `bblFunction`, `usageFunction`, `calculationScope`, `dwellingType`) | Stap Project en Gebouw |
 | Schil: vloeren op grond, hellingen, belemmering, zonwering en glas per raam, massa, interne warmte, setpoints | Gebouw › Schil & ramen, Gebouw › Zones |
 | Verwarming: opwekker (rol van de ketel, bronsysteem van de warmtepomp), afgifte | Installaties › Verwarming |
-| Distributie: pomp (EEI, ontwerpvolumestroom, eenpijpsysteem, vermogen, L_max), buffervat, combinatieleidingen, afleverset, b_U | Installaties › Verwarming › Distributie |
-| Tapwater: alle opwekkers (ook boosterwarmtepomp bijlage W, warmtepompen in serie, warmtepomp met indirect vat, biomassa-combitoestel, groot direct gestookt vat), afleversets, b_U | Installaties › Tapwater |
+| Distributie: Ψ forfaitair of berekend uit de leidinggegevens (9.33–9.35), pomp (EEI, ontwerpvolumestroom, eenpijpsysteem, vermogen, L_max), combinatieleidingen, b_U; bij een collectieve installatie de afleverset, en met een berekende Ψ ook het buffervat (tabel 9.16 opmerking 2) | Installaties › Verwarming › Distributie |
+| Tapwater: alle opwekkers (ook boosterwarmtepomp bijlage W, warmtepompen in serie, warmtepomp met indirect vat, biomassa-combitoestel, groot direct gestookt vat, gasgestookt voorraadtoestel), kokendwaterkraan, douche-WTW, afleversets, b_U | Installaties › Tapwater |
 | Koeling: opwekkers, afgifte, distributie met leidinglengte buiten de gekoelde zone en de circulatiepomp | Installaties › Koeling |
 | Ventilatie: systeem, ventilatoren (opgegeven of motorvermogen), woningoppervlak bij meer zones | Installaties › Ventilatie |
 | Verlichting, PV, GBS, opgegeven gebruik, hernieuwbaar | Installaties › Verlichting, Opwekking, Overig |
@@ -51,7 +57,9 @@ De 16 overige opties staan in de vrijstellingen hieronder: 2 hebben wel een form
 | `hotWater.generator.annexT`, `annexTConditions` | Beproevingsrapport volgens bijlage T (gaskeur-koppeling); zeldzaam, uit het rapport over te nemen. |
 | `distributionSystem.unheatedPipeTransmittance` | Afwijkende Ψ voor het deel in onverwarmde ruimten; leeg geldt de Ψ van het hele systeem. |
 
-**Wel een formulier, niet op naam te vinden:** de kleur van een zonweringstoestel (`dark`, `white`). Zonwering per raam en de projectbrede zonwering kiezen het toestel als één samengestelde waarde "soort:kleur".
+**Wel een formulier, niet op naam te vinden:** het soort en de kleur van een zonweringstoestel. Zonwering per raam en de projectbrede zonwering kiezen het toestel als één samengestelde waarde "soort:kleur". `distributionSystem.usageFunction` neemt het sjabloon over van het blok.
+
+**Bewust JSON, nieuw in de lijst:** de maandwaarden van de warmte die een boosterwarmtepomp aan de koeling onttrekt, en de maandfracties van de ventilatorregeling; beide uit een meetrapport.
 
 ## Nieuwe formulieren in deze ronde
 
