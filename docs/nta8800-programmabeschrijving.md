@@ -1,6 +1,6 @@
 # Globale beschrijving van het NTA 8800-rekenprogramma
 
-**Stand:** 8 oktober 2026, op `nta8800-kernel`.
+**Stand:** 9 oktober 2026, op `nta8800-kernel`.
 **Status:** werkdocument voor de attesteringsinstelling. Het programma is niet geattesteerd.
 
 BRL 9501 van 29-05-2026 vraagt bij de aanvraag naast de handleiding een globale beschrijving van het rekenprogramma (§3.0, p. 5). Dit is die beschrijving. Ze geeft het overzicht en verwijst voor de details naar de deeldocumenten in `docs/`. Eisen uit de BRL worden alleen met artikel en pagina genoemd.
@@ -63,6 +63,9 @@ De gate `scripts/verify-nta.sh` loopt bij elke wijziging. Er wordt alleen vastge
 - de differentiële tests tussen de normversies;
 - de **optiedekkingstest** (`crates/nta8800-core/tests/option_coverage.rs`). Die leidt elke invoeroptie af uit de invoertypen zelf en rekent haar door in alle vijf normversies. Elke run moet rekenen of weigeren met een benoemde code met tekst, zonder paniek en zonder niet-eindige getallen.
 - de **openbare gevallen** A–H, waarvan H een utiliteitsgebouw (`tests/public_comparison.rs`), nagerekend in hun eigen normversie;
+- de **numerieke fuzz** (`tests/numeric_fuzz.rs`): elk getal uit de voorbeelden en openbare gevallen krijgt randwaarden, in alle vijf normversies, met controles op eindigheid, plausibiliteit en monotonie;
+- de **referentiesuites** (`reference_gate`): de openbare gevallen en de RVO-voorbeeldwoningen met een oordeel, en de gecodeerde ISSO 54-deeltesten (240 van 266, versie 2.0) die rekenen zonder verwachting (`pending_expectation`);
+- de **formulierbewaking**: ongeveer 2 400 toestanden van de projectformulieren en alle opnamesecties gaan door de kern; geen afgekeurde vorm, geen achtergebleven veld, elk gat met een route;
 - de robuustheidstests;
 - de service- en API-tests;
 - de tests van de desktop-opdrachten;
@@ -71,7 +74,7 @@ De gate `scripts/verify-nta.sh` loopt bij elke wijziging. Er wordt alleen vastge
 Daarnaast zijn er:
 - **MSRV-test.** De kern wordt ook getest met Rust 1.77.2, de oudste ondersteunde versie.
 - **Onafhankelijke herberekening.** Elke route is apart herberekend; de stand staat in de [verificatiestatus](nta8800-verificatiestatus.md).
-- **Referentieharnas.** Het [referentieprotocol](nta8800-referentieprotocol.md) beschrijft het harnas waarmee de ISSO 54-testset wordt gedraaid zodra die er is.
+- **Referentieharnas.** Het [referentieprotocol](nta8800-referentieprotocol.md) beschrijft het harnas. De gate draait het al op de gecodeerde ISSO 54-deeltesten, zonder oordeel; zodra de uitkomsten van versie 5.0 er zijn, worden die als verwachting ingevuld ([voorbereiding ISSO 54](nta8800-isso54-voorbereiding.md)).
 - **Builds.** De build-verificaties per commit staan in `docs/nta8800-build-verificatie-*.md`, en de procedure in de [buildprocedure](nta8800-build-procedure.md).
 
 ## 6. Versiebeheer
@@ -86,7 +89,7 @@ Daarnaast zijn er:
 
 ## 7. Beperkingen
 
-- **Geen attest.** Het programma is niet geattesteerd. Alle uitkomsten hebben status `calculated_unverified`.
+- **Geen attest.** Het programma is niet geattesteerd. Alle uitkomsten hebben status `calculated_unverified`, of `calculated_legacy_edition` in een oudere normversie.
 - **Geen testset.** De ISSO 54-testset versie 5.0:2026 met verwachte uitkomsten is nog niet ingezien. Overeenstemming binnen de bandbreedtes is dus nog niet aangetoond (§4.2, p. 7).
 - **Geen registratiebestand.** Registratie in EP-Online is niet mogelijk zonder het uploadformaat van RVO en een attest.
 - **Open interpretatie koeling.** De koelroute volgt 10.15 en 10.87 letterlijk. Dat wijkt af van ten minste één ander programma, zie de vragen aan NEN.
@@ -109,7 +112,7 @@ Gemeten op 9 oktober 2026 (rekenkern 0.3.0, release-build, 8 kernen) met `crates
 | woningen | 50 | 100 | 94 ms | 2,7 MB | – |
 | woningen | 200 | 400 | 412 ms | 10 MB | – |
 
-- **Lineair.** Rekentijd, uitvoer en geheugen groeien evenredig met het aantal zones: ongeveer 4 ms, 72 kB uitvoer en 0,7 MB geheugen per utiliteitszone. Er is geen kwadratisch gedrag gevonden. Van de 904 ms voor 200 zones gaat 553 ms naar de gebouwberekening zelf; de rest is afleiding, controle en de eindige-getallencontrole van de uitkomst. Er was dus geen algoritmische correctie nodig.
+- **Lineair.** Rekentijd, uitvoer en geheugen groeien evenredig met het aantal zones: ongeveer 4 ms, 72 kB uitvoer en 0,7 MB geheugen per utiliteitszone. Er is geen kwadratisch gedrag gevonden. In een meting met tijden per fase (904 ms in totaal voor 200 zones, door de meting zelf iets trager dan de 759 ms in de tabel) gaat 553 ms naar de gebouwberekening zelf; de rest is afleiding, controle en de eindige-getallencontrole van de uitkomst. Er was dus geen algoritmische correctie nodig.
 - **Uitkomst bij schalen.** Een gebouw dat n keer herhaald wordt, houdt dezelfde energiebehoefte per m² (BENG 1). Verwarming, ventilatie en verlichting worden precies n keer zo groot. Tapwater, koeling en hulpenergie groeien minder, omdat ze vaste posten per systeem hebben (het verlies van het voorraadvat, de 87,6 kWh regelenergie van 10.87). De test controleert dit.
 - **Invoergrootte.** Een utiliteitszone is ongeveer 11 kB invoer. De standaardlimiet van de HTTP-API (16 MB) laat dus ruwweg 1 500 zones toe. Geëxtrapoleerd kost zo'n verzoek ongeveer 7 s en 1 GB geheugen.
 - **HTTP-API.** De API begrenst daarom het aantal gelijktijdige berekeningen (`--max-calculations`, standaard het aantal kernen) en de tijd per verzoek (`--calculation-timeout-s`, standaard 120 s). Daarna volgt 503 met `server_busy` of `calculation_timeout` (zie [HTTP-API](nta8800-api.md)). Wie de API buiten de eigen computer aanbiedt, stelt beide en `--body-limit-mb` lager in.

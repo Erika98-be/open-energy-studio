@@ -1,5 +1,5 @@
 import type { IProject } from '../energy/types';
-import type { ProjectPerformanceAssessment } from '../nta/KernelClient';
+import { legacyEdition, type ProjectPerformanceAssessment } from '../nta/KernelClient';
 
 /**
  * EP-Online data overview for the project dossier.
@@ -13,6 +13,12 @@ import type { ProjectPerformanceAssessment } from '../nta/KernelClient';
  * serves only to check the registered label in EP-Online against the
  * calculation afterwards. It is NOT a registration file.
  */
+/** Fields left out when the result is in an older, non-registrable edition. */
+const LEGACY_OMITTED: EpOnlineField[] = [
+  'Energieklasse', 'Energiebehoefte', 'Primaire_fossiele_energie', 'Aandeel_hernieuwbare_energie',
+  'Temperatuuroverschrijding', 'Warmtebehoefte',
+];
+
 export const EP_ONLINE_OVERVIEW_NOTICE =
   'Overzicht ter controle van het geregistreerde label in EP-Online. Veldnamen volgen het openbare exportschema '
   + 'EpbdExportTypesV4 (Pandcertificaat). Dit is GEEN registratiebestand: het uploadformaat van EP-Online is niet '
@@ -129,7 +135,11 @@ export function buildEpOnlineOverview(
 ): EpOnlineOverview {
   const registration = project.registration ?? {};
   const performance = assessment?.performance ?? null;
-  const calculated = performance?.status === 'calculated_unverified';
+  // An older edition calculates, but is not registrable: no class or indicators
+  // in an overview meant to check a registered label.
+  const legacy = assessment != null && legacyEdition(assessment);
+  const calculated = assessment?.status === 'calculated_unverified' && !legacy
+    && performance?.status === 'calculated_unverified';
   const indicators = assessment?.labelData?.indicators ?? null;
   const residential = project.buildingFunction === 'residential';
   const existing = (registration.purpose ?? 'existing_building') === 'existing_building';
@@ -192,6 +202,10 @@ export function buildEpOnlineOverview(
       set('Eis_aandeel_hernieuwbare_energie', round(limits.renewableShareMinPercent, 1));
       if (residential) set('Eis_temperatuuroverschrijding', 1.2);
     }
+  } else if (legacy) {
+    values.Energieklasse = null;
+    const reason = `oudere uitgave (NTA 8800:${assessment?.normVersion ?? 'onbekend'}), niet registreerbaar`;
+    for (const field of LEGACY_OMITTED) omitted.push({ field, reason });
   } else {
     values.Energieklasse = null;
     omitted.push({ field: 'Energieklasse', reason: 'geen berekend resultaat van de rekenkern' });
@@ -210,7 +224,9 @@ export function buildEpOnlineOverview(
     if (field in values) ordered[field] = values[field] as EpOnlineValue;
   }
   return {
-    notice: EP_ONLINE_OVERVIEW_NOTICE,
+    notice: legacy
+      ? `${EP_ONLINE_OVERVIEW_NOTICE} Berekend in de oudere uitgave NTA 8800:${assessment?.normVersion ?? 'onbekend'}: niet registreerbaar, daarom zonder energieklasse en indicatoren.`
+      : EP_ONLINE_OVERVIEW_NOTICE,
     schema: 'EpbdExportTypesV4 (exportschema, Pandcertificaat)',
     pandcertificaat: ordered,
     omitted,

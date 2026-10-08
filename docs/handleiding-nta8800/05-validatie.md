@@ -22,7 +22,7 @@ De basisopname kent daarnaast `derived_input_rejected`. Dan is de opname afgelei
 - **Waarschuwing** (`warnings`): de berekening gaat door. Een waarschuwing wijst op iets ongebruikelijks dat de adviseur moet controleren.
 - **Kernmelding** (`issues`): een weigering door de kern zelf, bijvoorbeeld bij een tegenstrijdige combinatie.
 
-Een leeg getal in het invoerblok wordt per veld gemeld als `nta_value_missing`. Een keuzeveld (type) dat leeg is, wordt als enige gemeld. De velden daaronder volgen pas als het type is gekozen. Fuzztests op drie voorbeeldprojecten bewaken dat geen veld vals of te weinig wordt gemeld.
+Een leeg getal in het invoerblok dat de kern nodig heeft, wordt per veld gemeld als `nta_value_missing`. Een leeg veld met een standaardwaarde in de kern (bijvoorbeeld de montage van PV of het aantal gedeelde zones van een verticale leiding) houdt die standaardwaarde: leeg telt als niet ingevuld. Een keuzeveld (type) dat leeg is, wordt als enige gemeld. De velden daaronder volgen pas als het type is gekozen. Fuzztests op drie voorbeeldprojecten bewaken dat geen veld vals of te weinig wordt gemeld.
 
 ## Invoergrenzen (keuzes van dit programma)
 

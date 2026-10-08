@@ -218,7 +218,7 @@ function results(doc: ReportDocument, project: IProject, assessment: ProjectPerf
       <th>Hernieuwbaar aandeel (label)</th><td class="n">${n(performance.labelPrimaryFossilIndicatorKwhPerM2Year != null ? performance.labelRenewableSharePercent : performance.renewableSharePercent, 1)} %</td></tr>
     <tr><th>CO<sub>2</sub>-emissie</th><td class="n">${n(performance.co2KgPerM2, 1)} kg/m²·jr</td><th>Warmtebehoefte (5.3a)</th><td class="n">${n(performance.chapter5?.heatingNeedKwhPerM2, 2)} kWh/m²·jr</td></tr>
     ${elements ? Object.entries(elements).filter(([key, value]) => value != null && typeof value !== 'object' && !STATEMENT_ELEMENTS.has(key)).map(([key, value]) =>
-      `<tr><th colspan="2">${escapeHtml(LABEL_ELEMENT[key] ?? key)}</th><td colspan="2">${escapeHtml(typeof value === 'number' ? n(value, 1) : value)}</td></tr>`).join('') : ''}
+      `<tr><th colspan="2">${escapeHtml(LABEL_ELEMENT[key] ?? key)}</th><td colspan="2">${escapeHtml(labelElementValue(key, value))}</td></tr>`).join('') : ''}
     ${project.registration ? labelStatementRows(assessment.labelData?.indicators?.elements, project.registration.labelStatements) : ''}`;
   const labelTable = doc.table('Indicatieve labelklasse en labelgegevens (Omgevingsregeling art. 5.11–5.13a)', '', labelRows);
   const warnings: Array<{ code: string; path: string; detail?: string | null }> = [...(assessment.warnings ?? []), ...(performance.warnings ?? [])];
@@ -262,13 +262,29 @@ function attestMarkSlot(attest: AttestMark): string {
   return attest.markText ? `<div class="attest-mark" data-mark="nl-epbd">${escapeHtml(attest.markText)}</div>` : '';
 }
 
-const LABEL_ELEMENT: Record<string, string> = {
-  operationalCo2KgPerM2: 'Operationele CO₂-emissie [kg/m²·jr]', wlcGwpKgCo2EqPerM2Year: 'WLC-GWP [kg CO₂-eq/m²·jr]',
+/** Labels of the kernel's label elements (crates/nta8800-core/src/label_data.rs `LabelElements`). */
+export const LABEL_ELEMENT: Record<string, string> = {
+  operationalCo2KgPerM2: 'Operationele CO₂-emissie [kg/m²·jr]', wlcGwpKgCo2EqPerM2: 'WLC-GWP [kg CO₂-eq/m²·jr]',
   finalEnergyKwhPerM2: 'Finaal energiegebruik [kWh/m²·jr]', annualPrimaryFossilKwh: 'Primair fossiel energiegebruik [kWh/jr]',
   annualRenewablePrimaryKwh: 'Hernieuwbare primaire energie [kWh/jr]', annualFinalEnergyKwh: 'Finaal energiegebruik [kWh/jr]',
-  onSiteRenewableProductionKwh: 'Hernieuwbare opwekking op locatie [kWh/jr]', mainEnergyCarrier: 'Belangrijkste energiedrager',
+  renewableProductionKwh: 'Hernieuwbare opwekking op locatie [kWh/jr]', mainEnergyCarrier: 'Belangrijkste energiedrager',
   mainRenewableSource: 'Belangrijkste hernieuwbare bron',
 };
+
+/** Dutch names of the carrier and renewable-source tokens in the label elements (label_data.rs). */
+export const LABEL_TOKEN: Record<string, string> = {
+  el: 'elektriciteit', electricity: 'elektriciteit', gas: 'aardgas', oil: 'olie', bm: 'biomassa', biomass: 'biomassa',
+  dh: 'warmte van derden', dw: 'warmte van derden (tapwater)', dc: 'koude van derden',
+  heat_pump_heat: 'omgevingswarmte (warmtepomp)', solar_heat: 'zonnewarmte', cold: 'omgevingskoude',
+  external_heat: 'externe warmte', external_cold: 'externe koude',
+};
+
+/** A label element value: kWh per year as whole kWh, other numbers with one decimal, tokens in Dutch. */
+export function labelElementValue(key: string, value: unknown): string {
+  if (typeof value === 'number') return n(value, key.endsWith('Kwh') ? 0 : 1);
+  const text = String(value);
+  return LABEL_TOKEN[text] ?? text;
+}
 
 /* ------------------------------------------------------------------ standard */
 
