@@ -1548,6 +1548,15 @@ fn zone_terms(
                 format!("{prefix}emission.airHeaters.count"),
             ));
         }
+        // 9.23: with heaters of other types in the zone the count of this
+        // type is needed to weigh the factors (n_H,aux of tables 9.12/9.13,
+        // 2025+C1 p. 299–301; 2022 p. 282).
+        if heaters.count.is_none() && !heaters.further.is_empty() {
+            issues.push(issue(
+                "air_heater_count_required",
+                format!("{prefix}emission.airHeaters.count"),
+            ));
+        }
         for (index, unit) in heaters.further.iter().enumerate() {
             if unit.count == 0 {
                 issues.push(issue(
@@ -6555,6 +6564,46 @@ mod tests {
             .iter()
             .any(|item| item.code == "air_heater_count_invalid"
                 && item.path.ends_with("emission.airHeaters.further[0].count")));
+    }
+
+    #[test]
+    fn mixed_air_heaters_need_the_count_of_the_first_type() {
+        use crate::heating_emission::{AirHeaterAuxiliary, AirHeaterKind, AirHeaterUnit};
+        // 9.23 with tables 9.12/9.13 (2025+C1 p. 299–301; 2022 p. 282):
+        // n_H,aux counts every heater in the zone, so with other types
+        // given the count of `kind` cannot be guessed.
+        let mixed = AirHeaterAuxiliary {
+            kind: AirHeaterKind::Direct {
+                radial_fan: Some(false),
+            },
+            count: None,
+            further: vec![AirHeaterUnit {
+                kind: AirHeaterKind::Direct {
+                    radial_fan: Some(true),
+                },
+                count: 3,
+            }],
+            design_heat_load_w: Some(10_000.0),
+            source_reference: "ISSO 54 EP-W203o".to_owned(),
+        };
+        assert_eq!(mixed.factor(), None);
+        let mut input = boiler_chain();
+        input.emission.system = EmissionSystem::AirHeating;
+        input.emission.balancing = HydronicBalancing::NotApplicable;
+        input.emission.air_heaters = Some(mixed.clone());
+        let result = assess_space_heating_chain(&input);
+        assert_ne!(result.status, "calculated_unverified");
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "air_heater_count_required"
+                && item.path.ends_with("emission.airHeaters.count")));
+        // Without other types an absent count still means "all heaters".
+        let single = AirHeaterAuxiliary {
+            further: Vec::new(),
+            ..mixed
+        };
+        assert!(single.factor().is_some());
     }
 
     #[test]
