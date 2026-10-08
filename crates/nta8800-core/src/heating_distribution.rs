@@ -467,23 +467,23 @@ impl PipeGeometry {
 
     /// A diameter or the depth exceeds [`Self::MAX_DIMENSION_M`].
     pub fn dimension_above_one_metre(&self) -> bool {
-        let lengths: &[f64] = match self {
+        let lengths: Vec<f64> = match *self {
             Self::InsulatedInAir {
                 pipe_outer_diameter_m,
                 insulated_diameter_m,
                 ..
-            } => &[*pipe_outer_diameter_m, *insulated_diameter_m],
+            } => vec![pipe_outer_diameter_m, insulated_diameter_m],
             Self::InsulatedEmbedded {
                 pipe_outer_diameter_m,
                 insulated_diameter_m,
                 depth_m,
                 ..
-            } => &[*pipe_outer_diameter_m, *insulated_diameter_m, *depth_m],
+            } => vec![pipe_outer_diameter_m, insulated_diameter_m, depth_m],
             Self::Uninsulated {
                 inner_diameter_m,
                 outer_diameter_m,
                 ..
-            } => &[*inner_diameter_m, *outer_diameter_m],
+            } => vec![inner_diameter_m, outer_diameter_m],
         };
         lengths.iter().any(|value| *value > Self::MAX_DIMENSION_M)
     }
