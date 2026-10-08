@@ -1168,7 +1168,11 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
               // §10.4.1: direct expansion only without a water distribution; the
               // hidden answer is cleared so it cannot block the survey.
               const next = write(draft, ['cooling', 'waterBased'], event.target.checked);
-              save({ kind, survey: event.target.checked ? write(next, ['cooling', 'directExpansion'], undefined) : next });
+              // Without a water distribution the design temperature and pipe insulation no longer
+              // apply (opname/utility.rs reads them only for water-based cooling); they are cleared too.
+              save({ kind, survey: event.target.checked
+                ? write(next, ['cooling', 'directExpansion'], undefined)
+                : write(write(next, ['cooling', 'designTemperature'], undefined), ['cooling', 'pipesInsulated'], undefined) });
             }} />
           {t('opname.cooling.waterBased')}
         </label>

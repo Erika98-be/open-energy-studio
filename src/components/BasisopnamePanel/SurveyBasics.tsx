@@ -394,6 +394,18 @@ export function emptyRequiredSurveyFields(survey: unknown): string[] {
       });
     }
   });
+  items(draft, ['envelope', 'panels']).forEach((panel, index) => {
+    if (typeof panel.areaM2 !== 'number') missing.push(`envelope.panels[${index}].areaM2`);
+    if (typeof panel.surfaceId !== 'string' || panel.surfaceId === '') missing.push(`envelope.panels[${index}].surfaceId`);
+    if (typeof panel.frame !== 'string') missing.push(`envelope.panels[${index}].frame`);
+    const insulation = (panel.insulation ?? {}) as Draft;
+    if (insulation.kind === 'known_thickness' && typeof insulation.thicknessMm !== 'number') {
+      missing.push(`envelope.panels[${index}].insulation.thicknessMm`);
+    }
+  });
+  items(draft, ['hotWater', 'storage']).forEach((vessel, index) => {
+    if (typeof vessel.volumeL !== 'number') missing.push(`hotWater.storage[${index}].volumeL`);
+  });
   items(draft, ['envelope', 'surfaces']).forEach((surface, index) => {
     const boundary = (surface.boundary ?? {}) as Draft;
     if (boundary.kind === 'unheated_space' && (typeof boundary.spaceId !== 'string' || boundary.spaceId === '')) {

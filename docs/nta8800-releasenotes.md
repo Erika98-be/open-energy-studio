@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — opnameformulieren na de achtste review (geen rekenwijziging)
+
+- **Lijsten met getallen.** Bij de belemmeringsfactoren van PV en ramen schreef een leeggemaakt veld `[0]` en een afsluitende ";" een extra 0. Bij PV gaf dat zonder melding een opbrengst van nul. Lege delen vallen nu weg, en een leeg veld laat de lijst weg.
+- **Lege verplichte getallen.** De oppervlakte en isolatiedikte van een paneel en de inhoud van een voorraadvat schreven leeg `null`, waarna de kern de hele opname weigerde met een kale melding. "Opname doorrekenen" noemt die velden nu eerst. De opslagcapaciteiten (elektrisch, thermisch) hebben in de kern de standaard 0 en worden leeg weggelaten. De keuze van het vlak en het kozijn van een paneel heeft geen lege optie meer.
+- **Een vangnet tegen deze fout.** `src/__tests__/survey-null-paths.test.tsx` maakt in elk opnameblok elk getal leeg en kiest elke lege optie. Elke `null` die overblijft, moet `emptyRequiredSurveyFields` noemen of in `training-data/nta8800-survey-null-tolerant-paths.json` staan: antwoorden die de kern als "niet beantwoord" leest. `crates/nta8800-core/tests/survey_form_shapes.rs` controleert die lijst tegen de kern, en dat een verplicht getal `null` weigert.
+- **Bypass bij systeem E.** De vraag naar de bypass staat nu ook bij een gecombineerd systeem (E), waar de kern hem leest (tabel 11.12 en `passive_cooling_requires_bypass`).
+- **Koeling in de utiliteitsopname.** De ontwerptemperatuur en de leidingisolatie staan alleen bij watergedragen koeling, de enige waarbij de kern ze leest, en worden gewist bij de overstap naar directe expansie.
+
 ### 9 oktober 2026 — formulieren voor de laatste invoer die alleen via JSON kon (geen rekenwijziging)
 
 De formulierdekking ([formulierdekking](ui-redesign/formulierdekking.md)) telt geen open opties meer: 1 799 van de 1 823 kernopties schrijft een formulier, 8 zet een formulier op een manier die de check niet op naam ziet, 16 blijven bewust JSON. De kern en zijn uitkomsten zijn ongewijzigd; `crates/nta8800-core/tests/survey_form_shapes.rs` en `project_form_shapes.rs` laten de kern de nieuwe formuliervormen lezen en doorrekenen zonder nieuwe meldingen.
