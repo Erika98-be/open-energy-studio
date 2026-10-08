@@ -264,7 +264,10 @@ export function UtilityInstallationExtrasFields({ draft, change, t }: Props) {
 }
 
 /** ISSO 82.1/75.1 §8: survey surface answers for reed roofs, crawlspace floors, proven insulation and unheated spaces. */
-export function SurfaceExtrasFields({ draft, change, t, base }: Props & { base: Path }) {
+/** NTA 8800 editions that take the measured height h of (8.47) (2022 p. 236); from 2023 h is fixed. */
+const MEASURED_WALL_HEIGHT_EDITIONS = new Set(['2022', '2020+A1']);
+
+export function SurfaceExtrasFields({ draft, change, t, base, edition }: Props & { base: Path; edition?: string | null }) {
   const field = { draft, onChange: change };
   const element = read(draft, [...base, 'element']);
   const boundary = read(draft, [...base, 'boundary', 'kind']);
@@ -273,6 +276,8 @@ export function SurfaceExtrasFields({ draft, change, t, base }: Props & { base: 
     {element === 'roof' && <NumberField {...field} path={[...base, 'reedThicknessMm']} label={t('opname.surface.reed')} optional unit="mm" />}
     {boundary === 'crawlspace' && <TriStateField {...field} yes={t('opname.yes')} no={t('opname.no')}
       path={[...base, 'crawlspaceBottomInsulated']} label={t('opname.surface.crawlspaceBottom')} />}
+    {(boundary === 'crawlspace' || boundary === 'unheated_cellar') && edition != null && MEASURED_WALL_HEIGHT_EDITIONS.has(edition) &&
+      <NumberField {...field} path={[...base, 'floorHeightAboveGroundM']} label={t('opname.surface.floorHeightAboveGround')} optional unit="m" />}
     {read(draft, [...base, 'insulation', 'kind']) === 'thickness' &&
       <CheckField {...field} path={[...base, 'insulation', 'proven']} label={t('opname.surface.proven')} />}
     {boundary === 'unheated_space' && <SelectField {...field} path={[...base, 'boundary', 'spaceId']} label={t('opname.surface.space')}

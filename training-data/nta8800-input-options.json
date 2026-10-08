@@ -3000,6 +3000,7 @@
       "reedThicknessMm",
       "exposedPerimeterM",
       "crawlspaceBottomInsulated",
+      "floorHeightAboveGroundM",
       "renovation",
       "zoneId",
       "sourceReference"
@@ -3722,6 +3723,7 @@
       "reedThicknessMm",
       "exposedPerimeterM",
       "crawlspaceBottomInsulated",
+      "floorHeightAboveGroundM",
       "renovation",
       "zoneId",
       "sourceReference"

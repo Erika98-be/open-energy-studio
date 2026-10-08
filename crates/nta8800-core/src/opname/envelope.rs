@@ -123,6 +123,14 @@ pub struct SurveySurface {
     /// (table 8.13, p. 93); `None`/false: uninsulated.
     #[serde(default)]
     pub crawlspace_bottom_insulated: Option<bool>,
+    /// H2 of ISSO 82.1 4e druk afb. 8.23 (p. 73) and ISSO 75.1 4e druk
+    /// (same §): the height from the top of the ground floor to ground
+    /// level, m, for a floor above a crawlspace or unheated cellar. NTA
+    /// 8800:2022 (8.47) (p. 236) takes it as h; there is no forfait value
+    /// for an unknown height. From NTA 8800:2023 h is the fixed 0,125 m
+    /// (p. 240) and this answer is not used.
+    #[serde(default)]
+    pub floor_height_above_ground_m: Option<f64>,
     /// Insulated at a renovation or in a later extension, thickness not
     /// determinable (§8.7.2.1, afb. 8.14, p. 84–85); only with
     /// `presentUnknownThickness`. Without it, a building from 1965 on keeps
@@ -1146,6 +1154,34 @@ pub fn derive_envelope_zone(
                         "wallResistanceM2kPerW": 0.0,
                         "wallUValueWPerM2k": 0.0,
                     });
+                    // NTA 8800:2022 (8.47) (p. 236): h is the measured H2
+                    // (ISSO 82.1 4e druk p. 73); no forfait value exists.
+                    // From 2023 h is fixed and the kernel refuses an input.
+                    if !crate::norm_versions::profile().crawl_wall_height_fixed {
+                        match surface.floor_height_above_ground_m {
+                            Some(height) if height.is_finite() && height >= 0.0 => {
+                                floor["below"]["wallHeightAboveGroundM"] = json!(height);
+                                recorder.record(
+                                    "crawlspace_wall_height_h2",
+                                    &format!("{path}.floorHeightAboveGroundM"),
+                                    format!("h {height} m"),
+                                    "NTA 8800:2022 (8.47) p. 236; ISSO 82.1 4e druk p. 73 (H2)",
+                                );
+                            }
+                            Some(_) => {
+                                recorder.issue(
+                                    "floor_height_above_ground_invalid",
+                                    format!("{path}.floorHeightAboveGroundM"),
+                                );
+                            }
+                            None => {
+                                recorder.issue(
+                                    "floor_height_above_ground_required",
+                                    format!("{path}.floorHeightAboveGroundM"),
+                                );
+                            }
+                        }
+                    }
                     crawl_floors.push(ground_floors.len());
                 }
                 ground_floors.push(floor);
@@ -1418,6 +1454,7 @@ mod tests {
             reed_thickness_mm: None,
             exposed_perimeter_m: Some(16.0),
             crawlspace_bottom_insulated: None,
+            floor_height_above_ground_m: None,
             renovation: None,
             zone_id: None,
             source_reference: "survey".into(),
