@@ -40,9 +40,8 @@ describe('hot-water generators without a form before', () => {
       <HotWaterGeneratorFields draft={d} change={change} base={['hotWater', 'generator']} />}</Harness>);
     select('Hot-water generator', 'booster_heat_pump');
     expect(draft().hotWater.generator).toEqual(hotWaterGeneratorTemplate('booster_heat_pump'));
-    const cops = screen.getAllByLabelText('Measured COP');
-    fireEvent.change(cops[0], { target: { value: '3.2' } });
-    fireEvent.change(cops[1], { target: { value: '4.4' } });
+    fireEvent.change(screen.getByLabelText('Measured COP — test 1 (low source temperature)'), { target: { value: '3.2' } });
+    fireEvent.change(screen.getByLabelText('Measured COP — test 2 (40 °C)'), { target: { value: '4.4' } });
     setNumber(/Standing loss P_ls/, '0.05');
     fireEvent.click(screen.getByLabelText('Enter the source temperature per month'));
     fireEvent.change(screen.getByLabelText('Mean source inlet temperature θ_evap 3'), { target: { value: '30' } });

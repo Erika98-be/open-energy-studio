@@ -1,4 +1,5 @@
 import { useI18n } from '../../i18n/i18n';
+import { SwimmingPoolFields } from './NtaZoneData';
 import {
   heatRecoveryTemplate, VENTILATION_VARIANTS, ventilationOp, ventilationUnit,
 } from '../../core/nta/NtaFormModels';
@@ -163,6 +164,7 @@ export function NtaVentilationSection({ draft, change }: SectionProps) {
       <NumberField {...field} path={[...base, 'constructionYear']} label={t('nta.vent.constructionYear')} step="1" />
       <CheckField {...field} path={[...base, 'floorAboveCrawlspace']} label={t('nta.vent.crawlspace')} />
       {!utility && <NumberField {...field} path={[...base, 'wholeDwellingAreaM2']} label={t('nta.vent.wholeDwellingArea')} optional unit="m²" />}
+      <SwimmingPoolFields draft={draft} change={change} base={base} />
       <TextField {...field} path={[...base, 'sourceReference']} label={t('nta.form.source')} />
     </Section>
     <Section title={t('nta.vent.system')}>

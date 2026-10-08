@@ -107,3 +107,84 @@ fn residential_survey_form_shapes_are_read() {
         "{codes:?}"
     );
 }
+
+/// The answers the form-coverage forms add (src/components/BasisopnamePanel/
+/// SurveyCoverageFields.tsx), in the shapes those forms write: the kernel
+/// reads them and they bring no code the plain fixture does not have.
+fn coverage_answers(value: &mut Value, utility: bool) {
+    value["areaSourceReference"] = json!("NEN 2580 meetrapport");
+    // §15.5 storage counts only with PV (storage_requires_pv); the form offers it only then.
+    if value.get("pv").and_then(Value::as_array).is_some_and(|pv| !pv.is_empty()) {
+        value["storage"] =
+            json!({ "electricalKwh": 5.0, "thermalKwh": 0.0, "sourceReference": "factuur" });
+    }
+    let surface = value["envelope"]["surfaces"][0]["id"].clone();
+    value["envelope"]["surfaces"][0]["orientation"] = json!("south");
+    value["envelope"]["surfaces"][0]["tiltDeg"] = json!(90.0);
+    value["envelope"]["surfaces"][0]["cavity"] = json!(true);
+    value["envelope"]["panels"] = json!([{ "id": "paneel-1", "surfaceId": surface, "areaM2": 1.0,
+        "insulation": { "kind": "known_thickness", "thicknessMm": 40.0 }, "cavity": false,
+        "frame": "wood_or_plastic", "sourceReference": "opname" }]);
+    // `get_mut`, not `value[...]`: indexing a missing key would insert a null.
+    if let Some(window) = value
+        .get_mut("envelope")
+        .and_then(|envelope| envelope.get_mut("windows"))
+        .and_then(|windows| windows.get_mut(0))
+    {
+        window.as_object_mut().unwrap().remove("shading");
+        window["obstruction"] = json!({ "heating": vec![1.0; 12], "cooling": vec![1.0; 12],
+            "sourceReference": "berekening" });
+    }
+    value["heating"]["balanced"] = json!(true);
+    value["heating"]["storeys"] = json!(2);
+    value["hotWater"]["showerHeatRecovery"] = json!("vertical");
+    if let Some(pv) = value.get_mut("pv").and_then(|pv| pv.get_mut(0)) {
+        pv["mounting"] = json!("strongly_ventilated");
+        pv["moduleType"] = json!("amorphous_multi_junction");
+        pv.as_object_mut().unwrap().remove("shading");
+        pv["obstructionFactors"] = json!([0.9]);
+    }
+    if utility {
+        value["hotWater"]["circulation"] = json!(true);
+        value["hotWater"]["storage"] = json!([{ "id": "vat-1", "volumeL": 150.0, "label": "b",
+            "producedFrom2018": true, "connection": "fully_insulated", "inHeatedZone": true,
+            "sourceReference": "typeplaat" }]);
+        if value.get("cooling").is_some_and(Value::is_object) {
+            value["cooling"]["designTemperature"] = json!("t12_to18");
+            value["cooling"]["control"] = json!("central_with_room_control");
+            value["cooling"]["pipesInsulated"] = json!(true);
+        }
+        if value["ventilation"].get("ahu").is_some_and(Value::is_object) {
+            value["ventilation"]["ahu"]["insideThermalZone"] = json!(true);
+        }
+    } else {
+        value["hotWater"]["served"] = json!("kitchen_and_bathroom");
+        value["hotWater"]["kitchenLengthM"] = json!(3.0);
+        value["hotWater"]["bathroomLengthM"] = json!(6.0);
+    }
+}
+
+#[test]
+fn form_coverage_answers_are_read_by_both_surveys() {
+    let (_, before) = utility(utility_fixture());
+    let mut value = utility_fixture();
+    coverage_answers(&mut value, true);
+    let (_, after) = utility(value);
+    for code in &after {
+        assert!(
+            before.contains(code),
+            "utility: new code {code} in {after:?}"
+        );
+    }
+
+    let before = residential(residential_fixture());
+    let mut value = residential_fixture();
+    coverage_answers(&mut value, false);
+    let after = residential(value);
+    for code in &after {
+        assert!(
+            before.contains(code),
+            "residential: new code {code} in {after:?}"
+        );
+    }
+}
