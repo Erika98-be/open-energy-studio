@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — formulier voor de forfaitaire boosterwarmtepomp; meldteksten bij velden (geen rekenwijziging)
+
+- De forfaitaire boosterwarmtepomp (13.162/13.163) heeft een formulier bij het tapwatertoestel: de ontwerpaanvoertemperatuur van het voedende verwarmingssysteem (leeg is onbekend) en de bron van de warmte volgens figuur W.1 (externe warmtelevering, het verwarmingssysteem of een collectieve opwekker met rendement en energiedrager). Eerder kon deze route alleen via Geavanceerd (JSON).
+- Een veld met een melding toont bij aanwijzen de tekst van de melding in plaats van de kale code. Ook het controlepaneel van de rekenkern zoekt de tekst bij elke meldcode op.
+- Een test controleert dat elke code die de kern kan geven, in de lijst met invoergaten een Nederlandse en Engelse tekst heeft.
+
 ### 9 oktober 2026 — handleiding bijgewerkt voor de routes sinds 8 oktober (geen rekenwijziging)
 
 - Hoofdstuk 3 beschrijft de nieuwe invoer: dunne luchtspouwen (bijlage D.2 van NEN-EN-ISO 6946), forfaitaire koudebruggen met een onverwarmde ruimte, de verwarmde vloer onder maaiveld boven een kruipruimte, luchtverwarmers van meer typen, ketelhulpenergie en WKK-omzettingsgetallen uit een kwaliteitsverklaring (ook voor tapwater), ψ uit de leidinggegevens met de eenheden en de vaste h_a bij tapwater, en de forfaitaire boosterwarmtepomp. Een nieuwe paragraaf zegt welk bewijs bij opgegeven productwaarden hoort, en de meldingentabel noemt de nieuwe meldcodes.
