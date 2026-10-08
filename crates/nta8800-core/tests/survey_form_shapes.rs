@@ -216,7 +216,9 @@ fn set_null(value: &mut Value, path: &str, item: &Value) {
             return;
         }
         if list {
-            let empty = current[key].as_array().map_or(true, |items| items.is_empty());
+            let empty = current[key]
+                .as_array()
+                .map_or(true, |items| items.is_empty());
             if empty {
                 current[key] = json!([item.clone()]);
             }

@@ -143,13 +143,14 @@ describe('survey answers that had no form', () => {
   });
 
   it('writes the utility cooling answers in the kernel enum codes', () => {
-    renderWithProviders(<Harness initial={{ cooling: { generator: 'compression' } }}>
+    // The design temperature and pipe insulation belong to a water distribution (review 8).
+    renderWithProviders(<Harness initial={{ cooling: { generator: 'compression', waterBased: true } }}>
       {(d, change) => <UtilityCoolingCoverageFields draft={d} change={change} t={t} />}</Harness>);
     select('Design temperature of the cooling emission', 't12_to18');
     select('Control of the cooling', 'central_with_room_control');
     select('Cooling pipes insulated', 'true');
-    expect(draft().cooling).toEqual({ generator: 'compression', designTemperature: 't12_to18', control: 'central_with_room_control',
-      pipesInsulated: true });
+    expect(draft().cooling).toEqual({ generator: 'compression', waterBased: true, designTemperature: 't12_to18',
+      control: 'central_with_room_control', pipesInsulated: true });
   });
 
   it('writes the utility circulation and vessels with fresh ids', () => {
