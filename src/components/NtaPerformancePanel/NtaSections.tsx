@@ -38,7 +38,7 @@ import {
   SpaceGeneratorFields, WindowObstructionFields,
 } from './NtaSystemSections';
 import {
-  buildVentilationDraft, removeVentilation, syncVentilation, utilityInternalGains,
+  buildVentilationDraft, removeVentilation, syncVentilation, utilityInternalGains, verticalPipesResidential,
 } from '../../core/nta/NtaFormModels';
 import { bacsTemplate } from '../../core/nta/NtaSystemTemplates';
 import {
@@ -93,7 +93,7 @@ export function VerticalPipesFields({ draft, change, residential, path, label }:
           <NumberField {...field} path={[...path, index, 'areaShare']} label={t('nta.form.verticalPipes.areaShare')} optional />
         </>}
       <CheckField {...field} path={[...path, index, 'insulated']} label={t('nta.form.verticalPipes.insulated')} />
-      <NumberField {...field} path={[...path, index, 'sharedZones']} label={t('nta.form.verticalPipes.shared')} step="1" />
+      <NumberField {...field} path={[...path, index, 'sharedZones']} label={t('nta.form.verticalPipes.shared')} step="1" optional />
       <TextField {...field} path={[...path, index, 'sourceReference']} label={t('nta.form.source')} />
       <button type="button" onClick={() => change(path, list.filter((_, other) => other !== index))}>
         {t('nta.form.verticalPipes.remove')}</button>
@@ -542,13 +542,15 @@ function GroundFloorsSection(props: NtaSectionProps) {
 
 function VerticalPipesSection({ draft, change, project }: NtaSectionProps) {
   const { t } = useI18n();
-  const residential = residentialScope(draft);
+  // The route (storeys or building height) follows the zone's use function, as in the kernel.
   return <>
     {project.zones.length > 1
       ? ((read(draft, ['zoneData']) as Draft[] | undefined) ?? []).map((item, index) =>
-        <VerticalPipesFields key={String(item.zoneId)} draft={draft} change={change} residential={residential}
+        <VerticalPipesFields key={String(item.zoneId)} draft={draft} change={change}
+          residential={verticalPipesResidential(draft, item)}
           path={['zoneData', index, 'verticalPipes']} label={String(item.zoneId)} />)
-      : <VerticalPipesFields draft={draft} change={change} residential={residential} path={['verticalPipes']} />}
+      : <VerticalPipesFields draft={draft} change={change} residential={verticalPipesResidential(draft)}
+        path={['verticalPipes']} />}
     <p className="nta-form-note">{t('nta.form.verticalPipes.note')}</p>
   </>;
 }

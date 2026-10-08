@@ -104,6 +104,52 @@ export function buildVentilationDraft(block: Block, project: IProject): Block {
  * one of both, and drops declared fan energy that chapter 11 replaces.
  */
 export function syncVentilation(block: Block, project: IProject): Block {
+  return syncVerticalPipes(syncVentilationOnly(block, project));
+}
+
+/**
+ * Whether a zone follows the residential route of 7.17a (storeys) rather than
+ * the utility route (building height H): the kernel decides by the zone's use
+ * function, which a zone's own data overrides (review 9).
+ */
+export function verticalPipesResidential(block: Block, zoneData?: Block): boolean {
+  const usage = (zoneData?.usageFunction ?? block.usageFunction) as string | undefined;
+  return usage == null ? block.calculationScope !== 'utility' : usage === 'residential';
+}
+
+/**
+ * A vertical pipe keeps only the members of its route: storeys on the
+ * residential route, building height and area share on the utility route.
+ * A member of the other route would stay hidden in the form and still block
+ * or change the kernel (review 9); a missing member of its own route is set
+ * blank so the kernel names it at the field the form shows.
+ */
+export function syncVerticalPipes(block: Block): Block {
+  const fix = (pipes: unknown, residential: boolean): unknown => Array.isArray(pipes)
+    ? pipes.map((pipe) => {
+      if (pipe == null || typeof pipe !== 'object') return pipe;
+      const { storeys, buildingHeightM, areaShare, ...rest } = pipe as Block;
+      return residential
+        ? { ...rest, storeys: storeys ?? null }
+        : { ...rest, buildingHeightM: buildingHeightM ?? null, ...(areaShare != null ? { areaShare } : {}) };
+    })
+    : pipes;
+  let next = block;
+  if (Array.isArray(block.verticalPipes)) {
+    next = { ...next, verticalPipes: fix(block.verticalPipes, verticalPipesResidential(block)) };
+  }
+  if (Array.isArray(block.zoneData)) {
+    next = {
+      ...next,
+      zoneData: (block.zoneData as Block[]).map((item) => Array.isArray(item?.verticalPipes)
+        ? { ...item, verticalPipes: fix(item.verticalPipes, verticalPipesResidential(block, item)) }
+        : item),
+    };
+  }
+  return next;
+}
+
+function syncVentilationOnly(block: Block, project: IProject): Block {
   const ventilation = block.ventilation as Block | null | undefined;
   if (!ventilation) return block;
   const zone = project.zones[0];

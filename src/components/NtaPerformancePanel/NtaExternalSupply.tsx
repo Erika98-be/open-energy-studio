@@ -495,7 +495,7 @@ export function AnnexPRouteFields({ draft, change, base, fn, label }: SectionPro
       <button type="button" onClick={() => change(at('inputs'), [...inputs, { carrier: { kind: 'natural_gas' }, kwh: null }])}>
         {t('nta.annexP.addInput')}
       </button>
-      <NumberField {...field} path={at('exportedElectricityKwh')} label={t('nta.annexP.exported')} />
+      <NumberField {...field} path={at('exportedElectricityKwh')} label={t('nta.annexP.exported')} optional />
       <NumberField {...field} path={at('renewableFactor')} label={t('nta.annexP.renewableFactor')} />
       <TextField {...field} path={at('sourceReference')} label={t('nta.form.source')} />
     </>}

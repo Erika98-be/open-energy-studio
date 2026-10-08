@@ -957,7 +957,7 @@ export function SolarWaterHeaterFields({ draft, change, base = ['hotWater', 'sol
         <SelectField {...field} path={at('solarUse')} label={t('nta.form.solar.use')} options={[
           ['water_heating', t('nta.form.solar.use.water')], ['combi', t('nta.form.solar.use.combi')],
           ['space_heating', t('nta.form.solar.use.space')]]} />
-        <NumberField {...field} path={at('count')} label={t('nta.form.solar.count')} step="1" />
+        <NumberField {...field} path={at('count')} label={t('nta.form.solar.count')} step="1" optional />
         <SelectField {...field} path={at('method', 'method')} label={t('nta.form.solar.method')} options={[
           ['calculated', t('nta.form.solar.method.calculated')], ['tested', t('nta.form.solar.method.tested')]]}
           onChange={(_, value) => change(at('method'), value === 'tested' ? testedSolarMethod() : calculatedSolarMethod())} />

@@ -196,7 +196,7 @@ export function NtaVentilationSection({ draft, change }: SectionProps) {
       </label>
       {installed != null && <>
         <NumberField {...field} path={[...base, 'installedCapacity', 'totalDm3PerS']} label={t('nta.vent.installedTotal')} />
-        <NumberField {...field} path={[...base, 'installedCapacity', 'naturalSupplyDm3PerS']} label={t('nta.vent.installedNatural')} />
+        <NumberField {...field} path={[...base, 'installedCapacity', 'naturalSupplyDm3PerS']} label={t('nta.vent.installedNatural')} optional />
         <TextField {...field} path={[...base, 'installedCapacity', 'sourceReference']} label={t('nta.form.source')} />
       </>}
       {utility && <>
@@ -314,7 +314,7 @@ export function NtaVentilationSection({ draft, change }: SectionProps) {
           <SelectField {...field} path={[...base, 'fans', 'control', 'control']} label={t('nta.vent.flowControlMethod')} options={[
             ['throttle', t('nta.vent.flowControl.throttle')], ['inlet_vane_or_blade_pitch', t('nta.vent.flowControl.vane')],
             ['speed_control', t('nta.vent.flowControl.speed')], ['other', t('nta.vent.flowControl.other')]]} />}
-        <NumberField {...field} path={[...base, 'fans', 'buildingShare']} label={t('nta.vent.buildingShare')} />
+        <NumberField {...field} path={[...base, 'fans', 'buildingShare']} label={t('nta.vent.buildingShare')} optional />
         <TextField {...field} path={[...base, 'fans', 'sourceReference']} label={t('nta.form.source')} />
       </> : <>
         <SelectField {...field} path={[...base, 'fans', 'current']} label={t('nta.vent.fanCurrent')}
