@@ -45,7 +45,8 @@ describe('evidence link made in the app and checked at registration', () => {
 
   it('keeps an id link through save and reload, and the kernel can resolve it', async () => {
     const base = exampleProject('terraced_dwelling');
-    const seeded = { ...base, registration: { ...(base.registration ?? {}), evidence: [photo] } } as IProject;
+    // A fixed project id: the example gets a fresh one each time.
+    const seeded = { ...base, id: 'voorbeeld-bewijskoppeling', registration: { ...(base.registration ?? {}), evidence: [photo] } } as IProject;
     const { container } = renderWithProviders(<>
       <Seed value={seeded} />
       <EvidenceAttach pointer="/zones/0/surfaces/0" />
