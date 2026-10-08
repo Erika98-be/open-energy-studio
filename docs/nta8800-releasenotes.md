@@ -13,6 +13,17 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — formulieren voor de laatste invoer die alleen via JSON kon (geen rekenwijziging)
+
+De formulierdekking ([formulierdekking](ui-redesign/formulierdekking.md)) telt geen open opties meer: 1 799 van de 1 823 kernopties schrijft een formulier, 8 zet een formulier op een manier die de check niet op naam ziet, 16 blijven bewust JSON. De kern en zijn uitkomsten zijn ongewijzigd; `crates/nta8800-core/tests/survey_form_shapes.rs` en `project_form_shapes.rs` laten de kern de nieuwe formuliervormen lezen en doorrekenen zonder nieuwe meldingen.
+
+- **Gegevens per rekenzone** (Gebouw › Zones, bij meer rekenzones): eigen gebruiksfunctie, woningtype, delen met een andere functie (§6.5.3), thermische massa, serres en een zwembad in een sportfunctie. Een rekenzone met eigen gegevens begint als kopie van de interne warmte, de luchtstromen en de ventilatie van het blok, want de kern haalt die dan alleen uit de zone (zonder kopie: `ventilation_flow_required`).
+- **Circulatieleiding** voor het hoofdtapwatersysteem en elk verder systeem (13.27–13.39). Voorheen had alleen de berekende Ψ een veld, en dat verscheen alleen als er via JSON al een circulatie stond.
+- **Verder tapwatersysteem:** nominaal vermogen, extra opwekkers en serieopstelling (die verdwijnt als er niet precies één extra opwekker is).
+- **Collectieve koeling, gedeeld PV-systeem, zwembad, rekenzone van de verlichting.**
+- **Opname:** bron van de gebruiksoppervlakte; opslag (alleen met PV, `storage_requires_pv`); oriëntatie, helling, spouw en omtrek per vlak; panelen; opgegeven belemmeringsfactoren per raam en per PV-veld; waterzijdig inregelen en bouwlagen van de distributie; bypass; tappunten en leidinglengtes; douche-WTW; PV-ventilatie en amorfe modules; in de utiliteitsopname de koeling (ontwerptemperatuur, regeling, leidingisolatie), circulatie en voorraadvaten, en de luchtbehandelingskast binnen de thermische zone.
+- **Boosterwarmtepomp (bijlage W):** de twee beproevingen hebben elk een eigen naam voor schermlezers.
+
 ### 9 oktober 2026 — opnameformulieren leveren invoer die de kern leest (geen rekenwijziging)
 
 Na de zevende review. Elk punt hieronder liet de kern de hele opname weigeren of gaf een melding die de gebruiker niet kon oplossen.

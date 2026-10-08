@@ -9,6 +9,7 @@ import { deliveryLabelsNl } from './deliveryLabels';
 import { evidenceLinkLabelsNl } from './evidenceLinkLabels';
 import { manualLabelsNl } from './manualLabels';
 import { existingLabelsNl } from './existingLabels';
+import { formCoverageLabelsNl } from './formCoverageLabels';
 
 export const nl: Record<string, string> = {
   // Generated kernel and survey code labels; specific keys below take precedence.
@@ -23,6 +24,7 @@ export const nl: Record<string, string> = {
   ...evidenceLinkLabelsNl,
   ...manualLabelsNl,
   ...existingLabelsNl,
+  ...formCoverageLabelsNl,
   // App
   'app.title': 'Open Energy Studio',
   'app.untitledProject': 'Naamloos Project',
@@ -1674,8 +1676,6 @@ export const nl: Record<string, string> = {
   'nta.form.dhwGen.largeDirectStorage': "overig direct gestookt voorraadtoestel (13.8.4.5.4)",
   'nta.form.boosterW.lowTest': "Beproeving bij 24 °C (of 16 °C)",
   'nta.form.boosterW.highTest': "Beproeving bij 40 °C",
-  'nta.form.boosterW.testTemperature': "Brontemperatuur van de beproeving",
-  'nta.form.boosterW.cop': "Gemeten COP",
   'nta.form.boosterW.standingLoss': "Stilstandsverlies P_ls (W.17)",
   'nta.form.boosterW.monthly': "Brontemperatuur per maand opgeven",
   'nta.form.boosterW.sourceTemperature': "Gemiddelde intredetemperatuur van de bron θ_evap",

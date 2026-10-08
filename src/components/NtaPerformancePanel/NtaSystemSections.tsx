@@ -1,4 +1,4 @@
-import { DeclaredAuxiliaryConstantsFields, DeclaredChpEfficienciesFields } from './NtaPipeGeometry';
+import { DeclaredAuxiliaryConstantsFields, DeclaredChpEfficienciesFields, HotWaterCirculationFields } from './NtaPipeGeometry';
 import { useI18n } from '../../i18n/i18n';
 import { ShowerHeatRecoveryFields } from './NtaShowerHeatRecovery';
 import { ElectricBoilerInsulatedPipe2022Field } from './NtaEdition2022Fields';
@@ -374,8 +374,8 @@ function BoosterAnnexWFields({ draft, change, base }: SectionProps & { base: Pat
   return <div className="nta-form-subsection">
     {(['lowTest', 'highTest'] as const).map((test) => <fieldset key={test} className="nta-form-row">
       <legend>{t(`nta.form.boosterW.${test}`)}</legend>
-      <NumberField {...field} path={at(test, 'sourceTemperatureC')} label={t('nta.form.boosterW.testTemperature')} unit="°C" />
-      <NumberField {...field} path={at(test, 'cop')} label={t('nta.form.boosterW.cop')} />
+      <NumberField {...field} path={at(test, 'sourceTemperatureC')} label={t(`nta.form.boosterW.testTemperature.${test}`)} unit="°C" />
+      <NumberField {...field} path={at(test, 'cop')} label={t(`nta.form.boosterW.cop.${test}`)} />
     </fieldset>)}
     <SelectField {...field} path={at('measuredClass')} label={t('nta.form.dhwClass')} options={[
       ['class1', '1 (CW-1+)'], ['class2', '2 (CW-2)'], ['class3', '3 (CW-3)'], ['class4', '4 (CW-4/5/6)']]} />
@@ -692,26 +692,42 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
 export function HotWaterGeneratorsFields({ draft, change }: SectionProps) {
   const { t } = useI18n();
   const field = { draft, onChange: change };
-  const extra = list(draft, ['hotWater', 'additionalGenerators']);
-  const series = read(draft, ['hotWater', 'series', 'kind']);
   return <div className="nta-form-subsection">
     <NumberField {...field} path={['hotWater', 'nominalPowerKw']} label={t('nta.form.dhwNominalPower')} />
     <HotWaterUnitFields draft={draft} change={change} unit={['hotWater']} />
     <HotWaterSystemExtrasFields draft={draft} change={change} base={['hotWater']} />
+    <HotWaterExtraGeneratorsFields draft={draft} change={change} base={['hotWater']} />
+  </div>;
+}
+
+/**
+ * 13.8.2: further generators of a hot-water system (`base`: `['hotWater']` or a further system) and,
+ * with exactly one further generator, the series arrangement of 13.141a–d.
+ */
+export function HotWaterExtraGeneratorsFields({ draft, change, base }: SectionProps & { base: Path }) {
+  const { t } = useI18n();
+  const field = { draft, onChange: change };
+  const extra = list(draft, [...base, 'additionalGenerators']);
+  const series = read(draft, [...base, 'series', 'kind']);
+  return <>
     {extra.map((_, index) => <fieldset key={index} className="nta-form-row">
       <legend>{t('nta.form.dhwExtra')} {index + 1}</legend>
-      <HotWaterGeneratorFields draft={draft} change={change} base={['hotWater', 'additionalGenerators', index, 'generator']} />
-      <NumberField {...field} path={['hotWater', 'additionalGenerators', index, 'nominalPowerKw']} label={t('nta.form.dhwNominalPower')} />
-      <HotWaterUnitFields draft={draft} change={change} unit={['hotWater', 'additionalGenerators', index]} />
-      <TextField {...field} path={['hotWater', 'additionalGenerators', index, 'equipmentReference']} label={t('nta.form.boilerEquipmentSource')} />
-      <RemoveButton label={t('nta.form.remove')}
-        onClick={() => change(['hotWater', 'additionalGenerators'], extra.filter((__, other) => other !== index))} />
+      <HotWaterGeneratorFields draft={draft} change={change} base={[...base, 'additionalGenerators', index, 'generator']} />
+      <NumberField {...field} path={[...base, 'additionalGenerators', index, 'nominalPowerKw']} label={t('nta.form.dhwNominalPower')} />
+      <HotWaterUnitFields draft={draft} change={change} unit={[...base, 'additionalGenerators', index]} />
+      <TextField {...field} path={[...base, 'additionalGenerators', index, 'equipmentReference']} label={t('nta.form.boilerEquipmentSource')} />
+      <RemoveButton label={t('nta.form.remove')} onClick={() => {
+        const rest = extra.filter((__, other) => other !== index);
+        change([...base, 'additionalGenerators'], rest);
+        // The series arrangement needs exactly one further generator.
+        if (rest.length !== 1 && series != null) change([...base, 'series'], null);
+      }} />
     </fieldset>)}
-    <button type="button" onClick={() => change(['hotWater', 'additionalGenerators'], [...extra, additionalHotWaterGeneratorTemplate()])}>
+    <button type="button" onClick={() => change([...base, 'additionalGenerators'], [...extra, additionalHotWaterGeneratorTemplate()])}>
       {t('nta.form.dhwExtraAdd')}
     </button>
     {extra.length === 1 && <label>{t('nta.form.dhwSeries')}
-      <select value={typeof series === 'string' ? series : ''} onChange={(event) => change(['hotWater', 'series'],
+      <select value={typeof series === 'string' ? series : ''} onChange={(event) => change([...base, 'series'],
         event.target.value === 'hotfill_electric_boiler' ? { kind: 'hotfill_electric_boiler' }
           : event.target.value === 'collective_first_also_heating'
             ? { kind: 'collective_first_also_heating', maximumSupplyC: Array(12).fill(null) } : null)}>
@@ -721,8 +737,8 @@ export function HotWaterGeneratorsFields({ draft, change }: SectionProps) {
       </select>
     </label>}
     {series === 'collective_first_also_heating' && <MonthlyValues draft={draft} change={change}
-      path={['hotWater', 'series', 'maximumSupplyC']} label={t('nta.form.dhwSeries.maxSupply')} />}
-  </div>;
+      path={[...base, 'series', 'maximumSupplyC']} label={t('nta.form.dhwSeries.maxSupply')} />}
+  </>;
 }
 
 /** A further hot-water system (§13.2.4), started from the main system. */
@@ -777,8 +793,11 @@ export function AdditionalHotWaterSystemsFields({ draft, change, residential }: 
         </>}
         <TextField {...field} path={[...base, 'emission', 'sourceReference']} label={t('nta.form.source')} />
         <HotWaterGeneratorFields draft={draft} change={change} base={[...base, 'generator']} />
+        <NumberField {...field} path={[...base, 'nominalPowerKw']} label={t('nta.form.dhwNominalPower')} />
         <HotWaterStorageFields draft={draft} change={change} base={base} />
+        <HotWaterCirculationFields draft={draft} change={change} base={base} />
         <HotWaterSystemExtrasFields draft={draft} change={change} base={base} />
+        <HotWaterExtraGeneratorsFields draft={draft} change={change} base={base} />
         <TextField {...field} path={[...base, 'equipmentReference']} label={t('nta.form.boilerEquipmentSource')} />
         <RemoveButton label={t('nta.form.remove')}
           onClick={() => change(['additionalHotWaterSystems'], systems.filter((__, other) => other !== index))} />

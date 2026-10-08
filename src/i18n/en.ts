@@ -9,6 +9,7 @@ import { deliveryLabelsEn } from './deliveryLabels';
 import { evidenceLinkLabelsEn } from './evidenceLinkLabels';
 import { manualLabelsEn } from './manualLabels';
 import { existingLabelsEn } from './existingLabels';
+import { formCoverageLabelsEn } from './formCoverageLabels';
 
 export const en: Record<string, string> = {
   // Generated kernel and survey code labels; specific keys below take precedence.
@@ -23,6 +24,7 @@ export const en: Record<string, string> = {
   ...evidenceLinkLabelsEn,
   ...manualLabelsEn,
   ...existingLabelsEn,
+  ...formCoverageLabelsEn,
   // App
   'app.title': 'Open Energy Studio',
   'app.untitledProject': 'Untitled Project',
@@ -1674,8 +1676,6 @@ export const en: Record<string, string> = {
   'nta.form.dhwGen.largeDirectStorage': "other directly fired storage appliance (13.8.4.5.4)",
   'nta.form.boosterW.lowTest': "Test at 24 °C (or 16 °C)",
   'nta.form.boosterW.highTest': "Test at 40 °C",
-  'nta.form.boosterW.testTemperature': "Source temperature of the test",
-  'nta.form.boosterW.cop': "Measured COP",
   'nta.form.boosterW.standingLoss': "Standing loss P_ls (W.17)",
   'nta.form.boosterW.monthly': "Enter the source temperature per month",
   'nta.form.boosterW.sourceTemperature': "Mean source inlet temperature θ_evap",

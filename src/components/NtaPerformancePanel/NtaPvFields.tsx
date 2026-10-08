@@ -1,5 +1,6 @@
 import { useI18n } from '../../i18n/i18n';
 import { NumberField, read, SelectField, TextField, type Draft, type Path } from './NtaFormFields';
+import { CollectivePvField } from './NtaCollectiveShare';
 
 // §16 PV system fields (16.2–16.4b, tables 16.1/16.2), shared by the
 // building's own PV systems and annex P area electricity (P.7/P.71).
@@ -49,6 +50,7 @@ export function PvSystemFields({ draft, change, base, label }: {
     {/* Optional (16.2): clearing drops the factor instead of leaving a blank. */}
     <NumberField {...field} path={at('obstructionFactors', 0)} label={t('nta.form.obstruction')}
       onChange={(path, value) => change(value == null ? at('obstructionFactors') : path, value == null ? [] : value)} />
+    <CollectivePvField draft={draft} change={change} base={base} />
     <TextField {...field} path={at('sourceReference')} label={t('nta.form.source')} />
   </>;
 }

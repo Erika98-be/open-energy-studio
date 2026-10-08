@@ -1,4 +1,5 @@
 import { PipeGeometryFields } from './NtaPipeGeometry';
+import { CollectiveCoolingField } from './NtaCollectiveShare';
 import { CoolingEmission2023Fields } from './NtaEdition2023Fields';
 import { useI18n } from '../../i18n/i18n';
 import type { IProject } from '../../core/energy/types';
@@ -32,13 +33,13 @@ function RemoveButton({ label, onClick }: { label: string; onClick: () => void }
 }
 
 /** 7.30b adjacent unheated sunrooms with their glazing and surfaces. */
-export function SunroomsFields({ draft, change }: SectionProps) {
+export function SunroomsFields({ draft, change, base = ['sunrooms'] }: SectionProps & { base?: Path }) {
   const { t } = useI18n();
   const field = { draft, onChange: change };
-  const rooms = list(draft, ['sunrooms']);
+  const rooms = list(draft, base);
   return <div className="nta-form-subsection">
     {rooms.map((_, index) => {
-      const at = (...rest: Path): Path => ['sunrooms', index, ...rest];
+      const at = (...rest: Path): Path => [...base, index, ...rest];
       const surfaces = list(draft, at('surfaces'));
       return <fieldset key={index} className="nta-form-row">
         <legend>{t('nta.form.sunroom')} {index + 1}</legend>
@@ -61,10 +62,10 @@ export function SunroomsFields({ draft, change }: SectionProps) {
           {t('nta.form.sunroom.addSurface')}
         </button>
         <TextField {...field} path={at('sourceReference')} label={t('nta.form.source')} />
-        <RemoveButton label={t('nta.form.remove')} onClick={() => change(['sunrooms'], rooms.filter((__, other) => other !== index))} />
+        <RemoveButton label={t('nta.form.remove')} onClick={() => change(base, rooms.filter((__, other) => other !== index))} />
       </fieldset>;
     })}
-    <button type="button" className="btn" onClick={() => change(['sunrooms'], [...rooms, sunroomTemplate(rooms.length)])}>
+    <button type="button" className="btn" onClick={() => change(base, [...rooms, sunroomTemplate(rooms.length)])}>
       {t('nta.form.sunroom.add')}
     </button>
   </div>;
@@ -255,6 +256,7 @@ export function CoolingSystemsFields({ draft, change, project }: SectionProps & 
       {t('nta.form.coolingSystems.several')}
     </label>}
     {!several && <CoolingSystemFields draft={draft} change={change} base={['cooling']} allowNone />}
+    {!several && <CollectiveCoolingField draft={draft} change={change} />}
     {several && <div className="nta-form-subsection">
       {systems.map((system, index) => {
         const zoneIds = Array.isArray(system.zoneIds) ? system.zoneIds as string[] : [];

@@ -26,7 +26,8 @@ import { DynamicWindowsFields } from './NtaDynamicWindows';
 import { WindowObstructionsFields } from './NtaWindowObstructions';
 import { WindowShadingsFields } from './NtaWindowShadings';
 import { WindowGlazingsFields } from './NtaWindowGlazings';
-import { CirculationPsiFields } from './NtaPipeGeometry';
+import { HotWaterCirculationFields } from './NtaPipeGeometry';
+import { ZoneDataFields } from './NtaZoneData';
 import { AnnexAaCalculationFields } from './NtaAnnexAaFields';
 import { annexAaCalculations, annexAaEditionRules } from '../../core/nta/annexAaForm';
 import { DeclaredHeatingTableTool, GroundFloorDetailFields } from './NtaProductGenerators';
@@ -684,7 +685,7 @@ function HotWaterSection(props: NtaSectionProps) {
     <HotWaterGeneratorFields draft={draft} change={change} base={['hotWater', 'generator']} />
     <HotWaterGeneratorsFields draft={draft} change={change} />
     <HotWaterStorageFields draft={draft} change={change} />
-    <CirculationPsiFields draft={draft} change={change} />
+    <HotWaterCirculationFields draft={draft} change={change} base={['hotWater']} />
     <TextField {...f} path={['hotWater', 'equipmentReference']} label={t('nta.form.boilerEquipmentSource')} />
   </>;
 }
@@ -755,6 +756,9 @@ export const NTA_SECTIONS: NtaSectionDef[] = [
     paths: ['labelFunctions', 'bblFunctions', 'functionAreas'] },
   { id: 'setpoints', step: 'building', sub: 'zones', titleKey: 'nta.form.setpoints', Component: SetpointsSection, paths: ['setpoints'] },
   { id: 'mass', step: 'building', sub: 'zones', titleKey: 'nta.form.mass', Component: MassSection, paths: ['thermalMass'] },
+  { id: 'zoneData', step: 'building', sub: 'zones', titleKey: 'nta.zoneData.title',
+    Component: ({ draft, change, project }) => <ZoneDataFields draft={draft} change={change} project={project} />, paths: ['zoneData'],
+    when: (project, draft) => project.zones.length > 1 || listed('zoneData')(project, draft) },
   { id: 'internalGains', step: 'building', sub: 'zones', titleKey: 'nta.form.internalGains', Component: InternalGainsSection, paths: ['internalGains'] },
   { id: 'windows', step: 'building', sub: 'envelope', titleKey: 'nta.form.windows', Component: WindowsSection, paths: ['windowSolar'] },
   { id: 'windowObstructions', step: 'building', sub: 'envelope', titleKey: 'nta.form.windowObstructions.title',
