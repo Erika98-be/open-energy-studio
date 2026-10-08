@@ -162,6 +162,7 @@ export function NtaVentilationSection({ draft, change }: SectionProps) {
       <NumberField {...field} path={[...base, 'buildingHeightM']} label={t('nta.vent.height')} />
       <NumberField {...field} path={[...base, 'constructionYear']} label={t('nta.vent.constructionYear')} step="1" />
       <CheckField {...field} path={[...base, 'floorAboveCrawlspace']} label={t('nta.vent.crawlspace')} />
+      {!utility && <NumberField {...field} path={[...base, 'wholeDwellingAreaM2']} label={t('nta.vent.wholeDwellingArea')} optional unit="m²" />}
       <TextField {...field} path={[...base, 'sourceReference']} label={t('nta.form.source')} />
     </Section>
     <Section title={t('nta.vent.system')}>
@@ -283,7 +284,16 @@ export function NtaVentilationSection({ draft, change }: SectionProps) {
           : { method: 'forfait', current: 'dc', manufactureYear: null })} />
       {fansMethod === 'declared' ? <>
         {fans.map((item, index) => <div key={String(item.id)} className="nta-form-row">
-          <NumberField {...field} path={[...base, 'fans', 'fans', index, 'power', 'nominalPowerW']} label={`${String(item.id)} — ${t('nta.vent.fanPower')}`} />
+          <SelectField {...field} path={[...base, 'fans', 'fans', index, 'power', 'method']} label={`${String(item.id)} — ${t('nta.vent.fanPowerMethod')}`}
+            options={[['nominal', t('nta.vent.fanPowerMethod.nominal')], ['motor', t('nta.vent.fanPowerMethod.motor')]]}
+            onChange={(_, value) => change([...base, 'fans', 'fans', index, 'power'], value === 'motor'
+              ? { method: 'motor', motorPowerW: null, manufactureYear: null }
+              : { method: 'nominal', nominalPowerW: null })} />
+          {read(draft, [...base, 'fans', 'fans', index, 'power', 'method']) === 'motor' ? <>
+            <NumberField {...field} path={[...base, 'fans', 'fans', index, 'power', 'motorPowerW']} label={t('nta.vent.motorPower')} unit="W" />
+            <NumberField {...field} path={[...base, 'fans', 'fans', index, 'power', 'manufactureYear']} label={t('nta.vent.motorYear')} optional step="1" />
+            <NumberField {...field} path={[...base, 'fans', 'fans', index, 'power', 'electricalInputW']} label={t('nta.vent.motorInput')} optional unit="W" />
+          </> : <NumberField {...field} path={[...base, 'fans', 'fans', index, 'power', 'nominalPowerW']} label={`${String(item.id)} — ${t('nta.vent.fanPower')}`} />}
           <button type="button" onClick={() => change([...base, 'fans', 'fans'], fans.filter((_, i) => i !== index))}>{t('nta.vent.remove')}</button>
         </div>)}
         <button type="button" onClick={() => change([...base, 'fans', 'fans'], [...fans, {

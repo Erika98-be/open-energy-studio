@@ -130,6 +130,33 @@ export function NtaLightingSection({ draft, change, project, measureOnly = false
 }
 
 /** Calculated distribution 9.26–9.51 (`distributionSystem`). */
+/** §9.5 buffer vessel in the distribution system: volume, loss (measured or by label) and location. */
+function BufferVesselFields({ draft, change }: SectionProps) {
+  const { t } = useI18n();
+  const field = { draft, onChange: change };
+  const base: Path = ['distributionSystem', 'bufferVessel'];
+  const vessel = read(draft, base);
+  return <>
+    <label className="nta-form-check">
+      <input type="checkbox" checked={vessel != null} onChange={(event) => change(base, event.target.checked
+        ? { volumeL: null, standingLossW: null, label: null, producedFrom2018: false, inHeatedSpace: true, sourceReference: '' }
+        : null)} />
+      {t('nta.dist.buffer')}
+    </label>
+    {vessel != null && <div className="nta-form-subsection">
+      <NumberField {...field} path={[...base, 'volumeL']} label={t('nta.dist.buffer.volume')} unit="l" />
+      <NumberField {...field} path={[...base, 'standingLossW']} label={t('nta.dist.buffer.loss')} optional unit="W" />
+      <SelectField {...field} path={[...base, 'label']} label={t('nta.dist.buffer.label')}
+        options={(['a_plus', 'a', 'b', 'c', 'd', 'e', 'f', 'g'] as const)
+          .map((key): [string, string] => [key, key === 'a_plus' ? 'A+' : key.toUpperCase()])} />
+      <CheckField {...field} path={[...base, 'producedFrom2018']} label={t('nta.dist.buffer.from2018')} />
+      <CheckField {...field} path={[...base, 'inHeatedSpace']} label={t('nta.dist.buffer.inHeated')} />
+      <CheckField {...field} path={[...base, 'constantTemperature']} label={t('nta.dist.buffer.constant')} />
+      <TextField {...field} path={[...base, 'sourceReference']} label={t('nta.form.source')} />
+    </div>}
+  </>;
+}
+
 export function NtaDistributionFields({ draft, change }: SectionProps) {
   const { t } = useI18n();
   const field = { draft, onChange: change };
@@ -171,6 +198,10 @@ export function NtaDistributionFields({ draft, change }: SectionProps) {
         <DistributionShell2023Field draft={draft} change={change} />
         <NumberField {...field} path={['distributionSystem', 'actualPipeLengthM']} label={t('nta.dist.pipeLength')} />
         <NumberField {...field} path={['distributionSystem', 'unheatedPipeLengthM']} label={t('nta.dist.unheatedLength')} />
+        <NumberField {...field} path={['distributionSystem', 'unheatedReductionFactor']} label={t('nta.dist.unheatedReduction')} optional />
+        <CheckField {...field} path={['distributionSystem', 'pipesAlsoForHotWater']} label={t('nta.dist.alsoHotWater')} />
+        <CheckField {...field} path={['distributionSystem', 'collectiveHotWaterDeliverySet']} label={t('nta.dist.deliverySet')} />
+        <BufferVesselFields draft={draft} change={change} />
       </>}
       <SelectField {...field} path={['distributionSystem', 'pump', 'method']} label={t('nta.dist.pump')} options={[
         ['included_in_generator_auxiliary', t('nta.dist.pump.included')], ['calculated', t('nta.dist.pump.calculated')],
@@ -178,7 +209,14 @@ export function NtaDistributionFields({ draft, change }: SectionProps) {
         onChange={(_, value) => change(['distributionSystem', 'pump'], value === 'calculated'
           ? { method: 'calculated', heatMeterPresent: false, sourceReference: '' }
           : value === 'none_on_site' ? { method: 'none_on_site', sourceReference: '' } : { method: 'included_in_generator_auxiliary' })} />
-      {pump === 'calculated' && <CheckField {...field} path={['distributionSystem', 'pump', 'heatMeterPresent']} label={t('nta.dist.heatMeter')} />}
+      {pump === 'calculated' && <>
+        <CheckField {...field} path={['distributionSystem', 'pump', 'heatMeterPresent']} label={t('nta.dist.heatMeter')} />
+        <NumberField {...field} path={['distributionSystem', 'pump', 'maxPipeLengthM']} label={t('nta.dist.pump.maxLength')} optional unit="m" />
+        <NumberField {...field} path={['distributionSystem', 'pump', 'designFlowM3PerH']} label={t('nta.dist.pump.designFlow')} optional unit="m³/h" />
+        <NumberField {...field} path={['distributionSystem', 'pump', 'energyEfficiencyIndex']} label={t('nta.dist.pump.eei')} optional />
+        <NumberField {...field} path={['distributionSystem', 'pump', 'electricPowerKw']} label={t('nta.dist.pump.power')} optional unit="kW" />
+        <NumberField {...field} path={['distributionSystem', 'pump', 'onePipeEmitterCount']} label={t('nta.dist.pump.onePipe')} optional step="1" />
+      </>}
       {pump && pump !== 'included_in_generator_auxiliary' &&
         <TextField {...field} path={['distributionSystem', 'pump', 'sourceReference']} label={t('nta.form.source')} />}
       <TextField {...field} path={['distributionSystem', 'sourceReference']} label={t('nta.form.source')} />

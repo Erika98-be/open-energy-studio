@@ -87,7 +87,10 @@ export function VerticalPipesFields({ draft, change, residential, path, label }:
     {list?.map((_, index) => <div key={index} className="nta-form-row">
       {residential
         ? <NumberField {...field} path={[...path, index, 'storeys']} label={t('nta.form.verticalPipes.storeys')} step="1" />
-        : <NumberField {...field} path={[...path, index, 'buildingHeightM']} label={t('nta.form.verticalPipes.height')} />}
+        : <>
+          <NumberField {...field} path={[...path, index, 'buildingHeightM']} label={t('nta.form.verticalPipes.height')} />
+          <NumberField {...field} path={[...path, index, 'areaShare']} label={t('nta.form.verticalPipes.areaShare')} optional />
+        </>}
       <CheckField {...field} path={[...path, index, 'insulated']} label={t('nta.form.verticalPipes.insulated')} />
       <NumberField {...field} path={[...path, index, 'sharedZones']} label={t('nta.form.verticalPipes.shared')} step="1" />
       <TextField {...field} path={[...path, index, 'sourceReference']} label={t('nta.form.source')} />
@@ -433,7 +436,10 @@ function InternalGainsSection(props: NtaSectionProps) {
   const f = fieldOf(props);
   return <>
     {residentialScope(draft)
-      ? <NumberField {...f} path={['internalGains', 'dwellingCount']} label={t('nta.form.dwellingCount')} step="1" />
+      ? <>
+        <NumberField {...f} path={['internalGains', 'dwellingCount']} label={t('nta.form.dwellingCount')} step="1" />
+        <NumberField {...f} path={['internalGains', 'dwellingShare']} label={t('nta.form.dwellingShare')} optional />
+      </>
       : <>
         <SelectField {...f} path={['internalGains', 'method']} label={t('nta.gains.method')}
           options={[['utility', t('nta.gains.method.utility')], ['declared', t('nta.gains.method.declared')]]}
