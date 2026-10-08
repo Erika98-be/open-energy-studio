@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — basisopname en maatwerkadvies na de dertiende review
+
+- **Renovatie met onbekende isolatiedikte (ISSO §8.7.2.1).** "De klasse ervóór" en "de klasse erna" tellen nu op de klassen van ISSO-tabel 8.10 (82.1 p. 90, 75.1 p. 89). Bij gewone gevels is dat één klasse "van 1975 tot 1988"; de kern telde op de splitsing bij 1983 uit NTA-tabel I.5. Gevolgen: gebouwd 1970 en gerenoveerd 1985 zonder bewijs geeft R_c 0,43 (was 1,3); gebouwd 1978 met onbekend renovatiejaar geeft 2,0 (was 1,3). Vloeren en daken hebben in beide tabellen de splitsing bij 1983 en veranderen niet.
+- **Romp van een woonboot uit 2014.** De basisopname volgt ISSO-tabel 8.10 (82.1 p. 89): R_c 3,5 ("van 2014 tot 2018"). De rechtstreekse forfaitaire route blijft NTA-tabel I.7 (p. 831) volgen: 2,5.
+- **Woningpaspoort, stap 1.** Zonder verklaring van de adviseur toetst de kern de warmtebehoefte van stap 1 nu aan de Standaard voor Woningisolatie "na 1945" (ISSO 82.2 §1.10.2 p. 22, §4.4.2 p. 75). De vooroorlogse standaard geldt alleen met `prewarStandard` en een motivering. Een opgegeven grens wordt vergeleken met de warmtebehoefte E_H;nd, niet met E_H+C;nd (NTA 8800 §5.3.2 Opmerking 2, p. 75). Hoofdstuk 5 geeft daarvoor ook `standardInsulationPost1945KwhPerM2`.
+- **Gebruikersprofielen utiliteit (ISSO 75.2 tabellen 2.3 p. 42 en 2.4 p. 43).** Elke rekenzone krijgt het profiel ten opzichte van haar eigen NTA-waarden (tabellen 7.13–7.15). Eerder kregen alle zones de setpoints en uren van de hoofdzone.
+- **Afwijking van het elektriciteitsgebruik.** De gerapporteerde afwijking (jaar en per maand) en het berekende maandgemiddelde gebruiken nu de netto levering (levering min teruglevering), zoals de passingstoets en de meting (ISSO 82.2 Bijlage C.1 p. 105, C.3 p. 107). Bij teruglevering liet het rapport eerder een te grote afwijking zien.
+- **NCW-horizon.** Zonder opgegeven horizon gebruiken alle varianten en pakketten één gemeenschappelijke horizon: de langste levensduur van alle maatregelen. Zo vergelijkt de automatische keuze op de hoogste NCW pakketten over dezelfde periode.
+- **Bronnen.** De verwijzingen naar BRL 9500-MWA-W/U van 24-03-2026 zijn niet gecontroleerd; die tekst ontbreekt hier (gereedheid E7).
+
 ### 9 oktober 2026 — getalvelden na de twaalfde review (geen rekenwijziging)
 
 - **Geen ander getal dan getypt.** Een getalveld overschreef de getypte tekst als het formulier een tussenstand weigerde (de "0" van "0,04" bij een λ die groter dan nul moet zijn). Daarna las het "0.8,04" als 8,04 en sloeg dat op. Zolang het veld focus heeft, blijft de getypte tekst nu staan; een geweigerde stand is gemarkeerd en bij het verlaten toont het veld weer de opgeslagen waarde. Gemengde scheidingstekens tellen alleen als getal als het ene teken per drie cijfers groepeert ("1.234,5"); "0.8,04" is geen getal. Een overloop zoals "1e999" ook niet.
