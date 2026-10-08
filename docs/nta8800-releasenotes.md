@@ -13,6 +13,21 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — opnameformulieren leveren invoer die de kern leest (geen rekenwijziging)
+
+Na de zevende review. Elk punt hieronder liet de kern de hele opname weigeren of gaf een melding die de gebruiker niet kon oplossen.
+
+- **Ramen met zonwerend glas.** Het laatste vinkje uitzetten schreef `null` in plaats van een lege lijst; nu `[]`. Een verwijderd raam verdwijnt ook uit deze lijst, zodat geen `solar_control_window_unknown` achterblijft.
+- **Onverwarmde ruimte als begrenzing.** De opname heeft een lijst *Onverwarmde ruimten* (id en omschrijving). De begrenzing "onverwarmde ruimte" staat pas in de keuze als die lijst een ruimte heeft, en neemt dan de eerste als `spaceId`. Een verwijderde ruimte zet de vlakken die eraan grensden terug op buitenlucht.
+- **Deur met glas.** Bij een glasaandeel boven 0 vraagt het formulier de glassoort (`door_glass_required` was niet op te lossen). De oppervlakte heet nu *Oppervlakte van de deur*.
+- **Variant van tabel 11.5** is een keuzelijst met de codes van de kern; leeg laat het veld weg (vrije tekst gaf bij leeg of hoofdletters een geweigerde opname).
+- **Nieuwe verlichtingszones en deuren** krijgen een id die nog niet bestaat, ook na het verwijderen van een eerdere.
+- **Recirculatiepercentage** staat er alleen bij "aanwezig" en verdwijnt bij "geen" of "onbekend"; de kern geeft een ingevuld percentage voorrang op het antwoord (ISSO 75.1 p. 148, NTA 11.60).
+- **Daglichtregeling** toont "geen" als standaard en laat het veld weg (de keuze "—" schreef `null`).
+- **Lege verplichte getallen** (gemeten q_v10, oppervlakte en vermogens van verlichtingszones, de onverwarmde ruimte van een vlak) worden vóór het doorrekenen genoemd in plaats van als kale weigering van de kern.
+- **Gebouwautomatisering:** het veld heet nu *Nominaal vermogen van het grootste verwarmings- of koelsysteem (opgeteld)*.
+- Een gesloten of verlaagd plafond blijft alleen bij utiliteit: de kern weigert het in de woningopname (`closed_ceiling_not_in_dwelling_survey`, ISSO 82.1 tabel 7.4 kent die kolom niet).
+
 ### 9 oktober 2026 — formulieren voor alle gewone invoer; bewaakte formulierdekking (geen rekenwijziging)
 
 - **Formulierdekking bewaakt.** De kern levert een catalogus van elke keuzewaarde en elk optioneel veld van de projectinvoer en beide basisopnamen (`training-data/nta8800-input-options.json`, bijgehouden door een test in `option_coverage.rs`). Een nieuwe test (`nta-form-coverage.test.ts`) faalt als een optie geen formulier heeft en ook niet als bewust-JSON met reden is vastgelegd. Dekking op naam: van 1 651 naar 1 807 van de 1 823 opties; de overige 16 staan met reden in [Formulierdekking](ui-redesign/formulierdekking.md).
