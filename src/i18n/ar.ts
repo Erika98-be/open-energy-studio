@@ -104,7 +104,6 @@ export const ar: Record<string, string> = {
   'dialog.save': 'حفظ',
   'dialog.cancel': 'إلغاء',
   'dialog.delete': 'حذف',
-  'dialog.add': 'إضافة',
   'dialog.edit': 'تعديل',
   'dialog.close': 'إغلاق',
 
@@ -434,7 +433,6 @@ export const ar: Record<string, string> = {
 
   // Feedback dialog
   'feedback.title': 'Send Feedback',
-  'feedback.sendFeedback': 'Send Feedback',
   'feedback.email': 'Email',
   'feedback.emailPlaceholder': 'your@email.com',
   'feedback.fullName': 'Full Name',

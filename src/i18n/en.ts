@@ -140,11 +140,7 @@ export const en: Record<string, string> = {
   'item.deleteYes': "Yes, delete",
   'item.constructionInUse': "This construction is used by {{count}} surface(s): {{list}}. Assign those surfaces another construction first.",
   'envelope.actions': "Actions",
-  'envelope.windowsOf': "Windows",
-  'envelope.surfaceOf': "Surface",
-  'envelope.emptyHint': "Add a zone from the ribbon menu to get started.",
   'dialog.delete': 'Delete',
-  'dialog.add': 'Add',
   'dialog.edit': 'Edit',
   'dialog.close': 'Close',
 
@@ -613,7 +609,6 @@ export const en: Record<string, string> = {
 
   // Feedback dialog
   'feedback.title': 'Send Feedback',
-  'feedback.sendFeedback': 'Send Feedback',
   'feedback.email': 'Email',
   'feedback.emailPlaceholder': 'your@email.com',
   'feedback.fullName': 'Full Name',
@@ -1282,7 +1277,6 @@ export const en: Record<string, string> = {
   'nta.performance.gas': 'Gas',
   'nta.performance.electricity': 'Electricity',
   'nta.performance.limits': 'Not included and traceability',
-  'nta.performance.fingerprint': 'Input fingerprint',
   'nta.performance.start': 'Start NTA input',
   'nta.performance.edit': 'Edit NTA input',
   'nta.performance.blockLabel': 'NTA input block (JSON)',
@@ -2296,8 +2290,6 @@ export const en: Record<string, string> = {
   'nta.performance.co2': "CO2 emission",
   'nta.performance.storage': "Storage correction (5.14a)",
   'nta.performance.details': "Ventilation, lighting, CO2 and storage",
-  'nta.report.ventilation': "Ventilation (chapter 11)",
-  'nta.report.extras': "Additional results",
   "mwa.persons": "Persons in the building (utility, ISSO 75.2 table 2.6)",
   "mwa.lightingHours": "Lighting burning hours factor (utility, 0.8–1.2)",
   "mwa.measured": "Measured use (fit check)",

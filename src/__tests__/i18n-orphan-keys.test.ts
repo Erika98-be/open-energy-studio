@@ -52,7 +52,9 @@ describe('i18n keys', () => {
       const parts = key.split('.');
       return parts.slice(1).map((_, index) => parts.slice(0, index + 1).join('.'));
     }));
-    for (const literal of literals) if (keyPrefixes.has(literal)) prefixes.add(`${literal}.`);
+    // A literal counts as a key prefix only when it has a dot ("nta.annexP.carrier"):
+    // a one-word literal such as 'nta' or 'overview' would cover a whole namespace.
+    for (const literal of literals) if (literal.includes('.') && keyPrefixes.has(literal)) prefixes.add(`${literal}.`);
     const unused = keys.filter((key) => !literals.has(key)
       && ![...prefixes].some((prefix) => key.startsWith(prefix))
       && !(key in ALLOWED_UNUSED));

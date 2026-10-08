@@ -140,11 +140,7 @@ export const nl: Record<string, string> = {
   'item.deleteYes': "Ja, verwijderen",
   'item.constructionInUse': "Deze constructie is in gebruik bij {{count}} vlak(ken): {{list}}. Koppel die vlakken eerst aan een andere constructie.",
   'envelope.actions': "Acties",
-  'envelope.windowsOf': "Ramen",
-  'envelope.surfaceOf': "Vlak",
-  'envelope.emptyHint': "Voeg een zone toe via het Ribbon-menu om te beginnen.",
   'dialog.delete': 'Verwijderen',
-  'dialog.add': 'Toevoegen',
   'dialog.edit': 'Bewerken',
   'dialog.close': 'Sluiten',
 
@@ -613,7 +609,6 @@ export const nl: Record<string, string> = {
 
   // Feedback dialog
   'feedback.title': 'Feedback sturen',
-  'feedback.sendFeedback': 'Feedback sturen',
   'feedback.email': 'E-mail',
   'feedback.emailPlaceholder': 'jouw@e-mail.nl',
   'feedback.fullName': 'Naam',
@@ -1282,7 +1277,6 @@ export const nl: Record<string, string> = {
   'nta.performance.gas': 'Gas',
   'nta.performance.electricity': 'Elektriciteit',
   'nta.performance.limits': 'Niet meegenomen en herleidbaarheid',
-  'nta.performance.fingerprint': 'Invoervingerafdruk',
   'nta.performance.start': 'NTA-invoer starten',
   'nta.performance.edit': 'NTA-invoer bewerken',
   'nta.performance.blockLabel': 'NTA-invoerblok (JSON)',
@@ -2296,8 +2290,6 @@ export const nl: Record<string, string> = {
   'nta.performance.co2': "CO2-emissie",
   'nta.performance.storage': "Opslagcorrectie (5.14a)",
   'nta.performance.details': "Ventilatie, verlichting, CO2 en opslag",
-  'nta.report.ventilation': "Ventilatie (hoofdstuk 11)",
-  'nta.report.extras': "Aanvullende uitkomsten",
   "mwa.persons": "Aantal personen in het gebouw (utiliteit, ISSO 75.2 tabel 2.6)",
   "mwa.lightingHours": "Factor branduren verlichting (utiliteit, 0,8–1,2)",
   "mwa.measured": "Gemeten verbruik (fitprocedure)",

@@ -104,7 +104,6 @@ export const ja: Record<string, string> = {
   'dialog.save': '保存',
   'dialog.cancel': 'キャンセル',
   'dialog.delete': '削除',
-  'dialog.add': '追加',
   'dialog.edit': '編集',
   'dialog.close': '閉じる',
 
@@ -434,7 +433,6 @@ export const ja: Record<string, string> = {
 
   // Feedback dialog
   'feedback.title': 'Send Feedback',
-  'feedback.sendFeedback': 'Send Feedback',
   'feedback.email': 'Email',
   'feedback.emailPlaceholder': 'your@email.com',
   'feedback.fullName': 'Full Name',
