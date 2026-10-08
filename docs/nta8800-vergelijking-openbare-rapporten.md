@@ -402,7 +402,82 @@ Gezocht op repository.officiele-overheidspublicaties.nl (ter-inzage-leggingen 20
 | Gevonden | Periode | Uitkomst |
 |---|---|---|
 | [The View 2, installaties bij aanvraag (ter inzage 2026)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2026/til-2026-16676/1/bijlage/0.062_VII-ARC-RP-ME-0100-Toelichting_en_berekeningen_installaties.pdf.pdf) | rapport van 15-12-2022 | geen BENG-uitdraai uit de periode van 2025+C1 |
-| [Krimpenerwaard, woongebouw met bedrijfsruimte, Uniec 3.0.19.4, 07-04-2022](https://www.krimpenerwaard.nl/sites/default/files/2024-10/15.%202022068_beng_svds_a0_pdf%20(geanonimiseerd)_0.pdf) | 2020+A1 | niet in de gezochte uitgave |
-| [Seafarm, kantoor in bedrijfspand, Uniec 3.0.9.3, 01-04-2021](https://www.noord-beveland.nl/sites/noord_beveland/files/2022-02/Rapportage_BENG_berekening_Geredigeerd_0.pdf) | 2020+A1 | niet in de gezochte uitgave; een kandidaat voor een tweede utiliteitsgeval onder 2020+A1 |
+| [Krimpenerwaard, woongebouw met bedrijfsruimte, Uniec 3.0.19.4, 07-04-2022](https://www.krimpenerwaard.nl/sites/default/files/2024-10/15.%202022068_beng_svds_a0_pdf%20(geanonimiseerd)_0.pdf) | 2020+A1 | niet in de gezochte uitgave; de winkelruimte is sindsdien nagebouwd als J |
+| [Seafarm, kantoor in bedrijfspand, Uniec 3.0.9.3, 01-04-2021](https://www.noord-beveland.nl/sites/noord_beveland/files/2022-02/Rapportage_BENG_berekening_Geredigeerd_0.pdf) | 2020+A1 | niet in de gezochte uitgave; sindsdien nagebouwd als I |
 
 Geen openbaar rapport met Uniec 3.4 gevonden. Bij een omgevingsvergunning wordt de BENG-berekening meestal pas na het besluit ter inzage gelegd; vier maanden na 29 mei 2026 is dat voor de meeste aanvragen nog niet gebeurd. De acceptatie onder 2025+C1 blijft daarom voorlopig de berekening van A–C in 2025+C1 naast hun eigen uitgave (zie hierboven) en de referentiesuites. Opnieuw zoeken als er ter-inzage-leggingen met Uniec 3.4 verschijnen.
+
+## I en J, twee utiliteitsgevallen in 2020+A1 (9 oktober 2026)
+
+Twee openbare rapporten uit de vorige zoekronde, beide uit de periode van NTA 8800:2020+A1, zijn nagebouwd: I is een kantoor met bijeenkomstfunctie, J een winkelruimte onder appartementen. Daarmee zijn er drie utiliteitsgevallen (H, I, J). De test is `case_i_utility_under_nta_8800_2020_a1` en `case_j_retail_under_nta_8800_2020_a1` in `crates/nta8800-core/tests/public_comparison.rs`; de suite `training-data/reference-suites/openbare-gevallen.json` heeft ze als `openbaar-i-2020a1` en `openbaar-j-2020a1`. BENG 1 / BENG 2 / BENG 3:
+
+| Geval | Rapport | Kern (2020+A1) | Eisen in rapport en kern |
+|---|---|---|---|
+| I | 75,26 / −36,81 / 143,8 | 81,02 / −13,31 / 112,3 | 97,96 / 44,06 / 30,0 |
+| J | 63,92 / 46,11 / 30,1 | 67,19 / 54,49 / 26,7 | 75,19 / 60,00 / 30,0 |
+
+### Kernfout: tapwaterwarmtepomp forfaitair zonder c_W;gen
+
+J liet een fout in de kern zien. De kern vermenigvuldigde het forfaitaire opwekkingsrendement van een tapwaterwarmtepomp (1,4, of 1,4 · c_source) met c_W;gen van tabel 13.27 voor klasse 4. Bij een kleine tapwatervraag is dat 0,45: de ventilatiewarmtepomp van J kreeg 0,63 en gebruikte 200 kWh in plaats van de 90 kWh van het rapport. Tabel 13.25 geeft de warmtepompen 1,4 en 1,4 · c_source zonder c_W;gen; alleen de gasrijen dragen c_W;gen (2020+A1 p. 612, 2025+C1 p. 641). 13.8.4.7.3 c) bepaalt c_W;gen uit "de toepassingsklasse waarbij het rendement van de warmtepomp is gemeten" (2020+A1 p. 615, 2025+C1 p. 643). De kern corrigeert nu alleen bij een gemeten klasse (`measuredClass`). Test `forfait_heat_pump_takes_no_class_correction`. Woningen met een forfaitaire tapwaterwarmtepomp en een bruto tapwatervraag onder 3 890 kWh rekenen daardoor met minder tapwaterelektriciteit; de openbare gevallen A–H veranderen niet (C heeft een vraag boven 3 890 kWh, de andere een productverklaring).
+
+### I: kantoor met bijeenkomstfunctie (Uniec 3.0.9.3, 01-04-2021)
+
+Een rekenzone van 439,04 m²: kantoor 251,80, bijeenkomst overig 64,08 en een gemeenschappelijke ruimte van 123,16 m², naar rato over beide functies verdeeld. Daarmee zijn de eisen van de kern gelijk aan die van het rapport. Herbouw:
+- Gevels NW en W met triple glas (U 1,4, g 0,50), plat dak Rc 6,30, vloer op of boven maaiveld Rc 3,70 (R_f 3,87 met R_si). De rekenzone en de gemeenschappelijke ruimte zijn samengevoegd; lineaire bruggen per oriëntatie opgeteld.
+- Twee ramen op NW hebben een zijbelemmering rechts van ten minste 2,5 m hoog: receptie op 7,73 m afstand en entree op 2,53 m, beide 37,85 m breed (b_b 0,204 en 0,067, de koelvoorwaarde geldt).
+- Lucht/lucht-warmtepomp forfaitair (COP 2,80, installatiejaar 2021) met recirculatieluchtverwarming (Δθ 1,1 K, tabel 9.7) en forfaitaire luchtverwarmerventilatoren (tabel 9.13, indirect, met terugkeer van warme lucht).
+- Balansventilatie D.2 met tegenstroom-WTW 0,75 en 100 % bypass; elektrisch doorstroomtoestel (0,95); compressiekoeling EER 3,00 met directe expansie aan het plafond en 20 ventilatoren van 10 W.
+- 125 PV-panelen van 300 Wp, zuidoost 15°, sterk geventileerd. Het paneeloppervlak staat niet in de uitdraai; de fixture neemt 1,5 m² (200 W/m²), zodat de afronding van punt 68 niets afhaalt.
+- Verlichting met een eigen vermogen van 6,00 W/m², hand aan/uit, geen daglichtregeling.
+
+Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 439,04:
+
+| Post | Rapport | Kern | Verschil in BENG 2 |
+|---|---|---|---|
+| Verwarming | 4 807 | 4 840 | +0,11 |
+| Hulpenergie verwarming | 293 | 316 | +0,08 |
+| Tapwater (met hulpenergie) | 866 | 866 | 0 |
+| Koeling | 4 023 | 10 957 | +22,90 |
+| Hulpenergie koeling | 628 | 716 | +0,29 |
+| Ventilatoren | 1 411 | 1 411 | 0 |
+| Verlichting | 7 446 | 7 484 | +0,13 |
+| PV (op de meter) | 30 621 | 30 621 | 0 |
+| **BENG 2** | **−36,81** | **−13,31** | **+23,50** |
+
+- **Koeling.** De kern rekent een koudebehoefte van 12 315 kWh, de ontvochtiging Q_C;dhum van 12.5 (15 311 kWh) en het verlies van 10.15 letterlijk (5 245 kWh): samen 32 871 kWh koude. Het rapport noemt 12 069 kWh als totale koudebehoefte, ongeveer de voelbare behoefte alleen. 12.3 en tabel 12.2 rekenen directe expansie als een systeem van 6/12 °C en dus met ontvochtiging (2020+A1 p. 500–501, 2025+C1 p. 523–524); Uniec 3.0.9.3 telde die niet mee. Per oorzaak: ontvochtiging +5 104 kWh (+16,86), 10.15 +1 748 kWh (+5,77), behoefte +82 kWh (+0,27).
+- **Hulpenergie koeling.** 20 ventilatoren van 10 W over 3 141 bedrijfsuren zijn de 628 kWh van het rapport; de kern telt daar de regelenergie van 10.87 bij (87,6 kWh).
+- **Verlichting.** 14.3.2 rondt P_n naar boven af op twee significante cijfers volgens bijlage X (2020+A1 p. 631): 1 895 → 1 900 W en 739 → 750 W.
+- **BENG 1** is 7,7 % hoger (81,02 tegen 75,26). Het rapport noemt een verliesoppervlakte van 906,83 m²; de opgegeven vlakken tellen op tot 1 041,37 m². Het verschil van 134,54 m² is uit de uitdraai niet te herleiden.
+
+### J: winkelruimte onder appartementen (Uniec 3.0.19.4, 06-04-2022)
+
+Een rekenzone van 89,80 m² winkelfunctie onder twee appartementen (die apart zijn berekend en niet zijn nagebouwd). Herbouw:
+- Gevels W, Z, O en N (Rc 4,70), een plat dak van 15,21 m² (Rc 6,30) en een vloer boven een kruipruimte (Rc 4,00, P 34,99 m, kruipruimteventilatie 0,0012 m²/m, R_bw 4,70). h van (8.47) staat niet in de uitdraai; de fixture neemt 0,00 m. Geen lineaire bruggen in de uitdraai, dus de forfaitaire toeslag.
+- Ventilatiewarmtepomp voor verwarming (COP 4,50, 35 °C, installatiejaar 2022) met vloerverwarming; een tweede ventilatiewarmtepomp met geïntegreerd vat (0,6 kW) voor tapwater, met tabel 13.25: 1,4.
+- Ventilatiesysteem C.4c (f_ctrl 0,82); compressiekoeling EER 3,00 met vloerkoeling 17/21 en een pomp van 33 W (EEI 0,23).
+- 4 PV-panelen van 360 Wp, zuid 23°, matig geventileerd; paneeloppervlak aangenomen 1,8 m² (200 W/m²). Verlichting 7,00 W/m².
+
+Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 89,80:
+
+| Post | Rapport | Kern | Verschil in BENG 2 |
+|---|---|---|---|
+| Verwarming | 978 | 1 009 | +0,49 |
+| Hulpenergie verwarming | 26 | 27 | +0,01 |
+| Tapwater | 90 | 90 | 0 |
+| Koeling | 697 | 1 098 | +6,48 |
+| Hulpenergie koeling | 94 | 181 | +1,41 |
+| Ventilatoren | 44 | 44 | 0 |
+| Verlichting | 2 162 | 2 162 | 0 |
+| PV (op de meter) | 1 235 | 1 235 | 0 |
+| **BENG 2** | **46,11** | **54,49** | **+8,38** |
+
+- **Koeling.** Vloerkoeling ontvochtigt niet. De kern rekent een behoefte van 1 869 kWh en het verlies van 10.15 letterlijk (1 341 kWh, 72 % van de behoefte), samen met de teruggewonnen pompwarmte 3 294 kWh koude; het rapport 2 092 kWh. Dat is de bekende lezing van 10.15 ([vragen aan NEN](nta8800-vragen-nen.md)).
+- **Hulpenergie koeling.** De regelenergie van 10.87 (87,6 kWh).
+- **Verwarming.** De kern rekent 4 538 kWh warmte (3 % meer dan 4 400); BENG 1 is 5,1 % hoger (67,19 tegen 63,92).
+- **Tapwater** en de **hulpenergie van de warmtepomp** waren eerst ook anders: 200 kWh (de kernfout hierboven) en 101 kWh (A = 87,6 voor een toestel zonder installatiejaar, punt 74). Met de correctie en het installatiejaar 2022 (A = 13,0) zijn ze gelijk aan het rapport.
+
+### Wat I en J toevoegen
+
+- De verdeling van een gemeenschappelijke ruimte naar rato over de functies geeft opnieuw exact de eisen van het rapport (na H ook I).
+- Ventilatoren, verlichting met eigen vermogen, PV, tapwater en het warmtepomprendement komen overeen; de grote verschillen zitten weer bij koeling.
+- Nieuw ten opzichte van H: bij directe expansie telt de kern de ontvochtiging van 12.5 mee, die Uniec 3.0.9.3 niet meetelde. De norm is daarin duidelijk (12.3: directe expansie geldt als 6/12 °C).

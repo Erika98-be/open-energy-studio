@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — tapwaterwarmtepomp forfaitair zonder c_W;gen; openbare gevallen I en J
+
+- **Tapwaterwarmtepomp forfaitair.** De kern vermenigvuldigde het forfaitaire opwekkingsrendement van een tapwaterwarmtepomp (1,4, of 1,4 · c_source) met c_W;gen van tabel 13.27 voor klasse 4: bij een kleine bruto tapwatervraag 0,45, dus 0,63 in plaats van 1,4. Tabel 13.25 geeft de warmtepompen zonder c_W;gen; alleen de gasrijen dragen c_W;gen (p. 641; 2020+A1 p. 612). 13.8.4.7.3 c) neemt c_W;gen uit de klasse waarbij het rendement van de warmtepomp is gemeten (p. 643). De kern corrigeert nu alleen bij een opgegeven gemeten klasse (`measuredClass`). Test `forfait_heat_pump_takes_no_class_correction`.
+- **Resultaten die veranderen.** Projecten met een forfaitaire tapwaterwarmtepomp zonder gemeten klasse en een bruto tapwatervraag onder 3 890 kWh rekenen met minder tapwaterelektriciteit, dus een lagere BENG 2 en een hoger aandeel hernieuwbaar. Een productverklaring (`declared`) en de boosterwarmtepomp (13.162/13.163) veranderen niet. De openbare gevallen A–H en de RVO-voorbeeldwoningen veranderen niet.
+- **Openbare gevallen I en J.** Twee utiliteitsgevallen uit de periode van 2020+A1, nagebouwd uit openbare Uniec-uitdraaien: I een kantoor met bijeenkomstfunctie (439,04 m²), J een winkelruimte onder appartementen (89,80 m²). De eisen van de kern zijn gelijk aan die van de rapporten. Fixtures `training-data/nta8800-public-comparison-{i,j}.json`, tests in `crates/nta8800-core/tests/public_comparison.rs`, suitegevallen `openbaar-i-2020a1` en `openbaar-j-2020a1`. De verschillen per post staan in `docs/nta8800-vergelijking-openbare-rapporten.md`: bij I vooral de ontvochtiging bij directe expansie (12.5) en 10.15, bij J 10.15 en 10.87.
+
 ### 9 oktober 2026 — openbare rapporten onder 2025+C1 gezocht (geen rekenwijziging)
 
 - Opnieuw gezocht naar openbare BENG-rapporten uit de periode van NTA 8800:2025+C1 (Uniec 3.4, rekendatum vanaf 29 mei 2026), voor woningen en utiliteitsgebouwen. Er is er nog geen gevonden; de zoekopdrachten en de gevonden, niet bruikbare rapporten staan in `docs/nta8800-vergelijking-openbare-rapporten.md`.
