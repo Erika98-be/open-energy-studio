@@ -480,4 +480,4 @@ Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 89,80:
 
 - De verdeling van een gemeenschappelijke ruimte naar rato over de functies geeft opnieuw exact de eisen van het rapport (na H ook I).
 - Ventilatoren, verlichting met eigen vermogen, PV, tapwater en het warmtepomprendement komen overeen; de grote verschillen zitten weer bij koeling.
-- Nieuw ten opzichte van H: bij directe expansie telt de kern de ontvochtiging van 12.5 mee, die Uniec 3.0.9.3 niet meetelde. De norm is daarin duidelijk (12.3: directe expansie geldt als 6/12 °C).
+- Nieuw ten opzichte van H: bij directe expansie telt de kern de ontvochtiging van 12.5 mee, die Uniec 3.0.9.3 niet meetelde. De norm is daarin duidelijk: 12.3 rekent directe expansie als 6/12 °C, en hoofdstuk 10, OPMERKING 2 bij de afgiftesystemen, gaat bij directe expansie uitdrukkelijk uit van ontvochtiging, met een verwijzing naar 12.3 (2025+C1 p. 371, 2020+A1 p. 347).

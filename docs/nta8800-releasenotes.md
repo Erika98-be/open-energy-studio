@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — tapwaterwarmtepomp: opgegeven klasse zonder kwaliteitsverklaring
+
+- **Klasse alleen bij een opgegeven rendement.** Een forfaitaire tapwaterwarmtepomp met een toepassingsklasse maar zonder kwaliteitsverklaring kreeg nog c_W;gen van tabel 13.27, en bij klasse 1 boven 1 805 kWh de fout `hot_water_heat_pump_class_exceeded`. Een forfaitaire waarde heeft geen gemeten klasse (tabel 13.25 en 13.8.4.7.3 c); 2025+C1 p. 641/643, 2020+A1 p. 612/615, 2022 p. 617/620, 2023 p. 627/630, 2024 p. 625/627). De kern corrigeert nu alleen een opgegeven rendement met de klasse waarbij het is gemeten. De klasse blijft gelden voor de douche (13.30).
+- **Resultaten die veranderen.** Projecten met een forfaitaire tapwaterwarmtepomp, zonder kwaliteitsverklaring en met een opgegeven klasse, rekenen nu met 1,4 (of 1,4 · c_source). Een project dat met klasse 1 op `hot_water_heat_pump_class_exceeded` stuitte, rekent nu.
+
 ### 9 oktober 2026 — tapwaterwarmtepomp forfaitair zonder c_W;gen; openbare gevallen I en J
 
 - **Tapwaterwarmtepomp forfaitair.** De kern vermenigvuldigde het forfaitaire opwekkingsrendement van een tapwaterwarmtepomp (1,4, of 1,4 · c_source) met c_W;gen van tabel 13.27 voor klasse 4: bij een kleine bruto tapwatervraag 0,45, dus 0,63 in plaats van 1,4. Tabel 13.25 geeft de warmtepompen zonder c_W;gen; alleen de gasrijen dragen c_W;gen (p. 641; 2020+A1 p. 612). 13.8.4.7.3 c) neemt c_W;gen uit de klasse waarbij het rendement van de warmtepomp is gemeten (p. 643). De kern corrigeert nu alleen bij een opgegeven gemeten klasse (`measuredClass`). Test `forfait_heat_pump_takes_no_class_correction`.
