@@ -2731,6 +2731,91 @@ CASES += [
     ),
 ]
 
+# --- Routes added for ISSO 54 (EP-W011a, W203j, W204h, W202e, W302e, W402f) ---
+# EP-W011a: closed horizontal louvres on every window; g_gl from 7.41 with
+# g_gl;alt;wi 0,045 at 45 degrees solar altitude and g_gl;dif;wi 0,2 (p. 14;
+# 2022 7.6.6.1.3). The rest of the window is as EP-W001.
+W011A = [
+    setp(
+        f"{NTA}/windowGlazings",
+        [
+            {
+                "windowId": f"raam-zuid-{k}",
+                "glazing": {
+                    "diffusing": {
+                        "gAltitude45": 0.045,
+                        "gDiffuse": 0.2,
+                        "sourceReference": "ISSO 54 v2.0 EP-W011a p. 14: gesloten horizontale lamellen, g_gl;alt 0,045 en g_gl;dif 0,2 (7.41)",
+                    }
+                },
+                "sourceReference": "ISSO 54 v2.0 EP-W011a p. 14: alle ramen",
+            }
+            for k in range(1, 5)
+        ],
+    )
+]
+
+# EP-W202e, W302e, W402f: insulated pipes embedded in the construction (p. 24,
+# 32, 34). The test's "binnendiameter 0,02 m" is taken as d_i of 9.34/10.25/
+# 13.28, which those formulas define as the pipe diameter excluding the
+# insulation; d_a 0,04 m, depth 0,03 m, lambda insulation 0,04, lambda
+# construction 2 W/(m.K).
+EMBEDDED = {
+    "method": "insulated_embedded",
+    "pipeOuterDiameterM": 0.02,
+    "insulatedDiameterM": 0.04,
+    "insulationLambdaWPerMK": 0.04,
+    "embeddingLambdaWPerMK": 2.0,
+    "depthM": 0.03,
+}
+
+CASES += [
+    ("EPW011a", 14, W011A),
+    # EP-W203j: the HR107 with a quality declaration (p. 25): efficiency
+    # 0,975 and fraction 1, equal to the 2022 table 9.25 value of an HR107
+    # inside the envelope at 45/40 (so not entered); A 10 kWh, B 0,12 kW,
+    # C 0,3 and B_nom 20 kW replace the 9.85 constants (§9.1). The test's
+    # W;H;aux of 106,48/111,55 kWh is an expected result.
+    (
+        "EPW203j",
+        25,
+        [
+            setp(
+                f"{GEN}/declaredAuxiliaryConstants",
+                {"aKwh": 10.0, "bKw": 0.12, "c": 0.3, "nominalLoadKw": 20.0, "declarationReference": "ISSO 54 v2.0 EP-W203j p. 25: kwaliteitsverklaring HR107, A 10 kWh, B 0,12 kW, C 0,3, B_nom 20 kW"},
+            )
+        ],
+    ),
+    # EP-W204h: as EP-W204g (micro-CHP below 2 kW, LT, 45/40) but with an HRe
+    # label and a quality declaration eps_th 0,8 and eps_el 0,12 (p. 28;
+    # method 2 with §9.1 instead of table 9.31).
+    (
+        "EPW204h",
+        28,
+        micro_chp("EP-W204h", True, True, "ISSO 54 v2.0 EP-W204h p. 28: micro-WKK < 2 kW met HRe-label, LT, kwaliteitsverklaring")
+        + [
+            setp(f"{GEN}/declaredEfficiencies", {"thermal": 0.8, "electric": 0.12, "declarationReference": "ISSO 54 v2.0 EP-W204h p. 28: kwaliteitsverklaring eps_th 0,8, eps_el 0,12"}),
+            temperature_class("45_40"),
+        ],
+    ),
+    (
+        "EPW202e",
+        24,
+        [setp(f"{NTA}/distributionSystem/pipeTransmittance", EMBEDDED)],
+    ),
+    (
+        "EPW302e",
+        32,
+        W301A + [setp(f"{COOL}/distribution/pipe", {"kind": "calculated", "geometry": EMBEDDED, "sourceReference": "ISSO 54 v2.0 EP-W302e p. 32: geisoleerde leidingen in de constructie (10.25)"})],
+    ),
+    (
+        "EPW402f",
+        34,
+        W402A + [setp(f"{HW}/circulation/calculatedPsi", EMBEDDED)],
+    ),
+]
+
+
 def case(test_id, page, patch):
     utility = test_id.startswith("EPU")
     metrics = UTILITY_METRICS if utility else RESIDENTIAL_METRICS
