@@ -104,7 +104,6 @@ export const zh: Record<string, string> = {
   'dialog.save': '保存',
   'dialog.cancel': '取消',
   'dialog.delete': '删除',
-  'dialog.add': '添加',
   'dialog.edit': '编辑',
   'dialog.close': '关闭',
 
@@ -434,7 +433,6 @@ export const zh: Record<string, string> = {
 
   // Feedback dialog
   'feedback.title': 'Send Feedback',
-  'feedback.sendFeedback': 'Send Feedback',
   'feedback.email': 'Email',
   'feedback.emailPlaceholder': 'your@email.com',
   'feedback.fullName': 'Full Name',

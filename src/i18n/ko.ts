@@ -104,7 +104,6 @@ export const ko: Record<string, string> = {
   'dialog.save': '저장',
   'dialog.cancel': '취소',
   'dialog.delete': '삭제',
-  'dialog.add': '추가',
   'dialog.edit': '편집',
   'dialog.close': '닫기',
 
@@ -434,7 +433,6 @@ export const ko: Record<string, string> = {
 
   // Feedback dialog
   'feedback.title': 'Send Feedback',
-  'feedback.sendFeedback': 'Send Feedback',
   'feedback.email': 'Email',
   'feedback.emailPlaceholder': 'your@email.com',
   'feedback.fullName': 'Full Name',

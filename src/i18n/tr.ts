@@ -104,7 +104,6 @@ export const tr: Record<string, string> = {
   'dialog.save': 'Kaydet',
   'dialog.cancel': 'İptal',
   'dialog.delete': 'Sil',
-  'dialog.add': 'Ekle',
   'dialog.edit': 'Düzenle',
   'dialog.close': 'Kapat',
 
@@ -434,7 +433,6 @@ export const tr: Record<string, string> = {
 
   // Feedback dialog
   'feedback.title': 'Send Feedback',
-  'feedback.sendFeedback': 'Send Feedback',
   'feedback.email': 'Email',
   'feedback.emailPlaceholder': 'your@email.com',
   'feedback.fullName': 'Full Name',

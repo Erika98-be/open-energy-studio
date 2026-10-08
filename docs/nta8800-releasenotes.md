@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — getalvelden na de twaalfde review (geen rekenwijziging)
+
+- **Geen ander getal dan getypt.** Een getalveld overschreef de getypte tekst als het formulier een tussenstand weigerde (de "0" van "0,04" bij een λ die groter dan nul moet zijn). Daarna las het "0.8,04" als 8,04 en sloeg dat op. Zolang het veld focus heeft, blijft de getypte tekst nu staan; een geweigerde stand is gemarkeerd en bij het verlaten toont het veld weer de opgeslagen waarde. Gemengde scheidingstekens tellen alleen als getal als het ene teken per drie cijfers groepeert ("1.234,5"); "0.8,04" is geen getal. Een overloop zoals "1e999" ook niet.
+- **Pijltjestoetsen binnen de grenzen.** ↑/↓ houden zich aan `min` en `max` van het veld, zoals een gewoon getalveld (hellingshoek niet onder 0, dekking niet boven 100 %).
+- **Perzisch, Arabisch en volle breedte.** Getallen staan in elke taal in Latijnse cijfers, zodat het veld bewerkbaar blijft; Perzische, Arabisch-Indische en volle-breedtecijfers en -scheidingstekens en richtingstekens worden bij het typen gelezen.
+- **Opmaak.** De monospace-letter geldt alleen voor de nieuwe getalvelden, niet meer voor elk getalveld van de NTA-formulieren.
+- **Hulptechnologie.** Een getalveld meldt zijn waarde en grenzen (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`).
+- **Vertaalsleutels.** De controle op ongebruikte sleutels liet een hele naamruimte door zodra een los woord zoals `'overview'` in de code stond. Een letterlijke tekst telt nu alleen als voorvoegsel als hij een punt bevat. Daarmee zijn 15 ongebruikte sleutels gevonden en verwijderd, onder meer `envelope.windowsOf`, `installations.blockCount` en `overview.issueCount`.
+- Toetsen: `src/__tests__/decimal-input-typing.test.tsx`.
+
 ### 9 oktober 2026 — decimale komma in alle getalvelden, ongebruikte vertaalsleutels (geen rekenwijziging)
 
 - **Decimale komma overal.** De 81 resterende kale getalvelden (`type="number"`) buiten de NTA-formulieren accepteren nu een komma: de oudere dialogen (zone, schildeel, raam, constructie, koudebruggen, installaties, luchtdichtheid), het maatwerkadvies, de rekenhulpen en de diagnosepanelen voor warmtepompen. Een kaal getalveld weigerde "0,35" zonder melding. Ze gebruiken het nieuwe `DecimalInput`. Dat neemt de waarde en de afhandeling van het veld ongewijzigd over (leeg, minimum, afwijzen van een negatief getal) en geeft de waarde met een punt door. Tekst die geen getal is, wordt gemarkeerd en niet doorgegeven.
