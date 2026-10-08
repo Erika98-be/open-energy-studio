@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — bewijskoppelingen op id bij de registratiecontrole (tiende review)
+
+- **Bewijskoppeling.** De app schrijft een koppeling naar een bouwdeel op id (`/zones/@z1/surfaces/@gevel-n`, sinds 7 oktober), maar de registratiecontrole van de kern kon die vorm niet lezen. Elk zo gekoppeld bewijsstuk gaf `evidence_link_path_unknown`, en het project werd daardoor nooit klaar voor registratie (`readyForRegistration` onwaar). De kern lost `@id`-delen nu op zoals de app: het ene element met die id, anders onbekend (ontbrekend of dubbel). De oude vorm met posities blijft werken.
+- **Resultaten die veranderen.** Alleen de registratiestatus: een project met zulke koppelingen kan nu wel klaar voor registratie zijn. Rekenuitkomsten veranderen niet.
+- **Bewaking.** Een gedeelde lijst (`training-data/nta8800-evidence-pointer-cases.json`) wordt door de app en de kern opgelost; beide moeten hetzelfde geven. Een eind-tot-eindtest koppelt in de app een foto, bewaart en opent het project en laat de kern het verzoek controleren.
+
+### 9 oktober 2026 — EP-Online-overzicht en labelgegevens in het rapport (geen rekenwijziging)
+
+- **Oudere uitgave in het EP-Online-overzicht.** Bij een berekening in een oudere uitgave van NTA 8800 vulde het gegevensoverzicht toch de energieklasse en de indicatoren in, zonder vermelding van de uitgave. Die blijven nu leeg met de reden "oudere uitgave (NTA 8800:…), niet registreerbaar", en de toelichting noemt de uitgave. Het rapport zei dit al.
+- **Labelgegevens in het rapport (Omgevingsregeling art. 5.13a).** Twee elementen verschenen met hun Engelse sleutel (`renewableProductionKwh`, `wlcGwpKgCo2EqPerM2`); ze hebben nu hun Nederlandse naam. Energiedrager en hernieuwbare bron staan in het Nederlands (aardgas, elektriciteit, …), jaarhoeveelheden in hele kWh. Een test leest de velden en codes uit de kern, zodat een nieuw element niet ongenoemd blijft.
+- **Documentatie.** Achterhaalde tellingen en standen bijgewerkt in de BRL 9501-gereedheid, de programmabeschrijving en de handleiding (240 van 266 ISSO 54-deeltesten, openbare gevallen A–H, hoofdstukken 00–10).
+
 ### 9 oktober 2026 — een leeg veld met een standaardwaarde houdt die waarde (negende review)
 
 - **Null is ontbrekend.** Sinds de vorige wijziging kreeg de projectroute de lege velden als null. Een veld met een standaardwaarde in de kern (bijvoorbeeld de bevestiging van PV, het aantal zones langs een verticale leiding, het aantal ventilatorconvectoren, het buitengebouwaandeel van de ventilatoren, het aantal zonnecollectoren) gaf dan `nta_value_missing` en status `incomplete`, waar het weggelaten veld gewoon rekende. Dat gold voor 76 velden die de formulieren kunnen leegmaken. De kern leest een null-lid in het NTA-blok nu als ontbrekend, zoals de invoervingerafdruk: het veld houdt zijn standaardwaarde. `nta_value_missing` volgt alleen nog voor een veld dat de kern echt nodig heeft. De enige uitzondering is `nominalThermalCapacityKw` van een GBS-opwekker, waar null bewust "niet te bepalen" betekent; die null telt ook in de vingerafdruk mee. De ruwe controles op `ntaHeatPump` en `layers` behandelen null nu ook als ontbrekend.
