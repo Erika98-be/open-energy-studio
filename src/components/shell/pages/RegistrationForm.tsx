@@ -5,6 +5,7 @@
  * unchanged — one local draft, saved with `cleanRegistration` (software
  * identity kept on a relabel) and the BAG ledger update.
  */
+import { NumberInput } from '../../ui/Field';
 import { useEffect, useMemo, useState } from 'react';
 import { Save, Undo2 } from 'lucide-react';
 import { useI18n } from '../../../i18n/i18n';
@@ -139,8 +140,8 @@ export function RegistrationForm() {
           </div>
           <div className="dialog-field" data-path="registration.constructionYear">
             <label htmlFor="reg-construction-year">{t('reg.constructionYear')}</label>
-            <input id="reg-construction-year" type="number" value={registration.constructionYear ?? ''}
-              onChange={(e) => update({ constructionYear: e.target.value ? Number(e.target.value) : undefined })} />
+            <NumberInput id="reg-construction-year" value={registration.constructionYear ?? null} optional
+              onChange={(next) => update({ constructionYear: next ?? undefined })} />
           </div>
           <div className="dialog-field" data-path="registration.messageType">
             <label htmlFor="reg-message-type">{t('reg.messageType')}</label>
@@ -201,8 +202,8 @@ export function RegistrationForm() {
         <div className="dialog-grid">
           <div className="dialog-field" data-path="registration.wlcGwp.valueKgCo2EqPerM2Year">
             <label htmlFor="reg-wlc-value">{t('reg.wlcGwp.value')}</label>
-            <input id="reg-wlc-value" type="number" step="any" value={registration.wlcGwp?.valueKgCo2EqPerM2Year ?? ''}
-              onChange={(e) => update({ wlcGwp: { ...registration.wlcGwp, valueKgCo2EqPerM2Year: e.target.value ? Number(e.target.value) : undefined } })} />
+            <NumberInput id="reg-wlc-value" value={registration.wlcGwp?.valueKgCo2EqPerM2Year ?? null} optional
+              onChange={(next) => update({ wlcGwp: { ...registration.wlcGwp, valueKgCo2EqPerM2Year: next ?? undefined } })} />
           </div>
           <div className="dialog-field" data-path="registration.wlcGwp.reportReference">
             <label htmlFor="reg-wlc-reference">{t('reg.wlcGwp.reference')}</label>
@@ -216,8 +217,8 @@ export function RegistrationForm() {
           </div>
           <div className="dialog-field" data-path="registration.buildingUsableFloorAreaM2">
             <label htmlFor="reg-building-area">{t('reg.buildingUsableFloorArea')}</label>
-            <input id="reg-building-area" type="number" step="any" value={registration.buildingUsableFloorAreaM2 ?? ''}
-              onChange={(e) => update({ buildingUsableFloorAreaM2: e.target.value ? Number(e.target.value) : undefined })} />
+            <NumberInput id="reg-building-area" value={registration.buildingUsableFloorAreaM2 ?? null} optional
+              onChange={(next) => update({ buildingUsableFloorAreaM2: next ?? undefined })} />
           </div>
         </div>
       </Card>

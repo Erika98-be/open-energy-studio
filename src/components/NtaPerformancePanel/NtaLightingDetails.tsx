@@ -51,7 +51,7 @@ export function LuminaireGroupsFields({ draft, change, base }: SectionProps & { 
     {groups.map((_, index) => {
       const at = (...rest: Path): Path => [...base, 'luminaires', index, ...rest];
       const method = read(draft, at('power', 'method'));
-      return <div key={index} className="nta-form-row">
+      return <div key={index} className="nta-form-row" role="group" aria-label={`${t('nta.light.group')} ${index + 1}`}>
         <NumberField {...field} path={at('count')} label={`${t('nta.light.group')} ${index + 1} — ${t('nta.light.count')}`} step="1" />
         <SelectField {...field} path={at('power', 'method')} label={t('nta.light.groupPower')} options={[
           ['system', t('nta.light.groupPower.system')], ['lamps', t('nta.light.groupPower.lamps')]]}

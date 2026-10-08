@@ -122,7 +122,7 @@ function UnitFields({ draft, change, path }: SectionProps & { path: Path }) {
         <NumberField {...field} path={[...path, 'heatRecovery', 'supplyDuctInsulation', 'conductivityWPerMK']} label="λ W/(m·K)" />
       </>}
       <NumberField {...field} path={[...path, 'heatRecovery', 'manufactureYear']} label={t('nta.vent.manufactureYear')} step="1" />
-      <TextField {...field} path={[...path, 'heatRecovery', 'equipmentReference']} label={t('nta.form.boilerEquipmentSource')} />
+      <TextField {...field} path={[...path, 'heatRecovery', 'equipmentReference']} label={t('nta.vent.hrEquipmentSource')} />
     </>}
     {(op === 'balanced' || op === 'supply') && <label className="nta-form-check">
       <input type="checkbox" checked={ahu != null}
@@ -183,10 +183,14 @@ export function NtaVentilationSection({ draft, change }: SectionProps) {
       {systemKind === 'combined' ? <>
         <NumberField {...field} path={[...base, 'system', 'decentralAreaM2']} label={t('nta.vent.decentralArea')} />
         <NumberField {...field} path={[...base, 'system', 'totalResidenceAreaM2']} label={t('nta.vent.totalResidenceArea')} />
-        <p className="nta-form-note">{t('nta.vent.decentralPart')}</p>
-        <UnitFields draft={draft} change={change} path={[...base, 'system', 'decentral']} />
-        <p className="nta-form-note">{t('nta.vent.otherPart')}</p>
-        <UnitFields draft={draft} change={change} path={[...base, 'system', 'other']} />
+        <div role="group" aria-label={t('nta.vent.decentralPart').replace(/:$/, '')}>
+          <p className="nta-form-note">{t('nta.vent.decentralPart')}</p>
+          <UnitFields draft={draft} change={change} path={[...base, 'system', 'decentral']} />
+        </div>
+        <div role="group" aria-label={t('nta.vent.otherPart').replace(/:$/, '')}>
+          <p className="nta-form-note">{t('nta.vent.otherPart')}</p>
+          <UnitFields draft={draft} change={change} path={[...base, 'system', 'other']} />
+        </div>
       </> : <UnitFields draft={draft} change={change} path={[...base, 'system', 'unit']} />}
       <OptionalText draft={draft} change={change} path={[...base, 'maximumCapacityForCooling']} label={t('nta.vent.maxCapacity')} />
       <label className="nta-form-check">

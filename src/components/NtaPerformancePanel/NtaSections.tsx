@@ -7,6 +7,7 @@
  * order; the step pages render the entries of their own page. Fields and paths
  * are unchanged.
  */
+import { NumberInput } from '../ui/Field';
 import { ThermalMassPerM22022Field } from './NtaEdition2022Fields';
 import type { ComponentType } from 'react';
 import { DEFAULT_NORM_VERSION, IMPLEMENTED_NORM_VERSIONS } from '../../core/nta/KernelClient';
@@ -85,7 +86,8 @@ export function VerticalPipesFields({ draft, change, residential, path, label }:
         <option value="listed">{t('nta.form.verticalPipes.listed')}</option>
       </select>
     </label>
-    {list?.map((_, index) => <div key={index} className="nta-form-row">
+    {list?.map((_, index) => <div key={index} className="nta-form-row" role="group"
+      aria-label={`${t('nta.form.verticalPipes.item')} ${index + 1}`}>
       {residential
         ? <NumberField {...field} path={[...path, index, 'storeys']} label={t('nta.form.verticalPipes.storeys')} step="1" />
         : <>
@@ -503,7 +505,8 @@ function RoofTiltsSection(props: NtaSectionProps) {
   const tilts = (read(props.draft, ['surfaceTilts']) as Draft[] | undefined) ?? [];
   const surfaceName = surfaceNameOf(props.project);
   return <>
-    {tilts.map((item, index) => <div key={String(item.surfaceId)} className="nta-form-row">
+    {tilts.map((item, index) => <div key={String(item.surfaceId)} className="nta-form-row" role="group"
+      aria-label={surfaceName(item.surfaceId)}>
       <NumberField {...f} path={['surfaceTilts', index, 'tiltDeg']} label={`${surfaceName(item.surfaceId)} — ${t('nta.form.tilt')}`} />
       <TextField {...f} path={['surfaceTilts', index, 'sourceReference']} label={t('nta.form.source')} />
     </div>)}
@@ -517,7 +520,8 @@ function GroundFloorsSection(props: NtaSectionProps) {
   const ground = (read(draft, ['groundFloors']) as Draft[] | undefined) ?? [];
   const surfaceName = surfaceNameOf(props.project);
   return <>
-    {ground.map((item, index) => <div key={String(item.surfaceId)} className="nta-form-row">
+    {ground.map((item, index) => <div key={String(item.surfaceId)} className="nta-form-row" role="group"
+      aria-label={surfaceName(item.surfaceId)}>
       <NumberField {...f} path={['groundFloors', index, 'exposedPerimeterM']} label={`${surfaceName(item.surfaceId)} — ${t('nta.form.perimeter')}`} />
       <NumberField {...f} path={['groundFloors', index, 'constructionResistanceM2kPerW']} label={t('nta.form.floorResistance')} />
       <label data-path={`ntaCalculation.groundFloors[${index}].edgeThermalBridges`}>{t('nta.form.edgeBridges')}
@@ -576,14 +580,13 @@ function VentilationModeSection(props: NtaSectionProps) {
     </label>
     {!chapter11 && <>
       <label data-path="ntaCalculation.ventilationFlows">{t('nta.form.ventilationConstant')}
-        <input type="number" step="any" value={typeof constantConductance === 'number' ? constantConductance : ''}
-          onChange={(event) => setConstantVentilation(event.target.value === '' ? null : Number(event.target.value))} />
+        <NumberInput value={typeof constantConductance === 'number' ? constantConductance : null}
+          onChange={(next) => setConstantVentilation(next ?? null)} />
       </label>
       <label>{t('nta.form.ventilationFlow')}
-        <input type="number" step="any" value={typeof constantConductance === 'number'
-          ? Math.round((constantConductance / AIR_HEAT_CAPACITY_W_PER_M3H_K) * 100) / 100 : ''}
-          onChange={(event) => setConstantVentilation(event.target.value === ''
-            ? null : Number(event.target.value) * AIR_HEAT_CAPACITY_W_PER_M3H_K)} />
+        <NumberInput value={typeof constantConductance === 'number'
+          ? Math.round((constantConductance / AIR_HEAT_CAPACITY_W_PER_M3H_K) * 100) / 100 : null}
+          onChange={(next) => setConstantVentilation(next == null ? null : next * AIR_HEAT_CAPACITY_W_PER_M3H_K)} />
       </label>
       <TextField {...f} path={['ventilationFlows', 0, 'sourceReference']} label={t('nta.form.source')} />
       <p className="nta-form-note">{t('nta.form.ventilationNote')}</p>
@@ -701,7 +704,7 @@ function HotWaterSection(props: NtaSectionProps) {
       <KitchenPipeDiameterField draft={draft} change={change} path={['hotWater', 'emission', 'kitchenPipeDiameter']} />
       <NumberField {...f} path={['hotWater', 'emission', 'bathroomLengthM']} label={t('nta.form.hotWaterBathroomLength')} />
     </> : <NumberField {...f} path={['hotWater', 'emission', 'meanLengthM']} label={t('nta.form.hotWaterMeanLength')} />}
-    <TextField {...f} path={['hotWater', 'emission', 'sourceReference']} label={t('nta.form.source')} />
+    <TextField {...f} path={['hotWater', 'emission', 'sourceReference']} label={t('nta.form.hotWaterEmissionSource')} />
     <HotWaterGeneratorFields draft={draft} change={change} base={['hotWater', 'generator']} />
     <HotWaterGeneratorsFields draft={draft} change={change} />
     <HotWaterStorageFields draft={draft} change={change} />

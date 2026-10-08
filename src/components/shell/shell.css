@@ -126,6 +126,9 @@
 .nav-count { font-size: 10.5px; font-weight: 600; padding: 0 6px; height: 18px; line-height: 18px; border-radius: 9px; flex: none; }
 .nav-count.errors { background: var(--error-subtle); color: var(--error-text); }
 .nav-count.warnings { background: var(--warn-subtle); color: var(--warn-text); }
+/* Not colour alone (WCAG 1.4.1): errors and warnings also differ in their mark. */
+.nav-count.errors::before { content: "\2715\00A0" / ""; }
+.nav-count.warnings::before { content: "\26A0\00A0" / ""; }
 .nav-subs { list-style: none; margin: 2px 0 6px 20px; border-left: 1px solid var(--line); padding: 0 0 0 8px; }
 .nav-sub {
   display: flex; align-items: center; gap: 8px; width: 100%; height: 28px; padding: 0 8px; border-radius: var(--radius-sm);
