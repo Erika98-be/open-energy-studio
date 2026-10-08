@@ -16,6 +16,10 @@ import {
 import { KernelCode } from '../KernelCode/KernelCode';
 import { EvidenceAttach } from '../EvidenceLink/EvidenceLink';
 import { SurveyTakeoverAction } from './SurveyTakeoverAction';
+import {
+  BuildingTypeFields, ConstructionExtrasFields, DwellingTypeFields, HeatingControlFields, HotWaterTapsFields, SolarControlWindowsFields,
+  SurfaceExtrasFields, SurveyDoorsFields, UtilityInstallationExtrasFields, UtilityLightingFields, VentilationBasicsFields,
+} from './SurveyBasics';
 import { freshItemId, jsonPointer, linksAfterRemoval } from '../../core/nta/EvidenceLinks';
 import { formatNumber } from '../../i18n/format';
 import { dutchDefaultValue, dutchSource, snakeCase } from '../../core/nta/OpnameValueText';
@@ -54,6 +58,10 @@ const EMITTERS = ['radiators', 'low_temperature_radiators', 'floor_heating', 'fl
   'local_heaters'];
 const AIR_HEATING_KINDS = ['direct', 'indirect', 'via_air_handling_unit'];
 const ORIENTATIONS = ['north', 'north_east', 'east', 'south_east', 'south', 'south_west', 'west', 'north_west'];
+/** ISSO 82.1 table 7.8 / 75.1 table 7.9 glass kinds. */
+const GLASS_KINDS = ['triple_hr', 'hr_plus_plus', 'hr_plus', 'hr', 'coated_type_unknown', 'double', 'double_with_coating',
+  'double_with_secondary', 'hr_with_secondary', 'hr_plus_plus_with_secondary', 'secondary_window', 'single', 'leaded_light',
+  'glass_blocks'];
 
 function opts(t: T, prefix: string, keys: string[]): Array<[string, string]> {
   return keys.map((key) => [key, t(`${prefix}.${key}`)]);
@@ -819,6 +827,9 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       {kind === 'residential' && <NumberField {...field} path={['usableFloorAreaM2']} label={t('opname.usableFloorArea')} />}
       <NumberField {...field} path={['buildingHeightM']} label={t('opname.buildingHeight')} />
       <NumberField {...field} path={['storeys']} label={t('opname.storeys')} step="1" />
+      {kind === 'residential' ? <DwellingTypeFields draft={draft} change={change} t={t} />
+        : <BuildingTypeFields draft={draft} change={change} t={t} />}
+      <ConstructionExtrasFields draft={draft} change={change} t={t} utility={kind === 'utility'} />
       {kind === 'residential' && read(draft, ['dwelling', 'kind']) === 'apartment' &&
         <SelectField {...field} path={['dwelling', 'floor']} label={t('opname.dwelling.floor')}
           options={opts(t, 'opname.dwelling.floorKind', ['ground_or_intermediate', 'top', 'roof_and_floor'])} />}
@@ -848,6 +859,9 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
 
     {show('zones') && <>{kind === 'utility' && <Section title={t('opname.zones')}>
       <CalculationZoneFields draft={draft} change={change} replace={(next) => save({ kind, survey: next })} t={t} />
+    </Section>}
+    {kind === 'utility' && <Section title={t('opname.lighting')}>
+      <UtilityLightingFields draft={draft} change={change} t={t} />
     </Section>}</>}
 
     {show('envelope') && <><Section title={t('opname.envelope')}>
@@ -872,7 +886,8 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
           <label>{t('opname.surface.boundary')}
             <select value={String(read(draft, [...base, 'boundary', 'kind']) ?? '')}
               onChange={(event) => change([...base, 'boundary'], { kind: event.target.value })}>
-              {['outdoor', 'ground', 'crawlspace', 'adjacent_heated', 'unheated_cellar', 'strongly_ventilated', 'sunroom', 'water'].map((key) =>
+              {['outdoor', 'ground', 'crawlspace', 'adjacent_heated', 'unheated_cellar', 'strongly_ventilated', 'sunroom', 'water',
+                'unheated_space'].map((key) =>
                 <option key={key} value={key}>{t(`opname.surface.boundaryKind.${key}`)}</option>)}
             </select>
           </label>
@@ -889,6 +904,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
             </select>
           </label>
           {insulation === 'thickness' && <NumberField {...field} path={[...base, 'insulation', 'thicknessMm']} label={t('opname.surface.thicknessMm')} />}
+          <SurfaceExtrasFields draft={draft} change={change} t={t} base={base} />
           <CheckField {...field} path={[...base, 'thermalCushions']} label={t('opname.surface.thermalCushions')} />
           {insulation === 'present_unknown_thickness' && <>
             <NumberField {...field} path={[...base, 'renovation', 'year']} label={t('opname.surface.renovationYear')} step="1" />
@@ -906,7 +922,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
             options={surfaces.map((surface) => [String(surface.id), String(surface.id)])} />
           <NumberField {...field} path={[...base, 'areaM2']} label={t('opname.window.area')} />
           <SelectField {...field} path={[...base, 'glass']} label={t('opname.window.glass')}
-            options={opts(t, 'opname.window.glassKind', ['triple_hr', 'hr_plus_plus', 'hr_plus', 'hr', 'double', 'single'])} />
+            options={opts(t, 'opname.window.glassKind', GLASS_KINDS)} />
           <SelectField {...field} path={[...base, 'frame']} label={t('opname.window.frame')}
             options={opts(t, 'opname.window.frameKind', ['wood_or_plastic', 'metal_with_thermal_break', 'metal', 'none'])} />
           <label>{t('opname.window.shading')}
@@ -933,6 +949,8 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       })}
       <ListControls label={t('opname.addWindow')}
         onAdd={() => change(['envelope', 'windows'], [...windows, windowTemplate(windows.length, String(surfaces[0]?.id ?? ''))])} />
+      {kind === 'utility' && <SolarControlWindowsFields draft={draft} change={change} t={t} />}
+      <SurveyDoorsFields draft={draft} change={change} t={t} />
       {rooflights.map((rooflight, index) => {
         const base: Path = ['envelope', 'rooflights', index];
         return <div key={`r${index}`} className="opname-item">
@@ -942,7 +960,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
           <NumberField {...field} path={[...base, 'areaM2']} label={t('opname.rooflight.area')} />
           <NumberField {...field} path={[...base, 'uValue']} label={t('opname.rooflight.uValue')} />
           <SelectField {...field} path={[...base, 'glass']} label={t('opname.window.glass')}
-            options={opts(t, 'opname.window.glassKind', ['triple_hr', 'hr_plus_plus', 'hr_plus', 'hr', 'double', 'single'])} />
+            options={opts(t, 'opname.window.glassKind', GLASS_KINDS)} />
           <TextField {...field} path={[...base, 'qualityDeclarationReference']} label={t('opname.rooflight.declaration')} />
           <SurveyPhotos path={base} />
           <RemoveButton label={t('opname.remove')} onRemove={() => removeAt(['envelope', 'rooflights'], index)} />
@@ -965,6 +983,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
         options={opts(t, 'opname.heating.designClassKind', ['c45_40', 'c55_47', 'c70_50', 'c90_70'])} />
       {read(draft, ['heating', 'designClass']) === 'c90_70' &&
         <TextField {...field} path={['heating', 'heatPumpAbove70Declaration']} label={t('opname.heating.above70Declaration')} />}
+      <HeatingControlFields draft={draft} change={change} t={t} />
       <DistributionFields draft={draft} change={change} t={t} />
       <CheckField {...field} path={['heating', 'addedPreferredGenerator']} label={t('opname.heating.addedPreferred')} />
       <label className="nta-form-check">
@@ -990,6 +1009,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
     {show('hotWater') && <><Section title={t('opname.hotWater')}>
       <HotWaterGeneratorFields draft={draft} path={['hotWater', 'generator']} kind={kind} change={change} t={t} />
       <NumberField {...field} path={['hotWater', 'nominalPowerKw']} label={t('opname.nominalPowerKw')} />
+      <HotWaterTapsFields draft={draft} change={change} t={t} utility={kind === 'utility'} />
       <SurveyPhotos path={['hotWater', 'generator']} />
       {kind === 'residential' && <>
         <label className="nta-form-check">
@@ -1070,12 +1090,15 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
     </Section>}
 
     {kind === 'residential' && <Section title={t('opname.ventilation')}>
+      <VentilationBasicsFields draft={draft} change={change} t={t} />
       <VentilationSurveyFields draft={draft} change={change} t={t} />
       <SurveyPhotos path={['ventilation']} />
     </Section>}
 
     {kind === 'utility' && <Section title={t('opname.ventilation')}>
+      <VentilationBasicsFields draft={draft} change={change} t={t} />
       <UtilityVentilationFields draft={draft} change={change} t={t} />
+      <UtilityInstallationExtrasFields draft={draft} change={change} t={t} />
       <SurveyPhotos path={['ventilation']} />
     </Section>}
 

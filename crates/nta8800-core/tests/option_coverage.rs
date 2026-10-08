@@ -1086,3 +1086,49 @@ fn numeric_route_jobs(fixtures: &[Fixture]) -> Vec<Job> {
 const MIN_VARIANTS: usize = 1490;
 const MIN_FIELDS: usize = 1210;
 const MIN_OMITTED: usize = 300;
+
+/// The catalogue of input options a user can choose, for the form-coverage
+/// check of the interface (`src/__tests__/nta-form-coverage.test.ts`): every
+/// enum variant and optional field of the project input (`ntaCalculation`
+/// and the project model) and of both surveys, as serde lists them.
+/// `UPDATE_INPUT_OPTIONS=1` rewrites the committed file; otherwise a new
+/// option fails here until the catalogue, and with it the form check, is
+/// brought up to date.
+#[test]
+fn input_option_catalogue_is_current() {
+    let fixtures = fixtures();
+    let positions = discover(&fixtures);
+    let mut entries = Vec::new();
+    for position in &positions {
+        let route = match position.route {
+            Route::Project => "project",
+            Route::Residential => "residentialSurvey",
+            Route::Utility => "utilitySurvey",
+            _ => continue,
+        };
+        entries.push(json!({
+            "route": route,
+            "kind": match position.kind {
+                Kind::Variant => "variant",
+                Kind::Field => "field",
+            },
+            "path": position.schema,
+            "options": position.options,
+        }));
+    }
+    let text = serde_json::to_string_pretty(&Value::Array(entries)).unwrap() + "\n";
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../training-data/nta8800-input-options.json"
+    );
+    if std::env::var_os("UPDATE_INPUT_OPTIONS").is_some() {
+        std::fs::write(path, &text).unwrap();
+        return;
+    }
+    let committed = std::fs::read_to_string(path).unwrap_or_default();
+    assert!(
+        committed == text,
+        "training-data/nta8800-input-options.json is out of date: run this test with \
+         UPDATE_INPUT_OPTIONS=1 and map the new options in src/core/nta/formCoverage.ts"
+    );
+}

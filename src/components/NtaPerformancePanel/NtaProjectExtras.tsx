@@ -201,6 +201,26 @@ export function CoolingSystemFields({ draft, change, base, allowNone }: SectionP
           <TextField {...field} path={at('distribution', 'pipe', 'sourceReference')} label={t('nta.form.pipeGeometry.source')} />
         </>}
         <CheckField {...field} path={at('distribution', 'fittingsInsulated')} label={t('nta.form.coolingFittings')} />
+        <NumberField {...field} path={at('distribution', 'pipeLengthM')} label={t('nta.form.coolDist.pipeLength')} optional unit="m" />
+        <NumberField {...field} path={at('distribution', 'unconditionedPipeLengthM')} label={t('nta.form.coolDist.unconditionedLength')} optional unit="m" />
+        <NumberField {...field} path={at('distribution', 'unconditionedAmbientC')} label={t('nta.form.coolDist.unconditionedAmbient')} optional unit="°C" />
+        <label className="nta-form-check">
+          <input type="checkbox" checked={read(draft, at('distribution', 'pump')) != null}
+            onChange={(event) => change(at('distribution', 'pump'), event.target.checked
+              ? { hydraulicallyBalanced: false, floorCount: 1, heatMeter: false, individualDwellingInstallation: false, sourceReference: '' }
+              : null)} />
+          {t('nta.form.coolDist.pump')}
+        </label>
+        {read(draft, at('distribution', 'pump')) != null && <div className="nta-form-subsection">
+          <CheckField {...field} path={at('distribution', 'pump', 'hydraulicallyBalanced')} label={t('nta.form.coolDist.balanced')} />
+          <NumberField {...field} path={at('distribution', 'pump', 'floorCount')} label={t('nta.form.coolDist.floors')} step="1" />
+          <CheckField {...field} path={at('distribution', 'pump', 'heatMeter')} label={t('nta.form.coolDist.meter')} />
+          <CheckField {...field} path={at('distribution', 'pump', 'individualDwellingInstallation')} label={t('nta.form.coolDist.individual')} />
+          <NumberField {...field} path={at('distribution', 'pump', 'labelPowerKw')} label={t('nta.form.coolDist.labelPower')} optional unit="kW" />
+          <NumberField {...field} path={at('distribution', 'pump', 'energyEfficiencyIndex')} label={t('nta.dist.pump.eei')} optional />
+          <NumberField {...field} path={at('distribution', 'pump', 'maxPipeLengthM')} label={t('nta.dist.pump.maxLength')} optional unit="m" />
+          <TextField {...field} path={at('distribution', 'pump', 'sourceReference')} label={t('nta.form.source')} />
+        </div>}
         <TextField {...field} path={at('distribution', 'sourceReference')} label={t('nta.form.source')} />
       </>}
     </>}

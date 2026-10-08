@@ -42,6 +42,10 @@ export function BoilerForfaitFields({ draft, change, base }: SectionProps & { ba
   const field = { draft, onChange: change };
   const at = (...rest: Path): Path => [...base, ...rest];
   return <>
+    <SelectField {...field} path={at('role')} label={t('nta.form.boilerRole')} options={[
+      ['individual_main', t('nta.form.boilerRole.individual_main')],
+      ['individual_supplementary', t('nta.form.boilerRole.individual_supplementary')],
+      ['collective', t('nta.form.boilerRole.collective')]]} />
     <SelectField {...field} path={at('kind')} label={t('nta.form.boilerKind')} options={[
       ['hr107', 'HR107'], ['hr104', 'HR104'], ['hr100', 'HR100'], ['vr', 'VR'], ['conventional', t('nta.form.boiler.conventional')]]} />
     <SelectField {...field} path={at('location')} label={t('nta.form.boilerLocation')} options={[

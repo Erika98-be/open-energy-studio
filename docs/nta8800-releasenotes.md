@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — formulieren voor alle gewone invoer; bewaakte formulierdekking (geen rekenwijziging)
+
+- **Formulierdekking bewaakt.** De kern levert een catalogus van elke keuzewaarde en elk optioneel veld van de projectinvoer en beide basisopnamen (`training-data/nta8800-input-options.json`, bijgehouden door een test in `option_coverage.rs`). Een nieuwe test (`nta-form-coverage.test.ts`) faalt als een optie geen formulier heeft en ook niet als bewust-JSON met reden is vastgelegd. Dekking op naam: van 1 651 naar 1 807 van de 1 823 opties; de overige 16 staan met reden in [Formulierdekking](ui-redesign/formulierdekking.md).
+- **Nieuwe formulieren, projectinvoer:** boosterwarmtepomp met meetwaarden (bijlage W), warmtepompen in serie, warmtepomp met indirect vat, biomassa-combitoestel, groot direct gestookt voorraadtoestel; afleversets en b_U per tapwatersysteem; rol van de ketel en bronsysteem van de warmtepomp; pomp, buffervat, combinatieleidingen, afleverset en b_U in de distributie; leidinglengte buiten de gekoelde zone en de circulatiepomp van de koeling; ventilatorvermogen uit het motorvermogen; woningoppervlak bij meer zones; aandeel woningen per zone; aandeel per verticale leiding.
+- **Nieuwe formulieren, basisopname:** woningtype en ligging, gebouwtype, constructie en plafond, gemeten q_v10, ventilatieprincipe en unit, ruimteregeling, leidingen in onverwarmde ruimten, douches en tappunten, deuren, alle glassoorten, rietdak, kruipruimtebodem, aangetoonde isolatie, onverwarmde ruimte als grens; bij utiliteit de verlichtingszones, recirculatie, volumestroomregeling, LUKA- en LBK-kanalen, bevochtiging, GBS, collectieve verwarming, zonwerend glas en koelleidingisolatie.
+
 ### 9 oktober 2026 — formulier voor de forfaitaire boosterwarmtepomp; meldteksten bij velden (geen rekenwijziging)
 
 - De forfaitaire boosterwarmtepomp (13.162/13.163) heeft een formulier bij het tapwatertoestel: de ontwerpaanvoertemperatuur van het voedende verwarmingssysteem (leeg is onbekend) en de bron van de warmte volgens figuur W.1 (externe warmtelevering, het verwarmingssysteem of een collectieve opwekker met rendement en energiedrager). Eerder kon deze route alleen via Geavanceerd (JSON).
