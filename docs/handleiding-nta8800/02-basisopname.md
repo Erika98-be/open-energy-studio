@@ -26,6 +26,17 @@ De opname heeft deze onderdelen:
 
 **Nieuwe vragen in het formulier (9 oktober 2026).** Wat eerder alleen via de JSON-weergave kon, staat nu in de wizard: het ventilatieprincipe (A–D) met zelfregelende roosters, drukklasse, installatie- en fabricagejaar, motor en een aangetoonde variant van tabel 11.5; de ruimtetemperatuurregeling en de leidingen in onverwarmde ruimten (afb. 9.1); deuren met isolatie, glasaandeel en kozijn; alle glassoorten van tabel 7.8 (ook gecoat, met voorzetraam, glas-in-lood en glazen bouwstenen); bij een vlak de dikte van een rieten dak, een geïsoleerde kruipruimtebodem, aangetoonde isolatiedikte en een onverwarmde ruimte als grens. Een onverwarmde ruimte als grens kies je pas nadat je haar onder *Onverwarmde ruimten* hebt toegevoegd; bij een deur met een glasaandeel vraagt het formulier ook de glassoort. Lege verplichte getallen (zoals een gemeten q_v10 of het vermogen van een verlichtingszone) noemt *Opname doorrekenen* bij naam voordat de kern rekent.
 
+**Ook in het formulier (9 oktober 2026, middag).** De laatste vragen die alleen via JSON konden, hebben nu een veld, in beide opnames:
+- **Algemeen:** de bron van de gebruiksoppervlakte (NEN 2580) en gebouwgebonden opslag (§15.5). Opslag vraagt het formulier alleen als er PV is, want zonder PV telt ze niet (`storage_requires_pv`).
+- **Schil:** per vlak de oriëntatie (niet bij een vloer), de hellingshoek (leeg = 90° gevel, 0° dak), een spouw, en bij een vloer op grond, boven een kruipruimte of onverwarmde kelder de omtrek langs de buitenlucht; panelen in een vlak (isolatie, spouw, kozijn); per raam opgegeven belemmeringsfactoren (§17.3, 12 voor verwarming en 12 voor koeling) in plaats van een situatie.
+- **Verwarming:** waterzijdig ingeregeld en het aantal bouwlagen dat de distributie bedient (9.37).
+- **Ventilatie:** bij gebalanceerde ventilatie de bypass op de warmteterugwinning; in de utiliteitsopname of de luchtbehandelingskast binnen de thermische zone staat.
+- **Tapwater:** de douche-WTW (tabel 13.16); in de woningopname de tappunten die de opwekker bedient met de leidinglengtes naar keuken en badruimte; in de utiliteitsopname de circulatieleiding en de voorraadvaten (energielabel, fabricage vanaf 2018, aansluitleidingen, binnen de thermische zone).
+- **Koeling (utiliteit):** ontwerptemperatuur van de afgifte, regeling en leidingisolatie.
+- **PV:** de ventilatie achter de modules (tabel 16.2), de amorfe moduletypen, en opgegeven belemmeringsfactoren F_sh;obst (één waarde of twaalf) in plaats van een situatie.
+
+Factoren per maand vul je in als lijst gescheiden door puntkomma's, met een komma als decimaalteken.
+
 **Standaardwaarden.** Een vraag zonder antwoord krijgt de standaardwaarde uit de ISSO-tabel. Elke toegepaste standaardwaarde verschijnt onder Uitkomst & forfaitair in de lijst "Toegepaste standaardwaarden". Leg per regel de reden vast in het veld **Reden inklappen**. Het projectdossier toetst die redenen; zie [hoofdstuk 7](07-herlabelen-registratie-dossier.md).
 
 **Meldingen die vaak voorkomen**

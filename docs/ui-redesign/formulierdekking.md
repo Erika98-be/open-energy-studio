@@ -19,12 +19,14 @@ Tot 9 oktober 2026 telde de check een optie als gedekt zodra haar naam ergens in
 
 | Route | Opties | Door een formulier geschreven | Vrijstelling `form` | `json` | `missing` | `parallel` |
 |---|---|---|---|---|---|---|
-| Projectinvoer | 1 098 | 1 061 | 8 | 16 | 13 | 0 |
-| Woningopname | 316 | 291 | 0 | 0 | 25 | 0 |
-| Utiliteitsopname | 409 | 380 | 0 | 0 | 29 | 0 |
-| **Totaal** | **1 823** | **1 732 (95,0 %)** | **8** | **16** | **67** | **0** |
+| Projectinvoer | 1 098 | 1 074 | 8 | 16 | 0 | 0 |
+| Woningopname | 316 | 316 | 0 | 0 | 0 | 0 |
+| Utiliteitsopname | 409 | 409 | 0 | 0 | 0 | 0 |
+| **Totaal** | **1 823** | **1 799 (98,7 %)** | **8** | **16** | **0** | **0** |
 
-Met de vrijstellingen van soort `form` erbij heeft **1 740 / 1 823 (95,4 %)** een formulier. 16 opties zijn bewust alleen JSON. 67 opties hebben nog geen formulier (`missing`): vooral velden per rekenzone in `zoneData`, onderdelen van een verder tapwatersysteem en opnamevragen naar schildelen, PV en tapwater (lijst in `formCoverage.ts`). De 4 opties van de parallelle opnamewijziging (glas van een deur, onverwarmde ruimten) zijn sinds de merge van 9 oktober 2026 gedekt.
+Met de vrijstellingen van soort `form` erbij heeft **1 807 / 1 823 (99,1 %)** een formulier; de overige 16 opties zijn bewust alleen JSON (zie hieronder). Geen enkele optie staat nog als `missing`. Na de strengere check stonden er 67 open (9 oktober 2026, ochtend); die kregen in de ronde van 9 oktober 2026 (middag) een formulier, zie "Formulieren van de tweede ronde".
+
+Eerder telde de check 1 732 / 1 823 (95,0 %) door een formulier geschreven, met 67 opties `missing`.
 
 In deze ronde kregen een formulier: de douche-WTW (§13.5.3, per douche met verbinding en opgegeven rendement), de kokendwaterkraan, het gasgestookte voorraadtoestel (13.165–13.175), de ontbrekende Bbl-functies (woonwagen, drijvende bouwwerken, logies in een logiesgebouw) en de berekende Ψ van de verwarmingsleidingen (9.33–9.35).
 
@@ -40,8 +42,11 @@ In deze ronde kregen een formulier: de douche-WTW (§13.5.3, per douche met verb
 | Koeling: opwekkers, afgifte, distributie met leidinglengte buiten de gekoelde zone en de circulatiepomp | Installaties › Koeling |
 | Ventilatie: systeem, ventilatoren (opgegeven of motorvermogen), woningoppervlak bij meer zones | Installaties › Ventilatie |
 | Verlichting, PV, GBS, opgegeven gebruik, hernieuwbaar | Installaties › Verlichting, Opwekking, Overig |
-| Woningopname: woningtype, ligging, daktype, constructie en plafond, gemeten q_v10, ventilatieprincipe en unit, ruimteregeling, leidingen in onverwarmde ruimten, douches en tappunten, deuren, glas (alle soorten van tabel 7.8), rietdak, kruipruimtebodem, onverwarmde ruimte als grens | Basisopname (woning) |
-| Utiliteitsopname: gebouwtype, verlichtingszones (armaturen of lampen, lamptype, aanwezigheid, daglicht), recirculatie, volumestroomregeling, LUKA-kanalen, LBK-kanalen, bevochtiging, GBS, collectieve verwarming, zonwerend glas, koelleidingisolatie | Basisopname (utiliteit) |
+| Gegevens per rekenzone (`zoneData`): gebruiksfunctie, woningtype, delen met een andere functie, thermische massa, serres, zwembad in een sportfunctie | Gebouw › Zones › Gegevens per rekenzone (bij meer rekenzones) |
+| Tapwater per systeem: circulatieleiding (isolatie, lengte, deel in onverwarmde ruimten, bouwlagen, pomp, opgegeven of berekende Ψ), extra opwekkers en serieopstelling ook bij een verder tapwatersysteem | Installaties › Tapwater |
+| Collectieve koeling en gedeeld PV-systeem (aandeel naar de gebruiksoppervlakte van het gebouw), rekenzone van de verlichting | Installaties › Koeling, Opwekking, Verlichting |
+| Woningopname: woningtype, ligging, daktype, constructie en plafond, gemeten q_v10, ventilatieprincipe en unit, bypass, ruimteregeling, waterzijdig inregelen, bouwlagen van de distributie, leidingen in onverwarmde ruimten, douches, tappunten en leidinglengtes, douche-WTW, deuren, panelen, glas (alle soorten van tabel 7.8), oriëntatie, helling, spouw en omtrek per vlak, opgegeven belemmeringsfactoren per raam, PV-ventilatie en belemmeringsfactoren, rietdak, kruipruimtebodem, onverwarmde ruimte als grens, bron van de gebruiksoppervlakte, opslag | Basisopname (woning) |
+| Utiliteitsopname: gebouwtype, verlichtingszones (armaturen of lampen, lamptype, aanwezigheid, daglicht), recirculatie, volumestroomregeling, LUKA-kanalen, LBK-kanalen en LBK binnen de thermische zone, bevochtiging, GBS, collectieve verwarming, zonwerend glas, koeling (ontwerptemperatuur, regeling, leidingisolatie), circulatie en voorraadvaten, en verder dezelfde schil-, PV- en tapwatervragen als de woningopname | Basisopname (utiliteit) |
 
 ## Bewust alleen via JSON
 
@@ -71,3 +76,14 @@ In deze ronde kregen een formulier: de douche-WTW (§13.5.3, per douche met verb
 - **Basisopname:** zie de tabel hierboven; daarnaast de volledige glaslijst van ISSO 82.1 tabel 7.8 / 75.1 tabel 7.9.
 
 De formulieren schrijven precies de vorm van de kern; `src/__tests__/nta-form-coverage-forms.test.tsx` controleert dat per formulier (formulier → kern-JSON) en dat de invoergaten van de nieuwe velden naar de juiste stap leiden.
+
+## Formulieren van de tweede ronde (9 oktober 2026, middag)
+
+- **Gegevens per rekenzone:** een rekenzone krijgt desgewenst eigen gegevens; die beginnen als kopie van de interne warmte, de luchtstromen en de ventilatie van het blok, omdat de kern die bij een eigen `zoneData` alleen uit de zone haalt.
+- **Circulatieleiding** voor het hoofdsysteem en elk verder tapwatersysteem (13.27–13.39); opgegeven en berekende Ψ sluiten elkaar uit.
+- **Verder tapwatersysteem:** eigen nominaal vermogen, extra opwekkers en serieopstelling (de serie verdwijnt als er niet precies één extra opwekker is).
+- **Collectieve koeling en gedeeld PV-systeem**, **zwembad** in een sportfunctie (§11.2.2.5.1), **rekenzone van de verlichting**.
+- **Opname:** zie de tabel hierboven. Opslag (§15.5) wordt alleen met PV gevraagd (`storage_requires_pv`); opgegeven belemmeringsfactoren van een raam of PV-veld vervangen de situatie (die sluiten elkaar uit).
+- **Boosterwarmtepomp bijlage W:** de twee beproevingen hebben elk een eigen naam ("beproeving 1/2").
+
+`src/__tests__/survey-coverage-forms.test.tsx` en `src/__tests__/nta-form-coverage-project.test.tsx` controleren formulier → kern-JSON; `crates/nta8800-core/tests/survey_form_shapes.rs` en `project_form_shapes.rs` laten de kern dezelfde vormen lezen en doorrekenen.
