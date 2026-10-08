@@ -717,8 +717,7 @@ fn allow_named_hot_water_swaps(changes: &mut [RelabelChange]) {
         }) else {
             continue;
         };
-        if change.path == format!("{generator}/kind") || change.verdict == RelabelVerdict::Review
-        {
+        if change.path == format!("{generator}/kind") || change.verdict == RelabelVerdict::Review {
             change.verdict = RelabelVerdict::Allowed;
             change.cluster = HOT_WATER_SWAP_CLUSTER;
             change.note = None;
@@ -1450,7 +1449,10 @@ mod tests {
             RelabelVerdict::Allowed
         );
         assert_eq!(
-            verdict(&result, "/ntaCalculation/distributionSystem/bufferVessel/label"),
+            verdict(
+                &result,
+                "/ntaCalculation/distributionSystem/bufferVessel/label"
+            ),
             RelabelVerdict::Allowed
         );
         assert!(result
@@ -1555,7 +1557,9 @@ mod tests {
 
     #[test]
     fn window_solar_is_not_production() {
-        assert!(!is_production_path("/ntaCalculation/windowSolar/frameFraction"));
+        assert!(!is_production_path(
+            "/ntaCalculation/windowSolar/frameFraction"
+        ));
         assert!(!is_installation_path(
             "/ntaCalculation/windowSolar/frameFraction"
         ));
