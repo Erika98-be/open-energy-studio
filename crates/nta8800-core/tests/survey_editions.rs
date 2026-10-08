@@ -62,7 +62,10 @@ fn run(utility: bool, mut value: Value, edition: &str) -> Outcome {
     let mut codes = Vec::new();
     collect_codes(&assessment, &mut codes);
     Outcome {
-        status: assessment["status"].as_str().unwrap_or_default().to_string(),
+        status: assessment["status"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string(),
         codes,
     }
 }
@@ -184,9 +187,11 @@ fn missing_h2_names_the_survey_answer_only_where_the_edition_needs_it() {
             for index in &floors {
                 let expected = format!("envelope.surfaces[{index}].floorHeightAboveGroundM");
                 assert!(
-                    outcome.codes.iter().any(|(code, path)| code
-                        == "floor_height_above_ground_required"
-                        && path == &expected),
+                    outcome
+                        .codes
+                        .iter()
+                        .any(|(code, path)| code == "floor_height_above_ground_required"
+                            && path == &expected),
                     "{name} in {edition}: {:?}",
                     outcome.codes
                 );
@@ -205,8 +210,7 @@ fn h2_does_not_change_the_result_from_2023() {
         }
         let mut answered = base.clone();
         for index in &floors {
-            answered["envelope"]["surfaces"][*index]["floorHeightAboveGroundM"] =
-                Value::from(0.8);
+            answered["envelope"]["surfaces"][*index]["floorHeightAboveGroundM"] = Value::from(0.8);
         }
         for edition in ["2025+C1", "2024", "2023"] {
             let ep = |value: &Value| {
@@ -235,8 +239,7 @@ fn h2_raises_the_heat_loss_in_2022() {
     let heat = |height: f64| {
         let mut value = base.clone();
         for index in &floors {
-            value["envelope"]["surfaces"][*index]["floorHeightAboveGroundM"] =
-                Value::from(height);
+            value["envelope"]["surfaces"][*index]["floorHeightAboveGroundM"] = Value::from(height);
         }
         value["normVersion"] = Value::from("2022");
         let survey: ResidentialSurvey = serde_json::from_value(value).unwrap();
