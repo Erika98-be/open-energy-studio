@@ -23,6 +23,17 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 - **NCW-horizon.** Zonder opgegeven horizon gebruiken alle varianten en pakketten één gemeenschappelijke horizon: de langste levensduur van alle maatregelen. Zo vergelijkt de automatische keuze op de hoogste NCW pakketten over dezelfde periode.
 - **Bronnen.** De verwijzingen naar BRL 9500-MWA-W/U van 24-03-2026 zijn niet gecontroleerd; die tekst ontbreekt hier (gereedheid E7).
 
+### 9 oktober 2026 — herlabelen na de dertiende review
+
+Het oordeel bij herlabelen verandert in vier gevallen (BRL 9500-W bijlage 6a/6b, p. 67–68; U p. 58–60; ISSO 82.1 en 75.1 bijlage A):
+
+- **Energielabel van een vat.** Een ander label van een voorraadvat (`hotWater.storage[].loss.label`) of buffervat (`distributionSystem.bufferVessel.label`) viel weg uit de vergelijking, terwijl de hash wel veranderde. Het telt nu als één-op-één wijziging (6a). Alleen een `label` die weergavetekst is, blijft buiten de vergelijking. Ook de manier waarop het stilstandsverlies is bepaald (label of meting) is een eigenschap van het vat en geen systeemwijziging meer.
+- **Gastoestel door elektrische boiler.** Een gasgestookt warmwatertoestel (`gas_appliance`, `gas_storage_heater`) vervangen door een elektrische boiler is volgens ISSO 82.1 bijlage A, cluster 1 (p. 209) en ISSO 75.1 (p. 215) een één-op-één vervanging. Het was "niet toegestaan"; nu is het toegestaan (6a). Andere wissels, zoals een gastoestel door een warmtepomp, blijven een systeemwijziging (6b).
+- **Luchtdichtheid.** Een andere q<sub>v10</sub> of infiltratie gold als toegestane installatiewijziging. Bijlage 6a en 6b noemen luchtdichtheid niet; het is nu "te beoordelen", met het meetrapport als bewijs.
+- **Koeling.** Koeling aanbrengen of verwijderen was "te beoordelen". Het is een systeemwijziging ("het aanbrengen van koeling", ISSO 82.1 bijlage A, cluster 6, p. 210; 6b W p. 68) en is nu niet toegestaan.
+
+De indeling herkent de eigenschappen van ramen (`windowSolar`) niet meer als zonne-energie. De clusters "uitgave van NTA 8800 gewijzigd" en die van deze wijziging hebben nu een Nederlandse en Engelse tekst; een test leest alle clusters en notities uit de kern en eist een tekst.
+
 ### 9 oktober 2026 — getalvelden na de twaalfde review (geen rekenwijziging)
 
 - **Geen ander getal dan getypt.** Een getalveld overschreef de getypte tekst als het formulier een tussenstand weigerde (de "0" van "0,04" bij een λ die groter dan nul moet zijn). Daarna las het "0.8,04" als 8,04 en sloeg dat op. Zolang het veld focus heeft, blijft de getypte tekst nu staan; een geweigerde stand is gemarkeerd en bij het verlaten toont het veld weer de opgeslagen waarde. Gemengde scheidingstekens tellen alleen als getal als het ene teken per drie cijfers groepeert ("1.234,5"); "0.8,04" is geen getal. Een overloop zoals "1e999" ook niet.
