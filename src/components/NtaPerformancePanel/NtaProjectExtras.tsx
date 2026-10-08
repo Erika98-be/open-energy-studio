@@ -49,7 +49,7 @@ export function SunroomsFields({ draft, change, base = ['sunrooms'] }: SectionPr
         <NumberField {...field} path={at('exteriorFrameFraction')} label={t('nta.form.sunroom.frame')} />
         <NumberField {...field} path={at('reductionFactor')} label={t('nta.form.sunroom.reduction')} />
         <NumberField {...field} path={at('zoneConductanceWPerK')} label={t('nta.form.sunroom.conductance')} />
-        <NumberField {...field} path={at('distributionFactor')} label={t('nta.form.sunroom.distribution')} />
+        <NumberField {...field} path={at('distributionFactor')} label={t('nta.form.sunroom.distribution')} optional />
         {surfaces.map((__, surface) => <div key={surface} className="nta-form-row">
           <NumberField {...field} path={at('surfaces', surface, 'areaM2')} label={t('nta.form.sunroom.surfaceArea')} />
           <NumberField {...field} path={at('surfaces', surface, 'absorptance')} label={t('nta.form.sunroom.absorptance')} />
@@ -180,7 +180,7 @@ export function CoolingSystemFields({ draft, change, base, allowNone }: SectionP
       <SelectField {...field} path={at('emission', 'control')} label={t('nta.form.coolingControl')} options={[
         ['unknown_or_other', t('nta.form.coolCtrl.unknown')], ['standalone_per_room', t('nta.form.coolCtrl.standalone')],
         ['central_with_room_control', t('nta.form.coolCtrl.central')]]} />
-      <NumberField {...field} path={at('emission', 'fanCoilCount')} label={t('nta.form.coolingFanCoils')} />
+      <NumberField {...field} path={at('emission', 'fanCoilCount')} label={t('nta.form.coolingFanCoils')} optional />
       <CoolingEmission2023Fields draft={draft} change={change} base={at('emission')} />
       <TextField {...field} path={at('emission', 'sourceReference')} label={t('nta.form.source')} />
       <label className="nta-form-check">

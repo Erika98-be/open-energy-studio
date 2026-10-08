@@ -210,3 +210,34 @@ fn a_second_further_generator_ends_the_series() {
         "{after:?}"
     );
 }
+
+/// Review 9: a pipe added on the residential route keeps a blank `storeys`
+/// when the office takes the utility route. A null member reads as absent,
+/// so with H filled in the pipe calculates and nothing points at the hidden
+/// storeys field.
+#[test]
+fn hidden_blank_storeys_on_the_utility_route_reads_as_absent() {
+    let base = office();
+    let (status, before) = gap_codes(&base);
+    let mut value = base;
+    value["ntaCalculation"]["verticalPipes"][0]["storeys"] = Value::Null;
+    let (after_status, after) = gap_codes(&value);
+    assert_eq!(after_status, status);
+    assert_eq!(after, before);
+    assert!(!after.iter().any(|gap| gap.contains("storeys")), "{after:?}");
+}
+
+/// Review 9: the form syncs a utility pipe to `buildingHeightM` (blank when
+/// not yet entered) and drops `storeys`, so the gap lands on the shown field.
+#[test]
+fn blank_building_height_is_named_on_the_utility_route() {
+    let mut value = office();
+    value["ntaCalculation"]["verticalPipes"][0]["buildingHeightM"] = Value::Null;
+    let (_, gaps) = gap_codes(&value);
+    assert!(
+        gaps.iter()
+            .any(|gap| gap.ends_with("verticalPipes[0].buildingHeightM")),
+        "{gaps:?}"
+    );
+    assert!(!gaps.iter().any(|gap| gap.contains("storeys")), "{gaps:?}");
+}

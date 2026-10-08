@@ -102,4 +102,29 @@ describe('project-form guard findings', () => {
     expect(draft().bacs.bacs).toEqual({ present: false, sourceReference: '' });
     expect(screen.queryByLabelText(/Automatic controls class/)).toBeNull();
   });
+
+  // Review 9: a cleared field with a kernel default drops its member (the default applies),
+  // and a choice with a default has no blank option.
+  it('drops a cleared shared-zones count instead of writing a blank', () => {
+    renderWithProviders(<Section id="verticalPipes" project={officeProject} />);
+    const input = screen.getByLabelText(/Zones or heated spaces along the pipe/);
+    fireEvent.change(input, { target: { value: '2' } });
+    expect(draft().verticalPipes[0].sharedZones).toBe(2);
+    fireEvent.change(input, { target: { value: '' } });
+    expect('sharedZones' in draft().verticalPipes[0]).toBe(false);
+  });
+
+  it('offers no blank PV mounting', () => {
+    renderWithProviders(<Section id="pv" project={officeProject} />);
+    const mountings = screen.queryAllByLabelText(/Mounting \(table 16.2\)/);
+    for (const select of mountings) {
+      expect([...(select as HTMLSelectElement).options].map((option) => option.value)).not.toContain('');
+    }
+  });
+
+  it('shows the building height, not the storeys, on the utility route', () => {
+    renderWithProviders(<Section id="verticalPipes" project={officeProject} />);
+    expect(screen.getByLabelText(/External building height H/)).toBeTruthy();
+    expect(screen.queryByLabelText(/Storeys of the zone/)).toBeNull();
+  });
 });
