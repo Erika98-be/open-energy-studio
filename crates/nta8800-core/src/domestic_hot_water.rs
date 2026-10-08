@@ -2985,8 +2985,13 @@ fn generation_values(
             // declared for one tapping class takes c_W;gen for that class;
             // without a class it is the declaration's value interpolated
             // for this system's demand (allowed before rounding), so no
-            // class correction applies.
-            let correction = if declared.is_some() && measured_class.is_none() {
+            // class correction applies. The forfait rows of table 13.25
+            // for heat pumps (1,4 and 1,4·c_source; 2025+C1 p. 641, 2020+A1
+            // p. 612) carry no c_W;gen, unlike the gas rows: 13.8.4.7.3 c)
+            // (2025+C1 p. 643, 2020+A1 p. 615) takes c_W;gen from the class
+            // "waarbij het rendement van de warmtepomp is gemeten", so only
+            // a measured class corrects.
+            let correction = if measured_class.is_none() {
                 1.0
             } else {
                 heat_pump_class_correction(
@@ -5811,6 +5816,38 @@ mod tests {
         assert!((jan.generation_efficiency - 0.90).abs() < 1e-12);
         let carrier = jan.generator_output_kwh / 0.9;
         assert!((jan.carrier_input_kwh - carrier).abs() < 1e-9);
+    }
+
+    /// Table 13.25 (2025+C1 p. 641, 2020+A1 p. 612) gives the forfait heat
+    /// pumps 1,4 and 1,4·c_source without c_W;gen; 13.8.4.7.3 c) (2025+C1
+    /// p. 643) corrects a measured class only. Public case J (Uniec, COP
+    /// 1,40 on a 126 kWh demand) uses the table value as is, where class 4
+    /// would give 1,4·0,45.
+    #[test]
+    fn forfait_heat_pump_takes_no_class_correction() {
+        for (exhaust_air_source, source_correction, expected) in
+            [(true, None, 1.4), (false, Some(1.04), 1.4 * 1.04)]
+        {
+            let input = system(HotWaterGenerator::HeatPump {
+                declared: None,
+                same_ground_source: false,
+                exhaust_air_source,
+                source_correction,
+                measured_class: None,
+                outdoor_air_fraction: None,
+            });
+            let result = assess_hot_water(&input, context()).unwrap();
+            // Class 4 would correct this demand.
+            let class4 = heat_pump_class_correction(
+                ApplicationClass::Class4,
+                result.annual_generator_output_kwh,
+            )
+            .unwrap();
+            assert!(class4 < 1.0, "{class4}");
+            for month in &result.months {
+                assert!((month.generation_efficiency - expected).abs() < 1e-12);
+            }
+        }
     }
 
     #[test]
