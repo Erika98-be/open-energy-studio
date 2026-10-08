@@ -157,6 +157,7 @@ Afgerond op 8 en 9 oktober 2026: B1–B5 (gebouwd, zie de rijen) en B6, B7, B8 e
 | **E4** Een attesteringsinstelling | aangewezen instelling met InstallQ-overeenkomst | §3.6: toelatingsonderzoek, overeenkomst en afgifte. |
 | **E5** Uurklimaat 17.3.8 | NEN 5060:2018+A1:2021 (uurwaarden) | De uitgebreide beschaduwingsmethode vraagt per uur zonnestand en straling (direct plus circumsolair); de kern aanvaardt nu opgegeven factoren. ISO 6946 tabel 8 is sinds 9 oktober 2026 geen blokkade meer: de kern rekent dunne spouwen met D.2. Zie de [verificatiestatus](nta8800-verificatiestatus.md). |
 | **E6** ISSO-rapport 110293 (kostenmodel) | ISSO | Alleen voor deelgebied 3 en de NCW-regels van het maatwerkadvies. |
+| **E7** BRL 9500-MWA-W/U van 24-03-2026 (van kracht 29-05-2026) | InstallQ | De kern verwijst naar §3.1 (p. 13), §3.2 (p. 14), §4.2.5 (p. 21) en §4.2.8 (p. 23) van die versie, maar de tekst is hier niet aanwezig: alleen MWA-W/U van 19-06-2024 en het wijzigingsblad van 26-06-2024. Die verwijzingen zijn dus niet gecontroleerd (gemarkeerd in `maatwerkadvies.rs`). |
 
 ### (c) Organisatorisch
 

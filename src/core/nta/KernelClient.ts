@@ -4450,6 +4450,8 @@ export interface NtaChapterFiveIndicators {
   heatingAndCoolingNeedKwhPerM2: number;
   /** §5.3.2 Standaard voor woningisolatie (dwellings), whole kWh/m². */
   standardInsulationKwhPerM2: number | null;
+  /** §5.3.2 with the values "na 1945" (renovation passport, ISSO 82.2 §1.10.2). */
+  standardInsulationPost1945KwhPerM2?: number | null;
   meetsStandardInsulation: boolean | null;
   /** §5.3.1.3 EwePrenTot, rounded down to 0,01. */
   renewableIndicatorKwhPerM2: number;
@@ -4895,6 +4897,8 @@ export interface MwaVariantResult {
     /** NTA 8800 §5.3.2 net heat need and Standaard voor Woningisolatie (dwellings). */
     heatingNeedKwhPerM2?: number | null;
     standardInsulationKwhPerM2?: number | null;
+    /** §5.3.2 with the values "na 1945" (ISSO 82.2 §1.10.2 p. 22). */
+    standardInsulationPost1945KwhPerM2?: number | null;
     /** Table 5.7 renovation standard EP2 (utility). */
     renovationStandardKwhPerM2?: number | null;
   };

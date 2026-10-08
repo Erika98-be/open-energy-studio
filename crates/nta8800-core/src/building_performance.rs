@@ -561,6 +561,12 @@ pub struct ChapterFiveIndicators {
     /// §5.3.2 Standaard voor woningisolatie (dwellings with a known
     /// construction year and loss area), rounded to a whole number.
     pub standard_insulation_kwh_per_m2: Option<f64>,
+    /// §5.3.2 with the values "na 1945", whatever the construction year.
+    /// The renovation passport measures step 1 against this standard
+    /// unless the pre-war standard is motivated (ISSO 82.2 §1.10.2 p. 22,
+    /// §4.4.2 p. 75).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub standard_insulation_post_1945_kwh_per_m2: Option<f64>,
     pub meets_standard_insulation: Option<bool>,
     /// §5.3.1.3 EwePrenTot, rounded down to 0,01 (EMGverklaring when a
     /// quality declaration is used).
@@ -3780,6 +3786,20 @@ fn assess_in_edition(input: &BuildingPerformanceInput) -> BuildingPerformanceAss
                 ),
                 _ => None,
             };
+            let standard_post_1945 = match (
+                residential && single_dwelling,
+                input.construction_year,
+                input.loss_area_m2,
+            ) {
+                (true, Some(year), Some(loss)) => standard_insulation(
+                    input.space_heating.demand.dwelling_type
+                        == Some(crate::monthly_demand::DwellingType::ApartmentBuilding),
+                    year.max(1946),
+                    loss,
+                    area,
+                ),
+                _ => None,
+            };
             // 5.17–5.19 from E_EPdel per carrier.
             let delivered = |codes: &[&str]| -> f64 {
                 carriers
@@ -3808,6 +3828,7 @@ fn assess_in_edition(input: &BuildingPerformanceInput) -> BuildingPerformanceAss
                     / 100.0,
                 meets_standard_insulation: standard.map(|limit| heating_indicator <= limit),
                 standard_insulation_kwh_per_m2: standard,
+                standard_insulation_post_1945_kwh_per_m2: standard_post_1945,
                 renewable_indicator_kwh_per_m2: indicator.renewable_indicator_kwh_per_m2_year,
                 renewable_indicator_forfait_kwh_per_m2: indicators.as_ref().and_then(|result| {
                     result
