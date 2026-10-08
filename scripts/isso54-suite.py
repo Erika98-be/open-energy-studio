@@ -3018,10 +3018,12 @@ W203O = [
 # specification; every facade R_c 0,35, the rest as EP-W001, floor on ground
 # (p. 9). The reference uses the forfait thermal bridges, so 8.4.1 note 5
 # with C.10 applies (2022 p. 240, 748): the partition joins H_D;for as
-# U_C.b_U. The AOR is not specified; b_U is derived with 8.53 from the
-# defaults that annex I.2.4 note 1 (2022 p. 815) gives for an adjacent
-# unheated space: A_T;ue 1,44 x A_T;iu at U 3,2 and 1,5 x A_T;iu m3/h, with
-# A_T;iu the east facade of 32,4 m2.
+# U_C.b_U. The AOR is not specified; b_U follows 8.53 with the normative
+# H_ue = 5 x A_T;iu of formula I.8 (2025+C1 p. 841; I.8 in 2022 annex I),
+# entered as one transmission element of U 5,0 over A_T;iu (the east facade
+# of 32,4 m2) without ventilation. Assumption: annex I.2.4 is strictly for
+# the forfait Rc/U values of I.2.1-I.2.3 (2022 p. 240) and, in 2025+C1, for
+# the basisopname (p. 266).
 def aor_east(project):
     project["constructions"].append({"id": "c-gevel-035", "name": "Gevel Rc 0,35", "layers": [], "rcValue": 0.35, "uValue": u_from_rc(0.35, 0.17)})
     for item in project["zones"][0]["surfaces"]:
@@ -3036,8 +3038,8 @@ def aor_east(project):
             "id": "aor-oost",
             "name": "Aangrenzende onverwarmde ruimte oost",
             "outside": {
-                "transmission": {"elements": [{"id": "aor-buiten", "areaM2": round(1.44 * area, 3), "uValueWPerM2k": 3.2, "sourceReference": "ISSO 54 v2.0 EP-W006h p. 9: AOR zonder specificatie; bijlage I.2.4 opmerking 1 (2022 p. 815): A_T;ue 1,44 x A_T;iu, U 3,2"}]},
-                "ventilation": {"method": "flow", "airflowM3PerH": round(1.5 * area, 3), "sourceReference": "bijlage I.2.4 opmerking 1: q_ve;ue 1,5 x A_T;iu m3/h"},
+                "transmission": {"elements": [{"id": "aor-buiten", "areaM2": round(area, 3), "uValueWPerM2k": 5.0, "sourceReference": "ISSO 54 v2.0 EP-W006h p. 9: AOR zonder specificatie; formule I.8 (2025+C1 p. 841): H_ue = 5 x A_T;iu (aanname, zie docs/nta8800-isso54-voorbereiding.md)"}]},
+                "ventilation": {"method": "flow", "airflowM3PerH": 0.0, "sourceReference": "formule I.8: H_ue = 5 x A_T;iu omvat transmissie en ventilatie"},
                 "otherZonesConductanceWPerK": 0.0,
             },
         }

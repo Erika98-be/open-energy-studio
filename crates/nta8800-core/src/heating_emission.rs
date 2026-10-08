@@ -136,7 +136,8 @@ impl AirHeaterKind {
 pub struct AirHeaterAuxiliary {
     pub kind: AirHeaterKind,
     /// Number of heaters of `kind`; absent means every heater in the zone
-    /// is of this type.
+    /// is of this type, so it is required as soon as `further` names other
+    /// types (n_H,aux of 9.23 counts every heater in the zone).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub count: Option<u32>,
     /// Heaters of other table 9.12/9.13 types in the same zone.
@@ -161,14 +162,15 @@ impl AirHeaterAuxiliary {
     /// Table 9.12/9.13 give P_H,aux = factor·Q_h;b/n_H,aux with n_H,aux the
     /// number of heaters in the zone, so heaters of several types weigh
     /// their factors by their share of that number; one type alone gives
-    /// its factor. `None` when a count is 0.
+    /// its factor. `None` when a count is 0, or when other types are given
+    /// without the count of `kind`.
     pub fn factor(&self) -> Option<f64> {
         if self.further.is_empty() {
             return (self.count != Some(0)).then(|| self.kind.factor());
         }
         let first = AirHeaterUnit {
             kind: self.kind,
-            count: self.count.unwrap_or(1),
+            count: self.count?,
         };
         let units: Vec<AirHeaterUnit> = std::iter::once(first)
             .chain(self.further.iter().copied())

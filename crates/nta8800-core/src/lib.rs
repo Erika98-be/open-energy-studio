@@ -1778,7 +1778,12 @@ pub(crate) fn forfait_partition_elements(
             let surface_id = surface.get("id")?.as_str()?;
             let note = format!(" · b_U {factor:.3} (C.10, 8.4.1 opmerking 5)");
             let mut window_area = 0.0;
-            for window in surface.get("windows")?.as_array()? {
+            // A partition without a `windows` array has no windows.
+            let windows = match surface.get("windows") {
+                None | Some(Value::Null) => &[][..],
+                Some(items) => items.as_array()?.as_slice(),
+            };
+            for window in windows {
                 let window_id = window.get("id")?.as_str()?;
                 let area = window.get("area")?.as_f64()?;
                 let u_value = window.get("uValue")?.as_f64()?;
@@ -1826,10 +1831,31 @@ pub(crate) fn forfait_partition_elements(
     Some(out)
 }
 
-/// b_U of every project unheated space (8.4.1), declared or derived; `None`
-/// when one cannot be determined.
+/// b_U (8.4.1), declared or derived, of every project unheated space that a
+/// surface borders; `None` when one of those cannot be determined. A space
+/// no surface refers to plays no part in H_D;for, so it may stay
+/// unresolved, as in the per-zone route of `unheated_zone_input`.
 pub(crate) fn unheated_reduction_factors(project: &ProjectInput) -> Option<HashMap<String, f64>> {
-    let input = unheated_zone_input(project, None)?;
+    let referenced: HashSet<&str> = project
+        .zones
+        .iter()
+        .flat_map(|zone| &zone.surfaces)
+        .filter(|surface| {
+            surface
+                .get("thermalBoundary")
+                .and_then(|value| serde_json::from_value::<ThermalBoundary>(value.clone()).ok())
+                == Some(ThermalBoundary::UnheatedSpace)
+        })
+        .filter_map(|surface| surface.get("unheatedSpaceId").and_then(Value::as_str))
+        .collect();
+    if referenced.is_empty() {
+        return Some(HashMap::new());
+    }
+    let mut bordered = project.clone();
+    bordered
+        .unheated_spaces
+        .retain(|space| referenced.contains(space.id.as_str()));
+    let input = unheated_zone_input(&bordered, None)?;
     let assessed = unheated_transmission::assess_unheated_transmission(&input);
     if assessed.status != "input_valid" || assessed.spaces.len() != input.spaces.len() {
         return None;
@@ -1934,7 +1960,11 @@ pub(crate) fn direct_boundary_input_zone(
             }
             let surface_id = surface.get("id")?.as_str()?;
             let gross_area = surface.get("area")?.as_f64()?;
-            let windows = surface.get("windows")?.as_array()?;
+            // A surface without a `windows` array has no windows.
+            let windows = match surface.get("windows") {
+                None | Some(Value::Null) => &[][..],
+                Some(items) => items.as_array()?.as_slice(),
+            };
             // 8.4.2.1 (p. 266): H_D;zi,j;ztu follows 8.2.1 with R_se replaced
             // by the R_si of table C.2 that applies on the unheated side.
             // Project U-values carry R_se = 0,04 (C.1.2 with table C.2).

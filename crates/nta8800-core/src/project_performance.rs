@@ -3781,9 +3781,21 @@ fn derive_input(
         } else if let Some(delta) = delta_u_forfait {
             // 8.4.1 note 5 with C.10: H_U;for = 0; the partitions join H_D;for
             // as U_C·b_U with ΔU_for like every other H_D element.
-            let partitions = crate::unheated_reduction_factors(&project).and_then(|factors| {
-                crate::forfait_partition_elements(&project, Some(&zone.id), &factors)
+            // A zone without partitions to an unheated space adds nothing and
+            // needs no b_U.
+            let borders_unheated = zone.surfaces.iter().any(|surface| {
+                surface
+                    .get("thermalBoundary")
+                    .and_then(|value| serde_json::from_value::<ThermalBoundary>(value.clone()).ok())
+                    == Some(ThermalBoundary::UnheatedSpace)
             });
+            let partitions = if borders_unheated {
+                partition_factors.as_ref().and_then(|factors| {
+                    crate::forfait_partition_elements(&project, Some(&zone.id), factors)
+                })
+            } else {
+                Some(Vec::new())
+            };
             match (partitions, direct.as_mut()) {
                 (Some(elements), Some(direct)) => {
                     for (mut element, _) in elements {
@@ -5946,9 +5958,89 @@ mod tests {
             .tojuli
             .iter()
             .all(|item| item.status != "invalid"));
+
+        // A partition without a `windows` array has no windows; it is not an
+        // unresolved unheated transmission.
+        let mut no_windows = value.clone();
+        let wall = no_windows["zones"][0]["surfaces"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .find(|surface| surface["id"] == "garage-wall")
+            .unwrap();
+        wall.as_object_mut().unwrap().remove("windows");
+        let without_array = assess_project_performance(&no_windows);
+        assert_eq!(
+            without_array.status, "calculated_unverified",
+            "{:?}",
+            without_array.gaps
+        );
+        assert_eq!(
+            without_array
+                .performance
+                .as_ref()
+                .unwrap()
+                .space_heating
+                .demand
+                .transmission
+                .as_ref()
+                .unwrap()
+                .direct_conductance_w_per_k,
+            Some(transmission.direct_conductance_w_per_k.unwrap())
+        );
+
+        // A space no surface borders needs no b_U: an unresolvable one leaves
+        // the forfait route calculating, as the per-zone route always did.
+        let mut unreferenced = value.clone();
+        unreferenced["unheatedSpaces"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({ "id": "berging", "name": "Berging" }));
+        let unreferenced = assess_project_performance(&unreferenced);
+        assert_eq!(
+            unreferenced.status, "calculated_unverified",
+            "{:?}",
+            unreferenced.gaps
+        );
+        assert!(
+            (unreferenced
+                .performance
+                .as_ref()
+                .unwrap()
+                .space_heating
+                .demand
+                .transmission
+                .as_ref()
+                .unwrap()
+                .direct_conductance_w_per_k
+                .unwrap()
+                - expected)
+                .abs()
+                < 1e-9
+        );
         fn partition_u() -> f64 {
             0.21 * 0.6
         }
+    }
+
+    #[test]
+    fn forfait_route_ignores_an_unreferenced_unheated_space() {
+        // Regression of the forfait route with an unheated space (8.4.1
+        // note 5): a project whose surfaces border no unheated space, with
+        // an unresolvable space in the list, calculates as before.
+        let mut value = project();
+        value["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"] =
+            serde_json::json!({ "method": "forfait" });
+        value["zones"][0]["thermalBridges"] = serde_json::json!([]);
+        let before = assess_project_performance(&value);
+        assert_eq!(before.status, "calculated_unverified", "{:?}", before.gaps);
+        value["unheatedSpaces"] = serde_json::json!([{ "id": "schuur", "name": "Schuur" }]);
+        let after = assess_project_performance(&value);
+        assert_eq!(after.status, before.status, "{:?}", after.gaps);
+        assert!(!after
+            .gaps
+            .iter()
+            .any(|gap| gap.code == "unheated_transmission_unresolved"));
     }
 
     #[test]
