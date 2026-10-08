@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — forfaitaire koudebruggen met een onverwarmde ruimte, luchtverwarmers van meer typen; ISSO 54: 239 deeltesten gecodeerd
+
+- **Forfaitaire thermische bruggen met een aangrenzende onverwarmde ruimte.** De kern weigerde deze combinatie (`forfait_thermal_bridges_unheated_space_unsupported`); die code vervalt. Volgens 8.4.1 opmerking 5 (2025+C1 p. 266, 2022 p. 240) telt de onverwarmde ruimte dan als buitenlucht en is H_U;for = 0. De scheiding hoort in H_D;for met U_iu;equi = U_C·b_U (C.10), en krijgt ΔU_for zoals elk element van H_D.
+  - U_C is de U-waarde van het project (R_se 0,04, niet de R_si van 8.4.2.1). b_U is die van de ruimte in `unheatedSpaces`, opgegeven of afgeleid (8.53–8.59).
+  - De scheiding telt mee in Ū van 8.3. In de TOjuli-splitsing staat ze op haar eigen oriëntatie, zonder zonnewinst.
+  - Zonder b_U voor de ruimte volgt `unheated_transmission_unresolved`.
+  - Projecten die eerder werden geweigerd, rekenen nu. Projecten zonder onverwarmde ruimte of met gedetailleerde bruggen rekenen gelijk.
+- **Luchtverwarmers van verschillende typen in één zone (9.23).** `emission.airHeaters` heeft `count` en `further`. P_H;aux = factor·Q_h;b/n_H;aux per toestel (tabel 9.12/9.13), opgeteld over de typen. Eén axiale en drie radiale luchtverwarmers geven (0,014 + 3·0,022)/4·Q_h;b. Nieuwe code `air_heater_count_invalid` bij een aantal van 0. Bestaande invoer rekent gelijk.
+- **ISSO 54 v2.0: 239 van de 266 deeltesten gecodeerd** (was 227). Nieuw: EP-W011a/b, W202e, W203j, W203o, W204h, W206a–c, W302e, W402f en W006h. De interpretaties staan in `docs/nta8800-isso54-voorbereiding.md`.
+  - EP-W006f blijft open: de norm staat een vloer onder maaiveld boven een kruipruimte toe (8.38/8.39), maar de periodieke coëfficiënten van bijlage D zijn voor die combinatie nog niet uitgewerkt.
+  - EP-W406j heeft geen route: een booster met één COP, waar bijlage W twee meetpunten vraagt.
+
 ### 9 oktober 2026 — routes uit ISSO 54: glas per raam, opgegeven hulpenergie- en WKK-waarden, ψ uit de leidinggegevens
 
 Het coderen van de ISSO 54-deeltesten liet vier invoerroutes zien die de rekenkern kende maar de projectinvoer niet doorgaf, of die ontbraken. Ze gelden in alle uitgaven. Projecten zonder deze invoer rekenen gelijk.
