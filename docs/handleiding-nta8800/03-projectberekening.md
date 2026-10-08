@@ -13,10 +13,10 @@ Elke opgegeven waarde vraagt een bron, zoals een tekening, productblad, normtabe
 |---|---|---|
 | Zone | gebruiksoppervlakte A_g, volume, bouwlagen | §6.6 |
 | Vlak | thermische begrenzing (buitenlucht, grond, onverwarmde ruimte, aangrenzend verwarmd, intern), oriëntatie, constructie | §6.7, §8.2 |
-| Constructie | U-waarde, of R_c uit lagen via **Constructie bewerken**: het onderdeel *NTA 8800 U/R_c* rekent met de kern (bijlage C, forfaitair bijlage I) | §8.2, bijlagen C en I |
+| Constructie | U-waarde, of R_c uit lagen via **Constructie bewerken**: het onderdeel *NTA 8800 U/R_c* rekent met de kern (bijlage C, forfaitair bijlage I). Een niet-geventileerde luchtspouw dunner dan 20 mm zonder reflecterende laag rekent de kern zelf (bijlage D.2 van NEN-EN-ISO 6946, voetnoten c en e van tabel C.3/C.4); een zwak geventileerde of reflecterende dunne spouw geef je op als R-waarde met bron | §8.2, bijlagen C en I |
 | Raam | oppervlakte, U, g (loodrecht) | §7.6, §8.2 |
 | Koudebrug | lineair (ψ, lengte) en puntvormig (χ), met begrenzing | §8.2 |
-| Onverwarmde ruimte | reductiefactor b met bron, of afgeleid via de NTA-invoer | §8.4 (8.53–8.59) |
+| Onverwarmde ruimte | reductiefactor b met bron, of afgeleid via de NTA-invoer. Ook te combineren met forfaitaire koudebruggen (zie [hieronder](#forfaitaire-koudebruggen-met-een-onverwarmde-ruimte)) | §8.4 (8.53–8.59) |
 | PV-systeem | panelen of oppervlak, oriëntatie, helling | hoofdstuk 16 |
 
 **Bewerken en verwijderen.**
@@ -61,14 +61,14 @@ Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staa
 | Dynamische ramen (bijlage A) | per buitenraam methode A (toestanden met gewichten) of B, correctie stap 2 | bijlage A (p. 766–771) |
 | Aangrenzende onverwarmde serres (7.30b) | serre en de vlakken ervan | 7.30b |
 | Dakhellingen | helling per hellend dakvlak | tabel 17.2 |
-| Vloeren op grond (§8.3) | blootgestelde omtrek, R_si + R_c, vloerrand (ψ of forfait), kruipruimte of onverwarmde kelder, verwarmde kelder, randisolatie; onder 2022 en 2020+A1 bij een kruipruimte of kelder ook de wandhoogte h boven maaiveld (8.47) | §8.3, bijlage D |
+| Vloeren op grond (§8.3) | blootgestelde omtrek, R_si + R_c, vloerrand (ψ of forfait), kruipruimte of onverwarmde kelder, verwarmde kelder, randisolatie; onder 2022 en 2020+A1 bij een kruipruimte of kelder ook de wandhoogte h boven maaiveld (8.47). Een verwarmde vloer die zelf onder maaiveld ligt en een kruipruimte of onverwarmde kelder onder zich heeft, geef je op als kruipruimte of kelder plus *verwarmde kelder* met de werkelijke diepte (zie [hieronder](#verwarmde-vloer-onder-maaiveld-boven-een-kruipruimte)) | §8.3, bijlage D |
 | Verticale leidingen (7.3.3) | "geen", een lijst, of onbekend (geeft een gat) | §7.3.3 |
 | Ventilatie | hoofdstuk 11 (systeem, WTW, kanalen, LBK, infiltratie, regelingen, passieve koeling), of "H_ve zelf opgeven". Bij het systeem kan een **gedeclareerde f_ctrl** uit een kwaliteitsverklaring of BCRG-gelijkwaardigheidsverklaring worden opgegeven, met de verklaring als bron; die vervangt de waarde van tabel 11.5 (niet bij het decentrale deel van E.1) | hoofdstuk 11, tabel 11.5 |
-| Afgifte en distributie (§9.3/9.4) | afgiftesysteem, inregeling, regeling, ventilatoren in de afgifte, distributie berekend of forfaitair, luchtverwarmers. ψ van de leidingen kan uit de leidinggegevens worden berekend, ook voor leidingen in de constructie (9.34) | §9.3, §9.4, 9.21/9.22, 9.26–9.51 |
-| Opwekker | zie hieronder. Bij een gasketel kan de hulpenergie uit een kwaliteitsverklaring komen (A, B, C en B_nom van 9.85; A en C worden naar beneden afgerond op één decimaal, B op drie). Bij een WKK met methode 2 kunnen ε_chp;th en ε_chp;el uit een kwaliteitsverklaring de waarden van tabel 9.31 vervangen | §9.6 |
+| Afgifte en distributie (§9.3/9.4) | afgiftesysteem, inregeling, regeling, ventilatoren in de afgifte, distributie berekend of forfaitair, luchtverwarmers. Staan er luchtverwarmers van meer dan één type in de zone (bijvoorbeeld axiale en radiale recirculatieventilatoren), dan telt de hulpenergie per type naar rato van het aantal (9.23): geef het aantal van het eerste type en de overige typen met hun aantal op. ψ van de leidingen kan uit de leidinggegevens worden berekend, ook voor leidingen in de constructie (9.34), met **ψ uit de leidinggegevens** (zie [hieronder](#leidinggegevens)) | §9.3, §9.4, 9.21–9.23, 9.26–9.51 |
+| Opwekker | zie hieronder. Bij een gas- of olieketel kan de hulpenergie uit een kwaliteitsverklaring komen: vink **Hulpenergie uit een kwaliteitsverklaring (A, B, C en Bnom van 9.85)** aan. A en C worden naar beneden afgerond op één decimaal en B op drie; de term met B rekent met de brandstofinvoer van de ketel, gas of olie. Bij een WKK met methode 2 kunnen ε_chp;th en ε_chp;el uit een kwaliteitsverklaring de waarden van tabel 9.31 vervangen (**Omzettingsgetallen uit een kwaliteitsverklaring**), naar beneden afgerond op twee decimalen | §9.1, §9.6 |
 | BCRG-verklaringstabel | losse controle van een BCRG-tabel; telt niet mee in de projectberekening | — |
 | Extra verwarmingssystemen (§9.2) | bij meerdere zones: systemen per zone | §9.2 |
-| Warm tapwater (§13) | functie en oppervlakte of aantal woningen, tappunten, leidingen, circulatie, voorraadvaten, toestel; onder 2022 en 2020+A1 ook "elektrische boiler met geïsoleerde leidingen" (f_sto;dis;ls). Bij een circulatieleiding kan ψ uit de leidinggegevens worden berekend (13.27–13.29), bijvoorbeeld voor een leiding in de constructie | hoofdstuk 13 |
+| Warm tapwater (§13) | functie en oppervlakte of aantal woningen, tappunten, leidingen, circulatie, voorraadvaten, toestel; onder 2022 en 2020+A1 ook "elektrische boiler met geïsoleerde leidingen" (f_sto;dis;ls). Bij een circulatieleiding kan ψ uit de leidinggegevens worden berekend (13.27–13.29), bijvoorbeeld voor een leiding in de constructie; de warmteovergangscoëfficiënt ligt daar vast op 8,0 W/(m²·K). Een WKK die ook tapwater levert, kan dezelfde omzettingsgetallen uit een kwaliteitsverklaring gebruiken als bij verwarming. Een boosterwarmtepomp kan forfaitair rekenen (13.162/13.163) met de ontwerpaanvoertemperatuur van het verwarmingssysteem dat hem voedt; zonder die temperatuur rekent de kern met de ongunstigste waarden | hoofdstuk 13 |
 | Extra tapwatersystemen (§13.2.4) | meerdere systemen per gebouw | §13.2.4 |
 | Zonneboilers (§13.7) | berekend of getest systeem, PVT | §13.7 |
 | Zonneverwarming zonder tapwatersysteem | zonnecombi voor ruimteverwarming | §13.7 |
@@ -101,6 +101,42 @@ Een warmtepomp volgens bijlage Q in een set bepaalt boven 55 °C zelf zijn aande
 Onder de uitgave 2020+A1 vraagt de forfaitaire (of hybride) warmtepomp ook het **installatiejaar** met bron. Formule 9.85 van die uitgave neemt A = 13,0 kWh voor een toestel vanaf 2015 en 87,6 kWh voor een ouder of onbekend toestel. Onder de latere uitgaven heeft het jaar geen invloed en is het veld verborgen.
 
 **Invoer die alleen in een uitgave bestaat.** Velden die een andere uitgave niet kent, staan alleen onder die uitgave in het formulier. Kies je een andere uitgave terwijl zo'n veld een waarde heeft, dan toont het formulier een melding met **Verwijderen**; de rekenkern weigert de waarde anders met `route_not_in_edition`. Zie [Normversies](10-normversies.md).
+
+### Opgegeven productwaarden en hun bewijs
+
+Waar het formulier een waarde uit een kwaliteitsverklaring toelaat (§9.1), vervangt die waarde het forfait of de tabelwaarde. Dat geldt onder meer voor:
+- de gedeclareerde f_ctrl bij de ventilatie (tabel 11.5);
+- A, B, C en B_nom van de ketelhulpenergie (9.85);
+- ε_chp;th en ε_chp;el van een WKK (tabel 9.31), voor verwarming en tapwater;
+- het opwekkingsrendement van een warmtepomp of tapwatertoestel;
+- de belemmering, de zonwering en het glas per raam.
+
+Elke opgegeven waarde vraagt een bron: nummer en uitgever van de verklaring, of de tekening, het productblad of de opname. Leg het bestand zelf vast in het bewijsregister en koppel het aan het veld met **Bron & bewijs** (zie [hoofdstuk 7](07-herlabelen-registratie-dossier.md#bewijsregister)); het projectdossier bevat dan de gebruikte verklaringen (BRL 9500 bijlage 3). Zonder bron geeft de kern een invoergat en gebruikt hij de opgegeven waarde niet.
+
+### Leidinggegevens
+
+Bij distributie (verwarming en koeling) en bij de circulatieleiding van warm tapwater kun je ψ berekenen in plaats van opgeven. Kies onder **ψ uit de leidinggegevens** de soort leiding (*geïsoleerd, in lucht*, *geïsoleerd, in de constructie* of *ongeïsoleerd*) en vul de diameters, de λ-waarden en, bij een leiding in de constructie, de diepte in. Bij koeling kies je daarvoor *berekend uit de leidinggegevens (10.24–10.26)*.
+- Alle maten zijn in **meters**: 15 mm is 0,015 m. Een diameter of diepte boven 1 m wordt geweigerd met *Leidinggegevens: een diameter of diepte is groter dan 1 m …*.
+- Bij verwarming (9.33–9.35) en koeling (10.24–10.26) mag een eigen warmteovergangscoëfficiënt worden opgegeven; bij tapwater ligt die vast op 8,0 W/(m²·K) (13.27/13.29).
+- Bij tapwater geef je ψ óf op óf bereken je hem, niet allebei.
+
+### Forfaitaire koudebruggen met een onverwarmde ruimte
+
+Rekent het gebouw met forfaitaire koudebruggen (ΔU_for) en grenst een rekenzone aan een onverwarmde ruimte, dan volgt de kern 8.4.1 opmerking 5 met bijlage C.10:
+- de onverwarmde ruimte telt als buitenlucht, dus H_U;for = 0;
+- de scheidingsconstructie tussen rekenzone en onverwarmde ruimte telt in H_D;for, met haar U-waarde maal b_U en dezelfde ΔU_for als de andere constructies;
+- voor TOjuli telt ze op haar eigen oriëntatie, zonder zoninstraling.
+
+b_U volgt uit de gegevens van de onverwarmde ruimte (8.53–8.59) of uit de opgegeven reductiefactor. Kan de kern hem niet afleiden, dan meldt hij *Transmissie via onverwarmde ruimte niet af te leiden*.
+
+### Verwarmde vloer onder maaiveld boven een kruipruimte
+
+Ligt een verwarmde vloer zelf onder maaiveld, met een kruipruimte of onverwarmde kelder eronder, dan geef je bij **Vloeren op grond** beide op: de kruipruimte of kelder, en *verwarmde kelder* met de werkelijke diepte z. De kern rekent:
+- de vloer volgens 8.39 met U_fl van 8.43 en U_x;T = 0, omdat de vloer al onder maaiveld ligt;
+- de wanden onder maaiveld met z·P·U_bw (8.45);
+- de periodieke coëfficiënten in twee delen: de vloer met D.13/D.14 (kruipruimte) of D.15/D.16 (kelder), de wanden met de wandtermen van D.10/D.11. Bijlage D heeft voor deze combinatie geen eigen formule; de splitsing volgt de opbouw van 8.39 en opmerking 3 van 8.3.2. Zie [`nta8800-maandbehoefte.md`](../nta8800-maandbehoefte.md).
+
+Onder 2022 is de wandhoogte h (8.47) voor zo'n vloer niet nodig; vanaf 2023 wordt een opgegeven h geweigerd. Randisolatie op zo'n vloer weigert de kern.
 
 ### Externe levering (bijlage P)
 
@@ -155,3 +191,16 @@ Het paneel toont het volledige NTA-invoerblok als JSON. Gebruik dit alleen als e
 | `window_dynamic_and_shading_exclusive` | dynamisch raam én beweegbare zonwering (§A.2) | neem de zonwering op in de toestanden van bijlage A |
 | `rest_set_power_partial` | in een set met een bijlage Q-warmtepomp zijn niet alle restvermogens ingevuld | vul alle restvermogens in of maak ze allemaal leeg |
 | `flow_reduction_evidence_required` | een gunstiger debietreductie dan het forfait zonder bewijs (11.60/11.61) | geef de bron op |
+| `window_obstruction_without_window`, `window_shading_without_window`, `window_glazing_without_window` | een regel in *Belemmering*, *Zonwering* of *Glas per raam* noemt een raam dat niet meer bestaat | verwijder de regel |
+| `window_obstruction_not_outdoor`, `window_shading_not_outdoor`, `window_glazing_not_outdoor` | het raam ligt niet meer in een vlak aan buitenlucht | verwijder de regel of zet het vlak terug op buitenlucht |
+| `window_obstruction_reference_required`, `window_shading_reference_required`, `window_glazing_reference_required`, `source_reference_required` | een opgegeven waarde zonder bron | vul de bron in; tot dan rekent het raam met de projectwaarde |
+| `window_g_declared_and_table` | een eigen g-waarde én een glastype uit tabel 7.4 | kies één van beide |
+| `declared_control_factor_invalid`, `declared_control_factor_not_applicable` | gedeclareerde f_ctrl buiten (0, 2], of bij het decentrale deel van E.1 | waarde uit de verklaring overnemen; bij E.1 opgeven bij het overige systeem |
+| `auxiliary_constant_invalid`, `boiler_auxiliary_declared_and_measured` | ketelhulpenergie: A, B of C buiten bereik, of zowel verklaring als metingen van bijlage O | waarden controleren; één route kiezen |
+| `chp_declared_efficiency_invalid`, `chp_declared_efficiency_method1` | WKK: omzettingsgetallen niet groter dan 0 of samen boven 1, of opgegeven bij methode 1 | waarden controleren; methode 2 kiezen |
+| `pipe_dimension_not_in_metres`, `hot_water_pipe_surface_coefficient_fixed`, `hot_water_psi_declared_and_calculated` | leidinggegevens in millimeters, een eigen h_a bij tapwater, of ψ zowel opgegeven als berekend | maten in meters; h_a leeg laten; één route kiezen |
+| `booster_supply_temperature_invalid` | boosterwarmtepomp: aanvoertemperatuur niet groter dan 0 of boven 100 °C | temperatuur corrigeren of leeg laten |
+| `air_heater_count_invalid` | aantal luchtverwarmers kleiner dan 1 | aantal per type invullen |
+| `manufacture_year_invalid` | fabricagejaar van ventilator of WTW buiten 1900–2100 | jaar corrigeren, of leeg laten als het onbekend is |
+| `unheated_transmission_unresolved` | transmissie via een onverwarmde ruimte is niet af te leiden | reductiefactor of de gegevens van de ruimte invullen |
+| `air_cavity_below_20_mm_unsupported` | dunne luchtspouw die zwak geventileerd is of een reflecterende laag heeft | opgeven als R-waarde met bron |

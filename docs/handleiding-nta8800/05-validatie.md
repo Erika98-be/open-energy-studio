@@ -59,7 +59,30 @@ Een uitkomst mag nooit oneindig of NaN zijn. De kern controleert elke uitkomst v
 - **API:** elke route geeft dan HTTP 500 met `{"error":"non_finite_result","path":…}`.
 - **Desktop-app:** elk kerncommando geeft dan een foutmelding met het pad.
 
-Een dekkingstest (`crates/nta8800-core/tests/option_coverage.rs`) zet elke keuzemogelijkheid van de kerninvoer (elke variant en elk optioneel veld) een keer in de voorbeeldprojecten en rekent ze in alle vijf uitgaven. Elke run moet zonder paniek en met eindige getallen eindigen, als berekening of als weigering met een vertaalde meldcode. Een robuustheidstest (`crates/nta8800-core/tests/robustness.rs`) varieert de voorbeeldprojecten en opnames willekeurig. Hij faalt bij een paniek, een niet-eindig getal, of een ingreep van het vangnet.
+## Hoe de kern wordt bewaakt
+
+Elke wijziging van het programma doorloopt dezelfde controle (`scripts/verify-nta.sh`). Een wijziging komt alleen in de code als alle onderdelen slagen. De onderdelen die voor de gebruiker van belang zijn:
+
+- **Versie en handleiding.** De controle faalt als de releasenotes een wijziging van uitkomsten noemen zonder dat de kernversie omhoog is gegaan (`scripts/nta-kernel-version.mjs check`). Een item zonder rekenwijziging eindigt precies op "(geen rekenwijziging)". Ook faalt ze als deze handleiding niet is bijgewerkt voor de huidige kernversie (`scripts/nta-manual.mjs check`).
+- **Dekking van alle opties** (`crates/nta8800-core/tests/option_coverage.rs`). Elke keuzemogelijkheid van de kerninvoer (elke variant en elk optioneel veld) gaat een keer door de voorbeeldprojecten en de openbare gevallen, in alle vijf uitgaven. Elke run moet zonder paniek en met eindige getallen eindigen, als berekening of als weigering met een vertaalde meldcode. Een geweigerde berekening moet ten minste één invoergat hebben met een **Ga naar**. De lijst met opties komt uit de invoertypen zelf, dus een nieuwe optie valt er vanzelf onder.
+- **Numerieke fuzz** (`crates/nta8800-core/tests/numeric_fuzz.rs`). Elk getal in de voorbeeldprojecten en de openbare gevallen krijgt randwaarden (0, negatief, heel klein, heel groot, net buiten de grens), in alle vijf uitgaven. Er gelden dezelfde eisen als bij de dekkingstest. Daarnaast is een berekende uitkomst plausibel: geen negatieve energiebehoefte, en een hogere U-waarde of meer infiltratie verlaagt de warmtebehoefte nooit.
+- **Robuustheid** (`crates/nta8800-core/tests/robustness.rs`). De voorbeeldprojecten en opnames worden willekeurig gevarieerd. De test faalt bij een paniek, een niet-eindig getal, of een ingreep van het vangnet.
+- **Grote projecten** (`crates/nta8800-core/tests/large_projects.rs`). Een utiliteitsgebouw met tientallen rekenzones en een woongebouw met tientallen woningen moeten binnen een tijdslimiet rekenen, met uitkomsten die evenredig met de grootte meeschalen. De gemeten tijden staan in de [programmabeschrijving](../nta8800-programmabeschrijving.md#8-grenzen-en-prestaties).
+- **Referentiesuites** (zie hieronder).
+
+## Referentiesuites
+
+De referentiesuites in `training-data/reference-suites/` rekenen vaste projecten door en vergelijken de uitkomst met een verwachting en een bandbreedte (absoluut, relatief, of de ruimste van beide):
+- **Openbare gevallen A–H**: herbouwde openbare BENG-rapporten, elk in de uitgave waarin het rapport is gemaakt. Zie [`nta8800-vergelijking-openbare-rapporten.md`](../nta8800-vergelijking-openbare-rapporten.md).
+- **RVO-voorbeeldwoningen**: de warmtebehoefte binnen de bandbreedte van RVO.
+- **ISSO 54 versie 2.0**: de deeltesten uit de openbare uitgave van ISSO-publicatie 54, door ons gecodeerd. De verwachte uitkomsten zijn niet openbaar, dus deze gevallen staan op "geen verwachting": ze moeten rekenen, maar worden nog niet vergeleken. Zie [`nta8800-isso54-voorbereiding.md`](../nta8800-isso54-voorbereiding.md).
+
+Het rapport (`reference-report.md` en `.json`) noemt per geval de uitkomst, het verschil en het oordeel, met de commit, de kernversie en de SHA-256 van invoer en uitvoer. Het eindoordeel:
+- *geslaagd*: alle vergeleken gevallen liggen binnen hun band (afsluitcode 0);
+- *mislukt*: een geval ligt buiten zijn band of rekent niet (afsluitcode 1);
+- *geen vergelijking*: er is niets vergeleken, bijvoorbeeld bij een run met alleen ISSO 54 (afsluitcode 3).
+
+Een rapport met alleen "geen verwachting" is dus geen bewijs van overeenstemming. Dat ontstaat pas met de verwachte uitkomsten van ISSO 54 versie 5.0:2026, waar BRL 9501 naar verwijst.
 
 ## Plausibiliteit bij registratie
 

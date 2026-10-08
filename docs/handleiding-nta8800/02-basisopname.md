@@ -18,8 +18,8 @@ De opname heeft deze onderdelen:
 |---|---|---|
 | Algemeen | bouwjaar, woningtype en ligging (ook appartement met dak en vloer), gebruiksoppervlakte, bouwlagen | ISSO 82.1 hoofdstuk 6 |
 | Thermische schil | vlakken met isolatie (aanwezig, dikte, renovatiejaar), ramen en deuren met beglazing, zonwerende beglazing met productgegevens | hoofdstuk 8, tabellen 8.9–8.17 |
-| Verwarming | opwekker (ketel, warmtepomp, lokale verwarming, luchtverwarmer, collectief), ontwerpklasse (tabel 9.9), distributie (leidingisolatie, eenpijps), afgifte | hoofdstuk 9 |
-| Ventilatie | systeem (A–E), regelingen (tabellen 11.4–11.6), WTW met bypass, ventilatoren, roosterverwarming, passieve koeling | hoofdstuk 11 |
+| Verwarming | opwekker (ketel, warmtepomp, lokale verwarming, luchtverwarmer, collectief), ontwerpklasse (tabel 9.9), distributie (leidingisolatie, eenpijps), afgifte. Bij een ketel en een warmtepomp het **Fabricagejaar** en **Installatiejaar**: onder 2020+A1 bepalen ze de hulpenergie van 9.85 (fabricagejaar, anders installatiejaar, anders het bouwjaar; ISSO 82.1 p. 28). Onder de latere uitgaven heeft het jaar van de warmtepomp geen invloed | hoofdstuk 9 |
+| Ventilatie | systeem (A–E), regelingen (tabellen 11.4–11.6), WTW met bypass, ventilatoren, roosterverwarming, passieve koeling. Is het fabricagejaar van de ventilatoren onbekend, dan neemt de opname het bouwjaar, en voor een gebouw van vóór 1900 het jaar 1900 (de oudste rijen van tabel 11.20 en 11.23 gelden toch al voor alle eerdere jaren). Een opgegeven fabricagejaar buiten 1900–2100 geeft een melding | hoofdstuk 11 |
 | Warm tapwater | toestel, opslag, douche-WTW | hoofdstuk 13 |
 | Ruimtekoeling | opwekker en afgifte | hoofdstuk 10 |
 | Zonnestroom (PV) | panelen, oriëntatie, helling | ISSO-hoofdstuk over zonne-energie; NTA hoofdstuk 16 |

@@ -15,6 +15,11 @@ De registratiegegevens staan in werkstap 10 **Registratie**, in het formulier on
 - **Berichttype:** `regular`, `relabel` (herlabelen) of `replacement` (vervanging van een onjuist label binnen 24 maanden, BRL 9500-W p. 24–25).
 - **WLC-GWP:** voor nieuwe gebouwen boven 1000 m² bij een toets Bbl vanaf 1-1-2028 en de oplevering daarna (BRL 9500-W p. 18, 21, 62).
 - **Vorige labelklasse:** alleen voor de plausibiliteitscontrole.
+- **Verklaringen voor het energielabel:** de elementen k en l van het label (Omgevingsregeling art. 5.13a lid 1, sinds 29 mei 2026). NTA 8800 berekent ze niet; de adviseur beantwoordt ze met ja of nee:
+  - *k. Kan het gebouw reageren op externe signalen en zijn energiegebruik aanpassen?*
+  - *l. Is het verwarmingsdistributiesysteem ontworpen voor lage temperatuur?*
+
+  Bij een registratiedatum vanaf 29 mei 2026, of zonder datum, zijn beide verplicht. Een onbeantwoorde vraag geeft *Verklaring k (reageren op externe signalen) ontbreekt* of *Verklaring l (afgiftesysteem voor lage temperatuur) ontbreekt*, en het dossier is dan niet compleet. Het antwoord gaat mee in de labelgegevens van de kern, het rekenrapport (tabel met de labelelementen) en het EP-Online-gegevensoverzicht. Bewaar de onderbouwing van het antwoord, zoals een productblad van de regeling of de ontwerptemperatuur van het afgiftesysteem, in het bewijsregister.
 
 **Ingelezen gegevens.** Bij registratie moet blijken of de adviseur gegevens met een ander hulpmiddel in het programma heeft ingelezen, en met welk hulpmiddel (BRL 9501 van 29-05-2026, §4.3.1, opmerking, p. 8). Automatisch inlezen mag niet: elke import in dit programma start de adviseur zelf. De UNIEC3- en VABI-import schrijven daarom een regel in het importlogboek van het project (`importLog`, met hulpmiddel, bestandsnaam en tijdstip). De registratiecontrole en het rekenrapport tonen het resultaat in de regel *Gegevens ingelezen*: "nee", of "ja, met …". Het importlogboek telt niet mee als labelinvoer bij herlabelen.
 

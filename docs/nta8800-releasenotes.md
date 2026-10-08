@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — handleiding bijgewerkt voor de routes sinds 8 oktober (geen rekenwijziging)
+
+- Hoofdstuk 3 beschrijft de nieuwe invoer: dunne luchtspouwen (bijlage D.2 van NEN-EN-ISO 6946), forfaitaire koudebruggen met een onverwarmde ruimte, de verwarmde vloer onder maaiveld boven een kruipruimte, luchtverwarmers van meer typen, ketelhulpenergie en WKK-omzettingsgetallen uit een kwaliteitsverklaring (ook voor tapwater), ψ uit de leidinggegevens met de eenheden en de vaste h_a bij tapwater, en de forfaitaire boosterwarmtepomp. Een nieuwe paragraaf zegt welk bewijs bij opgegeven productwaarden hoort, en de meldingentabel noemt de nieuwe meldcodes.
+- Hoofdstuk 2 noemt het fabricage- en installatiejaar van de warmtepomp onder 2020+A1 en het fabricagejaar van ventilatoren in een gebouw van vóór 1900.
+- Hoofdstuk 5 beschrijft de controle bij elke wijziging (versie- en handleidingcontrole, dekking van alle opties, numerieke fuzz, robuustheid, grote projecten) en de referentiesuites met het oordeel *geen vergelijking* (afsluitcode 3).
+- Hoofdstuk 7 beschrijft de verklaringen k en l bij het energielabel.
+- Hoofdstuk 1 noemt de gecodeerde deeltesten van ISSO 54 versie 2.0; de lijst met ontbrekende schermafdrukken in de inhoudsopgave is aangevuld.
+
 ### 9 oktober 2026 — verwarmde vloer onder maaiveld boven een kruipruimte
 
 - **Vloer onder maaiveld boven een kruipruimte of onverwarmde kelder rekent.** Een vloer met zowel `below` als `heatedBasement` gaf `ground_floor_below_and_heated_basement`. De norm staat de combinatie toe: 8.39 met U_fl van 8.43 en U_x;T = 0 (2025+C1 p. 255, 256 en 262; 2022 p. 229, 230 en 236; gelijk in alle uitgaven). De wanden onder maaiveld tellen met z·P·U_bw. Bijlage D heeft voor de combinatie geen formule; de vloer wordt in een vloerdeel (D.13/D.14, of D.15/D.16 zonder h·P·U_xw) en een wanddeel (wandtermen van D.10/D.11) gesplitst, elk met de faseverschuiving van tabel D.1. De meldcode `ground_floor_below_and_heated_basement` vervalt. h van (8.47) wordt bij deze vloer niet gebruikt: in 2022 is hij daar niet verplicht, vanaf 2023 wordt een opgegeven h geweigerd (`route_not_in_edition`).
