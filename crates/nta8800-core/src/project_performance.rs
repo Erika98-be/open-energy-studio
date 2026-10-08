@@ -3604,12 +3604,23 @@ fn derive_input(
                     source_reference.push_str(&format!("; glazing: {}", item.source_reference));
                     item.glazing.clone()
                 });
+                // g_gl;n comes from NEN-EN 410 or from table 7.4 (2025+C1
+                // p. 190): a chosen glazing type replaces the window's own
+                // gValue, which then stays out of the derived input.
+                let g_perpendicular = if glazing
+                    .as_ref()
+                    .is_some_and(|item| item.glazing_type.is_some())
+                {
+                    f64::NAN
+                } else {
+                    g_value
+                };
                 windows.push(Window {
                     id: format!("window:{window_id}"),
                     area_m2: area,
                     orientation: azimuth_orientation,
                     tilt_deg: tilt,
-                    g_perpendicular: g_value,
+                    g_perpendicular,
                     frame_fraction: nta.window_solar.frame_fraction,
                     u_value_w_per_m2k: u_value,
                     forfait_delta_u_w_per_m2k: delta_u_forfait,
@@ -4474,6 +4485,58 @@ mod tests {
                 .sum::<f64>()
         };
         assert!(gains(&result) < gains(&base));
+    }
+
+    /// g_gl;n comes from NEN-EN 410 or from table 7.4 (2025+C1 p. 190): a
+    /// glazing type on win-S replaces that window's own gValue, so the
+    /// project calculates and gives the same numbers as the window with
+    /// the table value 0,60 for double low-e glass as its gValue.
+    #[test]
+    fn window_glazing_type_replaces_the_window_g_value() {
+        let mut value = project();
+        value["ntaCalculation"]["windowGlazings"] = serde_json::json!([{
+            "windowId": "win-S",
+            "glazing": {"glazingType": "double_low_e"},
+            "sourceReference": "survey: HR++ glass"
+        }]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        let demand = &result.derived_input.as_ref().unwrap().space_heating.demand;
+        let south = demand
+            .windows
+            .iter()
+            .find(|item| item.id == "window:win-S")
+            .unwrap();
+        assert!(south.g_perpendicular.is_nan());
+        let serialised = serde_json::to_value(south).unwrap();
+        assert!(serialised.get("gPerpendicular").is_none());
+
+        let mut equal = project();
+        let windows = equal["zones"][0]["surfaces"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .filter_map(|surface| surface.get_mut("windows"))
+            .filter_map(Value::as_array_mut)
+            .flatten();
+        for window in windows {
+            if window["id"] == "win-S" {
+                window["gValue"] = serde_json::json!(0.60);
+            }
+        }
+        let reference = assess_project_performance(&equal);
+        let ep = |item: &ProjectPerformanceAssessment| {
+            item.performance
+                .as_ref()
+                .unwrap()
+                .space_heating
+                .demand
+                .monthly
+                .iter()
+                .map(|month| month.cooling.gains_kwh)
+                .sum::<f64>()
+        };
+        assert!((ep(&result) - ep(&reference)).abs() < 1e-9);
     }
 
     /// Projects without `windowGlazings`, and entries without glazing

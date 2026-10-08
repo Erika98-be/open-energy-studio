@@ -4552,8 +4552,12 @@ fn generate(
                     match auxiliary_constants(measurements, "generator.auxiliaryMeasurements") {
                         Ok(constants) => {
                             for row in monthly.iter_mut() {
+                                // E_H;ci is the boiler's carrier input,
+                                // gas or oil (9.85, 2025+C1 p. 359), taken
+                                // before the pilot flame below.
+                                let carrier = row.natural_gas_kwh + row.oil_kwh;
                                 row.auxiliary_electricity_kwh =
-                                    Some(monthly_auxiliary_kwh(&constants, row.natural_gas_kwh));
+                                    Some(monthly_auxiliary_kwh(&constants, carrier));
                             }
                         }
                         Err(found) => {
@@ -4581,8 +4585,12 @@ fn generate(
                     ) {
                         Ok(constants) => {
                             for row in monthly.iter_mut() {
+                                // E_H;ci is the boiler's carrier input,
+                                // gas or oil (9.85, 2025+C1 p. 359), taken
+                                // before the pilot flame below.
+                                let carrier = row.natural_gas_kwh + row.oil_kwh;
                                 row.auxiliary_electricity_kwh =
-                                    Some(monthly_auxiliary_kwh(&constants, row.natural_gas_kwh));
+                                    Some(monthly_auxiliary_kwh(&constants, carrier));
                             }
                         }
                         Err(found) => {
@@ -7137,6 +7145,69 @@ mod tests {
             auxiliary_constants(boiler.auxiliary_measurements.as_ref().unwrap(), "a").unwrap();
         let jan = &result.monthly[0];
         let expected = monthly_auxiliary_kwh(&constants, jan.natural_gas_kwh);
+        assert!((jan.auxiliary_electricity_kwh.unwrap() - expected).abs() < 1e-9);
+    }
+
+    /// 9.85 (2025+C1 p. 359): E_H;ci is the boiler's carrier input, so an
+    /// oil boiler's declared constants and annex O measurements both use
+    /// the oil input for the B term, as the forfait route does.
+    #[test]
+    fn oil_boiler_auxiliary_uses_the_oil_input() {
+        let mut input = boiler_chain();
+        let Generator::GasBoiler(boiler) = &mut input.generator else {
+            unreachable!()
+        };
+        boiler.boiler.fuel = "oil".into();
+        boiler.boiler.kind = crate::boiler_forfait_draft::BoilerKind::Conventional;
+        boiler.declared_auxiliary_constants = Some(
+            serde_json::from_value(json!({
+                "aKwh": 10.0, "bKw": 0.12, "c": 0.3, "nominalLoadKw": 20.0,
+                "declarationReference": "oil boiler declaration"
+            }))
+            .unwrap(),
+        );
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        assert!(result.monthly.iter().any(|row| row.oil_kwh > 0.0));
+        for row in &result.monthly {
+            assert_eq!(row.natural_gas_kwh, 0.0);
+            let expected = 10.0 / 12.0 + 0.12 * row.oil_kwh / (0.3 * 20.0);
+            assert!((row.auxiliary_electricity_kwh.unwrap() - expected).abs() < 1e-9);
+        }
+
+        let Generator::GasBoiler(boiler) = &mut input.generator else {
+            unreachable!()
+        };
+        boiler.declared_auxiliary_constants = None;
+        boiler.auxiliary_measurements = Some(
+            serde_json::from_value(json!({
+                "nominalLoadKw": 24.0, "standbyElectronicsW": 2.0, "gasValveW": 5.0,
+                "fan": {"method": "single_speed", "powerW": 20.0},
+                "pump": {"method": "staged", "operationW": 40.0, "prePostRunW": 30.0},
+                "pumpPostRunS": 60.0,
+                "loadCurve": [{"timeS": 200.0, "meanLoad": 0.5}, {"timeS": 300.0, "meanLoad": 0.5}],
+                "sourceReference": "test report"
+            }))
+            .unwrap(),
+        );
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        let Generator::GasBoiler(boiler) = &input.generator else {
+            unreachable!()
+        };
+        let constants =
+            auxiliary_constants(boiler.auxiliary_measurements.as_ref().unwrap(), "a").unwrap();
+        let jan = &result.monthly[0];
+        assert!(jan.oil_kwh > 0.0);
+        let expected = monthly_auxiliary_kwh(&constants, jan.oil_kwh);
         assert!((jan.auxiliary_electricity_kwh.unwrap() - expected).abs() < 1e-9);
     }
 
