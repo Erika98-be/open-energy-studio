@@ -197,6 +197,8 @@ export function preferredGeneratorTemplate(parts: Block[], project?: IProject): 
 
 /** A hot-water generator of `kind` in the kernel's `HotWaterGenerator` shape. */
 export function hotWaterGeneratorTemplate(kind: string): Block {
+  // "—": a blank the kernel names at `…generator.kind` (an empty string is no generator kind).
+  if (kind === '') return { kind: null };
   if (kind === 'gas_appliance') return { kind, appliance: null, measuredClass: 'class4', kitchenOnly: false };
   if (kind === 'heat_pump') return { kind, exhaustAirSource: false, measuredClass: 'class4' };
   if (kind === 'indirect_boiler') return { kind, boiler: null, oil: false, insideBoundary: true, alsoSpaceHeating: true };
@@ -410,19 +412,22 @@ export function heatPumpRenewableTemplate(): Block {
   return { sourceBelow20C: false, exhaustAirSource: false, combinedOutdoorAndExhaustAir: false, sourceReference: '' };
 }
 
+/** Twelve blank months: the kernel names each one still empty (an empty list is only "invalid"). */
+const blankMonths = (): null[] => Array.from({ length: 12 }, () => null);
+
 /** §5.5 use determined outside the calculation, per month. */
 export function declaredUseTemplate(index = 0): Block {
-  return { id: `gebruik-${index + 1}`, service: null, carrier: 'el', monthlyKwh: [], sourceReference: '' };
+  return { id: `gebruik-${index + 1}`, service: null, carrier: 'el', monthlyKwh: blankMonths(), sourceReference: '' };
 }
 
 /** 5.35/5.36 ambient heat of a hot-water heat pump determined elsewhere. */
 export function declaredRenewableHeatTemplate(index = 0): Block {
-  return { id: `warmte-${index + 1}`, monthlyKwh: [], sourceReference: '' };
+  return { id: `warmte-${index + 1}`, monthlyKwh: blankMonths(), sourceReference: '' };
 }
 
 /** Chapter 16 electricity produced on site per month. */
 export function onSiteProductionTemplate(index = 0): Block {
-  return { id: `opwekking-${index + 1}`, kind: 'pv', monthlyKwh: [], sourceReference: '' };
+  return { id: `opwekking-${index + 1}`, kind: 'pv', monthlyKwh: blankMonths(), sourceReference: '' };
 }
 
 /** An annex P route (§5.8) of `method` for `fn` (heating, hot_water or cooling). */

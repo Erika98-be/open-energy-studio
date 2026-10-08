@@ -370,6 +370,10 @@ pub fn assess_json(value: Value) -> Result<InputAssessment, String> {
     Ok(assess_project(&project, input_fingerprint))
 }
 
+/// SHA-256 of the canonical input: object keys sorted, and object members
+/// that are null left out, because a null member means the same as an
+/// absent one (the UI sends the blanks of the NTA block as null to the
+/// project route and leaves them out on the validate route).
 pub(crate) fn input_fingerprint(value: &Value) -> String {
     fn canonical(value: &Value, output: &mut String) {
         match value {
@@ -385,7 +389,11 @@ pub(crate) fn input_fingerprint(value: &Value) -> String {
             }
             Value::Object(fields) => {
                 output.push('{');
-                let mut keys: Vec<_> = fields.keys().collect();
+                let mut keys: Vec<_> = fields
+                    .iter()
+                    .filter(|(_, item)| !item.is_null())
+                    .map(|(key, _)| key)
+                    .collect();
                 keys.sort();
                 for (index, key) in keys.into_iter().enumerate() {
                     if index > 0 {
@@ -2703,6 +2711,26 @@ mod tests {
             .issues
             .iter()
             .any(|item| item.code == "windows_missing"));
+    }
+
+    #[test]
+    fn fingerprint_ignores_null_members() {
+        let base = json!({"id": "x", "name": "A", "buildingFunction": "residential", "zones": [],
+            "ntaCalculation": {"a": 1, "b": [null, 2]}});
+        let mut with_nulls = base.clone();
+        with_nulls["ntaCalculation"]["c"] = Value::Null;
+        with_nulls["ntaCalculation"]["d"] = json!({"e": null});
+        let mut empty_object = base.clone();
+        empty_object["ntaCalculation"]["d"] = json!({});
+        assert_eq!(
+            input_fingerprint(&with_nulls),
+            input_fingerprint(&empty_object)
+        );
+        assert_ne!(input_fingerprint(&with_nulls), input_fingerprint(&base));
+        // A null array element keeps its position.
+        let mut shifted = base.clone();
+        shifted["ntaCalculation"]["b"] = json!([2]);
+        assert_ne!(input_fingerprint(&base), input_fingerprint(&shifted));
     }
 
     #[test]

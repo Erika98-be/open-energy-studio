@@ -74,7 +74,16 @@ step "TypeScript"
 npx tsc --noEmit
 
 step "UI tests"
-npx vitest run --testTimeout=20000 --maxWorkers="${NTA_VITEST_MAX_WORKERS:-4}"
+# The project-form guard (src/__tests__/nta-project-form-guard.test.tsx) writes every form state
+# it produced; the next step runs them through the kernel.
+nta_form_guard_docs="$nta_evidence_dir/form-guard/project-forms.jsonl"
+rm -f "$nta_form_guard_docs"
+NTA_FORM_GUARD_OUT="$nta_form_guard_docs" \
+  npx vitest run --testTimeout=20000 --maxWorkers="${NTA_VITEST_MAX_WORKERS:-4}"
+
+step "project-form states through the kernel"
+NTA_FORM_GUARD_DOCS="$(realpath "$nta_form_guard_docs")" \
+  cargo test --locked --manifest-path crates/nta8800-core/Cargo.toml --quiet --test project_form_guard
 
 step "frontend bundle"
 npm run build

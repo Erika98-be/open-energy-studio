@@ -13,6 +13,24 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — lege velden per veld gemeld, vingerafdruk zonder null-leden
+
+- **Lege velden in de NTA-invoer.** De app liet de lege velden (null) van het NTA-blok weg voor de projectroute. Een verplicht veld ontbrak dan, en de kern kon alleen het hele blok weigeren: één melding `nta_calculation_block_invalid` op `ntaCalculation`, zonder veld. De projectroute krijgt de lege velden nu als null; de zoektocht naar lege waarden in de kern meldt elk veld dat nog leeg is als `nta_value_missing` op zijn eigen pad, met "Ga naar". Van de formuliertoestanden van de nieuwe vangnettest (hieronder) gaf eerst 1 484 van de 2 412 de blokmelding; nu geen. Status en uitkomst van een volledig ingevuld project veranderen niet.
+- **Invoervingerafdruk.** Een object-lid met de waarde null telt niet meer mee, net als een ontbrekend lid. Zo geven de valideer- en de projectroute dezelfde vingerafdruk, en blijft de vingerafdruk van opgeslagen projecten uit de app gelijk. Een API-aanroep die null-leden meestuurt, krijgt een andere vingerafdruk dan voorheen.
+- **Verticale leiding in een utiliteitsgebouw.** Zonder gebouwhoogte H (7.17a) volgde `vertical_pipe_storeys_invalid` op de bouwlagen, een veld dat het utiliteitsformulier niet toont. Nu `vertical_pipe_building_height_invalid` op `buildingHeightM`; een woning houdt de melding op de bouwlagen.
+
+### 9 oktober 2026 — vangnet voor de projectformulieren (geen rekenwijziging)
+
+- **Vangnet.** `src/__tests__/nta-project-form-guard.test.tsx` opent elke NTA-sectie die de stappagina's tonen op drie projecten (het kantoor, de rijwoning en het kantoor met twee rekenzones). Elke keuze gaat door al haar opties, elk vinkje aan en uit, elke knop "toevoegen" één keer, en tot slot wordt elk getal leeggemaakt en elke lege optie gekozen. Na elke stap gaat de invoer door wat "Toepassen" en de aanroep van de projectroute doen; zo'n 2 400 verschillende toestanden. `crates/nta8800-core/tests/project_form_guard.rs` rekent ze in de gate door de kern en weigert een vorm die de kern niet kan lezen (`nta_calculation_block_invalid`, `derived_input_*`), een melding zonder route in `gapRoutes.ts` en een achtergebleven toestand die het formulier niet meer laat wissen (de lijst `LEFTOVER_STATE`, met de fouten van review 7 en 8). Een melding die alleen om een waarde vraagt, is de verwachte uitkomst van een leeg veld.
+- **Gevonden en verholpen:**
+  - "—" bij de tapwateropwekker schreef `kind: ""`; de kern weigerde het hele blok. Nu blijft de soort leeg (null) en noemt de kern het veld.
+  - Een andere gebruiksfunctie dan woonfunctie in de algemene gegevens liet het woningtype staan (`dwelling_type_not_applicable`); het verdwijnt nu.
+  - Een ander afgiftesysteem liet de hydraulische inregeling staan (`emission_balancing_inconsistent`). Luchtverwarming en lokale verwarming krijgen nu "n.v.t.", een watersysteem verliest "n.v.t."; de keuze biedt alleen wat tabel 9.3 (voetnoot a) bij het systeem toestaat.
+  - Een utiliteitsgebouw kreeg de varianten C4a, C5a, C5b en D5c aangeboden, waarvoor tabel 11.5 geen f_ctrl voor utiliteit kent (`variant_not_applicable_to_category`). Ze staan er nu niet meer bij.
+  - Een woning kreeg "verlichting" als opgegeven gebruik (§5.5) aangeboden (`residential_lighting_must_be_omitted`); die keuze is er nu alleen voor utiliteit.
+  - "GBS aanwezig" uitvinken liet de klassen staan (`absent_bacs_has_classes`). De klassen verdwijnen nu en staan alleen bij een aanwezig GBS.
+  - Opgegeven maandwaarden begonnen als lege lijst (`monthly_values_invalid`); nu als twaalf lege maanden, zodat de kern elke lege maand noemt.
+
 ### 9 oktober 2026 — projectformulieren na de achtste review (geen rekenwijziging)
 
 De kern is ongewijzigd; de formulieren schrijven nu invoer die de kern leest.

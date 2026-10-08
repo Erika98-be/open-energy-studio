@@ -139,9 +139,15 @@ function BacsEvidenceFields({ draft, change, base, label }: SectionProps & { bas
       {label}
     </label>
     {present && <>
-      <CheckField {...field} path={[...base, 'present']} label={t('nta.form.bacs.present')} />
-      <SelectField {...field} path={[...base, 'automaticControlsClass']} label={t('nta.form.bacs.controlsClass')} options={BACS_CLASSES} />
-      <SelectField {...field} path={[...base, 'energyManagementClass']} label={t('nta.form.bacs.managementClass')} options={BACS_CLASSES} />
+      {/* Classes belong to a present BACS only (absent_bacs_has_classes): unticking clears them. */}
+      <CheckField {...field} path={[...base, 'present']} label={t('nta.form.bacs.present')}
+        onChange={(_, value) => change(base, value === true
+          ? { ...(read(draft, base) as Draft), present: true }
+          : { ...(read(draft, base) as Draft), present: false, automaticControlsClass: undefined, energyManagementClass: undefined })} />
+      {read(draft, [...base, 'present']) === true && <>
+        <SelectField {...field} path={[...base, 'automaticControlsClass']} label={t('nta.form.bacs.controlsClass')} options={BACS_CLASSES} />
+        <SelectField {...field} path={[...base, 'energyManagementClass']} label={t('nta.form.bacs.managementClass')} options={BACS_CLASSES} />
+      </>}
       <TextField {...field} path={[...base, 'sourceReference']} label={t('nta.form.source')} />
     </>}
   </>;
