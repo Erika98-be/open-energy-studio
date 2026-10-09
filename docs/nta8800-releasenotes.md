@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — oudere uitgave ook in het geneste prestatieblok; klimaatbron per uitgave (geen rekenwijziging)
+
+- **Status van het geneste blok.** Bij een berekening in een oudere uitgave kreeg alleen de bovenste status `calculated_legacy_edition`. Het geneste `performance`-blok van de project- en opnameroute bleef `calculated_unverified`. Nu krijgt ook dat blok de status van de oudere uitgave, en `registrationEligible: false` als het die heeft. Wie alleen het geneste blok leest, ziet zo geen registreerbaar resultaat meer. Het rapport, het rapportmodel en het EP-Online-overzicht behandelen het resultaat zoals eerder: berekend in een oudere uitgave, niet voor registratie.
+- **Klimaatbron.** `climateSource` noemde altijd NTA 8800:2025+C1:2026, ook bij een uitkomst in 2022 of 2020+A1. Nu noemt hij de tabellen 17.1/17.2 van de uitgave waarin is gerekend (2025+C1 p. 690, 2024 p. 674, 2023 p. 676, 2022 p. 666, 2020+A1 p. 662).
+- **Gecontroleerd:** tabel 17.2 is in alle vijf de uitgaven gelijk. Tabel 17.1 verschilt alleen in θ_e;argII voor mei tot en met september (2023, 2022 en 2020+A1 tegenover 2024 en later). Die waarden wisselde de kern al per uitgave (`argii_temperature_c` in het profiel), dus de uitkomsten veranderen niet. 2020+A1 heeft geen kolom ϑ_ODA;preh;WTWC; koudeterugwinning weigert de kern daar al (omslagpunt 79).
+
 ### 10 oktober 2026 — import en export van UNIEC3- en VABI-bestanden na de zestiende review
 
 Ingelezen VABI-projecten rekenen anders dan voorheen: de koudebruggen, U-waarden en hellingshoeken veranderen. Een eerder ingelezen project verandert pas als je het bestand opnieuw inleest.
