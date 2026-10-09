@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — testprotocol en testrapport per vrijgave (geen rekenwijziging)
+
+- Nieuw [testprotocol](nta8800-testprotocol.md). Het beschrijft:
+  - de testniveaus van de gate, met opdrachten, criteria, bewijs en duur;
+  - de procedure voor de ISSO 54-testset;
+  - 17 handmatige acceptatietests vóór elke vrijgave;
+  - de regressieprocedure per soort wijziging, met de end-to-endvergelijking;
+  - de codereviews 1–19.
+- Nieuw sjabloon [testrapport](templates/nta8800-testrapport.md). `scripts/release-nta.sh` zet het vooringevuld (versies, tag, commit, datum, gatestatus) als `testrapport.md` in elk vrijgavearchief; het valt onder `SHA256SUMS`.
+
 ### 10 oktober 2026 — EP-Online-gegevensoverzicht, dossiercontrole en A0-tabel na de achttiende review
 
 - **`Op_basis_van_referentiegebouw` stond omgekeerd.** Het veld is nu `true` voor de gelijkende woning, die een referentie-energieprestatierapport krijgt, en `false` voor de bezochte referentiewoning (BRL 9500-W §4.3 p. 26; RVO-handleiding EP-online bijlage 2).
