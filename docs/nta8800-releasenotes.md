@@ -13,6 +13,21 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — import en export van UNIEC3- en VABI-bestanden na de zestiende review
+
+Ingelezen VABI-projecten rekenen anders dan voorheen: de koudebruggen, U-waarden en hellingshoeken veranderen. Een eerder ingelezen project verandert pas als je het bestand opnieuw inleest.
+- **Koudebruggen.** De VABI-export schreef de koudebruggen van een zone onder elk vlak; de import telde ze dan per vlak op, zodat ΣψL na een rondgang met het aantal vlakken vermenigvuldigde. Nu staan ze één keer per rekenzone. Een ouder bestand met dezelfde lijst onder elk vlak wordt één keer ingelezen, met een punt in het importverslag. Een ontbrekende ψ wordt een punt.
+- **U-waarde.** Een constructie zonder R_c (alleen een U ingevoerd) kwam na een VABI-rondgang terug met U = 0. Nu schrijft de export `UWaarde`, leest de import die eerst, dan de bibliotheek met dezelfde naam, en pas daarna R_c met de R_si van het vlaktype. Een U van 0 wordt nooit overgenomen, ook niet bij UNIEC3: het vlak blijft dan zonder constructie, met een punt.
+- **Getallen.** `1.234,5` is 1234,5 (was 1,2345); tekst, NaN en waarden buiten het bereik worden niet meer stil 0 of NaN maar een punt met de standaardwaarde of de grens. Elk ingelezen project gaat door dezelfde controle als een geopend projectbestand. Een q_v10 van 0 of zonder waarde krijgt de forfaitaire waarde met het kenmerk *aangenomen*.
+- **Codes.** Codes als `constructor` of `__proto__` worden niet meer als functie, vlaktype of oriëntatie overgenomen.
+- **UNIEC3-export** schrijft getallen met volle precisie in plaats van op twee decimalen (q_v10 0,987 werd 0,99).
+- **Hellingshoek.** VABI `Hellingshoek` 0 en 180 zijn horizontaal (een plat dak werd een noordgevel); een andere hoek van een dak komt in de NTA-invoer (`surfaceTilts`). De export schrijft de hellingshoek.
+- **Deelvlakken.** Een VABI-vlak met meer dichte deelvlakken wordt gesplitst, elk met zijn eigen constructie uit de bibliotheek met dezelfde naam; eerder kreeg het hele vlak de waarde van het eerste deelvlak en verdubbelde de constructielijst.
+- **Meer gebouwen en dubbele ids.** Meer dan één gebouw, GEB of UNIT, dubbele ids en verwijzingen naar onbekende elementen worden punten. In een EPA-archief met meer XML-bestanden wordt `project.xml` gelezen.
+- **Tekencodering.** VABI-bestanden in UTF-16 of windows-1252, en met BOM, worden goed gelezen; een bestand met `DOCTYPE` wordt geweigerd. Ongeldige JSON of een verkeerde opbouw van een UNIEC3-bestand geeft een duidelijke melding in het Nederlands of Engels.
+- **Importverslag.** Elke import legt bestandsnaam, SHA-256 en de punten om na te lopen vast in het importlogboek; de app toont ze na het inlezen en in Projectinformatie. Het logboek blijft buiten de vingerafdruk van de labelinvoer, gelijk aan de rekenkern.
+- **Verlies bij export.** De UNIEC3- en VABI-export melden welke projectgegevens (zoals de NTA-invoer) niet in het bestand komen; bij opnieuw inlezen staat dat als punt in het verslag.
+
 ### 10 oktober 2026 — dossier, bewijsstukken en webview afgeschermd (geen rekenwijziging)
 
 Vijftiende review (desktoplaag en bestanden).
