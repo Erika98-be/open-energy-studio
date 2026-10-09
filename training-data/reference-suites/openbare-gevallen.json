@@ -676,21 +676,21 @@
       "expected": [
         {
           "path": "beng1",
-          "value": 33.25,
+          "value": 29.57,
           "unit": "kWh/m2.year",
           "normReference": "BENG 1, energiebehoefte (5.3)",
           "absoluteTolerance": 0.05
         },
         {
           "path": "beng2",
-          "value": -0.16,
+          "value": -0.9,
           "unit": "kWh/m2.year",
           "normReference": "BENG 2, primair fossiel energiegebruik (5.2)",
           "absoluteTolerance": 0.05
         },
         {
           "path": "beng3",
-          "value": 100.1,
+          "value": 101.1,
           "unit": "%",
           "normReference": "BENG 3, aandeel hernieuwbare energie (5.4)",
           "absoluteTolerance": 0.15

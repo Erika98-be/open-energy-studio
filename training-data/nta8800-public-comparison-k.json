@@ -897,10 +897,10 @@
       "sourceReference": "table 7.13"
     },
     "thermalMass": {
-      "floor": "light",
+      "floor": "heavy",
       "wall": "light",
       "ceiling": "open_or_none",
-      "sourceReference": "openbare bron Uniec 3.1.5.0 printout (sporthal met kantoor en bijeenkomstfunctie 1896,98 m2, 11-12-2022): hsb/sfb/staalskelet met staalbeton of niet-massieve betonvloeren, geen of open plafond, 1 bouwlaag"
+      "sourceReference": "openbare bron Uniec 3.1.5.0 printout (sporthal met kantoor en bijeenkomstfunctie 1896,98 m2, 11-12-2022): hsb/sfb/staalskelet met staalbeton of niet-massieve betonnen vloeren, geen of open plafond, 1 bouwlaag; tabel 7.10 rij 250 tot 500 kg/m2 (2022 p. 181)"
     },
     "internalGains": {
       "method": "utility",
@@ -1008,10 +1008,10 @@
           "sourceReference": "tabellen 7.2/7.3 per functie; verlichting uit hoofdstuk 14"
         },
         "thermalMass": {
-          "floor": "light",
+          "floor": "heavy",
           "wall": "light",
           "ceiling": "closed_or_suspended",
-          "sourceReference": "openbare bron Uniec 3.1.5.0 printout (sporthal met kantoor en bijeenkomstfunctie 1896,98 m2, 11-12-2022): hsb/sfb/staalskelet met staalbeton of niet-massieve betonvloeren, gesloten of verlaagd plafond, 2 bouwlagen"
+          "sourceReference": "openbare bron Uniec 3.1.5.0 printout (sporthal met kantoor en bijeenkomstfunctie 1896,98 m2, 11-12-2022): hsb/sfb/staalskelet met staalbeton of niet-massieve betonnen vloeren, gesloten of verlaagd plafond, 2 bouwlagen; tabel 7.10 rij 250 tot 500 kg/m2 (2022 p. 181)"
         }
       },
       {
@@ -1096,10 +1096,10 @@
           "sourceReference": "tabellen 7.2/7.3 per functie; verlichting uit hoofdstuk 14"
         },
         "thermalMass": {
-          "floor": "light",
+          "floor": "heavy",
           "wall": "light",
           "ceiling": "open_or_none",
-          "sourceReference": "openbare bron Uniec 3.1.5.0 printout (sporthal met kantoor en bijeenkomstfunctie 1896,98 m2, 11-12-2022): hsb/sfb/staalskelet met staalbeton of niet-massieve betonvloeren, geen of open plafond, 1 bouwlaag"
+          "sourceReference": "openbare bron Uniec 3.1.5.0 printout (sporthal met kantoor en bijeenkomstfunctie 1896,98 m2, 11-12-2022): hsb/sfb/staalskelet met staalbeton of niet-massieve betonnen vloeren, geen of open plafond, 1 bouwlaag; tabel 7.10 rij 250 tot 500 kg/m2 (2022 p. 181)"
         }
       }
     ],
