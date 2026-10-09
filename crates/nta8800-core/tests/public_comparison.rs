@@ -529,7 +529,12 @@ fn case_h_utility_under_nta_8800_2023() {
 /// of 12.5 for direct expansion, 2020+A1 p. 500–501, and the literal 10.15
 /// emission loss), the 10.87 control energy +88 (+0,29), heating −339
 /// (−1,12), its auxiliary energy −4 (−0,01) and lighting +38 (+0,13; P_n
-/// rounded up per annex X).
+/// rounded up per annex X). Of the cooling, Q_C;dhum is 13 885 kWh cold
+/// (+15,29), the 10.15 loss 4 186 kWh (+4,61) and the sensible need 10 456
+/// kWh (−1,78 against the report's 12 069 kWh of cold at EER 3,00). BENG 3
+/// follows from BENG 2 alone: E_ren (PV 44 401 primary plus ambient heat
+/// 8 042 kWh against the report's 8 653) is within 1,2 %, and with the
+/// report's E_P the kernel's E_ren gives 144,5 % against 143,8 %.
 #[test]
 fn case_i_utility_under_nta_8800_2020_a1() {
     let value: Value = serde_json::from_str(include_str!(
@@ -552,6 +557,25 @@ fn case_i_utility_under_nta_8800_2020_a1() {
         performance["spaceHeating"]["generationEfficiency"].as_f64(),
         Some(2.8)
     );
+    // The BENG 2 and BENG 3 gaps are cooling: Q_C;dhum (12.5) and the 10.15
+    // loss, which Uniec 3.0.9.3 did not count for direct expansion in the room.
+    let cooling = |key: &str| -> f64 {
+        performance["cooling"]["months"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|month| month[key].as_f64().unwrap())
+            .sum()
+    };
+    assert!((cooling("needKwh") - 10456.0).abs() < 1.0);
+    assert!((cooling("dehumidificationKwh") - 13885.0).abs() < 1.0);
+    assert!((cooling("emissionLossKwh") - 4186.0).abs() < 1.0);
+    let renewable = performance["annualRenewablePrimaryKwh"].as_f64().unwrap();
+    assert!((renewable - 52443.0).abs() < 1.0, "{renewable}");
+    let ambient = performance["annualHeatPumpAmbientHeatKwh"]
+        .as_f64()
+        .unwrap();
+    assert!((ambient - 8042.0).abs() < 1.0, "{ambient}");
 }
 
 /// Case J, a retail space of 89,80 m² under apartments, calculated on
