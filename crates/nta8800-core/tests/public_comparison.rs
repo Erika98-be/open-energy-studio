@@ -670,6 +670,48 @@ fn filled_hot_water_and_lighting_lists_cover_the_zone_within_the_tolerance() {
     );
 }
 
+/// Review 25: the lists may be omitted only because common spaces fill them.
+/// Without common spaces an omitted list is still refused, on its own path.
+#[test]
+fn omitted_hot_water_and_lighting_lists_without_common_spaces_are_refused() {
+    let mut input: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-example-office.json"
+    ))
+    .unwrap();
+    let nta = &mut input["ntaCalculation"];
+    nta["lighting"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("functions");
+    nta["hotWater"]["need"]
+        .as_object_mut()
+        .unwrap()
+        .remove("areas");
+    let result = assess_project_performance(&input);
+    assert_eq!(result.status, "invalid", "{:?}", result.gaps);
+    let paths: Vec<(&str, &str)> = result
+        .gaps
+        .iter()
+        .map(|gap| (gap.code, gap.path.as_str()))
+        .collect();
+    assert!(
+        paths.contains(&(
+            "lighting_function_areas_invalid",
+            "ntaCalculation.lighting[0].functions"
+        )),
+        "{paths:?}"
+    );
+    assert!(
+        paths.contains(&(
+            "hot_water_function_areas_invalid",
+            "ntaCalculation.hotWater.need.areas"
+        )),
+        "{paths:?}"
+    );
+    let split = result.common_spaces.as_ref();
+    assert!(split.is_none());
+}
+
 /// Case H with the common space as input and the hot-water and lighting
 /// lists left empty: the kernel fills them with the within-zone split, as
 /// 13.19 (2023 p. 527) and chapter 14 (t_D, t_N p. 643, P_n;spec p. 647)

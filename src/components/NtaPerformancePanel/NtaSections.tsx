@@ -688,7 +688,8 @@ function HotWaterSection(props: NtaSectionProps) {
   return <>
     {residential
       ? <NumberField {...f} path={['hotWater', 'need', 'dwellingCount']} label={t('nta.form.dwellingCount')} step="1" />
-      : <CommonSpaceFillField draft={draft} change={change} path={['hotWater', 'need', 'areas']}>
+      : <CommonSpaceFillField draft={draft} change={change} path={['hotWater', 'need', 'areas']}
+        available={((read(draft, ['additionalHotWaterSystems']) as unknown[] | undefined) ?? []).length === 0}>
         <SelectField {...f} path={['hotWater', 'need', 'areas', 0, 'function']} label={t('nta.form.hotWaterFunction')} options={[
           ['office', t('nta.form.label.office')], ['education', t('nta.form.label.education')], ['retail', t('nta.form.label.retail')],
           ['sport', t('nta.form.label.sport')], ['lodging', t('nta.form.label.lodging')], ['cell', t('nta.form.label.cell')],

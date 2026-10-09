@@ -35,12 +35,12 @@ export function hasCommonSpaces(draft: Draft): boolean {
  * (13.19; chapter 14, t_D, t_N and P_n;spec). Ticked: the list is empty and the entry fields are hidden; unticked:
  * one blank entry to fill in by hand (for instance Uniec's building split).
  */
-export function CommonSpaceFillField({ draft, change, path, children }:
-  SectionProps & { path: Path; children: ReactNode }) {
+export function CommonSpaceFillField({ draft, change, path, children, available = true }:
+  SectionProps & { path: Path; children: ReactNode; /** False where the kernel does not fill (several hot-water systems, 13.20). */ available?: boolean }) {
   const { t } = useI18n();
   const value = read(draft, path);
   const filled = Array.isArray(value) && value.length === 0;
-  if (!hasCommonSpaces(draft)) return <>{children}</>;
+  if (!available || !hasCommonSpaces(draft)) return <>{children}</>;
   return <>
     <label className="nta-form-check">
       <input type="checkbox" checked={filled}
