@@ -2,7 +2,8 @@ import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { FieldPathPrefixProvider, write, type Draft, type Path } from '../components/NtaPerformancePanel/NtaFormFields';
-import { LightingZoneField, SwimmingPoolFields, ZoneDataFields } from '../components/NtaPerformancePanel/NtaZoneData';
+import { CommonSpaceFillField, LightingZoneField, SwimmingPoolFields, ZoneDataFields } from '../components/NtaPerformancePanel/NtaZoneData';
+import { NtaLightingSection } from '../components/NtaPerformancePanel/NtaExtraSections';
 import { CollectiveCoolingField, CollectivePvField } from '../components/NtaPerformancePanel/NtaCollectiveShare';
 import { CirculationPsiFields, HotWaterCirculationFields } from '../components/NtaPerformancePanel/NtaPipeGeometry';
 import { AdditionalHotWaterSystemsFields, HotWaterExtraGeneratorsFields } from '../components/NtaPerformancePanel/NtaSystemSections';
@@ -105,6 +106,42 @@ describe('project forms that had no form', () => {
     expect(draft().zoneData[0].commonSpaces[0].areaM2).toBe(20);
     select(/Use function of the calculation zone/, 'residential');
     expect('commonSpaces' in draft().zoneData[0]).toBe(false);
+  });
+
+  it('lets the kernel fill the lighting and hot-water function lists from the common spaces', () => {
+    const block = {
+      calculationScope: 'utility', usageFunction: 'office', internalGains: { method: 'utility' },
+      zoneData: [{ zoneId: 'z1', commonSpaces: [{ areaM2: 20, sourceReference: 'meetstaat' }] }],
+      lighting: [{ zoneId: 'z1', functions: [{ function: 'office', areaM2: 400 }], lightingZones: [], sourceReference: '' }],
+      hotWater: { need: { method: 'utility', areas: [{ function: 'office', areaM2: 600 }], sourceReference: '' } },
+    };
+    renderWithProviders(<Harness initial={block}>
+      {(d, change) => <>
+        <NtaLightingSection draft={d} change={change} project={project(['z1'])} />
+        <CommonSpaceFillField draft={d} change={change} path={['hotWater', 'need', 'areas']}>
+          <span>hot-water entries</span>
+        </CommonSpaceFillField>
+      </>}</Harness>);
+    const toggles = screen.getAllByLabelText(/Let the kernel split the areas per function from the common spaces/);
+    expect(toggles).toHaveLength(2);
+    fireEvent.click(toggles[0]);
+    fireEvent.click(toggles[1]);
+    expect(draft().lighting[0].functions).toEqual([]);
+    expect(draft().hotWater.need.areas).toEqual([]);
+    expect(screen.queryByText('hot-water entries')).toBeNull();
+    expect(screen.getAllByText(/The kernel fills this list with the within-zone split/)).toHaveLength(2);
+    // Unticked: one blank entry to fill in by hand.
+    fireEvent.click(toggles[1]);
+    expect(draft().hotWater.need.areas).toEqual([{ function: null, areaM2: null }]);
+    expect(screen.getByText('hot-water entries')).toBeTruthy();
+  });
+
+  it('offers no fill choice without common spaces', () => {
+    renderWithProviders(<Harness initial={{ hotWater: { need: { method: 'utility', areas: [] } } }}>
+      {(d, change) => <CommonSpaceFillField draft={d} change={change} path={['hotWater', 'need', 'areas']}>
+        <span>hot-water entries</span></CommonSpaceFillField>}</Harness>);
+    expect(screen.queryByLabelText(/Let the kernel split the areas/)).toBeNull();
+    expect(screen.getByText('hot-water entries')).toBeTruthy();
   });
 
   it('starts zone data with valid internal gains when the block has none', () => {

@@ -16,6 +16,15 @@
 //! zone and the common spaces with the functions they serve, and writes the
 //! allocated areas into `functionAreas` of the zone, the zone's chapter 11
 //! ventilation functions and `bblFunctions` (when not given).
+//!
+//! Hot water and lighting weight their table values per calculation zone by
+//! "de gebruiksfuncties usi in de beschouwde rekenzone" (13.19, 2025+C1
+//! p. 538) and "de gebruiksfuncties die in de rekenzone zijn gelegen"
+//! (t_D and t_N p. 657, P_n;spec p. 661), which is the within-zone split of
+//! 6.6.4. The same wording is in 2020+A1 (p. 515, 628–636), 2022 (p. 519,
+//! 633–641), 2023 (p. 527, 643–651) and 2024. When those lists are empty
+//! the kernel fills them from that split (`withinZones`, the zones'
+//! `allocated`); entered lists take precedence.
 
 use crate::bbl_requirements::{BblFunction, BblFunctionArea};
 use crate::label_class::{LabelFunction, LabelFunctionArea};
@@ -81,8 +90,14 @@ pub struct CommonSpaceSplit {
     pub source: &'static str,
     pub spaces: Vec<CommonSpaceAllocation>,
     pub zones: Vec<ZoneFunctionAreas>,
-    /// Use-function areas of the building (Bbl limits, hot water, lighting).
+    /// Use-function areas of the building (Bbl limits, label functions).
     pub building: Vec<UsageFunctionArea>,
+    /// Use-function areas summed over the calculation zones, each zone with
+    /// its within-zone split (hot water, 13.19).
+    pub within_zones: Vec<UsageFunctionArea>,
+    /// Input lists the kernel filled from the split, below `ntaCalculation`.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub filled: Vec<String>,
 }
 
 /// A refusal with the path below `ntaCalculation`.
@@ -254,12 +269,55 @@ pub fn allocate(
     if !issues.is_empty() {
         return Some(Err(issues));
     }
+    let mut within_zones = Vec::new();
+    for (zone, initial) in zones.iter().zip(&initial_by_zone) {
+        let parts = zone_results
+            .iter()
+            .find(|result| result.zone_id == zone.zone_id)
+            .map_or(initial.as_slice(), |result| result.allocated.as_slice());
+        for part in parts.iter().filter(|part| part.area_m2 > 0.0) {
+            add(&mut within_zones, part.function, part.area_m2);
+        }
+    }
     Some(Ok(CommonSpaceSplit {
         source: SOURCE,
         spaces,
         zones: zone_results,
         building,
+        within_zones,
+        filled: Vec::new(),
     }))
+}
+
+/// The use-function areas of every zone after the within-zone split: the
+/// allocated areas of a zone with common spaces, otherwise its own function
+/// areas (or its single function over the whole zone). `None` when a zone
+/// has a non-positive part; that zone keeps its own validation.
+pub fn zone_use_areas(
+    zones: &[ZoneCommonSpaces<'_>],
+    split: &CommonSpaceSplit,
+) -> Option<Vec<(String, Vec<UsageFunctionArea>)>> {
+    zones
+        .iter()
+        .map(|zone| {
+            let parts = match split
+                .zones
+                .iter()
+                .find(|result| result.zone_id == zone.zone_id)
+            {
+                Some(result) => result.allocated.clone(),
+                None if zone.initial.is_empty() => vec![UsageFunctionArea {
+                    function: zone.usage_function,
+                    area_m2: zone.floor_area_m2,
+                }],
+                None => zone.initial.to_vec(),
+            };
+            parts
+                .iter()
+                .all(|part| part.area_m2.is_finite() && part.area_m2 > 0.0)
+                .then(|| (zone.zone_id.to_string(), parts))
+        })
+        .collect()
 }
 
 /// Bbl function of a utility use function; `None` for the residential

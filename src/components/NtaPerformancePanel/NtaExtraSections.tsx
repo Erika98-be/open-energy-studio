@@ -2,7 +2,7 @@ import { DistributionShell2023Field } from './NtaEdition2023Fields';
 import { NumberInput } from '../ui/Field';
 import { PipeGeometryFields, pipeGeometryTemplate } from './NtaPipeGeometry';
 import { ConstantIlluminance2022Field } from './NtaEdition2022Fields';
-import { LightingZoneField } from './NtaZoneData';
+import { CommonSpaceFillField, LightingZoneField } from './NtaZoneData';
 import { useI18n } from '../../i18n/i18n';
 import type { IProject } from '../../core/energy/types';
 import { distributionSystemTemplate, lightingTemplate } from '../../core/nta/NtaFormModels';
@@ -75,6 +75,7 @@ export function NtaLightingSection({ draft, change, project, measureOnly = false
     </label>}
     {lighting.length > 0 && <>
       {!measureOnly && <LightingZoneField draft={draft} change={change} project={project} index={0} />}
+      <CommonSpaceFillField draft={draft} change={change} path={['lighting', 0, 'functions']}>
       <SelectField {...field} path={['lighting', 0, 'functions', 0, 'function']} label={t('nta.form.usageFunction')} options={[
         ['office', t('nta.form.label.office')], ['education', t('nta.form.label.education')], ['retail', t('nta.form.label.retail')],
         ['sport', t('nta.form.label.sport')], ['lodging', t('nta.form.label.lodging')], ['cell', t('nta.form.label.cell')],
@@ -82,6 +83,7 @@ export function NtaLightingSection({ draft, change, project, measureOnly = false
         ['healthcare_without_beds', t('nta.form.label.healthcare')], ['healthcare_with_beds', t('nta.form.label.healthcareBeds')]]}
         disabled={measureOnly} />
       <NumberField {...field} path={['lighting', 0, 'functions', 0, 'areaM2']} label={t('nta.form.area')} disabled={measureOnly} />
+      </CommonSpaceFillField>
       {zones.map((zone, index) => <div key={String(zone.id)} className="nta-form-row" role="group" aria-label={String(zone.id)}>
         <NumberField {...field} path={['lighting', 0, 'lightingZones', index, 'areaM2']} label={`${String(zone.id)} — ${t('nta.form.area')}`}
           disabled={measureOnly} />

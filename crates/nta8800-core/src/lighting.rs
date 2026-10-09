@@ -522,6 +522,8 @@ pub struct UseArea {
 pub struct ZoneLighting {
     pub zone_id: String,
     /// Use functions in the zone (weights for tables 14.1, 14.3, 14.4).
+    /// Empty with common spaces: filled from the 6.6.4 within-zone split.
+    #[serde(default)]
     pub functions: Vec<UseArea>,
     pub lighting_zones: Vec<LightingZone>,
     pub source_reference: String,
