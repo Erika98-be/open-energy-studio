@@ -108,6 +108,8 @@ Stap 10 **Registratie** is een eigen pagina. Bovenaan staat of het project geree
 - Alle tekst haalt in elk thema een contrast van minstens 4,5:1, invoerranden en statusmarkeringen minstens 3:1.
 - Het programma is volledig met het toetsenbord te bedienen. De focus is altijd zichtbaar als amberkleurige rand. **Naar inhoud** (eerste Tab) springt over de navigatie heen.
 - Meldingen (de status van de rekenkern en de pop-upberichten rechtsonder) worden voorgelezen door schermlezers. Bij de systeeminstelling "minder beweging" staan animaties uit.
+- Elk invoerveld heeft een naam die een schermlezer voorleest. Is een veld fout of ontbreekt het, dan leest de schermlezer ook de foutmelding bij dat veld voor. **Ga naar** bij een melding zet de focus in het bijbehorende veld.
+- Een venster (bijvoorbeeld *Overnemen in projectmodel* of een invoervenster) houdt de focus vast zolang het open is: Tab en Shift+Tab blijven binnen het venster, Escape sluit het, en daarna staat de focus weer op de knop waarmee je het opende.
 
 ## Sneltoetsen
 

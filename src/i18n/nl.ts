@@ -616,6 +616,7 @@ export const nl: Record<string, string> = {
   'feedback.categoryBug': 'Fout',
   'feedback.categoryFeature': 'Wens',
   'feedback.categoryGeneral': 'Algemeen',
+  'feedback.message': 'Bericht',
   'feedback.messagePlaceholder': 'Wat wil je ons laten weten? (minimaal 10 tekens)',
   'feedback.attachImages': 'Afbeeldingen toevoegen',
   'feedback.imageLimit': 'Maximaal 3 afbeeldingen, samen 1 MB',
