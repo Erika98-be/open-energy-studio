@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — GitHub Actions volgen de vrijgaveprocedure (geen rekenwijziging)
+
+- **`release.yml`** start nu op tags `oes-v*` (oude `v*`-tags blijven werken). Het controleert dat de tag hoort bij `package.json` en `KERNEL_VERSION` en draait de volledige gate (`scripts/verify-nta.sh`, met Rust 1.77.2). Daarna bouwt het de pakketten voor Linux, macOS en Windows en hangt ze met `SHA256SUMS-installers.txt` aan de release. Een bestaande release houdt zijn tekst; anders komt er een concept (pre-release) dat handmatig wordt gepubliceerd.
+- **`ci.yml`** draait dezelfde gate bij push en pull request naar `main` en `nta8800-kernel`, en maakt geen releases meer vanaf `main`.
+- [Versiebeheer](nta8800-versiebeheer.md) en de wiki beschrijven de stappen na het pushen van een tag.
+
 ### 9 oktober 2026 — README, wiki en testprotocol gecorrigeerd na de feitencontrole (geen rekenwijziging)
 
 Alleen documentatie (review 20).
