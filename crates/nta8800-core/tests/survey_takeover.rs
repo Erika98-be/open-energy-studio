@@ -80,7 +80,10 @@ fn takeover_entry(floor: &Value) -> Value {
         if let Some(value) = floor.get(key).filter(|value| !none(value)) {
             let mut value = value.clone();
             if key == "heatedBasement" {
-                value.as_object_mut().unwrap().remove("forfaitDeltaUWPerM2k");
+                value
+                    .as_object_mut()
+                    .unwrap()
+                    .remove("forfaitDeltaUWPerM2k");
             }
             entry[key] = value;
         }
@@ -117,7 +120,8 @@ fn slab(value: &Value) -> SlabOnGround {
 fn the_committed_fixture_is_what_the_survey_derives() {
     let expected = fixture();
     let committed: Value = serde_json::from_str(
-        &std::fs::read_to_string(FIXTURE_PATH).expect("training-data/nta8800-survey-takeover-ground.json"),
+        &std::fs::read_to_string(FIXTURE_PATH)
+            .expect("training-data/nta8800-survey-takeover-ground.json"),
     )
     .unwrap();
     assert_eq!(
@@ -174,7 +178,11 @@ fn a_taken_over_heated_basement_calculates_like_the_survey_floor() {
     // With the project's ΔU_for in both, the ground conductance is the survey's.
     let project_slab = slab(project_floor);
     let mut survey_slab = slab(survey);
-    survey_slab.heated_basement.as_mut().unwrap().forfait_delta_u_w_per_m2k = project_slab
+    survey_slab
+        .heated_basement
+        .as_mut()
+        .unwrap()
+        .forfait_delta_u_w_per_m2k = project_slab
         .heated_basement
         .as_ref()
         .unwrap()
@@ -186,15 +194,11 @@ fn a_taken_over_heated_basement_calculates_like_the_survey_floor() {
         "{h_project} against {h_survey}"
     );
 
-    // The basement walls count in A_ls (6.7.3 c) and add heat demand.
-    let loss = |assessment: &nta8800_core::project_performance::ProjectPerformanceAssessment| {
-        serde_json::to_value(assessment).unwrap()
-    };
-    let (before, after) = (loss(&before), loss(&after));
-    let heat = |value: &Value| {
-        value["performance"]["annualHeatingAndCoolingNeedKwh"]
+    // The taken-over floor changes the project's heat need.
+    let heat = |assessment: &nta8800_core::project_performance::ProjectPerformanceAssessment| {
+        serde_json::to_value(assessment).unwrap()["performance"]["annualHeatingAndCoolingNeedKwh"]
             .as_f64()
-            .unwrap_or_default()
+            .expect("heat need")
     };
     assert!(heat(&after) > 0.0 && heat(&before) > 0.0);
     assert_ne!(heat(&after), heat(&before));
