@@ -37,6 +37,7 @@ pub mod bbl_requirements;
 pub mod boiler_forfait_draft;
 pub mod building_performance;
 pub mod climate;
+pub mod common_space;
 pub mod constructions;
 pub mod declared_dhw;
 pub mod declared_heating_table;

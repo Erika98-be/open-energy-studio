@@ -179,6 +179,7 @@ const LAYOUT_ARRAYS: &[&str] = &[
     "rooms",
     "functions",
     "functionAreas",
+    "commonSpaces",
     "unheatedSpaces",
 ];
 

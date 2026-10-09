@@ -2368,6 +2368,7 @@
     "options": [
       "zoneId",
       "functionAreas",
+      "commonSpaces",
       "sunrooms",
       "verticalPipes",
       "ventilationFlows",

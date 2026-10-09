@@ -61,6 +61,7 @@ fn fixtures() -> Vec<(&'static str, Value)> {
     .map(|(name, json)| (name, serde_json::from_str(json).unwrap()))
     .chain(std::iter::once(declared_window_shading()))
     .chain(std::iter::once(sunken_crawlspace_floor()))
+    .chain(std::iter::once(common_space_input()))
     .chain(isso54_routes())
     .collect()
 }
@@ -156,6 +157,33 @@ fn isso54_routes() -> Vec<(&'static str, Value)> {
         ("example-terraced-dwelling (ISSO 54 declared CHP)", chp),
         ("public-comparison-c (calculated cooling-pipe Ψ)", cooling),
     ]
+}
+
+/// Case H with its 49,20 m² common space as input, allocated by the kernel
+/// (6.6.4), so the common-space leaves are fuzzed too.
+fn common_space_input() -> (&'static str, Value) {
+    let mut value: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-h.json"
+    ))
+    .unwrap();
+    let rz1 = &mut value["ntaCalculation"]["zoneData"][0];
+    rz1["functionAreas"] = serde_json::json!([
+        {"function": "office", "areaM2": 14.70},
+        {"function": "other_assembly", "areaM2": 26.30},
+        {"function": "other_healthcare", "areaM2": 27.60}
+    ]);
+    rz1["commonSpaces"] = serde_json::json!([{
+        "areaM2": 49.20, "sourceReference": "printout: gemeenschappelijke ruimte"
+    }]);
+    rz1["ventilation"]["functions"] = serde_json::json!([]);
+    value["ntaCalculation"]
+        .as_object_mut()
+        .unwrap()
+        .remove("bblFunctions");
+    (
+        "public-comparison-h (common space allocated by the kernel)",
+        value,
+    )
 }
 
 /// Case C with its floor above the crawlspace 0,5 m below ground level
@@ -781,6 +809,7 @@ fn every_number_at_its_edges_calculates_plausibly_or_refuses_with_a_routed_gap()
         "/ntaCalculation/distributionSystem/pipeTransmittance/depthM",
         "/ntaCalculation/groundFloors/*/heatedBasement/depthM",
         "/ntaCalculation/groundFloors/*/heatedBasement/wallAreaM2",
+        "/ntaCalculation/zoneData/*/commonSpaces/*/areaM2",
         "/ntaCalculation/lighting/*/lightingZones/*/daylight/sectors/*/daylightDependencyFactor",
     ] {
         assert!(
