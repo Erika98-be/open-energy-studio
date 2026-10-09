@@ -8,6 +8,7 @@ import {
   type DetailSection, type ReportLevel, type ReportOptions,
 } from '../../core/report/EnergyPerformanceReport';
 import { downloadEnergyPerformanceReportHTML, printEnergyPerformanceReport } from '../../core/report/ReportGenerator';
+import { REPORT_FRAME_SANDBOX } from '../../core/report/reportFrame';
 
 const STORAGE_KEY = 'oes-energy-report-options';
 const LEVELS: ReportLevel[] = ['summary', 'standard', 'detailed'];
@@ -121,7 +122,8 @@ export function ReportBuilder({ project, assessment, pending }: {
         pending && !preview
           ? <p role="status">{t('report.builder.pending')}</p>
           : preview
-            ? <iframe className="report-builder-preview" title={t('report.builder.previewTitle')} srcDoc={preview} data-testid="report-builder-preview" />
+            ? <iframe className="report-builder-preview" title={t('report.builder.previewTitle')} srcDoc={preview}
+              sandbox={REPORT_FRAME_SANDBOX} data-testid="report-builder-preview" />
             : <p role="status">{t('report.builder.noKernel')}</p>
       )}
     </section>

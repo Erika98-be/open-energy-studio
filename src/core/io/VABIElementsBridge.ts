@@ -13,7 +13,8 @@
  *   Hellingshoek: 0=0°, 90=90°
  */
 
-import { zipSync, unzipSync, strToU8, strFromU8 } from 'fflate';
+import { zipSync, strToU8, strFromU8 } from 'fflate';
+import { safeUnzip } from './safeUnzip';
 import type {
   IProject, IZone, ISurface, IWindow, IThermalBridge, IConstruction,
   IHeatingSystem, IVentilationSystem, ICoolingSystem, IHotWaterSystem,
@@ -395,7 +396,9 @@ export function exportToVABI(project: IProject): Uint8Array {
 // ============================================================
 
 export function importFromVABI(zipData: Uint8Array): IProject {
-  const files = unzipSync(zipData);
+  // Only XML entries are read (project.xml), with a size cap, so a crafted
+  // archive cannot unpack gigabytes into memory.
+  const files = safeUnzip(zipData, (name) => name.toLowerCase().endsWith('.xml'));
 
   // Find project.xml in the ZIP
   let xmlData: Uint8Array | undefined;

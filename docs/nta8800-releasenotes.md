@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — dossier, bewijsstukken en webview afgeschermd (geen rekenwijziging)
+
+Vijftiende review (desktoplaag en bestanden).
+- **Content Security Policy.** De desktopapp had geen CSP (`"csp": null`). Nu staat er een strikte: alleen eigen scripts (`script-src 'self'`), geen plug-ins, en netwerk alleen naar de app zelf, de IPC, de lokale API en de feedbackdienst. Lettertypen van Google Fonts en `blob:`-afbeeldingen (miniaturen) blijven toegestaan. In ontwikkeling geldt geen CSP (`devCsp: null`), zodat Vite blijft werken.
+- **Rapportvoorbeelden zonder scripts.** De iframes van de rapportbouwer en het afdrukvoorbeeld, en het verborgen afdrukframe, hebben nu een `sandbox` zonder `allow-scripts`. Rapport-HTML wordt al ontsnapt; dit voorkomt dat één gemiste ontsnapping toegang tot de IPC zou geven.
+- **Dossier niet opgeslagen is een fout.** Mislukt het wegschrijven van het projectdossier in de desktopapp (schijf vol, geen schrijfrechten), dan toont de app de fout. Eerder viel ze terug op een browserdownload die in de webview niets doet, waarna de export als gelukt gold.
+- **Grootte van het dossier.** Een dossier boven 2 GB wordt geweigerd met een melding (de ZIP-bibliotheek schrijft geen ZIP64; boven 4 GB zou de ZIP onbruikbaar zijn). Foto's, pdf's en andere al gecomprimeerde bestanden worden niet opnieuw gecomprimeerd.
+- **Bewijsstukken.** Per bestand maximaal 200 MB, en alleen pdf, afbeeldingen, tekeningen (dwg, dxf, ifc), kantoordocumenten en e-mails; anders een melding, zonder het bestand te lezen. De hash rekent zonder extra kopie van het bestand. De desktopapp houdt een bestand na het wegschrijven in de app-map niet meer ook in het geheugen, en verwijderen uit het register geeft het geheugen vrij.
+- **Gelijktijdig toevoegen.** Bestanden die in twee blokken tegelijk worden toegevoegd, krijgen elk een eigen id; het toevoegen gebeurt op het register zoals het op dat moment is (`ADD_EVIDENCE`), zodat tussentijdse wijzigingen in de registratie niet verloren gaan.
+- **Dubbele ids en namen.** Een dubbel id in het register krijgt bij het openen een nieuw id, met een notitie in de beschrijving. Twee bewijsstukken met dezelfde naam in de ZIP krijgen een volgnummer, zodat de SHA-256 in het manifest overeenkomt met het gearchiveerde bestand. Namen in de ZIP houden hun extensie bij inkorten en verliezen afsluitende punten en spaties.
+- **Import van UNIEC3 en VABI.** Alleen de benodigde bestanden uit het archief worden uitgepakt, met een grens op de opgegeven grootte (64 MB per bestand, 256 MB samen), zodat een zip-bom het geheugen niet kan vullen.
+
 ### 9 oktober 2026 — basisopname rekent in NTA 8800:2022 en 2020+A1
 
 - **Hoogte H2 bij een kruipruimte.** NTA 8800:2022 en 2020+A1 rekenen in (8.47) met de werkelijke hoogte h van de kruipruimtewand boven het maaiveld (2022 p. 236); vanaf 2023 is h vast 0,125 m (p. 240). De basisopname vulde h nooit in, dus een woning- of utiliteitsopname met een vloer boven een kruipruimte of onverwarmde kelder werd in die uitgaven geweigerd met `ground_floor_wall_height_required`, op een veld dat de opname niet kon zetten. De opname vraagt nu H2, de hoogte van de bovenkant van de begane grondvloer tot het maaiveld (ISSO 82.1 4e druk afb. 8.23, p. 73; ISSO 75.1 4e druk dezelfde paragraaf), als `floorHeightAboveGroundM` op die vloer. In 2022 en 2020+A1 gaat de waarde door als h; zonder antwoord meldt de opname `floor_height_above_ground_required` op het opnameveld. Een forfaitaire waarde voor een onbekende hoogte geven de bronnen niet. Vanaf 2023 wordt H2 niet gebruikt en verandert er niets. Het veld staat in de opname alleen bij die twee uitgaven.

@@ -15,7 +15,8 @@
  *     summary.json      - Empty until a verified calculation is available
  */
 
-import { zipSync, unzipSync, strToU8, strFromU8 } from 'fflate';
+import { zipSync, strToU8, strFromU8 } from 'fflate';
+import { safeUnzip } from './safeUnzip';
 import type {
   IProject,
   Orientation, SurfaceType, HeatingSystemType,
@@ -621,7 +622,9 @@ export function exportToUNIEC3(project: IProject): Uint8Array {
 // ============================================================
 
 export function importFromUNIEC3(zipData: Uint8Array): IProject {
-  const files = unzipSync(zipData);
+  // Only the building entities and relations are read, with a size cap,
+  // so a crafted archive cannot unpack gigabytes into memory.
+  const files = safeUnzip(zipData, (name) => /^buildings\/\d+\/(entities|relations)\.json$/.test(name));
 
   // Find the building directory
   let buildingId = '';
