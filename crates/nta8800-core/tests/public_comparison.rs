@@ -808,6 +808,32 @@ fn case_n_supermarket_under_nta_8800_2020_a1() {
         assert!((loss - 0.15 * need).abs() < 1e-6, "{loss} {need}");
     }
     assert!((used_kwh(&performance, "heating") - 33080.0).abs() < 1.0);
+    // Heat need of the actual system against fixed C1 (5.4.2). The report
+    // implies about 71 000-74 000 kWh; see the doc section "Warmtebehoefte
+    // van het werkelijke systeem".
+    let demand = &performance["spaceHeating"]["demand"];
+    let need = demand["annualHeatingNeedKwh"].as_f64().unwrap();
+    assert!((need - 80201.0).abs() < 1.0, "{need}");
+    let c1 = demand["fixedC1"]["annualHeatingNeedKwh"].as_f64().unwrap();
+    assert!((c1 - 93686.0).abs() < 1.0, "{c1}");
+    // Infiltration without a measurement: 11.86 gives 0,5 · 1,2 · 0,7 =
+    // 0,42 dm³/(s·m²), 11.85 q_v1 = 0,42/10^0,67 · A_g · 3,6. In January
+    // the mass balance of 11.5 (table 11.1, H 9,40 m) lets in 629,5 m³/h
+    // next to 876,1 m³/h mechanical supply at 18 °C (table 11.15).
+    let ventilation = &demand["ventilation"];
+    let q1 = ventilation["infiltrationQV1M3PerH"].as_f64().unwrap();
+    assert!((q1 - 667.29).abs() < 0.01, "{q1}");
+    let january = &ventilation["months"][0]["heating"];
+    let infiltration = january["infiltrationM3PerH"].as_f64().unwrap();
+    assert!((infiltration - 629.5).abs() < 0.1, "{infiltration}");
+    let supply = january["mechanicalSupplyM3PerH"].as_f64().unwrap();
+    assert!((supply - 876.1).abs() < 0.1, "{supply}");
+    assert_eq!(january["mechanicalSupplyTemperatureC"].as_f64(), Some(18.0));
+    // 7.28 with f_L 0,5: the lighting heat of the actual system is
+    // 0,5 · 60 961 kWh / 8 760 h = 3 479 W (1,69 W/m²); the C1 run takes the
+    // fixed q_L of 3 W/m² for retail (5.4.2).
+    let lighting_gain = performance["lighting"][0]["internalGainW"].as_f64().unwrap();
+    assert!((lighting_gain - 3479.5).abs() < 0.1, "{lighting_gain}");
     let limits = &performance["bblCheck"]["limits"];
     let limit = |key: &str| limits[key].as_f64().unwrap();
     assert!((limit("energyNeedMaxKwhPerM2") - 95.31).abs() < 0.005);
