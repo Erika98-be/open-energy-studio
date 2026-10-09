@@ -207,7 +207,7 @@ Het paneel toont het volledige NTA-invoerblok als JSON. Gebruik dit alleen als e
 | `pv_peak_power_invalid` | PV: een opgegeven K_pk boven 400 W/m², of een paneelvermogen onder de vermogensstap | waarde en datablad controleren |
 | `lighting_daylight_sector_invalid` | een daglichtsector met een onmogelijke geometrie, of een opgegeven F_D;dayl buiten 0–1 of met een oppervlakte van 0 | maten of opgegeven waarden controleren |
 | `air_cavity_below_20_mm_unsupported` | dunne luchtspouw die zwak geventileerd is of een reflecterende laag heeft | opgeven als R-waarde met bron |
-| `common_space_invalid`, `common_space_function_outside_zone`, `common_space_exceeds_zone` | gemeenschappelijke ruimte: geen oppervlakte of een functie dubbel aangevinkt, geen aangewezen functie in de rekenzone, of samen groter dan de rekenzone | zie [Gemeenschappelijke ruimten](#gemeenschappelijke-ruimten-664) |
+| `common_space_invalid`, `common_space_function_outside_zone`, `common_space_exceeds_zone`, `common_space_area_mismatch` | gemeenschappelijke ruimte: geen oppervlakte of een functie dubbel aangevinkt, geen aangewezen functie in de rekenzone, samen groter dan de rekenzone, of eigen functie-oppervlakten plus gemeenschappelijke ruimten niet gelijk aan de rekenzone | zie [Gemeenschappelijke ruimten](#gemeenschappelijke-ruimten-664) |
 
 ## Gemeenschappelijke ruimten (6.6.4)
 
@@ -216,15 +216,15 @@ Een gemeenschappelijke ruimte, zoals een centrale entree, gang of toiletgroep, w
 - **Binnen de rekenzone** gaat de ruimte alleen naar de aangewezen functies die in die rekenzone liggen. Daarmee rekent de zone (setpoint, interne warmte, ventilatiecapaciteit, §6.5.3).
 - **Voor het gebouw** gaat de ruimte naar alle aangewezen functies. Daarmee rekenen de Bbl-eisen per functie (§5.3.1).
 
-Zo vult u het in, onder **Gebouw › Zones › Eigen gegevens voor deze rekenzone**:
+Zo vult u het in, onder **Gebouw › Zones › Eigen gegevens voor deze rekenzone** (ook bij een project met één rekenzone):
 
 1. Geef bij de delen met een gebruiksfunctie de **eigen oppervlakte** van elke functie, zonder de gemeenschappelijke ruimte.
 2. Kies **Gemeenschappelijke ruimte toevoegen (6.6.4)** in de rekenzone waar de ruimte ligt. Vul de gebruiksoppervlakte in (NEN 2580) en de bron, bijvoorbeeld de meetstaat of tekening.
 3. Vink de functies aan die op de ruimte zijn aangewezen. Vinkt u niets aan, dan geldt de ruimte voor alle functies van het gebouw.
 
-De rekenkern verdeelt de ruimte en legt de verdeling vast in de uitkomst (`commonSpaces`). Hij schrijft de verdeelde oppervlakten in de functies van de rekenzone en in de ventilatiefuncties van die zone (hoofdstuk 11), en, als u geen Bbl-functies met oppervlakte hebt opgegeven, ook in de Bbl-functies. Een zwembad bij een sportfunctie blijft bij die functie. Oppervlakten per functie voor tapwater en verlichting geeft u zelf op: neem daarvoor de gebouwverdeling uit de uitkomst over.
+De rekenkern verdeelt de ruimte en legt de verdeling vast in de uitkomst (`commonSpaces`). Hij schrijft de verdeelde oppervlakten in de functies van de rekenzone en in de ventilatiefuncties van die zone (hoofdstuk 11), en, als u ze niet zelf hebt opgegeven, ook in de Bbl-functies en de labelfuncties (beide met de gebouwverdeling). Een zwembad bij een sportfunctie blijft bij die functie; staat de sportfunctie er in twee delen, met en zonder zwembad, dan houden die delen hun verhouding. Oppervlakten per functie voor tapwater en verlichting geeft u zelf op: neem daarvoor de gebouwverdeling uit de uitkomst over.
 
-De kern weigert een gemeenschappelijke ruimte zonder oppervlakte, met een functie die twee keer is aangevinkt (`common_space_invalid`), of waarvan geen enkele aangewezen functie in de rekenzone ligt (`common_space_function_outside_zone`). Ook weigert hij gemeenschappelijke ruimten die samen de hele rekenzone vullen (`common_space_exceeds_zone`).
+De kern weigert een gemeenschappelijke ruimte zonder oppervlakte, met een functie die twee keer is aangevinkt (`common_space_invalid`), of waarvan geen enkele aangewezen functie in de rekenzone ligt (`common_space_function_outside_zone`). Ook weigert hij gemeenschappelijke ruimten die samen de hele rekenzone vullen (`common_space_exceeds_zone`), en een rekenzone waarvan de eigen functie-oppervlakten plus de gemeenschappelijke ruimten niet de gebruiksoppervlakte van de zone geven (`common_space_area_mismatch`, 6.6.3): dan zit de gemeenschappelijke ruimte meestal al in de functie-oppervlakten en zou ze dubbel tellen.
 
 Een woonzone krijgt geen gemeenschappelijke ruimte in het formulier. In een woongebouw dat als geheel wordt berekend, horen de gemeenschappelijke ruimten bij de woonfunctie.
 

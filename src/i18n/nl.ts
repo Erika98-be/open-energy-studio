@@ -1339,6 +1339,7 @@ export const nl: Record<string, string> = {
   'nta.gap.common_space_invalid': 'Gemeenschappelijke ruimte: de oppervlakte moet groter dan 0 zijn en elke functie mag één keer voorkomen',
   'nta.gap.common_space_function_outside_zone': 'Gemeenschappelijke ruimte: geen van de functies die erop aangewezen zijn ligt in deze rekenzone (6.6.4)',
   'nta.gap.common_space_exceeds_zone': 'De gemeenschappelijke ruimten zijn samen groter dan de rekenzone of laten geen eigen functie-oppervlakte over',
+  'nta.gap.common_space_area_mismatch': 'De eigen functie-oppervlakten plus de gemeenschappelijke ruimten moeten samen de gebruiksoppervlakte van de rekenzone zijn (6.6.3); vul bij de functies alleen hun eigen oppervlakte in, zonder de gemeenschappelijke ruimte',
   'nta.gap.window_data_missing': 'Raamgegevens onvolledig (oppervlakte, U of g)',
   'nta.gap.construction_u_value_missing': 'U-waarde van constructie ontbreekt',
   'nta.gap.direct_transmission_unresolved': 'Transmissie naar buiten niet af te leiden (begrenzing, koudebrugclassificatie of puntbruginventaris)',

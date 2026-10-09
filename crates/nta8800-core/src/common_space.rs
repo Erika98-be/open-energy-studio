@@ -18,6 +18,7 @@
 //! ventilation functions and `bblFunctions` (when not given).
 
 use crate::bbl_requirements::{BblFunction, BblFunctionArea};
+use crate::label_class::{LabelFunction, LabelFunctionArea};
 use crate::monthly_demand::{UsageFunction, UsageFunctionArea};
 use serde::{Deserialize, Serialize};
 
@@ -184,6 +185,12 @@ pub fn allocate(
     let mut building = building_initial.clone();
     let mut zone_results = Vec::new();
     for (zone, initial) in zones.iter().zip(&initial_by_zone) {
+        // A zone without common spaces keeps its own validation of the
+        // function areas (function_areas_invalid); only its positive parts
+        // take part in the building split.
+        if zone.common_spaces.is_empty() {
+            continue;
+        }
         if initial
             .iter()
             .any(|part| !(part.area_m2.is_finite() && part.area_m2 > 0.0))
@@ -193,6 +200,20 @@ pub fn allocate(
                 path: format!("zoneData[{}].commonSpaces", zone.data_index),
             });
             continue;
+        }
+        // 6.6.3: the zone area is its own (initial) function areas plus its
+        // common spaces. Function areas that already hold the common space
+        // would count it twice.
+        if !zone.initial.is_empty() {
+            let own: f64 = initial.iter().map(|part| part.area_m2).sum();
+            let common: f64 = zone.common_spaces.iter().map(|space| space.area_m2).sum();
+            if (own + common - zone.floor_area_m2).abs() > 0.01 * zone.floor_area_m2 {
+                issues.push(CommonSpaceIssue {
+                    code: "common_space_area_mismatch",
+                    path: format!("zoneData[{}].commonSpaces", zone.data_index),
+                });
+                continue;
+            }
         }
         let mut allocated = initial.clone();
         for (index, space) in zone.common_spaces.iter().enumerate() {
@@ -257,6 +278,40 @@ pub fn bbl_function(function: UsageFunction) -> Option<BblFunction> {
         UsageFunction::Retail => BblFunction::Retail,
         UsageFunction::Residential => return None,
     })
+}
+
+/// Label function (Omgevingsregeling bijlage X) of a utility use function;
+/// `None` for the residential function.
+pub fn label_function(function: UsageFunction) -> Option<LabelFunction> {
+    Some(match function {
+        UsageFunction::AssemblyChildCare => LabelFunction::AssemblyWithDayCare,
+        UsageFunction::OtherAssembly => LabelFunction::AssemblyWithoutDayCare,
+        UsageFunction::Cell => LabelFunction::Cell,
+        UsageFunction::HealthcareWithBeds => LabelFunction::HealthcareWithBeds,
+        UsageFunction::OtherHealthcare => LabelFunction::HealthcareWithoutBeds,
+        UsageFunction::Office => LabelFunction::Office,
+        UsageFunction::Lodging => LabelFunction::Lodging,
+        UsageFunction::Education => LabelFunction::Education,
+        UsageFunction::Sport => LabelFunction::Sport,
+        UsageFunction::Retail => LabelFunction::Retail,
+        UsageFunction::Residential => return None,
+    })
+}
+
+/// The building split as label functions (the label is set per use
+/// function of the building, like the Bbl limits); `None` when a residential
+/// function takes part.
+pub fn label_functions(split: &CommonSpaceSplit) -> Option<Vec<LabelFunctionArea>> {
+    split
+        .building
+        .iter()
+        .map(|part| {
+            Some(LabelFunctionArea {
+                function: label_function(part.function)?,
+                area_m2: part.area_m2,
+            })
+        })
+        .collect()
 }
 
 /// The building split as Bbl functions; `None` when a residential function
@@ -396,5 +451,113 @@ mod tests {
         let issues = allocate(&zones).unwrap().unwrap_err();
         assert_eq!(issues[0].code, "common_space_exceeds_zone");
         assert!(allocate(&[]).is_none());
+    }
+
+    /// Review 24: function areas that already hold the common space count it
+    /// twice (6.6.3: the zone is its own areas plus its common spaces).
+    #[test]
+    fn function_areas_with_the_common_space_inside_are_refused() {
+        let initial = [
+            area(UsageFunction::Office, 70.0),
+            area(UsageFunction::Retail, 50.0),
+        ];
+        let spaces = [space(20.0, Vec::new())];
+        let zones = [ZoneCommonSpaces {
+            zone_id: "z",
+            data_index: 1,
+            floor_area_m2: 120.0,
+            initial: &initial,
+            usage_function: UsageFunction::Office,
+            common_spaces: &spaces,
+        }];
+        let issues = allocate(&zones).unwrap().unwrap_err();
+        assert_eq!(
+            issues,
+            vec![CommonSpaceIssue {
+                code: "common_space_area_mismatch",
+                path: "zoneData[1].commonSpaces".into(),
+            }]
+        );
+    }
+
+    /// Review 24: a zone without common spaces is not refused for its own
+    /// function areas here; it keeps function_areas_invalid of the zone.
+    #[test]
+    fn a_zone_without_common_spaces_keeps_its_own_validation() {
+        let own = [area(UsageFunction::Office, 60.0)];
+        let spaces = [space(10.0, Vec::new())];
+        let blank = [
+            area(UsageFunction::Retail, 0.0),
+            area(UsageFunction::Sport, 40.0),
+        ];
+        let zones = [
+            ZoneCommonSpaces {
+                zone_id: "a",
+                data_index: 0,
+                floor_area_m2: 70.0,
+                initial: &own,
+                usage_function: UsageFunction::Office,
+                common_spaces: &spaces,
+            },
+            ZoneCommonSpaces {
+                zone_id: "b",
+                data_index: 1,
+                floor_area_m2: 40.0,
+                initial: &blank,
+                usage_function: UsageFunction::Sport,
+                common_spaces: &[],
+            },
+        ];
+        let split = allocate(&zones).unwrap().unwrap();
+        assert_eq!(split.zones.len(), 1);
+        let labels = label_functions(&split).unwrap();
+        assert!(labels
+            .iter()
+            .any(|part| part.function == LabelFunction::Office));
+    }
+
+    #[test]
+    fn label_functions_follow_the_building_split() {
+        let rz1 = [
+            area(UsageFunction::Office, 14.70),
+            area(UsageFunction::OtherAssembly, 26.30),
+            area(UsageFunction::OtherHealthcare, 27.60),
+        ];
+        let spaces = [space(49.20, Vec::new())];
+        let zones = [
+            ZoneCommonSpaces {
+                zone_id: "rz1",
+                data_index: 0,
+                floor_area_m2: 117.8,
+                initial: &rz1,
+                usage_function: UsageFunction::OtherHealthcare,
+                common_spaces: &spaces,
+            },
+            ZoneCommonSpaces {
+                zone_id: "rz2",
+                data_index: 1,
+                floor_area_m2: 626.0,
+                initial: &[],
+                usage_function: UsageFunction::Sport,
+                common_spaces: &[],
+            },
+        ];
+        let split = allocate(&zones).unwrap().unwrap();
+        let labels = label_functions(&split).unwrap();
+        let bbl = bbl_functions(&split).unwrap();
+        assert_eq!(labels.len(), bbl.len());
+        for (label, bbl) in labels.iter().zip(&bbl) {
+            assert_eq!(label.area_m2, bbl.area_m2);
+        }
+        let sport = labels
+            .iter()
+            .find(|part| part.function == LabelFunction::Sport)
+            .unwrap();
+        assert!((sport.area_m2 - 670.35).abs() < 0.01);
+        assert_eq!(
+            label_function(UsageFunction::OtherHealthcare),
+            Some(LabelFunction::HealthcareWithoutBeds)
+        );
+        assert_eq!(label_function(UsageFunction::Residential), None);
     }
 }

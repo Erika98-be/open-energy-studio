@@ -93,6 +93,20 @@ describe('project forms that had no form', () => {
     expect(screen.queryByText(/Add a common space/)).toBeNull();
   });
 
+  // Review 24: function areas and common spaces live on zone data only, so a single-zone utility project needs
+  // the way in too; a zone turning residential keeps no hidden common spaces.
+  it('offers own zone data, and so common spaces, with a single zone', () => {
+    renderWithProviders(<Harness initial={{ calculationScope: 'utility', usageFunction: 'office', internalGains: { method: 'utility' } }}>
+      {(d, change) => <ZoneDataFields draft={d} change={change} project={project(['z1'])} />}</Harness>);
+    expect(screen.getByText(/The project has one calculation zone/)).toBeTruthy();
+    fireEvent.click(screen.getByText('Own data for this calculation zone'));
+    fireEvent.click(screen.getByText(/Add a common space \(6\.6\.4\)/));
+    setNumber(/Usable floor area of the common space/, '20');
+    expect(draft().zoneData[0].commonSpaces[0].areaM2).toBe(20);
+    select(/Use function of the calculation zone/, 'residential');
+    expect('commonSpaces' in draft().zoneData[0]).toBe(false);
+  });
+
   it('starts zone data with valid internal gains when the block has none', () => {
     renderWithProviders(<Harness initial={{ calculationScope: 'utility', usageFunction: 'office' }}>
       {(d, change) => <ZoneDataFields draft={d} change={change} project={project(['z1', 'z2'])} />}</Harness>);
