@@ -15,7 +15,7 @@
 //! Corrections this module does not apply are listed in
 //! [`OMITTED_CORRECTIONS`] and returned with every result.
 
-use crate::climate::{self, Orientation, CLIMATE_SOURCE, MONTH_HOURS, OUTDOOR_TEMPERATURE_C};
+use crate::climate::{self, Orientation, MONTH_HOURS, OUTDOOR_TEMPERATURE_C};
 use crate::direct_transmission::{assess_direct_transmission, DirectTransmissionInput};
 use crate::ground::{ground_monthly, slab_coefficient_parts, EdgeThermalBridges, SlabOnGround};
 use crate::solar_shading::{
@@ -2535,7 +2535,7 @@ fn assess_resolved(
         scope: SCOPE,
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
-        climate_source: CLIMATE_SOURCE,
+        climate_source: climate::climate_source(crate::norm_versions::current()),
         input_fingerprint: fingerprint,
         final_edition_verified: false,
         reference_verified: false,

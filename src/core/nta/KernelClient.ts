@@ -4199,7 +4199,8 @@ export async function fetchKernelInterpretations(): Promise<NtaInterpretationGro
 }
 
 export interface BuildingPerformanceAssessment {
-  status: 'calculated_unverified' | 'invalid';
+  /** `calculated_legacy_edition` when the project or survey route ran in an older edition (norm_versions::request::stamp). */
+  status: 'calculated_unverified' | 'calculated_legacy_edition' | 'invalid';
   normVersion?: NormVersion;
   registrationEligible?: boolean;
   scope: string;
