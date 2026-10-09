@@ -15759,9 +15759,9 @@
               "verticalPipes": [
                 {
                   "id": "epw001-zone-leiding",
-                  "storeys": 2,
+                  "storeys": 1,
                   "insulated": false,
-                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3), 2 aangrenzende rekenzones"
+                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3); 1 bouwlaag per rekenzone"
                 }
               ],
               "ventilationFlows": [],
@@ -15819,7 +15819,8 @@
                   "current": "dc",
                   "manufactureYear": 2021
                 },
-                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6"
+                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6",
+                "wholeDwellingAreaM2": 96.0
               },
               "internalGains": {
                 "method": "residential",
@@ -15833,9 +15834,9 @@
               "verticalPipes": [
                 {
                   "id": "epw001-boven-leiding",
-                  "storeys": 2,
+                  "storeys": 1,
                   "insulated": false,
-                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3), 2 aangrenzende rekenzones"
+                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3); 1 bouwlaag per rekenzone"
                 }
               ],
               "ventilationFlows": [],
@@ -15893,7 +15894,8 @@
                   "current": "dc",
                   "manufactureYear": 2021
                 },
-                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6"
+                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6",
+                "wholeDwellingAreaM2": 96.0
               },
               "internalGains": {
                 "method": "residential",
@@ -16253,9 +16255,9 @@
               "verticalPipes": [
                 {
                   "id": "epw001-zone-leiding",
-                  "storeys": 2,
+                  "storeys": 1,
                   "insulated": false,
-                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3), 2 aangrenzende rekenzones"
+                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3); 1 bouwlaag per rekenzone"
                 }
               ],
               "ventilationFlows": [],
@@ -16313,7 +16315,8 @@
                   "current": "dc",
                   "manufactureYear": 2021
                 },
-                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6"
+                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6",
+                "wholeDwellingAreaM2": 96.0
               },
               "internalGains": {
                 "method": "residential",
@@ -16327,9 +16330,9 @@
               "verticalPipes": [
                 {
                   "id": "epw001-boven-leiding",
-                  "storeys": 2,
+                  "storeys": 1,
                   "insulated": false,
-                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3), 2 aangrenzende rekenzones"
+                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3); 1 bouwlaag per rekenzone"
                 }
               ],
               "ventilationFlows": [],
@@ -16387,7 +16390,8 @@
                   "current": "dc",
                   "manufactureYear": 2021
                 },
-                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6"
+                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6",
+                "wholeDwellingAreaM2": 96.0
               },
               "internalGains": {
                 "method": "residential",
@@ -16841,9 +16845,9 @@
               "verticalPipes": [
                 {
                   "id": "epw001-zone-leiding",
-                  "storeys": 2,
+                  "storeys": 1,
                   "insulated": false,
-                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3), 2 aangrenzende rekenzones"
+                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3); 1 bouwlaag per rekenzone"
                 }
               ],
               "ventilationFlows": [],
@@ -16901,7 +16905,8 @@
                   "current": "dc",
                   "manufactureYear": 2021
                 },
-                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6"
+                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6",
+                "wholeDwellingAreaM2": 96.0
               },
               "internalGains": {
                 "method": "residential",
@@ -16915,9 +16920,9 @@
               "verticalPipes": [
                 {
                   "id": "epw001-boven-leiding",
-                  "storeys": 2,
+                  "storeys": 1,
                   "insulated": false,
-                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3), 2 aangrenzende rekenzones"
+                  "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3); 1 bouwlaag per rekenzone"
                 }
               ],
               "ventilationFlows": [],
@@ -16975,7 +16980,8 @@
                   "current": "dc",
                   "manufactureYear": 2021
                 },
-                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6"
+                "sourceReference": "ISSO 54 v2.0, EP-W001 p. 6",
+                "wholeDwellingAreaM2": 96.0
               },
               "internalGains": {
                 "method": "residential",
@@ -28663,6 +28669,11 @@
         },
         {
           "op": "set",
+          "pointer": "/ntaCalculation/verticalPipes/0/buildingHeightM",
+          "value": 21.6
+        },
+        {
+          "op": "set",
           "pointer": "/ntaCalculation/ventilation/usableFloorAreaM2",
           "value": 384.0
         },
@@ -28937,6 +28948,11 @@
           "op": "set",
           "pointer": "/ntaCalculation/distributionSystem/connectedStoreys",
           "value": 8
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/verticalPipes/0/buildingHeightM",
+          "value": 21.6
         },
         {
           "op": "set",
@@ -29252,6 +29268,11 @@
           "op": "set",
           "pointer": "/ntaCalculation/distributionSystem/connectedStoreys",
           "value": 8
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/verticalPipes/0/buildingHeightM",
+          "value": 21.6
         },
         {
           "op": "set",
@@ -29844,6 +29865,11 @@
           "op": "set",
           "pointer": "/ntaCalculation/distributionSystem/connectedStoreys",
           "value": 8
+        },
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/verticalPipes/0/buildingHeightM",
+          "value": 21.6
         },
         {
           "op": "set",

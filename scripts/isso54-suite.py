@@ -2478,6 +2478,9 @@ def scale_u(project, *, area, volume, height, roof, floor, south, north, east_we
     vent["usableFloorAreaM2"] = area
     vent["functions"][0]["areaM2"] = area
     vent["buildingHeightM"] = building_height
+    # 7.17a: the fictitious toilet-group pipe follows the building height
+    # (one toilet group; stacked groups count as one, 2022 p. 155-156).
+    nta["verticalPipes"][0]["buildingHeightM"] = building_height
     nta["hotWater"]["need"]["areas"][0]["areaM2"] = area
     nta["lighting"][0]["functions"][0]["areaM2"] = area
     nta["lighting"][0]["lightingZones"][0]["areaM2"] = area
@@ -2570,7 +2573,11 @@ UTILITY_CASES += [
 # facades with windows 1-2 below, the roof and the upper half with windows
 # 3-4 above; the intermediate floor lies inside the envelope. Each zone takes
 # half the dwelling (6.2b dwellingShare 0,5) and its own ventilation input
-# for its 48 m2. The hybrid: an outdoor-air heat pump of 10 kW not meeting
+# for its 48 m2, sized for the whole 96 m2 dwelling (wholeDwellingAreaM2 for
+# f_tau of table 11.8 and the 11.65 minimum). Each zone is one storey, so its
+# forfait vertical pipe counts 1 storey (7.3.3, N_bouwlaag of the zone): the
+# two zones together give the H_p of EP-W001. Review 19 (D1): with 2 storeys
+# per zone and a 48 m2 dwelling per zone the split alone added 8 kWh/m2 BENG 2. The hybrid: an outdoor-air heat pump of 10 kW not meeting
 # table 9.28 (table 9.27 COP 2,3 at 45 degrees C in 2022) and an HR107 with
 # CW4 of 35 kW (table 9.25 eta 0,95), inside the envelope; the priority
 # efficiencies of table 9.1 are these table values. Hot water stays the
@@ -2616,11 +2623,12 @@ def two_zones(project):
         zone_ventilation["zoneId"] = zone_id
         zone_ventilation["usableFloorAreaM2"] = 48.0
         zone_ventilation["functions"] = [{"function": "residential", "areaM2": 48.0}]
+        zone_ventilation["wholeDwellingAreaM2"] = 96.0
         gains = dict(nta["internalGains"], dwellingShare=0.5, sourceReference="een woning over twee rekenzones (6.2b, aandeel 0,5)")
         entries.append(
             {
                 "zoneId": zone_id,
-                "verticalPipes": [{"id": f"{zone_id}-leiding", "storeys": 2, "insulated": False, "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3), 2 aangrenzende rekenzones"}],
+                "verticalPipes": [{"id": f"{zone_id}-leiding", "storeys": 1, "insulated": False, "sourceReference": "ISSO 54 v2.0 EP-W001 p. 5: leidingdoorvoeren forfaitair (7.3.3); 1 bouwlaag per rekenzone"}],
                 "ventilationFlows": [],
                 "ventilation": zone_ventilation,
                 "internalGains": gains,
@@ -3098,3 +3106,22 @@ suite = {
 
 OUT.write_text(json.dumps(suite, ensure_ascii=False, indent=2) + "\n")
 print(f"{OUT.relative_to(ROOT)}: {len(CASES) + len(UTILITY_CASES)} cases")
+
+# Control for EP-W203l-n (review 19, D1): the two-zone split alone, with the
+# reference HR107 of EP-W001, must calculate as EP-W001 itself. The kernel
+# test crates/nta8800-core/tests/isso54_controls.rs applies this patch.
+CONTROL = ROOT / "training-data" / "isso54" / "EPW001-two-zones-control.json"
+CONTROL.write_text(
+    json.dumps(
+        {
+            "description": "EP-W001 als twee rekenzones (splitsing van EP-W203l-n zonder de hybride opwekker); moet rekenen als EP-W001.",
+            "projectFile": "EPW001.json",
+            "normVersion": "2022",
+            "projectPatch": variant(two_zones),
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+    + "\n"
+)
+print(f"{CONTROL.relative_to(ROOT)}: two-zone control")
