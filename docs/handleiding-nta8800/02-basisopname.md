@@ -110,8 +110,18 @@ Na **Opname doorrekenen** staat de knop **Overnemen in projectmodel** onder Uitk
 | Overgenomen | Niet overgenomen |
 |---|---|
 | verwarming (opwekker, distributie, afgifte, collectieve aansluiting), tapwater, koeling, ventilatie, PV, verlichting, BACS, gebruiksfunctie, setpoints, thermische massa en interne warmte | geometrie en oppervlakten: zones, vlakken en ramen blijven die van het projectmodel |
-| | bij een opname met meer rekenzones: de zonegegevens (setpoints, massa, interne warmte, ventilatie) |
+| per aangevinkte waarde: de gegevens van een vloer op de grond (zie hieronder) | bij een opname met meer rekenzones: de zonegegevens (setpoints, massa, interne warmte, ventilatie) |
 | | aanvullende verwarmingssystemen |
+
+**Vloeren op de grond.** Omdat de geometrie die van het projectmodel blijft, gaan de vloergegevens van de opname alleen mee in de grondvloergegevens van een vloer uit het projectmodel (Gebouw › Schil & ramen, *Vloeren op grond (§8.3)*). Het venster toont daarvoor per opnamevloer het deel *Vloeren op de grond*:
+
+- **Koppelen.** Kies bij elke opnamevloer de vloer van het projectmodel waar hij bij hoort. Het programma stelt een vloer voor: dezelfde id, anders de enige vloer op de grond aan beide kanten, anders de enige vloer met dezelfde oppervlakte (±2 %). Kies *niet overnemen* om een opnamevloer over te slaan.
+- **Per waarde aanvinken.** De lijst toont wat er verandert: omtrek P, R_c van de vloer, de randkoudebruggen, randisolatie, een kruipruimte of onverwarmde kelder (8.3.4.2) en een verwarmde kelder (8.3.3.2) met diepte, wandoppervlakte en R_c van de kelderwanden. Een geveldeel tegen de grond uit de opname komt zo als verwarmde kelder in het project.
+- **Nooit ongevraagd overschreven.** Een waarde die het project nog niet heeft, staat aangevinkt. Heeft het project al een andere waarde, dan staat er *het project heeft een andere waarde* en is de regel niet aangevinkt; die neem je alleen over door hem aan te vinken. Heeft de opname bij een vloer geen kruipruimte, randisolatie of verwarmde kelder en het project wel, dan biedt de lijst *verwijderen* aan, ook alleen na aanvinken.
+- **ΔU_for van de kelderwanden** neemt het venster niet over: de kern leidt hem af uit de schil van het projectmodel (8.38 met 8.2.1).
+- **Bron.** De bronverwijzing van de projectvloer krijgt "basisopname, vloer <id>" met de bron van de opnamevloer erbij, achter een bron die er al stond.
+
+Rekent het project daarna met een vloer van dezelfde oppervlakte als de opnamevloer, dan is de warmteoverdracht naar de grond gelijk aan die in de opname (getoetst in `crates/nta8800-core/tests/survey_takeover.rs`).
 
 **Overnemen in concept** past nog niets toe. De toepasbalk onderaan toont de wijzigingen, met **Ongedaan maken** en **Toepassen**. De normversie van het concept blijft staan.
 

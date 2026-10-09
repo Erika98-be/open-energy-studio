@@ -80,3 +80,173 @@ export function previewValue(value: unknown): string {
   const text = typeof value === 'string' ? value : JSON.stringify(value);
   return text.length > 60 ? `${text.slice(0, 57)}…` : text;
 }
+
+/*
+ * Ground floors. The takeover leaves the geometry to the project, so the
+ * survey's floors to the ground (perimeter P, crawlspace or unheated cellar,
+ * a heated basement from a façade part against the ground) only reach the
+ * project through the `ntaCalculation.groundFloors` entry of a project floor.
+ * The adviser pairs each survey floor with a project floor and accepts per
+ * value; a value the project already holds is never replaced unasked.
+ */
+
+/** The `groundFloors` members a survey floor can carry into a project floor. */
+export const GROUND_FIELDS = [
+  'exposedPerimeterM', 'constructionResistanceM2kPerW', 'edgeThermalBridges', 'edgeInsulation', 'below', 'heatedBasement',
+] as const;
+export type GroundField = typeof GROUND_FIELDS[number];
+
+/** Members whose absence in the survey means "none" (no crawlspace, no basement). */
+const OPTIONAL_GROUND: ReadonlySet<GroundField> = new Set<GroundField>(['edgeInsulation', 'below', 'heatedBasement']);
+
+/** A floor to the ground in the derived survey input. */
+export interface SurveyGroundFloor { id: string; areaM2: number | null; floor: Loose }
+
+/** A floor to the ground in the project geometry. */
+export interface ProjectGroundSurface { id: string; name: string; areaM2: number }
+
+/** One value of a survey floor offered for a project floor. */
+export interface GroundFloorItem {
+  key: string;
+  surveyId: string;
+  surfaceId: string;
+  field: GroundField;
+  from: unknown;
+  to: unknown;
+  /** `new`: the project has no value; `conflict`: it has another one. */
+  status: 'new' | 'conflict';
+}
+
+const demandsOf = (derived: BuildingPerformanceInput): Loose[] => {
+  const heating = ((derived as unknown as Loose).spaceHeating ?? {}) as Loose;
+  const zones = Array.isArray(heating.additionalZones) ? heating.additionalZones as Loose[] : [];
+  return [heating.demand as Loose | undefined, ...zones.map((zone) => zone.demand as Loose | undefined)]
+    .filter((demand): demand is Loose => demand != null);
+};
+
+/** The survey's floors to the ground, in all its zones. */
+export function surveyGroundFloors(derived: BuildingPerformanceInput): SurveyGroundFloor[] {
+  return demandsOf(derived).flatMap((demand) => {
+    const transmission = (demand.transmission ?? {}) as Loose;
+    const floors = Array.isArray(transmission.groundFloors) ? transmission.groundFloors as Loose[] : [];
+    return floors.map((floor) => ({
+      id: String(floor.id ?? ''),
+      areaM2: typeof floor.areaM2 === 'number' ? floor.areaM2 : null,
+      floor,
+    }));
+  });
+}
+
+type SurfaceLike = { id?: unknown; name?: unknown; type?: unknown; thermalBoundary?: unknown; area?: unknown };
+
+/** The project's floor surfaces to the ground (walls and roofs to the ground are refused by the kernel). */
+export function projectGroundSurfaces(project: { zones?: Array<{ surfaces?: SurfaceLike[] }> } | null | undefined): ProjectGroundSurface[] {
+  return (project?.zones ?? []).flatMap((zone) => zone.surfaces ?? [])
+    .filter((surface) => surface.thermalBoundary === 'ground' && surface.type !== 'wall' && surface.type !== 'roof')
+    .map((surface) => ({ id: String(surface.id), name: String(surface.name || surface.id), areaM2: Number(surface.area) || 0 }));
+}
+
+/**
+ * The project floor proposed for each survey floor: the same id, else the only
+ * floor on both sides, else the one free floor of the same area (±2 %);
+ * otherwise none, and the adviser picks.
+ */
+export function proposeGroundPairs(floors: SurveyGroundFloor[], surfaces: ProjectGroundSurface[]): Record<string, string | null> {
+  const pairs: Record<string, string | null> = {};
+  const taken = new Set<string>();
+  for (const floor of floors) {
+    const same = surfaces.find((surface) => surface.id === floor.id);
+    if (same) { pairs[floor.id] = same.id; taken.add(same.id); }
+  }
+  for (const floor of floors) {
+    if (floor.id in pairs) continue;
+    const free = surfaces.filter((surface) => !taken.has(surface.id));
+    let pick: ProjectGroundSurface | undefined;
+    if (floors.length === 1 && surfaces.length === 1) pick = free[0];
+    else if (floor.areaM2 != null) {
+      const area = floor.areaM2;
+      const near = free.filter((surface) => Math.abs(surface.areaM2 - area) <= 0.02 * Math.max(area, 1));
+      if (near.length === 1) pick = near[0];
+    }
+    pairs[floor.id] = pick?.id ?? null;
+    if (pick) taken.add(pick.id);
+  }
+  return pairs;
+}
+
+/**
+ * The value a survey floor gives for a member of a project's `groundFloors`
+ * entry. ΔU_for of a heated basement is left out: on the forfait route the
+ * kernel takes it from the project's own envelope (8.38 with 8.2.1).
+ */
+function surveyValue(floor: Loose, field: GroundField): unknown {
+  const value = floor[field];
+  if (field === 'heatedBasement' && value != null && typeof value === 'object') {
+    const rest = { ...(value as Loose) };
+    delete rest.forfaitDeltaUWPerM2k;
+    return rest;
+  }
+  return blank(value) ? undefined : value;
+}
+
+const sameValue = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+/** Absent, null or an empty list (no edge insulation) all mean "none". */
+const blank = (value: unknown) => value === undefined || value === null || (Array.isArray(value) && value.length === 0);
+
+const entryOf = (draft: Loose | null, surfaceId: string): Loose | undefined =>
+  (Array.isArray(draft?.groundFloors) ? draft.groundFloors as Loose[] : []).find((item) => item.surfaceId === surfaceId);
+
+/** Every value that would change in the paired project floors; unchanged values are left out. */
+export function groundFloorItems(derived: BuildingPerformanceInput, current: Loose | null, pairs: Record<string, string | null>): GroundFloorItem[] {
+  const items: GroundFloorItem[] = [];
+  for (const { id, floor } of surveyGroundFloors(derived)) {
+    const surfaceId = pairs[id];
+    if (!surfaceId) continue;
+    const entry = entryOf(current, surfaceId) ?? {};
+    for (const field of GROUND_FIELDS) {
+      const to = surveyValue(floor, field);
+      const from = entry[field] ?? undefined;
+      if (blank(to) && !OPTIONAL_GROUND.has(field)) continue;
+      if ((blank(from) && blank(to)) || sameValue(from, to)) continue;
+      items.push({ key: `${id}→${surfaceId}.${field}`, surveyId: id, surfaceId, field, from, to, status: blank(from) ? 'new' : 'conflict' });
+    }
+  }
+  return items;
+}
+
+/** Accepted by default: values the project does not have yet. A conflict needs the adviser's choice. */
+export function defaultGroundSelection(items: GroundFloorItem[]): Set<string> {
+  return new Set(items.filter((item) => item.status === 'new').map((item) => item.key));
+}
+
+/** The source reference of a project floor that took values over from a survey floor. */
+function withSurveySource(current: unknown, floor: Loose, surveyId: string): string {
+  const marker = `basisopname, vloer ${surveyId}`;
+  const note = floor.sourceReference ? `${marker}: ${String(floor.sourceReference)}` : marker;
+  const text = typeof current === 'string' ? current.trim() : '';
+  if (text.includes(marker)) return text;
+  return text ? `${text}; ${note}` : note;
+}
+
+/** Writes the accepted survey values into the paired `groundFloors` entries of a copy of the draft. */
+export function applyGroundFloors(
+  draft: Loose | null, derived: BuildingPerformanceInput, pairs: Record<string, string | null>, accepted: ReadonlySet<string>,
+): Loose {
+  const next: Loose = structuredClone(draft ?? {});
+  const items = groundFloorItems(derived, draft, pairs).filter((item) => accepted.has(item.key));
+  if (items.length === 0) return next;
+  const list = Array.isArray(next.groundFloors) ? next.groundFloors as Loose[] : [];
+  next.groundFloors = list;
+  const floors = new Map(surveyGroundFloors(derived).map((item) => [item.id, item.floor]));
+  for (const item of items) {
+    let entry = list.find((candidate) => candidate.surfaceId === item.surfaceId);
+    if (!entry) {
+      entry = { surfaceId: item.surfaceId, sourceReference: '' };
+      list.push(entry);
+    }
+    if (item.to === undefined) delete entry[item.field];
+    else entry[item.field] = structuredClone(item.to);
+    entry.sourceReference = withSurveySource(entry.sourceReference, floors.get(item.surveyId) ?? {}, item.surveyId);
+  }
+  return next;
+}
