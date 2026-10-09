@@ -176,10 +176,15 @@ fn common_space_input() -> (&'static str, Value) {
         "areaM2": 49.20, "sourceReference": "printout: gemeenschappelijke ruimte"
     }]);
     rz1["ventilation"]["functions"] = serde_json::json!([]);
-    value["ntaCalculation"]
-        .as_object_mut()
-        .unwrap()
-        .remove("bblFunctions");
+    let nta = &mut value["ntaCalculation"];
+    nta.as_object_mut().unwrap().remove("bblFunctions");
+    // Review 25: the hot-water and lighting lists come from the split too,
+    // so the fuzzed common-space areas reach the filled lists (case H as
+    // entered by hand covers the entered lists).
+    nta["hotWater"]["need"]["areas"] = serde_json::json!([]);
+    for lighting in nta["lighting"].as_array_mut().unwrap() {
+        lighting.as_object_mut().unwrap().remove("functions");
+    }
     (
         "public-comparison-h (common space allocated by the kernel)",
         value,
