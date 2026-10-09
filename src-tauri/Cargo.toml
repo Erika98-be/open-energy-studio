@@ -37,7 +37,9 @@ default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
 
 [profile.release]
-panic = "abort"
+# Unwind so a kernel panic in a command becomes an error (`off_main`)
+# instead of ending the app with every unsaved document.
+panic = "unwind"
 codegen-units = 1
 lto = true
 opt-level = "s"
