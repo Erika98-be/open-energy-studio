@@ -13,6 +13,17 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — README vernieuwd en wiki-documentatie (geen rekenwijziging)
+
+- **README:** de README beschrijft de huidige stand. Hij vermeldt:
+  - de rekenkern in Rust;
+  - de vijf uitgaven met hun exacte namen;
+  - de versies: programma 0.2.0, rekenkern 0.3.0, handleiding gestempeld voor 0.3.0;
+  - de toolchain: Rust 1.77.2 als MSRV (de service vraagt 1.88), Node.js 22 en Tauri 2;
+  - de gate, versiebeheer en release;
+  - de documentatiekaart, met een verwijzing naar het testprotocol.
+- **Wiki:** nieuwe map `wiki/` met Nederlandstalige wikipagina's per onderwerp, klaar om naar de GitHub-wiki te publiceren (zie `wiki/README-publiceren.md`). De pagina's vatten samen en verwijzen naar de handleiding en de documenten in de repository.
+
 ### 10 oktober 2026 — EP-Online-gegevensoverzicht, dossiercontrole en A0-tabel na de achttiende review
 
 - **`Op_basis_van_referentiegebouw` stond omgekeerd.** Het veld is nu `true` voor de gelijkende woning, die een referentie-energieprestatierapport krijgt, en `false` voor de bezochte referentiewoning (BRL 9500-W §4.3 p. 26; RVO-handleiding EP-online bijlage 2).
