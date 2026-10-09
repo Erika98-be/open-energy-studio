@@ -110,9 +110,14 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
             <label>{t('opname.takeover.ground.pair', { floor: floor.id, area: floor.areaM2 ?? '—' })}
               <select value={pairs[floor.id] ?? ''} onChange={(event) => pair(floor.id, event.target.value || null)}>
                 <option value="">{t('opname.takeover.ground.none')}</option>
-                {surfaces.map((surface) => <option key={surface.id} value={surface.id}>
-                  {`${surface.name} (${surface.areaM2} m²)`}
-                </option>)}
+                {surfaces.map((surface) => {
+                  // One project floor takes one survey floor.
+                  const other = floors.find((item) => item.id !== floor.id && pairs[item.id] === surface.id);
+                  return <option key={surface.id} value={surface.id} disabled={other != null}>
+                    {`${surface.name} (${surface.areaM2} m²)`}
+                    {other ? ` ${t('opname.takeover.ground.pairedElsewhere', { floor: other.id })}` : ''}
+                  </option>;
+                })}
               </select>
             </label>
           </div>)}
@@ -127,7 +132,7 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
               </tr></thead>
               <tbody>
                 {preview.ground.map((item) => {
-                  const label = `${surfaceName(item.surfaceId)} — ${item.field}`;
+                  const label = `${surfaceName(item.surfaceId)} — ${t(`opname.takeover.ground.field.${item.field}`)}`;
                   return <tr key={item.key} className={item.status === 'conflict' ? 'opname-takeover__conflict' : undefined}>
                     <td><input type="checkbox" checked={accepted.has(item.key)} onChange={() => toggle(item.key)}
                       aria-label={t('opname.takeover.ground.acceptItem', { item: label })} /></td>

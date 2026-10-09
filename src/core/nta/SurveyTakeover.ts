@@ -179,17 +179,25 @@ export function proposeGroundPairs(floors: SurveyGroundFloor[], surfaces: Projec
  * entry. ΔU_for of a heated basement is left out: on the forfait route the
  * kernel takes it from the project's own envelope (8.38 with 8.2.1).
  */
-function surveyValue(floor: Loose, field: GroundField): unknown {
+function surveyValue(floor: Loose, field: GroundField, project: unknown): unknown {
   const value = floor[field];
   if (field === 'heatedBasement' && value != null && typeof value === 'object') {
     const rest = { ...(value as Loose) };
     delete rest.forfaitDeltaUWPerM2k;
+    // A ΔU_for the adviser entered on the project floor stays theirs.
+    const own = project != null && typeof project === 'object' ? (project as Loose).forfaitDeltaUWPerM2k : undefined;
+    if (own !== undefined && own !== null) rest.forfaitDeltaUWPerM2k = own;
     return rest;
   }
   return blank(value) ? undefined : value;
 }
 
-const sameValue = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+/** JSON with sorted object keys, so that member order does not count as a difference. */
+const canonical = (value: unknown): string => JSON.stringify(value, (_key, item: unknown) =>
+  item != null && typeof item === 'object' && !Array.isArray(item)
+    ? Object.fromEntries(Object.entries(item as Loose).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+    : item);
+const sameValue = (a: unknown, b: unknown) => canonical(a) === canonical(b);
 /** Absent, null or an empty list (no edge insulation) all mean "none". */
 const blank = (value: unknown) => value === undefined || value === null || (Array.isArray(value) && value.length === 0);
 
@@ -199,12 +207,15 @@ const entryOf = (draft: Loose | null, surfaceId: string): Loose | undefined =>
 /** Every value that would change in the paired project floors; unchanged values are left out. */
 export function groundFloorItems(derived: BuildingPerformanceInput, current: Loose | null, pairs: Record<string, string | null>): GroundFloorItem[] {
   const items: GroundFloorItem[] = [];
+  const used = new Set<string>();
   for (const { id, floor } of surveyGroundFloors(derived)) {
     const surfaceId = pairs[id];
-    if (!surfaceId) continue;
+    // One project floor takes one survey floor: a second pairing to it is ignored.
+    if (!surfaceId || used.has(surfaceId)) continue;
+    used.add(surfaceId);
     const entry = entryOf(current, surfaceId) ?? {};
     for (const field of GROUND_FIELDS) {
-      const to = surveyValue(floor, field);
+      const to = surveyValue(floor, field, entry[field]);
       const from = entry[field] ?? undefined;
       if (blank(to) && !OPTIONAL_GROUND.has(field)) continue;
       if ((blank(from) && blank(to)) || sameValue(from, to)) continue;
@@ -224,7 +235,8 @@ function withSurveySource(current: unknown, floor: Loose, surveyId: string): str
   const marker = `basisopname, vloer ${surveyId}`;
   const note = floor.sourceReference ? `${marker}: ${String(floor.sourceReference)}` : marker;
   const text = typeof current === 'string' ? current.trim() : '';
-  if (text.includes(marker)) return text;
+  const notes = text.split(';').map((part) => part.trim());
+  if (notes.some((part) => part === marker || part.startsWith(`${marker}:`))) return text;
   return text ? `${text}; ${note}` : note;
 }
 
