@@ -703,7 +703,11 @@ fn case_l_school_under_nta_8800_2022() {
 /// emission loss (cooling electricity 1 496 against 949 kWh, +18,26; the
 /// report's 2 846 kWh cold is the kernel's 2 449 kWh need plus 16 %) and the
 /// 10.87 control energy (+87,6 kWh, +2,92). On this small floor area the
-/// two interpretations take BENG 2 over its limit of 30.
+/// two interpretations take BENG 2 over its limit of 30. BENG 3 follows from
+/// BENG 2 alone: E_ren is 8 649 against the report's 8 625 kWh (ambient heat
+/// of heating 3 817 against 3 793, of hot water 386 in both, cooling 0 in
+/// both, PV 4 446 in both); with the report's E_P (1 140 kWh) the kernel's
+/// E_ren gives 88,35 % against 88,3 %.
 #[test]
 fn case_m_small_dwelling_with_cooling_under_nta_8800_2022() {
     let value: Value = serde_json::from_str(include_str!(
@@ -741,6 +745,24 @@ fn case_m_small_dwelling_with_cooling_under_nta_8800_2022() {
         .sum();
     assert!((need - 2449.0).abs() < 1.0, "{need}");
     assert_eq!(performance["tojuliMaxK"].as_f64(), Some(0.0));
+    // E_ren per term (report: heating 3 793, hot water 386, cooling 0,
+    // electricity 4 446, total 8 625 kWh).
+    let read = |key: &str| performance[key].as_f64().unwrap();
+    let ambient = read("annualHeatPumpAmbientHeatKwh");
+    assert!((ambient - 3817.0).abs() < 1.0, "{ambient}");
+    let hot_water_ambient = performance["hotWater"]["annualGeneratorOutputKwh"]
+        .as_f64()
+        .unwrap()
+        - used_kwh(&performance, "hotWater");
+    assert!(
+        (hot_water_ambient - 386.0).abs() < 1.0,
+        "{hot_water_ambient}"
+    );
+    let renewable = read("annualRenewablePrimaryKwh");
+    assert!((renewable - 8649.0).abs() < 1.0, "{renewable}");
+    // With the report's E_P of 1 140 kWh the kernel's E_ren gives 88,3 %.
+    let share = renewable / (renewable + 1140.0) * 100.0;
+    assert!((share - 88.3).abs() < 0.1, "{share}");
 }
 
 /// Case N, a supermarket (2 064,26 m² retail over a basement entrance,
@@ -754,8 +776,14 @@ fn case_m_small_dwelling_with_cooling_under_nta_8800_2022() {
 /// limits equal the report's. Table 7.10 row 250–500 kg/m², open ceiling
 /// (180 kJ/(m²K), 2020+A1 p. 180). Hot water (3 175 kWh), the VRF COP 2,80
 /// and PV on the meter (146 257 kWh, panel area 1,63 m² taken back from the
-/// yield) agree. BENG 2 (Δ kWh · 1,45 / A_g): heating +2 892 (+2,03; 9,9 %
-/// more heat), its auxiliaries +95 (+0,07), cooling +1 526 (+1,07; the
+/// yield) agree. The supply-air reheating serves a 6–8 m room, so its
+/// emission takes 9.3.3.7 (2020+A1 p. 277–280): Δθ_ctr,1 2,5 K of table 9.10
+/// (the report prints the same), Δθ_str of 9.19 with the highest table 9.8
+/// gradient (supply position unknown) at h_R 7 m, together 4,0 K; 9.16 caps
+/// the loss at 0,15 in every month, so h_R and the gradient within the class
+/// do not matter. BENG 2 (Δ kWh · 1,45 / A_g): heating +3 836 (+2,69; 13,1 %
+/// more heat: need 80 201 + capped loss 12 030 + AHU 394 against the
+/// report's 81 882), its auxiliaries +108 (+0,08), cooling +1 526 (+1,07; the
 /// literal 10.15 loss of 3 026 kWh cold), the 10.87 control energy +88
 /// (+0,06), lighting +1 407 (+0,99; P_n rounded up per annex X, 17 546 →
 /// 18 000 W) and fans −2 881 (−2,02; the report takes q_V;ODA;req of the
@@ -768,7 +796,18 @@ fn case_n_supermarket_under_nta_8800_2020_a1() {
     .unwrap();
     assert_eq!(value["ntaCalculation"]["normVersion"], "2020+A1");
     let (performance, indicators) = run_edition(&value, "2020+A1");
-    assert_indicators("N 2020+A1", indicators, [54.57, -24.99, 123.6]);
+    assert_indicators("N 2020+A1", indicators, [54.57, -24.31, 122.6]);
+    assert_eq!(
+        performance["spaceHeating"]["emissionTemperatureIncrementK"].as_f64(),
+        Some(4.0)
+    );
+    // 9.16: the emission loss is capped at 0,15 of the need in every month.
+    for month in performance["spaceHeating"]["monthly"].as_array().unwrap() {
+        let need = month["heatingNeedKwh"].as_f64().unwrap();
+        let loss = month["emissionLossKwh"].as_f64().unwrap();
+        assert!((loss - 0.15 * need).abs() < 1e-6, "{loss} {need}");
+    }
+    assert!((used_kwh(&performance, "heating") - 33080.0).abs() < 1.0);
     let limits = &performance["bblCheck"]["limits"];
     let limit = |key: &str| limits[key].as_f64().unwrap();
     assert!((limit("energyNeedMaxKwhPerM2") - 95.31).abs() < 0.005);

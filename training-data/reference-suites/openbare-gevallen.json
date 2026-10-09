@@ -839,14 +839,14 @@
         },
         {
           "path": "beng2",
-          "value": -24.99,
+          "value": -24.31,
           "unit": "kWh/m2.year",
           "normReference": "BENG 2, primair fossiel energiegebruik (5.2)",
           "absoluteTolerance": 0.05
         },
         {
           "path": "beng3",
-          "value": 123.6,
+          "value": 122.6,
           "unit": "%",
           "normReference": "BENG 3, aandeel hernieuwbare energie (5.4)",
           "absoluteTolerance": 0.15
