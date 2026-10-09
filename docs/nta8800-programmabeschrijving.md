@@ -75,6 +75,7 @@ Daarnaast zijn er:
 - **MSRV-test.** De kern wordt ook getest met Rust 1.77.2, de oudste ondersteunde versie.
 - **Onafhankelijke herberekening.** Elke route is apart herberekend; de stand staat in de [verificatiestatus](nta8800-verificatiestatus.md).
 - **Referentieharnas.** Het [referentieprotocol](nta8800-referentieprotocol.md) beschrijft het harnas. De gate draait het al op de gecodeerde ISSO 54-deeltesten, zonder oordeel; zodra de uitkomsten van versie 5.0 er zijn, worden die als verwachting ingevuld ([voorbereiding ISSO 54](nta8800-isso54-voorbereiding.md)).
+- **Testprotocol.** Het [testprotocol](nta8800-testprotocol.md) beschrijft alle testniveaus met de opdrachten, de handmatige acceptatietests vóór een vrijgave, de regressieprocedure en de codereviews; per vrijgave komt een testrapport in het archief.
 - **Builds.** De build-verificaties per commit staan in `docs/nta8800-build-verificatie-*.md`, en de procedure in de [buildprocedure](nta8800-build-procedure.md).
 
 ## 6. Versiebeheer

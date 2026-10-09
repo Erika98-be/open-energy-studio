@@ -15,7 +15,8 @@
 #     wkhtmltopdf is installed), stamped with both versions (BRL 9501 §4.4);
 #  5. only then commits the released notes (one commit), so a failing gate or
 #     build leaves no release commit behind;
-#  6. writes the leveringsdocument, a manifest and SHA256SUMS;
+#  6. writes the leveringsdocument, a pre-filled test report
+#     (docs/templates/nta8800-testrapport.md), a manifest and SHA256SUMS;
 #  7. creates the annotated git tag oes-v<program>-kernel-v<kernel>.
 # When a release fails before its tag, its archive is moved aside to
 # release/<tag>.mislukt-<time>/ so the release can simply be run again.
@@ -196,6 +197,23 @@ fi
 step "leveringsdocument"
 node scripts/nta-leveringsdocument.mjs --out "$archive/leveringsdocument.md" \
   --commit "$commit" --tag "$tag" --date "$release_date" "${manual_args[@]}" "${packages[@]}"
+
+step "testrapport (docs/nta8800-testprotocol.md §7)"
+node --input-type=module -e "
+  import { readFileSync, writeFileSync } from 'node:fs';
+  const fields = {
+    PROGRAM_VERSION: '$program_version',
+    KERNEL_VERSION: '$kernel_version',
+    TAG: '$tag',
+    COMMIT: '$commit',
+    RELEASE_DATE: '$release_date',
+    GATE_STATUS: '$gate_status',
+    DRY_RUN: $dry_run === 1 ? 'ja' : 'nee',
+  };
+  const template = readFileSync('docs/templates/nta8800-testrapport.md', 'utf8');
+  const report = template.replace(/\{\{([A-Z_]+)\}\}/g, (match, key) => fields[key] ?? match);
+  writeFileSync('$archive/testrapport.md', report);
+"
 
 step "manifest en SHA256SUMS"
 node --input-type=module -e "
