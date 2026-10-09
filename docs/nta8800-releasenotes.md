@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Wanden van een verwarmde kelder in A_ls; openbaar geval N, een supermarkt in 2020+A1
+
+- **A_ls met kelderwanden (6.7.3 c, p. 162; 2020+A1 p. 144).** De wanden van een verwarmde kelder (`groundFloors[].heatedBasement`, z·P van 8.39) telden niet mee in de verliesoppervlakte. Ze grenzen aan de grond en tellen nu mee met f_ls 0,7, in de Bbl-toets en in de geometrie voor de registratiecontroles. Projecten met een verwarmde kelder krijgen een hogere A_ls/A_g, en dus een andere eis voor BENG 1 (bij een woning ook een andere energiebehoefte-eis). De BENG-waarden zelf veranderen niet. Openbaar geval G: A_ls 579,48 → 694,21 m² (rapport 670,80), eis BENG 1 57,10 → 66,42 (rapport 64,52). Test: `heated_basement_walls_count_in_the_loss_area` (project_performance.rs).
+- **Nieuw geval N.** Een openbaar BENG-rapport van een supermarkt van 2 064,26 m² boven een sterk geventileerde parkeerkelder (Uniec 3.0.7.1, 02-02-2021, NTA 8800:2020+A1) is nagebouwd: `training-data/nta8800-public-comparison-n.json`, de test `case_n_supermarket_under_nta_8800_2020_a1` en `openbaar-n-2020a1` in de suite van de openbare gevallen (29 vergeleken gevallen, 289 in totaal).
+- **Uitkomst N.** De kern rekent 54,57 / −24,99 / 123,6 tegen 55,98 / −27,18 / 126,9. A_ls/A_g (2,64), de Bbl-eisen, tapwater, de COP 2,80 en PV op de meter kloppen. Op BENG 2: verwarming +2,03 (9,9 % meer warmte, oorzaak niet uit de uitdraai te halen), koeling +1,07, verlichting +0,99 (P_n naar boven afgerond volgens bijlage X), 10.87 +0,06 en ventilatoren −2,02.
+- **Nieuwe vraag aan NEN.** Uniec rekent de forfaitaire ventilatoren (11.142; 2020+A1 11.139) met q_V;ODA;req van de koudebalans, de kern met die van de warmtebalans. Vraag 5 in [vragen aan NEN](nta8800-vragen-nen.md).
+
 ### 9 oktober 2026 — Handleiding en formulier bijgewerkt voor rekenkern 0.4.0 (geen rekenwijziging)
 
 - **Handleiding, hoofdstuk 3.**
@@ -32,7 +39,7 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 - **Nieuw geval.** Een openbaar BENG-rapport van een vrijstaande woning met kap van 43,44 m² (Uniec 3.1.3.1, 15-09-2022, NTA 8800:2022) is nagebouwd als geval M: `training-data/nta8800-public-comparison-m.json`, de test `case_m_small_dwelling_with_cooling_under_nta_8800_2022` en `openbaar-m-2022` in de suite van de openbare gevallen (28 vergeleken gevallen, 288 in totaal).
 - **Uitkomst.** De kern rekent 170,87 / 47,85 / 80,6 tegen 171,29 / 26,25 / 88,3. Verwarming, tapwater, ventilatoren, PV en de Bbl-eisen kloppen. Het verschil op BENG 2 komt geheel uit de koeling: 10.15 letterlijk (+18,26) en de regelenergie van 10.87 (+2,92). De koude van het rapport is de behoefte van de kern plus 16 %.
-- **Zoekronde.** Ook nu geen openbaar rapport in 2025+C1 (Uniec 3.4). Een supermarkt in 2020+A1 met volledige uitdraai is gevonden en nog niet nagebouwd ([vergelijking](nta8800-vergelijking-openbare-rapporten.md)).
+- **Zoekronde.** Ook nu geen openbaar rapport in 2025+C1 (Uniec 3.4). Een supermarkt in 2020+A1 met volledige uitdraai is gevonden ([vergelijking](nta8800-vergelijking-openbare-rapporten.md)); die is later nagebouwd als geval N.
 
 ### 9 oktober 2026 — Review 22: EP-U602h-daklichten zonder afronding, WKK-vat en opgegeven daglichtsector nagelopen (geen rekenwijziging)
 

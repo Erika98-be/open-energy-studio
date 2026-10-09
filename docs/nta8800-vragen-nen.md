@@ -43,3 +43,14 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 - **Gekozen lezing.** De kern geeft de hernieuwbare elektriciteitsopwekking op eigen terrein (PV en andere hernieuwbare opwekking van hoofdstuk 16), zonder de elektriciteit van een (micro-)WKK, die niet hernieuwbaar is (5.14b). Zonnewarmte en omgevingswarmte tellen niet mee in h: ze zitten in het aandeel hernieuwbare energie (element c) en in de belangrijkste hernieuwbare bron (element i). Een zonneboiler staat bovendien al apart bij de installaties (art. 5.13 onder c).
 - **Vraag.** Bedoelt h alleen hernieuwbare elektriciteit, of ook hernieuwbare warmte (zonnewarmte) in kWh?
 
+## 5. Luchtvolumestroom van het forfaitaire ventilatorvermogen, formule 11.142 (p. 518; 2020+A1: 11.139, p. 495)
+
+**Situatie.** Het forfaitaire ventilatorvermogen is f_SFP · f_systype · q_V;ODA;req;zi,mi · c, met q_V;ODA;req "bepaald volgens 11.2.2.1". Bij 11.46–11.49 staat dat f_sys en f_ctrl, en dus q_V;ODA;req, voor warmtebehoefte en voor koudebehoefte apart worden berekend. Met maximale benutting van de geïnstalleerde capaciteit voor passieve koeling (tabel 11.6, τ_sysC) is de waarde voor koudebehoefte veel groter dan die voor warmtebehoefte. Formule 11.142 zegt niet welke van de twee geldt.
+
+**Gekozen lezing.** De kern neemt q_V;ODA;req van de warmtebalans, in alle maanden.
+
+**Gevolg.** Openbaar geval N (supermarkt, D.3 met CO2-sturing en automatische passieve koelregeling) rekent in Uniec 3.0.7.1 5 164 kWh ventilatorenergie: tot op de kWh f_SFP · 2 · q_V;ODA;req van de koudebalans (2 122 m³/h) over het hele jaar, gedeeld door f_prac;vent 0,9. De kern rekent met de warmtebalans (938 m³/h) 2 283 kWh; dat is −2,02 kWh/(m²·jr) op BENG 2.
+
+**Vraag.**
+- Welke q_V;ODA;req geldt in 11.142: die van de warmtebalans, die van de koudebalans, of per maand de grootste?
+- Als de koudebalans bedoeld is: ook in maanden zonder koudebehoefte?

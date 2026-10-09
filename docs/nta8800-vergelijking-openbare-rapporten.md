@@ -1,6 +1,6 @@
 # Vergelijking met openbare BENG-rapporten — 5 oktober 2026
 
-Dit is **geen officiële referentietoets**. Dertien openbaar gepubliceerde BENG-rapporten (gevallen A–M) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
+Dit is **geen officiële referentietoets**. Veertien openbaar gepubliceerde BENG-rapporten (gevallen A–N) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
 
 De herbouwde invoer staat als fictieve, geanonimiseerde fixtures in `training-data/nta8800-public-comparison-{a,b,c,d,f}.json`. Adressen en namen zijn verwijderd. De test `crates/nta8800-core/tests/public_comparison.rs` legt de huidige uitkomsten vast als regressie; de gepubliceerde waarden zijn alleen context.
 
@@ -16,6 +16,7 @@ De herbouwde invoer staat als fictieve, geanonimiseerde fixtures in `training-da
 | G | [openbaar rapport G (vrijstaande woning met kelder)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-25471/1/bijlage/BENG_woning_B.pdf) | Uniec 3.3.5.0, 29-04-2025, NTA 8800:2024 (zie [G en H](#g-in-2024-en-h-het-eerste-utiliteitsgebouw-in-2023-9-oktober-2026)) |
 | H | [openbaar rapport H (utiliteitsgebouw met sportschool)](https://heusden.bestuurlijkeinformatie.nl/Document/View/3256b603-e6fb-4fa0-ab2c-b63fa0af6d28) | Uniec 3.2.9.2, 29-05-2024, NTA 8800:2023 (zie [G en H](#g-in-2024-en-h-het-eerste-utiliteitsgebouw-in-2023-9-oktober-2026)) |
 | M | [openbaar rapport M (kleine vrijstaande woning met kap en koeling)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-20303/1/bijlage/BS_7192605_1664526905911_PR18758_-_Parklaan_104a_te_Soest_-_BENG.pdf.pdf) | Uniec 3.1.3.1, 15-09-2022, NTA 8800:2022 (zie [M](#m-een-kleine-woning-met-koeling-in-2022-9-oktober-2026)) |
+| N | [openbaar rapport N (supermarkt met parkeerkelder)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-22714/1/bijlage/07.Stoks15_Lidl-Dutilhweg_2feb2021_Volledig.pdf) | Uniec 3.0.7.1, 02-02-2021, NTA 8800:2020+A1 (zie [N](#n-een-supermarkt-boven-een-parkeerkelder-in-2020a1-9-oktober-2026)) |
 
 De rapporten noemen de editie niet zelf. De editie volgt uit de rekendatum en de aanwijzingsperiode (`NormVersion::designation_period`): 2020+A1 tot 1 juni 2022, 2022 tot 1 juli 2023, 2023 tot 1 juli 2024, 2024 tot 29 mei 2026. De Uniec-versie past daarbij (3.0 voor 2020+A1, 3.1 voor 2022, 3.2 voor 2023).
 
@@ -718,9 +719,76 @@ Gezocht op repository.officiele-overheidspublicaties.nl (ter-inzage-leggingen 20
 | Rapport | Periode | Uitkomst |
 |---|---|---|
 | [Parklaan, Soest, Uniec 3.1.3.1, 15-09-2022](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-20303/1/bijlage/BS_7192605_1664526905911_PR18758_-_Parklaan_104a_te_Soest_-_BENG.pdf.pdf) | 2022 | nagebouwd als M |
-| [Lidl, supermarkt met parkeerkelder, Uniec 3.0.7.1, 02-02-2021](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-22714/1/bijlage/07.Stoks15_Lidl-Dutilhweg_2feb2021_Volledig.pdf) | 2020+A1 | gevonden, nog te bouwen: winkelfunctie van 2 064,26 m² met VRF-verwarming en -koeling en een volledige uitdraai; gepubliceerd 55,98 / −27,18 / 126,9 |
+| [Lidl, supermarkt met parkeerkelder, Uniec 3.0.7.1, 02-02-2021](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-22714/1/bijlage/07.Stoks15_Lidl-Dutilhweg_2feb2021_Volledig.pdf) | 2020+A1 | nagebouwd als N (zie [N](#n-een-supermarkt-boven-een-parkeerkelder-in-2020a1-9-oktober-2026)) |
 | [sporthal Amersfoort, pro-forma-rapport, Uniec 3.1.5.0, 11-12-2022](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-19434/1/bijlage/Bijlage_17_2022-4978_Rapportage_BENG_pro_formapdf_fc10d433-2427-ef11-844c-005056a12c84.pdf) | 2022 | is al geval K |
 | [chalets De Koog, BENG-wijziging (ter inzage 2025)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-33688/1/bijlage/Publicatie_-_6_-__BENG_Chalet_1_en_2_Bosrandweg_409B_en_409C_De_Koog.pdf) | onbekend | niet te downloaden (leeg antwoord) |
 | [25.20-078, ter inzage 2022](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2022/til-2022-373/1/bijlage/25.20-078_BENG_rapport.pdf), [Schagen, geanonimiseerd, 05-09-2022](https://www.schagen.nl/sites/default/files/2023-02/05%20Beng%20berekening%20geanonimiseerd.pdf) | 2020+A1, 2022 | niet nagebouwd: woongebouwen met veel woningen |
 
 Ook in deze ronde is geen openbaar rapport met Uniec 3.4 gevonden, dus nog geen vergelijking in de standaarduitgave 2025+C1.
+
+## N, een supermarkt boven een parkeerkelder in 2020+A1 (9 oktober 2026)
+
+Geval N is een supermarkt van 2 064,26 m² winkelfunctie, berekend op 02-02-2021 met Uniec 3.0.7.1. Dat valt in de periode van NTA 8800:2020+A1. Eén rekenzone loopt over een entree in het souterrain, de begane grond en een kleine verdieping met personeelsruimten. Daaronder ligt een sterk geventileerde parkeerkelder. Verwarming en koeling komen van een VRF-luchtwarmtepomp, via de luchtbehandelingskast. De test is `case_n_supermarket_under_nta_8800_2020_a1` in `crates/nta8800-core/tests/public_comparison.rs`; de suite heeft het geval als `openbaar-n-2020a1`.
+
+| | BENG 1 | BENG 2 | BENG 3 |
+|---|---|---|---|
+| rapport (Uniec 3.0.7.1) | 55,98 | −27,18 | 126,9 |
+| eis (Bbl, ook in de kern) | 95,31 | 60,00 | 30,0 |
+| kern, uitgave 2020+A1 | 54,57 | −24,99 | 123,6 |
+
+### Kernfout: wanden van een verwarmde kelder niet in A_ls
+
+N liet een fout in de kern zien. De verliesoppervlakte A_ls telde de vlakken van het project, maar niet de wanden van een verwarmde kelder. Die wanden zijn geen eigen vlak in het project: ze horen bij de keldervloer (`groundFloors[].heatedBasement`, z·P van 8.39). Ze grenzen wel aan de grond en tellen dus mee met f_ls 0,7 (6.7.3 c, 2020+A1 p. 144, 2025+C1 p. 162).
+
+- **Bij N.** De kern gaf A_ls/A_g 2,60 en een eis voor BENG 1 van 94,13. Met de 116,07 m² kelderwand erbij is A_ls 5 457,41 m², precies als in het rapport, en zijn A_ls/A_g (2,64) en de eis (95,31) gelijk aan die van het rapport.
+- **Bij G** (2024, woning met verwarmde kelder) gaat A_ls van 579,48 naar 694,21 m², tegen 670,80 in het rapport, en de eis voor BENG 1 van 57,10 naar 66,42, tegen 64,52 in het rapport. Het restverschil komt doordat Uniec de opgegeven kelderwand (130,45 m²) telt en de kern z·P (2,92 × 56,13 = 163,90 m²). De BENG-waarden van G veranderen niet.
+- **Test.** `heated_basement_walls_count_in_the_loss_area` in `project_performance.rs`. De berekening van de eisen verandert, de BENG-waarden niet.
+
+### Invoer
+
+Alles komt letterlijk uit de uitdraai, behalve waar hieronder anders staat.
+
+- **Sterk geventileerde ruimten.** De parkeerkelder, het laaddock, de vluchttrap en de ventilatieschacht zijn sterk geventileerd. 6.3 laat ze als buiten beschouwen (2020+A1 p. 136); 6.7.3 telt ze met f_ls 1. De uitdraai geeft de vlakken daarheen geen oriëntatie. De fixture zet de wanden op noord en geeft de ramen en deuren daarin g 0, zodat er geen zoninstraling is. De uitdraai heeft g 0,60 bij de puien en schuifdeuren naar de parking.
+- **Schil.** Gevels Rc 4,70, daken Rc 6,30, vloeren boven de parkeerkelder en het laaddock Rc 3,70. Ramen U 1,2 met g 0,25 (zonwerend glas) op ZW en ZO, en g 0,60 naar de parking. Raamkozijnen achter vaste lamellen U 1,65 met g 0,05. Deuren U 2,0–2,2, overheaddeur U 1,5.
+- **Zonwering.** Screens buiten, zwart/antraciet/donkerbruin, handbediend zonder lichtwering, bij de pui van de roltrap en de pui bij de kassa's (tabellen 7.5 en 7.8).
+- **Lineaire koudebruggen.** Vierendertig aansluitingen staan per vlak in de fixture, met de ψ uit de uitdraai.
+- **Souterrain.** Vloer 204,37 m², Rc 3,70, P 70,00 m, ψ 0,50 over de hele omtrek. Kelderwanden 116,07 m², Rc 3,70, z 3,65 m. In de kern is z·P de wandoppervlakte (8.39). De fixture geeft daarom 31,80 m van de omtrek een diepte van 3,65 m en de rest (de wanden naar de parkeerkelder) 0 m (8.42). Zo is z·P 116,07 m².
+- **Warmtecapaciteit.** "hsb, sfb of staalskeletbouw met staalbeton of niet-massieve betonnen vloeren", geen of open plafond: rij 250–500 kg/m² van tabel 7.10, 180 kJ/(m²K) (2020+A1 p. 179–180).
+- **Verwarming.** VRF-luchtwarmtepomp forfaitair, buitenlucht naar binnenlucht, COP 2,80. Luchtverwarming met naverwarming van de ingaande lucht, vertrekhoogte 6–8 m. Het rapport drukt Δθ 2,5 K voor de regeling en −0,5 K voor de automatische regeling per ruimte. De fixture geeft dat met de luchtverwarming van 9.3.3.4 (Δθ_ctr 2,5, Δθ_roomaut −0,5); tabel 9.7 (naverwarming, luchttemperatuur in de ruimte) zou 1,8 K geven. De afgifteventilatoren zijn indirect, AC, met terugkeer van warme lucht (tabel 9.13). Geen watergedragen distributie.
+- **Ventilatie.** D.3, centrale WTW met CO2-sturing. Roterende warmtewisselaar 0,70, 100 % bypass, constant-volumeregeling. LBK buiten de thermische zone, met verwarmings- en koelbatterij; kanalen ≤ 20 m en geïsoleerd (tabel 11.19 situatie 1). Geïnstalleerd 1 400 dm³/s. Terugregeling tot 40 % op debietregeling, automatische passieve koelregeling. Forfaitaire gelijkstroomventilatoren. q_v10;lea;ref 0,42.
+- **Koeling.** Compressiekoeling forfaitair (EER 3,00), directe expansie in de LBK, luchtkoeling. Het rapport drukt −2,5 K en +0,5 K; de fixture geeft dat als regeling per ruimte, niet gecertificeerd, met directe expansie. Tien afgifteventilatoren van 10 W.
+- **Tapwater.** Elektrische boiler forfaitair, één vat van 10 l, label A, warme aansluiting ongeïsoleerd.
+- **Verlichting.** 8,50 W/m² over 2 064,26 m², centraal aan, geen daglichtregeling, f_afzuiging 0,50 (7.28).
+- **PV.** Twee keer 349 panelen Eurener PEPV 280 (280 Wp), ZW en NO onder 12°, sterk geventileerd. 2020+A1 kent alleen 16.4a: K_pk = Wp per paneeloppervlak, naar beneden afgerond op 5 W/m² (p. 651). Het paneeloppervlak staat niet in de uitdraai. De fixture neemt 1,63 m² (K_pk 170 W/m²), teruggerekend uit de opbrengst op de meter; de kern geeft dan 146 257 kWh, gelijk aan het rapport.
+
+### Per post
+
+Elektriciteit in kWh/jr; tussen haakjes de geleverde warmte of koude. Δ BENG 2 = Δ kWh · 1,45 / A_g.
+
+| Post | Rapport | Kern | Δ BENG 2 |
+|---|---|---|---|
+| verwarming | 29 244 (81 882) | 32 136 (89 980) | +2,03 |
+| hulpenergie verwarming | 1 721 | 1 816 | +0,07 |
+| tapwater | 3 175 | 3 175 | 0,00 |
+| koeling | 8 380 (25 140) | 9 906 (29 719) | +1,07 |
+| hulpenergie koeling | 314 | 402 | +0,06 |
+| ventilatoren | 5 164 | 2 283 | −2,02 |
+| verlichting | 59 554 | 60 961 | +0,99 |
+| PV op de meter | 146 257 | 146 257 | 0,00 |
+| **totaal** | | | **+2,20** (gemeten +2,19) |
+
+- **Ventilatoren.** 5 164 kWh is tot op de kWh f_SFP 0,125 · f_systype 2 · 2 122 m³/h over het hele jaar, gedeeld door f_prac;vent 0,9. Die 2 122 m³/h is q_V;ODA;req van de koudebalans, met maximale benutting van de capaciteit (τ_sysC). De kern neemt die van de warmtebalans, 938 m³/h, en rekent 2 283 kWh. 11.139 (2020+A1 p. 495) zegt niet welke van de twee geldt; zie [vraag 5 aan NEN](nta8800-vragen-nen.md).
+- **Verlichting.** Het rapport rekent met P_n 17 546 W: 17 546 × 3 100 h + 5 161 kWh parasitair = 59 554 kWh. De kern rondt P_n af op twee significante cijfers naar boven volgens bijlage X (2020+A1 p. 631), dus 18 000 W. Dat is hetzelfde verschil als bij I.
+- **Hulpenergie koeling.** De tien ventilatoren zijn gelijk (314 kWh). Het verschil is de regelenergie van 10.87, 87,6 kWh.
+- **Koeling.** De kern rekent 29 719 kWh koude: netto koudebehoefte 10 242, afgifteverlies volgens 10.15 3 026 (30 %), ontvochtiging 16 263 (12.3, directe expansie als 6/12 °C) en de LBK 189. Het rapport noemt 25 140 kWh.
+  - Met het verlies van 10.15 op 0,15 begrensd zou de kern 28 229 kWh koude rekenen, 0,35 minder op BENG 2.
+  - Bij I telde Uniec 3.0.9.3 ontvochtiging niet mee. Hier ligt de koude van het rapport ruim boven de netto behoefte van de kern plus 15 % (11 778 kWh), dus Uniec 3.0.7.1 telt hier waarschijnlijk wel ontvochtiging. Hoeveel, is uit de uitdraai niet af te leiden.
+- **Verwarming.** De kern rekent 80 201 kWh warmtebehoefte, 9 385 kWh afgifteverlies (Δθ 2,0 K, 11,7 %) en 394 kWh voor de LBK. Het rapport geeft alleen de warmte voor het systeem, 81 882 kWh. De hulpenergie schaalt mee: de opwekker 0,51 % van de warmte in beide, de afgifteventilatoren 1 361 tegen 1 306 kWh (591,6 W in het rapport). Welk deel van de 9,9 % meer warmte uit de behoefte en welk uit de afgifte komt, is uit de uitdraai niet vast te stellen. BENG 1 ligt in de kern 2,5 % lager; dat wijst erop dat het verschil vooral in de afgifte zit.
+- **BENG 1** is 54,57 tegen 55,98 (−2,5 %), op de vaste C1-ventilatie van 5.3: warmte 93 686 en koude 18 952 kWh. Het rapport geeft geen behoefte per dienst.
+- **BENG 3** ligt lager (123,6 tegen 126,9): er staat meer elektriciteit tegenover dezelfde PV-opbrengst.
+
+### Wat N toevoegt
+
+- **Een fout in de kern** (A_ls zonder kelderwanden), gevonden doordat de eis van het rapport tot op twee decimalen te volgen is.
+- **Een derde lezing.** Naast 10.15 en 10.87 rekent Uniec de forfaitaire ventilatoren met de luchtvolumestroom van de koudebalans. Bij een utiliteitsgebouw met passieve koeling via de ventilatie weegt dat even zwaar als de koeling zelf, maar met het andere teken: −2,02 tegen +1,13 voor de koeling met haar hulpenergie.
+- **De eerste supermarkt en de eerste sterk geventileerde ruimten.** Na verklaring per post blijven verwarming (+2,03, oorzaak niet uit de uitdraai te halen) en de verdeling van de koude (+1,07) over.
