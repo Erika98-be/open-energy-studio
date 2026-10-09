@@ -184,7 +184,10 @@ pub fn allocate(
     let mut building = building_initial.clone();
     let mut zone_results = Vec::new();
     for (zone, initial) in zones.iter().zip(&initial_by_zone) {
-        if initial.iter().any(|part| !(part.area_m2 > 0.0)) {
+        if initial
+            .iter()
+            .any(|part| !(part.area_m2.is_finite() && part.area_m2 > 0.0))
+        {
             issues.push(CommonSpaceIssue {
                 code: "common_space_exceeds_zone",
                 path: format!("zoneData[{}].commonSpaces", zone.data_index),
