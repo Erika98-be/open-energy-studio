@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Openbaar geval H: de gemeenschappelijke ruimte binnen RZ-1 alleen naar de functies van die zone (geen rekenwijziging)
+
+- **Oorzaak.** De verwarming van H lag 9 % onder het rapport (3 989 tegen 4 382 kWh). De fixture verdeelde de gemeenschappelijke ruimte van 49,20 m² ook binnen RZ-1 over alle vier functies, met 44,35 m² sport in RZ-1. 6.6.4 (2023 p. 145) deelt haar binnen een rekenzone alleen toe aan de functies die in die zone liggen; de sportfunctie ligt in RZ-2.
+- **Nieuwe invoer van RZ-1.** Kantoor 25,24, bijeenkomst overig 45,16 en gezondheidszorg overig 47,40 m², alle drie 21 °C (6.5.3, 2023 p. 143–144, en tabel 7.13, p. 197), in plaats van een gewogen 19,12 °C. De ventilatie van RZ-1 rekent met dezelfde functies. De gebouwverdeling over vier functies blijft voor de Bbl-grenswaarden, het tapwater (13.2.3) en de verlichtingszone van de gemeenschappelijke ruimte; daar komen kern en rapport al op de kWh overeen.
+- **Gevolg.**
+  - De warmte is nu 13 301 tegen 13 366 kWh, de elektriciteit 4 361 tegen 4 382, de hulpenergie 318 tegen 319 en de omgevingswarmte 8 940 tegen 8 984 kWh.
+  - H: 30,20 / 81,86 / 30,0 tegen 29,08 / 80,01 / 30,5 (was 27,29 / 80,63 / 29,7).
+  - BENG 2 ligt nu 1,85 hoger door koeling (10.15, +1,56), de regelenergie van 10.87 (+0,17) en de ventilatoren (+0,17). BENG 1 ligt 3,9 % hoger; het rapport geeft geen behoefte per zone of dienst om dat te splitsen.
+- **Wat verandert.** De fixture van H, de test `case_h_utility_under_nta_8800_2023` (nu ook warmte, hulpenergie, omgevingswarmte en de behoefte van RZ-1), de suite `openbare-gevallen.json` en de documentatie. De rekenkern niet.
+
 ### 9 oktober 2026 — Openbaar geval N: warmtebehoefte van het werkelijke systeem verklaard (geen rekenwijziging)
 
 - **Ventilatie.** Elke ventilatie-invoer van de uitdraai is naast de fixture gelegd (systeem, f_ctrl, WTW, LBK, terugregeling, debieten). Ze kloppen. Een eigen herberekening van de massabalans (11.1–11.14) geeft dezelfde infiltratie als de kern: 629,5 m³/h in januari.
