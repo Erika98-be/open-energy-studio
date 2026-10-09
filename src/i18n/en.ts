@@ -1339,6 +1339,7 @@ export const en: Record<string, string> = {
   'nta.gap.common_space_invalid': 'Common space: the area must be above 0 and each function may appear once',
   'nta.gap.common_space_function_outside_zone': 'Common space: none of the functions that rely on it lies in this calculation zone (6.6.4)',
   'nta.gap.common_space_exceeds_zone': 'The common spaces together exceed the calculation zone or leave no own function area',
+  'nta.gap.common_space_area_mismatch': 'The own areas of the functions plus the common spaces must add up to the usable area of the calculation zone (6.6.3); enter only the own area of each function, without the common space',
   'nta.gap.window_data_missing': 'Window data incomplete (area, U or g)',
   'nta.gap.construction_u_value_missing': 'Construction U-value missing',
   'nta.gap.direct_transmission_unresolved': 'Outdoor transmission cannot be derived (boundary, bridge classification or point bridge inventory)',

@@ -128,9 +128,11 @@ export function ZoneDataFields({ draft, change, project }: SectionProps & { proj
   const { t } = useI18n();
   const field = { draft, onChange: change };
   const zoneData = list(draft, ['zoneData']);
-  if (project.zones.length < 2 && zoneData.length === 0) return <p className="nta-form-note">{t('nta.zoneData.singleZone')}</p>;
+  // With one zone the block's data apply until the zone gets its own entry, which a utility zone needs for
+  // several use functions (function areas) or a common space (6.6.4).
+  const single = project.zones.length < 2 && zoneData.length === 0;
   return <div className="nta-form-subsection">
-    <p className="nta-form-note">{t('nta.zoneData.note')}</p>
+    <p className="nta-form-note">{t(single ? 'nta.zoneData.singleZone' : 'nta.zoneData.note')}</p>
     {project.zones.map((zone) => {
       const index = zoneData.findIndex((item) => String(item.zoneId) === zone.id);
       const title = zone.name ? `${zone.name} (${zone.id})` : zone.id;
@@ -155,8 +157,10 @@ export function ZoneDataFields({ draft, change, project }: SectionProps & { proj
             if (value === 'residential') {
               if (own == null) change([...base, 'dwellingType'], read(draft, ['dwellingType']) ?? undefined);
             } else if (own != null) change([...base, 'dwellingType'], undefined);
-            // A residential zone has no function areas (function_areas_residential_mixed).
+            // A residential zone has no function areas (function_areas_residential_mixed) and no form for
+            // common spaces, so none are kept out of sight.
             if (value === 'residential' && areas.length > 0) change([...base, 'functionAreas'], undefined);
+            if (value === 'residential' && read(draft, [...base, 'commonSpaces']) != null) change([...base, 'commonSpaces'], undefined);
           }} />
         {usage === 'residential' && <SelectField {...field} path={[...base, 'dwellingType']} label={t('nta.zoneData.dwellingType')}
           options={[['apartment_building', t('nta.form.dwellingType.apartment')], ['other', t('nta.form.dwellingType.other')]]}

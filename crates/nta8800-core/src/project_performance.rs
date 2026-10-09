@@ -1549,32 +1549,59 @@ fn apply_common_spaces(
             data.function_areas = zone.allocated.clone();
         }
         // The chapter 11 functions of the zone are its allocated function
-        // areas (11.2.2.5.1 with 6.5.3); a swimming pool stays with its
-        // function.
+        // areas (11.2.2.5.1 with 6.5.3). Entries of one function (a part
+        // with and a part without a swimming pool) share its allocated area
+        // in the ratio of their entered areas.
         if let Some(ventilation) = data.ventilation.as_mut() {
-            ventilation.functions = zone
-                .allocated
-                .iter()
-                .map(|part| {
-                    let function = crate::zoning::ventilation_function(part.function);
-                    crate::ventilation::FunctionArea {
-                        function,
-                        area_m2: part.area_m2,
-                        swimming_pool: ventilation
-                            .functions
-                            .iter()
-                            .any(|item| item.function == function && item.swimming_pool),
-                    }
-                })
-                .collect();
+            ventilation.functions =
+                allocated_ventilation_functions(&zone.allocated, &ventilation.functions);
         }
     }
-    if nta.bbl_functions.is_empty() && split.building.len() > 1 {
-        if let Some(functions) = crate::common_space::bbl_functions(&split) {
-            nta.bbl_functions = functions;
+    if split.building.len() > 1 {
+        if nta.bbl_functions.is_empty() {
+            if let Some(functions) = crate::common_space::bbl_functions(&split) {
+                nta.bbl_functions = functions;
+            }
+        }
+        if nta.label_functions.is_empty() {
+            if let Some(functions) = crate::common_space::label_functions(&split) {
+                nta.label_functions = functions;
+            }
         }
     }
     true
+}
+
+/// The zone's chapter 11 function areas after the 6.6.4 allocation.
+fn allocated_ventilation_functions(
+    allocated: &[crate::monthly_demand::UsageFunctionArea],
+    entered: &[crate::ventilation::FunctionArea],
+) -> Vec<crate::ventilation::FunctionArea> {
+    let mut result = Vec::new();
+    for part in allocated {
+        let function = crate::zoning::ventilation_function(part.function);
+        let own: Vec<&crate::ventilation::FunctionArea> = entered
+            .iter()
+            .filter(|item| {
+                item.function == function && item.area_m2.is_finite() && item.area_m2 > 0.0
+            })
+            .collect();
+        let total: f64 = own.iter().map(|item| item.area_m2).sum();
+        if own.len() < 2 || total <= 0.0 {
+            result.push(crate::ventilation::FunctionArea {
+                function,
+                area_m2: part.area_m2,
+                swimming_pool: own.iter().any(|item| item.swimming_pool),
+            });
+            continue;
+        }
+        result.extend(own.iter().map(|item| crate::ventilation::FunctionArea {
+            function,
+            area_m2: part.area_m2 * item.area_m2 / total,
+            swimming_pool: item.swimming_pool,
+        }));
+    }
+    result
 }
 
 fn gap(code: &'static str, path: impl Into<String>) -> InputGap {
@@ -6900,6 +6927,52 @@ mod tests {
         let (entered_derived, entered_geometry) = loss(&value);
         assert!((entered_derived - derived - 0.7 * 12.5).abs() < 1e-9);
         assert!((entered_geometry.loss_area_m2 - geometry.loss_area_m2 - 0.7 * 12.5).abs() < 1e-9);
+    }
+
+    /// Review 24: after the 6.6.4 allocation a sport function entered as a
+    /// part with and a part without a swimming pool keeps that ratio; only the
+    /// pool part doubles q_usi;spec (11.2.2.5.1).
+    #[test]
+    fn allocated_ventilation_keeps_the_swimming_pool_part() {
+        use crate::monthly_demand::{UsageFunction, UsageFunctionArea};
+        use crate::ventilation::{FunctionArea, VentilationFunction};
+        let entered = [
+            FunctionArea {
+                function: VentilationFunction::Sport,
+                area_m2: 100.0,
+                swimming_pool: true,
+            },
+            FunctionArea {
+                function: VentilationFunction::Sport,
+                area_m2: 300.0,
+                swimming_pool: false,
+            },
+            FunctionArea {
+                function: VentilationFunction::Office,
+                area_m2: 50.0,
+                swimming_pool: false,
+            },
+        ];
+        let allocated = [
+            UsageFunctionArea {
+                function: UsageFunction::Sport,
+                area_m2: 440.0,
+            },
+            UsageFunctionArea {
+                function: UsageFunction::Office,
+                area_m2: 60.0,
+            },
+        ];
+        let functions = allocated_ventilation_functions(&allocated, &entered);
+        assert_eq!(functions.len(), 3);
+        let pool: f64 = functions
+            .iter()
+            .filter(|item| item.swimming_pool)
+            .map(|item| item.area_m2)
+            .sum();
+        assert!((pool - 110.0).abs() < 1e-9, "{functions:?}");
+        let total: f64 = functions.iter().map(|item| item.area_m2).sum();
+        assert!((total - 500.0).abs() < 1e-9);
     }
 
     #[test]

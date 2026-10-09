@@ -596,6 +596,14 @@ fn case_h_common_space_input_equals_the_hand_split() {
         .as_f64()
         .unwrap();
     assert!((sport - 670.35).abs() < 0.01, "{split}");
+    // Review 24: the label functions take the same building split as the
+    // Bbl functions when none are given.
+    let derived = result.derived_input.as_ref().unwrap();
+    assert_eq!(derived.label_functions.len(), 4);
+    assert_eq!(derived.bbl_functions.len(), 4);
+    for (label, bbl) in derived.label_functions.iter().zip(&derived.bbl_functions) {
+        assert!((label.area_m2 - bbl.area_m2).abs() < 1e-9);
+    }
 }
 
 /// Case I, the second utility case: an office with an assembly function and
