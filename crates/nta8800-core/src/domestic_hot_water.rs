@@ -4666,8 +4666,22 @@ mod tests {
         });
         assert!(validate_hot_water(&with_vessel, context(), "hotWater").is_empty());
         let stored = assess_hot_water(&with_vessel, context()).unwrap();
-        assert!(stored.months[0].storage_loss_kwh > 0.0);
-        assert!(stored.months[0].generator_output_kwh > jan.generator_output_kwh);
+        let stored_jan = &stored.months[0];
+        assert!(stored_jan.storage_loss_kwh > 0.0);
+        // 13.7: the loss is added once, on the demand side of the CHP, and
+        // the CHP's ε_th and ε_el apply to that output (as for a boiler).
+        assert!(
+            (stored_jan.generator_output_kwh
+                - jan.generator_output_kwh
+                - stored_jan.storage_loss_kwh)
+                .abs()
+                < 1e-9
+        );
+        assert!((stored_jan.natural_gas_kwh - stored_jan.generator_output_kwh / 0.49).abs() < 1e-9);
+        assert!(
+            (stored_jan.chp_electricity_kwh - stored_jan.generator_output_kwh * 0.30 / 0.49).abs()
+                < 1e-9
+        );
         // No method or both methods are rejected.
         let neither = system(HotWaterGenerator::Chp(Box::new(HotWaterChp {
             declared_efficiencies: None,

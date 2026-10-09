@@ -908,7 +908,9 @@ def daylight_zone(zone_id, area, watts, sector, test_id):
 # EP-U602g (p. 50): one zone of 96 m², a daylight sector of 48 m² with
 # F_D;S 0,3 and automatic dimming: F_D;dayl = 1 - 0,73 x 0,3 = 0,781 (the
 # test's F_D 0,8905 = (48 x 0,781 + 48)/96). The norm has no input for a
-# given F_D;S; the test's F_D;dayl enters through the 15193-1 alternative.
+# given F_D;S, and 0,3 is out of reach of 14.37 for vertical windows (at
+# least 0,65 x 0,12 + 0,25 = 0,328), so the test's F_D;dayl enters through
+# the 15193-1 alternative, which rounds it down to 0,78 (F_D 0,89).
 U602G = setp(
     f"{NTA}/lighting/0/lightingZones",
     [daylight_zone("kantoor", 96.0, 768.0, declared_sector(48.0, 0.781, "EP-U602g", "F_D;S 0,3, automatisch dimmen, F_D;dayl 0,781"), "EP-U602g")],
@@ -916,12 +918,34 @@ U602G = setp(
 # EP-U602h (p. 50-51): two equal lighting zones of 48 m² (half the power
 # each). The lower one as 602g (F_D 0,8905, so a sector of 24 m²); the upper
 # one with rooflights, F_D;S 0,68: F_D;dayl 0,5036, F_D 0,7518, so a sector
-# of 24 m² as well.
+# of 24 m² as well. F_D;S 0,68 is the table 14.9 value (2022 p. 650; 14.8 in
+# 2025+C1) for 2 % <= D < 4 %, so
+# the upper sector goes through 14.31-14.36 and 14.41/14.42 (no rounding):
+# a 2 x 4 m rooflight in a corner of an 8 x 6 m room, clear height 2,75 m
+# (extra depth 2 m, cut by the walls at 0 m), 3 m² opening, luminaires 2 m
+# above the work plane: A_D 4 x 6 = 24 m², room index 1,71, D about 3,2 %.
+# Only the lower sector (F_D;S 0,3 is below the 0,328 that 14.37 reaches
+# for vertical windows) needs the 15193-1 route.
+def u602h_rooflight():
+    return {
+        "kind": "rooflights",
+        "rooflightDepthM": 2.0,
+        "rooflightWidthM": 4.0,
+        "clearHeightM": 2.75,
+        "wallDistancesM": [0.0, 6.0, 0.0, 2.0],
+        "openingAreaM2": 3.0,
+        "roomLengthM": 8.0,
+        "roomWidthM": 6.0,
+        "luminaireHeightM": 2.0,
+        "control": "automatic_dimming",
+    }
+
+
 U602H = setp(
     f"{NTA}/lighting/0/lightingZones",
     [
         daylight_zone("onder", 48.0, 384.0, declared_sector(24.0, 0.781, "EP-U602h", "onderste zone als 602g, F_D;dayl 0,781"), "EP-U602h"),
-        daylight_zone("boven", 48.0, 384.0, declared_sector(24.0, 0.5036, "EP-U602h", "daklichten, F_D;S 0,68, F_D;dayl 0,5036"), "EP-U602h"),
+        daylight_zone("boven", 48.0, 384.0, u602h_rooflight(), "EP-U602h"),
     ],
 )
 

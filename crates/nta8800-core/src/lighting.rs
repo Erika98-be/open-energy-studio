@@ -1541,6 +1541,57 @@ mod tests {
         }
     }
 
+    #[test]
+    fn isso54_u602h_rooflight_sector_gives_the_unrounded_14_36_factor() {
+        // ISSO 54 EP-U602h, upper zone: F_D;S 0,68 is the table 14.8 value
+        // (2025+C1 p. 674; 14.9 in 2022, p. 650)
+        // for 2 % <= D < 4 %, so 14.36 gives 1 - 0,73 x 0,68 = 0,5036 and
+        // F_D = (24 x 0,5036 + 24)/48 = 0,7518, without the two-digit
+        // rounding of the 15193-1 route (which would give 0,75).
+        let sector = DaylightSector::Rooflights {
+            rooflight_depth_m: 2.0,
+            rooflight_width_m: 4.0,
+            clear_height_m: 2.75,
+            wall_distances_m: [0.0, 6.0, 0.0, 2.0],
+            opening_area_m2: 3.0,
+            room_length_m: 8.0,
+            room_width_m: 6.0,
+            luminaire_height_m: 2.0,
+            control: DaylightControl::AutomaticDimming,
+        };
+        let (area, factor) = sector_geometry(&sector).unwrap();
+        assert!((area - 24.0).abs() < 1e-12);
+        assert!((factor - 0.5036).abs() < 1e-12);
+        let mut zone = forfait_zone(48.0);
+        zone.power = InstalledPower::Installed {
+            luminaires: vec![LuminaireGroup {
+                count: 1,
+                power: LuminairePower::System { power_w: 384.0 },
+            }],
+            dynamic_factor: None,
+            source_reference: "test".into(),
+        };
+        zone.daylight = Daylight::Sectors {
+            sectors: vec![sector],
+            source_reference: "plattegrond".into(),
+        };
+        let input = office_of(48.0, zone);
+        assert!(validate_lighting(&input, 48.0, "lighting").is_empty());
+        let result = assess_zone_lighting(&input, 48.0, context()).unwrap();
+        assert!((result.lighting_zones[0].daylight_factor - 0.7518).abs() < 1e-12);
+    }
+
+    #[test]
+    fn declared_sector_takes_no_daylight_control() {
+        // The 15193-1 F_D;dayl already holds the control (14.36), so a
+        // control on a declared sector is refused rather than ignored.
+        let parsed = serde_json::from_value::<DaylightSector>(serde_json::json!({
+            "kind": "declared", "areaM2": 24.0, "daylightDependencyFactor": 0.5,
+            "sourceReference": "x", "control": "automatic_dimming"
+        }));
+        assert!(parsed.is_err());
+    }
+
     fn office_of(area: f64, zone: LightingZone) -> ZoneLighting {
         let mut input = office(vec![zone]);
         input.functions[0].area_m2 = area;
