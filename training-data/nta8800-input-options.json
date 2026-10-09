@@ -3001,6 +3001,8 @@
       "exposedPerimeterM",
       "crawlspaceBottomInsulated",
       "floorHeightAboveGroundM",
+      "depthBelowGroundM",
+      "groundFloorId",
       "renovation",
       "zoneId",
       "sourceReference"
@@ -3724,6 +3726,8 @@
       "exposedPerimeterM",
       "crawlspaceBottomInsulated",
       "floorHeightAboveGroundM",
+      "depthBelowGroundM",
+      "groundFloorId",
       "renovation",
       "zoneId",
       "sourceReference"
