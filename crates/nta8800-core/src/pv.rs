@@ -311,6 +311,7 @@ impl PvSystem {
 pub const INTERPRETATIONS: &[&str] = &[
     "Table 16.3 (p. 681) lists c_sh;PV from F_sh;obst 0,80 to 1,00 and gives no rule outside that range; below 0,80 the kernel holds the last value 0,75 (as other tables are held at their ends). The yield of 16.2/16.3 still falls with F_sh;obst itself, so only the extra mismatch correction stops at 0,75",
     "17.3.7 (p. 749): an azimuth exactly midway between two table orientations may take the higher neighbouring obstruction value; the kernel does so per month, consistent with I_sol in 17.2 (p. 694), where the higher value is required",
+    "16.4 (2025+C1 p. 679-680) sets no maximum for a declared K_pk; the kernel refuses more than 400 W/m² as an input error and the registration check warns above 300 W/m² (plausibility_pv_peak_power); both bounds are program choices",
 ];
 
 /// Table 16.3 with linear interpolation; `F_sh;obst ≤ 0,80` gives 0,75.
@@ -690,5 +691,9 @@ mod tests {
         assert!(declared(310.0).is_empty());
         assert!(declared(PEAK_POWER_MAX_W_PER_M2).is_empty());
         assert_eq!(declared(401.0)[0].code, "pv_peak_power_invalid");
+        // Both bounds are program choices and are in the interpretation register.
+        assert!(INTERPRETATIONS
+            .iter()
+            .any(|item| item.contains("400 W/m²") && item.contains("plausibility_pv_peak_power")));
     }
 }
