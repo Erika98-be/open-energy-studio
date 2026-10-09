@@ -911,7 +911,10 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
               onChange={(event) => change([...base, 'boundary'], event.target.value === 'unheated_space'
                 ? { kind: 'unheated_space', spaceId: String(unheatedSpaces[0]?.id ?? '') }
                 : { kind: event.target.value })}>
-              {['outdoor', 'ground', 'crawlspace', 'adjacent_heated', 'unheated_cellar', 'strongly_ventilated', 'sunroom', 'water',
+              {['outdoor',
+                // A roof has no ground route (NTA 8800 8.3; ISSO 82.1 §8.4 knows a floor and a façade part against the ground).
+                ...(read(draft, [...base, 'element']) !== 'roof' || read(draft, [...base, 'boundary', 'kind']) === 'ground' ? ['ground'] : []),
+                'crawlspace', 'adjacent_heated', 'unheated_cellar', 'strongly_ventilated', 'sunroom', 'water',
                 // An unheated space boundary needs a space from the list below (`spaceId`).
                 ...(unheatedSpaces.length > 0 || read(draft, [...base, 'boundary', 'kind']) === 'unheated_space'
                   ? ['unheated_space'] : [])].map((key) =>

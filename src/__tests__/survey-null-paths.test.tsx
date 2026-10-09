@@ -81,6 +81,14 @@ const sections: Array<{ name: string; route: 'residentialSurvey' | 'utilitySurve
     render: (d, c) => <SurfaceGeometryFields draft={d} change={c} t={t} base={['envelope', 'surfaces', 0]} />,
   },
   {
+    name: 'façade part against the ground', route: 'residentialSurvey',
+    initial: { envelope: { surfaces: [
+      { id: 'kelderwand', element: 'facade', boundary: { kind: 'ground' }, depthBelowGroundM: 2.5, groundFloorId: 'keldervloer' },
+      { id: 'keldervloer', element: 'floor', boundary: { kind: 'ground' }, exposedPerimeterM: 20 },
+    ] } },
+    render: (d, c) => <SurfaceGeometryFields draft={d} change={c} t={t} base={['envelope', 'surfaces', 0]} />,
+  },
+  {
     name: 'panels', route: 'residentialSurvey',
     initial: { envelope: { surfaces: [{ id: 'gevel' }], panels: [{
       id: 'paneel-1', surfaceId: 'gevel', areaM2: 2, insulation: { kind: 'known_thickness', thicknessMm: 40 },

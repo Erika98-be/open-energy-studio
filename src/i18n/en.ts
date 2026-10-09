@@ -2877,6 +2877,8 @@ export const en: Record<string, string> = {
   'opname.surface.reed': "Thickness of the reed roof",
   'opname.surface.crawlspaceBottom': "Crawlspace bottom insulated",
   'opname.surface.floorHeightAboveGround': "Height H2: top of the ground floor to ground level (NTA 8800:2022 and 2020+A1)",
+  'opname.surface.depthBelowGround': "Height H1: top of the floor to ground level at the façade part against the ground (ISSO 82.1 §8.4); the floor counts as a heated basement (NTA 8800 8.3.3.2)",
+  'opname.surface.groundFloor': "Floor this façade part against the ground belongs to",
   'opname.surface.proven': "Thickness proven (evidence)",
   'opname.surface.space': "Unheated space",
   'opname.surface.boundaryKind.unheated_space': "unheated space (from the list)",

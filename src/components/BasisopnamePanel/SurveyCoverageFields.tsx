@@ -82,6 +82,10 @@ export function SurfaceGeometryFields({ draft, change, t, base }: Props & { base
   const element = read(draft, [...base, 'element']);
   const boundary = read(draft, [...base, 'boundary', 'kind']);
   const groundFloor = element === 'floor' && (boundary === 'ground' || boundary === 'crawlspace' || boundary === 'unheated_cellar');
+  // ISSO 82.1 §8.4 (7e druk p. 74–75): a façade part against the ground goes with its floor, with H1.
+  const groundWall = element === 'facade' && boundary === 'ground';
+  const floors = groundWall ? items(draft, ['envelope', 'surfaces']).filter((surface) => surface.element === 'floor'
+    && ['ground', 'crawlspace', 'unheated_cellar'].includes(String((surface.boundary as Draft | undefined)?.kind))) : [];
   return <>
     {element !== 'floor' && <SelectField {...field} path={[...base, 'orientation']} label={t('opname.surface.orientation')}
       options={opts(t, 'opname.orientationKind', ORIENTATIONS)} onChange={omitEmpty(change)} />}
@@ -90,6 +94,12 @@ export function SurfaceGeometryFields({ draft, change, t, base }: Props & { base
     <CheckField {...field} path={[...base, 'cavity']} label={t('opname.surface.cavity')} />
     {groundFloor && <NumberField {...field} path={[...base, 'exposedPerimeterM']} label={t('opname.surface.exposedPerimeter')}
       optional unit="m" onChange={omitEmpty(change)} />}
+    {groundWall && <>
+      <NumberField {...field} path={[...base, 'depthBelowGroundM']} label={t('opname.surface.depthBelowGround')}
+        optional unit="m" onChange={omitEmpty(change)} />
+      <SelectField {...field} path={[...base, 'groundFloorId']} label={t('opname.surface.groundFloor')}
+        options={floors.map((floor) => [String(floor.id), String(floor.id)])} onChange={omitEmpty(change)} />
+    </>}
   </>;
 }
 
