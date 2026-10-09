@@ -552,9 +552,10 @@ Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 1 896,98:
   - Systeem 1: zes elektrische boilers van 10 l, label A+, ongeïsoleerde aansluiting (f_sto;dis;ls 2), voor de onderwijszone en 312,07 m² van de gymzaal.
   - Systeem 2: een elektrisch doorstroomtoestel voor de rest van de gymzaal.
 - **Verlichting.** 5,50 W/m², LED (L80) met nieuwwaardecompensatie (2022 tabel 14.4).
-- **PV.** 203 m² met een eigen waarde van 310 Wp/m², west 20°.
-  - De kern weigert K_pk boven 300 W/m²; dat is fysisch onwaarschijnlijk.
-  - De fixture neemt daarom hetzelfde piekvermogen (62 930 Wp) als 300 W/m² over 209,77 m². De opbrengst is gelijk aan die van het rapport.
+- **PV.** 203 m² met een eigen waarde van 310 Wp/m², west 20°; de fixture neemt dat letterlijk over.
+  - 16.4 kent geen maximum voor K_pk (2020+A1 p. 651, 2022 p. 656–657, 2025+C1 p. 679–680). De grens van 300 W/m² in de kern was een eigen keuze en weigerde deze invoer ten onrechte.
+  - Sinds rekenkern 0.4.0 weigert de kern pas boven 400 W/m² (een invoerfout); boven 300 W/m² geeft de registratiecontrole een plausibiliteitswaarschuwing.
+  - Eerder nam de fixture hetzelfde piekvermogen als 300 W/m² over 209,77 m² (62 931 Wp, 46 018 kWh); nu is het 62 930 Wp en 46 017 kWh, gelijk aan het rapport.
 
 Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 1 653,96:
 
@@ -566,7 +567,7 @@ Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 1 653,96:
 | Koeling met hulpenergie | 4 260 | 3 339 | −0,81 |
 | Ventilatoren | 8 052 | 7 843 | −0,18 |
 | Verlichting | 21 501 | 21 501 | 0 |
-| PV (op de meter) | 46 017 | 46 018 | 0 |
+| PV (op de meter) | 46 017 | 46 017 | 0 |
 | **BENG 2** | **25,36** | **18,63** | **−6,73** |
 
 - **Gelijk.**

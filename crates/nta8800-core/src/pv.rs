@@ -22,6 +22,16 @@ pub const F_PRAC_PV: f64 = 0.95;
 pub const I_REF: f64 = 1.0;
 /// 16.4b: panel peak power is rounded down to a multiple of this, W.
 pub const PANEL_POWER_STEP_W: f64 = 5.0;
+/// Upper bound on a declared K_pk, W/m². 16.4 sets no maximum (2020+A1
+/// p. 651, 2022 p. 656-657, 2025+C1 p. 679-680): K_pk is the declared
+/// peak power per m² of panel, excluding the frame. This bound is the
+/// program's own and refuses only input errors: 400 W/m² is 40 % module
+/// efficiency at 1 kW/m².
+pub const PEAK_POWER_MAX_W_PER_M2: f64 = 400.0;
+/// Above this declared K_pk, W/m² (30 % module efficiency, beyond today's
+/// crystalline silicon), the registration check warns; the program's own
+/// threshold.
+pub const PEAK_POWER_PLAUSIBLE_W_PER_M2: f64 = 300.0;
 
 /// Table 16.2: integration and ventilation of the panels.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -356,7 +366,7 @@ pub fn validate_pv(system: &PvSystem, path: &str) -> Vec<PvIssue> {
             if !positive(*panel_area_m2) {
                 push("pv_panel_area_invalid", "peakPower.panelAreaM2");
             }
-            if !positive(*peak_power_w_per_m2) || *peak_power_w_per_m2 > 300.0 {
+            if !positive(*peak_power_w_per_m2) || *peak_power_w_per_m2 > PEAK_POWER_MAX_W_PER_M2 {
                 push("pv_peak_power_invalid", "peakPower.peakPowerWPerM2");
             }
         }
@@ -664,5 +674,21 @@ mod tests {
             assert!(codes.contains(&code), "{code} missing in {codes:?}");
         }
         assert!(validate_pv(&system(), "pv[0]").is_empty());
+    }
+
+    #[test]
+    fn declared_peak_power_has_no_norm_maximum() {
+        // 16.4 sets no maximum K_pk; public case L declared 310 W/m².
+        let declared = |peak_power_w_per_m2| {
+            let mut item = system();
+            item.peak_power = PeakPower::DeclaredSpecific {
+                peak_power_w_per_m2,
+                panel_area_m2: 203.0,
+            };
+            validate_pv(&item, "pv[0]")
+        };
+        assert!(declared(310.0).is_empty());
+        assert!(declared(PEAK_POWER_MAX_W_PER_M2).is_empty());
+        assert_eq!(declared(401.0)[0].code, "pv_peak_power_invalid");
     }
 }

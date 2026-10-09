@@ -13,6 +13,15 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — PV: opgegeven piekvermogen per m² tot 400 W/m², waarschuwing boven 300 W/m²
+
+- **Wat.** De kern weigerde een opgegeven K_pk boven 300 W/m² (`pv_peak_power_invalid`). Die grens stond niet in de norm: 16.4 kent geen maximum (2020+A1 p. 651, 2022 p. 656–657, 2025+C1 p. 679–680). Openbaar geval L (Uniec 3.1.5.0) gaf 310 Wp/m² op.
+- **Nu.** De kern weigert pas boven 400 W/m² (40 % moduulrendement, een invoerfout). Tussen 300 en 400 W/m² rekent hij en geeft de registratiecontrole de plausibiliteitswaarschuwing `plausibility_pv_peak_power`; die blokkeert niet. Beide grenzen zijn keuzes van het programma.
+- **Gevolg voor opgeslagen projecten.** Een project met een opgegeven K_pk tussen 300 en 400 W/m² was onvolledig en rekent nu. Andere uitkomsten veranderen niet.
+- **Geval L** neemt nu letterlijk 310 Wp/m² over 203 m² over (was 300 W/m² over 209,77 m²): PV 46 017 kWh, gelijk aan het rapport (was 46 018). BENG 1/2/3 veranderen niet.
+- **Rekenkern.** `KERNEL_VERSION` 0.3.0 → 0.4.0; de handleiding is opnieuw gestempeld.
+- **Tests.** `declared_peak_power_has_no_norm_maximum` (pv.rs) en de uitgebreide `plausibility_warnings_never_block` (registration.rs).
+
 ### 9 oktober 2026 — Openbare gevallen K en L: sporthal en basisschool in 2022 (geen rekenwijziging)
 
 Twee nieuwe utiliteitsgevallen uit de periode van NTA 8800:2022 (Uniec 3.1.5.0). Ze zijn als regressie op de eigen uitkomst opgenomen, met de verschilanalyse per post in [vergelijking openbare rapporten](nta8800-vergelijking-openbare-rapporten.md).

@@ -4127,6 +4127,7 @@ export const nl: Record<string, string> = {
   'registration.issue.plausibility_label_class_jump': "Grote sprong ten opzichte van het vorige label",
   'registration.issue.plausibility_loss_area_ratio': "Als/Ag buiten het gebruikelijke bereik",
   'registration.issue.plausibility_usable_floor_area': "Gebruiksoppervlakte ongebruikelijk",
+  'registration.issue.plausibility_pv_peak_power': "PV-piekvermogen per m² boven 300 W/m²",
   'registration.issue.plausibility_u_value': "Gemiddelde U-waarde ongebruikelijk",
   'registration.issue.postcode_required': "Postcode ontbreekt",
   'registration.issue.previous_label_class_invalid': "Vorige labelklasse onbekend",

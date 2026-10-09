@@ -648,7 +648,7 @@ fn case_l_school_under_nta_8800_2022() {
     assert!((used_kwh(&performance, "hotWater") - 10233.0).abs() < 1.0);
     assert!((used_kwh(&performance, "lighting") - 21501.0).abs() < 1.0);
     let pv = performance["pvSystems"][0]["annualKwh"].as_f64().unwrap();
-    assert!((pv - 46017.0).abs() < 1.5, "{pv}");
+    assert!((pv - 46017.0).abs() < 0.5, "{pv}");
     assert_eq!(
         performance["spaceHeating"]["generationEfficiency"].as_f64(),
         Some(3.1)
