@@ -782,7 +782,9 @@ export const NTA_SECTIONS: NtaSectionDef[] = [
   { id: 'mass', step: 'building', sub: 'zones', titleKey: 'nta.form.mass', Component: MassSection, paths: ['thermalMass'] },
   { id: 'zoneData', step: 'building', sub: 'zones', titleKey: 'nta.zoneData.title',
     Component: ({ draft, change, project }) => <ZoneDataFields draft={draft} change={change} project={project} />, paths: ['zoneData'],
-    when: (project, draft) => project.zones.length > 1 || listed('zoneData')(project, draft) },
+    // A single utility zone needs the section too: function areas and common spaces (6.6.4) live on zone data only.
+    when: (project, draft) => project.zones.length > 1 || listed('zoneData')(project, draft)
+      || read(draft, ['calculationScope']) === 'utility' },
   { id: 'internalGains', step: 'building', sub: 'zones', titleKey: 'nta.form.internalGains', Component: InternalGainsSection, paths: ['internalGains'] },
   { id: 'windows', step: 'building', sub: 'envelope', titleKey: 'nta.form.windows', Component: WindowsSection, paths: ['windowSolar'] },
   { id: 'windowObstructions', step: 'building', sub: 'envelope', titleKey: 'nta.form.windowObstructions.title',

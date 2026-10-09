@@ -10,7 +10,7 @@ import { escapeHtml } from './HtmlEscaping';
 import { dutchCodeCell, dutchDetailHtml, dutchNumber, dutchTimeHtml, dutchTimestamp } from './DutchReportText';
 import { indicatorDecimals, kernelReportModel } from './KernelReportModel';
 import {
-  chapterFiveSection, coolingSection, hotWaterSection, interpretationsSection, pvSection,
+  chapterFiveSection, commonSpaceSection, coolingSection, hotWaterSection, interpretationsSection, pvSection,
   registrationSection, serviceEnergySection, zebSection,
 } from './NtaCalculationReport';
 
@@ -298,7 +298,9 @@ function buildingChapter(doc: ReportDocument, assessment: ProjectPerformanceAsse
   const zoneRows = zones.map(({ id, input, result }) => `<tr>${td(id)}${td(input?.usageFunction ?? '—')}${tdn(Number(input?.usableFloorAreaM2), 2)}
       ${tdn(result.specificHeatCapacityKjPerM2k)}${tdn(result.transmission?.conductanceWPerK, 2)}${tdn(result.annualHeatingNeedKwh)}${tdn(result.annualCoolingNeedKwh)}</tr>`).join('');
   const zoneTable = doc.table('Rekenzones (§6.5)', '<tr><th>Rekenzone</th><th>Gebruiksfunctie</th><th>A<sub>g</sub> [m²]</th><th>D<sub>m;int</sub> [kJ/m²K]</th><th>H<sub>tr</sub> [W/K]</th><th>Q<sub>H;nd</sub> [kWh]</th><th>Q<sub>C;nd</sub> [kWh]</th></tr>', zoneRows);
-  return doc.chapter('gebouw', 'Gebouw en rekenzones', general + zoneTable);
+  // The kernel's 6.6.4 split of the common spaces: function areas the adviser did not enter must be traceable.
+  const common = commonSpaceSection(assessment.commonSpaces).replace(/<h2>/g, '<h3>').replace(/<\/h2>/g, '</h3>');
+  return doc.chapter('gebouw', 'Gebouw en rekenzones', general + zoneTable + common);
 }
 
 function envelopeChapter(doc: ReportDocument, project: IProject, assessment: ProjectPerformanceAssessment, performance: BuildingPerformanceAssessment): string {
