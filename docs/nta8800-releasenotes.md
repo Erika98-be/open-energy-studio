@@ -13,6 +13,20 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Openbare gevallen K en L: sporthal en basisschool in 2022 (geen rekenwijziging)
+
+Twee nieuwe utiliteitsgevallen uit de periode van NTA 8800:2022 (Uniec 3.1.5.0). Ze zijn als regressie op de eigen uitkomst opgenomen, met de verschilanalyse per post in [vergelijking openbare rapporten](nta8800-vergelijking-openbare-rapporten.md).
+
+| Geval | Rapport (BENG 1 / 2 / 3) | Kern | Eisen |
+|---|---|---|---|
+| **K**, sporthal met kantoor en bijeenkomstfunctie | 29,68 / −0,79 / 101,0 | 29,57 / −0,90 / 101,1 | gelijk aan het rapport |
+| **L**, basisschool met gymzaal (eerste onderwijsfunctie) | 111,52 / 25,36 / 76,9 | 111,44 / 18,63 / 80,2 | gelijk aan het rapport |
+
+- **Eisen.** In beide gevallen geeft de kern dezelfde Bbl-eisen per gebruiksfunctie als het rapport, en dezelfde A_ls/A_g.
+- **Verschil bij L.** BENG 2 van L ligt 6,73 lager door de verwarming. Dat verschil is uit de uitdraai niet te herleiden (vertrekhoogte "> 8 m", luchtbehandelingskast); een kernfout is niet gevonden.
+- **Rekenkern.** Geen wijziging, `KERNEL_VERSION` blijft 0.3.0.
+- **Suites en tests.** De referentiesuite `openbare-gevallen.json` heeft nu 14 gevallen; de gate vergelijkt 27 gevallen. De tests zijn `case_k_sports_hall_under_nta_8800_2022` en `case_l_school_under_nta_8800_2022`.
+
 ### 9 oktober 2026 — GitHub Actions volgen de vrijgaveprocedure (geen rekenwijziging)
 
 - **`release.yml`** start nu op tags `oes-v*` (oude `v*`-tags blijven werken). Het controleert dat de tag hoort bij `package.json` en `KERNEL_VERSION` en draait de volledige gate (`scripts/verify-nta.sh`, met Rust 1.77.2). Daarna bouwt het de pakketten voor Linux, macOS en Windows en hangt ze met `SHA256SUMS-installers.txt` aan de release. Een bestaande release houdt zijn tekst; anders komt er een concept (pre-release) dat handmatig wordt gepubliceerd.

@@ -14,7 +14,7 @@ De gate controleert:
   - numerieke fuzz: grenswaarden, willekeurige waarden en monotonie;
   - grote projecten.
 - **Referentiesuites:**
-  - de openbare rapporten A–J, als regressie op de vastgelegde uitkomsten van deze kern; de verschillen met de gepubliceerde waarden zijn per post verklaard;
+  - de openbare rapporten A–L, als regressie op de vastgelegde uitkomsten van deze kern; de verschillen met de gepubliceerde waarden zijn per post verklaard;
   - de RVO-voorbeeldwoningen;
   - 240 van de 266 ISSO 54 v2.0-deeltests, als *pending* tot de verwachte uitkomsten beschikbaar zijn.
 - **Service, API, MCP en desktopcommando's.**

@@ -1,6 +1,6 @@
 # Vergelijking met openbare BENG-rapporten — 5 oktober 2026
 
-Dit is **geen officiële referentietoets**. Tien openbaar gepubliceerde BENG-rapporten (gevallen A–J) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
+Dit is **geen officiële referentietoets**. Twaalf openbaar gepubliceerde BENG-rapporten (gevallen A–L) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
 
 De herbouwde invoer staat als fictieve, geanonimiseerde fixtures in `training-data/nta8800-public-comparison-{a,b,c,d,f}.json`. Adressen en namen zijn verwijderd. De test `crates/nta8800-core/tests/public_comparison.rs` legt de huidige uitkomsten vast als regressie; de gepubliceerde waarden zijn alleen context.
 
@@ -481,3 +481,128 @@ Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 89,80:
 - De verdeling van een gemeenschappelijke ruimte naar rato over de functies geeft opnieuw exact de eisen van het rapport (na H ook I).
 - Ventilatoren, verlichting met eigen vermogen, PV, tapwater en het warmtepomprendement komen overeen; de grote verschillen zitten weer bij koeling.
 - Nieuw ten opzichte van H: bij directe expansie telt de kern de ontvochtiging van 12.5 mee, die Uniec 3.0.9.3 niet meetelde. De norm is daarin duidelijk: 12.3 rekent directe expansie als 6/12 °C, en hoofdstuk 10, OPMERKING 2 bij de afgiftesystemen, gaat bij directe expansie uitdrukkelijk uit van ontvochtiging, met een verwijzing naar 12.3 (2025+C1 p. 371, 2020+A1 p. 347).
+
+## K en L, een sporthal en een basisschool in 2022 (9 oktober 2026)
+
+Twee utiliteitsrapporten uit de periode van NTA 8800:2022 zijn nagebouwd: K is een sporthal met kantoor en bijeenkomstfunctie, L een basisschool met gymzaal. Daarmee zijn er vijf utiliteitsgevallen (H–L), waaronder het eerste onderwijsgebouw. De tests zijn `case_k_sports_hall_under_nta_8800_2022` en `case_l_school_under_nta_8800_2022` in `crates/nta8800-core/tests/public_comparison.rs`. De suite `training-data/reference-suites/openbare-gevallen.json` heeft ze als `openbaar-k-2022` en `openbaar-l-2022`. Beide zijn met Uniec 3.1.5.0 berekend (11-12-2022 en 02-01-2023); net als bij E telt dat als de uitgave 2022. BENG 1 / BENG 2 / BENG 3:
+
+| Geval | Rapport | Kern (2022) | Eisen in rapport en kern |
+|---|---|---|---|
+| [K](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-19434/1/bijlage/Bijlage_17_2022-4978_Rapportage_BENG_pro_formapdf_fc10d433-2427-ef11-844c-005056a12c84.pdf) | 29,68 / −0,79 / 101,0 | 29,57 / −0,90 / 101,1 | 50,34 / 84,87 / 30,0 |
+| [L](https://www.centraledorpenraad.nl/wp/wp-content/uploads/B48-uniec3-18363-OBS-De-Weidevogel.pdf) | 111,52 / 25,36 / 76,9 | 111,44 / 18,63 / 80,2 | 140,15 / 74,99 / 36,1 |
+
+**Bbl-eisen per gebruiksfunctie.** In beide gevallen zijn de gemeenschappelijke ruimten naar rato van A_g verdeeld over de functies die ze gebruiken. Daarmee geeft de kern precies de gewogen eisen van het rapport, en ook A_ls/A_g (K 1,99, L 1,96).
+- K: kantoor 83,09, bijeenkomst overig 185,79 en sport 1 628,10 m².
+- L: onderwijs 1 014,13, kantoor 24,01, bijeenkomst overig 111,66 en sport 504,17 m². De hoofdentree van 8,41 m² is over alle vier functies verdeeld; haar geometrie staat bij de rekenzone onderwijs.
+
+### K: sporthal met kantoor en bijeenkomstfunctie (Uniec 3.1.5.0, 11-12-2022)
+
+**Herbouw.**
+- **Zones.** De rekenzone "Rekenzone" (kantoor en bijeenkomst, 2 bouwlagen, met de gemeenschappelijke ruimte "Hulpfuncties") en de rekenzone "industrie" met de sportfunctie (1 bouwlaag, geen plafond).
+- **Schil.** Gevels Rc 5,50, platte daken Rc 7,50, vloer op maaiveld Rc 3,70 (P 176,19 m) en een vloer boven buitenlucht van 2,54 m². Alle ramen en deuren staan per stuk in de fixture, met de belemmeringen per raam (overstek, zijbelemmering beide, overige belemmering).
+- **Koudebruggen.** De uitdraai noemt geen lineaire koudebruggen. De kern rekent daarom de forfaitaire route van 8.2/8.3 en 8.37 (2022 p. 200–201), zoals bij J. Zonder koudebruggen komt BENG 1 op 25,85, met de forfaitaire toeslag op het rapport.
+- **Warmtecapaciteit.** "Hsb, sfb of staalskelet met staalbeton of niet-massieve betonnen vloeren" is de rij 250–500 kg/m² van tabel 7.10 (2022 p. 181): 110 kJ/(m²K) met gesloten plafond, 180 kJ/(m²K) zonder. De eerste herbouw nam de lichte rij (55/80) en kwam op 33,25 voor BENG 1.
+- **Installaties.**
+  - Verwarming: bodemwarmtepomp forfaitair (tabel 9.29, 35 °C, COP 3,40) met vloerverwarming.
+  - Koeling: koudeopslag in de bodem (EER 10) met vloerkoeling 17/21.
+  - Ventilatie: D.3 met enthalpiewisselaar 0,75, 100 % bypass en CO2-sturing (f_ctrl 1,00).
+  - Tapwater: drie elektrische boilers (2 × 10 l label A, 300 l label C) met geïsoleerde leiding: f_sto;dis;ls 1,5 (2022 p. 550).
+  - PV: 198 panelen JA-Solar JAM54S30-400 van 1,95 m² met 205,13 Wp/m² uit de kwaliteitsverklaring (kolom 2022), zuid 30°.
+- **Verticale leiding.** De fictieve leiding van de ene toiletgroep (7.17a) staat in de rekenzone met kantoor en bijeenkomst.
+
+Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 1 896,98:
+
+| Post | Rapport | Kern | Verschil in BENG 2 |
+|---|---|---|---|
+| Verwarming (warmte) | 12 052 (40 976) | 12 161 (41 346) | +0,08 |
+| Hulpenergie verwarming | 801 | 808 | +0,01 |
+| Tapwater | 27 769 | 27 769 | 0 |
+| Koeling met hulpenergie | 2 123 | 2 150 | +0,02 |
+| Ventilatoren | 2 955 | 2 955 | 0 |
+| Verlichting | 25 370 | 25 084 | −0,22 |
+| PV (op de meter) | 72 115 | 72 116 | 0 |
+| **BENG 2** | **−0,79** | **−0,90** | **−0,11** |
+
+- **Gelijk.** Tapwater, ventilatoren, PV, de COP en de eisen. De warmte verschilt 0,9 %.
+- **Verlichting (−1,1 %).** De kern rondt P_n per verlichtingszone naar boven af volgens bijlage X. Voor de sporthal is dat 6 512 → 7 000 W; tabel X.1 springt van 65 naar 70. Hoe Uniec tot 286 kWh meer komt, is uit de uitdraai niet te herleiden.
+- **Koeling.** De kern rekent 14 343 kWh koude, inclusief het letterlijke verlies van 10.15; het rapport noemt 11 484 kWh. De elektriciteit ligt toch dicht bij elkaar.
+
+### L: basisschool met gymzaal (Uniec 3.1.5.0, 02-01-2023)
+
+**Herbouw.**
+- **Zones.**
+  - Rekenzone onderwijs: onderwijs, kantoor en bijeenkomst, 2 bouwlagen, met de gemeenschappelijke ruimte naast de aula (34,85 m²) en de hoofdentree.
+  - Rekenzone sport: de gymzaal, meer dan 4 K kouder ingesteld.
+- **Schil.**
+  - Gevels Rc 4,70 en hellende daken van 20° met Rc 6,30.
+  - Vloeren boven een kruipruimte (Rc 3,70, ε 0,0012, R_bw 4,70, h 0,05 m) en een vloer op zand.
+  - Bijna alle ramen hebben buitenscreens (overige kleur, automatisch), per raam ingevoerd (tabel 7.5/7.9). Daarnaast tien zijbelemmeringen met maat.
+  - Geen lineaire koudebruggen in de uitdraai, dus de forfaitaire toeslag.
+- **Warmtecapaciteit.** "Betonnen kolom-ligger skeletbouw met niet-massieve betonnen vloeren" is de rij 500–750 kg/m², 180 kJ/(m²K).
+- **Verwarming.** Bodemwarmtepomp forfaitair (45 °C, COP 3,10) met een aanvullende pomp van 363 W (EEI 0,23).
+  - Afgifte: vloerverwarming in de onderwijszone en plafondpanelen in de gymzaal. Beide hebben in de uitdraai een vertrekhoogte van meer dan 8 m.
+  - De fixture neemt voor beide de gebouwhoogte van 9,28 m (9.19, tabel 9.8/9.10). Bij de vloerverwarming neemt ze de onbekende opbouw (Δθ_emb 1,9).
+  - Dynamisch ingeregeld; regeling per ruimte met handmatig overrulen.
+- **Ventilatie.** Luchtbehandelingskast buiten de thermische zone met verwarmings- en koelbatterij.
+  - D.5a met roterende WTW 0,70 en 100 % bypass.
+  - Kanalen buiten de zone: situatie 1 van tabel 11.19 (2022 p. 489).
+  - Geïnstalleerde capaciteit 2 761,9 en 361,1 dm³/s, debietregeling tot 40 % (11.61).
+- **Koeling.** Koudeopslag met vloerkoeling, alleen in de onderwijszone.
+- **Tapwater.**
+  - Systeem 1: zes elektrische boilers van 10 l, label A+, ongeïsoleerde aansluiting (f_sto;dis;ls 2), voor de onderwijszone en 312,07 m² van de gymzaal.
+  - Systeem 2: een elektrisch doorstroomtoestel voor de rest van de gymzaal.
+- **Verlichting.** 5,50 W/m², LED (L80) met nieuwwaardecompensatie (2022 tabel 14.4).
+- **PV.** 203 m² met een eigen waarde van 310 Wp/m², west 20°.
+  - De kern weigert K_pk boven 300 W/m²; dat is fysisch onwaarschijnlijk.
+  - De fixture neemt daarom hetzelfde piekvermogen (62 930 Wp) als 300 W/m² over 209,77 m². De opbrengst is gelijk aan die van het rapport.
+
+Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 1 653,96:
+
+| Post | Rapport | Kern | Verschil in BENG 2 |
+|---|---|---|---|
+| Verwarming (warmte) | 28 380 (87 979) | 22 144 (68 645) | −5,47 |
+| Hulpenergie verwarming | 2 425 | 2 118 | −0,27 |
+| Tapwater met hulpenergie | 10 321 | 10 320 | 0 |
+| Koeling met hulpenergie | 4 260 | 3 339 | −0,81 |
+| Ventilatoren | 8 052 | 7 843 | −0,18 |
+| Verlichting | 21 501 | 21 501 | 0 |
+| PV (op de meter) | 46 017 | 46 018 | 0 |
+| **BENG 2** | **25,36** | **18,63** | **−6,73** |
+
+- **Gelijk.**
+  - Verlichting (met de L80-compensatie), tapwater over twee systemen, PV, de COP en de eisen.
+  - BENG 1 (−0,07 %). BENG 1 rekent met de vaste C1-ventilatie, dus schil, warmtecapaciteit en interne warmte kloppen.
+- **Verwarming (−22 % warmte).** Het verschil zit in de rekening met het werkelijke ventilatiesysteem en de afgifte, niet in de schil.
+  - De kern komt op een warmtebehoefte van 51 815 kWh; het rapport geeft alleen de warmte uit de opwekker.
+  - Vanuit de uitdraai niet vast te stellen zijn de vertrekhoogte (alleen "> 8 m"), het type plafondverwarming en de toevoertemperatuur van de luchtbehandelingskast.
+  - Een kernfout is niet gevonden. De routes voor de luchtbehandelingskast (tabel 11.15, 11.100/11.101) en voor de geïnstalleerde capaciteit (11.55–11.61, 2022 p. 447–450) volgen de norm.
+  - Het onderwijsdebiet volgens de regelgeving is hoger dan de geïnstalleerde capaciteit maal f_τ en de terugregeling. Daardoor bepaalt 11.56 het debiet en heeft de debietregeling geen invloed.
+  - Dit is het grootste open verschil van de utiliteitsgevallen. Het is geen vraag aan NEN: eerst zijn gegevens nodig die de uitdraai niet geeft (vertrekhoogte, type plafondverwarming).
+- **Koeling.** De letterlijke lezing van 10.15, en 10.87, zoals bij de andere gevallen.
+
+### Wat K en L toevoegen
+
+- **Eisen.** De naar rato verdeelde gemeenschappelijke ruimte geeft opnieuw exact de eisen van het rapport (H, I, K, L). L is het eerste geval met een onderwijsfunctie en met een gemeenschappelijke ruimte die over twee rekenzones loopt.
+- **Nieuwe invoerroutes in een openbaar geval.** Allemaal bestaande routes van de kern:
+  - koudeopslag als koudeopwekker;
+  - elektrische boilers met f_sto;dis;ls 1,5 (2022);
+  - luchtbehandelingskast met batterijen en geïnstalleerde capaciteit;
+  - afgifte in vertrekken boven 4 m;
+  - een tweede tapwatersysteem;
+  - verlichting met nieuwwaardecompensatie;
+  - zonwering en belemmering per raam.
+- **Les voor de herbouw.** Tabel 7.10 van 2022 kiest de rij op de bouwwijze. "Staalbeton of niet-massieve betonnen vloeren" hoort bij 250–500 kg/m², niet bij de lichte rij. De herbouw van I (2020+A1) gebruikt de lichte rij voor een vergelijkbare omschrijving; dat is nog te controleren.
+- **Geen kernwijziging.** Er is geen rekenwijziging, dus geen ophoging van `KERNEL_VERSION`.
+
+### Gezochte rapporten (9 oktober 2026, utiliteit 2022–2024)
+
+Gezocht op repository.officiele-overheidspublicaties.nl, planviewer.nl, gemeentesites en websites van schoolbesturen en dorpsraden. Zoektermen waren onder meer "onderwijsfunctie" met "Uniec 3" en "Printdatum", "gezondheidszorgfunctie" met "Uniec", en "BENG berekening basisschool".
+
+| Rapport | Periode | Uitkomst |
+|---|---|---|
+| sporthal met kantoor, Amersfoort, Uniec 3.1.5.0, 11-12-2022 | 2022 | nagebouwd als K |
+| OBS De Weidevogel, Uniec 3.1.5.0, 02-01-2023 | 2022 | nagebouwd als L |
+| [kantoorgebouw VH2 Delfzijl, Uniec 3.1.3.2, 12-10-2022](https://bestanden.provinciegroningen.nl/bestanden-openbaar/publicatievoorstel/KIWI_PublicatieVoorstel_IPPC_000000260002/D2023-110459%20GEANONIMISEERD%207964649_1690292347274_51009090-NL22-648800269-33734_BENG-rapport%20D2023-0.pdf) | 2022 | gevonden, nog te bouwen: een portiersloge en kantine van 36 m² (geen groot kantoor); de tekst is een scan met slechte tekstherkenning |
+| [Hoek van Holland, 4 woningen, Uniec 3.1.6.2](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-415/1/bijlage/26.2220837_-_Rap._BENG-berekening.pdf) en [exb-2022-48764](https://repository.officiele-overheidspublicaties.nl/externebijlagen/exb-2022-48764/1/bijlage/exb-2022-48764.pdf) | 2022 | woningen, geen utiliteit |
+
+Een openbaar rapport van een zorggebouw of een groot kantoor met luchtbehandelingskast uit 2022–2024 is niet gevonden.
