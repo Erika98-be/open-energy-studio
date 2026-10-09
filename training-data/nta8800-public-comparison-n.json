@@ -1043,9 +1043,8 @@
         "evidenceReference": "openbare bron Uniec 3.0.7.1 printout (Lidl-supermarkt met parkeerkelder 2064,26 m2, 02-02-2021): terugregeling tot 40 % van het ventilatiedebiet (frequentieregeling op CO2), geen recirculatie"
       },
       "infiltration": {
-        "method": "measured",
-        "qv10DmPerSM2": 0.42,
-        "sourceReference": "openbare bron Uniec 3.0.7.1 printout (Lidl-supermarkt met parkeerkelder 2064,26 m2, 02-02-2021): geen meetwaarde; q_v10;lea;ref 0,42 uit de uitdraai overgenomen"
+        "method": "reference",
+        "buildingType": "multi_storey_whole_building"
       },
       "combustionAppliances": [],
       "fans": {
@@ -1053,7 +1052,7 @@
         "current": "dc",
         "manufactureYear": 2021
       },
-      "sourceReference": "openbare bron Uniec 3.0.7.1 printout (Lidl-supermarkt met parkeerkelder 2064,26 m2, 02-02-2021): balansventilatie met WTW, forfaitaire gelijkstroomventilatoren"
+      "sourceReference": "openbare bron Uniec 3.0.7.1 printout (Lidl-supermarkt met parkeerkelder 2064,26 m2, 02-02-2021): balansventilatie met WTW, forfaitaire gelijkstroomventilatoren; infiltratie zonder meetwaarde, q_v10;lea;ref 0,42 = meerlaags gebouw als geheel 0,5 x 1,2 x f_y 0,7 (11.86, tabellen 11.13/11.14)"
     },
     "hotWater": {
       "need": {
