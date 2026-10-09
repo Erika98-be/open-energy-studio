@@ -265,7 +265,7 @@ Tot nu toe kwamen alle gevallen uit de periodes van 2020+A1 tot en met 2023, en 
 | Geval | Rapport | Kern in de eigen editie | Verschil BENG 1 / 2 / 3 |
 |---|---|---|---|
 | G (2024), vrijstaande woning met kelder, 369,10 m² | 64,52 / 29,44 / 70,6 | 65,07 / 29,31 / 72,5 | +0,9 % / −0,4 % / +1,9 %-punt |
-| H (2023), kantoor, bijeenkomst, zorg en sportschool, 743,80 m² | 29,08 / 80,01 / 30,5 | 27,29 / 80,63 / 29,7 | −6,2 % / +0,8 % / −0,8 %-punt |
+| H (2023), kantoor, bijeenkomst, zorg en sportschool, 743,80 m² | 29,08 / 80,01 / 30,5 | 30,20 / 81,86 / 30,0 | +3,9 % / +2,3 % / −0,5 %-punt |
 
 ### G: vrijstaande woning met verwarmde kelder (Uniec 3.3.5.0, 29-04-2025)
 
@@ -311,7 +311,7 @@ Twee rekenzones:
 - RZ-1 is kantoor 14,70 m², bijeenkomst overig 26,30 m², gezondheidszorg overig 27,60 m² en de gemeenschappelijke ruimte van 49,20 m².
 - RZ-2 is de sportzaal van 626,00 m².
 
-De gemeenschappelijke ruimte "wordt gebruikt ten behoeve van" alle vier de functies. De herbouw verdeelt haar naar rato van hun A_g: kantoor 1,04, bijeenkomst 1,86, zorg 1,95 en sport 44,35 m². Met die verdeling zijn de Bbl-grenswaarden van de kern precies die van het rapport: 44,94 / 86,22 / 30,4. Dat bevestigt de verdeling.
+De gemeenschappelijke ruimte "wordt gebruikt ten behoeve van" alle vier de functies. De herbouw verdeelt haar voor het gebouw naar rato van hun A_g: kantoor 1,04, bijeenkomst 1,86, zorg 1,95 en sport 44,35 m². Met die verdeling zijn de Bbl-grenswaarden van de kern precies die van het rapport: 44,94 / 86,22 / 30,4. Dat bevestigt de verdeling. Binnen RZ-1, waar de ruimte ligt, gaat zij alleen naar de functies van die zone (zie [Gemeenschappelijke ruimte binnen RZ-1](#h-gemeenschappelijke-ruimte-binnen-rz-1-9-oktober-2026)).
 
 Verder:
 - Gevels Rc 4,70, daken Rc 6,30 onder 20° en vloeren Rc 3,70.
@@ -328,31 +328,54 @@ Per post, elektriciteit in kWh/jr (BENG 2-effect = Δ × 1,45 / 743,80):
 
 | Post | Rapport | Kern | BENG 2 |
 |---|---|---|---|
-| Warmtepomp verwarming (warmte) | 4 382 (13 366) | 3 989 (12 166) | −0,77 |
-| Hulpenergie verwarming | 319 | 295 | −0,05 |
+| Warmtepomp verwarming (warmte) | 4 382 (13 366) | 4 361 (13 301) | −0,04 |
+| Hulpenergie verwarming | 319 | 318 | 0 |
 | Tapwater | 7 961 | 7 961 | 0 |
 | Hulpenergie tapwater en koeling | 195 | 283 | +0,17 |
-| Koeling | 2 363 | 2 993 | +1,23 |
-| Ventilatoren | 1 180 | 1 195 | +0,03 |
+| Koeling | 2 363 | 3 161 | +1,56 |
+| Ventilatoren | 1 180 | 1 265 | +0,17 |
 | Verlichting | 34 294 | 34 294 | 0 |
 | PV (op de meter) | 9 652 | 9 652 | 0 |
-| **BENG 2** | **80,01** | **80,63** | **+0,62** |
+| **BENG 2** | **80,01** | **81,86** | **+1,85** |
 
 - **Gelijk.**
   - Verlichting: forfaitair vermogen per functie en handbediende vertrekschakeling, hoofdstuk 14.
   - Tapwater: tabel 13.1 per functie.
   - PV en de COP.
 - **Koeling** is weer de letterlijke lezing van 10.15. De **hulpenergie** bevat de 87,6 kWh regelenergie van 10.87, die de rapporten niet tellen (zie A–C).
-- **Verwarming en BENG 1** (−6,2 %). De onzekere invoer is:
+- **Verwarming** klopt sinds de verdeling binnen RZ-1 (zie hieronder) op 0,5 %: warmte, hulpenergie en omgevingswarmte.
+- **Ventilatoren** (+85 kWh). Het forfait van 11.139 schaalt met het ontwerpdebiet; RZ-1 met kantoor, bijeenkomst en zorg heeft een hoger debiet dan met een deel sport. Welk debiet Uniec neemt, staat niet in de uitdraai (zie ook vraag 5 aan NEN bij N).
+- **BENG 1** (+3,9 %). Het rapport geeft geen behoefte per zone of per dienst. De onzekere invoer is:
   - de aangenomen vloeromtrek;
-  - de verdeling van de gemeenschappelijke ruimte over de zones;
   - de ruimtehoogte (RZ-1 3 m, RZ-2 5 m; de uitdraai geeft alleen "4 < h ≤ 6 m" voor de afgifte).
+
+### H: gemeenschappelijke ruimte binnen RZ-1 (9 oktober 2026)
+
+De verwarming van H lag 9 % onder het rapport en BENG 1 6,2 %. De oorzaak zat in de invoer van RZ-1, niet in de kern.
+
+- **Wat de norm zegt.** 6.6.4 (2023 p. 145) deelt een gemeenschappelijke ruimte binnen een rekenzone alleen toe aan de functies "voor zover deze gebruiksfuncties zijn gelegen binnen de rekenzone". De rekenwaarden van een zone met meer functies zijn de naar A_g gewogen waarden van die functies (6.5.3, p. 143–144): setpoint, ventilatiecapaciteit, interne warmte.
+- **Wat de herbouw deed.** Zij gaf RZ-1 de gebouwverdeling, met 44,35 m² sport. De sportfunctie ligt in RZ-2. RZ-1 kreeg zo een gewogen setpoint van 19,12 °C en de warmte en ventilatie van een deel sport.
+- **Nu.** RZ-1 is kantoor 25,24, bijeenkomst overig 45,16 en gezondheidszorg overig 47,40 m², alle drie 21 °C (tabel 7.13, p. 197). RZ-2 blijft sport 626,00 m².
+- **Wat bij de gebouwverdeling blijft.** De Bbl-grenswaarden, het tapwater (13.2.3, per gebruiksfunctie) en de verlichtingszone van de gemeenschappelijke ruimte (49,20 m², alle vier functies). Daar komen kern en rapport op de kWh overeen; met de verdeling binnen de zone zou de verlichting 34 046 kWh worden tegen 34 294.
+
+| | Rapport | Kern voor | Kern na |
+|---|---|---|---|
+| Behoefte RZ-1 (werkelijk systeem) | – | 3 513 kWh | 4 457 kWh |
+| Warmte uit de opwekker | 13 366 | 12 166 | 13 301 |
+| Elektriciteit warmtepomp | 4 382 | 3 989 | 4 361 |
+| Hulpenergie verwarming | 319 | 295 | 318 |
+| Omgevingswarmte (E_ren verwarming) | 8 984 | 8 177 | 8 940 |
+| BENG 1 / 2 / 3 | 29,08 / 80,01 / 30,5 | 27,29 / 80,63 / 29,7 | 30,20 / 81,86 / 30,0 |
+
+- **De afgifte** zit in beide gevallen op de grens van 0,15 × de behoefte (9.16), en de distributie (476,03 m, geïsoleerd, alle verliezen in de zone) is gelijk aan het rapport. Het verschil zat dus geheel in de behoefte van RZ-1.
+- **BENG 1** ligt nu 3,9 % boven het rapport (was 6,2 % eronder). Het rapport geeft geen behoefte per zone of per dienst, dus dit valt niet verder te splitsen. De C1-ventilatie van RZ-1 weegt het zwaarst: zonder WTW geeft het hogere debiet van kantoor, bijeenkomst en zorg 2 175 kWh meer behoefte, met de WTW van D.2 maar 944.
+- **Ook nagekeken.** Infiltratie (q_v;10;lea;ref 0,69, geen meetwaarde: dezelfde waarde langs beide routes), de transmissie van RZ-2 (H_D 225,76 W/K, op 0,01 W/K gelijk aan de som van de uitdraai) en de verticale leidingen. Bij K en L ligt de gemeenschappelijke ruimte al alleen bij de functies van haar eigen zone.
 
 ### Wat dit zegt over de kern
 
 - **Gelijk.** Op de posten waar de invoer volledig in de uitdraai staat, zijn kern en rapport gelijk tot op de kWh:
   - G: tapwater, PV, ventilatoren, COP;
-  - H: verlichting, tapwater, PV, COP en de Bbl-grenswaarden van een gemengd utiliteitsgebouw.
+  - H: verlichting, tapwater, PV, COP, de warmte (op 0,5 %) en de Bbl-grenswaarden van een gemengd utiliteitsgebouw.
 - **Interpretatie.** De verschillen liggen bij koeling (10.15 en 10.87, open vraag aan NEN).
 - **Invoerroutes die ontbraken** en sinds 9 oktober 2026 in de kern zitten (zie hieronder):
   - een gedeclareerde f_ctrl uit een gelijkwaardigheidsverklaring (BCRG);
@@ -860,7 +883,7 @@ De vraag was waar de kern 80 201 kWh warmtebehoefte vindt, terwijl het rapport o
 | I (kantoor) | 2020+A1, 3.0.9.3 | 4 807 | 4 468 (−7,1 %) | 4 871 (+1,3 %) |
 | J | 2020+A1 | 978 | 971 (−0,7 %) | 953 (−2,6 %) |
 | N (winkel) | 2020+A1, 3.0.7.1 | 29 244 | 33 080 (+13,1 %) | 28 557 (−2,3 %) |
-| H (sport) | 2023 | 4 382 | 3 989 (−9,0 %) | 3 144 (−28 %) |
+| H (sport) | 2023 | 4 382 | 3 989 (−9,0 %); sinds de [verdeling binnen RZ-1](#h-gemeenschappelijke-ruimte-binnen-rz-1-9-oktober-2026) 4 361 (−0,5 %) | 3 144 (−28 %), met de oude invoer |
 | K (sport, bijeenkomst) | 2022 | 12 052 | 12 161 (+0,9 %) | 9 752 (−19 %) |
 
   - **In 2020+A1** brengt de vaste q_L de twee grote verschillen (I −7 %, N +13 %) binnen 2,5 %. Bij J is het verschil in verlichtingswarmte klein.
