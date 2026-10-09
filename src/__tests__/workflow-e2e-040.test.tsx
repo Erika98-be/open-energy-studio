@@ -172,3 +172,38 @@ describe('common spaces (6.6.4)', () => {
     expect(preview()).toContain('lighting[0].functions');
   }, 60000);
 });
+
+describe('heated basement walls (6.7.3 c, annex K)', () => {
+  it('enters the basement wall area, sends it to the kernel and shows the larger A_ls and BENG 1 limit', async () => {
+    const user = userEvent.setup();
+    // 30 m² of basement wall at f_ls 0,7 adds 21 m² to A_ls (tests: heated_basement_walls_count_in_the_loss_area,
+    // heated_basement_forfait_takes_the_entered_wall_area); BENG 1 limit 55 + 30·(A_ls/A_g − 1,5) for this dwelling.
+    const withBasement = structuredClone(terracedOutput) as Record<string, any>;
+    withBasement.geometry = { ...withBasement.geometry, lossAreaM2: 186.72, lossAreaRatio: 1.8672 };
+    withBasement.performance.bblCheck = { ...withBasement.performance.bblCheck, lossAreaRatio: 1.8672,
+      limits: { ...withBasement.performance.bblCheck.limits, energyNeedMaxKwhPerM2: 66.016 } };
+    projectAnswer = (block) => ((block?.groundFloors as Array<Record<string, unknown>> | undefined)?.some((floor) => floor.heatedBasement)
+      ? withBasement : terracedOutput);
+    await openProject(user, terracedProject);
+
+    await openStep(user, /^Building/, 'Envelope & windows');
+    expect(main().getByText(/A_ls 165[.,]7 m²/)).toBeInTheDocument();
+    await user.click(main().getByLabelText('Heated room below ground level (8.3.3.2)'));
+    await typeNumber(user, main().getByLabelText(/Depth of the floor below ground level z/), '2,5');
+    await typeNumber(user, main().getByLabelText(/R_c of the basement walls/), '3,5');
+    await typeNumber(user, main().getByLabelText(/Area of the basement walls below ground/), '30');
+    await applyDraft(user);
+    expect((lastNta()!.groundFloors as Array<Record<string, unknown>>)[0].heatedBasement)
+      .toEqual({ depthM: 2.5, wallResistanceM2kPerW: 3.5, wallAreaM2: 30 });
+
+    // The kernel's larger loss area and limit reach the pages.
+    await openStep(user, /^Building/, 'Envelope & windows');
+    await waitFor(() => expect(main().getByText(/A_ls 186[.,]7 m²/)).toBeInTheDocument());
+    await openStep(user, /^Results/);
+    const page = () => screen.getByRole('main').textContent ?? '';
+    // BENG 1 against its limit.
+    await waitFor(() => expect(page()).toMatch(/≤ 66[.,]0/));
+    await openStep(user, /^Project/);
+    await waitFor(() => expect(page()).toMatch(/100[.,]0 m² · 1[.,]867/));
+  }, 60000);
+});
