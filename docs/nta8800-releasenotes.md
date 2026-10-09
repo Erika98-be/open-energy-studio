@@ -13,6 +13,19 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — EP-Online-gegevensoverzicht, dossiercontrole en A0-tabel na de achttiende review
+
+- **`Op_basis_van_referentiegebouw` stond omgekeerd.** Het veld is nu `true` voor de gelijkende woning, die een referentie-energieprestatierapport krijgt, en `false` voor de bezochte referentiewoning (BRL 9500-W §4.3 p. 26; RVO-handleiding EP-online bijlage 2).
+- **Woning of niet volgt de berekening.** Het overzicht neemt de rekenomvang van de kern (`calculationScope`); een logiesfunctie die als woning is berekend, krijgt Gebouwklasse W met TOjuli, warmtebehoefte en de EMG-velden (Omgevingsregeling art. 5.11 lid 1, 5.13 onder a en d). Zonder kernuitvoer beslist de gebruiksfunctie.
+- **Veldlengtes uit het exportschema.** Huisnummertoevoeging (4), huisletter (1), Gebouwtype en Gebouwsubtype (75), Detailaanduiding (25), SBI-code (20) en Status (256). Een te lange waarde komt niet meer in de XML maar staat met reden bij de weggelaten velden. Een huisnummer dat niet te ontleden is, verdwijnt niet meer stil maar wordt gemeld.
+- **Dossiercontrole (BRL 9500 Bijlage 3).**
+  - De registratiegegevens vragen ook het registratienummer van de registrerende adviseur (W p. 62, U p. 54).
+  - Kwaliteits- en gelijkwaardigheidsverklaringen gelden bij elk doel zodra de invoer een verklaarde productwaarde gebruikt (kwaliteitsverklaring warmtepomp, gedeclareerde f_ctrl, A/B/C van de ketel, ε van de WKK, opgegeven opwekkerwaarden), met de verklaring en een foto of factuur (W p. 63, §4.2.7 p. 25; U p. 21).
+  - "Het geleverde energieprestatie-rapport" is ontbrekend als het dossier geen rapport bevat (W p. 61, U p. 53).
+  - Een utiliteitsdossier vraagt ook het type bevochtiging en/of ontvochtiging en het type verlichting (U p. 53).
+- **A0-tabel in het rapport.** De rij heet nu "b. Primair fossiel energiegebruik ≤ … (bijlage IXa/Xa)" in plaats van "BENG 2 ≤", en de voorwaarden a (energiebehoefte) en c (aandeel hernieuwbare energie) staan er ook in.
+- Rekenuitkomsten van de kern veranderen niet; de waarden in het EP-Online-overzicht en de dossierstatus wel.
+
 ### 10 oktober 2026 — oudere uitgave ook in het geneste prestatieblok; klimaatbron per uitgave (geen rekenwijziging)
 
 - **Status van het geneste blok.** Bij een berekening in een oudere uitgave kreeg alleen de bovenste status `calculated_legacy_edition`. Het geneste `performance`-blok van de project- en opnameroute bleef `calculated_unverified`. Nu krijgt ook dat blok de status van de oudere uitgave, en `registrationEligible: false` als het die heeft. Wie alleen het geneste blok leest, ziet zo geen registreerbaar resultaat meer. Het rapport, het rapportmodel en het EP-Online-overzicht behandelen het resultaat zoals eerder: berekend in een oudere uitgave, niet voor registratie.

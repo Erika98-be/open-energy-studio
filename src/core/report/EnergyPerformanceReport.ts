@@ -228,7 +228,8 @@ function results(doc: ReportDocument, project: IProject, assessment: ProjectPerf
     : '<p>Geen meldingen.</p>';
   const a0 = performance.a0Check;
   const a0Table = a0 ? doc.table('Aanduiding A0 (Omgevingsregeling art. 5.11/5.12 lid 5)', '', `
-      <tr><th>BENG 2 ≤ ${n(a0.primaryFossilMaxKwhPerM2)}</th>${td(meets(a0.primaryFossilMeets))}<th>Geen fossiele verbranding ter plaatse</th>${td(meets(a0.noOnSiteFossilCombustion))}</tr>
+      <tr><th>a. Energiebehoefte binnen de eis</th>${td(meets(a0.energyNeedMeets))}<th>b. Primair fossiel energiegebruik ≤ ${n(a0.primaryFossilMaxKwhPerM2)} (bijlage IXa/Xa)</th>${td(meets(a0.primaryFossilMeets))}</tr>
+      <tr><th>c. Aandeel hernieuwbare energie binnen de eis</th>${td(meets(a0.renewableShareMeets))}<th>d. Geen fossiele verbranding ter plaatse</th>${td(meets(a0.noOnSiteFossilCombustion))}</tr>
       <tr><th>A0 mogelijk</th><td colspan="3">${a0.eligible == null ? 'niet te toetsen' : a0.eligible ? 'ja (onverifieerd)' : 'nee'}</td></tr>`) : '';
   return doc.chapter('resultaten', 'Eisen en resultaten', resultTable + labelTable + a0Table + warningTable
     + `<p class="note">De gekozen lezingen van de rekenkern waar de norm meerdere uitleggen toelaat staan in de bijlage "Interpretaties".</p>`
