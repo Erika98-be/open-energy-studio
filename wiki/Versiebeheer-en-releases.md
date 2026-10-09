@@ -35,5 +35,7 @@ Programma 0.2.0 · Rekenkern 0.3.0 · Handleiding gestempeld voor rekenkern 0.3.
   - maakt een lokale tag `oes-v<programma>-kernel-v<kern>`.
 
   Het script pusht nooit. Met `--dry-run` doet het een proefrun zonder commit of tag.
+- **Na het pushen van de tag:** GitHub Actions (`release.yml`) controleert dat de tag bij `package.json` en `KERNEL_VERSION` hoort en draait de volledige gate. Daarna bouwt het de installatiepakketten voor Linux (`.deb`, `.rpm`, AppImage), macOS (`.dmg`) en Windows (`-setup.exe`, `.msi`) en hangt ze met `SHA256SUMS-installers.txt` aan de GitHub-release van de tag. Een bestaande release houdt zijn tekst; anders maakt de workflow een concept dat je zelf publiceert.
+- **CI:** elke push en pull request naar `main` en `nta8800-kernel` draait dezelfde gate (`ci.yml`).
 
 Details: [docs/nta8800-versiebeheer.md](https://github.com/Erika98-be/open-energy-studio/blob/nta8800-kernel/docs/nta8800-versiebeheer.md) en de [releasenotes](https://github.com/Erika98-be/open-energy-studio/blob/nta8800-kernel/docs/nta8800-releasenotes.md).

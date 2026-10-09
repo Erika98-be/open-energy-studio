@@ -55,7 +55,17 @@ Eén ophoging per uitgaveronde volstaat: latere uitkomstwijzigingen vóór de vr
 5. het [leveringsdocument](templates/nta8800-leveringsdocument.md) wordt gevuld uit `src/core/nta/attest.json`, de versienummers en de SHA-256 van de pakketten en de handleiding; daarnaast een `manifest.json` en `SHA256SUMS`;
 6. er komt een lokale, geannoteerde git-tag `oes-v<programmaversie>-kernel-v<rekenkernversie>`.
 
-Het archief staat in `release/<tag>/` (niet in git). Pushen van de tag en publiceren van het archief zijn een aparte, handmatige stap. `--dry-run` doet alles zonder commit en tag, en schrijft naar `release/dry-run-<tag>/`.
+Het archief staat in `release/<tag>/` (niet in git). Pushen van de tag en publiceren van het archief zijn een aparte, handmatige stap. `--dry-run` doet alles zonder commit en tag, en schrijft naar `release/dry-run-<tag>/`. Draai een echte vrijgave zonder `NTA_SKIP_MSRV`, zodat de MSRV-stap in het gate-log staat.
+
+### Na het pushen van de tag: GitHub Actions
+
+Een gepushte tag `oes-v*` (of een oude `v*`-tag) start `.github/workflows/release.yml`:
+1. **verify** controleert dat de tag hoort bij de broncode: `oes-v<versie in package.json>-kernel-v<KERNEL_VERSION>`. Daarna draaien de controle van de releasenotes en de handleidingstempel, en de volledige gate (`scripts/verify-nta.sh`, ook de rekenkern op Rust 1.77.2). Het gate-bewijs komt als artefact bij de run.
+2. **release** gebruikt de GitHub-release van de tag als die al bestaat, bijvoorbeeld met `release/<tag>/github-release.md` als tekst; de tekst blijft dan ongemoeid. Bestaat hij niet, dan maakt de workflow een concept (draft, pre-release) met een korte tekst die je vóór publiceren vervangt.
+3. **build** bouwt per platform de installatiepakketten en hangt ze aan de release: Linux (`.deb`, `.rpm`, AppImage), macOS (universele `.dmg`) en Windows (NSIS `-setup.exe` en `.msi`). Windows-pakketten worden ondertekend als de Azure-geheimen in de repository staan.
+4. **checksums** zet `SHA256SUMS-installers.txt` over alle geüploade pakketten bij de release.
+
+Een concept dat de workflow zelf maakte, blijft een concept: publiceren is een handmatige beslissing. Met *Run workflow* (invoer: een bestaande tag) bouw je de pakketten opnieuw. `.github/workflows/ci.yml` draait dezelfde gate bij elke push en pull request naar `main` en `nta8800-kernel`, en maakt zelf geen releases meer.
 
 Het attestnummer, de identificatiecode en de attesteringsinstelling staan op één plek: `src/core/nta/attest.json`. De app (registratieblok, rapport) en het leveringsdocument lezen ze daar.
 
