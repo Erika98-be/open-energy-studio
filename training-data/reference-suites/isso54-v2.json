@@ -38772,10 +38772,21 @@
                 "method": "sectors",
                 "sectors": [
                   {
-                    "kind": "declared",
-                    "areaM2": 24.0,
-                    "daylightDependencyFactor": 0.5036,
-                    "sourceReference": "ISSO 54 v2.0 EP-U602h: daklichten, F_D;S 0,68, F_D;dayl 0,5036"
+                    "kind": "rooflights",
+                    "rooflightDepthM": 2.0,
+                    "rooflightWidthM": 4.0,
+                    "clearHeightM": 2.75,
+                    "wallDistancesM": [
+                      0.0,
+                      6.0,
+                      0.0,
+                      2.0
+                    ],
+                    "openingAreaM2": 3.0,
+                    "roomLengthM": 8.0,
+                    "roomWidthM": 6.0,
+                    "luminaireHeightM": 2.0,
+                    "control": "automatic_dimming"
                   }
                 ],
                 "sourceReference": "ISSO 54 v2.0 EP-U602h p. 50"

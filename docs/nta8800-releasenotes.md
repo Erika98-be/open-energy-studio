@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Review 22: EP-U602h-daklichten zonder afronding, WKK-vat en opgegeven daglichtsector nagelopen (geen rekenwijziging)
+
+- **ISSO 54 EP-U602h.** De bovenste zone (daklichten, F_D;S 0,68) was als opgegeven F_D;dayl gecodeerd, waardoor de kern 0,5036 afrondde naar 0,50 en F_D 0,75 gaf in plaats van 0,7518. F_D;S 0,68 is de waarde van tabel 14.8 voor 2 % ≤ D < 4 % (2025+C1 p. 674; tabel 14.9 in 2022, p. 650), dus die sector gaat nu door de gewone daklichtroute (14.31–14.36, 14.41/14.42) en geeft 0,7518 exact. Alleen F_D;S 0,3 (EP-U602g en de onderste zone van h) ligt buiten bereik van 14.37 en blijft op de route van NEN-EN 15193-1 (F_D 0,89 tegen 0,8905). Test: `isso54_u602h_rooflight_sector_gives_the_unrounded_14_36_factor` (lighting.rs).
+- **Opgegeven daglichtsector.** Een `declared` sector met een daglichtregeling wordt geweigerd in plaats van stil genegeerd: de regeling zit al in F_D;dayl (14.36, 2025+C1 p. 671–672). Test: `declared_sector_takes_no_daylight_control`. De afronding naar beneden op twee significante cijfers en de samenstelling van F_D (14.24–14.26) kloppen met de norm.
+- **WKK met voorraadvat.** Nagelopen tegen 13.8.4.7.4 (2025+C1 p. 643–644): het vatverlies telt één keer mee in de opwekkeruitvoer (13.7), en ε_th en ε_el van de WKK gelden voor die uitvoer, zoals bij een ketel. De test `hot_water_chp_method_2_uses_the_ht_conversion_factors` legt dat nu exact vast.
+
 ### 9 oktober 2026 — Opgegeven F_D;dayl per daglichtsector (NEN-EN 15193-1 bijlage F); ISSO 54: 260 van de 266 deeltesten
 
 - **Nieuwe daglichtroute.** Onder de tabel met de daglichtregelingfactor F_D;C staat een alternatief: F_D;dayl;i van een daglichtsector mag worden bepaald met bijlage F van NEN-EN 15193-1:2017, naar beneden afgerond op twee significante cijfers (2025+C1 p. 672; 2022 p. 648; dezelfde tekst in 2020+A1, 2023 en 2024). De kern kende die route niet. Een daglichtsector kan nu van soort `declared` zijn, met de sectoroppervlakte `areaM2`, `daylightDependencyFactor` (0–1) en een verplichte `sourceReference`. De kern rondt naar beneden af op twee cijfers (0,781 wordt 0,78); tabel X.1 geldt hier niet, omdat de alinea bijlage X niet noemt (interpretatie in `lighting.rs`). Bestaande berekeningen veranderen niet.
