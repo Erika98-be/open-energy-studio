@@ -13,6 +13,15 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — ISSO 54-codering gecorrigeerd na review 19 (geen rekenwijziging)
+
+De rekenkern verandert niet; alleen de codering van de ISSO 54 v2.0-deeltesten in `training-data/` (zie `docs/nta8800-isso54-voorbereiding.md`, "Correcties na review 19").
+- **EP-W203l–n.** De splitsing in twee rekenzones telde een verticale leiding van 2 bouwlagen per zone en ventilatie voor twee woningen van 48 m². Nu 1 bouwlaag per zone en ventilatie voor de hele woning van 96 m²; zonder hybride rekent de splitsing als EP-W001 (nieuwe test `isso54_controls.rs`). W203l: BENG 2 105,81 → 98,48.
+- **Utiliteitsreferentie EP-U001.** Nu met de fictieve verticale leiding per toiletgroep (7.17a); alle 55 utiliteitsdeeltesten stijgen ongeveer 1 %.
+- **EP-W009c/d.** Ramen met b_b ≥ 3,73 zijn minimale belemmering (17.3.2 situatie a).
+- **EP-W013b/d.** Een eigen installatie per woning: `identicalSystems` 4 en 10.
+- **Overig.** EP-W402 met onbekend vatlabel (rekent als C), een eigen vloerconstructie bij EP-W002, en paginaverwijzingen naar de rij van de deeltest. EP-W102b en EP-W003c zijn als open interpretatie vastgelegd.
+
 ### 10 oktober 2026 — EP-Online-gegevensoverzicht, dossiercontrole en A0-tabel na de achttiende review
 
 - **`Op_basis_van_referentiegebouw` stond omgekeerd.** Het veld is nu `true` voor de gelijkende woning, die een referentie-energieprestatierapport krijgt, en `false` voor de bezochte referentiewoning (BRL 9500-W §4.3 p. 26; RVO-handleiding EP-online bijlage 2).

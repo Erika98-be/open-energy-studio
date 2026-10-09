@@ -52,10 +52,11 @@ Deze keuzes volgen uit de testbeschrijving of uit NTA 8800:2022. Ze zijn het eer
   - het installatiejaar van de ketel en het fabricagejaar van de ventilatoren op 1950;
   - de leidingisolatie in de periode "vóór 1980".
 - **EP-U001 koeling.** De test noemt vloerkoeling met ontwerptemperatuur 12/16. NTA 8800:2022 tabel 10.8 opmerking 2 (p. 361) schrijft voor een afgiftesysteem van alleen vloerkoeling 17/21 voor, en de kern dwingt dat af (`cooling_design_temperature_inconsistent`). Gecodeerd is daarom 17/21.
+- **EP-U001 verticale leidingen.** Hetzelfde gebouw als EP-W001 (leidingdoorvoeren forfaitair) met 1 toiletgroep: één ongeïsoleerde fictieve verticale leiding per toiletgroep, N = H/3 (NTA 8800:2022 7.3.3, formule 7.17a, p. 155–156), met H 5,4 m en bij EP-U202 en EP-U701d 21,6 m.
 - **EP-U001 verlichting.** "LED, vermogen forfaitair": NTA 8800:2022 heeft geen aparte LED-kolom (die is van 2024), dus de forfaitaire waarde van de functie.
 - **EP-W003a/c en EP-W016.** De U-waarde is met de formules van `window_u` berekend en afgerond volgens 8.2.2.1 (één decimaal boven 1,0):
   - EP-W003a: 8.15, max(0,7·2,0 + 0,3·3,4; 0,8·2,0 + 0,2·3,4) + 2,5·0,11 = 2,695 → 2,7;
-  - EP-W003c: U_W+shut = 1/(1/1,8 + 0,2) = 1,324 (8.23), effectief 0,5·1,8 + 0,5·1,324 = 1,562 → 1,6 (8.22, f_shut;with 0,5). Alleen de extra weerstand varieert; het rolluik is niet als zonwering ingevoerd;
+  - EP-W003c: U_W+shut = 1/(1/1,8 + 0,2) = 1,324 (8.23), effectief 0,5·1,8 + 0,5·1,324 = 1,562 → 1,6 (8.22, f_shut;with 0,5). Alleen de extra weerstand varieert; het rolluik is niet als zonwering ingevoerd. Dit is een open interpretatie, te toetsen aan versie 5.0: als zonwering (buitenrolluik, gekleurd, handbediend) stijgt BENG 2 met ongeveer 12 % en daalt TOjuli van 8,91 naar 2,28. De alternatieve codering staat als commentaar in `scripts/isso54-suite.py`;
   - EP-W016: de deur is een raamelement van 2 m² in de noordgevel (bruto 43,2, netto 41,2 m²), opaak U 3,4 (8.20) en g 0. Met glas is U oppervlaktegewogen over glas en deur (geen ψ opgegeven): 3,1 (50 %) en 2,9 (80 %). De kozijnfractie is projectbreed 0,25, dus het glasaandeel staat in een equivalente g: 0,7 · aandeel / 0,75.
 - **EP-W012.** Zonwering die van binnenuit wordt bediend, is `manual_residential` (tabel 7.7). In NTA 8800:2022 telt die zonwering ook op de verwarmingsbalans (tabel 7.7, maart t/m oktober); pas vanaf 2024 is f_sh;with daar 0 voor woningen. Een donker screen verhoogt daarom BENG 1.
 - **EP-W404.** f_sto;dis;ls volgt 2022 p. 549–550: T-stukken geïsoleerd 2, ongeïsoleerd 5, gemeten H_sto;ls 1, elektroboiler met geïsoleerde warmwaterleiding 1,5 (`electricBoilerInsulatedPipe`). EP-W404c rekent de stilstandsproef (2 kWh bij 60/20 °C) via 13.60.
@@ -78,12 +79,12 @@ Deze keuzes volgen uit de testbeschrijving of uit NTA 8800:2022. Ze zijn het eer
   - EP-W101c: het bouwjaar 1985 werkt volgens de test op infiltratie, de ventilatoren en de isolatieperiode van de verwarmingsleidingen (1980–1995), niet op de ketel.
   - EP-W101r: verklaring van 85 % met dissipatie verdisconteerd, als NEN-EN 13141-7. EP-W101s: 85 % volgens NEN-EN 13142, zonder dissipatie.
   - EP-W101w: E.1 met D.5b op 40 m² en C.1 op 30 m² verblijfsgebied, zonder bypass, zonder passieve koeling via het systeem.
-- **EP-W102b.** q_v;inst 60 dm³/s natuurlijke toevoer, waarvan 30 dm³/s (108 m³/h) voorverwarmd.
+- **EP-W102b.** q_v;inst 60 dm³/s natuurlijke toevoer, waarvan 30 dm³/s (108 m³/h) voorverwarmd. De kern gebruikt q_v;inst (11.62) ook voor het ontwerpdebiet (11.55/11.58), niet alleen voor het voorverwarmde aandeel van 11.128; het voorverwarmde debiet vraagt bovendien een geïnstalleerde natuurlijke capaciteit. Tegen C1 komt daardoor ongeveer 6,4 kWh/m² BENG 2 van de capaciteit en 1,3 van de voorverwarming. De kern heeft geen route om de 60 dm³/s alleen aan de voorverwarming te geven; de codering volgt de testtekst letterlijk. Open interpretatie, te toetsen aan versie 5.0.
 - **EP-W103a/b.** De vier ramen van de zuidgevel, elk 2,5 m² netto (8,33 m² × 0,30 gaas), openingshoek 90°, middens op 1,2 m en 3,9 m, openingshoogte 2 m. De voorwaarden van 11.2.3.3 (inbraak, insecten, regen) zijn als vervuld aangenomen; de test noemt ze niet.
-- **Raamposities EP-W008–W010.** Uit de figuren 2–6: ramen van 3,0 × 2,0 m, borstwering 0,5 m, verdiepingshoogte 2,7 m, horizontaal 0,5–3,5 m en 4,5–7,5 m. Raammiddens op 1,5 m en 4,2 m. `raam-zuid-1`/`-3` zijn als de linker ramen (beneden, boven) genomen, `-2`/`-4` als de rechter. Links en rechts zijn gezien van binnen naar buiten (west is rechts).
+- **Raamposities EP-W008–W010.** Uit de figuren 2–6: ramen van 3,0 × 2,0 m, borstwering 0,5 m, verdiepingshoogte 2,7 m, horizontaal 0,5–3,5 m en 4,5–7,5 m. Raammiddens op 1,5 m en 4,2 m. `raam-zuid-1`/`-3` zijn als de linker ramen (beneden, boven) genomen, `-2`/`-4` als de rechter; links en rechts van de ramen zijn zoals in de figuren, van buiten op de zuidgevel gezien (oost is rechts). De zijde van een zijbelemmering (`side` in de kern) is gezien vanuit het raam naar buiten, het zichtveld van 17.3.2: west is rechts, oost is links.
   - EP-W008a–c: overstek direct boven elk raam, h_o = 1,0 / diepte (2022 p. 672).
   - EP-W008d/e: het doorlopende dak (5,4 m) over de linker 4 m dekt alleen de linker ramen.
-  - EP-W009a/b: b_b = 1,5 / diepte aan de westzijde (rechts). EP-W009c–f: één belemmering aan de oostzijde (links), 0,5 m naast de rechter ramen: b_b = 2,0 / diepte rechts en 6,0 / diepte links (p. 673).
+  - EP-W009a/b: b_b = 1,5 / diepte aan de westzijde (rechts). EP-W009c–f: één belemmering aan de oostzijde (in het zichtveld links), 0,5 m naast de rechter ramen: b_b = 2,0 / diepte voor de rechter en 6,0 / diepte voor de linker ramen (p. 673). Een b_b van 3,73 of meer is minimale belemmering (17.3.2 situatie a, p. 674): bij EP-W009c (b_b 10,0) en EP-W009d (b_b 5,0) zijn de linker ramen daarom `minimal`.
   - EP-W010: h_b = (h − raammidden) / x (p. 671); boven het midden van een raam is er geen belemmering (minimaal). De koelvoorwaarden van tabel 17.14 noemt de test niet, dus tabel 17.5 bij EP-W010e.
 - **Koeling EP-W301–303.** De gekoelde referentiewoning neemt de koeling van EP-U001 over: vloerkoeling, inregeling en regeling onbekend, geïsoleerde leidingen, pomp, geen warmtemeter, individuele compressiekoelmachine, 17/21 (tabel 10.8 opmerking 2).
   - De afgiftetabellen zijn die van 2023 (2022 p. 354–356). EP-W301b/d: ventilatorconvectoren, dus 12/16 (b) en 12/18 (d). Het aantal convectoren van EP-W301b is niet gegeven (n_fan 0); bij EP-W301d is 8 W één convector van 10 W (10.18).
@@ -102,11 +103,11 @@ Deze keuzes volgen uit de testbeschrijving of uit NTA 8800:2022. Ze zijn het eer
   - EP-W002c: de verticale hoeken zijn 4 × 5,4 = 21,6 m (de test drukt 20,8 en 21,6 af). De aansluiting vloer-gevel (ψ −0,18) is de vloerrand van 8.36.
   - EP-W006a–e: R_bw is de R_c van de gevel met zijn U 0,162 (8.47 staat de gevel-U toe). h van (8.47), in 2022 verplicht, is 0 voor een vloer op maaiveld en 0,25 m waar de test dat noemt. De vloer boven een kruipruimte telt ook voor de infiltratie (tabel 11.1, alleen vóór 1992).
   - EP-W006g: de dijkwoning is gerekend als verwarmde ruimte onder maaiveld (8.3.3.2, 8.42/D.12): het noordelijke wanddeel van 8 m ligt 5,4 m diep, de andere delen op maaiveld. De noordgevel is daarmee geen buitenvlak meer.
-  - EP-W013b: vier woningen in één gebouw, één berekening met N_woon 4 (internalGains, ventilatie, tapwater); de infiltratierij blijft die van de referentie.
-  - EP-W013d: 10 modules van 2 bouwlagen, 54 m hoog, 10 woningen met elk een eigen installatie (2 aangesloten bouwlagen per woning), infiltratie "meerlaags, hele gebouw". EP-W013e: de appartementvariant in een gebouw van 54 m; "bestaande bouw" verandert de berekening niet.
+  - EP-W013b: vier woningen in één gebouw, één berekening met N_woon 4 (internalGains, ventilatie, tapwater); de infiltratierij blijft die van de referentie. Elke woning heeft een eigen installatie: `identicalSystems` 4 (§9.1, zoals EP-W206c).
+  - EP-W013d: 10 modules van 2 bouwlagen, 54 m hoog, 10 woningen met elk een eigen installatie (2 aangesloten bouwlagen per woning, `identicalSystems` 10), infiltratie "meerlaags, hele gebouw". EP-W013e: de appartementvariant in een gebouw van 54 m; "bestaande bouw" verandert de berekening niet.
   - EP-W014a: lessenaarsdak van 45° op het zuiden, dak 67,9 m², zijgevels 50,4 m², noordgevel 91,2 m², volume 403,2 m³; Ag blijft 96 m². "Vrijstaand met puntdak" is in tabel 11.14 "hellend dak, vrijstaand".
   - EP-W103c: raam 2 (beneden) en raam 4 (boven) gaan naar de oostgevel; dubbelzijdig volgt uit azimutverschil ≥ 90° (11.77).
-- **EP-W203l–n.** Twee rekenzones van 48 m² (beneden met de vloer en ramen 1–2, boven met het dak en ramen 3–4), elk een halve woning (6.2b, `dwellingShare` 0,5) en een eigen ventilatie-invoer voor 48 m². Hybride: lucht/waterwarmtepomp 10 kW (tabel 9.27 COP 2,3 bij 45 °C in 2022) met HR107 CW4 35 kW (tabel 9.25 η 0,95); de prioriteitsrendementen van tabel 9.1 zijn deze tabelwaarden. Bij m heeft de bovenzone een tweede hybride en een eigen combi voor de badkamer, de onderzone een combi voor de keuken (13.19a).
+- **EP-W203l–n.** Twee rekenzones van 48 m² (beneden met de vloer en ramen 1–2, boven met het dak en ramen 3–4), elk een halve woning (6.2b, `dwellingShare` 0,5) en een eigen ventilatie-invoer voor 48 m², gemaakt voor de hele woning van 96 m² (`wholeDwellingAreaM2`, voor f_τ van tabel 11.8 en het minimum van 11.65). Elke zone is één bouwlaag, dus de forfaitaire verticale leiding telt per zone 1 bouwlaag (7.3.3). Zonder hybride opwekker rekent de splitsing als EP-W001; de test `crates/nta8800-core/tests/isso54_controls.rs` bewaakt dat met `training-data/isso54/EPW001-two-zones-control.json`. Hybride: lucht/waterwarmtepomp 10 kW (tabel 9.27 COP 2,3 bij 45 °C in 2022) met HR107 CW4 35 kW (tabel 9.25 η 0,95); de prioriteitsrendementen van tabel 9.1 zijn deze tabelwaarden. Bij m heeft de bovenzone een tweede hybride en een eigen combi voor de badkamer, de onderzone een combi voor de keuken (13.19a).
 - **EP-W303c/d.** Vrije koeling met opslag (1 of 2 kW) naast een compressiekoelmachine (9 of 8 kW); de warmtepomp gebruikt de opslag als bron (10.84). Aquifer is grondwater onder 15 °C (tabel 9.27). De test geeft geen regeneratiegraad R, dus c_source 1,00 (tabel V.1 laagste rij; bij c ook tabel V.3 recirculatie). Bij c is het tapwater een warmtepomp op dezelfde aquifer.
 - **EP-W406i/k.** De boosterwarmtepomp zonder meetgegevens rekent met de forfaitaire waarden van 13.162/13.163 (2022 p. 607–609), nieuw in de kern, op de aanvoer 45 °C van de collectieve HR107 (de waarde bij 44 °C geldt). Bij k zijn A/B/C/B_nom van de test de constanten van 9.85 voor een individueel toestel; de collectieve ketel valt onder 9.91, dus ze zijn niet ingevoerd. De regeling in het hoofdvertrek is "centraal met ruimteregeling" van tabel 10.4.
 - **EP-W011a.** Alle vier ramen krijgen 7.41 met g_gl;alt 0,045 en g_gl;dif 0,2 (`windowGlazings`, `diffusing`).
@@ -127,6 +128,24 @@ Deze keuzes volgen uit de testbeschrijving of uit NTA 8800:2022. Ze zijn het eer
   - EP-U401a: wandkoeling is stralingskoeling, dus 17/21. EP-U403a: gasmotor van 30 kW, gebouwd na 2006.
   - EP-U502b: L_max 40 m heeft geen invoer bij de circulatiepomp (13.39).
   - EP-U503a: tien douches, waarvan 2 met verticale en 4 met horizontale douche-WTW, collectieve opstelling ("gedeelde units", tabel 13.8), toewijzing onbekend (p. 564).
+
+## Correcties na review 19 (10 oktober 2026)
+
+Een steekproef van 41 deeltesten tegen de testtekst vond vier codeerfouten. Ze zijn gecorrigeerd; de kern is niet veranderd.
+
+| Correctie | Deeltesten | Effect (BENG 1 / BENG 2) |
+|---|---|---|
+| Splitsing in twee rekenzones: 1 bouwlaag per zone voor de verticale leiding, ventilatie voor de hele woning van 96 m² | EP-W203l–n | W203l 75,96 → 74,47 / 105,81 → 98,48; W203m BENG 2 114,90 → 107,58; W203n 98,39 → 91,76 |
+| Fictieve verticale leiding per toiletgroep (7.17a) in de utiliteitsreferentie | alle 55 EP-U | EP-U001 94,55 → 95,43 / 135,32 → 136,28; EP-U202a 88,40 → 89,74 / 122,04 → 123,38 |
+| Linker ramen met b_b ≥ 3,73 als minimale belemmering | EP-W009c/d | 75,73 → 74,92 / 106,50 → 105,76 |
+| Eigen installatie per woning: `identicalSystems` 4 en 10 | EP-W013b/d | BENG 2 103,71 → 104,70 en 86,35 → 86,94 |
+
+Verder, zonder effect op de uitkomst:
+- **EP-W402a–g.** De test geeft geen label van het vat (p. 33): nu `unknown_label` met productie vanaf 2018, wat 13.59 als label C rekent. Bij EP-U502a staat label C wel in de test (p. 49).
+- **EP-W002.** De vloer op grond had de constructie van het dak; nu een eigen vloerconstructie. De U van de vloer komt uit `groundFloors`.
+- **Paginaverwijzingen.** Ongeveer 60 deeltesten noemden de pagina vóór (of na) de rij van de deeltest; ze wijzen nu naar de pagina van de deeltest zelf. EP-W406q (p. 39) en EP-U601c (p. 50, in de testtekst als "EP-W601c") waren goed.
+
+Open interpretaties, te toetsen zodra versie 5.0 met uitkomsten er is: EP-W102b (q_v;inst ook in het ontwerpdebiet) en EP-W003c (rolluik alleen als extra weerstand), zie hierboven.
 
 ## Stand van de codering
 
