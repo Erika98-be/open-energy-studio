@@ -132,7 +132,7 @@ The gate runs:
 - **Numeric fuzz test:** boundary and random values, plus monotonicity checks.
 - **Large-project tests.**
 - **Reference suites** (`reference_gate`):
-  - public calculation reports A–M, as a regression on this kernel's recorded results; the differences from the published values are explained post by post in [docs/nta8800-vergelijking-openbare-rapporten.md](docs/nta8800-vergelijking-openbare-rapporten.md);
+  - public calculation reports A–N, as a regression on this kernel's recorded results; the differences from the published values are explained post by post in [docs/nta8800-vergelijking-openbare-rapporten.md](docs/nta8800-vergelijking-openbare-rapporten.md);
   - the RVO voorbeeldwoningen;
   - 260 of the 266 ISSO 54 v2.0 sub-tests, encoded as *pending*: they must calculate, but cannot be judged until the test set's expected results are available. See [docs/nta8800-isso54-voorbereiding.md](docs/nta8800-isso54-voorbereiding.md).
 - **Service, API, MCP and desktop-command tests.**
