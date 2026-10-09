@@ -181,7 +181,7 @@ The policy is in [docs/nta8800-versiebeheer.md](docs/nta8800-versiebeheer.md).
 - **No norm texts.** NTA 8800, ISSO publications and BRL texts are copyrighted and are **not** part of this repository. Code and documentation cite them by paragraph, table and page number only.
 - **What you need yourself.** Using the software for registration requires your own licensed copies and the applicable attest.
 
-The software is licensed under **LGPL-3.0-or-later**, as declared in the crate manifests.
+The software is licensed under **LGPL-3.0-or-later**, as declared in the crate manifests. The licence texts are in [`COPYING.LESSER`](COPYING.LESSER) (LGPL-3.0) and [`COPYING`](COPYING) (GPL-3.0, which the LGPL builds on).
 
 ## Contributing
 
