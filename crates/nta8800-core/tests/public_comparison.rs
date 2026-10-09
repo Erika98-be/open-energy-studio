@@ -606,6 +606,70 @@ fn case_h_common_space_input_equals_the_hand_split() {
     }
 }
 
+/// Review 25: own areas plus common space may differ from the zone area by up
+/// to 1 % (common_space_area_mismatch, 6.6.3). The lists the kernel fills
+/// then still cover the zone exactly (14.4 and 13.19 take A_g of the zone),
+/// so a filled list never raises lighting_function_areas_invalid or
+/// hot_water_function_areas_invalid on a field the adviser did not enter.
+#[test]
+fn filled_hot_water_and_lighting_lists_cover_the_zone_within_the_tolerance() {
+    let hand: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-h.json"
+    ))
+    .unwrap();
+    let mut input = hand.clone();
+    let nta = &mut input["ntaCalculation"];
+    let rz1 = &mut nta["zoneData"][0];
+    // 0,5 % more own area than the zone holds next to its common space.
+    rz1["functionAreas"] = serde_json::json!([
+        {"function": "office", "areaM2": 15.29},
+        {"function": "other_assembly", "areaM2": 26.30},
+        {"function": "other_healthcare", "areaM2": 27.60}
+    ]);
+    rz1["commonSpaces"] = serde_json::json!([{
+        "id": "gemeenschappelijk",
+        "areaM2": 49.20,
+        "sourceReference": "openbare bron Uniec 3.2.9.2 printout: gemeenschappelijke ruimte 49,20 m2 voor alle functies"
+    }]);
+    rz1["ventilation"]["functions"] = rz1["functionAreas"].clone();
+    nta.as_object_mut().unwrap().remove("bblFunctions");
+    nta["hotWater"]["need"]["areas"] = serde_json::json!([]);
+    for lighting in nta["lighting"].as_array_mut().unwrap() {
+        lighting.as_object_mut().unwrap().remove("functions");
+    }
+    let (_, indicators) = run_edition(&input, "2023");
+    assert!(indicators.iter().all(|value| value.is_finite()));
+    let mut copy = input.clone();
+    copy["ntaCalculation"]["normVersion"] = Value::from("2023");
+    let result = assess_project_performance(&copy);
+    let derived = result.derived_input.as_ref().unwrap();
+    let derived = serde_json::to_value(derived).unwrap();
+    let zone_area = hand["zones"][0]["floorArea"].as_f64().unwrap();
+    let lit: f64 = derived["lighting"][0]["functions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|part| part["areaM2"].as_f64().unwrap())
+        .sum();
+    assert!((lit - zone_area).abs() < 1e-9, "{lit} against {zone_area}");
+    let building_area: f64 = hand["zones"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|zone| zone["floorArea"].as_f64().unwrap())
+        .sum();
+    let served: f64 = derived["hotWater"]["need"]["areas"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|part| part["areaM2"].as_f64().unwrap())
+        .sum();
+    assert!(
+        (served - building_area).abs() < 1e-9,
+        "{served} against {building_area}"
+    );
+}
+
 /// Case H with the common space as input and the hot-water and lighting
 /// lists left empty: the kernel fills them with the within-zone split, as
 /// 13.19 (2023 p. 527) and chapter 14 (t_D, t_N p. 643, P_n;spec p. 647)

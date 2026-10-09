@@ -1577,8 +1577,18 @@ fn fill_from_common_spaces(
             nta.hot_water.as_mut().map(|system| &mut system.need)
         {
             if areas.is_empty() {
-                let parts: Option<Vec<crate::domestic_hot_water::UtilityArea>> = split
-                    .within_zones
+                // The within-zone parts of every zone, scaled to the zone
+                // areas (13.19 takes A_g;zi).
+                let mut summed: Vec<crate::monthly_demand::UsageFunctionArea> = Vec::new();
+                for (_, parts) in use_areas {
+                    for part in parts {
+                        match summed.iter_mut().find(|item| item.function == part.function) {
+                            Some(item) => item.area_m2 += part.area_m2,
+                            None => summed.push(part.clone()),
+                        }
+                    }
+                }
+                let parts: Option<Vec<crate::domestic_hot_water::UtilityArea>> = summed
                     .iter()
                     .map(|part| {
                         Some(crate::domestic_hot_water::UtilityArea {

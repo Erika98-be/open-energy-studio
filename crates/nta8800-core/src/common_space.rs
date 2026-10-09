@@ -312,10 +312,31 @@ pub fn zone_use_areas(
                 }],
                 None => zone.initial.to_vec(),
             };
-            parts
+            if !parts
                 .iter()
                 .all(|part| part.area_m2.is_finite() && part.area_m2 > 0.0)
-                .then(|| (zone.zone_id.to_string(), parts))
+            {
+                return None;
+            }
+            // The lists filled from these parts take A_g of the zone (14.4,
+            // 13.19); own areas plus common spaces may differ from it by up
+            // to 1 % (common_space_area_mismatch), so scale to the zone.
+            let total: f64 = parts.iter().map(|part| part.area_m2).sum();
+            let scale = if zone.floor_area_m2.is_finite() && zone.floor_area_m2 > 0.0 {
+                zone.floor_area_m2 / total
+            } else {
+                1.0
+            };
+            Some((
+                zone.zone_id.to_string(),
+                parts
+                    .iter()
+                    .map(|part| UsageFunctionArea {
+                        function: part.function,
+                        area_m2: part.area_m2 * scale,
+                    })
+                    .collect(),
+            ))
         })
         .collect()
 }
