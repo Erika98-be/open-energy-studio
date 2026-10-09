@@ -16,7 +16,7 @@ Programma 0.2.0 · Rekenkern 0.3.0 · Handleiding gestempeld voor rekenkern 0.3.
 - NTA 8800:2020+A1:2020.
 
 **Toolchain:**
-- Rust 1.77.2 (minimum voor kern en desktop; de service vraagt 1.88);
+- Rust 1.77.2 (minimum voor de rekenkern; de desktop-app en de API/MCP-service vragen 1.88);
 - Node.js 22;
 - Tauri 2.
 

@@ -31,8 +31,8 @@ Program 0.2.0 · Kernel 0.3.0 · Manual stamped for kernel 0.3.0.
 
 | Tool | Version |
 |---|---|
-| Rust | 1.77.2 minimum (MSRV) for the kernel and the desktop app; 1.88 for the service crate (API/MCP) |
-| Node.js | 22 |
+| Rust | 1.77.2 minimum (MSRV) for the kernel; 1.88 for the desktop app and the service crate (API/MCP) |
+| Node.js | 20 or later (CI uses 20; development and release builds use 22) |
 | Tauri | 2 |
 
 ## Features
@@ -79,10 +79,10 @@ The kernel has no I/O and is deterministic. The desktop commands and the HTTP/MC
 
 ### Prerequisites
 
-- **Node.js** 22, and npm.
+- **Node.js** 20 or later (CI uses 20, release builds 22), and npm.
 - **Rust**:
-  - the kernel (`crates/nta8800-core`) and the desktop app build with Rust 1.77.2 or later (MSRV);
-  - the service crate (API/MCP) needs Rust 1.88 or later.
+  - the kernel (`crates/nta8800-core`) builds with Rust 1.77.2 or later (MSRV);
+  - the desktop app (`src-tauri/`) and the service crate (API/MCP) need Rust 1.88 or later.
 - **Tauri** 2 (installed through npm as `@tauri-apps/cli`).
 - **Linux, for the desktop app:**
   ```bash
@@ -100,7 +100,7 @@ npm run dev          # web UI on http://localhost:3006
 npm run tauri:dev    # desktop app
 ```
 
-The browser build calculates through the local HTTP API (port 3007 by default):
+The browser build calculates through the local HTTP API (port 3007 by default). `npm run dev` proxies `/api/*` to it; a static `dist/` build needs the same reverse proxy (`/api` → `http://127.0.0.1:3007`, with `/api` stripped). Start the API with:
 
 ```bash
 cargo run --release --manifest-path crates/nta8800-service/Cargo.toml --bin api
@@ -113,7 +113,7 @@ The API binds to `127.0.0.1` by default and limits concurrent calculations, queu
 
 ```bash
 npm run build                  # type check + web bundle (dist/)
-npm run tauri:build            # desktop installers (nsis, deb, rpm, appimage, dmg)
+npm run tauri:build            # desktop installers for the host OS (NSIS on Windows; deb, rpm, AppImage on Linux; dmg on macOS)
 ```
 
 ## Verification
@@ -132,9 +132,9 @@ The gate runs:
 - **Numeric fuzz test:** boundary and random values, plus monotonicity checks.
 - **Large-project tests.**
 - **Reference suites** (`reference_gate`):
-  - public calculation reports A–J, reconciled post by post in [docs/nta8800-vergelijking-openbare-rapporten.md](docs/nta8800-vergelijking-openbare-rapporten.md);
+  - public calculation reports A–J, as a regression on this kernel's recorded results; the differences from the published values are explained post by post in [docs/nta8800-vergelijking-openbare-rapporten.md](docs/nta8800-vergelijking-openbare-rapporten.md);
   - the RVO voorbeeldwoningen;
-  - the ISSO 54 v2.0 sub-tests, encoded as *pending*: they must calculate, but cannot be judged until the test set's expected results are available. See [docs/nta8800-isso54-voorbereiding.md](docs/nta8800-isso54-voorbereiding.md).
+  - 240 of the 266 ISSO 54 v2.0 sub-tests, encoded as *pending*: they must calculate, but cannot be judged until the test set's expected results are available. See [docs/nta8800-isso54-voorbereiding.md](docs/nta8800-isso54-voorbereiding.md).
 - **Service, API, MCP and desktop-command tests.**
 - **Front-end tests (Vitest):** end-to-end workflow tests, form-coverage and form-guard tests (form states run through the kernel), accessibility and i18n checks.
 
@@ -150,11 +150,11 @@ The gate prints the current test counts. The test protocol (what is tested, how,
 
 - **Kernel version.** `KERNEL_VERSION` is the version in `crates/nta8800-core/Cargo.toml`. Every result is stamped with it. A relabel against a different kernel version is refused.
 - **Release notes.** [docs/nta8800-releasenotes.md](docs/nta8800-releasenotes.md) is grouped by kernel version, with new entries under `## Onuitgebracht`. An entry that does not change results ends in `(geen rekenwijziging)`. The gate fails when a result-changing entry has no version bump.
-- **Release.** `scripts/release-nta.sh` runs the gate and builds the packages. It then:
+- **Release.** `scripts/release-nta.sh` runs the gate and builds the Linux package (`.deb`). It then:
   - exports the manual (HTML, and PDF when a converter is installed);
-  - writes the leveringsdocument, a manifest and `SHA256SUMS`;
-  - commits the released notes;
-  - creates a local tag `oes-v<program>-kernel-v<kernel>`.
+  - commits the released notes (only for a new kernel version);
+  - writes the leveringsdocument, a pre-filled test report, a manifest and `SHA256SUMS`;
+  - creates an annotated local tag `oes-v<program>-kernel-v<kernel>`.
   
   It never pushes. Use `--dry-run` to try it without committing or tagging.
 
@@ -165,7 +165,7 @@ The policy is in [docs/nta8800-versiebeheer.md](docs/nta8800-versiebeheer.md).
 | Topic | Where |
 |---|---|
 | User manual (Dutch) | [docs/handleiding-nta8800/](docs/handleiding-nta8800/index.md) |
-| Wiki (Dutch, summary per topic) | [wiki/Home.md](wiki/Home.md) |
+| Wiki (Dutch, summary per topic) | [GitHub wiki](https://github.com/Erika98-be/open-energy-studio/wiki) (source in [wiki/](wiki/Home.md)) |
 | Norm editions and switch points | [docs/nta8800-normversies.md](docs/nta8800-normversies.md) |
 | Test protocol | [docs/nta8800-testprotocol.md](docs/nta8800-testprotocol.md) |
 | BRL 9501 readiness | [docs/nta8800-brl9501-gereedheid.md](docs/nta8800-brl9501-gereedheid.md) |
@@ -179,7 +179,7 @@ The policy is in [docs/nta8800-versiebeheer.md](docs/nta8800-versiebeheer.md).
 ## Norm texts and licensing
 
 - **No norm texts.** NTA 8800, ISSO publications and BRL texts are copyrighted and are **not** part of this repository. Code and documentation cite them by paragraph, table and page number only.
-- **What you need yourself.** Using the software for registration requires your own licensed copies and the applicable attest.
+- **What you need yourself.** Your own licensed copies of the norm texts. Registration also requires a BRL 9501 attest for the software, which Open Energy Studio does not have yet.
 
 The software is licensed under **LGPL-3.0-or-later**, as declared in the crate manifests. The licence texts are in [`COPYING.LESSER`](COPYING.LESSER) (LGPL-3.0) and [`COPYING`](COPYING) (GPL-3.0, which the LGPL builds on).
 

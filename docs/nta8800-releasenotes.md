@@ -13,7 +13,17 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
-### 10 oktober 2026 — ISSO 54-codering gecorrigeerd na review 19 (geen rekenwijziging)
+### 9 oktober 2026 — README, wiki en testprotocol gecorrigeerd na de feitencontrole (geen rekenwijziging)
+
+Alleen documentatie (review 20).
+- **Rust-versies:** 1.77.2 is de minimumversie voor de rekenkern; de desktop-app en de API/MCP-service vragen 1.88.
+- **Pakketten:** een release levert alleen een `.deb`; installers voor andere platforms bouw je met `npm run tauri:build` op dat platform.
+- **Webversie:** een statische `dist/`-build heeft een doorverwijzing `/api` → `http://127.0.0.1:3007` nodig.
+- **Herlabelen:** de termijn van 24 maanden geldt voor de verbeteringen, gerekend vanaf de oorspronkelijke opnamedatum; het oordeel heet "te beoordelen".
+- **Openbare gevallen:** zijn een regressie op de vastgelegde uitkomsten van de kern; de verschillen met de gepubliceerde waarden zijn per post verklaard. ISSO 54: 240 van de 266 deeltests.
+- **Overig:** het BRL 9501-attest ontbreekt nog (README), de releasevolgorde, de controle met `sha256sum -c --ignore-missing`, het benchmarkcommando, de plek van `KERNEL_VERSION` in de app, en de publicatie van de wiki vanuit de hoofdmap.
+
+### 9 oktober 2026 — ISSO 54-codering gecorrigeerd na review 19 (geen rekenwijziging)
 
 De rekenkern verandert niet; alleen de codering van de ISSO 54 v2.0-deeltesten in `training-data/` (zie `docs/nta8800-isso54-voorbereiding.md`, "Correcties na review 19").
 - **EP-W203l–n.** De splitsing in twee rekenzones telde een verticale leiding van 2 bouwlagen per zone en ventilatie voor twee woningen van 48 m². Nu 1 bouwlaag per zone en ventilatie voor de hele woning van 96 m²; zonder hybride rekent de splitsing als EP-W001 (nieuwe test `isso54_controls.rs`). W203l: BENG 2 105,81 → 98,48.
