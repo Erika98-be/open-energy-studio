@@ -17,6 +17,8 @@ The goal is a complete, verifiable NTA 8800 calculation tool that can be atteste
 
 Program 0.2.0 · Kernel 0.3.0 · Manual stamped for kernel 0.3.0.
 
+The branch `nta8800-kernel` is ahead of this release: it carries kernel **0.4.0** (unreleased, manual stamped for 0.4.0). Its changes are under "Onuitgebracht" in [docs/nta8800-releasenotes.md](docs/nta8800-releasenotes.md).
+
 **Supported norm editions** (`normVersion` in the input → label stamped on results):
 
 | `normVersion` | Edition | Status |

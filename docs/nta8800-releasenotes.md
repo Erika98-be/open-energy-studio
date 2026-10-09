@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Vrijgavecontrole voor rekenkern 0.4.0 (geen rekenwijziging)
+
+- **Releasenotes.** Elke merge sinds `oes-v0.2.0-kernel-v0.3.0` heeft een item onder "Onuitgebracht"; de aanduiding "(geen rekenwijziging)" klopt per item.
+- **Versies.** README en wiki noemen naast de uitgave 0.3.0 dat de tak rekenkern 0.4.0 (onuitgebracht) draagt; `docs/nta8800-versiebeheer.md` en het testprotocol noemen 0.4.0 als huidige, onuitgebrachte rekenkern.
+- **Aantallen.** Het sjabloon van het testrapport en het kwaliteitshandboek noemen openbare gevallen A–N; de BRL 9501-gereedheid noemt veertien nagerekende rapporten.
+- **Handleiding.** De meldingentabel in hoofdstuk 3 noemt `ground_surface_not_floor`.
+
 ### 9 oktober 2026 — Review 24: gemeenschappelijke ruimten (6.6.4) nagelopen
 
 - **Labelfuncties.** De kern vulde met de gebouwverdeling alleen de Bbl-functies. Het label (Omgevingsregeling bijlage X) wordt per gebruiksfunctie van het gebouw bepaald, net als de Bbl-eisen; zonder opgegeven labelfuncties rekende het label nu met één functie over het hele gebouw. De kern vult ze nu ook, met dezelfde verdeling (`label_functions_follow_the_building_split`, en in `case_h_common_space_input_equals_the_hand_split`).
