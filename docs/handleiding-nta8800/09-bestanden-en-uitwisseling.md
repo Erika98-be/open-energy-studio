@@ -41,6 +41,37 @@ Wat het **niet** bevat of garandeert:
 
 **UNIEC3 import** leest een `.uniec3`-bestand en opent het als een nieuw project. Alleen het projectmodel komt mee: zones, vlakken, ramen, koudebruggen, constructies en installaties. De NTA-invoer, opname en registratie moet je daarna zelf invullen; tot dan geeft de rekenkern invoergaten.
 
+Getallen worden met volle precisie geschreven (geen afronding op twee decimalen).
+
+## VABI-uitwisseling
+
+**VABI export** schrijft het projectmodel als een EPA-bestand (zip met `project.xml`). Per vlak staan de U-waarde en de R_c van de constructie, de hellingshoek (`Hellingshoek`: 0 voor een vloer of plat dak, 90 voor een wand, de hoek uit de NTA-invoer voor een hellend dak) en de ramen. De koudebruggen staan één keer per rekenzone.
+
+**VABI import** leest een `.epa`-bestand of een losse `project.xml`:
+- de tekencodering volgt het bestand (UTF-8, UTF-16 of windows-1252, met of zonder BOM); een bestand met een `DOCTYPE` wordt om veiligheidsredenen geweigerd;
+- staan er meer XML-bestanden in het archief, dan wordt `project.xml` gelezen;
+- de U-waarde komt uit het deelvlak, anders uit de constructiebibliotheek met dezelfde naam, en pas daarna uit R_c met de R_si van het vlaktype (NTA 8800 tabel C.2); zonder U en R_c wordt het vlak niet aan een constructie gekoppeld. Een U van 0 neemt de import nooit over;
+- een vlak met meer dichte deelvlakken wordt in delen gesplitst, elk met een eigen constructie;
+- hellingshoek 0 of 180 is horizontaal; een andere hoek van een dak komt in de NTA-invoer (`surfaceTilts`), met het bestand als bron;
+- koudebruggen die een oudere export onder elk vlak herhaalde, worden één keer ingelezen.
+
+## Wat de import aanneemt: het importverslag
+
+De UNIEC3- en VABI-import lezen alle getallen streng: een komma of punt als decimaalteken, punten als duizendtallen (`1.234,5` is 1234,5), en geen tekst, NaN of oneindig. Een ontbrekende of ongeldige waarde, een waarde buiten het toegestane bereik, een onbekende code of verwijzing, een dubbel id, meer dan één gebouw, en elk gegeven dat niet kon worden overgenomen, wordt een **punt om na te lopen**. Een ontbrekende q_v10 krijgt de forfaitaire waarde en het kenmerk *aangenomen*. Een ontbrekende ψ krijgt 0,05 W/(m·K), met een punt.
+
+Na het inlezen toont de app hoeveel punten er zijn, per soort, met de eerste paar. De volledige lijst staat in **Projectinformatie › Importverslag**, met per import:
+- het hulpmiddel (UNIEC3 of VABI), de bestandsnaam en het tijdstip;
+- de SHA-256 van het ingelezen bestand, zodat het bronbestand later aan te wijzen is;
+- elk punt met het pad in het project (bijvoorbeeld `zones[0].airTightness.qv10`), de soort, de aangenomen waarde en een toelichting.
+
+Het importverslag is herkomst, geen labelinvoer: het telt niet mee in de vingerafdruk van de labelinvoer (`labelInputSha256`, gelijk aan de rekenkern), zodat herlabelen er niet op reageert.
+
+Een bestand dat helemaal niet te lezen is (geen geldige JSON, een verkeerde opbouw, geen gebouw, een onbekende tekencodering) geeft een melding in het Nederlands of Engels met de naam van het bestand.
+
+## Wat bij export verloren gaat
+
+UNIEC3 en VABI kunnen niet alles bevatten wat het project bevat: de NTA-invoer (`ntaCalculation`), de basisopname, het maatwerkadvies, de registratie, en bij UNIEC3 de lagen van de constructies. Bij het exporteren toont de app welke onderdelen niet in het bestand komen. Lees je zo'n bestand later weer in, dan staat de ontbrekende NTA-invoer als punt in het importverslag.
+
 ## Exports onder Rapport & dossier
 
 | Knop | Uitvoer |
