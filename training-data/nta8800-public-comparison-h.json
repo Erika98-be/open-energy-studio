@@ -981,26 +981,22 @@
         "functionAreas": [
           {
             "function": "office",
-            "areaM2": 15.74
+            "areaM2": 25.24
           },
           {
             "function": "other_assembly",
-            "areaM2": 28.16
+            "areaM2": 45.16
           },
           {
             "function": "other_healthcare",
-            "areaM2": 29.55
-          },
-          {
-            "function": "sport",
-            "areaM2": 44.35
+            "areaM2": 47.4
           }
         ],
-        "usageFunction": "sport",
+        "usageFunction": "other_healthcare",
         "setpoints": {
-          "heatingC": 19.117572156196946,
+          "heatingC": 21.0,
           "coolingC": 24.0,
-          "sourceReference": "6.5.3: tabel 7.13 naar rato van de functies van de zone"
+          "sourceReference": "6.5.3: tabel 7.13 naar rato van de functies van de zone; de gemeenschappelijke ruimte (49,20 m2) ligt in RZ-1 en gaat binnen de rekenzone alleen naar kantoor, bijeenkomst en zorg (6.6.4, 2023 p. 145), alle drie 21 C"
         },
         "verticalPipes": [
           {
@@ -1018,22 +1014,17 @@
           "functions": [
             {
               "function": "office",
-              "areaM2": 15.74,
+              "areaM2": 25.24,
               "swimmingPool": false
             },
             {
               "function": "other_assembly",
-              "areaM2": 28.16,
+              "areaM2": 45.16,
               "swimmingPool": false
             },
             {
               "function": "other_healthcare",
-              "areaM2": 29.55,
-              "swimmingPool": false
-            },
-            {
-              "function": "sport",
-              "areaM2": 44.35,
+              "areaM2": 47.4,
               "swimmingPool": false
             }
           ],
@@ -1042,7 +1033,7 @@
           "buildingHeightM": 9.54,
           "constructionYear": 2024,
           "floorAboveCrawlspace": false,
-          "heatingSetpointC": 19.117572156196946,
+          "heatingSetpointC": 21.0,
           "coolingSetpointC": 24.0,
           "system": {
             "kind": "single",

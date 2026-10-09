@@ -483,15 +483,19 @@ fn case_g_under_nta_8800_2024() {
 /// calculated on 29-05-2024 with Uniec 3.2.9.2 (NTA 8800:2023 period);
 /// published 29,08 / 80,01 / 30,5 against limits 44,94 / 86,22 / 30,4.
 /// The common space of 49,20 m² serves all four functions and is shared over
-/// them pro rata; with that the kernel's Bbl limits equal the report's.
-/// Lighting (34 294 kWh, forfait power, manual on/off), hot water (7 961 kWh,
-/// table 13.1 per function, COP 1,40, f_sto;dis;ls 4), PV (9 652 kWh) and the
-/// heat-pump COP (3,05, table 9.29 outdoor air at 45 °C) agree. BENG 2
-/// (Δ kWh · 1,45 / A_g): heating −393 (−0,77) with a 9 % lower heat, its
-/// auxiliary energy −25 (−0,05), cooling +630 (+1,23; the literal 10.15
-/// emission loss), the 10.87 cooling control energy +88 (+0,17) and the
-/// forfait fans +15 (+0,03). BENG 1 is 6,2 % lower; the floor perimeters are
-/// not printed and are taken as the lengths of the foundation junctions.
+/// them pro rata for the building (Bbl limits, hot water, the lighting zone);
+/// with that the kernel's Bbl limits equal the report's. Within RZ-1, where
+/// it lies, it goes only to the functions of that zone (6.6.4, 2023 p. 145):
+/// RZ-1 is office, assembly and healthcare, all 21 °C (6.5.3, table 7.13),
+/// with no sport. Lighting (34 294 kWh, forfait power, manual on/off), hot
+/// water (7 961 kWh, table 13.1 per function, COP 1,40, f_sto;dis;ls 4), PV
+/// (9 652 kWh) and the heat-pump COP (3,05, table 9.29 outdoor air at 45 °C)
+/// agree, and so do the heat (13 301 against 13 366 kWh), its auxiliary
+/// energy (318 against 319) and the ambient heat (8 940 against 8 984). BENG 2
+/// (Δ kWh · 1,45 / A_g): heating −21 (−0,04), cooling +798 (+1,56; the
+/// literal 10.15 emission loss), the 10.87 cooling control energy +88
+/// (+0,17) and the forfait fans +85 (+0,17). BENG 1 is 3,9 % higher; the
+/// report gives no need per zone or per service to split it.
 #[test]
 fn case_h_utility_under_nta_8800_2023() {
     let value: Value = serde_json::from_str(include_str!(
@@ -500,7 +504,7 @@ fn case_h_utility_under_nta_8800_2023() {
     .unwrap();
     assert_eq!(value["ntaCalculation"]["normVersion"], "2023");
     let (performance, indicators) = run_edition(&value, "2023");
-    assert_indicators("H 2023", indicators, [27.29, 80.63, 29.7]);
+    assert_indicators("H 2023", indicators, [30.20, 81.86, 30.0]);
     let limits = &performance["bblCheck"]["limits"];
     let limit = |key: &str| limits[key].as_f64().unwrap();
     assert!((limit("energyNeedMaxKwhPerM2") - 44.94).abs() < 0.005);
@@ -514,6 +518,26 @@ fn case_h_utility_under_nta_8800_2023() {
         performance["spaceHeating"]["generationEfficiency"].as_f64(),
         Some(3.05)
     );
+    // RZ-1 holds only its own functions (6.6.4), so its setpoint is 21 °C;
+    // the heat and its auxiliary energy then agree with the report.
+    let rz1 = &performance["spaceHeating"]["demand"];
+    assert!((rz1["annualHeatingNeedKwh"].as_f64().unwrap() - 4457.2).abs() < 1.0);
+    let heating = &performance["spaceHeating"];
+    let output: f64 = heating["monthly"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|month| month["generatorOutputKwh"].as_f64().unwrap())
+        .sum();
+    assert!((output - 13301.0).abs() < 1.0, "{output}");
+    let electricity = heating["annualGeneratorElectricityKwh"].as_f64().unwrap();
+    assert!((electricity - 4361.0).abs() < 1.0, "{electricity}");
+    let auxiliary = heating["annualAuxiliaryElectricityKwh"].as_f64().unwrap();
+    assert!((auxiliary - 318.0).abs() < 1.0, "{auxiliary}");
+    let ambient = performance["annualHeatPumpAmbientHeatKwh"]
+        .as_f64()
+        .unwrap();
+    assert!((ambient - 8940.0).abs() < 1.0, "{ambient}");
 }
 
 /// Case I, the second utility case: an office with an assembly function and
