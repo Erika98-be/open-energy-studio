@@ -1324,7 +1324,9 @@ mod tests {
         // A non-positive area is refused.
         floor.heated_basement.as_mut().unwrap().wall_area_m2 = Some(0.0);
         assert!(slab_on_ground_conductance(&floor).is_none());
-        floor.edge_thermal_bridges = EdgeThermalBridges::Detailed { bridges: Vec::new() };
+        floor.edge_thermal_bridges = EdgeThermalBridges::Detailed {
+            bridges: Vec::new(),
+        };
         assert!(slab_on_ground_conductance(&floor).is_none());
     }
 
