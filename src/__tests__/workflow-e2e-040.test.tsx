@@ -347,10 +347,14 @@ describe('basic survey: façade part against the ground (ISSO 82.1 §8.4)', () =
     expect(await main().findByText('envelope.surfaces[6]')).toBeInTheDocument();
     expect(main().getByText(/ISSO 82\.1 7e druk §8\.4; NTA 8800 8\.3\.3\.2/)).toBeInTheDocument();
 
-    // The takeover keeps the project's own geometry: the heated basement is entered on the project's ground floor.
+    // The takeover keeps the project's own geometry; floor data to the ground goes only per ticked value
+    // (survey-takeover-ground.test.tsx). Untick every floor value: the project's ground floors stay as they are.
     await user.click(await main().findByRole('button', { name: 'Take over into project model' }));
     const dialog = within(await screen.findByRole('dialog'));
-    expect(dialog.getByText('geometry and areas stay those of the project model (zones, surfaces, windows)')).toBeInTheDocument();
+    expect(dialog.getByText(/^geometry and areas stay those of the project model \(zones, surfaces, windows\)/)).toBeInTheDocument();
+    for (const box of dialog.queryAllByRole('checkbox', { name: /^Take over: / })) {
+      if ((box as HTMLInputElement).checked) await user.click(box);
+    }
     await user.click(dialog.getByRole('button', { name: 'Take over into draft' }));
     const before = structuredClone(lastNta()!.groundFloors);
     await applyDraft(user);
