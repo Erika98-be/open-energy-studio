@@ -1,6 +1,6 @@
 # Vergelijking met openbare BENG-rapporten — 5 oktober 2026
 
-Dit is **geen officiële referentietoets**. Twaalf openbaar gepubliceerde BENG-rapporten (gevallen A–L) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
+Dit is **geen officiële referentietoets**. Dertien openbaar gepubliceerde BENG-rapporten (gevallen A–M) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
 
 De herbouwde invoer staat als fictieve, geanonimiseerde fixtures in `training-data/nta8800-public-comparison-{a,b,c,d,f}.json`. Adressen en namen zijn verwijderd. De test `crates/nta8800-core/tests/public_comparison.rs` legt de huidige uitkomsten vast als regressie; de gepubliceerde waarden zijn alleen context.
 
@@ -15,6 +15,7 @@ De herbouwde invoer staat als fictieve, geanonimiseerde fixtures in `training-da
 | F | [openbaar rapport F (vrijstaande woning met kap en plat dak)](https://www.planviewer.nl/imro/files/NL.IMRO.1640.OV22KoKelperveen24-VG01/b_NL.IMRO.1640.OV22KoKelperveen24-VG01_bd10.pdf) | Uniec 3.0.19.4, 08-03-2022, NTA 8800:2020+A1 (zie [F in 2020+A1](#f-in-2020a1-7-oktober-2026)) |
 | G | [openbaar rapport G (vrijstaande woning met kelder)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-25471/1/bijlage/BENG_woning_B.pdf) | Uniec 3.3.5.0, 29-04-2025, NTA 8800:2024 (zie [G en H](#g-in-2024-en-h-het-eerste-utiliteitsgebouw-in-2023-9-oktober-2026)) |
 | H | [openbaar rapport H (utiliteitsgebouw met sportschool)](https://heusden.bestuurlijkeinformatie.nl/Document/View/3256b603-e6fb-4fa0-ab2c-b63fa0af6d28) | Uniec 3.2.9.2, 29-05-2024, NTA 8800:2023 (zie [G en H](#g-in-2024-en-h-het-eerste-utiliteitsgebouw-in-2023-9-oktober-2026)) |
+| M | [openbaar rapport M (kleine vrijstaande woning met kap en koeling)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-20303/1/bijlage/BS_7192605_1664526905911_PR18758_-_Parklaan_104a_te_Soest_-_BENG.pdf.pdf) | Uniec 3.1.3.1, 15-09-2022, NTA 8800:2022 (zie [M](#m-een-kleine-woning-met-koeling-in-2022-9-oktober-2026)) |
 
 De rapporten noemen de editie niet zelf. De editie volgt uit de rekendatum en de aanwijzingsperiode (`NormVersion::designation_period`): 2020+A1 tot 1 juni 2022, 2022 tot 1 juli 2023, 2023 tot 1 juli 2024, 2024 tot 29 mei 2026. De Uniec-versie past daarbij (3.0 voor 2020+A1, 3.1 voor 2022, 3.2 voor 2023).
 
@@ -663,3 +664,63 @@ Eén inconsistentie is gevonden. Het projectmodel van E had q_v10 0,40, terwijl 
 **Uitkomst.** Er is geen geval met een verkeerde rij of een andere invoerfout die de uitkomst raakt. De vastgelegde uitkomsten van alle gevallen zijn ongewijzigd (`public_comparison_cases_keep_their_recorded_results`, `openbare-gevallen.json`).
 
 De RVO-voorbeeldwoningen noemen geen bouwwijze: de verantwoordingsrapportage 2022 geeft niets over massa of bouwwijze. Hun klassen blijven daarom een aanname, zoals in [de RVO-vergelijking](nta8800-vergelijking-rvo-voorbeeldwoningen.md) staat.
+
+## M, een kleine woning met koeling in 2022 (9 oktober 2026)
+
+Geval M is een vrijstaande woning met kap van 43,44 m², berekend op 15-09-2022 met Uniec 3.1.3.1. Dat valt in de periode van NTA 8800:2022. De woning heeft een kleine vloer en veel schil (A_ls/A_g 4,40). Verwarming, tapwater en koeling komen van één forfaitaire lucht/water-warmtepomp, met vloerverwarming en vloerkoeling. De test is `case_m_small_dwelling_with_cooling_under_nta_8800_2022` in `crates/nta8800-core/tests/public_comparison.rs`; de suite heeft het geval als `openbaar-m-2022`.
+
+| | BENG 1 | BENG 2 | BENG 3 | TOjuli |
+|---|---|---|---|---|
+| rapport (Uniec 3.1.3.1) | 171,29 | 26,25 | 88,3 | 0,00 |
+| eis (Bbl, ook in de kern) | 174,95 | 30,00 | 50,0 | 1,20 |
+| kern, uitgave 2022 | 170,87 | 47,85 | 80,6 | 0,00 |
+
+### Invoer
+
+Alles komt letterlijk uit de uitdraai, behalve waar hieronder anders staat.
+
+- **Schil.** Gevel Rc 4,70, hellend dak Rc 6,30 (50°), vloer Rc 3,70 op/boven mv (z ≤ 0,3, h 0,05 m). De bouwwijze "hsb, sfb of staalskeletbouw met staalbeton of niet-massieve betonnen vloeren" is de rij 250–500 kg/m² van tabel 7.10, zoals bij F.
+- **Ramen.** Elf ramen en deuren per stuk, met U en g uit de uitdraai. Vijf zijlichten hebben een zijbelemmering. De maten staan in een blok dat bij tekstextractie wegvalt; op de opgemaakte pagina's 4 en 5 staan ze wel. Met b_b = afstand / breedte (2022 p. 673): V1 en A1 links en rechts 0,67 / 0,38 = 1,76, R2 rechts 0,29 / 0,15 = 1,93, alle lager dan 2,5 m.
+- **Lineaire koudebruggen.** Zeventien aansluitingen uit bijlage I staan per gevel in de fixture. De drie funderingsaansluitingen (19,68 m Ψ 0,90, 4,33 m Ψ 0,50 en 4,09 m Ψ 0,68) staan bij de vloer.
+- **Vloeromtrek.** De uitdraai geeft geen P. De fixture neemt de som van de funderingsaansluitingen, 28,10 m. Dat is gelijk aan 2 × (9,61 + 4,44), de dakvoet maal de gevelbreedte die uit de vloer volgt.
+- **Warmtepomp.** Forfaitair, buitenlucht, "voldoet aan tabel 9.28", 40 °C. De rij van tabel 9.28 geeft bij 40 °C COP 3,15, net als het rapport. Het rapport geeft geen meetwaarden en geen vermogen; de fixture neemt meetwaarden net boven de minimale eisen van NEN-EN 14511-2:2007 en 6 kW (beide fictief, zonder invloed op de COP).
+- **Tapwater.** Dezelfde warmtepomp met geïntegreerd voorraadvat, forfaitair (COP 1,40), leidingen 4–6 m naar badruimte en aanrecht.
+- **Ventilatie.** C.4c met de BCRG-gelijkwaardigheidsverklaring die als bijlage in het rapport staat: f_ctrl 0,51, P 7,2 W, f_regfan 0,155. Natuurlijke toevoer 32,1 dm³/s, q_v10 forfaitair (0,98).
+- **Koeling.** Compressiekoeling forfaitair (EER 3,00), vloerkoeling, regeling in hoofdvertrek (Δθ −2,5 K), pomp 33 W met EEI 0,23 (onbekend), leidingen 27,80 m geïsoleerd.
+- **PV.** 18,20 m² met 208,79 Wp/m² op het zuidoosten onder 50°, matig geventileerd.
+
+### Per post
+
+| Post | Rapport | Kern | Δ BENG 2 (Δ kWh · 1,45 / A_g) |
+|---|---|---|---|
+| verwarming, elektrisch | 1 764 kWh | 1 775 kWh | +0,37 |
+| hulpenergie verwarming | 155 kWh | 155 kWh | 0,00 |
+| tapwater | 964 kWh | 964 kWh | 0,00 |
+| ventilatoren | 11 kWh | 10,9 kWh | 0,00 |
+| koeling, elektrisch | 949 kWh | 1 496 kWh | +18,26 |
+| hulpenergie koeling | 10 kWh | 97,6 kWh | +2,92 |
+| PV op de meter | 3 066 kWh | 3 066 kWh | 0,00 |
+| **totaal** | | | **+21,55** (gemeten +21,60) |
+
+De eisen van het Bbl en A_ls/A_g zijn gelijk aan die van het rapport. TOjuli is 0 (actieve koeling). BENG 3 ligt lager (80,6 tegen 88,3), omdat er meer elektriciteit tegenover dezelfde hernieuwbare energie staat (de kern 199,09 tegen 198,54 kWh/m²).
+
+### Wat M toevoegt
+
+- **Het scherpste geval voor 10.15 en 10.87.** Alles zonder koeling klopt binnen 1 %, BENG 1 binnen 0,3 %. Het verschil op BENG 2 komt geheel uit de koeling.
+  - De kern rekent een netto koudebehoefte van 2 449 kWh en, met 10.15 letterlijk, 2 030 kWh afgifteverlies. Het rapport noemt 2 846 kWh koude voor het systeem. Dat is de behoefte van de kern plus 16 %, dicht bij de ondergrens 0,15 van 10.15. Met het verlies op 0,15 begrensd zou de kern 2 816 kWh en 939 kWh elektriciteit rekenen, tegen 949 in het rapport.
+  - De hulpenergie van de koeling bevat de 87,6 kWh regelenergie van 10.87, die het rapport niet telt.
+- **Gevolg.** Op 43 m² wegen deze twee lezingen zwaar: BENG 2 komt boven de eis van 30, waar het rapport er ruim onder blijft. Een kleine woning met koeling is daarmee het geval waar de vragen aan NEN ([vragen-nen](nta8800-vragen-nen.md)) het meest uitmaken.
+
+### Gezochte rapporten (9 oktober 2026, vierde ronde)
+
+Gezocht op repository.officiele-overheidspublicaties.nl (ter-inzage-leggingen 2024–2026), planviewer.nl en gemeentesites, met onder meer "Uniec 3.4" met "Printdatum" en 2026, "NTA 8800:2025" met "ter inzage", "Rapportage Energieprestatie" met 2026, en BENG-berekeningen van utiliteitsgebouwen met Uniec 3.3.
+
+| Rapport | Periode | Uitkomst |
+|---|---|---|
+| [Parklaan, Soest, Uniec 3.1.3.1, 15-09-2022](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-20303/1/bijlage/BS_7192605_1664526905911_PR18758_-_Parklaan_104a_te_Soest_-_BENG.pdf.pdf) | 2022 | nagebouwd als M |
+| [Lidl, supermarkt met parkeerkelder, Uniec 3.0.7.1, 02-02-2021](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-22714/1/bijlage/07.Stoks15_Lidl-Dutilhweg_2feb2021_Volledig.pdf) | 2020+A1 | gevonden, nog te bouwen: winkelfunctie van 2 064,26 m² met VRF-verwarming en -koeling en een volledige uitdraai; gepubliceerd 55,98 / −27,18 / 126,9 |
+| [sporthal Amersfoort, pro-forma-rapport, Uniec 3.1.5.0, 11-12-2022](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-19434/1/bijlage/Bijlage_17_2022-4978_Rapportage_BENG_pro_formapdf_fc10d433-2427-ef11-844c-005056a12c84.pdf) | 2022 | is al geval K |
+| [chalets De Koog, BENG-wijziging (ter inzage 2025)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-33688/1/bijlage/Publicatie_-_6_-__BENG_Chalet_1_en_2_Bosrandweg_409B_en_409C_De_Koog.pdf) | onbekend | niet te downloaden (leeg antwoord) |
+| [25.20-078, ter inzage 2022](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2022/til-2022-373/1/bijlage/25.20-078_BENG_rapport.pdf), [Schagen, geanonimiseerd, 05-09-2022](https://www.schagen.nl/sites/default/files/2023-02/05%20Beng%20berekening%20geanonimiseerd.pdf) | 2020+A1, 2022 | niet nagebouwd: woongebouwen met veel woningen |
+
+Ook in deze ronde is geen openbaar rapport met Uniec 3.4 gevonden, dus nog geen vergelijking in de standaarduitgave 2025+C1.
