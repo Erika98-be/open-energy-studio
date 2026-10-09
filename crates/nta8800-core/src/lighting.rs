@@ -1505,8 +1505,18 @@ mod tests {
         assert!(validate_lighting(&input, 96.0, "lighting").is_empty());
         let result = assess_zone_lighting(&input, 96.0, context()).unwrap();
         assert!((result.lighting_zones[0].daylight_factor - 0.89).abs() < 1e-12);
-        for (value, expected) in [(0.781, 0.78), (0.5036, 0.5), (0.5, 0.5), (1.0, 1.0), (0.0947, 0.094), (0.0, 0.0)] {
-            assert!((floor_two_digits(value) - expected).abs() < 1e-12, "{value}");
+        for (value, expected) in [
+            (0.781, 0.78),
+            (0.5036, 0.5),
+            (0.5, 0.5),
+            (1.0, 1.0),
+            (0.0947, 0.094),
+            (0.0, 0.0),
+        ] {
+            assert!(
+                (floor_two_digits(value) - expected).abs() < 1e-12,
+                "{value}"
+            );
         }
 
         // Out of range, a blank evidence reference and a zero area are refused.
