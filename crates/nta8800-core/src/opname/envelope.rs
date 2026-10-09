@@ -496,6 +496,25 @@ struct WindowPart {
     reference: String,
 }
 
+/// Source of the crawlspace wall height h (H2), in the active edition: the
+/// 2022 page is known, for 2020+A1 the chapter is cited.
+fn crawl_wall_height_source() -> &'static str {
+    use crate::norm_versions::{current, leak_once, NormVersion};
+    const SOURCE_2022: &str = "NTA 8800:2022 (8.47) p. 236; ISSO 82.1 4e druk p. 73 (H2)";
+    let version = current();
+    if version == NormVersion::V2022 {
+        return SOURCE_2022;
+    }
+    leak_once(
+        version,
+        SOURCE_2022,
+        format!(
+            "{}, hoofdstuk 8 (h van de kruipruimtewand); ISSO 82.1 4e druk p. 73 (H2)",
+            version.label()
+        ),
+    )
+}
+
 fn default_tilt(surface: &SurveySurface) -> f64 {
     surface.tilt_deg.unwrap_or(match surface.element {
         SurfaceElement::Facade => 90.0,
@@ -1165,7 +1184,7 @@ pub fn derive_envelope_zone(
                                     "crawlspace_wall_height_h2",
                                     &format!("{path}.floorHeightAboveGroundM"),
                                     format!("h {height} m"),
-                                    "NTA 8800:2022 (8.47) p. 236; ISSO 82.1 4e druk p. 73 (H2)",
+                                    crawl_wall_height_source(),
                                 );
                             }
                             Some(_) => {

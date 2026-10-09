@@ -22,6 +22,7 @@ function legacy(): ProjectPerformanceAssessment {
   copy.status = 'calculated_legacy_edition';
   copy.registrationEligible = false;
   (copy as unknown as { normVersion: string }).normVersion = '2022';
+  copy.targetNormVersion = 'NTA 8800:2022';
   copy.performance.status = 'calculated_legacy_edition';
   copy.performance.registrationEligible = false;
   return copy;

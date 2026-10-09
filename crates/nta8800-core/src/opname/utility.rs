@@ -4400,7 +4400,14 @@ fn derive_utility_input_cited(survey: &UtilitySurvey, recorder: &mut Recorder) -
             "bacs_factor_not_in_edition",
             "bacs",
             format!("f_BACS 1,0 instead of {bacs} (no 5.5.8 in this NTA 8800 edition)"),
-            "NTA 8800:2025+C1 5.5.8; not in 2024 and older",
+            {
+                let version = crate::norm_versions::current();
+                crate::norm_versions::leak_once(
+                    version,
+                    "bacs_factor_not_in_edition",
+                    format!("{}: no f_BACS (5.5.8 is new in 2025+C1)", version.label()),
+                )
+            },
         );
         bacs = 1.0;
         bacs_reference = format!("{bacs_reference}; not in this NTA 8800 edition, 1,0");

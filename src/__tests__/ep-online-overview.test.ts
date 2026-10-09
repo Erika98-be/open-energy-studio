@@ -115,7 +115,8 @@ describe('EP-Online data overview', () => {
 
   it('leaves the class and indicators out for an older, non-registrable edition', () => {
     const legacy = {
-      ...assessment(25.5), status: 'calculated_legacy_edition', normVersion: '2022', registrationEligible: false,
+      ...assessment(25.5), status: 'calculated_legacy_edition', normVersion: '2022', targetNormVersion: 'NTA 8800:2022',
+      registrationEligible: false,
     } as unknown as ProjectPerformanceAssessment;
     const overview = buildEpOnlineOverview(project(), legacy);
     expect(overview.pandcertificaat.Energieklasse).toBeNull();

@@ -3874,7 +3874,7 @@ fn assess_in_edition(input: &BuildingPerformanceInput) -> BuildingPerformanceAss
             "invalid"
         },
         scope: "nta8800_single_zone_building_performance_unverified",
-        chapter_5_source: DRAFT_SOURCE,
+        chapter_5_source: crate::norm_versions::cite(DRAFT_SOURCE),
         target_norm_version: norm_versions::current_label(),
         norm_version: norm_versions::current(),
         registration_eligible: norm_versions::current().registration_eligible(),

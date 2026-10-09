@@ -436,5 +436,48 @@ pub fn profile() -> &'static NormProfile {
     current().profile()
 }
 
+/// A source citation written for the default edition ("NTA 8800:2025+C1:2026,
+/// §9.3, formules 9.9–9.12a (p. 294–297)"), made valid for the active one.
+/// In the default edition it is returned unchanged. Paragraph, formula, table
+/// and page numbers differ between the editions, while the chapters are the
+/// same, so an older edition keeps only its own label and the chapter:
+/// "NTA 8800:2022, hoofdstuk 9".
+pub fn cite(citation: &'static str) -> &'static str {
+    let version = current();
+    if version.is_default() {
+        return citation;
+    }
+    let rest = citation
+        .strip_prefix(crate::TARGET_NORM_VERSION)
+        .unwrap_or(citation);
+    let chapter: String = rest
+        .chars()
+        .skip_while(|c| !c.is_ascii_digit())
+        .take_while(char::is_ascii_digit)
+        .collect();
+    let text = if chapter.is_empty() {
+        version.label().to_string()
+    } else {
+        format!("{}, hoofdstuk {chapter}", version.label())
+    };
+    leak_once(version, citation, text)
+}
+
+/// The edition-specific text for `(version, key)`, made `'static` once. The
+/// keys are the kernel's own citation constants, so the set stays small.
+pub fn leak_once(version: NormVersion, key: &'static str, text: String) -> &'static str {
+    use std::collections::HashMap;
+    use std::sync::{Mutex, OnceLock};
+    type Cache = Mutex<HashMap<(NormVersion, &'static str), &'static str>>;
+    static CACHE: OnceLock<Cache> = OnceLock::new();
+    let mut cache = CACHE
+        .get_or_init(Default::default)
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    cache
+        .entry((version, key))
+        .or_insert_with(|| Box::leak(text.into_boxed_str()))
+}
+
 #[cfg(test)]
 mod tests;
