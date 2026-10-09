@@ -86,7 +86,7 @@ describe('project forms that had no form', () => {
     expect(draft().zoneData[0].commonSpaces).toEqual([{ areaM2: 49.2, sourceReference: 'NEN 2580-meetstaat', servedFunctions: ['office'] }]);
     fireEvent.click(office);
     expect('servedFunctions' in draft().zoneData[0].commonSpaces[0]).toBe(false);
-    fireEvent.click(screen.getAllByText('Remove').at(-1)!);
+    fireEvent.click(screen.getAllByText('Remove').slice(-1)[0]);
     expect('commonSpaces' in draft().zoneData[0]).toBe(false);
     // A residential zone offers none: its common spaces belong to the dwellings.
     select(/Use function of the calculation zone/, 'residential');
