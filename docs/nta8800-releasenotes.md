@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Openbaar geval N: warmtebehoefte van het werkelijke systeem verklaard (geen rekenwijziging)
+
+- **Ventilatie.** Elke ventilatie-invoer van de uitdraai is naast de fixture gelegd (systeem, f_ctrl, WTW, LBK, terugregeling, debieten). Ze kloppen. Een eigen herberekening van de massabalans (11.1–11.14) geeft dezelfde infiltratie als de kern: 629,5 m³/h in januari.
+- **Infiltratie.** De fixture geeft de infiltratie nu via de referentieroute van 11.86, want de uitdraai zegt "geen meetwaarde". Dat is meerlaags gebouw als geheel, 0,5 × 1,2 × 0,7 = 0,42; het getal blijft gelijk.
+- **Oorzaak van het verschil.** De +13 % in de verwarming zit in de verlichtingswarmte. De kern rekent die buiten BENG 1 met 7.28 (f_L × W_t), zoals opmerking 3 bij 5.4.1 voorschrijft. Uniec 3.0.x lijkt daar de vaste q_L van 5.4.2 te gebruiken.
+  - Met die waarde komt de kern bij N op −2,3 % en bij I op +1,3 % (nu +13,1 % en −7,1 %).
+  - Bij de rapporten uit 2022 en 2023 (H, K) wordt het daarmee juist slechter.
+  - De norm is duidelijk, dus de kern verandert niet en er is geen vraag aan NEN nodig.
+- **Wat verandert.** De fixture van N, de test `case_n_supermarket_under_nta_8800_2020_a1` (nu ook behoefte, infiltratie, toevoer en verlichtingswarmte) en de documentatie in `nta8800-vergelijking-openbare-rapporten.md`. De rekenkern niet.
+
 ### 9 oktober 2026 — Openbare gevallen M en N per term verklaard; N rekent de afgifte van de hoge ruimte met 9.3.3.7 (geen rekenwijziging)
 
 - **M, BENG 3.** E_ren klopt per term met het rapport: omgevingswarmte verwarming 3 817 tegen 3 793 kWh, tapwater 386 in beide, koeling 0 in beide, PV 4 446 in beide; samen 8 649 tegen 8 625 kWh. Met de E_P van het rapport (1 140 kWh) geeft de E_ren van de kern 88,35 % tegen 88,3 %. Het verschil op BENG 3 (80,6 tegen 88,3) volgt dus geheel uit BENG 2: de koeling volgens 10.15 en 10.87. De test controleert nu E_ren, de omgevingswarmte van verwarming en tapwater en BENG 3 met de E_P van het rapport.
