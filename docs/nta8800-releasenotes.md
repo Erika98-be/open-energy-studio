@@ -28,6 +28,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
   - Test: `nta-kernel-040-messages.test.ts`.
 - **Aantallen.** Het testprotocol en de BRL 9501-gereedheid noemden nog 240 ISSO 54-deeltesten; het zijn er 260 (203 woning, 57 utiliteit).
 
+### 9 oktober 2026 — Openbaar geval M: kleine vrijstaande woning met koeling in 2022 (geen rekenwijziging)
+
+- **Nieuw geval.** Een openbaar BENG-rapport van een vrijstaande woning met kap van 43,44 m² (Uniec 3.1.3.1, 15-09-2022, NTA 8800:2022) is nagebouwd als geval M: `training-data/nta8800-public-comparison-m.json`, de test `case_m_small_dwelling_with_cooling_under_nta_8800_2022` en `openbaar-m-2022` in de suite van de openbare gevallen (28 vergeleken gevallen, 288 in totaal).
+- **Uitkomst.** De kern rekent 170,87 / 47,85 / 80,6 tegen 171,29 / 26,25 / 88,3. Verwarming, tapwater, ventilatoren, PV en de Bbl-eisen kloppen. Het verschil op BENG 2 komt geheel uit de koeling: 10.15 letterlijk (+18,26) en de regelenergie van 10.87 (+2,92). De koude van het rapport is de behoefte van de kern plus 16 %.
+- **Zoekronde.** Ook nu geen openbaar rapport in 2025+C1 (Uniec 3.4). Een supermarkt in 2020+A1 met volledige uitdraai is gevonden en nog niet nagebouwd ([vergelijking](nta8800-vergelijking-openbare-rapporten.md)).
+
 ### 9 oktober 2026 — Review 22: EP-U602h-daklichten zonder afronding, WKK-vat en opgegeven daglichtsector nagelopen (geen rekenwijziging)
 
 - **ISSO 54 EP-U602h.** De bovenste zone (daklichten, F_D;S 0,68) was als opgegeven F_D;dayl gecodeerd, waardoor de kern 0,5036 afrondde naar 0,50 en F_D 0,75 gaf in plaats van 0,7518. F_D;S 0,68 is de waarde van tabel 14.8 voor 2 % ≤ D < 4 % (2025+C1 p. 674; tabel 14.9 in 2022, p. 650), dus die sector gaat nu door de gewone daklichtroute (14.31–14.36, 14.41/14.42) en geeft 0,7518 exact. Alleen F_D;S 0,3 (EP-U602g en de onderste zone van h) ligt buiten bereik van 14.37 en blijft op de route van NEN-EN 15193-1 (F_D 0,89 tegen 0,8905). Test: `isso54_u602h_rooflight_sector_gives_the_unrounded_14_36_factor` (lighting.rs).

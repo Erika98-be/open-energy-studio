@@ -73,7 +73,7 @@ Elke wijziging van het programma doorloopt dezelfde controle (`scripts/verify-nt
 ## Referentiesuites
 
 De referentiesuites in `training-data/reference-suites/` rekenen vaste projecten door en vergelijken de uitkomst met een verwachting en een bandbreedte (absoluut, relatief, of de ruimste van beide):
-- **Openbare gevallen A–L**: herbouwde openbare BENG-rapporten, elk in de uitgave waarin het rapport is gemaakt. Zie [`nta8800-vergelijking-openbare-rapporten.md`](../nta8800-vergelijking-openbare-rapporten.md).
+- **Openbare gevallen A–M**: herbouwde openbare BENG-rapporten, elk in de uitgave waarin het rapport is gemaakt. Zie [`nta8800-vergelijking-openbare-rapporten.md`](../nta8800-vergelijking-openbare-rapporten.md).
 - **RVO-voorbeeldwoningen**: de warmtebehoefte binnen de bandbreedte van RVO.
 - **ISSO 54 versie 2.0**: de deeltesten uit de openbare uitgave van ISSO-publicatie 54, door ons gecodeerd. De verwachte uitkomsten zijn niet openbaar, dus deze gevallen staan op "geen verwachting": ze moeten rekenen, maar worden nog niet vergeleken. Zie [`nta8800-isso54-voorbereiding.md`](../nta8800-isso54-voorbereiding.md).
 

@@ -658,3 +658,54 @@ fn case_l_school_under_nta_8800_2022() {
         Some(3.1)
     );
 }
+
+/// Case M, a small detached house with a pitched roof (43,44 m², A_ls/A_g
+/// 4,40), calculated on 15-09-2022 with Uniec 3.1.3.1 (NTA 8800:2022);
+/// published 171,29 / 26,25 / 88,3 against limits 174,95 / 30,00 / 50,0,
+/// TOjuli 0 (active cooling). Forfait outdoor-air heat pump (table 9.28 row,
+/// COP 3,15 at 40 °C, auxiliary 155 kWh), its hot water with an integrated
+/// vessel (COP 1,40, 964 kWh), C.4c with the declared f_ctrl 0,51, PV (3 066
+/// kWh on the meter) and the Bbl limits agree; heating is +11 kWh. BENG 2
+/// (Δ kWh · 1,45 / A_g) is 21,60 higher, all cooling: the literal 10.15
+/// emission loss (cooling electricity 1 496 against 949 kWh, +18,26; the
+/// report's 2 846 kWh cold is the kernel's 2 449 kWh need plus 16 %) and the
+/// 10.87 control energy (+87,6 kWh, +2,92). On this small floor area the
+/// two interpretations take BENG 2 over its limit of 30.
+#[test]
+fn case_m_small_dwelling_with_cooling_under_nta_8800_2022() {
+    let value: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-m.json"
+    ))
+    .unwrap();
+    assert_eq!(value["ntaCalculation"]["normVersion"], "2022");
+    let (performance, indicators) = run_edition(&value, "2022");
+    assert_indicators("M 2022", indicators, [170.87, 47.85, 80.6]);
+    let limits = &performance["bblCheck"]["limits"];
+    assert!((limits["energyNeedMaxKwhPerM2"].as_f64().unwrap() - 174.95).abs() < 0.005);
+    let ratio = performance["bblCheck"]["lossAreaRatio"].as_f64().unwrap();
+    assert!((ratio - 4.40).abs() < 0.005, "{ratio}");
+    assert_eq!(
+        performance["spaceHeating"]["generationEfficiency"].as_f64(),
+        Some(3.15)
+    );
+    assert!((used_kwh(&performance, "heating") - 1764.0).abs() < 15.0);
+    assert!((used_kwh(&performance, "hotWater") - 964.0).abs() < 1.0);
+    assert!((used_kwh(&performance, "ventilation") - 11.0).abs() < 0.5);
+    let heating_auxiliary = performance["spaceHeating"]["annualAuxiliaryElectricityKwh"]
+        .as_f64()
+        .unwrap();
+    assert!(
+        (heating_auxiliary - 155.0).abs() < 1.0,
+        "{heating_auxiliary}"
+    );
+    let pv = performance["pvSystems"][0]["annualKwh"].as_f64().unwrap();
+    assert!((pv - 3066.0).abs() < 1.0, "{pv}");
+    let need: f64 = performance["cooling"]["months"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|month| month["needKwh"].as_f64().unwrap())
+        .sum();
+    assert!((need - 2449.0).abs() < 1.0, "{need}");
+    assert_eq!(performance["tojuliMaxK"].as_f64(), Some(0.0));
+}
