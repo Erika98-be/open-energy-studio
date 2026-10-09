@@ -30,7 +30,7 @@ export function auditAccessibility(root: ParentNode): string[] {
   const doc = (root as Node).ownerDocument ?? document;
 
   for (const element of Array.from(root.querySelectorAll(NAMED))) {
-    if (element.closest('[aria-hidden="true"]')) continue;
+    if (element.closest('[aria-hidden="true"], [hidden]') || (element as HTMLElement).style?.display === 'none') continue;
     if (!accessibleName(element)) problems.push(`no accessible name: ${describe(element)}`);
   }
 
@@ -58,7 +58,7 @@ export function auditAccessibility(root: ParentNode): string[] {
   }
   const referenced = new Set(Array.from(root.querySelectorAll('[aria-describedby]'))
     .flatMap((element) => (element.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean)));
-  for (const error of Array.from(root.querySelectorAll('.ui-field [role="alert"], .ui-field__error'))) {
+  for (const error of Array.from(root.querySelectorAll('.ui-field [role="alert"], .ui-field__error, .dialog-field .field-error-text'))) {
     if (!error.id || !referenced.has(error.id)) problems.push(`field error not linked to its control: ${describe(error)}`);
   }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
 import { DialogShell } from '../DialogShell';
@@ -10,6 +10,7 @@ interface AirTightnessDialogProps {
 }
 
 export function AirTightnessDialog({ editId, onClose }: AirTightnessDialogProps) {
+  const fieldId = useId();
   const { t } = useI18n();
   const { state, dispatch } = useEnergy();
   const { project } = state;
@@ -57,8 +58,8 @@ export function AirTightnessDialog({ editId, onClose }: AirTightnessDialogProps)
       cancelLabel={t('dialog.cancel')}
     >
         <div className="dialog-field">
-          <label>{t('dialog.surface.zone')}</label>
-          <select
+          <label htmlFor={`${fieldId}-a1`}>{t('dialog.surface.zone')}</label>
+          <select id={`${fieldId}-a1`}
             value={zoneId}
             onChange={(e) => { handleZoneChange(e.target.value); setErrors(prev => ({ ...prev, zoneId: '' })); }}
             className={errors.zoneId ? 'field-error' : ''}
@@ -74,8 +75,8 @@ export function AirTightnessDialog({ editId, onClose }: AirTightnessDialogProps)
         </div>
 
         <div className="dialog-field">
-          <label>{t('dialog.airTightness.qv10')}</label>
-          <DecimalInput
+          <label htmlFor={`${fieldId}-a2`}>{t('dialog.airTightness.qv10')}</label>
+          <DecimalInput id={`${fieldId}-a2`}
             min={0}
             step={0.01}
             value={qv10}

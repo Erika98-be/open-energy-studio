@@ -616,6 +616,7 @@ export const en: Record<string, string> = {
   'feedback.categoryBug': 'Bug',
   'feedback.categoryFeature': 'Feature',
   'feedback.categoryGeneral': 'General',
+  'feedback.message': 'Message',
   'feedback.messagePlaceholder': 'Tell us what\'s on your mind... (minimum 10 characters)',
   'feedback.attachImages': 'Attach Images',
   'feedback.imageLimit': 'Max 3 images, 1MB total',

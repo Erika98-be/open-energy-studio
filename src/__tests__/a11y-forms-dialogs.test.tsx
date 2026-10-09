@@ -7,6 +7,20 @@ import { BasisopnamePanel } from '../components/BasisopnamePanel/BasisopnamePane
 import { SurveyTakeoverAction } from '../components/BasisopnamePanel/SurveyTakeoverAction';
 import { SettingsDialog } from '../components/SettingsDialog/SettingsDialog';
 import { ProjectInfoDialog } from '../components/dialogs/ProjectInfoDialog/ProjectInfoDialog';
+import { AirTightnessDialog } from '../components/dialogs/AirTightnessDialog/AirTightnessDialog';
+import { ConstructionEditorDialog } from '../components/dialogs/ConstructionEditorDialog/ConstructionEditorDialog';
+import { CoolingSystemDialog } from '../components/dialogs/CoolingSystemDialog/CoolingSystemDialog';
+import { FeedbackDialog } from '../components/dialogs/FeedbackDialog/FeedbackDialog';
+import { HeatingSystemDialog } from '../components/dialogs/HeatingSystemDialog/HeatingSystemDialog';
+import { HotWaterSystemDialog } from '../components/dialogs/HotWaterSystemDialog/HotWaterSystemDialog';
+import { PointBridgeDialog } from '../components/dialogs/PointBridgeDialog/PointBridgeDialog';
+import { SolarPVDialog } from '../components/dialogs/SolarPVDialog/SolarPVDialog';
+import { SolarThermalDialog } from '../components/dialogs/SolarThermalDialog/SolarThermalDialog';
+import { SurfaceEditorDialog } from '../components/dialogs/SurfaceEditorDialog/SurfaceEditorDialog';
+import { ThermalBridgeDialog } from '../components/dialogs/ThermalBridgeDialog/ThermalBridgeDialog';
+import { VentilationSystemDialog } from '../components/dialogs/VentilationSystemDialog/VentilationSystemDialog';
+import { WindowEditorDialog } from '../components/dialogs/WindowEditorDialog/WindowEditorDialog';
+import { ZoneEditorDialog } from '../components/dialogs/ZoneEditorDialog/ZoneEditorDialog';
 import { CommandPalette } from '../components/shell/CommandPalette';
 import { focusPathIn } from '../components/shell/focusPath';
 import { applyIssueMarks } from '../components/shell/NtaStepPage';
@@ -198,6 +212,44 @@ describe('keyboard: "Ga naar" lands on the field', () => {
       expect(checked).toBeGreaterThan(100);
     }, 180000);
   }
+});
+
+const EDITOR_DIALOGS = {
+  AirTightnessDialog, ConstructionEditorDialog, CoolingSystemDialog, FeedbackDialog, HeatingSystemDialog, HotWaterSystemDialog,
+  PointBridgeDialog, SolarPVDialog, SolarThermalDialog, SurfaceEditorDialog, ThermalBridgeDialog, VentilationSystemDialog,
+  WindowEditorDialog, ZoneEditorDialog,
+} as const;
+
+describe('accessibility audit: editor dialogs', () => {
+  for (const [name, Component] of Object.entries(EDITOR_DIALOGS)) {
+    it(name, async () => {
+      renderWithProviders(<><Seed value={office as unknown as IProject} /><Component onClose={noop} /></>);
+      await screen.findByRole('dialog');
+      expect(auditAccessibility(document.body)).toEqual([]);
+    });
+  }
+});
+
+describe('dialog field errors', () => {
+  it('a refused save links each error to its field and clears the link once fixed', async () => {
+    renderWithProviders(<><Seed value={office as unknown as IProject} /><ThermalBridgeDialog onClose={noop} /></>);
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: /save|opslaan/i }));
+    const invalid = await waitFor(() => {
+      const found = Array.from(dialog.querySelectorAll('[aria-invalid="true"]'));
+      expect(found.length).toBeGreaterThan(0);
+      return found;
+    });
+    for (const control of invalid) {
+      const error = document.getElementById((control.getAttribute('aria-describedby') ?? '').split(' ').pop()!);
+      expect(error?.classList.contains('field-error-text')).toBe(true);
+    }
+    expect(auditAccessibility(document.body)).toEqual([]);
+    const name = within(dialog).getByRole('textbox', { name: /name|naam/i });
+    fireEvent.change(name, { target: { value: 'Balkonplaat' } });
+    await waitFor(() => expect(name.hasAttribute('aria-invalid')).toBe(false));
+    expect(name.hasAttribute('aria-describedby')).toBe(false);
+  });
 });
 
 describe('keyboard: dialogs', () => {
