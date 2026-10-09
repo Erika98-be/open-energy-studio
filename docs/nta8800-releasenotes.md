@@ -13,6 +13,15 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Review 24: gemeenschappelijke ruimten (6.6.4) nagelopen
+
+- **Labelfuncties.** De kern vulde met de gebouwverdeling alleen de Bbl-functies. Het label (Omgevingsregeling bijlage X) wordt per gebruiksfunctie van het gebouw bepaald, net als de Bbl-eisen; zonder opgegeven labelfuncties rekende het label nu met één functie over het hele gebouw. De kern vult ze nu ook, met dezelfde verdeling (`label_functions_follow_the_building_split`, en in `case_h_common_space_input_equals_the_hand_split`).
+- **Dubbele telling.** Functie-oppervlakten waarin de gemeenschappelijke ruimte al zat, telden haar twee keer en werden pas later geweigerd als `function_areas_invalid` op de functies. Nu weigert de kern dit bij de gemeenschappelijke ruimte zelf met `common_space_area_mismatch`: de eigen oppervlakten plus de gemeenschappelijke ruimten moeten de gebruiksoppervlakte van de rekenzone zijn (6.6.3, 2025+C1 p. 158).
+- **Zones zonder gemeenschappelijke ruimte.** Een ongeldige functie-oppervlakte in zo'n zone gaf `common_space_exceeds_zone`, soms op het pad van een andere zone. Die zone houdt nu haar eigen melding (`function_areas_invalid`).
+- **Zwembad.** Een sportfunctie die in twee ventilatiedelen stond, met en zonder zwembad, kreeg na de verdeling over het hele sportdeel het zwembad (dubbele q_usi;spec, 11.2.2.5.1). De delen houden nu hun verhouding (`allocated_ventilation_keeps_the_swimming_pool_part`).
+- **Formulier.** Functie-oppervlakten en gemeenschappelijke ruimten staan alleen in de eigen gegevens van een rekenzone, en die waren bij één rekenzone niet te openen. Dat kan nu. Een zone die een woonfunctie krijgt, houdt geen verborgen gemeenschappelijke ruimten meer.
+- **Gecontroleerd en in orde.** Dezelfde tekst van 6.6.4 staat in 2020+A1 (p. 140), 2022 (p. 141), 2023 (p. 145) en 2025+C1 (p. 158); de 90 %-toets volgt na de verdeling; een aangewezen functie die niet in het gebouw zit, valt terecht weg; Uniec 3/VABI en EP-Online dragen geen functie-oppervlakten.
+
 ### 9 oktober 2026 — Gemeenschappelijke ruimten als invoer, verdeeld door de rekenkern volgens 6.6.4 (geen rekenwijziging)
 
 - **Waarom.** Openbaar geval H liet zien dat een met de hand verdeelde gemeenschappelijke ruimte makkelijk fout gaat: binnen een rekenzone gaat zij alleen naar de functies van die zone, voor de Bbl-eisen naar alle functies die erop zijn aangewezen (6.2, p. 142; 6.6.4, p. 158).
