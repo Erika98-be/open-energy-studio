@@ -338,7 +338,10 @@ mod tests {
         assert_eq!(climate_source(NormVersion::V2025C1), CLIMATE_SOURCE);
         for version in NormVersion::ALL {
             let source = climate_source(version);
-            assert!(source.starts_with(version.label().split(" met").next().unwrap()), "{source}");
+            assert!(
+                source.starts_with(version.label().split(" met").next().unwrap()),
+                "{source}"
+            );
         }
         // The monthly demand result carries the source of the active edition.
         let older = crate::norm_versions::with_version(NormVersion::V2022, || {
