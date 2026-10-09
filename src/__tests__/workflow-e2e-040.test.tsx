@@ -207,3 +207,67 @@ describe('heated basement walls (6.7.3 c, annex K)', () => {
     await waitFor(() => expect(page()).toMatch(/100[.,]0 m² · 1[.,]867/));
   }, 60000);
 });
+
+describe('declared daylight factor (14.36, NEN-EN 15193-1 annex F)', () => {
+  /** The office with installed lighting power: daylight sectors need a lighting zone that is not on the default power. */
+  function officeWithInstalledLighting() {
+    const project = structuredClone(officeProject) as Record<string, any>;
+    project.ntaCalculation.lighting[0].lightingZones[0].power = {
+      method: 'installed', sourceReference: 'lichtplan', luminaires: [{ count: 40, power: { method: 'system', powerW: 35 } }] };
+    return project;
+  }
+  const sector = (block: NtaBlock | undefined) =>
+    (block as Record<string, any> | undefined)?.lighting?.[0]?.lightingZones?.[0]?.daylight?.sectors?.[0] as Record<string, unknown> | undefined;
+
+  it('enters a declared F_D;dayl with its evidence and finds it in the report input overview', async () => {
+    const user = userEvent.setup();
+    // The kernel echoes the input in derivedInput (tests: declared_sector_takes_no_daylight_control, lighting.rs).
+    projectAnswer = (block) => {
+      const answer = structuredClone(officeOutput) as Record<string, any>;
+      if (sector(block)) answer.derivedInput.lighting = structuredClone((block as Record<string, any>).lighting);
+      return answer;
+    };
+    await openProject(user, officeWithInstalledLighting());
+
+    await openStep(user, /^Installations/, 'Lighting');
+    await user.selectOptions(main().getByLabelText('Daylight'), 'sectors');
+    await user.selectOptions(main().getByLabelText('Kind'), 'declared');
+    // A declared factor already holds the daylight control: no control choice.
+    expect(main().queryByLabelText(/^Daylight control/)).toBeNull();
+    await typeNumber(user, main().getByLabelText(/Daylight sector area A_D/), '120');
+    await typeNumber(user, main().getByLabelText(/Daylight dependency factor F_D;dayl/), '0,78');
+    await user.type(main().getByLabelText('Evidence: calculation per NEN-EN 15193-1:2017 annex F'), 'daglichtrapport bijlage F');
+    await applyDraft(user);
+    expect(sector(lastNta())).toEqual({ kind: 'declared', areaM2: 120, daylightDependencyFactor: 0.78, sourceReference: 'daglichtrapport bijlage F' });
+
+    await openStep(user, /^Report/);
+    const preview = () => (main().getByTestId('report-builder-preview') as HTMLIFrameElement).getAttribute('srcdoc') ?? '';
+    await waitFor(() => expect(preview()).toContain('Invoeroverzicht'), { timeout: 10000 });
+    expect(preview()).toContain('lighting[1].lightingZones[1].daylight.sectors[1].daylightDependencyFactor');
+    expect(preview()).toContain('daglichtrapport bijlage F');
+  }, 60000);
+
+  it('sends a factor of 1,2 and goes from the kernel\'s refusal to the field', async () => {
+    const user = userEvent.setup();
+    const path = 'ntaCalculation.lighting[0].lightingZones[0].daylight.sectors[0].daylightDependencyFactor';
+    projectAnswer = (block) => (sector(block) && Number(sector(block)!.daylightDependencyFactor) > 1 ? {
+      ...officeOutput, status: 'incomplete', derivedInput: null, performance: null,
+      gaps: [{ code: 'lighting_daylight_sector_invalid', path }],
+    } : officeOutput);
+    const project = officeWithInstalledLighting();
+    project.ntaCalculation.lighting[0].lightingZones[0].daylight = { method: 'sectors', sourceReference: '',
+      sectors: [{ kind: 'declared', areaM2: 120, daylightDependencyFactor: 0.78, sourceReference: 'daglichtrapport' }] };
+    await openProject(user, project);
+
+    await openStep(user, /^Installations/, 'Lighting');
+    await typeNumber(user, main().getByLabelText(/Daylight dependency factor F_D;dayl/), '1,2');
+    await applyDraft(user);
+    expect(sector(lastNta())!.daylightDependencyFactor).toBe(1.2);
+
+    await openStep(user, /^Check/, 'Check overview');
+    expect(await main().findByText(/a declared F_D;dayl lies outside 0–1/)).toBeInTheDocument();
+    await user.click(await main().findByRole('button', { name: /Go to/ }));
+    expect(within(nav()).getByRole('button', { name: /^Installations/ })).toHaveAttribute('aria-current', 'page');
+    await waitFor(() => expect(document.activeElement).toBe(main().getByLabelText(/Daylight dependency factor F_D;dayl/)));
+  }, 60000);
+});

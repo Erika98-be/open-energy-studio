@@ -388,7 +388,8 @@ function readableValue(value: string): string {
 
 /** Readable rows of a derived input object: Dutch name, value and the input path as reference. */
 function inputRows(value: unknown, prefix = '', depth = 0, rows: string[] = []): string[] {
-  if (depth > 7 || rows.length > 600) return rows;
+  // Deep enough for a declared value in a list in a list (lighting[1].lightingZones[1].daylight.sectors[1].daylightDependencyFactor).
+  if (depth > 9 || rows.length > 600) return rows;
   const row = (text: string) => rows.push(`<tr><th>${escapeHtml(readableKey(prefix))}</th>${td(text)}<td><code>${escapeHtml(prefix)}</code></td></tr>`);
   if (Array.isArray(value)) {
     if (value.length && value.every((item) => typeof item === 'number')) {
