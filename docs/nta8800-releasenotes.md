@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Doorlooptests van de invoer van kern 0.4.0; drie gaten in scherm en rapport (geen rekenwijziging)
+
+- **Doorlooptests.** `src/__tests__/workflow-e2e-040.test.tsx` doorloopt in de hele app, via de stappagina's en de toepasbalk, de invoer die sinds 0.3.0 is toegevoegd: een gemeenschappelijke ruimte (6.6.4) met door de kern gevulde tapwater- en verlichtingslijsten, de wandoppervlakte van een verwarmde kelder (A_ls en BENG 1-eis), een opgegeven F_D;dayl en de weigering van 1,2, K_pk 350 W/m² met de plausibiliteitsmelding op de registratiepagina, een geveldeel tegen de grond in de basisopname, en een gevel aan de grond in het project (`ground_surface_not_floor`). De kern is in deze tests vervangen door antwoorden in de vorm die de kern teruggeeft; de rekenkant staat in de Rust-tests die per geval genoemd zijn.
+- **Eigen gegevens bij één utiliteitsrekenzone.** Het onderdeel "Gegevens per rekenzone" verscheen alleen bij meer dan één rekenzone of als er al eigen gegevens waren. Bij een utiliteitsgebouw met één rekenzone, het gewone geval, waren functieoppervlakten en gemeenschappelijke ruimten (6.6.4) daardoor in de app niet in te voeren. Het onderdeel staat nu bij elk utiliteitsproject.
+- **Verdeling van de gemeenschappelijke ruimten in de rapportage.** De verdeling volgens 6.6.4 en de lijsten die de kern invulde stonden alleen in het losse rekenrapport. Ze staan nu ook in de rapportage energieprestatie, in het hoofdstuk "Gebouw en rekenzones" (standaard en gedetailleerd).
+- **Invoeroverzicht reikt tot opgegeven waarden in geneste lijsten.** Het invoeroverzicht van de rapportage stopte acht niveaus diep, waardoor bijvoorbeeld een opgegeven F_D;dayl (`lighting[1].lightingZones[1].daylight.sectors[1].daylightDependencyFactor`) ontbrak. Het gaat nu tien niveaus diep.
+
 ### 9 oktober 2026 — Review 25: invulling van tapwater en verlichting uit de gemeenschappelijke ruimten nagelopen
 
 - **Lezing bevestigd.** 13.19 en de weging van t_D, t_N en P_n;spec in hoofdstuk 14 nemen de gebruiksoppervlakte binnen de rekenzone, zoals de laatste alinea van 6.6.4 die definieert (2025+C1 p. 158, 538, 656–661; 2023 p. 145, 527, 647–651). NEN-vraag 6 noemt nu de argumenten voor beide lezingen.
