@@ -449,7 +449,19 @@ Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 439,04. Tus
 | PV (op de meter) | 30 621 | 30 621 | 0 |
 | **BENG 2** | **−36,81** | **−19,41 (−13,31)** | **+17,40 (+23,50)** |
 
-- **Koeling.** De kern rekent nu een koudebehoefte van 10 456 kWh, plus de ontvochtiging Q_C;dhum van 12.5 en het verlies van 10.15 letterlijk: samen 28 527 kWh koude (was 32 871). Het rapport noemt 12 069 kWh als totale koudebehoefte, wat met EER 3,00 precies de 4 023 kWh geeft; Uniec 3.0.9.3 telde ontvochtiging en 10.15 dus niet mee. 12.3 en tabel 12.2 rekenen directe expansie als een systeem van 6/12 °C en dus met ontvochtiging (2020+A1 p. 500–501, 2025+C1 p. 523–524). Met de zwaardere rij ligt de voelbare behoefte van de kern nu 1 613 kWh onder die van het rapport (was +246); de verdeling van het restverschil over ontvochtiging en 10.15 is zonder de maandwaarden van het rapport niet vast te stellen.
+- **Koeling.** De kern rekent 28 527 kWh koude: de voelbare behoefte 10 456 kWh, de ontvochtiging Q_C;dhum van 12.5 13 885 kWh en het verlies van 10.15 letterlijk 4 186 kWh (was samen 32 871). Het rapport noemt 12 069 kWh als totale koudebehoefte, wat met EER 3,00 precies de 4 023 kWh geeft. Per term, in kWh elektriciteit bij EER 3,00 en Δ BENG 2:
+
+  | Term | Kern (koude) | Kern (elektriciteit) | Δ BENG 2 |
+  |---|---|---|---|
+  | ontvochtiging Q_C;dhum (12.5, tabel 12.2, 6/12 °C) | 13 885 | 4 628 | +15,29 |
+  | afgifteverlies 10.15, letterlijk | 4 186 | 1 395 | +4,61 |
+  | voelbare behoefte, tegen de 12 069 kWh van het rapport | 10 456 | 3 485 (rapport 4 023) | −1,78 |
+  | **koeling** | **28 527** | **9 509** | **+18,12** |
+
+  - De ontvochtiging verklaart dus 15,29 van de 17,40 op BENG 2. De norm is daarin niet open: de afgifte is directe expansie in de ruimte (figuur 10.5, principe 6, "directe expansie – plafond" in de uitdraai), en zowel 12.3 als OPMERKING 2 bij de afgifte van hoofdstuk 10 gaan daarbij uitdrukkelijk uit van ontvochtiging als 6/12 °C (2020+A1 p. 347 en 500–501; 2025+C1 p. 371 en 523–524). Alleen plafond-, vloer- en wandkoeling hebben Q_C;dhum = 0; een plafondcassette met directe expansie is geen plafondkoeling (tabel 10.2 noemt ze apart: "ventilatorconvector/room airconditioner – bevestigd aan het plafond", 2020+A1 p. 351).
+  - Zou Uniec de ontvochtiging wel tellen, dan moest zijn voelbare behoefte 12 069 / (1 + 13 885 / 10 456) = 5 184 kWh zijn, de helft van die van de kern, terwijl de warmte van het rapport 7 % hoger ligt. Dat past niet; de uitdraai wijst erop dat Uniec 3.0.9.3 bij directe expansie in de ruimte geen ontvochtiging telt. Bij N (Uniec 3.0.7.1, directe expansie in de luchtbehandelingskast) ligt de koude van het rapport ruim boven de netto behoefte, dus daar telt Uniec haar wel.
+  - Zonder ontvochtiging zou de kern op BENG 2 −34,70 en BENG 3 140,9 % uitkomen; zonder ontvochtiging én zonder het verlies van 10.15 op −39,31 en 149,0 %. Het rapport ligt daartussen (−36,81 en 143,8 %), wat past bij een begrensd verlies van 10.15 ([vragen aan NEN](nta8800-vragen-nen.md)).
+- **BENG 3.** De hernieuwbare termen komen overeen: E_ren is in de kern 52 443 kWh (PV 44 401 primair plus omgevingswarmte van de warmtepomp 8 042), in het rapport 53 054 (44 401 plus 8 653). De 611 kWh minder omgevingswarmte volgt uit de 7 % minder warmte hieronder. RER = E_ren / (E_ren + E_P): met de E_P van het rapport (−16 162 kWh) gaf de kern 144,5 % tegen 143,8 %. Het hele verschil op BENG 3 komt dus via E_P uit de koeling, niet uit de hernieuwbare termen. De primaire factor voor elektriciteit is in beide 1,45 (6 971 / 4 807 in het rapport).
 - **Hulpenergie koeling.** 20 ventilatoren van 10 W over 3 141 bedrijfsuren zijn de 628 kWh van het rapport; de kern telt daar de regelenergie van 10.87 bij (87,6 kWh).
 - **Verlichting.** 14.3.2 rondt P_n naar boven af op twee significante cijfers volgens bijlage X (2020+A1 p. 631): 1 895 → 1 900 W en 739 → 750 W.
 - **Verwarming** is nu 7 % lager dan het rapport (was 0,7 % hoger). Het rapport geeft alleen het elektriciteitsgebruik, niet de warmtebehoefte, dus de oorzaak is uit de uitdraai niet te herleiden.
@@ -489,6 +501,7 @@ Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 89,80. Tuss
 
 - De verdeling van een gemeenschappelijke ruimte naar rato over de functies geeft opnieuw exact de eisen van het rapport (na H ook I).
 - Ventilatoren, verlichting met eigen vermogen, PV, tapwater en het warmtepomprendement komen overeen; de grote verschillen zitten weer bij koeling.
+- Bij I komt het hele verschil op BENG 2 en BENG 3 uit de koeling (9 oktober 2026, per term uitgesplitst): de ontvochtiging 15,29, het verlies van 10.15 4,61 en de voelbare behoefte −1,78 op BENG 2; de hernieuwbare termen (PV en omgevingswarmte) komen overeen.
 - Nieuw ten opzichte van H: bij directe expansie telt de kern de ontvochtiging van 12.5 mee, die Uniec 3.0.9.3 niet meetelde. De norm is daarin duidelijk: 12.3 rekent directe expansie als 6/12 °C, en hoofdstuk 10, OPMERKING 2 bij de afgiftesystemen, gaat bij directe expansie uitdrukkelijk uit van ontvochtiging, met een verwijzing naar 12.3 (2025+C1 p. 371, 2020+A1 p. 347).
 
 ## K en L, een sporthal en een basisschool in 2022 (9 oktober 2026)

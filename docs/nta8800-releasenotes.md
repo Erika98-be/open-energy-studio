@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Openbaar geval I per term verklaard: BENG 2 en BENG 3 komen uit de koeling (geen rekenwijziging)
+
+- **Uitkomst.** Geval I (Uniec 3.0.9.3, 2020+A1) blijft 75,51 / −19,41 / 119,4 tegen 75,26 / −36,81 / 143,8; de fixture had geen codeerfout en de kern geen fout.
+- **BENG 2** (+17,40): de ontvochtiging Q_C;dhum van 12.5 is 13 885 kWh koude (+15,29), het verlies van 10.15 letterlijk 4 186 kWh (+4,61) en de voelbare behoefte −1,78 tegen de 12 069 kWh koude van het rapport. Directe expansie in de ruimte ontvochtigt volgens 12.3 en OPMERKING 2 bij de koudeafgifte (2025+C1 p. 371 en 523–524; 2020+A1 p. 347 en 500–501); de uitdraai wijst erop dat Uniec 3.0.9.3 daar geen ontvochtiging telde. Geen open lezing, dus geen nieuwe vraag aan NEN.
+- **BENG 3**: de hernieuwbare termen komen overeen (E_ren 52 443 tegen 53 054 kWh; PV gelijk, omgevingswarmte 8 042 tegen 8 653). Met de E_P van het rapport gaf de kern 144,5 % tegen 143,8 %; het verschil loopt dus volledig via E_P uit de koeling.
+- `case_i_utility_under_nta_8800_2020_a1` controleert nu ook de koudetermen, E_ren en de omgevingswarmte. Zie [vergelijking openbare rapporten](nta8800-vergelijking-openbare-rapporten.md), geval I.
+
 ### 9 oktober 2026 — Opgegeven kelderwandoppervlakte ΣA_T;bw in A_ls en 8.38; afronding van P_n gecontroleerd
 
 - **Kelderwandoppervlakte (6.7.1/6.7.2, 2025+C1 p. 161–162; 8.38, p. 253–254; 2020+A1 p. 144 en 225–226).** A_ls telt de geprojecteerde oppervlakte A_T volgens bijlage K, en de forfaitaire route 8.38 rekent de kelderwanden over ΣA_T;bw volgens K.1.2. Nieuw is het optionele veld `heatedBasement.wallAreaM2`: is het opgegeven, dan telt het in A_ls (f_ls 0,7) en in beide wandtermen van 8.38; zonder opgave blijft z·P gelden. De gedetailleerde 8.39 en de maandtermen van bijlage D blijven z·P gebruiken. Een opgave van 0 of minder wordt geweigerd. Formulier: "Oppervlakte kelderwanden onder maaiveld ΣA_T;bw" bij de verwarmde kelder. Dit verandert de uitkomst van projecten met een verwarmde kelder in de forfaitaire route die de oppervlakte opgeven.
