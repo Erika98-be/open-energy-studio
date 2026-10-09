@@ -99,23 +99,46 @@ Daarnaast zijn er:
 
 ## 8. Grenzen en prestaties
 
-Gemeten op 9 oktober 2026 (rekenkern 0.3.0, release-build, 8 kernen) met `crates/nta8800-core/tests/large_projects.rs`. Die test maakt deterministisch grote projecten:
+Gemeten op 10 oktober 2026 (rekenkern 0.4.0, release-build, 8 kernen) met `crates/nta8800-core/tests/large_projects.rs`. Die test maakt deterministisch grote projecten:
 - **utiliteit:** openbaar geval H (2 rekenzones, 18 ramen) n keer herhaald, met nieuwe ids voor elke kopie;
-- **woningen:** de voorbeeld-rijwoning als n woningen van elk één rekenzone, met `dwellingCount` = n (6.2b, p. 160).
+- **woningen:** de voorbeeld-rijwoning als n woningen van elk één rekenzone, met `dwellingCount` = n (6.2b, p. 160);
+- **dicht utiliteitsgebouw:** geval H met zijn gemeenschappelijke ruimte als invoer (6.6.4), 25 keer herhaald tot 50 rekenzones. Elk raam is in vijf gesplitst (2 250 ramen, elk raam naar buiten met eigen zonwering, en een belemmering waar geval H er een heeft). Verder 1 200 lineaire koudebruggen, het PV-veld verdeeld over 30 systemen en de tweede helft van de zones op een extra verwarmingssysteem;
+- **opname:** de opname van het kantoor uit 1985 met elk raam in n delen gesplitst.
 
 | Project | Zones | Ramen | Rekentijd | Uitvoer (JSON) | Piekgeheugen testproces |
 |---|---:|---:|---:|---:|---:|
-| utiliteit | 2 | 18 | 18 ms | 206 kB | 12 MB |
-| utiliteit | 20 | 180 | 70 ms | 1,5 MB | 23 MB |
-| utiliteit | 40 | 360 | 144 ms | 2,9 MB | 38 MB |
-| utiliteit | 80 | 720 | 314 ms | 5,8 MB | 65 MB |
-| utiliteit | 200 | 1 800 | 759 ms | 14 MB | 142 MB |
-| woningen | 50 | 100 | 94 ms | 2,7 MB | – |
-| woningen | 200 | 400 | 412 ms | 10 MB | – |
+| utiliteit | 2 | 18 | 22 ms | 207 kB | 14 MB |
+| utiliteit | 20 | 180 | 76 ms | 1,5 MB | 25 MB |
+| utiliteit | 40 | 360 | 150 ms | 2,9 MB | 40 MB |
+| utiliteit | 80 | 720 | 343 ms | 5,8 MB | 67 MB |
+| utiliteit | 200 | 1 800 | 883 ms | 14 MB | 144 MB |
+| woningen | 50 | 100 | 97 ms | 2,7 MB | – |
+| woningen | 200 | 400 | 425 ms | 10 MB | – |
+| dicht utiliteitsgebouw, 2020+A1 | 50 | 2 250 | 423 ms | 7,5 MB | – |
+| dicht utiliteitsgebouw, 2022 | 50 | 2 250 | 419 ms | 7,5 MB | – |
+| dicht utiliteitsgebouw, 2023 | 50 | 2 250 | 424 ms | 7,5 MB | – |
+| dicht utiliteitsgebouw, 2024 | 50 | 2 250 | 433 ms | 7,5 MB | – |
+| dicht utiliteitsgebouw, 2025+C1 | 50 | 2 250 | 477 ms | 7,5 MB | – |
+| geval H × 25, ramen × 1 | 50 | 450 | 207 ms | 3,7 MB | – |
+| geval H × 25, ramen × 10 | 50 | 4 500 | 844 ms | 12 MB | – |
+| geval H × 25, ramen × 20 | 50 | 9 000 | 1 511 ms | 21 MB | 257 MB |
 
-- **Lineair.** Rekentijd, uitvoer en geheugen groeien evenredig met het aantal zones: ongeveer 4 ms, 72 kB uitvoer en 0,7 MB geheugen per utiliteitszone. Er is geen kwadratisch gedrag gevonden. In een meting met tijden per fase (904 ms in totaal voor 200 zones, door de meting zelf iets trager dan de 759 ms in de tabel) gaat 553 ms naar de gebouwberekening zelf; de rest is afleiding, controle en de eindige-getallencontrole van de uitkomst. Er was dus geen algoritmische correctie nodig.
+- **Lineair.** Rekentijd, uitvoer en geheugen groeien evenredig met het aantal zones (ongeveer 4 ms, 72 kB uitvoer en 0,7 MB geheugen per utiliteitszone) en met het aantal ramen (ongeveer 0,15 ms per raam met zonwering). Alle vijf uitgaven rekenen het dichte gebouw even snel. Een complete berekening heeft geen kwadratisch gedrag.
+- **Lege velden.** Een project met lege velden in het NTA-blok rekent niet; de kern zoekt dan elk leeg veld op (`blank_paths` in `project_performance.rs`). Die zoektocht leest het hele NTA-blok opnieuw voor elke poging, dus de tijd groeit met het aantal lege velden maal de grootte van het blok. In het dichte gebouw (release-build):
+
+  | Lege velden | Tijd |
+  |---:|---:|
+  | 1 | 0,2 s |
+  | 10 | 1,1 s |
+  | 50 | 4,9 s |
+  | 200 | 19,6 s |
+
+  Sinds 10 oktober 2026 leest de zoektocht het blok zonder het per poging te kopiëren; dat halveert de tijd (200 lege velden: eerst 34,6 s). De uitvoer van alle voorbeelden, openbare gevallen en hun varianten met lege velden is daarbij byte voor byte gelijk gebleven. Een klein project blijft snel: geval H (2 zones) met 40 lege velden rekent in 27 ms.
+- **Opname.** De opname van het kantoor uit 1985 met 400 ramen rekent in 33 ms. In een meting met tijden per fase (904 ms in totaal voor 200 zones, door de meting zelf iets trager dan de 759 ms in de tabel) gaat 553 ms naar de gebouwberekening zelf; de rest is afleiding, controle en de eindige-getallencontrole van de uitkomst. Er was dus geen algoritmische correctie nodig.
 - **Uitkomst bij schalen.** Een gebouw dat n keer herhaald wordt, houdt dezelfde energiebehoefte per m² (BENG 1). Verwarming, ventilatie en verlichting worden precies n keer zo groot. Tapwater, koeling en hulpenergie groeien minder, omdat ze vaste posten per systeem hebben (het verlies van het voorraadvat, de 87,6 kWh regelenergie van 10.87). De test controleert dit.
 - **Invoergrootte.** Een utiliteitszone is ongeveer 11 kB invoer. De standaardlimiet van de HTTP-API (16 MB) laat dus ruwweg 1 500 zones toe. Geëxtrapoleerd kost zo'n verzoek ongeveer 7 s en 1 GB geheugen.
-- **HTTP-API.** De API begrenst daarom het aantal gelijktijdige berekeningen (`--max-calculations`, standaard het aantal kernen) en de tijd per verzoek (`--calculation-timeout-s`, standaard 120 s). Daarna volgt 503 met `server_busy` of `calculation_timeout` (zie [HTTP-API](nta8800-api.md)). Wie de API buiten de eigen computer aanbiedt, stelt beide en `--body-limit-mb` lager in.
+- **HTTP-API.** De API begrenst daarom het aantal gelijktijdige berekeningen (`--max-calculations`, standaard het aantal kernen) en de tijd per verzoek (`--calculation-timeout-s`, standaard 120 s). Daarna volgt 503 met `server_busy` of `calculation_timeout` (zie [HTTP-API](nta8800-api.md)). Wie de API buiten de eigen computer aanbiedt, stelt beide en `--body-limit-mb` lager in. Het dichte gebouw (68 000 JSON-waarden) blijft ver onder de standaardlimiet van 500 000 waarden en ver onder de rekentijdslimiet; ook 200 lege velden in dat gebouw (19,6 s) passen erin.
+- **MCP en desktop.** De MCP-server en de desktop-app rekenen met dezelfde release-build, zonder eigen tijdslimiet: de desktop-app rekent in een aparte thread (`spawn_blocking`), zodat de interface blijft reageren terwijl een groot project rekent.
+- **Bewaking in de gate.** `large_projects.rs` rekent in elke gate het dichte gebouw (budget 40 s in een debug-build; gemeten 3,4 s), tien lege velden in dat gebouw (budget 45 s; gemeten 4,4 s) en de opname met 400 ramen (budget 15 s; gemeten 0,3 s). Een algoritme dat kwadratisch wordt, valt zo op.
 - **Interface.** In de jsdom-testomgeving tekent de pagina Schil van een project met 40 zones en 360 ramen in ongeveer 3 s (0,4 s bij 2 zones), de overige invoer- en resultaatpagina's in minder dan 0,3 s. Ook dit groeit lineair. Een echte browser is sneller dan jsdom. De test `src/__tests__/large-project-ui.test.tsx` bewaakt dit met een ruime tijdsgrens.
 - **Zelf meten.** `cargo test --release --offline --test large_projects -- --ignored --nocapture` in `crates/nta8800-core` drukt de tabel hierboven af.

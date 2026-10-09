@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Schaal en prestaties van de rekenkern (geen rekenwijziging)
+
+- **Gemeten.** Een dicht utiliteitsgebouw is gemeten, in alle vijf uitgaven: 50 rekenzones, 2 250 ramen met eigen zonwering en belemmeringen, 1 200 koudebruggen, 30 PV-systemen, een extra verwarmingssysteem en een gemeenschappelijke ruimte. Het rekent in 0,42–0,48 s (release-build).
+  - De rekentijd groeit lineair met zones en ramen: 9 000 ramen kosten 1,5 s.
+  - Een opname met 400 ramen rekent in 33 ms.
+- **Knelpunt: het opzoeken van lege velden.** Voor elke poging werd het hele NTA-blok gekopieerd en opnieuw gelezen. De zoektocht leest het blok nu zonder kopie. Dat halveert de tijd: 200 lege velden in het dichte gebouw kosten 19,6 s in plaats van 34,6 s.
+  - De tijd groeit nog steeds met het aantal lege velden maal de grootte van het blok; de programmabeschrijving (§8) noemt de getallen.
+  - De uitvoer van alle voorbeelden, openbare gevallen en hun varianten met lege velden (494 berekeningen) is byte voor byte gelijk gebleven.
+- **Bewaking.** In de gate controleert `large_projects.rs` nu ook drie gevallen met een ruim tijdsbudget voor een debug-build: het dichte gebouw, tien lege velden daarin en de opname met 400 ramen.
+  - Een eenheidstest bewaakt dat het geleende en het gekopieerde blok dezelfde eerste fout geven.
+  - De benchmark (`--ignored`) drukt de nieuwe tabellen af.
+
 ### 10 oktober 2026 — Toegankelijkheid en toetsenbord van formulieren en vensters (geen rekenwijziging)
 
 - **Vaste controle.** Een nieuwe test (`src/__tests__/a11y-forms-dialogs.test.tsx`, met de controle in `a11yAudit.ts`) loopt elk NTA-onderdeel op het voorbeeldkantoor en de tussenwoning door (lijsten geopend), beide opnamen, het venster *Overnemen in projectmodel*, de registratiepagina, de instellingen-, project- en opdrachtvensters en alle invoervensters. Hij eist een toegankelijke naam op elk veld en elke knop, unieke id's, aria-verwijzingen die bestaan, `role="dialog"` met `aria-modal` en een titel op elk venster, en een foutmelding die aan het veld gekoppeld is. Nieuwe onderdelen in `NTA_SECTIONS` vallen er vanzelf onder.

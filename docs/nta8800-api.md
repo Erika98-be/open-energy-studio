@@ -46,6 +46,8 @@ Met 8 rekenplaatsen, 16 wachtplaatsen en de standaarden is dat ongeveer 1,7 GB i
 
 De wachttijd en de berekening hebben elk hun eigen tijdslimiet. Een verzoek dat binnen `--queue-timeout-s` geen rekenplaats krijgt, krijgt 503 `server_busy` en start geen berekening; een verzoek dat lang heeft gewacht, krijgt dus nooit een berekening die meteen weer wordt afgebroken. Een berekening die langer duurt dan `--calculation-timeout-s`, geeft 503 `calculation_timeout`; de service maakt haar op de achtergrond af en houdt zolang haar rekenplaats bezet. Elke 503 heeft een `Retry-After`-header: een kwart van de rekentijdslimiet, tussen 1 en 60 seconden.
 
+Hoe lang een berekening duurt, staat in [programmabeschrijving §8](nta8800-programmabeschrijving.md#8-grenzen-en-prestaties). Een utiliteitsgebouw van 50 rekenzones met 2 250 ramen rekent in ongeveer 0,5 s (release-build). Een project met lege velden duurt langer, omdat de kern elk leeg veld opzoekt: 200 lege velden in dat gebouw kosten ongeveer 20 s. Beide blijven ruim binnen de standaardrekentijd van 120 s.
+
 **Hostnamen.** Een webpagina kan haar eigen domeinnaam naar 127.0.0.1 laten wijzen (*DNS rebinding*) en zo een lokale service bereiken. Op een loopback-adres beantwoordt de service daarom alleen `localhost`, `127.0.0.1` en `::1` (met of zonder poort) plus de namen uit `--allowed-host`. Een andere `Host` krijgt 403 `host_not_allowed`. Een verzoek zonder `Host`-header (geen browser) gaat door.
 
 **CORS.** Met `--cors-origin` krijgt elk antwoord `Vary: Origin`, ook een geweigerde preflight, zodat een cache een antwoord voor de ene origin niet aan een andere geeft.

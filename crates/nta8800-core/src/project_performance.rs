@@ -2469,7 +2469,9 @@ fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
     let first_error = |candidate: &Value| -> FirstError {
         #[cfg(test)]
         BLANK_SEARCH_DESERIALIZATIONS.with(|count| count.set(count.get() + 1));
-        serde_path_to_error::deserialize::<_, T>(candidate.clone())
+        // Deserialized from the borrowed value: a clone of a large block per
+        // try doubled the cost of the search.
+        serde_path_to_error::deserialize::<_, T>(candidate)
             .err()
             .map(|error| {
                 (
@@ -6096,6 +6098,51 @@ mod tests {
         assert_eq!(blank_paths::<Holder>(&measured).paths, ["loss.valueKwh"]);
         let declared = serde_json::json!({"loss": {"method": "declared", "valueKwh": null, "source": "s"}, "other": 1.0});
         assert!(blank_paths::<Holder>(&declared).paths.is_empty());
+    }
+
+    /// The blank search deserializes the borrowed block instead of a clone
+    /// per try. Both give the same first error (path and message), so the
+    /// gaps stay the same: checked for every number of the example block
+    /// set to null, to text and to a list.
+    #[test]
+    fn borrowed_and_owned_blocks_give_the_same_first_error() {
+        let value = project();
+        let block = value["ntaCalculation"].clone();
+        let mut pointers = Vec::new();
+        fn numbers(value: &Value, pointer: String, out: &mut Vec<String>) {
+            match value {
+                Value::Number(_) => out.push(pointer),
+                Value::Object(map) => map
+                    .iter()
+                    .for_each(|(key, item)| numbers(item, format!("{pointer}/{key}"), out)),
+                Value::Array(items) => items
+                    .iter()
+                    .enumerate()
+                    .for_each(|(index, item)| numbers(item, format!("{pointer}/{index}"), out)),
+                _ => {}
+            }
+        }
+        numbers(&block, String::new(), &mut pointers);
+        assert!(pointers.len() > 20);
+        let first = |candidate: &Value, borrowed: bool| {
+            let result = if borrowed {
+                serde_path_to_error::deserialize::<_, NtaCalculationInput>(candidate).err()
+            } else {
+                serde_path_to_error::deserialize::<_, NtaCalculationInput>(candidate.clone()).err()
+            };
+            result.map(|error| (error.path().to_string(), error.inner().to_string()))
+        };
+        let mut errors = 0;
+        for pointer in &pointers {
+            for replacement in [Value::Null, Value::from("x"), serde_json::json!([1])] {
+                let mut candidate = block.clone();
+                *candidate.pointer_mut(pointer).unwrap() = replacement;
+                let owned = first(&candidate, false);
+                errors += usize::from(owned.is_some());
+                assert_eq!(first(&candidate, true), owned, "{pointer}");
+            }
+        }
+        assert!(errors > 0);
     }
 
     #[test]
