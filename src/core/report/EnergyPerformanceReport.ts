@@ -804,7 +804,7 @@ export function generateEnergyPerformanceReportHTML(project: IProject, assessmen
   const levelText = options.level === 'summary' ? 'samenvatting' : options.level === 'standard' ? 'standaard' : 'gedetailleerd';
   const runHeader = `<div class="run"><span>${escapeHtml(project.name || 'Project')} — Rapportage Energieprestatie (NTA 8800)</span>
     <span>${escapeHtml(dutchTimestamp(generatedAt))} · kern ${escapeHtml(assessment.kernelVersion)}${attest.attestNumber ? ` · attest ${escapeHtml(attest.attestNumber)}` : ''}</span></div>`;
-  const cover = `<header class="cover"><h1>Rapportage Energieprestatie</h1><p class="sub">NTA 8800:2025+C1:2026 — ${escapeHtml(project.name || 'Project')}</p>
+  const cover = `<header class="cover"><h1>Rapportage Energieprestatie</h1><p class="sub">${escapeHtml(assessment.targetNormVersion)} — ${escapeHtml(project.name || 'Project')}</p>
     <dl><dt>Adres</dt><dd>${escapeHtml([project.address, project.city].filter(Boolean).join(', ') || '—')}</dd>
     <dt>Rapportniveau</dt><dd>${levelText}</dd><dt>Datum</dt><dd>${dutchTimeHtml(generatedAt)}</dd>
     <dt>Rekenkern</dt><dd>Open Energy Studio ${escapeHtml(assessment.kernelVersion)} (${attest.attestNumber ? `BRL 9501-attest ${escapeHtml(attest.attestNumber)}` : 'niet geattesteerd'})</dd></dl>${attestMarkSlot(attest)}</header>`;

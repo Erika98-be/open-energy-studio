@@ -1,4 +1,6 @@
 import type { INtaHeatPumpInput, IProject } from '../energy/types';
+import { nl } from '../../i18n/nl';
+import { DEFAULT_NORM_VERSION } from '../nta/KernelClient';
 import { escapeHtml } from './HtmlEscaping';
 import { dutchTimeHtml } from './DutchReportText';
 
@@ -166,7 +168,7 @@ export function generateNtaInputDossierHTML(project: IProject, generatedAt: Date
     <p>Project: ${escapeHtml(project.name)} · Project-ID: ${escapeHtml(project.id)} · Gegenereerd: ${generatedTime}</p>
     <div class="notice"><strong>Invoer alleen — niet geattesteerd.</strong> Dit document bevat geen geverifieerde NTA 8800-berekening, BENG-uitkomst of officieel energielabel. Registervelden en bronverwijzingen zijn door de gebruiker ingevoerd en niet extern gecontroleerd.</div>
     <h2>Project en doeluitgave</h2><table><tbody>
-      <tr><th>Doeluitgave</th>${cell('NTA 8800:2025+C1:2026')}<th>Gebouwfunctie</th>${cell(project.buildingFunction)}</tr>
+      <tr><th>Doeluitgave</th>${cell(nl[`nta.edition.${project.ntaCalculation?.normVersion ?? DEFAULT_NORM_VERSION}`])}<th>Gebouwfunctie</th>${cell(project.buildingFunction)}</tr>
       <tr><th>Adres</th>${cell(project.address || 'Niet vastgelegd')}<th>Plaats</th>${cell(project.city || 'Niet vastgelegd')}</tr>
       <tr><th>Rekenzones</th>${cell(project.zones.length)}<th>Warmtepompregistraties</th>${cell(pumps.length)}</tr>
     </tbody></table>

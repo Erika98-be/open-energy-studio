@@ -98,7 +98,7 @@ export function generateMaatwerkadviesReportHTML(
     @media print{body{margin:12mm;padding:0;font-size:11px}table{break-inside:avoid}}</style></head><body>
     <h1>Maatwerkadvies</h1>
     <p>Project: ${escapeHtml(project.name)} · ${escapeHtml(project.address ?? '')} ${escapeHtml(project.city ?? '')} · Gegenereerd: ${generatedTime}</p>
-    <div class="notice"><strong>Onverifieerde berekening, niet geattesteerd.</strong> De energieberekening komt uit de Rust-rekenkern van Open Energy Studio (NTA 8800:2025+C1:2026). Werkelijke besparingen hangen af van gebruik, uitvoering en energieprijzen. TO<sub>juli</sub> is slechts een indicatie en is voor bestaande bouw niet gevalideerd (ISSO 82.2 §4.2.3).</div>
+    <div class="notice"><strong>Onverifieerde berekening, niet geattesteerd.</strong> De energieberekening komt uit de Rust-rekenkern van Open Energy Studio (${escapeHtml(assessment.targetNormVersion)}). Werkelijke besparingen hangen af van gebruik, uitvoering en energieprijzen. TO<sub>juli</sub> is slechts een indicatie en is voor bestaande bouw niet gevalideerd (ISSO 82.2 §4.2.3).</div>
     <h2>Herleidbaarheid</h2><table><tbody>
       <tr><th>Doeluitgave</th>${cell(assessment.targetNormVersion)}<th>Kernelversie</th>${cell(assessment.kernelVersion)}</tr>
       <tr><th>Status</th>${cell(status(assessment.status))}<th>Atteststatus</th>${cell(status(assessment.attestStatus))}</tr>

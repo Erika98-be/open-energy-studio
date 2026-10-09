@@ -212,7 +212,7 @@ pub fn assess_forfait_heat_pump_monthly_draft(
             "invalid"
         },
         scope: "public_chapter_9_draft_equation_9_62_supplied_monthly_flows_only",
-        consultation_source: DRAFT_SOURCE,
+        consultation_source: crate::norm_versions::cite(DRAFT_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),

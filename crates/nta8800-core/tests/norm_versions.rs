@@ -153,6 +153,7 @@ fn example_projects_differ_only_where_the_editions_differ() {
                     key.as_str(),
                     "inputFingerprint"
                         | "targetNormVersion"
+                        | "chapter5Source"
                         | "normVersion"
                         | "registrationEligible"
                 ) && (value.is_number() || value.is_string() || value.is_boolean())
@@ -233,7 +234,7 @@ fn changed_keys(a: &ProjectPerformanceAssessment, b: &ProjectPerformanceAssessme
         .filter(|(key, value)| {
             !matches!(
                 key.as_str(),
-                "inputFingerprint" | "targetNormVersion" | "normVersion"
+                "inputFingerprint" | "targetNormVersion" | "chapter5Source" | "normVersion"
             ) && (value.is_number() || value.is_string() || value.is_boolean())
                 && b.get(key.as_str()) != Some(value)
         })

@@ -235,7 +235,7 @@ export function buildEpOnlineOverview(
     }
   } else if (legacy) {
     values.Energieklasse = null;
-    const reason = `oudere uitgave (NTA 8800:${assessment?.normVersion ?? 'onbekend'}), niet registreerbaar`;
+    const reason = `oudere uitgave (${assessment?.targetNormVersion ?? 'NTA 8800, onbekende uitgave'}), niet registreerbaar`;
     for (const field of LEGACY_OMITTED) omitted.push({ field, reason });
   } else {
     values.Energieklasse = null;
@@ -256,7 +256,7 @@ export function buildEpOnlineOverview(
   }
   return {
     notice: legacy
-      ? `${EP_ONLINE_OVERVIEW_NOTICE} Berekend in de oudere uitgave NTA 8800:${assessment?.normVersion ?? 'onbekend'}: niet registreerbaar, daarom zonder energieklasse en indicatoren.`
+      ? `${EP_ONLINE_OVERVIEW_NOTICE} Berekend in de oudere uitgave ${assessment?.targetNormVersion ?? 'NTA 8800, onbekende uitgave'}: niet registreerbaar, daarom zonder energieklasse en indicatoren.`
       : EP_ONLINE_OVERVIEW_NOTICE,
     schema: 'EpbdExportTypesV4 (exportschema, Pandcertificaat)',
     pandcertificaat: ordered,

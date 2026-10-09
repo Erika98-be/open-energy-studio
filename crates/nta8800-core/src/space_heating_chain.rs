@@ -2899,7 +2899,7 @@ fn assess_chain_pass(
             "invalid"
         },
         scope: "nta8800_space_heating_zones_single_generator_unverified",
-        chapter_9_source: DRAFT_SOURCE,
+        chapter_9_source: crate::norm_versions::cite(DRAFT_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: fingerprint,

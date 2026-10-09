@@ -337,7 +337,7 @@ export function generateNtaCalculationReportHTML(
       <li>Klimaat: ${escapeHtml(heating.demand.climateSource)}</li>
       <li>Hoofdstuk 9 (afgifte, opwekking): ${escapeHtml(heating.chapter9Source)}</li>
       <li>Hoofdstuk 5 (primaire energie, indicatoren): ${escapeHtml(performance.chapter5Source)}</li>
-      <li>Hoofdstukken 7–17: getranscribeerd uit NTA 8800:2025+C1:2026 (paginaverwijzingen in de kern); verificatie met referentiegevallen nog nodig.</li>
+      <li>Hoofdstukken 7–17: getranscribeerd uit NTA 8800:2025+C1:2026 (paginaverwijzingen in de kern)${legacyEdition(assessment) ? `, met de afwijkingen van ${escapeHtml(assessment.targetNormVersion)} uit het uitgaveprofiel van de kern` : ''}; verificatie met referentiegevallen nog nodig.</li>
     </ul>
     ${interpretationsSection(interpretations)}</body></html>`;
 }
