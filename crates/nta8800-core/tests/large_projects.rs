@@ -504,67 +504,112 @@ fn benchmark_large_projects() {
     for copies in [1, 10, 50, 100, 200] {
         row("woningen (rijwoning)", scaled_dwellings(copies));
     }
-}
-
-#[test]
-#[ignore = "probe"]
-fn probe_dense() {
-    let project = dense_utility_building();
+    let dense = dense_utility_building();
     for edition in ["2020+A1", "2022", "2023", "2024", "2025+C1"] {
-        let p = in_edition(&project, edition);
-        let start = Instant::now();
-        let result = assess_project_performance(&p);
-        println!(
-            "{edition}: {} in {:?}, windows {}, gaps {:?}",
-            result.status,
-            start.elapsed(),
-            window_count(&p),
-            result.gaps.iter().take(5).collect::<Vec<_>>()
-        );
+        row(&format!("utiliteit dicht ({edition})"), in_edition(&dense, edition));
     }
-    let survey = dense_office_survey(100);
-    let start = Instant::now();
-    let result = assess_utility_survey(&survey);
-    println!("survey: {} in {:?}", result.status, start.elapsed());
-}
-
-#[test]
-#[ignore = "probe"]
-fn probe_window_scaling() {
-    for parts in [1usize, 2, 5, 10, 20] {
+    for parts in [1usize, 5, 10, 20] {
         let mut project = scaled_case_h(25);
         split_windows(&mut project, parts);
         shade_every_window(&mut project);
+        row(&format!("geval H × 25, ramen × {parts}"), project);
+    }
+    println!();
+    println!("| blanks in the NTA block | gaps | time (ms) |");
+    println!("|---:|---:|---:|");
+    for blanks in [1usize, 10, 50, 200] {
+        let project = with_blank_shadings(&dense, blanks);
         let start = Instant::now();
         let result = assess_project_performance(&project);
-        let calc = start.elapsed();
-        let start = Instant::now();
-        let bytes = serde_json::to_vec(&result).unwrap().len();
         println!(
-            "parts {parts}: windows {} {} calc {:?} serialize {:?} {} kB",
-            window_count(&project),
+            "| {blanks} | {} | {:.0} |",
+            result.gaps.len(),
+            start.elapsed().as_secs_f64() * 1000.0
+        );
+    }
+    println!();
+    for parts in [1usize, 10, 100] {
+        let survey = dense_office_survey(parts);
+        let start = Instant::now();
+        let result = assess_utility_survey(&survey);
+        println!(
+            "survey, {} windows: {} in {:.1} ms",
+            4 * parts,
             result.status,
-            calc,
-            start.elapsed(),
-            bytes / 1024
+            start.elapsed().as_secs_f64() * 1000.0
         );
     }
 }
 
-#[test]
-#[ignore = "probe"]
-fn probe_blanks() {
-    let project = dense_utility_building();
-    for blanks in [0usize, 1, 10, 50, 200] {
-        let mut copy = project.clone();
-        for index in 0..blanks {
-            copy["ntaCalculation"]["windowShadings"][index * 7]["movableShading"]["control"] = Value::Null;
-        }
-        let start = Instant::now();
-        let result = assess_project_performance(&copy);
-        println!("blanks {blanks}: {} gaps {} in {:?}", result.status, result.gaps.len(), start.elapsed());
+/// The project with the control of `blanks` window shadings cleared.
+fn with_blank_shadings(project: &Value, blanks: usize) -> Value {
+    let mut copy = project.clone();
+    let shadings = copy["ntaCalculation"]["windowShadings"]
+        .as_array_mut()
+        .unwrap();
+    let step = (shadings.len() / blanks.max(1)).max(1);
+    for index in 0..blanks {
+        shadings[index * step]["movableShading"]["control"] = Value::Null;
     }
+    copy
 }
+
+fn budget(debug_secs: u64, release_secs: u64) -> Duration {
+    Duration::from_secs(if cfg!(debug_assertions) {
+        debug_secs
+    } else {
+        release_secs
+    })
+}
+
+/// The scale audit's utility building (50 zones, 2 250 windows with
+/// shading, 1 200 thermal bridges, 30 PV systems, an additional heating
+/// system and a common space) calculates within budget. Measured on
+/// 10 October 2026: 3,4 s in a debug build, 0,42 s in release; the budget
+/// leaves room for a loaded gate machine.
+#[test]
+fn dense_utility_building_calculates_within_budget() {
+    let project = in_edition(&dense_utility_building(), "2025+C1");
+    let run = measure(&project);
+    assert_eq!(run.zones, 50);
+    assert_eq!(run.windows, 2250);
+    assert!(run.status.starts_with("calculated"), "{}", run.status);
+    let limit = budget(40, 4);
+    assert!(run.elapsed < limit, "dense building took {:?}", run.elapsed);
+}
+
+/// The blank search deserializes the whole NTA block per try, so its cost
+/// grows with the blanks times the size of the block. Ten blanks in the
+/// dense building: 4,4 s in a debug build, 0,9 s in release (10 October
+/// 2026).
+#[test]
+fn blanks_in_a_dense_building_are_found_within_budget() {
+    let project = with_blank_shadings(&in_edition(&dense_utility_building(), "2025+C1"), 10);
+    let start = Instant::now();
+    let result = assess_project_performance(&project);
+    let elapsed = start.elapsed();
+    assert_eq!(result.status, "incomplete");
+    assert_eq!(result.gaps.len(), 10, "{:?}", result.gaps);
+    assert!(result.gaps.iter().all(|gap| gap.code == "nta_value_missing"
+        && gap.path.ends_with("movableShading.control")));
+    let limit = budget(45, 5);
+    assert!(elapsed < limit, "ten blanks took {elapsed:?}");
+}
+
+/// The 1985 office survey with 400 windows calculates within budget
+/// (0,3 s debug, 35 ms release on 10 October 2026).
+#[test]
+fn dense_survey_calculates_within_budget() {
+    let start = Instant::now();
+    let result = assess_utility_survey(&dense_office_survey(100));
+    let elapsed = start.elapsed();
+    assert!(result.status.starts_with("calculated"), "{}", result.status);
+    let limit = budget(15, 2);
+    assert!(elapsed < limit, "dense survey took {elapsed:?}");
+}
+
+
+
 
 /// Writes the serialized result of every project fixture (as is, with
 /// blanks, in every edition) to `$NTA_SNAPSHOT_DIR`, to compare outputs
@@ -647,3 +692,4 @@ fn collect_number_paths(value: &Value, pointer: String, out: &mut Vec<String>) {
         _ => {}
     }
 }
+
