@@ -3605,7 +3605,8 @@ export interface NtaEnergyStorage {
 /** Chapter 14 lighting of one calculation zone. */
 export interface NtaZoneLighting {
   zoneId: string;
-  functions: Array<{ function: NtaLabelFunction; areaM2: number }>;
+  /** Empty or omitted with common spaces (6.6.4): the kernel fills the zone's within-zone split. */
+  functions?: Array<{ function: NtaLabelFunction; areaM2: number }>;
   lightingZones: Array<{
     id: string;
     areaM2: number;
@@ -4078,7 +4079,9 @@ export interface NtaHotWaterSystem {
   unheatedReductionFactor?: number | null;
   need:
     | { method: 'residential'; dwellingCount: number; /** 6.2b: A_g;zi / Σ A_g;zi; omitted: derived for multi-zone projects. */ dwellingShare?: number | null; sourceReference: string }
-    | { method: 'utility'; areas: Array<{ function: NtaLabelFunction; areaM2: number }>; sourceReference: string };
+    | { method: 'utility';
+        /** Empty or omitted with common spaces (6.6.4) and one system: the kernel fills the within-zone split summed over the zones (13.19). */
+        areas?: Array<{ function: NtaLabelFunction; areaM2: number }>; sourceReference: string };
   emission:
     | { method: 'residential'; served: 'kitchen_and_bathroom' | 'bathroom_only' | 'kitchen_only';
         kitchenLengthM?: number | null;
@@ -4554,6 +4557,10 @@ export interface CommonSpaceSplit {
   spaces: Array<{ zoneId: string; id?: string; areaM2: number; withinZone: FunctionAreaList; building: FunctionAreaList }>;
   zones: Array<{ zoneId: string; initial: FunctionAreaList; allocated: FunctionAreaList }>;
   building: FunctionAreaList;
+  /** Within-zone split summed over the zones (hot water, 13.19). */
+  withinZones: FunctionAreaList;
+  /** Input lists the kernel filled from the split, below ntaCalculation. */
+  filled?: string[];
 }
 
 /** Registration data of the EP report (crates/nta8800-core/src/registration.rs); all optional. */

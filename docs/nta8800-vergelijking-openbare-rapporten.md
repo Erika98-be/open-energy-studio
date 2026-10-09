@@ -368,6 +368,8 @@ De verwarming van H lag 9 % onder het rapport en BENG 1 6,2 %. De oorzaak zat in
 | Omgevingswarmte (E_ren verwarming) | 8 984 | 8 177 | 8 940 |
 | BENG 1 / 2 / 3 | 29,08 / 80,01 / 30,5 | 27,29 / 80,63 / 29,7 | 30,20 / 81,86 / 30,0 |
 
+- **Tapwater en verlichting met de verdeling binnen de zone.** Laat de invoer de lijsten voor tapwater en verlichting leeg, dan vult de kern ze met de verdeling binnen de rekenzone. 13.19 (2023 p. 527) en hoofdstuk 14 (t_D en t_N p. 643, P_n;spec p. 647) wegen naar de functies die in de rekenzone liggen, en dat is de laatste alinea van 6.6.4 (p. 145). De fixture houdt de gebouwverdeling van Uniec aan. Met de verdeling binnen de zone wordt het tapwater 317 kWh en de verlichting 248 kWh lager, en BENG 2 80,74 in plaats van 81,86 (rapport 80,01). Test `case_h_common_space_fills_hot_water_and_lighting_within_the_zone`; [vraag 6 aan NEN](nta8800-vragen-nen.md).
+
 - **De afgifte** zit in beide gevallen op de grens van 0,15 × de behoefte (9.16), en de distributie (476,03 m, geïsoleerd, alle verliezen in de zone) is gelijk aan het rapport. Het verschil zat dus geheel in de behoefte van RZ-1.
 - **BENG 1** ligt nu 3,9 % boven het rapport (was 6,2 % eronder). Het rapport geeft geen behoefte per zone of per dienst, dus dit valt niet verder te splitsen. De C1-ventilatie van RZ-1 weegt het zwaarst: zonder WTW geeft het hogere debiet van kantoor, bijeenkomst en zorg 2 175 kWh meer behoefte, met de WTW van D.2 maar 944.
 - **Ook nagekeken.** Infiltratie (q_v;10;lea;ref 0,69, geen meetwaarde: dezelfde waarde langs beide routes), de transmissie van RZ-2 (H_D 225,76 W/K, op 0,01 W/K gelijk aan de som van de uitdraai) en de verticale leidingen. Bij K en L ligt de gemeenschappelijke ruimte al alleen bij de functies van haar eigen zone.

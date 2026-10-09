@@ -54,3 +54,15 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Vraag.**
 - Welke q_V;ODA;req geldt in 11.142: die van de warmtebalans, die van de koudebalans, of per maand de grootste?
 - Als de koudebalans bedoeld is: ook in maanden zonder koudebehoefte?
+
+## 6. Oppervlakte per gebruiksfunctie voor tapwater en verlichting bij een gemeenschappelijke ruimte (13.19, p. 538; hoofdstuk 14, p. 657 en 661; 6.6.4, p. 158)
+
+**Situatie.** 6.6.4 kent twee verdelingen van een gemeenschappelijke ruimte: voor de gebruiksfunctie in het gebouw over alle aangewezen functies, en voor de gebruiksfunctie binnen een rekenzone alleen over de aangewezen functies die in die rekenzone liggen. Formule 13.19 weegt Q_W;nd;spec naar "de gebruiksfuncties usi in de beschouwde rekenzone"; t_D, t_N (p. 657) en P_n;spec (p. 661) wegen naar "de gebruiksfuncties die in de rekenzone zijn gelegen". Dezelfde tekst staat in 2020+A1 (p. 515, 628–636), 2022 (p. 519, 633–641), 2023 (p. 527, 643–651) en 2024.
+
+**Gekozen lezing.** De kern neemt de verdeling binnen de rekenzone als hij deze lijsten zelf vult. Een ingevulde lijst gaat altijd voor.
+
+**Gevolg.** Openbaar geval H (Uniec 3.2.9.2, NTA 8800:2023) heeft een gemeenschappelijke ruimte van 49,20 m² in de rekenzone zonder sport, terwijl ook de sportfunctie erop is aangewezen. Uniec neemt voor tapwater en verlichting de gebouwverdeling: 44,35 m² gaat naar sport, ook in de verlichting van de rekenzone zonder sport. Met de verdeling binnen de rekenzone rekent de kern 317 kWh minder tapwater en 248 kWh minder verlichting; BENG 2 wordt 80,74 in plaats van 81,86 (rapport 80,01).
+
+**Vraag.**
+- Geldt voor 13.19 en de weging in hoofdstuk 14 de gebruiksoppervlakte binnen de rekenzone (6.6.4, laatste alinea) of die in het gebouw (6.6.4, eerste alinea)?
+- Ligt het deel van een gemeenschappelijke ruimte dat aan een functie buiten de rekenzone wordt toebedeeld, voor deze weging "in de rekenzone"?

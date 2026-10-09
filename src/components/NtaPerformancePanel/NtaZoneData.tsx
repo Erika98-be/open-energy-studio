@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useI18n } from '../../i18n/i18n';
 import type { IProject } from '../../core/energy/types';
 import { CheckField, NumberField, read, SelectField, TextField, type Draft, type Path } from './NtaFormFields';
@@ -23,6 +24,32 @@ const USAGE_FUNCTIONS = ['residential', 'office', 'education', 'retail', 'other_
   'other_healthcare', 'healthcare_with_beds', 'lodging', 'cell', 'sport'];
 /** Function areas (§6.5.3) split a utility zone; a residential part is refused (function_areas_residential_mixed). */
 const FUNCTION_AREA_FUNCTIONS = USAGE_FUNCTIONS.filter((key) => key !== 'residential');
+
+/** Whether any zone of the NTA block has a common space (6.6.4). */
+export function hasCommonSpaces(draft: Draft): boolean {
+  return list(draft, ['zoneData']).some((zone) => Array.isArray(zone.commonSpaces) && zone.commonSpaces.length > 0);
+}
+
+/**
+ * With common spaces the kernel fills an empty hot-water or lighting function list with the within-zone split
+ * (13.19; chapter 14, t_D, t_N and P_n;spec). Ticked: the list is empty and the entry fields are hidden; unticked:
+ * one blank entry to fill in by hand (for instance Uniec's building split).
+ */
+export function CommonSpaceFillField({ draft, change, path, children }:
+  SectionProps & { path: Path; children: ReactNode }) {
+  const { t } = useI18n();
+  const value = read(draft, path);
+  const filled = Array.isArray(value) && value.length === 0;
+  if (!hasCommonSpaces(draft)) return <>{children}</>;
+  return <>
+    <label className="nta-form-check">
+      <input type="checkbox" checked={filled}
+        onChange={(event) => change(path, event.target.checked ? [] : [{ function: null, areaM2: null }])} />
+      {t('nta.zoneData.commonSpace.fill')}
+    </label>
+    {filled ? <p className="nta-form-note">{t('nta.zoneData.commonSpace.fillNote')}</p> : children}
+  </>;
+}
 
 /**
  * Common spaces lying in a zone (6.6.4): the kernel allocates each one pro rata over the functions that rely on it,

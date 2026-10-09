@@ -1506,22 +1506,112 @@ fn common_space_zones<'a>(
 }
 
 /// 6.6.4 allocation of the common spaces of the zones, `None` without any.
+/// `filled` names the input lists the kernel fills from it.
 pub fn common_space_split(project_value: &Value) -> Option<crate::common_space::CommonSpaceSplit> {
     let project: ProjectInput = serde_json::from_value(project_value.clone()).ok()?;
     let block = project_value.get("ntaCalculation")?;
-    let nta: NtaCalculationInput = serde_json::from_value(without_null_members(block)).ok()?;
-    crate::common_space::allocate(&common_space_zones(&project, &nta))?.ok()
+    let mut nta: NtaCalculationInput = serde_json::from_value(without_null_members(block)).ok()?;
+    let zones = common_space_zones(&project, &nta);
+    let mut split = crate::common_space::allocate(&zones)?.ok()?;
+    let use_areas = crate::common_space::zone_use_areas(&zones, &split);
+    split.filled = fill_from_common_spaces(&mut nta, &split, use_areas.as_deref());
+    Some(split)
+}
+
+/// Fills the empty use-function lists from the 6.6.4 allocation and returns
+/// their paths below `ntaCalculation`: `bblFunctions` and `labelFunctions`
+/// with the building split (5.3.1), the lighting functions of each zone
+/// with the zone's within-zone split (t_D, t_N and P_n;spec "gewogen naar
+/// de gebruiksoppervlakte van de gebruiksfuncties die in de rekenzone zijn
+/// gelegen", 2025+C1 p. 657 and 661) and the areas of a single utility
+/// hot-water system with the within-zone split summed over the zones (13.19,
+/// p. 538). Entered lists take precedence.
+fn fill_from_common_spaces(
+    nta: &mut NtaCalculationInput,
+    split: &crate::common_space::CommonSpaceSplit,
+    use_areas: Option<&[(String, Vec<crate::monthly_demand::UsageFunctionArea>)]>,
+) -> Vec<String> {
+    let mut filled = Vec::new();
+    if split.building.len() > 1 {
+        if nta.bbl_functions.is_empty() {
+            if let Some(functions) = crate::common_space::bbl_functions(split) {
+                nta.bbl_functions = functions;
+                filled.push("bblFunctions".to_string());
+            }
+        }
+        if nta.label_functions.is_empty() {
+            if let Some(functions) = crate::common_space::label_functions(split) {
+                nta.label_functions = functions;
+                filled.push("labelFunctions".to_string());
+            }
+        }
+    }
+    let Some(use_areas) = use_areas else {
+        return filled;
+    };
+    for (index, lighting) in nta.lighting.iter_mut().enumerate() {
+        if !lighting.functions.is_empty() {
+            continue;
+        }
+        let Some((_, parts)) = use_areas.iter().find(|(id, _)| *id == lighting.zone_id) else {
+            continue;
+        };
+        let functions: Option<Vec<crate::lighting::UseArea>> = parts
+            .iter()
+            .map(|part| {
+                Some(crate::lighting::UseArea {
+                    function: crate::common_space::label_function(part.function)?,
+                    area_m2: part.area_m2,
+                })
+            })
+            .collect();
+        if let Some(functions) = functions {
+            lighting.functions = functions;
+            filled.push(format!("lighting[{index}].functions"));
+        }
+    }
+    // 13.20: with several systems each serves its own part of the building,
+    // which the split does not fix.
+    if nta.additional_hot_water_systems.is_empty() {
+        if let Some(crate::domestic_hot_water::HotWaterNeed::Utility { areas, .. }) =
+            nta.hot_water.as_mut().map(|system| &mut system.need)
+        {
+            if areas.is_empty() {
+                let parts: Option<Vec<crate::domestic_hot_water::UtilityArea>> = split
+                    .within_zones
+                    .iter()
+                    .map(|part| {
+                        Some(crate::domestic_hot_water::UtilityArea {
+                            function: crate::common_space::label_function(part.function)?,
+                            area_m2: part.area_m2,
+                        })
+                    })
+                    .collect();
+                if let Some(parts) = parts.filter(|parts| !parts.is_empty()) {
+                    *areas = parts;
+                    filled.push("hotWater.need.areas".to_string());
+                }
+            }
+        }
+    }
+    filled
 }
 
 /// Writes the 6.6.4 allocation into the zone function areas, the zone
-/// ventilation functions and `bblFunctions` (when not given). `false` when
-/// the common spaces are refused.
+/// ventilation functions and the empty use-function lists
+/// (`fill_from_common_spaces`). `false` when the common spaces are refused.
 fn apply_common_spaces(
     project: &ProjectInput,
     nta: &mut NtaCalculationInput,
     gaps: &mut Vec<InputGap>,
 ) -> bool {
-    let split = match crate::common_space::allocate(&common_space_zones(project, nta)) {
+    let zones = common_space_zones(project, nta);
+    let allocation = crate::common_space::allocate(&zones);
+    let use_areas = match &allocation {
+        Some(Ok(split)) => crate::common_space::zone_use_areas(&zones, split),
+        _ => None,
+    };
+    let split = match allocation {
         None => return true,
         Some(Ok(split)) => split,
         Some(Err(issues)) => {
@@ -1557,18 +1647,7 @@ fn apply_common_spaces(
                 allocated_ventilation_functions(&zone.allocated, &ventilation.functions);
         }
     }
-    if split.building.len() > 1 {
-        if nta.bbl_functions.is_empty() {
-            if let Some(functions) = crate::common_space::bbl_functions(&split) {
-                nta.bbl_functions = functions;
-            }
-        }
-        if nta.label_functions.is_empty() {
-            if let Some(functions) = crate::common_space::label_functions(&split) {
-                nta.label_functions = functions;
-            }
-        }
-    }
+    fill_from_common_spaces(nta, &split, use_areas.as_deref());
     true
 }
 

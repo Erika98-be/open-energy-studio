@@ -606,6 +606,115 @@ fn case_h_common_space_input_equals_the_hand_split() {
     }
 }
 
+/// Case H with the common space as input and the hot-water and lighting
+/// lists left empty: the kernel fills them with the within-zone split, as
+/// 13.19 (2023 p. 527) and chapter 14 (t_D, t_N p. 643, P_n;spec p. 647)
+/// weight by the use functions lying in the calculation zone (6.6.4, last
+/// paragraph, p. 145). The result equals the same within-zone lists entered
+/// by hand. Uniec 3.2.9.2 takes the building split for both instead (the
+/// fixture); that reading gives slightly more hot water and lighting.
+#[test]
+fn case_h_common_space_fills_hot_water_and_lighting_within_the_zone() {
+    let hand: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-h.json"
+    ))
+    .unwrap();
+    let mut input = hand.clone();
+    let nta = &mut input["ntaCalculation"];
+    let rz1 = &mut nta["zoneData"][0];
+    rz1["functionAreas"] = serde_json::json!([
+        {"function": "office", "areaM2": 14.70},
+        {"function": "other_assembly", "areaM2": 26.30},
+        {"function": "other_healthcare", "areaM2": 27.60}
+    ]);
+    rz1["commonSpaces"] = serde_json::json!([{
+        "id": "gemeenschappelijk",
+        "areaM2": 49.20,
+        "sourceReference": "openbare bron Uniec 3.2.9.2 printout: gemeenschappelijke ruimte 49,20 m2 voor alle functies"
+    }]);
+    rz1["ventilation"]["functions"] = rz1["functionAreas"].clone();
+    nta.as_object_mut().unwrap().remove("bblFunctions");
+    nta["hotWater"]["need"]["areas"] = serde_json::json!([]);
+    for lighting in nta["lighting"].as_array_mut().unwrap() {
+        lighting.as_object_mut().unwrap().remove("functions");
+    }
+
+    // The same within-zone lists entered by hand.
+    let mut entered = input.clone();
+    let rz1_within = serde_json::json!([
+        {"function": "office", "areaM2": 25.24},
+        {"function": "assembly_without_day_care", "areaM2": 45.16},
+        {"function": "healthcare_without_beds", "areaM2": 47.40}
+    ]);
+    entered["ntaCalculation"]["lighting"][0]["functions"] = rz1_within.clone();
+    entered["ntaCalculation"]["lighting"][1]["functions"] =
+        serde_json::json!([{"function": "sport", "areaM2": 626.0}]);
+    let mut areas = rz1_within.as_array().unwrap().clone();
+    areas.push(serde_json::json!({"function": "sport", "areaM2": 626.0}));
+    entered["ntaCalculation"]["hotWater"]["need"]["areas"] = Value::from(areas);
+    // Exact within-zone shares of 49,20 m² over 14,70 / 26,30 / 27,60 m².
+    let own = [14.70, 26.30, 27.60];
+    let total: f64 = own.iter().sum();
+    for (index, area) in own.iter().enumerate() {
+        let allocated = area + 49.20 * area / total;
+        entered["ntaCalculation"]["lighting"][0]["functions"][index]["areaM2"] =
+            Value::from(allocated);
+        entered["ntaCalculation"]["hotWater"]["need"]["areas"][index]["areaM2"] =
+            Value::from(allocated);
+    }
+
+    let (filled_performance, filled) = run_edition(&input, "2023");
+    let (entered_performance, by_hand) = run_edition(&entered, "2023");
+    for (got, want) in filled.iter().zip(by_hand) {
+        assert!((got - want).abs() < 1e-9, "{filled:?} against {by_hand:?}");
+    }
+    for service in ["hotWater", "lighting"] {
+        let got = used_kwh(&filled_performance, service);
+        let want = used_kwh(&entered_performance, service);
+        assert!((got - want).abs() < 1e-6, "{service}: {got} against {want}");
+    }
+
+    let mut copy = input.clone();
+    copy["ntaCalculation"]["normVersion"] = Value::from("2023");
+    let result = assess_project_performance(&copy);
+    let split = serde_json::to_value(result.common_spaces.as_ref().unwrap()).unwrap();
+    let filled_paths: Vec<&str> = split["filled"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|path| path.as_str().unwrap())
+        .collect();
+    for path in [
+        "bblFunctions",
+        "labelFunctions",
+        "lighting[0].functions",
+        "lighting[1].functions",
+        "hotWater.need.areas",
+    ] {
+        assert!(filled_paths.contains(&path), "{filled_paths:?}");
+    }
+    let sport = split["withinZones"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|part| part["function"] == "sport")
+        .unwrap()["areaM2"]
+        .as_f64()
+        .unwrap();
+    assert!((sport - 626.0).abs() < 1e-9, "{split}");
+
+    // Against Uniec's building split (the fixture): less hot water and
+    // lighting, since the 44,35 m² sport share of the common space stays
+    // with the functions of RZ-1.
+    let (hand_performance, _) = run_edition(&hand, "2023");
+    let hot_water =
+        used_kwh(&filled_performance, "hotWater") - used_kwh(&hand_performance, "hotWater");
+    let lighting =
+        used_kwh(&filled_performance, "lighting") - used_kwh(&hand_performance, "lighting");
+    eprintln!("case H within-zone minus building split: hot water {hot_water:.1} kWh, lighting {lighting:.1} kWh, BENG {filled:?}");
+    assert!(hot_water < 0.0 && lighting < 0.0, "{hot_water} {lighting}");
+}
+
 /// Case I, the second utility case: an office with an assembly function and
 /// a common space (439,04 m², one zone), calculated on 01-04-2021 with
 /// Uniec 3.0.9.3 (NTA 8800:2020+A1 period); published 75,26 / −36,81 / 143,8

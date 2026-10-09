@@ -177,8 +177,10 @@ pub enum HotWaterNeed {
         #[serde(rename = "sourceReference")]
         source_reference: String,
     },
-    /// 13.19 with table 13.1 per use function (areas sum to `A_g`).
+    /// 13.19 with table 13.1 per use function (areas sum to `A_g`). Empty
+    /// with common spaces and one system: filled from the 6.6.4 split.
     Utility {
+        #[serde(default)]
         areas: Vec<UtilityArea>,
         #[serde(rename = "sourceReference")]
         source_reference: String,

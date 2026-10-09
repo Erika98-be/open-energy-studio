@@ -28,7 +28,7 @@ import { WindowObstructionsFields } from './NtaWindowObstructions';
 import { WindowShadingsFields } from './NtaWindowShadings';
 import { WindowGlazingsFields } from './NtaWindowGlazings';
 import { HotWaterCirculationFields } from './NtaPipeGeometry';
-import { ZoneDataFields } from './NtaZoneData';
+import { CommonSpaceFillField, ZoneDataFields } from './NtaZoneData';
 import { AnnexAaCalculationFields } from './NtaAnnexAaFields';
 import { annexAaCalculations, annexAaEditionRules } from '../../core/nta/annexAaForm';
 import { DeclaredHeatingTableTool, GroundFloorDetailFields } from './NtaProductGenerators';
@@ -688,14 +688,14 @@ function HotWaterSection(props: NtaSectionProps) {
   return <>
     {residential
       ? <NumberField {...f} path={['hotWater', 'need', 'dwellingCount']} label={t('nta.form.dwellingCount')} step="1" />
-      : <>
+      : <CommonSpaceFillField draft={draft} change={change} path={['hotWater', 'need', 'areas']}>
         <SelectField {...f} path={['hotWater', 'need', 'areas', 0, 'function']} label={t('nta.form.hotWaterFunction')} options={[
           ['office', t('nta.form.label.office')], ['education', t('nta.form.label.education')], ['retail', t('nta.form.label.retail')],
           ['sport', t('nta.form.label.sport')], ['lodging', t('nta.form.label.lodging')], ['cell', t('nta.form.label.cell')],
           ['assembly_without_day_care', t('nta.form.label.assembly')], ['assembly_with_day_care', t('nta.form.label.dayCare')],
           ['healthcare_without_beds', t('nta.form.label.healthcare')], ['healthcare_with_beds', t('nta.form.label.healthcareBeds')]]} />
         <NumberField {...f} path={['hotWater', 'need', 'areas', 0, 'areaM2']} label={t('nta.form.area')} />
-      </>}
+      </CommonSpaceFillField>}
     <TextField {...f} path={['hotWater', 'need', 'sourceReference']} label={t('nta.form.source')} />
     {residential ? <>
       <SelectField {...f} path={['hotWater', 'emission', 'served']} label={t('nta.form.hotWaterTaps')} options={[

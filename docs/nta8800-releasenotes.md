@@ -13,6 +13,17 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Gemeenschappelijke ruimten vullen ook tapwater en verlichting (geen rekenwijziging)
+
+- **Wat.** Met gemeenschappelijke ruimten (`zoneData[].commonSpaces`) vult de kern nu ook een lege lijst `lighting[].functions` en een lege `hotWater.need.areas`, met de verdeling binnen de rekenzone. Een ingevulde lijst gaat voor. De lijsten mogen daarvoor leeg zijn of ontbreken; zonder gemeenschappelijke ruimten blijft een lege lijst geweigerd (`lighting_function_areas_invalid`, `hot_water_function_areas_invalid`).
+- **Norm.** 13.19 weegt Q_W;nd;spec naar "de gebruiksfuncties usi in de beschouwde rekenzone" (2025+C1 p. 538). t_D, t_N (p. 657) en P_n;spec (p. 661) wegen naar "de gebruiksfuncties die in de rekenzone zijn gelegen". Dat is de verdeling binnen de rekenzone van 6.6.4 (p. 158). Dezelfde tekst staat in 2020+A1, 2022, 2023 en 2024.
+- **Tapwater.** Het tapwater krijgt de verdeling binnen de zone, opgeteld over de zones (`commonSpaces.withinZones`). Dat gebeurt alleen bij één tapwatersysteem: met meer systemen bedient elk zijn eigen deel (13.20).
+- **Herleidbaar.** `commonSpaces.filled` noemt elke lijst die de kern invulde, ook `bblFunctions` en `labelFunctions`.
+- **Formulier.** Bij tapwater en verlichting staat met gemeenschappelijke ruimten de keuze "Oppervlakten per functie uit de gemeenschappelijke ruimten laten verdelen (6.6.4)".
+- **Uniec.** Uniec 3.2.9.2 neemt in geval H de gebouwverdeling. Dat geeft daar 317 kWh meer tapwater en 248 kWh meer verlichting dan de verdeling binnen de zone. De vraag ligt bij NEN ([vraag 6](nta8800-vragen-nen.md)); de fixture van H houdt de gebouwverdeling van het rapport aan.
+- **Bestaande projecten.** Die rekenen gelijk: een lege lijst werd eerder geweigerd.
+- **Test.** `case_h_common_space_fills_hot_water_and_lighting_within_the_zone`.
+
 ### 9 oktober 2026 — Vrijgavecontrole voor rekenkern 0.4.0 (geen rekenwijziging)
 
 - **Releasenotes.** Elke merge sinds `oes-v0.2.0-kernel-v0.3.0` heeft een item onder "Onuitgebracht"; de aanduiding "(geen rekenwijziging)" klopt per item.
