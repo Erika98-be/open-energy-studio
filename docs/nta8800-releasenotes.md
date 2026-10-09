@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Overnemen in projectmodel neemt vloeren op de grond per waarde mee (geen rekenwijziging)
+
+- **Wat ontbrak.** "Overnemen in projectmodel" laat de geometrie bij het projectmodel, en nam daardoor ook de vloergegevens van de opname niet mee: de omtrek P, een kruipruimte of onverwarmde kelder, en de verwarmde kelder die de opname sinds vandaag maakt van een geveldeel tegen de grond (ISSO 82.1 §8.4, NTA 8800 8.3.3.2). De adviseur moest ze opnieuw invoeren.
+- **Nu.** Het venster koppelt elke opnamevloer aan een vloer van het projectmodel (dezelfde id, de enige vloer, of de enige met dezelfde oppervlakte; anders kiest de adviseur) en toont per waarde wat er in `ntaCalculation.groundFloors` verandert. Nieuwe waarden staan aangevinkt; een andere waarde in het project of het verwijderen van een kruipruimte, randisolatie of kelder gaat alleen mee na aanvinken. ΔU_for van de kelderwanden blijft uit het projectmodel komen (8.38 met 8.2.1). De bronverwijzing krijgt "basisopname, vloer <id>" met de bron van de opnamevloer.
+- **Toetsing.** `crates/nta8800-core/tests/survey_takeover.rs` controleert dat de opname de vloer in `training-data/nta8800-survey-takeover-ground.json` afleidt en dat een projectvloer van dezelfde oppervlakte met de overgenomen invoer met verwarmde kelder rekent en dezelfde warmteoverdracht naar de grond heeft. `src/__tests__/survey-takeover-ground.test.tsx` controleert dat het venster precies die invoer schrijft en een afwijkende omtrek niet ongevraagd vervangt.
+- **Uitkomsten.** Bestaande invoer rekent hetzelfde; alleen wat de adviseur in het venster aanvinkt, verandert het concept.
+
 ### 9 oktober 2026 — Doorlooptests van de invoer van kern 0.4.0; drie gaten in scherm en rapport (geen rekenwijziging)
 
 - **Doorlooptests.** `src/__tests__/workflow-e2e-040.test.tsx` doorloopt in de hele app, via de stappagina's en de toepasbalk, de invoer die sinds 0.3.0 is toegevoegd: een gemeenschappelijke ruimte (6.6.4) met door de kern gevulde tapwater- en verlichtingslijsten, de wandoppervlakte van een verwarmde kelder (A_ls en BENG 1-eis), een opgegeven F_D;dayl en de weigering van 1,2, K_pk 350 W/m² met de plausibiliteitsmelding op de registratiepagina, een geveldeel tegen de grond in de basisopname, en een gevel aan de grond in het project (`ground_surface_not_floor`). De kern is in deze tests vervangen door antwoorden in de vorm die de kern teruggeeft; de rekenkant staat in de Rust-tests die per geval genoemd zijn.
