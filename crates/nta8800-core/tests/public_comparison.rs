@@ -434,10 +434,13 @@ fn shading_device_serialises_without_reduction_factor() {
 ///   gelijkwaardigheidsverklaring (instead of table 11.5: 0,59), and the
 ///   roof window its dark external screens (table 7.5, per window), as in
 ///   the report.
-/// - Heating +149 kWh (+0,59): the heat need of three windows with
+/// - The basement walls take the entered 130,45 m² (ΣA_T;bw of K.1.2) in
+///   A_ls (6.7.2) and in the 8.38 forfait, so A_ls is the printed 670,80 m²
+///   and the BENG 1 limit the printed 64,52.
+/// - Heating +70 kWh (+0,28): the heat need of three windows with
 ///   "overige belemmering" without geometry (§17.3.2g, heating table 17.13).
-/// - Heating auxiliary about +10 kWh (+0,04).
-/// - Cooling with its auxiliary about −90 kWh (−0,35): the literal 10.15
+/// - Heating auxiliary about +5 kWh (+0,02).
+/// - Cooling with its auxiliary about −108 kWh (−0,42): the literal 10.15
 ///   emission loss and the 10.84 regeneration surcharge (ground not shown
 ///   above 0 °C).
 #[test]
