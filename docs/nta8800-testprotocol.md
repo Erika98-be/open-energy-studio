@@ -1,6 +1,6 @@
 # Testprotocol NTA 8800-rekenprogramma
 
-*Stand: 10 oktober 2026. Programma 0.1.6-alpha, rekenkern 0.3.0 (eerstvolgende vrijgave).*
+*Stand: 10 oktober 2026. Programma 0.2.0, rekenkern 0.3.0.*
 
 Dit protocol beschrijft hoe Open Energy Studio wordt getest: bij elke wijziging en bij elke vrijgave. Het is bedoeld voor de organisatie (ontwikkelaar, interne reviewer, vrijgever) en voor de attesteringsinstelling. Het sluit aan op BRL 9501 §3.0 (p. 5), §4.2 (p. 7), §6.2–6.3 (p. 10) en §7.1.3–7.2 (p. 11–13); de stand per eis staat in de [BRL 9501-gereedheid](nta8800-brl9501-gereedheid.md). Normtekst van NEN, ISSO of de BRL staat niet in dit document; verwijzingen gaan naar artikel en pagina.
 
@@ -21,7 +21,7 @@ Verwante documenten: [kwaliteitshandboek](kwaliteit/kwaliteitshandboek.md), [ref
 
 **Versies.** Elk testrapport noemt:
 
-- de programmaversie (`package.json`, nu 0.1.6-alpha);
+- de programmaversie (`package.json`, nu 0.2.0);
 - `KERNEL_VERSION` (`crates/nta8800-core/Cargo.toml`, nu 0.3.0);
 - de commit.
 
