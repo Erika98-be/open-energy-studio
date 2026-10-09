@@ -13,6 +13,7 @@
 //! ```
 
 use nta8800_core::finite::first_non_finite;
+use nta8800_core::opname::utility::{assess_utility_survey, UtilitySurvey};
 use nta8800_core::project_performance::assess_project_performance;
 use serde_json::{json, Value};
 use std::collections::HashSet;
@@ -21,6 +22,8 @@ use std::time::{Duration, Instant};
 const CASE_H: &str = include_str!("../../../training-data/nta8800-public-comparison-h.json");
 const TERRACED: &str =
     include_str!("../../../training-data/nta8800-example-terraced-dwelling.json");
+const OFFICE_SURVEY: &str =
+    include_str!("../../../training-data/nta8800-opname-utility-1985-office.json");
 
 /// Arrays in `ntaCalculation` whose entries belong to one zone, surface or
 /// window and are copied with it.
@@ -170,6 +173,159 @@ fn scaled(base: Value, copies: usize) -> Value {
         }
     }
     project
+}
+
+/// Splits every window of the project into `parts` equal windows
+/// (`<id>.<n>`), so the glazed area and the result stay those of the
+/// original. Window-level entries (obstructions) follow their window.
+fn split_windows(project: &mut Value, parts: usize) {
+    let mut children: std::collections::HashMap<String, Vec<String>> = Default::default();
+    for zone in project["zones"].as_array_mut().unwrap() {
+        for surface in zone["surfaces"].as_array_mut().unwrap() {
+            let Some(windows) = surface["windows"].as_array_mut() else {
+                continue;
+            };
+            let mut split = Vec::with_capacity(windows.len() * parts);
+            for window in windows.iter() {
+                let id = window["id"].as_str().unwrap().to_string();
+                let area = window["area"].as_f64().unwrap() / parts as f64;
+                let ids = children.entry(id.clone()).or_default();
+                for part in 0..parts {
+                    let mut piece = window.clone();
+                    let piece_id = format!("{id}.{part}");
+                    piece["id"] = Value::from(piece_id.clone());
+                    piece["area"] = Value::from(area);
+                    ids.push(piece_id);
+                    split.push(piece);
+                }
+            }
+            *windows = split;
+        }
+    }
+    let nta = &mut project["ntaCalculation"];
+    if let Some(entries) = nta["windowObstructions"].as_array() {
+        let mut split = Vec::new();
+        for entry in entries {
+            let id = entry["windowId"].as_str().unwrap();
+            for child in children.get(id).into_iter().flatten() {
+                let mut piece = entry.clone();
+                piece["windowId"] = Value::from(child.as_str());
+                split.push(piece);
+            }
+        }
+        nta["windowObstructions"] = Value::Array(split);
+    }
+}
+
+/// Every window to outside gets its own movable shading (7.5, a manual
+/// external screen).
+fn shade_every_window(project: &mut Value) {
+    let shadings: Vec<Value> = project["zones"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .flat_map(|zone| zone["surfaces"].as_array().unwrap())
+        .filter(|surface| surface["thermalBoundary"] == "outdoor")
+        .flat_map(|surface| surface["windows"].as_array().into_iter().flatten())
+        .map(|window| {
+            json!({
+                "windowId": window["id"],
+                "movableShading": {
+                    "device": {"kind": "external_screen", "colour": "dark"},
+                    "control": "manual_utility_without_glare_protection",
+                    "sourceReference": "schaaltest: screen per raam"
+                },
+                "sourceReference": "schaaltest: zonwering per raam"
+            })
+        })
+        .collect();
+    project["ntaCalculation"]["windowShadings"] = Value::Array(shadings);
+}
+
+/// The utility building of the scale audit: case H with its common space
+/// entered as a common space (6.6.4), repeated to 50 rekenzones, every
+/// window split in five (2 250 windows, each with shading and, where case H
+/// has one, an obstruction), 1 200 thermal bridges, the PV field split
+/// over 30 systems and the second half of the zones on an additional
+/// heating system.
+pub fn dense_utility_building() -> Value {
+    let mut base: Value = serde_json::from_str(CASE_H).unwrap();
+    {
+        let nta = &mut base["ntaCalculation"];
+        let rz1 = &mut nta["zoneData"][0];
+        rz1["functionAreas"] = json!([
+            {"function": "office", "areaM2": 14.70},
+            {"function": "other_assembly", "areaM2": 26.30},
+            {"function": "other_healthcare", "areaM2": 27.60}
+        ]);
+        rz1["commonSpaces"] = json!([{
+            "id": "gemeenschappelijk",
+            "areaM2": 49.20,
+            "sourceReference": "schaaltest: gemeenschappelijke ruimte van geval H"
+        }]);
+        rz1["ventilation"]["functions"] = rz1["functionAreas"].clone();
+        nta.as_object_mut().unwrap().remove("bblFunctions");
+    }
+    let mut project = scaled(base, 25);
+    split_windows(&mut project, 5);
+    shade_every_window(&mut project);
+    let nta = &mut project["ntaCalculation"];
+    let pv = nta["pvSystems"][0].clone();
+    let panel_area = pv["peakPower"]["panelAreaM2"].as_f64().unwrap();
+    nta["pvSystems"] = Value::Array(
+        (0..30)
+            .map(|n| {
+                let mut system = pv.clone();
+                system["id"] = Value::from(format!("pv-{n}"));
+                system["peakPower"]["panelAreaM2"] = Value::from(panel_area / 30.0);
+                system
+            })
+            .collect(),
+    );
+    let zone_ids: Vec<Value> = project["zones"].as_array().unwrap()[25..]
+        .iter()
+        .map(|zone| zone["id"].clone())
+        .collect();
+    let generator = project["ntaCalculation"]["generator"].clone();
+    let distribution = project["ntaCalculation"]["distributionSystem"].clone();
+    project["ntaCalculation"]["additionalHeatingSystems"] = json!([{
+        "zoneIds": zone_ids,
+        "generator": generator,
+        "distributionSystem": distribution,
+        "identicalSystems": 1
+    }]);
+    project
+}
+
+/// The project in another edition. Case H enters its emission with the
+/// 2023 route; the editions without it take the general one.
+fn in_edition(project: &Value, edition: &str) -> Value {
+    let mut copy = project.clone();
+    copy["ntaCalculation"]["normVersion"] = Value::from(edition);
+    if !["2022", "2023"].contains(&edition) {
+        if let Some(emission) = copy["ntaCalculation"]["emission"].as_object_mut() {
+            emission.remove("edition2023");
+        }
+    }
+    copy
+}
+
+/// The 1985 office survey with every window split into `parts` windows.
+fn dense_office_survey(parts: usize) -> UtilitySurvey {
+    let mut survey: Value = serde_json::from_str(OFFICE_SURVEY).unwrap();
+    let windows = survey["envelope"]["windows"].as_array().unwrap().clone();
+    let mut split = Vec::new();
+    for window in &windows {
+        let area = window["areaM2"].as_f64().unwrap() / parts as f64;
+        for part in 0..parts {
+            let mut piece = window.clone();
+            piece["id"] = Value::from(format!("{}.{part}", window["id"].as_str().unwrap()));
+            piece["areaM2"] = Value::from(area);
+            split.push(piece);
+        }
+    }
+    survey["envelope"]["windows"] = Value::Array(split);
+    serde_json::from_value(survey).unwrap()
 }
 
 struct Run {
@@ -347,5 +503,147 @@ fn benchmark_large_projects() {
     }
     for copies in [1, 10, 50, 100, 200] {
         row("woningen (rijwoning)", scaled_dwellings(copies));
+    }
+}
+
+#[test]
+#[ignore = "probe"]
+fn probe_dense() {
+    let project = dense_utility_building();
+    for edition in ["2020+A1", "2022", "2023", "2024", "2025+C1"] {
+        let p = in_edition(&project, edition);
+        let start = Instant::now();
+        let result = assess_project_performance(&p);
+        println!(
+            "{edition}: {} in {:?}, windows {}, gaps {:?}",
+            result.status,
+            start.elapsed(),
+            window_count(&p),
+            result.gaps.iter().take(5).collect::<Vec<_>>()
+        );
+    }
+    let survey = dense_office_survey(100);
+    let start = Instant::now();
+    let result = assess_utility_survey(&survey);
+    println!("survey: {} in {:?}", result.status, start.elapsed());
+}
+
+#[test]
+#[ignore = "probe"]
+fn probe_window_scaling() {
+    for parts in [1usize, 2, 5, 10, 20] {
+        let mut project = scaled_case_h(25);
+        split_windows(&mut project, parts);
+        shade_every_window(&mut project);
+        let start = Instant::now();
+        let result = assess_project_performance(&project);
+        let calc = start.elapsed();
+        let start = Instant::now();
+        let bytes = serde_json::to_vec(&result).unwrap().len();
+        println!(
+            "parts {parts}: windows {} {} calc {:?} serialize {:?} {} kB",
+            window_count(&project),
+            result.status,
+            calc,
+            start.elapsed(),
+            bytes / 1024
+        );
+    }
+}
+
+#[test]
+#[ignore = "probe"]
+fn probe_blanks() {
+    let project = dense_utility_building();
+    for blanks in [0usize, 1, 10, 50, 200] {
+        let mut copy = project.clone();
+        for index in 0..blanks {
+            copy["ntaCalculation"]["windowShadings"][index * 7]["movableShading"]["control"] = Value::Null;
+        }
+        let start = Instant::now();
+        let result = assess_project_performance(&copy);
+        println!("blanks {blanks}: {} gaps {} in {:?}", result.status, result.gaps.len(), start.elapsed());
+    }
+}
+
+/// Writes the serialized result of every project fixture (as is, with
+/// blanks, in every edition) to `$NTA_SNAPSHOT_DIR`, to compare outputs
+/// byte by byte before and after a performance change.
+#[test]
+#[ignore = "snapshot; set NTA_SNAPSHOT_DIR"]
+fn snapshot_outputs() {
+    let Ok(dir) = std::env::var("NTA_SNAPSHOT_DIR") else {
+        return;
+    };
+    let dir = std::path::Path::new(&dir);
+    std::fs::create_dir_all(dir).unwrap();
+    let data = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../training-data");
+    let mut names: Vec<_> = std::fs::read_dir(&data)
+        .unwrap()
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().is_some_and(|ext| ext == "json"))
+        .collect();
+    names.sort();
+    let mut written = 0;
+    for path in names {
+        let Ok(value) = serde_json::from_str::<Value>(&std::fs::read_to_string(&path).unwrap())
+        else {
+            continue;
+        };
+        if value.get("zones").is_none() || value.get("ntaCalculation").is_none() {
+            continue;
+        }
+        let stem = path.file_stem().unwrap().to_string_lossy().to_string();
+        let mut variants = vec![("asis".to_string(), value.clone())];
+        for edition in ["2020+A1", "2022", "2023", "2024", "2025+C1"] {
+            variants.push((format!("ed-{edition}"), in_edition(&value, edition)));
+        }
+        // Every third leaf number of the NTA block blanked, one at a time
+        // for the first 40, and all of them together.
+        let mut numbers = Vec::new();
+        collect_number_paths(&value["ntaCalculation"], String::new(), &mut numbers);
+        let picked: Vec<&String> = numbers.iter().step_by(3).take(40).collect();
+        for (index, pointer) in picked.iter().enumerate() {
+            let mut copy = value.clone();
+            *copy["ntaCalculation"].pointer_mut(pointer).unwrap() = Value::Null;
+            variants.push((format!("blank-{index}"), copy));
+        }
+        let mut all = value.clone();
+        for pointer in &picked {
+            *all["ntaCalculation"].pointer_mut(pointer).unwrap() = Value::Null;
+        }
+        variants.push(("blank-all".to_string(), all));
+        for (name, project) in variants {
+            let result = assess_project_performance(&project);
+            let bytes = serde_json::to_vec(&result).unwrap();
+            std::fs::write(dir.join(format!("{stem}.{name}.json")), bytes).unwrap();
+            written += 1;
+        }
+    }
+    let mut dense = dense_utility_building();
+    for index in 0..12 {
+        dense["ntaCalculation"]["windowShadings"][index * 37]["movableShading"]["control"] =
+            Value::Null;
+    }
+    let result = assess_project_performance(&dense);
+    std::fs::write(dir.join("dense.blanks.json"), serde_json::to_vec(&result).unwrap()).unwrap();
+    println!("{written} outputs written");
+}
+
+fn collect_number_paths(value: &Value, pointer: String, out: &mut Vec<String>) {
+    match value {
+        Value::Number(_) => out.push(pointer),
+        Value::Object(map) => {
+            for (key, item) in map {
+                collect_number_paths(item, format!("{pointer}/{key}"), out);
+            }
+        }
+        Value::Array(items) => {
+            for (index, item) in items.iter().enumerate() {
+                collect_number_paths(item, format!("{pointer}/{index}"), out);
+            }
+        }
+        _ => {}
     }
 }
