@@ -3511,6 +3511,20 @@ fn derive_input(
                 loss_area += weight * surface.get("area").and_then(Value::as_f64).unwrap_or(0.0);
             }
             match boundary {
+                // 8.3 has a ground route for floors only; walls below ground
+                // level are the walls of a heated basement (8.3.3.2, 2025+C1
+                // p. 255), entered on its floor (`heatedBasement`). A wall or
+                // roof surface to the ground would take the floor formulas
+                // and, next to a heated basement, count twice in H_g and A_ls.
+                ThermalBoundary::Ground if matches!(surface_type, "wall" | "roof") => {
+                    // Its groundFloors entry, if any, is not orphaned.
+                    used_ground.insert(id.to_owned());
+                    gaps.push(gap(
+                        "ground_surface_not_floor",
+                        format!("{path}.thermalBoundary"),
+                    ));
+                    continue;
+                }
                 ThermalBoundary::Ground => {
                     match ground_data.get(id) {
                         Some(data) => {
@@ -6693,6 +6707,43 @@ mod tests {
         assert!((geometry.loss_area_m2 - 232.8).abs() < 1e-9);
         assert!((geometry.loss_area_ratio.unwrap() - 2.425).abs() < 1e-9);
         assert_eq!(geometry.unclassified_surface_count, 0);
+    }
+
+    #[test]
+    fn a_wall_or_roof_to_the_ground_is_refused() {
+        // 8.3 has ground formulas for floors only; a wall below ground level
+        // is a heated-basement wall (8.3.3.2, 2025+C1 p. 255), entered on the
+        // floor. A ground wall next to a heated basement would otherwise count
+        // twice in H_g and A_ls.
+        for (index, kind) in [(0, "wall"), (4, "roof")] {
+            let mut value = project();
+            let id = value["zones"][0]["surfaces"][index]["id"].clone();
+            value["zones"][0]["surfaces"][index]["thermalBoundary"] = Value::from("ground");
+            let floors = value["ntaCalculation"]["groundFloors"]
+                .as_array_mut()
+                .unwrap();
+            let mut entry = floors[0].clone();
+            entry["surfaceId"] = id;
+            floors.push(entry);
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "incomplete", "{kind}");
+            let codes: Vec<_> = result
+                .gaps
+                .iter()
+                .map(|item| (item.code, item.path.as_str()))
+                .collect();
+            let path = format!("zones[0].surfaces[{index}].thermalBoundary");
+            assert!(
+                codes.contains(&("ground_surface_not_floor", path.as_str())),
+                "{kind}: {codes:?}"
+            );
+            assert!(
+                !codes
+                    .iter()
+                    .any(|(code, _)| *code == "ground_floor_data_without_ground_surface"),
+                "{kind}: {codes:?}"
+            );
+        }
     }
 
     #[test]
