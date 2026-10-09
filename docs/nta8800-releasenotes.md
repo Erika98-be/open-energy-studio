@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Toegankelijkheid en toetsenbord van formulieren en vensters (geen rekenwijziging)
+
+- **Vaste controle.** Een nieuwe test (`src/__tests__/a11y-forms-dialogs.test.tsx`, met de controle in `a11yAudit.ts`) loopt elk NTA-onderdeel op het voorbeeldkantoor en de tussenwoning door (lijsten geopend), beide opnamen, het venster *Overnemen in projectmodel*, de registratiepagina, de instellingen-, project- en opdrachtvensters en alle invoervensters. Hij eist een toegankelijke naam op elk veld en elke knop, unieke id's, aria-verwijzingen die bestaan, `role="dialog"` met `aria-modal` en een titel op elk venster, en een foutmelding die aan het veld gekoppeld is. Nieuwe onderdelen in `NTA_SECTIONS` vallen er vanzelf onder.
+- **Ga naar.** Voor elk gelabeld veld van elk onderdeel controleert de test dat **Ga naar** de focus in dat veld zet (een uitgeschakeld veld kan geen focus krijgen en telt niet mee).
+- **Vensters en toetsenbord.** Tests op de focusval (Tab en Shift+Tab blijven in het venster), Escape en het terugzetten van de focus op de knop die het venster opende.
+- **Gevonden en opgelost.**
+  - De velden van de vensters *Luchtdichtheid*, *Koudebrug* en *Feedback* hadden een label dat niet aan het veld gekoppeld was, zodat een schermlezer het veld zonder naam voorlas; het berichtveld, de bijlageknop en de categorieknoppen (nu met `aria-pressed`) van *Feedback* hadden geen naam.
+  - Foutmeldingen in de invoervensters (bijvoorbeeld "naam verplicht") waren niet aan hun veld gekoppeld. Het venster koppelt ze nu met `aria-invalid` en `aria-describedby`, en haalt de koppeling weg zodra de fout verholpen is.
+  - Het opdrachtvenster verwees met `aria-controls` naar een lijst die er niet is als niets gevonden wordt.
+
 ### 10 oktober 2026 — Review 26: overnemen van vloeren op de grond (geen rekenwijziging)
 
 - **Volgorde is geen verschil.** Het venster vergeleek de waarden van de opname en het project als tekst, zodat dezelfde kruipruimte, randkoudebruggen of verwarmde kelder met de leden in een andere volgorde als "het project heeft een andere waarde" verscheen. De vergelijking negeert nu de volgorde.
