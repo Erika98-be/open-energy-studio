@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Bronvermeldingen noemen de doorgerekende uitgave (geen rekenwijziging)
+
+- **Wat was er mis.** In een berekening in een oudere uitgave noemden `chapter5Source`, `chapter9Source`, `draftSource` en `consultationSource` de paragraaf- en paginanummers van NTA 8800:2025+C1:2026, bijvoorbeeld "NTA 8800:2025+C1:2026, §9.3 … (p. 294–297)" bij een 2020+A1-berekening. De opname noemde bij H2 onder 2020+A1 de bron van 2022, en bij f_BACS onder een oudere uitgave de 2025+C1-paragraaf als bron.
+- **Nu.** In de aangewezen uitgave blijft de verwijzing gelijk. In een oudere uitgave noemt ze die uitgave en het hoofdstuk ("NTA 8800:2020+A1:2020, hoofdstuk 9"): de hoofdstukken zijn in alle uitgaven gelijk, de paragraaf-, formule- en paginanummers niet (`norm_versions::cite`). Bij f_BACS staat in een uitgave zonder 5.5.8 dat die uitgave geen f_BACS kent.
+- **Rapporten.** Het voorblad van de energieprestatierapportage, de kernmelding van het BENG-rapport, het maatwerkadvies, de doeluitgave in het invoerdossier en de EP-Online-toelichting noemen de uitgave van de uitkomst, niet vast NTA 8800:2025+C1:2026.
+- **Test.** `tests/edition_labels.rs` rekent de voorbeelden, de openbare gevallen A–N en ISSO 54 EP-W001/EP-U001 in alle vijf uitgaven, de 260 ISSO 54-deeltesten in 2022 en de zes opnames in alle vijf uitgaven, en loopt de hele uitvoer door: geen tekst noemt "NTA 8800:<jaar>" van een andere uitgave. Bronverwijzingen die de adviseur zelf invoerde, blijven buiten beschouwing. Frontend: `report-edition-labels.test.ts`.
+
 ### 9 oktober 2026 — Openbaar geval I per term verklaard: BENG 2 en BENG 3 komen uit de koeling (geen rekenwijziging)
 
 - **Uitkomst.** Geval I (Uniec 3.0.9.3, 2020+A1) blijft 75,51 / −19,41 / 119,4 tegen 75,26 / −36,81 / 143,8; de fixture had geen codeerfout en de kern geen fout.

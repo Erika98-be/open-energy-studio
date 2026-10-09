@@ -4,6 +4,8 @@
 //! comparison such as "17.2 equal to 2025+C1" stays allowed: it does not cite.
 
 use nta8800_core::norm_versions::NormVersion;
+use nta8800_core::opname::utility::{assess_utility_survey, UtilitySurvey};
+use nta8800_core::opname::{assess_residential_survey, ResidentialSurvey};
 use nta8800_core::project_performance::assess_project_performance;
 use serde_json::{json, Value};
 use std::collections::HashSet;
@@ -106,6 +108,70 @@ fn run(project: &Value, version: NormVersion) -> Vec<String> {
     let mut found = Vec::new();
     foreign_citations(&result, version, &input, "", &mut found);
     found
+}
+
+/// Answers H2 (h 0,3 m) on every floor above a crawlspace.
+fn answer_h2(value: &mut Value) {
+    match value {
+        Value::Object(map) => {
+            if map
+                .get("boundary")
+                .and_then(|boundary| boundary.get("kind"))
+                .is_some_and(|kind| kind == "crawlspace")
+            {
+                map.insert("floorHeightAboveGroundM".into(), json!(0.3));
+            }
+            map.values_mut().for_each(answer_h2);
+        }
+        Value::Array(items) => items.iter_mut().for_each(answer_h2),
+        _ => {}
+    }
+}
+
+/// A basisopname in every edition: the survey's own defaults and notes too.
+/// The residential surveys also answer H2 (the crawlspace wall height),
+/// which 2022 and 2020+A1 cite with their own source.
+#[test]
+fn a_survey_names_only_the_edition_it_was_calculated_in() {
+    const SURVEYS: [(&str, bool); 6] = [
+        ("nta8800-opname-1930-terraced.json", false),
+        ("nta8800-opname-1975-apartment.json", false),
+        ("nta8800-opname-2015-detached.json", false),
+        ("nta8800-opname-utility-1970-retail.json", true),
+        ("nta8800-opname-utility-1985-office.json", true),
+        ("nta8800-opname-utility-2005-school.json", true),
+    ];
+    let mut found = Vec::new();
+    for (name, utility) in SURVEYS {
+        for version in NormVersion::ALL {
+            let mut survey = read(name);
+            survey["normVersion"] = json!(version);
+            answer_h2(&mut survey);
+            let result = if utility {
+                let survey: UtilitySurvey = serde_json::from_value(survey.clone()).unwrap();
+                serde_json::to_value(assess_utility_survey(&survey)).unwrap()
+            } else {
+                let survey: ResidentialSurvey = serde_json::from_value(survey.clone()).unwrap();
+                serde_json::to_value(assess_residential_survey(&survey)).unwrap()
+            };
+            let mut input = HashSet::new();
+            strings(&survey, &mut input);
+            let mut items = Vec::new();
+            foreign_citations(&result, version, &input, "", &mut items);
+            found.extend(
+                items
+                    .into_iter()
+                    .map(|item| format!("{name} in {}: {item}", version.id())),
+            );
+            if version == NormVersion::V2020A1 && name.ends_with("1930-terraced.json") {
+                // The H2 default was recorded, with the 2020+A1 source.
+                assert!(result
+                    .to_string()
+                    .contains("NTA 8800:2020+A1:2020, hoofdstuk 8 (h van de kruipruimtewand)"));
+            }
+        }
+    }
+    assert!(found.is_empty(), "{}", found.join("\n"));
 }
 
 #[test]
