@@ -1478,8 +1478,14 @@ fn attach_ground_walls(
         let Some(first) = walls.first() else {
             continue;
         };
-        if walls.iter().any(|wall| !(wall.area > 0.0 && wall.r_c > 0.0)) {
-            recorder.issue("surface_area_invalid", format!("{}.grossAreaM2", first.path));
+        if walls
+            .iter()
+            .any(|wall| !(wall.area > 0.0 && wall.r_c > 0.0))
+        {
+            recorder.issue(
+                "surface_area_invalid",
+                format!("{}.grossAreaM2", first.path),
+            );
             continue;
         }
         let area: f64 = walls.iter().map(|wall| wall.area).sum();
@@ -1636,7 +1642,11 @@ mod tests {
             surface("gevel", SurfaceElement::Facade, SurfaceBoundary::Outdoor),
             ground_wall("kelderwand-noord", 20.0, Some(2.0), None),
             ground_wall("kelderwand-zuid", 10.0, Some(1.0), None),
-            surface("keldervloer", SurfaceElement::Floor, SurfaceBoundary::Ground),
+            surface(
+                "keldervloer",
+                SurfaceElement::Floor,
+                SurfaceBoundary::Ground,
+            ),
         ]);
         let mut recorder = Recorder::default();
         let derived = derive_envelope(&envelope, 1975, &mut recorder);
@@ -1672,7 +1682,11 @@ mod tests {
             ground_wall("onbekend", 10.0, Some(1.0), Some("vloer-x")),
             roof,
             surface("vloer-a", SurfaceElement::Floor, SurfaceBoundary::Ground),
-            surface("vloer-b", SurfaceElement::Floor, SurfaceBoundary::Crawlspace),
+            surface(
+                "vloer-b",
+                SurfaceElement::Floor,
+                SurfaceBoundary::Crawlspace,
+            ),
         ]);
         let mut recorder = Recorder::default();
         derive_envelope(&envelope, 1975, &mut recorder);
