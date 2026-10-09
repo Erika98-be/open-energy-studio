@@ -614,3 +614,52 @@ Gezocht op repository.officiele-overheidspublicaties.nl, planviewer.nl, gemeente
 | [Hoek van Holland, 4 woningen, Uniec 3.1.6.2](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-415/1/bijlage/26.2220837_-_Rap._BENG-berekening.pdf) en [exb-2022-48764](https://repository.officiele-overheidspublicaties.nl/externebijlagen/exb-2022-48764/1/bijlage/exb-2022-48764.pdf) | 2022 | woningen, geen utiliteit |
 
 Een openbaar rapport van een zorggebouw of een groot kantoor met luchtbehandelingskast uit 2022–2024 is niet gevonden.
+
+## Controle van de letterlijke invoer, alle openbare gevallen (9 oktober 2026)
+
+Bij I, J en eerst K stond de bouwwijze uit de uitdraai op de verkeerde rij van tabel 7.10. Daarom zijn de andere gevallen (A–H, K, L) opnieuw naast hun uitdraai gelegd. Gecontroleerd zijn de invoer die de uitdraai letterlijk noemt:
+- de bouwwijze, het type plafond en het aantal bouwlagen;
+- Rc per dichte constructie, U en g per raam;
+- q_v;10 en de invoer van de infiltratie;
+- de ventilatievariant en het rendement van de warmteterugwinning;
+- de opwekker met COP, energiefractie en hulpenergie, en de tapwateropwekker;
+- de PV (Wp per m² of per paneel, aantal, hellingshoek en ventilatie);
+- de gebruiksoppervlakte per gebruiksfunctie, inclusief de verdeling van de gemeenschappelijke ruimte.
+
+**Bouwwijze.** Elk geval staat op de rij die de uitdraai noemt.
+
+| Geval | Editie | Uitdraai | Rij in de kern | Aangepast |
+|---|---|---|---|---|
+| A | 2020+A1 | sfb met hsb- of sfb-vloeren, geen of open plafond | < 250 kg/m², 80 | nee |
+| B | 2022 | dragend metselwerk met niet-massieve betonnen vloeren, 500–750 kg/m² | 360 | nee |
+| C | 2023 | zone 1 staal-beton / dragend metselwerk, zone 2 staal-beton / hsb | 360 en 180 | nee |
+| D | 2020+A1 | dragend metselwerk met massieve betonnen vloeren | > 750 kg/m² (massKgPerM2 800), 450 | klasse wand zeer zwaar → zwaar |
+| E | 2022 | dragend metselwerk met massieve betonnen vloeren | > 750 kg/m² (massKgPerM2 800), 450 | klasse vloer zwaar → zeer zwaar |
+| F | 2020+A1 | hsb, sfb of staalskelet met staalbeton of niet-massieve betonnen vloeren | 250–500 kg/m², 180 | nee |
+| G | 2024 | massief beton (zeer zwaar) / dragend metselwerk (zwaar) | 450 | nee |
+| H | 2023 | massief beton / hsb, sfb of staalskeletbouw; RZ-1 gesloten, RZ-2 open plafond | 110 en 180 | klasse vloer zwaar → zeer zwaar |
+| J | 2020+A1 | dragend metselwerk met massieve betonnen vloeren | > 750 kg/m², 250 | klasse wand zeer zwaar → zwaar |
+| K | 2022 | hsb, sfb of staalskelet met staalbeton of niet-massieve betonnen vloeren | 250–500 kg/m², 110 en 180 | nee |
+| L | 2022 | betonnen kolom-ligger skeletbouw met niet-massieve betonnen vloeren, gesloten plafond | 500–750 kg/m², 180 | nee |
+
+Waarom de aanpassingen bij D, E, H en J de uitkomst niet veranderen:
+- Bij D en E beslist de massa per m² (2020+A1 en 2022, `massKgPerM2`). De klassen tellen daar niet mee.
+- Bij H (2023) staan "zeer zwaar/licht" en "zwaar/licht" op dezelfde rij van tabel 7.10 (2023 p. 184).
+- Bij J staan "zeer zwaar/zwaar" en "zeer zwaar/zeer zwaar" op dezelfde rij.
+
+De klassen volgen nu letterlijk tabel 7.11 en 7.12 (2023 p. 185–186): massieve betonnen vloeren zijn zeer zwaar, dragend metselwerk is zwaar. Zo blijft de invoer goed als een geval in een latere editie wordt doorgerekend, waar de klassen wel beslissen.
+
+**Overige invoer.** De rest van de invoer klopt met de uitdraaien:
+- **Rc, U en g:** gelijk per constructie.
+- **q_v;10:** de meetwaarde, of bij A en D de referentiewaarde zonder meetwaarde (0,69 en 0,98, zoals de uitdraai).
+- **Ventilatie:** de variant en het rendement van de warmteterugwinning zijn gelijk.
+- **Opwekker:** COP, energiefractie en hulpenergie zijn gelijk. Bij B staat 146 kWh voor woning 2; woning 1 en 4 drukken 153 kWh af.
+- **Tapwater:** COP gelijk.
+- **PV:** gelijk. Bij F rondt de kern bewust af: 190 W/m² × 44,64 m² in plaats van 24 × 360 Wp (zie F).
+- **Gebruiksoppervlakten:** de oppervlakten per gebruiksfunctie, inclusief de naar rato verdeelde gemeenschappelijke ruimte van H, K en L.
+
+Eén inconsistentie is gevonden. Het projectmodel van E had q_v10 0,40, terwijl de rekeninvoer en de uitdraai 0,63 hebben. Die waarde gaat niet naar de kern, wel naar de Uniec 3-export (`zones[].airTightness`). Het projectmodel heeft nu 0,63.
+
+**Uitkomst.** Er is geen geval met een verkeerde rij of een andere invoerfout die de uitkomst raakt. De vastgelegde uitkomsten van alle gevallen zijn ongewijzigd (`public_comparison_cases_keep_their_recorded_results`, `openbare-gevallen.json`).
+
+De RVO-voorbeeldwoningen noemen geen bouwwijze: de verantwoordingsrapportage 2022 geeft niets over massa of bouwwijze. Hun klassen blijven daarom een aanname, zoals in [de RVO-vergelijking](nta8800-vergelijking-rvo-voorbeeldwoningen.md) staat.

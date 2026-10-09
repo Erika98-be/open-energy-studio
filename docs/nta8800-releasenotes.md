@@ -19,6 +19,23 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 - **Test over de projectroute.** `declared_pv_peak_power_warns_on_the_project_route` (project_performance.rs): 290 W/m² rekent zonder melding, 310 W/m² rekent en geeft `plausibility_pv_peak_power` op het veld, 401 W/m² wordt geweigerd (`pv_peak_power_invalid`).
 - **CI.** `ci.yml` draait de gate nu met Node 22, net als de lokale gate en `release.yml`; README en wiki zeggen dat.
 
+### 9 oktober 2026 — Openbare gevallen A–H, K en L naast hun uitdraai gecontroleerd (geen rekenwijziging)
+
+- **Wat.** Na de rijfouten van tabel 7.10 bij I, J en K is van elk ander openbaar geval de letterlijke invoer vergeleken met de uitdraai:
+  - bouwwijze en plafond;
+  - Rc, U en g;
+  - q_v;10;
+  - ventilatievariant en rendement van de warmteterugwinning;
+  - opwekkers en tapwater;
+  - PV;
+  - gebruiksoppervlakten.
+
+  Geen geval staat op een verkeerde rij, en er is geen invoerfout die de uitkomst raakt.
+- **Aangepast, zonder effect op de uitkomst:**
+  - De klassen van tabel 7.11 en 7.12 volgen nu letterlijk de uitdraai. D, E en J hebben wand zwaar (dragend metselwerk); E en H hebben vloer zeer zwaar (massieve betonvloer). Bij D en E beslist de massa per m², bij H en J blijft de rij gelijk.
+  - Het projectmodel van E heeft nu q_v10 0,63, zoals de rekeninvoer en de uitdraai. Dit raakt alleen de Uniec 3-export.
+- **Uitkomsten.** Alle vastgelegde uitkomsten zijn ongewijzigd. Zie [vergelijking openbare rapporten](nta8800-vergelijking-openbare-rapporten.md), "Controle van de letterlijke invoer".
+
 ### 9 oktober 2026 — Openbare gevallen I en J: rij van tabel 7.10 gecorrigeerd (geen rekenwijziging)
 
 Alleen de herbouw van twee openbare gevallen (2020+A1) is gecorrigeerd; de rekenkern is niet gewijzigd. Dezelfde soort fout als eerst bij K: de bouwwijze uit de uitdraai was op de verkeerde rij van tabel 7.10 gezet (2020+A1 p. 179–180).
