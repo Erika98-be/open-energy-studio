@@ -572,6 +572,8 @@ export interface NtaHeatedBasement {
   wallDepths?: Array<{ lengthM: number; depthM: number }>;
   wallResistanceM2kPerW: number;
   forfaitDeltaUWPerM2k?: number | null;
+  /** ΣA_T;bw of K.1.2 for A_ls (6.7.2) and the 8.38 forfait; omitted = z·P. */
+  wallAreaM2?: number | null;
 }
 
 /** Chapter 12 humidifier of one zone (space-heating chain input). */

@@ -456,17 +456,17 @@ fn loss_area_weight(boundary: ThermalBoundary) -> Option<f64> {
     }
 }
 
-/// The walls of a heated basement, z·P of 8.39 (with z of 8.42 over the wall
-/// parts), border the ground and count in `A_ls` with f_ls 0,7 (6.7.3 c,
-/// 2020+A1 p. 144; 2025+C1 p. 162). They are no project surface of their
-/// own: the floor's `groundFloors` entry carries them. 0 without a heated
-/// basement or with an unusable depth.
+/// The walls of a heated basement border the ground and count in `A_ls`
+/// with f_ls 0,7 (6.7.3 c, 2020+A1 p. 144; 2025+C1 p. 162). 6.7.2 takes
+/// their projected area A_T (annex K): the entered `wallAreaM2`, otherwise
+/// z·P of 8.39 (with z of 8.42 over the wall parts). They are no project
+/// surface of their own: the floor's `groundFloors` entry carries them. 0
+/// without a heated basement or with an unusable depth or area.
 fn basement_wall_loss_area(data: &GroundFloorData) -> f64 {
     let Some(basement) = &data.heated_basement else {
         return 0.0;
     };
-    let perimeter = data.exposed_perimeter_m;
-    let wall_area = basement.depth(perimeter) * perimeter;
+    let wall_area = basement.wall_area(data.exposed_perimeter_m);
     if wall_area.is_finite() && wall_area > 0.0 {
         0.7 * wall_area
     } else {
@@ -6727,6 +6727,13 @@ mod tests {
         assert!(
             (with_geometry.envelope_area_m2 - geometry.envelope_area_m2 - perimeter).abs() < 1e-9
         );
+        // 6.7.2 takes the projected area A_T of annex K: an entered wall
+        // area replaces z·P (public case G: 130,45 m² against z·P 163,90).
+        value["ntaCalculation"]["groundFloors"][0]["heatedBasement"]["wallAreaM2"] =
+            Value::from(12.5);
+        let (entered_derived, entered_geometry) = loss(&value);
+        assert!((entered_derived - derived - 0.7 * 12.5).abs() < 1e-9);
+        assert!((entered_geometry.loss_area_m2 - geometry.loss_area_m2 - 0.7 * 12.5).abs() < 1e-9);
     }
 
     #[test]

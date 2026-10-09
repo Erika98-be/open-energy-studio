@@ -780,6 +780,7 @@ fn every_number_at_its_edges_calculates_plausibly_or_refuses_with_a_routed_gap()
         "/ntaCalculation/cooling/distribution/pipe/geometry/depthM",
         "/ntaCalculation/distributionSystem/pipeTransmittance/depthM",
         "/ntaCalculation/groundFloors/*/heatedBasement/depthM",
+        "/ntaCalculation/groundFloors/*/heatedBasement/wallAreaM2",
         "/ntaCalculation/lighting/*/lightingZones/*/daylight/sectors/*/daylightDependencyFactor",
     ] {
         assert!(

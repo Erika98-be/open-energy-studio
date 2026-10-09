@@ -83,6 +83,13 @@ pub struct HeatedBasement {
     /// ΔU_for of 8.2.1 for the walls in the 8.38 forfait route, W/(m²K).
     #[serde(default)]
     pub forfait_delta_u_w_per_m2k: Option<f64>,
+    /// ΣA_T;bw: projected area of the basement walls below ground per K.1.2,
+    /// m². 8.38 and 6.7.2 take this area (2025+C1 p. 253–254 and 162;
+    /// 2020+A1 p. 225–226 and 144; the same text in 2022, 2023 and 2024);
+    /// without it the kernel takes z·P. The detailed 8.39 keeps Σz_j·ℓ_j
+    /// by its own formula.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wall_area_m2: Option<f64>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -126,6 +133,26 @@ impl HeatedBasement {
             .map(|part| part.length_m * part.depth_m)
             .sum::<f64>()
             / length
+    }
+
+    /// A_T;bw of 8.38 and 6.7.2: the entered wall area, or z·P without one;
+    /// NaN for an entered area that is not positive.
+    pub fn wall_area(&self, perimeter: f64) -> f64 {
+        match self.wall_area_m2 {
+            Some(area) if positive(area) => area,
+            Some(_) => f64::NAN,
+            None => self.depth(perimeter) * perimeter,
+        }
+    }
+}
+
+/// Wall area of the steady wall term: A_T;bw in the 8.38 forfait route,
+/// Σz_j·ℓ_j = z·P in the detailed 8.39.
+fn basement_wall_area(slab: &SlabOnGround, basement: &HeatedBasement) -> f64 {
+    let perimeter = slab.exposed_perimeter_m;
+    match slab.edge_thermal_bridges {
+        EdgeThermalBridges::Forfait => basement.wall_area(perimeter),
+        EdgeThermalBridges::Detailed { .. } => basement.depth(perimeter) * perimeter,
     }
 }
 
@@ -452,14 +479,17 @@ pub fn slab_floor_conductance(area: f64, perimeter: f64, resistance: f64) -> Opt
 }
 
 /// `H_g` of 8.36/8.37 in W/K, or `None` for non-physical input.
-/// 8.39 floor and wall terms of a heated basement: (A·U_fl, z·P·U_bw,
-/// d_f;equi, d_bw;equi).
+/// 8.38/8.39 floor and wall terms of a heated basement: (A·U_fl,
+/// A_T;bw·U_bw or z·P·U_bw, d_f;equi, d_bw;equi).
 fn heated_basement_terms(
     slab: &SlabOnGround,
     basement: &HeatedBasement,
 ) -> Option<(f64, f64, f64, f64)> {
     let z = basement.depth(slab.exposed_perimeter_m);
+    let wall_area = basement_wall_area(slab, basement);
     if !(positive(z)
+        && positive(basement.wall_area(slab.exposed_perimeter_m))
+        && positive(wall_area)
         && positive(basement.wall_resistance_m2k_per_w)
         && positive(slab.area_m2)
         && positive(slab.exposed_perimeter_m)
@@ -475,14 +505,14 @@ fn heated_basement_terms(
     let floor = slab.area_m2 * ground_floor_u(b_prime, d_f, z);
     // 8.45 with d_1 the smaller equivalent thickness.
     let u_bw = basement_wall_u(z, d_bw, d_f);
-    Some((floor, z * slab.exposed_perimeter_m * u_bw, d_f, d_bw))
+    Some((floor, wall_area * u_bw, d_f, d_bw))
 }
 
 /// Edge terms of a heated basement: (Σℓψ of 8.39 or 0,5·P of 8.38, the
-/// 8.38 ΔU_for over the wall area z·P; 0 in the detailed route).
+/// 8.38 ΔU_for over the wall area A_T;bw; 0 in the detailed route).
 fn basement_edge(slab: &SlabOnGround, basement: &HeatedBasement) -> Option<(f64, f64)> {
     match &slab.edge_thermal_bridges {
-        // 8.38: 0,5·P and ΔU_for over the wall area z·P.
+        // 8.38: 0,5·P and ΔU_for over the wall area A_T;bw.
         EdgeThermalBridges::Forfait => {
             let delta = basement.forfait_delta_u_w_per_m2k?;
             if !(delta.is_finite() && delta >= 0.0) {
@@ -490,7 +520,7 @@ fn basement_edge(slab: &SlabOnGround, basement: &HeatedBasement) -> Option<(f64,
             }
             Some((
                 0.5 * slab.exposed_perimeter_m,
-                basement.depth(slab.exposed_perimeter_m) * slab.exposed_perimeter_m * delta,
+                basement.wall_area(slab.exposed_perimeter_m) * delta,
             ))
         }
         EdgeThermalBridges::Detailed { bridges } => {
@@ -511,8 +541,9 @@ fn basement_edge(slab: &SlabOnGround, basement: &HeatedBasement) -> Option<(f64,
 /// p. 229) takes U_fl "volgens 8.3.4", here 8.43 (p. 256; 2022 p. 230),
 /// and for a floor below ground level U_x;T = 0 (p. 262; 2022 p. 236), so
 /// U_x is the ventilation term U_x;V alone. The walls of the heated room
-/// below ground give z·P·U_bw with z the actual depth (8.3.3.2) and d_1 of
-/// 8.45 against d_bf;equi of the crawlspace or basement floor.
+/// below ground give z·P·U_bw (A_T;bw·U_bw in the 8.38 forfait route) with
+/// z the actual depth (8.3.3.2) and d_1 of 8.45 against d_bf;equi of the
+/// crawlspace or basement floor.
 ///
 /// Annex D has no formula for this combination. Following 8.39 (floor and
 /// wall terms summed) and 8.3.2 note 3 (a partly sunken floor is split and
@@ -534,7 +565,10 @@ fn basement_over_space_parts(
     let area = slab.area_m2;
     let perimeter = slab.exposed_perimeter_m;
     let z = basement.depth(perimeter);
+    let wall_area = basement_wall_area(slab, basement);
     if !(positive(z)
+        && positive(basement.wall_area(perimeter))
+        && positive(wall_area)
         && positive(basement.wall_resistance_m2k_per_w)
         && positive(area)
         && positive(perimeter)
@@ -550,7 +584,7 @@ fn basement_over_space_parts(
     let floor_steady = area / (1.0 / terms.u_f + 1.0 / (terms.u_g + terms.u_x)) + edge;
     // 8.34 for the walls of the heated room, 8.45.
     let d_bw = LAMBDA_GROUND * (R_SI_HORIZONTAL + basement.wall_resistance_m2k_per_w + R_SE_GROUND);
-    let walls_steady = z * perimeter * basement_wall_u(z, d_bw, terms.d_bf) + wall_forfait;
+    let walls_steady = wall_area * basement_wall_u(z, d_bw, terms.d_bf) + wall_forfait;
     let (floor_internal, floor_external, floor_beta) = match below {
         FloorBelow::Crawlspace { .. } => {
             // D.13/D.14.
@@ -1196,6 +1230,7 @@ mod tests {
             wall_depths: Vec::new(),
             wall_resistance_m2k_per_w: 1.5,
             forfait_delta_u_w_per_m2k: None,
+            wall_area_m2: None,
         });
         let b: f64 = 50.0 / 15.0;
         let d_f: f64 = 0.5 + 2.0 * (1.17 + 0.04);
@@ -1255,6 +1290,46 @@ mod tests {
         assert!(slab_on_ground_conductance(&floor).is_none());
     }
 
+    /// 8.38 takes ΣA_T;bw of K.1.2 for both wall terms (2025+C1 p. 253–254;
+    /// 2020+A1 p. 225–226); the detailed 8.39 keeps z·P by its own formula. Public
+    /// case G: Uniec enters 130,45 m² of basement wall where z·P is 163,90.
+    #[test]
+    fn heated_basement_forfait_takes_the_entered_wall_area() {
+        let mut floor = slab(50.0, 30.0, 0.17 + 1.0);
+        floor.heated_basement = Some(HeatedBasement {
+            depth_m: 2.0,
+            wall_depths: Vec::new(),
+            wall_resistance_m2k_per_w: 1.5,
+            forfait_delta_u_w_per_m2k: Some(0.05),
+            wall_area_m2: None,
+        });
+        let detailed = slab_on_ground_conductance(&floor).unwrap();
+        floor.heated_basement.as_mut().unwrap().wall_area_m2 = Some(45.0);
+        // Detailed route: the entered area does not enter 8.39.
+        assert!((slab_on_ground_conductance(&floor).unwrap() - detailed).abs() < 1e-12);
+        let z = 2.0;
+        let d_f: f64 = 0.5 + 2.0 * (1.17 + 0.04);
+        let d_bw: f64 = 2.0 * (0.13 + 1.5 + 0.04);
+        let d1 = d_bw.min(d_f);
+        let u_bw = 4.0 / (PI * z) * (1.0 + 0.5 * d1 / (d1 + z)) * (z / d_bw + 1.0).ln();
+        let floor_term = detailed - z * 30.0 * u_bw;
+        floor.edge_thermal_bridges = EdgeThermalBridges::Forfait;
+        let forfait = slab_on_ground_conductance(&floor).unwrap();
+        let expected = floor_term + 0.5 * 30.0 + 45.0 * (u_bw + 0.05);
+        assert!((forfait - expected).abs() < 1e-9, "{forfait} {expected}");
+        // Without the area the forfait takes z·P.
+        floor.heated_basement.as_mut().unwrap().wall_area_m2 = None;
+        let fallback = slab_on_ground_conductance(&floor).unwrap();
+        assert!((fallback - (floor_term + 0.5 * 30.0 + 60.0 * (u_bw + 0.05))).abs() < 1e-9);
+        // A non-positive area is refused.
+        floor.heated_basement.as_mut().unwrap().wall_area_m2 = Some(0.0);
+        assert!(slab_on_ground_conductance(&floor).is_none());
+        floor.edge_thermal_bridges = EdgeThermalBridges::Detailed {
+            bridges: Vec::new(),
+        };
+        assert!(slab_on_ground_conductance(&floor).is_none());
+    }
+
     /// A depth given per wall part leaves `depthM` unset (NaN); it must stay
     /// out of the serialized input, or the derived project input carries a
     /// NaN and the project is refused with `non_finite_result`.
@@ -1279,6 +1354,7 @@ mod tests {
             wall_depths: Vec::new(),
             wall_resistance_m2k_per_w: 6.0,
             forfait_delta_u_w_per_m2k: None,
+            wall_area_m2: None,
         });
         assert_eq!(combination_issue(&floor), None);
         // Hand calculation.
@@ -1373,6 +1449,7 @@ mod tests {
             wall_depths: Vec::new(),
             wall_resistance_m2k_per_w: 2.0,
             forfait_delta_u_w_per_m2k: None,
+            wall_area_m2: None,
         });
         let parts = slab_coefficient_parts(&floor).unwrap();
         let (area, perimeter) = (60.0, 32.0);
@@ -1429,6 +1506,7 @@ mod tests {
             wall_depths: Vec::new(),
             wall_resistance_m2k_per_w: 1.5,
             forfait_delta_u_w_per_m2k: None,
+            wall_area_m2: None,
         });
         for floor in [slab(60.0, 16.0, 3.5), crawl, basement] {
             let parts = slab_coefficient_parts(&floor).unwrap();
