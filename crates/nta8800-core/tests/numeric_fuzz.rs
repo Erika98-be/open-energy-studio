@@ -68,8 +68,9 @@ fn fixtures() -> Vec<(&'static str, Value)> {
 /// The routes added for ISSO 54 v2.0, with the test's own values, so their
 /// numeric leaves are fuzzed too: 7.41 per window (EP-W011a), declared 9.85
 /// constants (EP-W203j), a calculated Ψ of an embedded hot-water pipe
-/// (13.28, EP-W402f), declared CHP factors (EP-W204h) and a calculated Ψ of
-/// an embedded cooling pipe (10.25, EP-W302e).
+/// (13.28, EP-W402f), declared CHP factors (EP-W204h), a calculated Ψ of
+/// an embedded cooling pipe (10.25, EP-W302e), and a declared F_D;dayl
+/// (NEN-EN 15193-1 annex F, EP-U602g).
 fn isso54_routes() -> Vec<(&'static str, Value)> {
     let embedded = serde_json::json!({
         "method": "insulated_embedded", "pipeOuterDiameterM": 0.02, "insulatedDiameterM": 0.04,
@@ -130,11 +131,28 @@ fn isso54_routes() -> Vec<(&'static str, Value)> {
     cooling["ntaCalculation"]["cooling"]["distribution"]["pipe"] = serde_json::json!({
         "kind": "calculated", "geometry": embedded, "sourceReference": "EP-W302e"
     });
+    // EP-U602g: installed lamp power with a daylight sector whose F_D;dayl
+    // comes from NEN-EN 15193-1 annex F (2025+C1 p. 672).
+    let mut daylight: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-example-office.json"
+    ))
+    .unwrap();
+    let zone = &mut daylight["ntaCalculation"]["lighting"][0]["lightingZones"][0];
+    zone["power"] = serde_json::json!({
+        "method": "installed", "sourceReference": "EP-U602g",
+        "luminaires": [{"count": 1, "power": {"method": "system", "powerW": 3200.0}}]
+    });
+    zone["daylight"] = serde_json::json!({
+        "method": "sectors", "sourceReference": "EP-U602g",
+        "sectors": [{"kind": "declared", "areaM2": 200.0, "daylightDependencyFactor": 0.781,
+            "sourceReference": "NEN-EN 15193-1:2017 bijlage F"}]
+    });
     vec![
         (
             "example-terraced-dwelling (ISSO 54 glazing, boiler, circulation)",
             boiler,
         ),
+        ("example-office (declared daylight sector)", daylight),
         ("example-terraced-dwelling (ISSO 54 declared CHP)", chp),
         ("public-comparison-c (calculated cooling-pipe Ψ)", cooling),
     ]
@@ -762,6 +780,7 @@ fn every_number_at_its_edges_calculates_plausibly_or_refuses_with_a_routed_gap()
         "/ntaCalculation/cooling/distribution/pipe/geometry/depthM",
         "/ntaCalculation/distributionSystem/pipeTransmittance/depthM",
         "/ntaCalculation/groundFloors/*/heatedBasement/depthM",
+        "/ntaCalculation/lighting/*/lightingZones/*/daylight/sectors/*/daylightDependencyFactor",
     ] {
         assert!(
             occurrences.contains_key(required),

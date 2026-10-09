@@ -24,7 +24,7 @@ De pdf wordt niet in de repository opgenomen. De invoer is in eigen woorden geco
 | Referentiekantoor EP-U001 (EP-W001 als kantoor met koeling) | `training-data/isso54/EPU001.json` |
 | Deeltesten als patch op de referentie | `training-data/reference-suites/isso54-v2.json`, gegenereerd door `scripts/isso54-suite.py` |
 | Uitvoering in elke gate | `reference_gate` via `scripts/verify-nta.sh` (alle suites in `training-data/reference-suites/`) |
-| Oordeel zonder verwachtingen | Een run met alleen deze suite vergelijkt niets: het rapport zegt "geen vergelijking (0 vergeleken, 258 zonder verwachting)" en de afsluitcode is 3, niet 0. In de gate lopen de openbare gevallen en de RVO-woningen mee; die vergelijken wel. |
+| Oordeel zonder verwachtingen | Een run met alleen deze suite vergelijkt niets: het rapport zegt "geen vergelijking (0 vergeleken, 260 zonder verwachting)" en de afsluitcode is 3, niet 0. In de gate lopen de openbare gevallen en de RVO-woningen mee; die vergelijken wel. |
 
 - **Patches.** Een deeltest verandert een of enkele kenmerken van de referentie. De suite geeft daarom per deeltest een `projectPatch` (`set`/`remove` op een JSON-pointer) op het referentieproject, in plaats van een volledig projectbestand. Een patch waarvan het doel ontbreekt, laat de gate falen, dus een wijziging van de referentie kan een deeltest niet stilletjes leegmaken.
 - **Zonder verwachting.** Zonder bijlage 2 heeft elke deeltest een blok `pending` in plaats van `expected`:
@@ -72,6 +72,10 @@ Deze keuzes volgen uit de testbeschrijving of uit NTA 8800:2022. Ze zijn het eer
 - **EP-W203a, EP-W204c.** Lokale toestellen zonder watergedragen distributie: afgifte `local_heater` zonder waterzijdige inregeling, en een opgegeven distributieverlies van 0. De kern heeft geen aparte invoer "geen distributiesysteem".
 - **EP-W204a, EP-W204e.** Bij warmtelevering en een biomassaketel hoort de distributiepomp niet bij de hulpenergie van 9.85. De pomp is berekend (9.41–9.51) met onbekend vermogen en EEI.
 - **EP-U601/602.** Het lampvermogen is één groep (14.9, tabel 14.2). Nieuwwaardecompensatie is tabel 14.4 van 2022 (`constantIlluminance`). EP-U602a "centraal aan" is handbediend met centrale aanschakeling.
+- **EP-U602g/h (opgegeven daglichtfactoren).** De test geeft F_D;S, F_D;dayl en F_D direct, zonder sectorgeometrie (p. 50–51). De norm kent geen invoer van een opgegeven F_D;S: die volgt uit 14.37–14.42. Wel mag F_D;dayl;i van een daglichtsector worden bepaald met bijlage F van NEN-EN 15193-1:2017, naar beneden afgerond op twee significante cijfers (de alinea onder tabel 14.7; 2020+A1 p. 643, 2022 p. 648, 2023 p. 657, 2025+C1 p. 672; ook in 2024). Die route heeft de kern nu: een sector van soort `declared` met de oppervlakte A_D;i, F_D;dayl;i en een bronvermelding. De deeltesten zijn zo gecodeerd:
+  - **g:** één verlichtingszone van 96 m², 768 W, voorschakeling onbekend, geen nieuwwaardecompensatie, automatisch aan/automatisch uit, en een sector van 48 m² met F_D;dayl 0,781 (= 1 − 0,73 × 0,3; de test geeft F_D 0,8905 = (48 × 0,781 + 48)/96).
+  - **h:** twee verlichtingszones van 48 m² met elk 384 W. De onderste heeft een sector van 24 m² met F_D;dayl 0,781 (F_D 0,8905 zoals g), de bovenste een daklichtsector van 24 m² met F_D;dayl 0,5036 (F_D 0,7518).
+  - **Te toetsen.** De kern rondt F_D;dayl af naar 0,78 en 0,50, zoals de norm voor deze route voorschrijft; daardoor wordt F_D 0,89 en 0,75 in plaats van 0,8905 en 0,7518. Het afronden gaat naar beneden op twee cijfers, niet naar een klasse van tabel X.1: waar de norm die klassen bedoelt, noemt ze bijlage X of tabel X.1 (zoals bij P_n, 2025+C1 p. 660), en deze alinea doet dat niet. Of versie 5.0 de onafgeronde waarden gebruikt, blijkt uit de uitkomsten.
 - **EP-U002j.** 30 % kantoor en 70 % overige bijeenkomst in één rekenzone. Ventilatie, tapwater en verlichting zijn per oppervlak verdeeld. De gebruiksfunctie van de zone, voor setpoints en interne warmte, is de grootste: overige bijeenkomst.
 - **Referenties: geen leidingen in onverwarmde ruimten.** EP-W001 en EP-U001 noemen geen verwarmingsleidingen door onverwarmde ruimten, maar de codering liet `unheatedPipeLengthM` leeg. Dan neemt 9.36 15 % van de lengte als onverwarmd. Gecorrigeerd naar 0 (9 oktober 2026): BENG 2 van EP-W001 daalt van 105,18 naar 105,07. EP-W202a (lengte onbekend) is nu de variant met 15 %.
 - **EP-W201b–d.** Rij van de overtemperatuur in tabel 9.3 (2022 p. 273) naar de gemiddelde watertemperatuur min 20 °C: 55/47 is 31 K (rij 30 K), 50/42 is 26 K (rij 30 K), 90/70 is 60 K. Bij convectoren met boosterventilatoren de rij "radiatoren met ventilator". De 40 W per ventilator vraagt de route van NEN-EN 16430, die NTA 8800:2022 niet kent (schakelpunt 56): gerekend is met 10 W per ventilator uit tabel 9.11. De gemiddelde ontwerptemperatuur van de ketel volgt de ontwerpklasse.
@@ -165,7 +169,7 @@ Open interpretaties, te toetsen zodra versie 5.0 met uitkomsten er is: EP-W102b 
 
 ## Stand van de codering
 
-258 van de 266 deeltesten uit bijlage 1 zijn gecodeerd: 203 voor woningen en 55 voor utiliteit (9 oktober 2026; eerst 52, daarna 115, 199, 227, 239 en 240). Elke gecodeerde deeltest rekent in de gate. De acht open deeltesten zijn niet te coderen: drie vragen een kwaliteitsverklaring uit een apart bijlagedocument dat niet in bezit is, drie hebben geen route in de norm, twee geven daglichtfactoren zonder geometrie (zie hieronder en de tabel).
+260 van de 266 deeltesten uit bijlage 1 zijn gecodeerd: 203 voor woningen en 57 voor utiliteit (9 oktober 2026; eerst 52, daarna 115, 199, 227, 239, 240 en 258). Elke gecodeerde deeltest rekent in de gate. De zes open deeltesten zijn niet te coderen: drie vragen een kwaliteitsverklaring uit een apart bijlagedocument dat niet in bezit is, drie hebben geen route in de norm (zie hieronder en de tabel).
 
 EP-W003c (rolluik met extra warmteweerstand) en EP-W016 (deuren) waren te controleren. Beide routes bestaan: `window_u` rekent U_W+shut (8.22/8.23) en de deur (8.20, 8.18/8.19) als rekenhulp, en het project neemt de uitkomst als U-waarde van het raam of de deur. Ze zijn gecodeerd.
 
@@ -173,7 +177,6 @@ Niet te coderen met de huidige kern of de norm:
 - **EP-W203q, EP-W406w, EP-W406x**: de kwaliteitsverklaringen (Inventum Modul AIR Solo, Modul Air combi 180 en Modul Air red) staan in aparte bijlagedocumenten bij ISSO 54 (p. 66–67). Die zijn niet in bezit; zonder de verklaarde waarden is er niets in te voeren.
 - **EP-W406l** (biomassa die niet aan bijlage R voldoet): geen forfaitaire route, zoals EP-W204d hieronder.
 - **EP-W204d** (pelletkachel die niet aan bijlage R voldoet): tabel 9.30 (2022 p. 337) geeft alleen rendementen voor toestellen die aan bijlage R voldoen. Voor andere toestellen is er geen forfaitaire route; de kern weigert met `biomass_class_unsupported`.
-- **EP-U602g/h**: de daglichtfactoren worden direct gegeven, zonder sectorgeometrie (zie de tabel).
 - **EP-W406j** (booster met COP 3,5 en P_ls 0,03 kW): 13.8.4.4 (2022 p. 607) kent meetgegevens volgens bijlage W of de forfaitaire waarden van 13.162/13.163. Bijlage W leidt de COP-lijn af uit twee meetpunten bij 24 (of 16) °C en 40 °C (W.11–W.13, 2022 p. 1089–1090). Met één COP is er geen route; het forfait kent geen opgegeven COP. De kern weigert terecht.
 
 **EP-W006f (vloer onder maaiveld boven een kruipruimte).** De kern weigerde deze combinatie (`ground_floor_below_and_heated_basement`); de norm staat haar toe en de kern rekent haar nu:
@@ -239,7 +242,7 @@ De 11 realistische gebouwen (EPWRealB01 tot en met EPWRealD05 en EPURealB01) zij
 | EPU503 | Douche wtw | 1 | EPU503 | – |  |
 | EPU504 | Opwekking | 1 | EPU504 | – |  |
 | EPU601 | Vermogen | 3 | a, b, c | – |  |
-| EPU602 | Regeling | 9 | a, b, c, d, e, f, i | g, h | g, h: de test geeft de daglichtfactoren F_D;S, F_D;dayl en F_D direct; de kern leidt ze af uit de sectorgeometrie (14.25–14.42) en kent geen invoer van opgegeven daglichtfactoren. Niet te coderen zonder geometrie |
+| EPU602 | Regeling | 9 | a, b, c, d, e, f, g, h, i | – |  |
 | EPU701 | Bevochtiging | 4 | a, b, c, d | – |  |
 | EPWReal/EPUReal | Realistische gebouwen | 11 | – | alle | invoer in bijlagen 3A–3K, niet in bezit |
 

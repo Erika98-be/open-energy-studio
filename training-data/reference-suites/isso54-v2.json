@@ -38611,6 +38611,212 @@
       }
     },
     {
+      "caseId": "isso54-v2-EPU602g",
+      "normVersion": "2022",
+      "projectFile": "../isso54/EPU001.json",
+      "projectPatch": [
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/lighting/0/lightingZones",
+          "value": [
+            {
+              "id": "kantoor",
+              "areaM2": 96.0,
+              "power": {
+                "method": "installed",
+                "luminaires": [
+                  {
+                    "count": 1,
+                    "power": {
+                      "method": "lamps",
+                      "lampPowerW": 768.0,
+                      "lampCount": 1,
+                      "technology": "unknown_or_other"
+                    }
+                  }
+                ],
+                "sourceReference": "ISSO 54 v2.0 EP-U602g: lampvermogen 768.0 W, voorschakeling onbekend, als een groep"
+              },
+              "parasitic": {
+                "method": "forfait"
+              },
+              "occupancy": {
+                "control": "auto_on_auto_off",
+                "centralOnControl": false,
+                "largeOfficeGroup": false
+              },
+              "daylight": {
+                "method": "sectors",
+                "sectors": [
+                  {
+                    "kind": "declared",
+                    "areaM2": 48.0,
+                    "daylightDependencyFactor": 0.781,
+                    "sourceReference": "ISSO 54 v2.0 EP-U602g: F_D;S 0,3, automatisch dimmen, F_D;dayl 0,781"
+                  }
+                ],
+                "sourceReference": "ISSO 54 v2.0 EP-U602g p. 50"
+              },
+              "extractedLuminaires": false
+            }
+          ]
+        }
+      ],
+      "source": {
+        "publisher": "ISSO / InstallQ (CCvD)",
+        "documentId": "ISSO 54 versie 2.0, Energie Prestatie Rekenprogramma's, testen voor het deelgebied EDR attest energieprestatie (CCvD InstallQ, 12-05-2022), test EPU-602g, p. 50",
+        "edition": "versie 2.0, 12-05-2022 (NTA 8800 januari 2022)",
+        "usePermission": "openbaar document; alleen de invoer is in eigen woorden gecodeerd, geen tekst overgenomen",
+        "independentReviewer": "geen: verwachte uitkomsten (bijlage 2) niet in bezit"
+      },
+      "pending": {
+        "reason": "De verwachte uitkomsten staan in bijlage 2 van ISSO 54 (apart resultatendocument), niet in bezit; de deeltest wordt doorgerekend zonder oordeel.",
+        "metrics": [
+          {
+            "path": "beng1",
+            "unit": "kWh/m2.year",
+            "normReference": "EP1 / BENG 1, energiebehoefte (5.3); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng2",
+            "unit": "kWh/m2.year",
+            "normReference": "EP2 / BENG 2, primair fossiel energiegebruik (5.2); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng3",
+            "unit": "%",
+            "normReference": "EP3 / BENG 3, aandeel hernieuwbare energie (5.4); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "isso54-v2-EPU602h",
+      "normVersion": "2022",
+      "projectFile": "../isso54/EPU001.json",
+      "projectPatch": [
+        {
+          "op": "set",
+          "pointer": "/ntaCalculation/lighting/0/lightingZones",
+          "value": [
+            {
+              "id": "onder",
+              "areaM2": 48.0,
+              "power": {
+                "method": "installed",
+                "luminaires": [
+                  {
+                    "count": 1,
+                    "power": {
+                      "method": "lamps",
+                      "lampPowerW": 384.0,
+                      "lampCount": 1,
+                      "technology": "unknown_or_other"
+                    }
+                  }
+                ],
+                "sourceReference": "ISSO 54 v2.0 EP-U602h: lampvermogen 384.0 W, voorschakeling onbekend, als een groep"
+              },
+              "parasitic": {
+                "method": "forfait"
+              },
+              "occupancy": {
+                "control": "auto_on_auto_off",
+                "centralOnControl": false,
+                "largeOfficeGroup": false
+              },
+              "daylight": {
+                "method": "sectors",
+                "sectors": [
+                  {
+                    "kind": "declared",
+                    "areaM2": 24.0,
+                    "daylightDependencyFactor": 0.781,
+                    "sourceReference": "ISSO 54 v2.0 EP-U602h: onderste zone als 602g, F_D;dayl 0,781"
+                  }
+                ],
+                "sourceReference": "ISSO 54 v2.0 EP-U602h p. 50"
+              },
+              "extractedLuminaires": false
+            },
+            {
+              "id": "boven",
+              "areaM2": 48.0,
+              "power": {
+                "method": "installed",
+                "luminaires": [
+                  {
+                    "count": 1,
+                    "power": {
+                      "method": "lamps",
+                      "lampPowerW": 384.0,
+                      "lampCount": 1,
+                      "technology": "unknown_or_other"
+                    }
+                  }
+                ],
+                "sourceReference": "ISSO 54 v2.0 EP-U602h: lampvermogen 384.0 W, voorschakeling onbekend, als een groep"
+              },
+              "parasitic": {
+                "method": "forfait"
+              },
+              "occupancy": {
+                "control": "auto_on_auto_off",
+                "centralOnControl": false,
+                "largeOfficeGroup": false
+              },
+              "daylight": {
+                "method": "sectors",
+                "sectors": [
+                  {
+                    "kind": "declared",
+                    "areaM2": 24.0,
+                    "daylightDependencyFactor": 0.5036,
+                    "sourceReference": "ISSO 54 v2.0 EP-U602h: daklichten, F_D;S 0,68, F_D;dayl 0,5036"
+                  }
+                ],
+                "sourceReference": "ISSO 54 v2.0 EP-U602h p. 50"
+              },
+              "extractedLuminaires": false
+            }
+          ]
+        }
+      ],
+      "source": {
+        "publisher": "ISSO / InstallQ (CCvD)",
+        "documentId": "ISSO 54 versie 2.0, Energie Prestatie Rekenprogramma's, testen voor het deelgebied EDR attest energieprestatie (CCvD InstallQ, 12-05-2022), test EPU-602h, p. 50",
+        "edition": "versie 2.0, 12-05-2022 (NTA 8800 januari 2022)",
+        "usePermission": "openbaar document; alleen de invoer is in eigen woorden gecodeerd, geen tekst overgenomen",
+        "independentReviewer": "geen: verwachte uitkomsten (bijlage 2) niet in bezit"
+      },
+      "pending": {
+        "reason": "De verwachte uitkomsten staan in bijlage 2 van ISSO 54 (apart resultatendocument), niet in bezit; de deeltest wordt doorgerekend zonder oordeel.",
+        "metrics": [
+          {
+            "path": "beng1",
+            "unit": "kWh/m2.year",
+            "normReference": "EP1 / BENG 1, energiebehoefte (5.3); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng2",
+            "unit": "kWh/m2.year",
+            "normReference": "EP2 / BENG 2, primair fossiel energiegebruik (5.2); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          },
+          {
+            "path": "beng3",
+            "unit": "%",
+            "normReference": "EP3 / BENG 3, aandeel hernieuwbare energie (5.4); band: ISSO 54 v2.0 bijlage 2 (p. 67): afkeuring bij meer dan 1,0 % afwijking naar boven of beneden",
+            "relativeTolerance": 0.01
+          }
+        ]
+      }
+    },
+    {
       "caseId": "isso54-v2-EPU602i",
       "normVersion": "2022",
       "projectFile": "../isso54/EPU001.json",

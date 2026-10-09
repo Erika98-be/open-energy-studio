@@ -874,6 +874,58 @@ PARASITIC_601A = setp(
 U601A = [lamps(768.0, "led"), setp(f"{LZ}/constantIlluminance", "led_l80"), PARASITIC_601A]
 
 
+def declared_sector(area, factor, test_id, note):
+    """A daylight sector with F_D;dayl from NEN-EN 15193-1 annex F, the
+    alternative below table 14.7 (2022 p. 648): the kernel rounds it down to
+    two significant digits."""
+    return {
+        "kind": "declared",
+        "areaM2": area,
+        "daylightDependencyFactor": factor,
+        "sourceReference": f"ISSO 54 v2.0 {test_id}: {note}",
+    }
+
+
+def daylight_zone(zone_id, area, watts, sector, test_id):
+    """EP-U602g/h: lamp power with unknown ballast and unknown constant-
+    illuminance compensation (none), auto on/auto off as EP-U001, and one
+    daylight sector."""
+    return {
+        "id": zone_id,
+        "areaM2": area,
+        "power": {
+            "method": "installed",
+            "luminaires": [{"count": 1, "power": {"method": "lamps", "lampPowerW": watts, "lampCount": 1, "technology": "unknown_or_other"}}],
+            "sourceReference": f"ISSO 54 v2.0 {test_id}: lampvermogen {watts} W, voorschakeling onbekend, als een groep",
+        },
+        "parasitic": {"method": "forfait"},
+        "occupancy": {"control": "auto_on_auto_off", "centralOnControl": False, "largeOfficeGroup": False},
+        "daylight": {"method": "sectors", "sectors": [sector], "sourceReference": f"ISSO 54 v2.0 {test_id} p. 50"},
+        "extractedLuminaires": False,
+    }
+
+
+# EP-U602g (p. 50): one zone of 96 m², a daylight sector of 48 m² with
+# F_D;S 0,3 and automatic dimming: F_D;dayl = 1 - 0,73 x 0,3 = 0,781 (the
+# test's F_D 0,8905 = (48 x 0,781 + 48)/96). The norm has no input for a
+# given F_D;S; the test's F_D;dayl enters through the 15193-1 alternative.
+U602G = setp(
+    f"{NTA}/lighting/0/lightingZones",
+    [daylight_zone("kantoor", 96.0, 768.0, declared_sector(48.0, 0.781, "EP-U602g", "F_D;S 0,3, automatisch dimmen, F_D;dayl 0,781"), "EP-U602g")],
+)
+# EP-U602h (p. 50-51): two equal lighting zones of 48 m² (half the power
+# each). The lower one as 602g (F_D 0,8905, so a sector of 24 m²); the upper
+# one with rooflights, F_D;S 0,68: F_D;dayl 0,5036, F_D 0,7518, so a sector
+# of 24 m² as well.
+U602H = setp(
+    f"{NTA}/lighting/0/lightingZones",
+    [
+        daylight_zone("onder", 48.0, 384.0, declared_sector(24.0, 0.781, "EP-U602h", "onderste zone als 602g, F_D;dayl 0,781"), "EP-U602h"),
+        daylight_zone("boven", 48.0, 384.0, declared_sector(24.0, 0.5036, "EP-U602h", "daklichten, F_D;S 0,68, F_D;dayl 0,5036"), "EP-U602h"),
+    ],
+)
+
+
 def utility_heat_pump(test_id, source, supply, page):
     """EP-U303: a utility heat pump, table 9.29 (scope utility)."""
     step = heat_pump(test_id, source, supply)
@@ -932,13 +984,16 @@ UTILITY_CASES = [
     ("EPU601a", 50, U601A),
     ("EPU601b", 50, [lamps(960.0, "unknown_or_other")]),
     ("EPU601c", 50, [lamps(1344.0, "fluorescent_t5"), setp(f"{LZ}/constantIlluminance", "linear_fluorescent")]),
-    # EP-U602a-f/i: lighting control (p. 50-51; table 14.5).
+    # EP-U602a-i: lighting control (p. 50-51; table 14.5).
     ("EPU602a", 50, [switch("manual_or_unknown", central=True)]),
     ("EPU602b", 50, [switch("manual_or_unknown")]),
     ("EPU602c", 50, [switch("manual_with_sweep")]),
     ("EPU602d", 50, function("d") + [switch("auto_on_dimmed")]),
     ("EPU602e", 50, [switch("manual_on_dimmed")]),
     ("EPU602f", 50, [switch("manual_on_auto_off")]),
+    # EP-U602g/h: given daylight factors (p. 50-51), see U602G/U602H.
+    ("EPU602g", 50, [U602G]),
+    ("EPU602h", 50, [U602H]),
     ("EPU602i", 51, U601A + [setp(f"{LZ}/extractedLuminaires", True)]),
 ]
 

@@ -64,7 +64,7 @@ De gate `scripts/verify-nta.sh` loopt bij elke wijziging. Er wordt alleen vastge
 - de **optiedekkingstest** (`crates/nta8800-core/tests/option_coverage.rs`). Die leidt elke invoeroptie af uit de invoertypen zelf en rekent haar door in alle vijf normversies. Elke run moet rekenen of weigeren met een benoemde code met tekst, zonder paniek en zonder niet-eindige getallen.
 - de **openbare gevallen** A–L, waarvan H–L utiliteitsgebouwen (`tests/public_comparison.rs`), nagerekend in hun eigen normversie;
 - de **numerieke fuzz** (`tests/numeric_fuzz.rs`): elk getal uit de voorbeelden en openbare gevallen krijgt randwaarden, in alle vijf normversies, met controles op eindigheid, plausibiliteit en monotonie;
-- de **referentiesuites** (`reference_gate`): de openbare gevallen en de RVO-voorbeeldwoningen met een oordeel, en de gecodeerde ISSO 54-deeltesten (258 van 266, versie 2.0) die rekenen zonder verwachting (`pending_expectation`);
+- de **referentiesuites** (`reference_gate`): de openbare gevallen en de RVO-voorbeeldwoningen met een oordeel, en de gecodeerde ISSO 54-deeltesten (260 van 266, versie 2.0) die rekenen zonder verwachting (`pending_expectation`);
 - de **formulierbewaking**: ongeveer 2 400 toestanden van de projectformulieren en alle opnamesecties gaan door de kern; geen afgekeurde vorm, geen achtergebleven veld, elk gat met een route;
 - de robuustheidstests;
 - de service- en API-tests;

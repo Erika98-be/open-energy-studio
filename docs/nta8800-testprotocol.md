@@ -89,7 +89,7 @@ CARGO_NET_OFFLINE=true NTA_SKIP_MSRV=1 scripts/verify-nta.sh   # zonder, voor tu
 
 **BRL 9501 §3.0 en §4.2 (p. 5 en 7):** de aanvrager voert de deeltesten van ISSO 54 zelf uit. Elke deeltest ligt binnen de bandbreedte (1 % per deeltest). Versie 5.0:2026 met de verwachte uitkomsten is nog niet in bezit. De voorbereiding staat in de [voorbereiding ISSO 54](nta8800-isso54-voorbereiding.md).
 
-**Nu.** 258 van de 266 deeltesten van versie 2.0 zijn gecodeerd:
+**Nu.** 260 van de 266 deeltesten van versie 2.0 zijn gecodeerd:
 
 - generator: `scripts/isso54-suite.py`;
 - suite: `training-data/reference-suites/isso54-v2.json`;

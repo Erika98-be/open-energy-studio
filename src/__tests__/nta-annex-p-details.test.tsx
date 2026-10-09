@@ -196,6 +196,25 @@ describe('lighting, floor edges and measure patches without JSON', () => {
     expect(current().lighting[0].lightingZones.map((item: Draft) => item.id)).toEqual(['lighting-1', 'lighting-2']);
   }, 60000);
 
+  it('enters a declared F_D;dayl sector without a daylight control (NEN-EN 15193-1 annex F)', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<Harness initial={{ labelFunction: 'office' }}
+      body={(draft, change) => <NtaLightingSection draft={draft} change={change} project={project} />} />);
+    await user.click(screen.getByLabelText('Calculate lighting'));
+    await user.selectOptions(screen.getByLabelText('Power'), 'installed');
+    await user.selectOptions(screen.getByLabelText('Daylight'), 'sectors');
+    await user.selectOptions(screen.getByLabelText('Kind'), 'declared');
+    expect(screen.queryByLabelText('Daylight control (table 14.6)')).toBeNull();
+    await user.type(screen.getByLabelText('Daylight sector area A_D, m² (14.27–14.35)'), '48');
+    await user.type(screen.getByLabelText(/Daylight dependency factor F_D;dayl/), '0.781');
+    await user.type(screen.getByLabelText('Evidence: calculation per NEN-EN 15193-1:2017 annex F'), 'rapport 12');
+    expect(withoutNulls(current().lighting[0].lightingZones[0]).daylight).toEqual({
+      method: 'sectors', sourceReference: '', sectors: [{
+        kind: 'declared', areaM2: 48, daylightDependencyFactor: 0.781, sourceReference: 'rapport 12',
+      }],
+    });
+  }, 60000);
+
   it('edits the floor-edge ψ values of 8.36', async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness initial={{ groundFloors: [{ edgeThermalBridges: { method: 'detailed', bridges: [] } }] }}

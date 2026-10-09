@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Opgegeven F_D;dayl per daglichtsector (NEN-EN 15193-1 bijlage F); ISSO 54: 260 van de 266 deeltesten
+
+- **Nieuwe daglichtroute.** Onder de tabel met de daglichtregelingfactor F_D;C staat een alternatief: F_D;dayl;i van een daglichtsector mag worden bepaald met bijlage F van NEN-EN 15193-1:2017, naar beneden afgerond op twee significante cijfers (2025+C1 p. 672; 2022 p. 648; dezelfde tekst in 2020+A1, 2023 en 2024). De kern kende die route niet. Een daglichtsector kan nu van soort `declared` zijn, met de sectoroppervlakte `areaM2`, `daylightDependencyFactor` (0–1) en een verplichte `sourceReference`. De kern rondt naar beneden af op twee cijfers (0,781 wordt 0,78); tabel X.1 geldt hier niet, omdat de alinea bijlage X niet noemt (interpretatie in `lighting.rs`). Bestaande berekeningen veranderen niet.
+  - Formulier: "opgegeven F_D;dayl" bij de soort daglichtsector, zonder keuze voor de daglichtregeling (die zit in de opgegeven factor).
+  - Tests: `declared_sector_takes_the_15193_annex_f_factor_rounded_down` (lighting.rs), een route in de numerieke fuzz, een donor in de optiedekking en een formuliertest.
+- **ISSO 54 v2.0.** EP-U602g en h zijn met deze route gecodeerd: 260 van de 266 deeltesten, alle `pending_expectation`. Te toetsen tegen versie 5.0: de test geeft F_D;dayl 0,781 en 0,5036 onafgerond, de kern rekent met 0,78 en 0,50 ([voorbereiding ISSO 54](nta8800-isso54-voorbereiding.md)). Open blijven zes deeltesten: EP-W203q, EP-W406w en EP-W406x (kwaliteitsverklaring niet in bezit) en EP-W204d, EP-W406j en EP-W406l (geen route in de norm).
+- **Voorraadvat bij een WKK in het formulier.** Het tapwaterformulier biedt een voorraadvat bij elke opwekker, dus ook bij een WKK (13.8.4.7.4); een formuliertest legt dat vast.
+
 ### 9 oktober 2026 — ISSO 54: 258 van de 266 deeltesten; voorraadvat bij een WKK voor tapwater
 
 - **Voorraadvat bij een WKK voor tapwater.** De kern weigerde een indirect verwarmd voorraadvat naast een WKK voor tapwater (`hot_water_storage_in_generator_efficiency`). Volgens 13.8.4.7.4 (2022 p. 621) volgen de verliezen van zo'n vat uit 13.6, en opmerking 1 van 13.6.2 (2022 p. 547) zondert een WKK niet uit. Het vat wordt nu toegestaan en gerekend, zoals bij een ketel. Een berekening die al rekende, verandert niet; alleen de eerder geweigerde invoer rekent nu. Test: `hot_water_chp_method_2_uses_the_ht_conversion_factors`.
