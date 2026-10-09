@@ -264,14 +264,14 @@ Tot nu toe kwamen alle gevallen uit de periodes van 2020+A1 tot en met 2023, en 
 
 | Geval | Rapport | Kern in de eigen editie | Verschil BENG 1 / 2 / 3 |
 |---|---|---|---|
-| G (2024), vrijstaande woning met kelder, 369,10 m² | 64,52 / 29,44 / 70,6 | 65,42 / 29,71 / 72,1 | +1,4 % / +0,9 % / +1,5 %-punt |
+| G (2024), vrijstaande woning met kelder, 369,10 m² | 64,52 / 29,44 / 70,6 | 65,07 / 29,31 / 72,5 | +0,9 % / −0,4 % / +1,9 %-punt |
 | H (2023), kantoor, bijeenkomst, zorg en sportschool, 743,80 m² | 29,08 / 80,01 / 30,5 | 27,29 / 80,63 / 29,7 | −6,2 % / +0,8 % / −0,8 %-punt |
 
 ### G: vrijstaande woning met verwarmde kelder (Uniec 3.3.5.0, 29-04-2025)
 
 Herbouw:
 - Gevels Rc 4,71 per oriëntatie (bruto 40,11 / 80,10 / 52,90 / 74,68 m²), daken Rc 7,30 onder 45° en 48°.
-- Kelder: keldervloer 150,63 m², P 56,13 m, z 2,92 m en kelderwanden Rc 3,71 (8.38/8.39). Lineaire koudebruggen forfaitair.
+- Kelder: keldervloer 150,63 m², P 56,13 m, z 2,92 m en kelderwanden Rc 3,71 van 130,45 m² (8.38/8.39). Lineaire koudebruggen forfaitair, dus 8.38 met ΣA_T;bw = 130,45 m² zoals ingevoerd (zie [Kelderwandoppervlakte](#kelderwandoppervlakte-in-a_ls-en-838-9-oktober-2026)).
 - 21 ramen U 1,1 / g 0,60, een dakraam U 0,92 / g 0,50 en een paneel U 1,6.
 - Belemmering per raam uit de uitdraai:
   - zijbelemmering met b_b = afstand / breedte bij D, E, C (hoogte ≥ 2,5 m) en N, P (beide zijden, < 2,5 m);
@@ -287,20 +287,20 @@ Per post, elektriciteit in kWh/jr (BENG 2-effect = Δ × 1,45 / 369,10):
 
 | Post | Rapport | Kern | BENG 2 |
 |---|---|---|---|
-| Warmtepomp verwarming | 4 366 | 4 515 | +0,59 |
-| Hulpenergie verwarming | 318 | ca. 328 | +0,04 |
+| Warmtepomp verwarming | 4 366 | 4 436 | +0,28 |
+| Hulpenergie verwarming | 318 | ca. 323 | +0,02 |
 | Tapwater (warmte uit de opwekkers) | 5 545 (7 317) | 5 545 (7 317) | 0 |
-| Koeling incl. hulpenergie | 1 127 | ca. 1 037 | −0,35 |
+| Koeling incl. hulpenergie | 1 127 | ca. 1 019 | −0,42 |
 | Ventilatoren | 300 | 300 | 0 |
 | PV (op de meter) | 4 164 | 4 164 | 0 |
-| **BENG 2** | **29,44** | **29,71** | **+0,27** |
+| **BENG 2** | **29,44** | **29,31** | **−0,13** |
 
 De kern rekent hier met de gedeclareerde f_ctrl 0,51 en de screens op het dakraam (9 oktober 2026). Daarvoor, met tabel 11.5 en zonder zonwering per raam: 65,67 / 30,89 / 71,8, verwarming 4 747 kWh. De hulpenergie is per dienst uitgesplitst; de verdeling tussen verwarming en koeling is benaderd met de 10 kWh koelhulpenergie van de eerste herbouw.
 
 - **Tapwater.** Netto behoefte 13.15/13.18 (2024 p. 521–522): 856 × (1,28 + 0,01 × 369,10) = 4 255 kWh. Beide vaten hebben f_sto;dis;ls 2 (2024 p. 552–553): alle aansluitingen zijn geïsoleerd, met T-stukken en kleppen, en een elektrisch toestel zonder meetgegevens krijgt ook 2. Een eerste herbouw nam 1 en gaf 869 kWh vatverlies te weinig; dat was een invoerfout, geen fout in de kern.
-- **Verwarming.** De COP is gelijk (4,25), de warmte is 8,7 % hoger.
+- **Verwarming.** De COP is gelijk (4,25), de warmte is 1,6 % hoger (8,7 % vóór de opgegeven kelderwandoppervlakte).
   - f_ctrl is nu gelijk aan het rapport: 0,51 uit de BCRG-gelijkwaardigheidsverklaring 20201914GG voor de Itho CVE/CVD ECO Optima 2 GG (C.4c), in plaats van 0,59 uit tabel 11.5. Dat verlaagt de verwarming met 232 kWh (−1,18 BENG 2).
-  - Wat overblijft (+0,59) is warmtebehoefte. Twee ramen hebben "overige belemmering" zonder maat, wat voor verwarming de conservatieve tabel 17.13 geeft.
+  - Wat overblijft (+0,28) is warmtebehoefte. Twee ramen hebben "overige belemmering" zonder maat, wat voor verwarming de conservatieve tabel 17.13 geeft.
   - De screens op het dakraam (buiten, donker, handbediend; tabel 7.5) staan nu per raam in de invoer. Ze verlagen BENG 1 met 0,25 en raken BENG 2 niet.
   - BENG 1 rekent met de vaste C1-ventilatie en verschilt daarom maar 1,8 %.
 - **Koeling.** De kern rekent letterlijk 10.15: 5 886 kWh koude tegen 4 157. De toeslag van 10.84 voor regeneratie en de EER 10 vallen daardoor bijna tegen elkaar weg.
@@ -741,8 +741,18 @@ Geval N is een supermarkt van 2 064,26 m² winkelfunctie, berekend op 02-02-2021
 N liet een fout in de kern zien. De verliesoppervlakte A_ls telde de vlakken van het project, maar niet de wanden van een verwarmde kelder. Die wanden zijn geen eigen vlak in het project: ze horen bij de keldervloer (`groundFloors[].heatedBasement`, z·P van 8.39). Ze grenzen wel aan de grond en tellen dus mee met f_ls 0,7 (6.7.3 c, 2020+A1 p. 144, 2025+C1 p. 162).
 
 - **Bij N.** De kern gaf A_ls/A_g 2,60 en een eis voor BENG 1 van 94,13. Met de 116,07 m² kelderwand erbij is A_ls 5 457,41 m², precies als in het rapport, en zijn A_ls/A_g (2,64) en de eis (95,31) gelijk aan die van het rapport.
-- **Bij G** (2024, woning met verwarmde kelder) gaat A_ls van 579,48 naar 694,21 m², tegen 670,80 in het rapport, en de eis voor BENG 1 van 57,10 naar 66,42, tegen 64,52 in het rapport. Het restverschil komt doordat Uniec de opgegeven kelderwand (130,45 m²) telt en de kern z·P (2,92 × 56,13 = 163,90 m²). De BENG-waarden van G veranderen niet.
+- **Bij G** (2024, woning met verwarmde kelder) gaat A_ls van 579,48 naar 694,21 m², tegen 670,80 in het rapport, en de eis voor BENG 1 van 57,10 naar 66,42, tegen 64,52 in het rapport. Het restverschil kwam doordat Uniec de opgegeven kelderwand (130,45 m²) telt en de kern z·P (2,92 × 56,13 = 163,90 m²); zie hieronder. De BENG-waarden van G veranderden hierdoor niet.
 - **Test.** `heated_basement_walls_count_in_the_loss_area` in `project_performance.rs`. De berekening van de eisen verandert, de BENG-waarden niet.
+
+### Kelderwandoppervlakte in A_ls en 8.38 (9 oktober 2026)
+
+Het restverschil bij G is opgelost. 6.7.2 telt in A_ls de geprojecteerde oppervlakte A_T van elke constructie, bepaald volgens bijlage K (6.7.1 en formule 6.3; 2020+A1 p. 144, 2025+C1 p. 161–162). De forfaitaire route 8.38 rekent de kelderwanden over ΣA_T;bw, "bepaald volgens K.1.2" (2020+A1 p. 225–226, 2025+C1 p. 253–254; dezelfde tekst in 2022, 2023 en 2024). Alleen de gedetailleerde formule 8.39 rekent met Σz_j·ℓ_j.
+
+- **Kern.** `heatedBasement.wallAreaM2` is ΣA_T;bw. Is die opgegeven, dan telt hij in A_ls (f_ls 0,7) en in beide wandtermen van 8.38 (U_bw en ΔU_for). Zonder opgave blijft z·P gelden. 8.39 en de maandtermen van bijlage D blijven z·P gebruiken. Een opgave van 0 of minder wordt geweigerd.
+- **Bij G.** De fixture geeft de 130,45 m² uit de uitdraai. A_ls is nu 670,80 m² en de eis voor BENG 1 64,52, beide gelijk aan het rapport. Omdat G forfaitair rekent, daalt ook H_g: de BENG-waarden gaan van 65,42 / 29,71 / 72,1 naar 65,07 / 29,31 / 72,5, tegen 64,52 / 29,44 / 70,6 in het rapport. BENG 1 komt dichterbij (+0,9 % in plaats van +1,4 %), BENG 2 ook (−0,13 in plaats van +0,27). BENG 3 ligt verder af (+1,9 %-punt), omdat dezelfde hernieuwbare energie nu tegenover minder gebruik staat.
+- **Bij N.** Geen verandering: N rekent de kelder gedetailleerd (8.39), en z·P is daar al de 116,07 m² van het rapport.
+- **Formulier.** "Oppervlakte kelderwanden onder maaiveld ΣA_T;bw" bij de verwarmde kelder; leeg betekent z × P.
+- **Tests.** `heated_basement_forfait_takes_the_entered_wall_area` (`ground.rs`), een uitbreiding van `heated_basement_walls_count_in_the_loss_area` en `case_g_under_nta_8800_2024`, die nu ook de eis 64,52 controleert.
 
 ### Invoer
 
@@ -778,7 +788,7 @@ Elektriciteit in kWh/jr; tussen haakjes de geleverde warmte of koude. Δ BENG 2 
 | **totaal** | | | **+2,20** (gemeten +2,19) |
 
 - **Ventilatoren.** 5 164 kWh is tot op de kWh f_SFP 0,125 · f_systype 2 · 2 122 m³/h over het hele jaar, gedeeld door f_prac;vent 0,9. Die 2 122 m³/h is q_V;ODA;req van de koudebalans, met maximale benutting van de capaciteit (τ_sysC). De kern neemt die van de warmtebalans, 938 m³/h, en rekent 2 283 kWh. 11.139 (2020+A1 p. 495) zegt niet welke van de twee geldt; zie [vraag 5 aan NEN](nta8800-vragen-nen.md).
-- **Verlichting.** Het rapport rekent met P_n 17 546 W: 17 546 × 3 100 h + 5 161 kWh parasitair = 59 554 kWh. De kern rondt P_n af op twee significante cijfers naar boven volgens bijlage X (2020+A1 p. 631), dus 18 000 W. Dat is hetzelfde verschil als bij I.
+- **Verlichting.** Het rapport rekent met P_n 17 546 W: 17 546 × 3 100 h + 5 161 kWh parasitair = 59 554 kWh. De kern rondt P_n af op twee significante cijfers naar boven volgens bijlage X (2020+A1 p. 631), dus 18 000 W. Dat is hetzelfde verschil als bij I. De afronding staat in 14.3.2, de route met het werkelijk geïnstalleerde vermogen (14.8/14.9), en geldt dus juist voor een opgegeven P_n, niet alleen voor de forfaitaire route van 14.3.4. De zin staat letterlijk gelijk in elke uitgave (2020+A1 p. 631, 2023 p. 646, 2024 14.3.2, 2025+C1 p. 660). Dit is geen open lezing; de kern blijft afronden en er is geen vraag aan NEN voor nodig.
 - **Hulpenergie koeling.** De tien ventilatoren zijn gelijk (314 kWh). Het verschil is de regelenergie van 10.87, 87,6 kWh.
 - **Koeling.** De kern rekent 29 719 kWh koude: netto koudebehoefte 10 242, afgifteverlies volgens 10.15 3 026 (30 %), ontvochtiging 16 263 (12.3, directe expansie als 6/12 °C) en de LBK 189. Het rapport noemt 25 140 kWh.
   - Met het verlies van 10.15 op 0,15 begrensd zou de kern 28 229 kWh koude rekenen, 0,35 minder op BENG 2.

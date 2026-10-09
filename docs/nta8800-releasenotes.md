@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Opgegeven kelderwandoppervlakte ΣA_T;bw in A_ls en 8.38; afronding van P_n gecontroleerd
+
+- **Kelderwandoppervlakte (6.7.1/6.7.2, 2025+C1 p. 161–162; 8.38, p. 253–254; 2020+A1 p. 144 en 225–226).** A_ls telt de geprojecteerde oppervlakte A_T volgens bijlage K, en de forfaitaire route 8.38 rekent de kelderwanden over ΣA_T;bw volgens K.1.2. Nieuw is het optionele veld `heatedBasement.wallAreaM2`: is het opgegeven, dan telt het in A_ls (f_ls 0,7) en in beide wandtermen van 8.38; zonder opgave blijft z·P gelden. De gedetailleerde 8.39 en de maandtermen van bijlage D blijven z·P gebruiken. Een opgave van 0 of minder wordt geweigerd. Formulier: "Oppervlakte kelderwanden onder maaiveld ΣA_T;bw" bij de verwarmde kelder. Dit verandert de uitkomst van projecten met een verwarmde kelder in de forfaitaire route die de oppervlakte opgeven.
+  - Openbaar geval G geeft nu de 130,45 m² uit de uitdraai: A_ls 694,21 → 670,80 m² en eis BENG 1 66,42 → 64,52, beide gelijk aan het rapport. BENG 65,42 / 29,71 / 72,1 → 65,07 / 29,31 / 72,5 (rapport 64,52 / 29,44 / 70,6).
+  - Tests: `heated_basement_forfait_takes_the_entered_wall_area` (ground.rs), uitgebreid `heated_basement_walls_count_in_the_loss_area` (project_performance.rs), `case_g_under_nta_8800_2024` controleert nu ook de eis, en een formuliertest in `nta-product-generators.test.tsx`.
+- **Afronding van P_n gecontroleerd, geen wijziging.** Bij geval N rondt de kern P_n naar boven af (17 546 → 18 000 W) en Uniec niet (+0,99 op BENG 2). De zin "Rond de aldus bepaalde waarde Pn naar boven af op twee significante cijfers volgens bijlage X" staat in 14.3.2, de route met het werkelijk geïnstalleerde vermogen, in elke uitgave (2020+A1 p. 631, 2023 p. 646, 2025+C1 p. 660). De afronding geldt dus juist voor een opgegeven vermogen. Dat is geen open lezing; de kern blijft afronden.
+
 ### 9 oktober 2026 — Wanden van een verwarmde kelder in A_ls; openbaar geval N, een supermarkt in 2020+A1
 
 - **A_ls met kelderwanden (6.7.3 c, p. 162; 2020+A1 p. 144).** De wanden van een verwarmde kelder (`groundFloors[].heatedBasement`, z·P van 8.39) telden niet mee in de verliesoppervlakte. Ze grenzen aan de grond en tellen nu mee met f_ls 0,7, in de Bbl-toets en in de geometrie voor de registratiecontroles. Projecten met een verwarmde kelder krijgen een hogere A_ls/A_g, en dus een andere eis voor BENG 1 (bij een woning ook een andere energiebehoefte-eis). De BENG-waarden zelf veranderen niet. Openbaar geval G: A_ls 579,48 → 694,21 m² (rapport 670,80), eis BENG 1 57,10 → 66,42 (rapport 64,52). Test: `heated_basement_walls_count_in_the_loss_area` (project_performance.rs).
