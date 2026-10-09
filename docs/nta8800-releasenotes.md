@@ -13,6 +13,15 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Gemeenschappelijke ruimten als invoer, verdeeld door de rekenkern volgens 6.6.4 (geen rekenwijziging)
+
+- **Waarom.** Openbaar geval H liet zien dat een met de hand verdeelde gemeenschappelijke ruimte makkelijk fout gaat: binnen een rekenzone gaat zij alleen naar de functies van die zone, voor de Bbl-eisen naar alle functies die erop zijn aangewezen (6.2, p. 142; 6.6.4, p. 158).
+- **Nieuwe invoer.** `zoneData[].commonSpaces[]` met `areaM2`, `servedFunctions` (leeg = alle functies van het gebouw) en `sourceReference`. Met gemeenschappelijke ruimten zijn de `functionAreas` van de zone de eigen oppervlakten van de functies.
+- **Wat de kern doet.** Hij verdeelt elke ruimte naar rato van de eigen oppervlakten: binnen de zone over de aangewezen functies van die zone, voor het gebouw over alle aangewezen functies. Hij schrijft de verdeling in `functionAreas` en de ventilatiefuncties van de zone (een zwembad blijft bij zijn functie) en, als ze ontbreken, in `bblFunctions`. De verdeling staat in de uitkomst onder `commonSpaces`.
+- **Weigeringen.** `common_space_invalid`, `common_space_function_outside_zone` en `common_space_exceeds_zone`, met tekst in nl en en.
+- **Formulier.** Onder Eigen gegevens voor deze rekenzone kunt u een gemeenschappelijke ruimte toevoegen; de handleiding (hoofdstuk 3) beschrijft het.
+- **Gelijkwaardigheid.** `case_h_common_space_input_equals_the_hand_split` rekent geval H met deze invoer en krijgt dezelfde BENG-waarden en Bbl-eisen als met de handmatige verdeling van de fixture. Bestaande projecten zonder `commonSpaces` rekenen ongewijzigd.
+
 ### 9 oktober 2026 — Openbaar geval H: de gemeenschappelijke ruimte binnen RZ-1 alleen naar de functies van die zone (geen rekenwijziging)
 
 - **Oorzaak.** De verwarming van H lag 9 % onder het rapport (3 989 tegen 4 382 kWh). De fixture verdeelde de gemeenschappelijke ruimte van 49,20 m² ook binnen RZ-1 over alle vier functies, met 44,35 m² sport in RZ-1. 6.6.4 (2023 p. 145) deelt haar binnen een rekenzone alleen toe aan de functies die in die zone liggen; de sportfunctie ligt in RZ-2.
