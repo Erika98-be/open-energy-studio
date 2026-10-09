@@ -13,6 +13,9 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+## Rekenkern 0.3.0 — 9 oktober 2026
+<!-- kernel-version: 0.3.0 -->
+
 ### 10 oktober 2026 — testprotocol en testrapport per vrijgave (geen rekenwijziging)
 
 - Nieuw [testprotocol](nta8800-testprotocol.md). Het beschrijft:
