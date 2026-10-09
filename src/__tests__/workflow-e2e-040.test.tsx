@@ -20,6 +20,8 @@ const officeProject = json('nta8800-example-office.json');
 const officeOutput = json('nta8800-example-office.kernel-output.json');
 const terracedProject = json('nta8800-example-terraced-dwelling.json');
 const terracedOutput = json('nta8800-example-terraced-dwelling.kernel-output.json');
+const survey1930 = json('nta8800-opname-1930-terraced.json');
+const survey1930Output = json('nta8800-opname-1930-terraced.kernel-output.json');
 
 type Body = Record<string, unknown>;
 type NtaBlock = Record<string, unknown>;
@@ -302,5 +304,56 @@ describe('PV peak power per m² (16.4a)', () => {
     await user.click(within(row).getByRole('button', { name: /Go to/ }));
     expect(within(nav()).getByRole('button', { name: /^Installations/ })).toHaveAttribute('aria-current', 'page');
     await waitFor(() => expect(document.activeElement).toBe(main().getByLabelText(/^K_pk W\/m²/)));
+  }, 60000);
+});
+
+describe('basic survey: façade part against the ground (ISSO 82.1 §8.4)', () => {
+  it('enters H1 and the floor, calculates the survey and takes it over without its geometry', async () => {
+    const user = userEvent.setup();
+    const survey = structuredClone(survey1930) as Record<string, any>;
+    survey.envelope.surfaces.push({ id: 'kelderwand', element: 'facade', boundary: { kind: 'outdoor' }, orientation: 'north',
+      grossAreaM2: 12, cavity: false, insulation: { kind: 'none_or_unknown' }, sourceReference: 'opname' });
+    // The survey makes the floor a heated basement (test: a_facade_part_against_the_ground_calculates_with_its_floor_in_every_edition).
+    surveyAnswer = (body) => {
+      const surfaces = ((body as { survey?: { envelope?: { surfaces?: Array<Record<string, unknown>> } } } | null)?.survey?.envelope?.surfaces) ?? [];
+      const wall = surfaces.find((surface) => surface.id === 'kelderwand');
+      const answer = structuredClone(survey1930Output) as Record<string, any>;
+      if (wall?.depthBelowGroundM != null) {
+        answer.appliedDefaults.push({ path: 'envelope.surfaces[6]', rule: 'heated_basement_from_ground_wall',
+          source: 'ISSO 82.1 7e druk §8.4; NTA 8800 8.3.3.2', value: 'z 1.20 m' });
+      }
+      return answer;
+    };
+    projectAnswer = () => terracedOutput;
+    await openProject(user, { ...terracedProject, basisopname: { kind: 'residential', survey } });
+
+    await openStep(user, /^Basic survey/, 'Thermal envelope');
+    const wall = within(main().getByRole('group', { name: 'kelderwand' }));
+    await user.selectOptions(wall.getByLabelText('Boundary'), 'ground');
+    // A façade part against the ground has no orientation of its own; it goes with its floor (H1).
+    await typeNumber(user, wall.getByLabelText(/^Height H1/), '1,2');
+    const floor = wall.getByLabelText('Floor this façade part against the ground belongs to') as HTMLSelectElement;
+    expect([...floor.options].map((option) => option.value).filter(Boolean)).toEqual(['vloer']);
+    await user.selectOptions(floor, 'vloer');
+
+    await openStep(user, /^Basic survey/);
+    await user.click(main().getByRole('button', { name: 'Calculate survey' }));
+    await waitFor(() => expect(requests.some((request) => request.url.endsWith('/opname/residential'))).toBe(true));
+    const sent = requests.filter((request) => request.url.endsWith('/opname/residential')).slice(-1)[0].body as Record<string, any>;
+    expect(sent.survey.envelope.surfaces.find((surface: { id: string }) => surface.id === 'kelderwand')).toMatchObject({
+      element: 'facade', boundary: { kind: 'ground' }, depthBelowGroundM: 1.2, groundFloorId: 'vloer' });
+
+    await user.click(main().getByRole('button', { name: 'Outcome & defaults' }));
+    expect(await main().findByText('envelope.surfaces[6]')).toBeInTheDocument();
+    expect(main().getByText(/ISSO 82\.1 7e druk §8\.4; NTA 8800 8\.3\.3\.2/)).toBeInTheDocument();
+
+    // The takeover keeps the project's own geometry: the heated basement is entered on the project's ground floor.
+    await user.click(await main().findByRole('button', { name: 'Take over into project model' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByText('geometry and areas stay those of the project model (zones, surfaces, windows)')).toBeInTheDocument();
+    await user.click(dialog.getByRole('button', { name: 'Take over into draft' }));
+    const before = structuredClone(lastNta()!.groundFloors);
+    await applyDraft(user);
+    expect(lastNta()!.groundFloors).toEqual(before);
   }, 60000);
 });
