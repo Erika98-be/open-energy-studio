@@ -8,6 +8,8 @@
 
 Programma 0.2.0 · Rekenkern 0.3.0 · Handleiding gestempeld voor rekenkern 0.3.0.
 
+De tak `nta8800-kernel` is verder dan deze uitgave: daar staat rekenkern **0.4.0** (onuitgebracht, handleiding gestempeld voor 0.4.0). De wijzigingen staan onder "Onuitgebracht" in de releasenotes.
+
 **Uitgaven:**
 - NTA 8800:2025+C1:2026 (registreerbaar);
 - NTA 8800:2024 met INT-V1:2024;
