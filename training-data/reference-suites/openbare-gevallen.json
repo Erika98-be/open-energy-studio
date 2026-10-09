@@ -1,6 +1,6 @@
 {
   "suiteId": "openbare-gevallen",
-  "description": "Herbouwde openbare BENG-rapporten A–J. Verwacht is de vastgelegde uitkomst van deze rekenkern (regressie, banden als in crates/nta8800-core/tests/public_comparison.rs); de gepubliceerde waarden staan er ter vergelijking bij en beslissen niets. Geen officiële referentietoets.",
+  "description": "Herbouwde openbare BENG-rapporten A–K. Verwacht is de vastgelegde uitkomst van deze rekenkern (regressie, banden als in crates/nta8800-core/tests/public_comparison.rs); de gepubliceerde waarden staan er ter vergelijking bij en beslissen niets. Geen officiële referentietoets.",
   "cases": [
     {
       "caseId": "openbaar-a-2025c1",
@@ -659,6 +659,58 @@
           "path": "beng3",
           "value": 30.1,
           "source": "rapport J (Uniec 3.0.19.4, 07-04-2022, NTA 8800:2020+A1)"
+        }
+      ]
+    },
+    {
+      "caseId": "openbaar-k-2022",
+      "normVersion": "2022",
+      "projectFile": "../nta8800-public-comparison-k.json",
+      "source": {
+        "publisher": "openbaar BENG-rapport K (sporthal met kantoor en bijeenkomstfunctie), bijlage bij een ter-inzage-legging",
+        "documentId": "https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-19434/1/bijlage/Bijlage_17_2022-4978_Rapportage_BENG_pro_formapdf_fc10d433-2427-ef11-844c-005056a12c84.pdf",
+        "edition": "Uniec 3.1.5.0, 11-12-2022",
+        "usePermission": "openbaar gepubliceerd; alleen getallen overgenomen, geen rapporttekst",
+        "independentReviewer": "geen: regressie op de eigen uitkomst van de rekenkern (docs/nta8800-vergelijking-openbare-rapporten.md)"
+      },
+      "expected": [
+        {
+          "path": "beng1",
+          "value": 33.25,
+          "unit": "kWh/m2.year",
+          "normReference": "BENG 1, energiebehoefte (5.3)",
+          "absoluteTolerance": 0.05
+        },
+        {
+          "path": "beng2",
+          "value": -0.16,
+          "unit": "kWh/m2.year",
+          "normReference": "BENG 2, primair fossiel energiegebruik (5.2)",
+          "absoluteTolerance": 0.05
+        },
+        {
+          "path": "beng3",
+          "value": 100.1,
+          "unit": "%",
+          "normReference": "BENG 3, aandeel hernieuwbare energie (5.4)",
+          "absoluteTolerance": 0.15
+        }
+      ],
+      "published": [
+        {
+          "path": "beng1",
+          "value": 29.68,
+          "source": "rapport K (Uniec 3.1.5.0, 11-12-2022, NTA 8800:2022)"
+        },
+        {
+          "path": "beng2",
+          "value": -0.79,
+          "source": "rapport K (Uniec 3.1.5.0, 11-12-2022, NTA 8800:2022)"
+        },
+        {
+          "path": "beng3",
+          "value": 101.0,
+          "source": "rapport K (Uniec 3.1.5.0, 11-12-2022, NTA 8800:2022)"
         }
       ]
     }

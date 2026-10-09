@@ -1175,8 +1175,8 @@ mod tests {
         assert!(failing.is_empty(), "{failing:?}");
         assert!(report.numeric_comparison_passed);
         assert_eq!(report.comparison_verdict, "passed");
-        assert_eq!(report.compared_cases, 25);
-        assert_eq!(report.cases.len(), 265);
+        assert_eq!(report.compared_cases, 26);
+        assert_eq!(report.cases.len(), 266);
         // The public cases and RVO compare; every ISSO 54 deeltest is
         // pending (its results document is not in hand) and calculates.
         for case in &report.cases {
