@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Review 26: overnemen van vloeren op de grond (geen rekenwijziging)
+
+- **Volgorde is geen verschil.** Het venster vergeleek de waarden van de opname en het project als tekst, zodat dezelfde kruipruimte, randkoudebruggen of verwarmde kelder met de leden in een andere volgorde als "het project heeft een andere waarde" verscheen. De vergelijking negeert nu de volgorde.
+- **ΔU_for van de adviseur blijft.** De opname neemt ΔU_for van een verwarmde kelder niet mee (de kern leidt die af uit het projectmodel, 8.38). Had de adviseur bij de projectvloer zelf een ΔU_for ingevuld, dan gaf dat een schijnconflict, en overnemen wiste die waarde. Die waarde blijft nu staan en telt niet als verschil.
+- **Eén opnamevloer per projectvloer.** Twee opnamevloeren konden aan dezelfde projectvloer gekoppeld worden; de tweede overschreef dan de eerste. Een projectvloer die al bij een opnamevloer hoort, is nu in de keuzelijst van de andere uitgeschakeld (met de naam van die vloer), en een dubbele koppeling wordt genegeerd.
+- **Bronvermelding.** Een vloer met de id `begane-grondvloer` werd als al vermeld gezien als de bron al `basisopname, vloer begane-grondvloer-2` noemde. De herkenning vergelijkt nu de hele vermelding.
+- **Leesbare namen.** De regels in het venster noemen de waarde in gewone taal ("omtrek P (m)", "verwarmde kelder") in plaats van de veldnaam.
+- **Gecontroleerd en in orde:** de koppeling volgt dezelfde vloeren als de kern (grens grond, geen wand of dak); id's van opnamevloeren zijn uniek (`survey_item_id_duplicate`); de waarden hebben in opname en project dezelfde vorm en eenheid; overnemen gaat via het concept en is ongedaan te maken; een opname die niet rekent, biedt geen overname aan.
+- **Toetsing.** Vijf nieuwe tests in `src/__tests__/survey-takeover-ground.test.tsx`.
+
 ### 9 oktober 2026 — Overnemen in projectmodel neemt vloeren op de grond per waarde mee (geen rekenwijziging)
 
 - **Wat ontbrak.** "Overnemen in projectmodel" laat de geometrie bij het projectmodel, en nam daardoor ook de vloergegevens van de opname niet mee: de omtrek P, een kruipruimte of onverwarmde kelder, en de verwarmde kelder die de opname sinds vandaag maakt van een geveldeel tegen de grond (ISSO 82.1 §8.4, NTA 8800 8.3.3.2). De adviseur moest ze opnieuw invoeren.
