@@ -357,3 +357,37 @@ describe('basic survey: façade part against the ground (ISSO 82.1 §8.4)', () =
     expect(lastNta()!.groundFloors).toEqual(before);
   }, 60000);
 });
+
+describe('a wall to the ground in the project (8.3)', () => {
+  it('sets a wall\'s boundary to the ground, shows ground_surface_not_floor and goes to the envelope', async () => {
+    const user = userEvent.setup();
+    // The kernel refuses a wall or roof to the ground on its boundary (test: a_wall_or_roof_to_the_ground_is_refused).
+    projectAnswer = (block) => {
+      const zones = (projectBodies().slice(-1)[0] as { zones?: Array<{ surfaces: Array<{ type: string; thermalBoundary?: string }> }> }).zones ?? [];
+      const wall = zones[0]?.surfaces.findIndex((surface) => surface.type !== 'floor' && surface.thermalBoundary === 'ground') ?? -1;
+      return block && wall >= 0 ? {
+        ...terracedOutput, status: 'incomplete', derivedInput: null, performance: null,
+        gaps: [{ code: 'ground_surface_not_floor', path: `zones[0].surfaces[${wall}].thermalBoundary` }],
+      } : terracedOutput;
+    };
+    window.localStorage.setItem('oes.inspector.open', '1');
+    await openProject(user, terracedProject);
+    window.localStorage.setItem('oes.inspector.open', '1');
+
+    await openStep(user, /^Building/, 'Envelope & windows');
+    const runs = projectBodies().length;
+    await user.click(within(main().getByRole('table', { name: 'Envelope & windows' })).getAllByText(/Gevel N/)[0]);
+    const inspector = within(screen.getByRole('complementary', { name: 'Context' }));
+    await user.selectOptions(inspector.getByLabelText('Thermal boundary'), 'ground');
+    await kernelRuns(runs + 1);
+    await kernelSettled();
+    expect((projectBodies().slice(-1)[0] as { zones: Array<{ surfaces: Array<{ id: string; thermalBoundary?: string }> }> })
+      .zones[0].surfaces[0]).toMatchObject({ id: 'wall-N', thermalBoundary: 'ground' });
+
+    await openStep(user, /^Check/, 'Check overview');
+    expect(await main().findByText(/Only a floor can border the ground/)).toBeInTheDocument();
+    await user.click(await main().findByRole('button', { name: /Go to/ }));
+    expect(within(nav()).getByRole('button', { name: /^Building/ })).toHaveAttribute('aria-current', 'page');
+    expect(within(nav()).getByRole('button', { name: 'Envelope & windows' })).toHaveAttribute('aria-current', 'page');
+  }, 60000);
+});
