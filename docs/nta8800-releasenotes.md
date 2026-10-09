@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Review 23: een wand of dak aan de grond wordt geweigerd
+
+- **Wand of dak met begrenzing "grond".** Hoofdstuk 8.3 kent alleen een grondroute voor vloeren. Wanden onder het maaiveld zijn de wanden van een verwarmde kelder (8.3.3.2, 2025+C1 p. 255) en worden bij de kelder van de vloer ingevoerd. Een wand- of dakvlak met begrenzing grond kreeg tot nu toe de vloerformules. Naast een verwarmde kelder telde het dubbel mee in H_g en in A_ls. De kern weigert zo'n vlak nu met `ground_surface_not_floor` op de begrenzing van het vlak ("Ga naar" leidt naar de gebouwschil). Een project dat zo'n vlak had, rekent pas weer als de begrenzing is aangepast. Test: `a_wall_or_roof_to_the_ground_is_refused`.
+- **Formulier.** Het veld voor ΣA_T;bw zegt nu dat de oppervlakte in A_ls en in 8.38 telt, en dat 8.39 met z × P rekent.
+- **Gecontroleerd en in orde:** de bronvermeldingen per uitgave (`cite`, `leak_once`: de sleutels botsen niet), het EP-Online-overzicht in een oudere uitgave, en de kelderwanden in A_ls bij meer zones en bij een onverwarmde kelder.
+
 ### 9 oktober 2026 — Bronvermeldingen noemen de doorgerekende uitgave (geen rekenwijziging)
 
 - **Wat was er mis.** In een berekening in een oudere uitgave noemden `chapter5Source`, `chapter9Source`, `draftSource` en `consultationSource` de paragraaf- en paginanummers van NTA 8800:2025+C1:2026, bijvoorbeeld "NTA 8800:2025+C1:2026, §9.3 … (p. 294–297)" bij een 2020+A1-berekening. De opname noemde bij H2 onder 2020+A1 de bron van 2022, en bij f_BACS onder een oudere uitgave de 2025+C1-paragraaf als bron.
