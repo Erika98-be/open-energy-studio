@@ -5008,6 +5008,55 @@ mod tests {
         assert_eq!(result.status, "incomplete");
     }
 
+    /// Review 21: a declared K_pk between 300 and 400 W/m² calculates on the
+    /// project route and reaches the registration check as a plausibility
+    /// warning on the field; above 400 W/m² the kernel refuses it.
+    #[test]
+    fn declared_pv_peak_power_warns_on_the_project_route() {
+        let with_peak = |peak: f64| {
+            let mut value: Value = serde_json::from_str(include_str!(
+                "../../../training-data/nta8800-example-terraced-dwelling.json"
+            ))
+            .unwrap();
+            value["ntaCalculation"]["pvSystems"][0]["peakPower"] = serde_json::json!({
+                "method": "declared_specific",
+                "peakPowerWPerM2": peak,
+                "panelAreaM2": 10.0
+            });
+            value["registration"] = serde_json::json!({});
+            assess_project_performance(&value)
+        };
+        let warned = |result: &ProjectPerformanceAssessment| {
+            result
+                .registration
+                .as_ref()
+                .unwrap()
+                .plausibility
+                .iter()
+                .any(|issue| {
+                    issue.code == "plausibility_pv_peak_power"
+                        && issue.path == "pvSystems[0].peakPower.peakPowerWPerM2"
+                })
+        };
+        let plausible = with_peak(290.0);
+        assert!(plausible.performance.is_some(), "{:?}", plausible.gaps);
+        assert!(!warned(&plausible));
+        let high = with_peak(310.0);
+        assert!(high.performance.is_some(), "{:?}", high.gaps);
+        assert!(warned(&high));
+        let refused = with_peak(401.0);
+        assert_eq!(refused.status, "invalid");
+        assert!(
+            refused
+                .gaps
+                .iter()
+                .any(|gap| gap.code == "pv_peak_power_invalid"
+                    && gap.path.ends_with("pvSystems[0].peakPower.peakPowerWPerM2")),
+            "{:?}",
+            refused.gaps
+        );
+    }
+
     /// Omgevingsregeling art. 5.13a lid 1: the label elements the calculation
     /// supplies, and the WLC-GWP taken from the registration.
     #[test]

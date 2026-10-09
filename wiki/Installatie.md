@@ -9,7 +9,7 @@ Bij elke release horen een leveringsdocument, `SHA256SUMS` en de handleiding als
 ## Zelf bouwen
 
 Vereist:
-- Node.js 20 of nieuwer (CI gebruikt 20, de releasebuilds 22);
+- Node.js 20 of nieuwer (CI en de releasebuilds gebruiken 22);
 - Rust 1.77.2 of nieuwer voor de rekenkern; de desktop-app en de API/MCP-service vragen Rust 1.88;
 - Tauri 2;
 - op Linux ook `libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf`.
