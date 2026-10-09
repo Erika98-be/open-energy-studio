@@ -238,7 +238,7 @@ CASES = [
     ),
     (
         "EPW201e",
-        23,
+        24,
         [
             setp(f"{NTA}/emission/system", "other_or_unknown"),
             # Only the emitter, the NEN-EN 215 declaration and the missing
@@ -282,6 +282,10 @@ CASES = [
 # EP-W003c: U_W+shut = 1/(1/1,8 + 0,2) = 1,324 (8.23); effective
 #   0,5.1,8 + 0,5.1,324 = 1,562 -> 1,6 (8.22, f_shut;with 0,5). Only the extra
 #   resistance is varied; the roller shutter is not entered as sun shading.
+#   Open interpretation (review 19, R2), to confirm against ISSO 54 v5.0: the
+#   "gekleurd rolluik" could also be movable shading. That alternative moves
+#   BENG 2 by about +12 % and TOjuli from 8,91 to 2,28. To try it, add:
+#     setp(f"{NTA}/windowSolar/movableShading", {"device": {"kind": "external_roller_shutter", "colour": "other"}, "control": "manual_residential", "sourceReference": "ISSO 54 v2.0 EP-W003c p. 7: gekleurd rolluik"})
 CASES += [
     ("EPW003a", 7, windows("uValue", 2.7)),
     ("EPW003c", 7, windows("uValue", 1.6)),
@@ -292,11 +296,11 @@ CASES += [
 # EP-W015a: no penetrations, no pipe. EP-W015b: one insulated pipe running
 # through both storeys (table 7.1 footnote a).
 CASES += [
-    ("EPW015a", 18, [setp(f"{NTA}/verticalPipes", [])]),
+    ("EPW015a", 19, [setp(f"{NTA}/verticalPipes", [])]),
     (
         "EPW015b",
-        18,
-        [setp(f"{NTA}/verticalPipes", [{"id": "leiding-1", "storeys": 2, "insulated": True, "sourceReference": "ISSO 54 v2.0 EP-W015b p. 18: 1 geisoleerde verticale leiding per bouwlaag"}])],
+        19,
+        [setp(f"{NTA}/verticalPipes", [{"id": "leiding-1", "storeys": 2, "insulated": True, "sourceReference": "ISSO 54 v2.0 EP-W015b p. 19: 1 geisoleerde verticale leiding per bouwlaag"}])],
     ),
 ]
 
@@ -325,9 +329,9 @@ def door(u_value, g_value):
 
 
 CASES += [
-    ("EPW016a", 18, [door(3.4, 0.0)]),
-    ("EPW016b", 18, [door(3.1, round(0.7 * 0.5 / 0.75, 4))]),
-    ("EPW016c", 18, [door(2.9, round(0.7 * 0.8 / 0.75, 4))]),
+    ("EPW016a", 19, [door(3.4, 0.0)]),
+    ("EPW016b", 19, [door(3.1, round(0.7 * 0.5 / 0.75, 4))]),
+    ("EPW016c", 19, [door(2.9, round(0.7 * 0.8 / 0.75, 4))]),
 ]
 
 
@@ -341,12 +345,12 @@ def residential_screen(device):
 
 
 CASES += [
-    ("EPW012a", 15, [residential_screen({"kind": "external_screen", "colour": "dark"})]),
-    ("EPW012b", 15, rotate("SW") + [residential_screen({"kind": "external_venetian_blind", "colour": "white"})]),
-    ("EPW012c", 15, rotate("W") + [residential_screen({"kind": "external_screen", "colour": "other"})]),
-    ("EPW012d", 15, rotate("SE") + [residential_screen({"kind": "internal_metallised_fabric"})]),
-    ("EPW012e", 15, rotate("E") + [residential_screen({"kind": "drop_arm_awning"})]),
-    ("EPW012f", 15, [residential_screen({"kind": "folding_arm_awning"})]),
+    ("EPW012a", 16, [residential_screen({"kind": "external_screen", "colour": "dark"})]),
+    ("EPW012b", 16, rotate("SW") + [residential_screen({"kind": "external_venetian_blind", "colour": "white"})]),
+    ("EPW012c", 16, rotate("W") + [residential_screen({"kind": "external_screen", "colour": "other"})]),
+    ("EPW012d", 16, rotate("SE") + [residential_screen({"kind": "internal_metallised_fabric"})]),
+    ("EPW012e", 16, rotate("E") + [residential_screen({"kind": "drop_arm_awning"})]),
+    ("EPW012f", 16, [residential_screen({"kind": "folding_arm_awning"})]),
 ]
 
 
@@ -883,7 +887,7 @@ def utility_heat_pump(test_id, source, supply, page):
 
 UTILITY_CASES = [
     ("EPU001", 44, []),
-    *[(f"EPU002{letter}", 44, function(letter)) for letter in "abcdefghi"],
+    *[(f"EPU002{letter}", 45, function(letter)) for letter in "abcdefghi"],
     # EP-U002j: 30 % office, 70 % other assembly in one zone (p. 45).
     (
         "EPU002j",
@@ -1159,7 +1163,7 @@ UTILITY_CASES += [
     # insulation within 10 cm: table 9.8/9.10 row (2022 9.3.3.7).
     (
         "EPU301a",
-        46,
+        47,
         [
             setp(
                 f"{NTA}/emission/edition2023/kind",
@@ -1171,7 +1175,7 @@ UTILITY_CASES += [
     # only matters for a calculated pump; the boiler pump is in 9.85.
     (
         "EPU302a",
-        46,
+        47,
         [
             setp(f"{NTA}/distributionSystem/actualPipeLengthM", 80.0),
             setp(f"{NTA}/distributionSystem/unheatedPipeLengthM", 0.0),
@@ -1181,7 +1185,7 @@ UTILITY_CASES += [
     # 2000 (p. 46).
     (
         "EPU302b",
-        46,
+        47,
         [
             setp(f"{NTA}/constructionYear", 1950),
             setp(f"{VENT}/constructionYear", 1950),
@@ -1233,7 +1237,7 @@ U502A = function("d") + [
             "unheatedLengthM": 0.0,
             "floorCount": 2,
             "pump": {"control": "uncontrolled_or_unknown"},
-            "sourceReference": "ISSO 54 v2.0 EP-U502a p. 49: circulatie, forfaitaire lengte, 35/32 mm, 25 mm isolatie, kleppen en beugels geisoleerd, pomp onbekend zonder regeling",
+            "sourceReference": "ISSO 54 v2.0 EP-U502a p. 48: circulatie, forfaitaire lengte, 35/32 mm, 25 mm isolatie, kleppen en beugels geisoleerd, pomp onbekend zonder regeling",
         },
     ),
     setp(f"{HW}/storage", [vessel(200.0, {"method": "label", "label": "c"}, 3, False)]),
@@ -1282,10 +1286,10 @@ UTILITY_CASES += [
     # EP-U501a: some draw-off points further than 3 m (p. 49; table 13.3).
     (
         "EPU501a",
-        49,
-        [setp(f"{HW}/emission", {"method": "utility", "meanLengthM": 5.0, "sourceReference": "ISSO 54 v2.0 EP-U501a p. 49: sommige tappunten verder dan 3 m (tabel 13.3, rij > 3 m)"})],
+        48,
+        [setp(f"{HW}/emission", {"method": "utility", "meanLengthM": 5.0, "sourceReference": "ISSO 54 v2.0 EP-U501a p. 48: sommige tappunten verder dan 3 m (tabel 13.3, rij > 3 m)"})],
     ),
-    ("EPU502a", 49, U502A),
+    ("EPU502a", 48, U502A),
     # EP-U502b: 80 m circulation, L_max 40 m (p. 49); L_max has no input for
     # the circulation pump (13.39).
     ("EPU502b", 49, U502A + [setp(f"{HW}/circulation/lengthM", 80.0)]),
@@ -1385,27 +1389,27 @@ def boiler_temperature(supply, ret):
 CASES += [
     (
         "EPW201b",
-        23,
+        24,
         [
-            radiators("EP-W201b", "radiators_or_convectors", "two_pipe30_k", "outer_wall", "network_with_override_and_adaptive", why="ISSO 54 v2.0 EP-W201b p. 23: radiatoren tegen buitenwand, 55/47, netwerk met handmatig overrulen en adaptief, geen waterzijdige inregeling"),
+            radiators("EP-W201b", "radiators_or_convectors", "two_pipe30_k", "outer_wall", "network_with_override_and_adaptive", why="ISSO 54 v2.0 EP-W201b p. 24: radiatoren tegen buitenwand, 55/47, netwerk met handmatig overrulen en adaptief, geen waterzijdige inregeling"),
             temperature_class("55_47"),
         ]
         + boiler_temperature(55, 47),
     ),
     (
         "EPW201c",
-        23,
+        24,
         [
-            radiators("EP-W201c", "fan_assisted_radiators_or_convectors", "fan_assisted", "unknown", "individual_per_room", fans=6, why="ISSO 54 v2.0 EP-W201c p. 23: convectoren met boosterventilatoren, 90/70, individueel per ruimte, geen waterzijdige inregeling"),
+            radiators("EP-W201c", "fan_assisted_radiators_or_convectors", "fan_assisted", "unknown", "individual_per_room", fans=6, why="ISSO 54 v2.0 EP-W201c p. 24: convectoren met boosterventilatoren, 90/70, individueel per ruimte, geen waterzijdige inregeling"),
             temperature_class("90_70"),
         ]
         + boiler_temperature(90, 70),
     ),
     (
         "EPW201d",
-        23,
+        24,
         [
-            radiators("EP-W201d", "fan_assisted_radiators_or_convectors", "fan_assisted", "unknown", "individual_per_room", certified=True, fans=6, why="ISSO 54 v2.0 EP-W201d p. 23: convectoren met boosterventilatoren, 50/42, individueel per ruimte, regeling volgens NEN-EN 215 en NEN-EN 15500, geen waterzijdige inregeling"),
+            radiators("EP-W201d", "fan_assisted_radiators_or_convectors", "fan_assisted", "unknown", "individual_per_room", certified=True, fans=6, why="ISSO 54 v2.0 EP-W201d p. 24: convectoren met boosterventilatoren, 50/42, individueel per ruimte, regeling volgens NEN-EN 215 en NEN-EN 15500, geen waterzijdige inregeling"),
             temperature_class("50_42"),
         ]
         + boiler_temperature(50, 42),
@@ -1468,7 +1472,7 @@ CASES += [
     # AC fans (p. 19).
     (
         "EPW101c",
-        19,
+        20,
         [
             unit("b1", "luka_a_b_c"),
             NO_PASSIVE,
@@ -1482,13 +1486,13 @@ CASES += [
     # insulated duct 1 m, central, bypass 70 % (p. 21).
     (
         "EPW101r",
-        21,
+        20,
         [
             unit(
                 "d4a",
                 "luka_a_b_c",
                 recovery(
-                    declared_recovery(0.85, "en13141_7", "ISSO 54 v2.0 EP-W101r p. 21: WTW-verklaring 85 %, dissipatie verdisconteerd"),
+                    declared_recovery(0.85, "en13141_7", "ISSO 54 v2.0 EP-W101r p. 20: WTW-verklaring 85 %, dissipatie verdisconteerd"),
                     {"kind": "partial", "fraction": 0.7},
                     length=1.0,
                 ),
@@ -1538,7 +1542,14 @@ CASES += [
         ],
     ),
     # EP-W102a/b: C1 with preheating of the natural supply (p. 21-22; 11.123,
-    # 11.124).
+    # 11.124). EP-W102b (review 19, R1): the test's q_v;inst 60 dm3/s is the
+    # installed capacity of 11.62, which the kernel also uses for the design
+    # flow (11.55/11.58), not only for the preheated share of 11.128; the
+    # preheated flow itself requires an installed natural capacity. So
+    # EP-W102b also differs from EP-W102a through the capacity: against C1
+    # about +6,4 kWh/m2 BENG 2 from the capacity and +1,3 from the preheating.
+    # The kernel has no route to give 60 dm3/s to the preheating share only;
+    # this follows the test text literally and is an open interpretation.
     (
         "EPW102a",
         21,
@@ -1550,18 +1561,18 @@ CASES += [
     ),
     (
         "EPW102b",
-        22,
+        21,
         [
             unit("c1", "luka_a_b_c"),
             NO_PASSIVE,
-            installed(60.0, "ISSO 54 v2.0 EP-W102b p. 22: q_v;inst 60 dm3/s"),
+            installed(60.0, "ISSO 54 v2.0 EP-W102b p. 21: q_v;inst 60 dm3/s"),
             setp(f"{VENT}/installedCapacity/naturalSupplyDm3PerS", 60.0),
             setp(
                 f"{VENT}/grillePreheating",
                 {
                     "control": {"method": "specified", "maxPowerWPerDm3PerS": 10.0, "maxTemperatureRiseK": 5.0, "switchOnBelowC": 18.0, "maxSupplyTemperatureC": 15.0},
                     "preheatedDesignFlowM3PerH": 108.0,
-                    "sourceReference": "ISSO 54 v2.0 EP-W102b p. 22: 50 % voorverwarmd (30 dm3/s), sprong 5 K, 10 W/(dm3/s), aan onder 18 C, inblaas max 15 C",
+                    "sourceReference": "ISSO 54 v2.0 EP-W102b p. 21: 50 % voorverwarmd (30 dm3/s), sprong 5 K, 10 W/(dm3/s), aan onder 18 C, inblaas max 15 C",
                 },
             ),
         ],
@@ -1737,7 +1748,7 @@ CASES += [
     # the reference (kitchen and bathroom 1).
     (
         "EPW406n",
-        38,
+        39,
         [
             setp(f"{HW}/connectedTaps", {"bathrooms": 1, "kitchens": 1}),
             setp(
@@ -1748,7 +1759,7 @@ CASES += [
                         "emission": bathroom_emission(3.0),
                         "generator": {"kind": "gas_appliance", "appliance": "water_heater_gaskeur_cw", "measuredClass": "class4"},
                         "connectedTaps": {"bathrooms": 1, "kitchens": 0},
-                        "equipmentReference": "ISSO 54 v2.0 EP-W406n p. 38: gesloten gastoestel met Gaskeur, CW4",
+                        "equipmentReference": "ISSO 54 v2.0 EP-W406n p. 39: gesloten gastoestel met Gaskeur, CW4",
                     }
                 ],
             ),
@@ -1767,7 +1778,7 @@ CASES += [
     # water, 2 kW (p. 39). The heating supply stays 45 C (45/40).
     (
         "EPW406v",
-        39,
+        40,
         EXHAUST_C1
         + exhaust_hot_water(True)
         + [heat_pump("EP-W406v", "exhaust_air", 45.0), renewable("EP-W406v", True, exhaust=True)],
@@ -1804,13 +1815,13 @@ CASES += [
     # (p. 24; 9.91 with P_H;gen 50 kW, f_gebouw with 4 x 96 m2).
     (
         "EPW202f",
-        24,
+        25,
         APARTMENT
         + [
             setp(f"{BOILER}/role", "collective"),
             setp(f"{BOILER}/location", "outside_thermal_boundary"),
-            setp(f"{GEN}/auxiliary", {"electricallyConnectedDevices": 1, "nominalPowerKw": 50.0, "sourceReference": "ISSO 54 v2.0 EP-W202f p. 24: collectieve HR107, 50 kW"}),
-            setp(f"{NTA}/collectiveConnection", {"connectedUsableAreaM2": BUILDING_AREA, "sourceReference": "ISSO 54 v2.0 EP-W202f p. 24: 4 woningen van 96 m2"}),
+            setp(f"{GEN}/auxiliary", {"electricallyConnectedDevices": 1, "nominalPowerKw": 50.0, "sourceReference": "ISSO 54 v2.0 EP-W202f p. 25: collectieve HR107, 50 kW"}),
+            setp(f"{NTA}/collectiveConnection", {"connectedUsableAreaM2": BUILDING_AREA, "sourceReference": "ISSO 54 v2.0 EP-W202f p. 25: 4 woningen van 96 m2"}),
             setp(f"{NTA}/distributionSystem/installation", "collective"),
             setp(f"{NTA}/distributionSystem/connectedStoreys", 4),
             remove(f"{NTA}/distributionSystem/unheatedPipeLengthM"),
@@ -1844,7 +1855,9 @@ CASES += [
 # of the test belongs to external heat (§13.4.2) and is not entered.
 W402A = APARTMENT + [
     setp(f"{HW}/collective", {"buildingUsableFloorAreaM2": BUILDING_AREA, "sourceReference": "ISSO 54 v2.0 EP-W402 p. 33: 4 woningen van 96 m2"}),
-    setp(f"{HW}/storage", [vessel(1000.0, {"method": "label", "label": "c"}, 2, False)]),
+    # The test gives no vessel label (p. 33): label unknown, produced from 2018
+    # (the building of EP-W001), which 13.59 takes as label C; review 19.
+    setp(f"{HW}/storage", [vessel(1000.0, {"method": "unknown_label", "producedFrom2018": True}, 2, False)]),
     hw_generator({"kind": "indirect_boiler", "boiler": "hr100_or104", "oil": False, "insideBoundary": False, "alsoSpaceHeating": False}),
     setp(
         f"{HW}/circulation",
@@ -1856,17 +1869,17 @@ W402A = APARTMENT + [
             "floorCount": 4,
             "connectedDwellings": 4,
             "pump": {"control": "uncontrolled_or_unknown"},
-            "sourceReference": "ISSO 54 v2.0 EP-W402a p. 33: circulatie alleen tapwater, 28/25, 20 mm isolatie, kleppen en beugels geisoleerd, pomp onbekend zonder regeling",
+            "sourceReference": "ISSO 54 v2.0 EP-W402a p. 34: circulatie alleen tapwater, 28/25, 20 mm isolatie, kleppen en beugels geisoleerd, pomp onbekend zonder regeling",
         },
     ),
 ]
 CASES += [
-    ("EPW402a", 33, W402A),
-    ("EPW402b", 33, W402A + [remove(f"{HW}/circulation/unheatedLengthM")]),
-    ("EPW402c", 33, W402A + [setp(f"{HW}/circulation/unheatedLengthM", 20.0), setp(f"{HW}/circulation/fittingsInsulated", False)]),
+    ("EPW402a", 34, W402A),
+    ("EPW402b", 34, W402A + [remove(f"{HW}/circulation/unheatedLengthM")]),
+    ("EPW402c", 34, W402A + [setp(f"{HW}/circulation/unheatedLengthM", 20.0), setp(f"{HW}/circulation/fittingsInsulated", False)]),
     (
         "EPW402d",
-        33,
+        34,
         W402A
         + [
             remove(f"{HW}/circulation/unheatedLengthM"),
@@ -1918,20 +1931,20 @@ def plot_obstruction(test_id, distance, height):
             {
                 "windowId": window_id,
                 "obstruction": obstruction,
-                "sourceReference": f"ISSO 54 v2.0 {test_id} p. 13: x {distance} m, h {height} m, raammidden {centre} m: h_b = {round(relative, 4)}",
+                "sourceReference": f"ISSO 54 v2.0 {test_id} p. 14: x {distance} m, h {height} m, raammidden {centre} m: h_b = {round(relative, 4)}",
             }
         )
     return setp(f"{NTA}/windowObstructions", entries)
 
 
 CASES += [
-    ("EPW010a", 13, [plot_obstruction("EP-W010a", 0.6, 2.7)]),
-    ("EPW010b", 13, [plot_obstruction("EP-W010b", 0.6, 5.4)]),
-    ("EPW010c", 13, [plot_obstruction("EP-W010c", 1.2, 2.7)]),
-    ("EPW010d", 13, [plot_obstruction("EP-W010d", 1.2, 5.4)]),
+    ("EPW010a", 14, [plot_obstruction("EP-W010a", 0.6, 2.7)]),
+    ("EPW010b", 14, [plot_obstruction("EP-W010b", 0.6, 5.4)]),
+    ("EPW010c", 14, [plot_obstruction("EP-W010c", 1.2, 2.7)]),
+    ("EPW010d", 14, [plot_obstruction("EP-W010d", 1.2, 5.4)]),
     # EP-W010e: full obstruction for all windows (17.3.2e); the cooling
     # conditions of table 17.14 are not stated, so table 17.5 applies.
-    ("EPW010e", 13, [setp(f"{NTA}/windowSolar/obstruction", {"method": "full"})]),
+    ("EPW010e", 14, [setp(f"{NTA}/windowSolar/obstruction", {"method": "full"})]),
 ]
 
 
@@ -2077,6 +2090,13 @@ def side_all(test_id, depth):
     )
 
 
+# 17.3.2 situation a (2022 p. 674): an obstruction with a relative width b_b
+# of 3,73 or more counts as minimal obstruction; only b_b < 3,73 is a side
+# obstruction (situation d). Review 19 (D3): the far windows of EP-W009c/d
+# (b_b 10,0 and 5,0) were encoded as side obstruction.
+MIN_SIDE_WIDTH = 3.73
+
+
 def east_obstruction(test_id, depth):
     """Fig. 5: one obstruction at the east edge, 0,5 m from the right
     windows; the far point is 2,0 m from the right and 6,0 m from the left
@@ -2085,8 +2105,11 @@ def east_obstruction(test_id, depth):
     for windows, distance in ((RIGHT, 2.0), (LEFT, 6.0)):
         relative = round(distance / depth, 4)
         for window_id in windows:
-            entries.append((window_id, {"method": "side_obstruction", "side": "left", "relativeWidth": relative}, f"zijbelemmering oostzijde, diepte {depth} m: b_b = {distance}/{depth} = {relative}"))
-    return per_window(test_id, 12, entries)
+            if relative >= MIN_SIDE_WIDTH:
+                entries.append((window_id, {"method": "minimal"}, f"zijbelemmering oostzijde, diepte {depth} m: b_b = {distance}/{depth} = {relative} >= 3,73, minimale belemmering (17.3.2 situatie a, 2022 p. 674)"))
+            else:
+                entries.append((window_id, {"method": "side_obstruction", "side": "left", "relativeWidth": relative}, f"zijbelemmering oostzijde, diepte {depth} m: b_b = {distance}/{depth} = {relative}"))
+    return per_window(test_id, 13, entries)
 
 
 CASES += [
@@ -2097,10 +2120,10 @@ CASES += [
     ("EPW008e", 11, [roof_overhang("EP-W008e", 5.0)]),
     ("EPW009a", 12, [side_all("EP-W009a", 0.6)]),
     ("EPW009b", 12, [side_all("EP-W009b", 2.0)]),
-    ("EPW009c", 12, [east_obstruction("EP-W009c", 0.6)]),
-    ("EPW009d", 12, [east_obstruction("EP-W009d", 1.2)]),
-    ("EPW009e", 12, [east_obstruction("EP-W009e", 2.4)]),
-    ("EPW009f", 12, [east_obstruction("EP-W009f", 6.0)]),
+    ("EPW009c", 13, [east_obstruction("EP-W009c", 0.6)]),
+    ("EPW009d", 13, [east_obstruction("EP-W009d", 1.2)]),
+    ("EPW009e", 13, [east_obstruction("EP-W009e", 2.4)]),
+    ("EPW009f", 13, [east_obstruction("EP-W009f", 6.0)]),
 ]
 
 
@@ -2172,10 +2195,13 @@ def insulation(test_id, year_value, pipes, wall_rc, roof_rc, floor_rc, window_u,
         project["constructions"] = [
             {"id": "c-gevel", "name": f"Gevel Rc {wall_rc}", "layers": [], "rcValue": wall_rc, "uValue": u_from_rc(wall_rc, 0.17)},
             {"id": "c-dak", "name": f"Dak Rc {roof_rc}", "layers": [], "rcValue": roof_rc, "uValue": u_from_rc(roof_rc, 0.14)},
+            {"id": "c-vloer", "name": f"Vloer Rc {floor_rc}", "layers": [], "rcValue": floor_rc, "uValue": u_from_rc(floor_rc, 0.17)},
         ]
+        # The floor's U comes from groundFloors; its construction id names the
+        # floor's own Rc (review 19: it carried the roof's).
+        by_type = {"wall": "c-gevel", "roof": "c-dak", "floor": "c-vloer"}
         for item in project["zones"][0]["surfaces"]:
-            # The floor's U comes from groundFloors; it keeps a construction id.
-            item["constructionId"] = "c-gevel" if item["type"] == "wall" else "c-dak"
+            item["constructionId"] = by_type[item["type"]]
         for item in surface(project, "gevel-zuid")["windows"]:
             item["uValue"] = window_u
             item["gValue"] = window_g
@@ -2266,7 +2292,7 @@ def dike(project):
         "wallDepths": [{"lengthM": 8.0, "depthM": 5.4}, {"lengthM": 6.0, "depthM": 0.0}, {"lengthM": 8.0, "depthM": 0.0}, {"lengthM": 6.0, "depthM": 0.0}],
         "wallResistanceM2kPerW": 6.0,
     }
-    floor["sourceReference"] = "ISSO 54 v2.0 EP-W006g p. 8: dijkwoning, vloer en noordgevel volledig tegen grond (8.42/D.12)"
+    floor["sourceReference"] = "ISSO 54 v2.0 EP-W006g p. 9: dijkwoning, vloer en noordgevel volledig tegen grond (8.42/D.12)"
     # The wall below ground is part of the basement route (8.42), not a
     # surface of its own.
     zone = project["zones"][0]
@@ -2312,9 +2338,13 @@ def double(project):
     scale(project, area=192.0, volume=518.4, height=5.4, roof=96.0, floor=96.0, south=86.4, north=86.4, east_west=32.4, windows_=8, perimeter=44.0, storeys=2, building_height=5.4)
 
 
+# Every dwelling of EP-W013b/d has its own installation (p. 17-18): 4 and 10
+# identical systems (§9.1), as in EP-W206c, so the 9.85 standby term and the
+# 500 m2 limit of the recoverable losses apply per appliance (review 19, D4).
 def four_dwellings(project):
     double(project)
     dwellings(project, 4)
+    project["ntaCalculation"]["identicalSystems"] = 4
 
 
 def small(project):
@@ -2327,6 +2357,7 @@ def tower(project):
     scale(project, area=960.0, volume=2592.0, height=54.0, roof=48.0, floor=48.0, south=432.0, north=432.0, east_west=324.0, windows_=40, perimeter=28.0, storeys=2, building_height=54.0)
     dwellings(project, 10)
     nta = project["ntaCalculation"]
+    nta["identicalSystems"] = 10
     nta["dwellingType"] = "apartment_building"
     nta["ventilation"]["apartmentBuilding"] = True
     nta["ventilation"]["infiltration"]["buildingType"] = "multi_storey_whole_building"
@@ -2347,7 +2378,7 @@ def pitched(project):
     surface(project, "gevel-west")["area"] = 50.4
     project["zones"][0]["volume"] = 403.2
     nta = project["ntaCalculation"]
-    nta["surfaceTilts"] = [{"surfaceId": "dak", "tiltDeg": 45.0, "sourceReference": "ISSO 54 v2.0 EP-W014a p. 18: dakhelling 45 graden"}]
+    nta["surfaceTilts"] = [{"surfaceId": "dak", "tiltDeg": 45.0, "sourceReference": "ISSO 54 v2.0 EP-W014a p. 19: dakhelling 45 graden"}]
     nta["ventilation"]["buildingHeightM"] = 11.4
     nta["ventilation"]["infiltration"]["buildingType"] = "pitched_roof_detached"
 
@@ -2389,17 +2420,17 @@ CASES += [
     ("EPW006b", 8, crawlspace("EP-W006b", 3.5)),
     ("EPW006c", 8, crawlspace("EP-W006c", 0.0)),
     ("EPW006d", 8, crawlspace("EP-W006d", 6.0, height=0.25)),
-    ("EPW006e", 9, crawlspace("EP-W006e", 6.0, height=0.25, opening=0.0006)),
+    ("EPW006e", 8, crawlspace("EP-W006e", 6.0, height=0.25, opening=0.0006)),
     ("EPW006f", 9, variant(sunken_crawlspace)),
     ("EPW006g", 9, variant(dike)),
-    ("EPW013a", 16, variant(double)),
-    ("EPW013b", 16, variant(four_dwellings)),
-    ("EPW013c", 16, variant(small)),
-    ("EPW013d", 17, variant(tower)),
+    ("EPW013a", 17, variant(double)),
+    ("EPW013b", 17, variant(four_dwellings)),
+    ("EPW013c", 17, variant(small)),
+    ("EPW013d", 18, variant(tower)),
     # EP-W013e: only the top apartment (2 storeys) of the EP-W013d tower, no
     # floor (p. 17): the apartment variant in a 54 m building.
-    ("EPW013e", 17, APARTMENT + [setp(f"{VENT}/buildingHeightM", 54.0)]),
-    ("EPW014a", 18, variant(pitched)),
+    ("EPW013e", 18, APARTMENT + [setp(f"{VENT}/buildingHeightM", 54.0)]),
+    ("EPW014a", 19, variant(pitched)),
     ("EPW103c", 22, variant(cross_ventilation)),
 ]
 
@@ -2513,31 +2544,31 @@ def sport_hall(project):
 
 UTILITY_CASES += [
     # EP-U202a: an AHU in the heated zone that heats and cools (p. 45; 11.3.2).
-    ("EPU202a", 45, U202 + [ahu(True)]),
+    ("EPU202a", 46, U202 + [ahu(True)]),
     # EP-U202b: design flow 1500 dm3/s, flow control down to 60 % (11.61 x 60,
     # design evidence), speed control, nominal fan power 100 W (p. 45).
     (
         "EPU202b",
-        45,
+        46,
         U202
         + [
             ahu(True),
-            installed(1500.0, "ISSO 54 v2.0 EP-U202b p. 45: ontwerpdebiet 1500 dm3/s"),
-            setp(f"{VENT}/flowReduction", {"collective": True, "flowControlPercent": 60, "evidenceReference": "ISSO 54 v2.0 EP-U202b p. 45: terugregeling tot 60 % van de maximale capaciteit"}),
+            installed(1500.0, "ISSO 54 v2.0 EP-U202b p. 46: ontwerpdebiet 1500 dm3/s"),
+            setp(f"{VENT}/flowReduction", {"collective": True, "flowControlPercent": 60, "evidenceReference": "ISSO 54 v2.0 EP-U202b p. 46: terugregeling tot 60 % van de maximale capaciteit"}),
             setp(
                 f"{VENT}/fans",
                 {
                     "method": "declared",
                     "fans": [{"id": "ventilatoren", "power": {"method": "nominal", "nominalPowerW": 100.0}}],
                     "control": {"method": "flow_control", "control": "speed_control"},
-                    "sourceReference": "ISSO 54 v2.0 EP-U202b p. 45: toerenregeling, nominaal vermogen 100 W",
+                    "sourceReference": "ISSO 54 v2.0 EP-U202b p. 46: toerenregeling, nominaal vermogen 100 W",
                 },
             ),
         ],
     ),
     # EP-U202c: the AHU outside the heated zone, supply ducts 20-40 m outside
     # the thermal zone, insulated: table 11.19 situation 2 (2022 p. 489).
-    ("EPU202c", 45, U202 + [ahu(False, "situation2")]),
+    ("EPU202c", 46, U202 + [ahu(False, "situation2")]),
     (
         "EPU502c",
         49,
@@ -2781,10 +2812,10 @@ W011A = [
                     "diffusing": {
                         "gAltitude45": 0.045,
                         "gDiffuse": 0.2,
-                        "sourceReference": "ISSO 54 v2.0 EP-W011a p. 14: gesloten horizontale lamellen, g_gl;alt 0,045 en g_gl;dif 0,2 (7.41)",
+                        "sourceReference": "ISSO 54 v2.0 EP-W011a p. 15: gesloten horizontale lamellen, g_gl;alt 0,045 en g_gl;dif 0,2 (7.41)",
                     }
                 },
-                "sourceReference": "ISSO 54 v2.0 EP-W011a p. 14: alle ramen",
+                "sourceReference": "ISSO 54 v2.0 EP-W011a p. 15: alle ramen",
             }
             for k in range(1, 5)
         ],
@@ -2806,7 +2837,7 @@ EMBEDDED = {
 }
 
 CASES += [
-    ("EPW011a", 14, W011A),
+    ("EPW011a", 15, W011A),
     # EP-W203j: the HR107 with a quality declaration (p. 25): efficiency
     # 0,975 and fraction 1, equal to the 2022 table 9.25 value of an HR107
     # inside the envelope at 45/40 (so not entered); A 10 kWh, B 0,12 kW,
@@ -2814,11 +2845,11 @@ CASES += [
     # W;H;aux of 106,48/111,55 kWh is an expected result.
     (
         "EPW203j",
-        25,
+        26,
         [
             setp(
                 f"{GEN}/declaredAuxiliaryConstants",
-                {"aKwh": 10.0, "bKw": 0.12, "c": 0.3, "nominalLoadKw": 20.0, "declarationReference": "ISSO 54 v2.0 EP-W203j p. 25: kwaliteitsverklaring HR107, A 10 kWh, B 0,12 kW, C 0,3, B_nom 20 kW"},
+                {"aKwh": 10.0, "bKw": 0.12, "c": 0.3, "nominalLoadKw": 20.0, "declarationReference": "ISSO 54 v2.0 EP-W203j p. 26: kwaliteitsverklaring HR107, A 10 kWh, B 0,12 kW, C 0,3, B_nom 20 kW"},
             )
         ],
     ),
@@ -2974,8 +3005,8 @@ def w206b(project):
     nta["zoneData"] = entries
     individual = copy.deepcopy(REFERENCE["ntaCalculation"])
     individual["generator"]["boiler"]["generatorId"] = "hr107-boven"
-    individual["generator"]["boiler"]["equipmentReference"] = "ISSO 54 v2.0 EP-W206b p. 29: individuele HR107 per appartement in de bovenste vier bouwlagen"
-    individual["distributionSystem"]["sourceReference"] = "ISSO 54 v2.0 EP-W206b p. 29: individuele ketel, geen leidingen door onverwarmde ruimten"
+    individual["generator"]["boiler"]["equipmentReference"] = "ISSO 54 v2.0 EP-W206b p. 30: individuele HR107 per appartement in de bovenste vier bouwlagen"
+    individual["distributionSystem"]["sourceReference"] = "ISSO 54 v2.0 EP-W206b p. 30: individuele ketel, geen leidingen door onverwarmde ruimten"
     nta["additionalHeatingSystems"] = [
         {
             "zoneIds": [UPPER48],
@@ -2999,7 +3030,7 @@ W203O = [
             "kind": "forfait_heater",
             "heaterKind": "air_heater_hr104",
             "fuel": "natural_gas",
-            "equipmentReference": "ISSO 54 v2.0 EP-W203o p. 25: lokale gasgestookte luchtverwarmer HR104, 5 kW",
+            "equipmentReference": "ISSO 54 v2.0 EP-W203o p. 26: lokale gasgestookte luchtverwarmer HR104, 5 kW",
             "auxiliary": {"electricallyConnectedDevices": 0, "nominalPowerKw": 5.0, "sourceReference": "ISSO 54 v2.0 EP-W203o: hulpenergie van ventilatoren en regeling in de afgifte (9.23, tabel 9.12)"},
         },
     ),
@@ -3013,13 +3044,13 @@ W203O = [
                 "kind": {"kind": "direct", "radialFan": False},
                 "count": 1,
                 "further": [{"kind": {"kind": "direct", "radialFan": True}, "count": 3}],
-                "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: 4 luchtverwarmers, 1 met axiale en 3 met radiale recirculatieluchtventilator; Q_h;b geschat (tabel 9.12)",
+                "sourceReference": "ISSO 54 v2.0 EP-W203o p. 26: 4 luchtverwarmers, 1 met axiale en 3 met radiale recirculatieluchtventilator; Q_h;b geschat (tabel 9.12)",
             },
-            "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: luchtverwarming, regeling per ruimte als de referentie",
+            "sourceReference": "ISSO 54 v2.0 EP-W203o p. 26: luchtverwarming, regeling per ruimte als de referentie",
         },
     ),
     remove(f"{NTA}/distributionSystem"),
-    setp(f"{NTA}/distribution", {"method": "declared", "monthlyLossKwh": [0.0] * 12, "sourceReference": "ISSO 54 v2.0 EP-W203o p. 25: geen distributiesysteem"}),
+    setp(f"{NTA}/distribution", {"method": "declared", "monthlyLossKwh": [0.0] * 12, "sourceReference": "ISSO 54 v2.0 EP-W203o p. 26: geen distributiesysteem"}),
 ]
 
 # EP-W006h: the east facade borders an unheated space (AOR) without further
@@ -3056,9 +3087,9 @@ def aor_east(project):
 
 CASES += [
     ("EPW006h", 9, variant(aor_east)),
-    ("EPW203o", 25, W203O),
-    ("EPW206a", 29, variant(w206a)),
-    ("EPW206b", 29, variant(w206b)),
+    ("EPW203o", 26, W203O),
+    ("EPW206a", 30, variant(w206a)),
+    ("EPW206b", 30, variant(w206b)),
     ("EPW206c", 30, variant(w206c)),
 ]
 
