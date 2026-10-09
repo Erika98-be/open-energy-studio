@@ -24,6 +24,41 @@ const USAGE_FUNCTIONS = ['residential', 'office', 'education', 'retail', 'other_
 /** Function areas (§6.5.3) split a utility zone; a residential part is refused (function_areas_residential_mixed). */
 const FUNCTION_AREA_FUNCTIONS = USAGE_FUNCTIONS.filter((key) => key !== 'residential');
 
+/**
+ * Common spaces lying in a zone (6.6.4): the kernel allocates each one pro rata over the functions that rely on it,
+ * within the zone only over the functions of the zone, for the building (Bbl limits) over all of them. With common
+ * spaces the zone's function areas are its own (initial) areas. No function ticked: all functions of the building.
+ */
+export function CommonSpacesFields({ draft, change, base }: SectionProps & { base: Path }) {
+  const { t } = useI18n();
+  const field = { draft, onChange: change };
+  const spaces = list(draft, base);
+  return <>
+    {spaces.length > 0 && <p className="nta-form-note">{t('nta.zoneData.commonSpace.note')}</p>}
+    {spaces.map((space, index) => {
+      const served = Array.isArray(space.servedFunctions) ? space.servedFunctions as string[] : [];
+      return <fieldset key={index} className="nta-form-row"><legend>{t('nta.zoneData.commonSpace.title')}</legend>
+        <NumberField {...field} path={[...base, index, 'areaM2']} label={t('nta.zoneData.commonSpace.area')} unit="m²" />
+        <span className="nta-form-note">{t('nta.zoneData.commonSpace.served')}</span>
+        {USAGE_FUNCTIONS.map((key) => <label key={key} className="nta-form-check">
+          <input type="checkbox" checked={served.includes(key)} onChange={(event) => {
+            const next = event.target.checked ? [...served, key] : served.filter((item) => item !== key);
+            change([...base, index, 'servedFunctions'], next.length > 0 ? next : undefined);
+          }} />
+          {t(`nta.form.usage.${key}`)}
+        </label>)}
+        <TextField {...field} path={[...base, index, 'sourceReference']} label={t('nta.zoneData.commonSpace.source')} />
+        <button type="button" className="nta-form-remove" onClick={() => {
+          const rest = spaces.filter((__, other) => other !== index);
+          change(base, rest.length > 0 ? rest : undefined);
+        }}>{t('nta.form.remove')}</button>
+      </fieldset>;
+    })}
+    <button type="button" onClick={() => change(base, [...spaces, { areaM2: null, sourceReference: '' }])}>
+      {t('nta.zoneData.commonSpace.add')}</button>
+  </>;
+}
+
 /** The ventilation functions of a block (`base`: `['ventilation']` or a zone's): a swimming pool in a sport function doubles q_usi;spec. */
 export function SwimmingPoolFields({ draft, change, base }: SectionProps & { base: Path }) {
   const { t } = useI18n();
@@ -136,6 +171,7 @@ export function ZoneDataFields({ draft, change, project }: SectionProps & { proj
         {usage !== 'residential' && <button type="button" onClick={() => change([...base, 'functionAreas'],
           [...areas, { function: typeof usage === 'string' && usage !== 'residential' ? usage : 'office', areaM2: null }])}>
           {t('nta.zoneData.functionArea.add')}</button>}
+        {usage !== 'residential' && <CommonSpacesFields draft={draft} change={change} base={[...base, 'commonSpaces']} />}
         <label className="nta-form-check">
           <input type="checkbox" checked={mass != null} onChange={(event) => change([...base, 'thermalMass'], event.target.checked
             ? { floor: 'heavy', wall: 'heavy', ceiling: 'open_or_none', sourceReference: '' } : undefined)} />
