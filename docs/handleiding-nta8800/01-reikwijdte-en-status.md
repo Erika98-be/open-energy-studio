@@ -42,7 +42,7 @@ Daarnaast bevat het programma:
 - Luchtspouwen dunner dan 20 mm die zwak geventileerd zijn of een werkzame reflecterende laag hebben. Geef zo'n laag op als R-waarde met bron. Een niet-geventileerde dunne spouw zonder reflecterende laag rekent het programma zelf (bijlage D.2 van NEN-EN-ISO 6946, zie de [constructies](../nta8800-constructies.md)).
 - De kostenmodelbeschrijving van ISSO (rapport 110293) en een locatieklimaat voor het maatwerkadvies.
 - Het uitwisselformaat (XSD) van EP-Online voor registratie. Het programma registreert niet zelf.
-- Officiële referentiegevallen: de EDR-testen van ISSO-publicatie 54 versie 5.0:2026, de testset waar BRL 9501 naar verwijst, met hun verwachte uitkomsten. Van de openbare versie 2.0 zijn 240 van de 266 deeltesten al als referentiegevallen gecodeerd en rekenen bij elke controle mee, nog zonder verwachting (zie [hoofdstuk 5](05-validatie.md#referentiesuites)).
+- Officiële referentiegevallen: de EDR-testen van ISSO-publicatie 54 versie 5.0:2026, de testset waar BRL 9501 naar verwijst, met hun verwachte uitkomsten. Van de openbare versie 2.0 zijn 258 van de 266 deeltesten al als referentiegevallen gecodeerd en rekenen bij elke controle mee, nog zonder verwachting (zie [hoofdstuk 5](05-validatie.md#referentiesuites)).
 
 ## Attesteringsstatus
 

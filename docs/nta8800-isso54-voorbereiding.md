@@ -24,7 +24,7 @@ De pdf wordt niet in de repository opgenomen. De invoer is in eigen woorden geco
 | Referentiekantoor EP-U001 (EP-W001 als kantoor met koeling) | `training-data/isso54/EPU001.json` |
 | Deeltesten als patch op de referentie | `training-data/reference-suites/isso54-v2.json`, gegenereerd door `scripts/isso54-suite.py` |
 | Uitvoering in elke gate | `reference_gate` via `scripts/verify-nta.sh` (alle suites in `training-data/reference-suites/`) |
-| Oordeel zonder verwachtingen | Een run met alleen deze suite vergelijkt niets: het rapport zegt "geen vergelijking (0 vergeleken, 240 zonder verwachting)" en de afsluitcode is 3, niet 0. In de gate lopen de openbare gevallen en de RVO-woningen mee; die vergelijken wel. |
+| Oordeel zonder verwachtingen | Een run met alleen deze suite vergelijkt niets: het rapport zegt "geen vergelijking (0 vergeleken, 258 zonder verwachting)" en de afsluitcode is 3, niet 0. In de gate lopen de openbare gevallen en de RVO-woningen mee; die vergelijken wel. |
 
 - **Patches.** Een deeltest verandert een of enkele kenmerken van de referentie. De suite geeft daarom per deeltest een `projectPatch` (`set`/`remove` op een JSON-pointer) op het referentieproject, in plaats van een volledig projectbestand. Een patch waarvan het doel ontbreekt, laat de gate falen, dus een wijziging van de referentie kan een deeltest niet stilletjes leegmaken.
 - **Zonder verwachting.** Zonder bijlage 2 heeft elke deeltest een blok `pending` in plaats van `expected`:
@@ -129,6 +129,22 @@ Deze keuzes volgen uit de testbeschrijving of uit NTA 8800:2022. Ze zijn het eer
   - EP-U502b: L_max 40 m heeft geen invoer bij de circulatiepomp (13.39).
   - EP-U503a: tien douches, waarvan 2 met verticale en 4 met horizontale douche-WTW, collectieve opstelling ("gedeelde units", tabel 13.8), toewijzing onbekend (p. 564).
 
+## Codering EP-W104, EP-W406o/p/t en EP-W407 (9 oktober 2026)
+
+- **EP-W104a** (p. 22–23). Systeem A1 zonder kanalen. Een open CR-ketel (conventioneel) met waakvlam binnen de schil, 90/70, radiatoren tegen de buitenwand, regeling in het hoofdvertrek, geen waterzijdige inregeling. Tapwater: een badgeiser met Gaskeur CW3 (tabel 13.25, doorstroomtoestel met Gaskeur CW, klasse 3). Beide toestellen zijn open en halen verbrandingslucht uit de woning: tabel 11.11 gastoestel type B en tabel 11.12 cv-ketel en badgeiser, met de nominale belasting van 35 en 15 kW. De 35 kW werkt alleen daar: een individuele ketel rekent zijn hulpenergie met de constanten van 9.85.
+- **EP-W104b, c, d en f** (p. 23) zijn wijzigingen op EP-W001. b: geïnstalleerde capaciteit 150 dm³/s (11.62). c: nominaal ventilatorvermogen 100 W. d: motor 80 W met U·I·cos φ = 220 × 0,6 × 0,8 = 105,6 W (11.136, eenfasewisselstroommotor). f: C4b met 100 W.
+- **EP-W104g** (p. 23). Een hoekwoning op de onderste laag van een meergezinswoning: de referentie zonder dak en oostgevel (verwarmde buren), perimeter 22 m, gebouwhoogte 10,8 m, infiltratie "laag, eind, onder of tussen" (tabel 11.14), bouwjaar 1945. "Geïsoleerd vóór 1995" valt in de rij "vóór 1980 of onbekend": de test zegt niet of het vóór 1980 was. D4a met een verklaard rendement van 85 % (NEN-EN 13142, dissipatie verdisconteerd), Luka C, geïsoleerd kanaal van 1 m, centraal, bypass 100 % met koudeterugwinning op de verklaring (11.106a, in 2022 aanwezig). Forfaitaire gelijkstroomventilatoren van 2020, geen volumeregeling, geen passieve koeling.
+- **EP-W406o en p** (p. 39). Een warmtepompboiler op ventilatieretourlucht, alleen tapwater, met een kwaliteitsverklaring: COP 3 als verklaard η_W;gen. De kern past daarop f_prac 0,95 toe (13.152 voor een niet-forfaitaire waarde); dat is de f_prac die de test geeft. P_nom 5 en 0,3 kW (13.141) en q_ve;hp;W 200 m³/h uit de verklaring (13.148a). Het "aandeel hernieuwbare energie 1000 kWh" is geen invoer: retourlucht is zonder opgave van het buitenluchtaandeel niet hernieuwbaar (5.32). EP-W406p heeft bijverwarming nodig. Gecodeerd als elektrische doorstroomverwarmer (tabel 13.25, 0,95), omdat de test geen vat noemt. Het vermogen ontbreekt ook; 13.141 vraagt er een, dus 2 kW is aangenomen (fictief, genoeg voor de rest).
+- **EP-W406t** (p. 39). Een buitenluchtwarmtepomp (voldoet aan tabel 9.28) voor verwarming en tapwater, met een los vat van 150 l, label D, T-stukken geïsoleerd, binnen de schil, 0,3 kW. Ze levert 64,3 % van het tapwater (13.146, één punt). Een HR107 met CW4 van 10 kW levert alleen tapwater, de rest.
+- **EP-W407** (p. 41–42). Het gebouw van EP-W206: 48 appartementen, 12 bouwlagen, A_g 4608 m².
+  - a: elk appartement heeft de installaties van EP-W001 (48 gelijke systemen).
+  - b: een gemeenschappelijke HR107 van 100 kW buiten de verwarmde zone, voor verwarming en tapwater, met een indirect gestookt vat van 2000 l (label niet gegeven, vanaf 2018 zoals EP-W402) en geïsoleerde T-stukken (f_sto;dis;ls 2). Circulatie 28/25 met 20 mm isolatie, geen leidingen door onverwarmde ruimten, kleppen en beugels geïsoleerd, pomp onbekend zonder regeling, geen afleversets.
+  - c: tapwater uit een direct gestookt vat boven 150 kW (13.8.4.5.4, 0,50); verwarming als b.
+  - d: als b met een VR-ketel binnen de verwarmde zone, zonder waakvlam.
+  - e–h: dezelfde installaties voor één tussen-midden-appartement. Alleen de voor- en achtergevel grenzen aan buiten; infiltratie "laag, midden, onder of tussen". De collectieve oppervlakken blijven die van het hele gebouw.
+  - i: een WKK van 15 kW elektrisch en 30 kW thermisch, LT, met gemeten ε_th 0,6 en ε_el 0,3 in plaats van de rij van tabel 9.31. De WKK verwarmt ook een vat van 2000 l met geïsoleerde T-stukken. Gebouwd na 2006 is aangenomen; de gemeten waarden vervangen de rij toch.
+- **Kernwijziging voor EP-W407i.** De kern weigerde een voorraadvat naast een WKK voor tapwater (`hot_water_storage_in_generator_efficiency`). 13.8.4.7.4 (2022 p. 621) bepaalt de verliezen van indirect verwarmde voorraadvaten in 13.6, en opmerking 1 van 13.6.2 (2022 p. 547) zondert een WKK niet uit. Het vat wordt nu toegestaan en gerekend, zoals bij een ketel.
+
 ## Correcties na review 19 (10 oktober 2026)
 
 Een steekproef van 41 deeltesten tegen de testtekst vond vier codeerfouten. Ze zijn gecorrigeerd; de kern is niet veranderd.
@@ -149,11 +165,13 @@ Open interpretaties, te toetsen zodra versie 5.0 met uitkomsten er is: EP-W102b 
 
 ## Stand van de codering
 
-240 van de 266 deeltesten uit bijlage 1 zijn gecodeerd: 185 voor woningen en 55 voor utiliteit (9 oktober 2026; eerst 52, daarna 115, 199, 227 en 239). Elke gecodeerde deeltest rekent in de gate. Bij de open deeltesten heeft de kern in vrijwel alle gevallen de route al. Ze zijn nog niet gecodeerd, omdat geometrie of productgegevens uit de beschrijving moeten worden afgeleid.
+258 van de 266 deeltesten uit bijlage 1 zijn gecodeerd: 203 voor woningen en 55 voor utiliteit (9 oktober 2026; eerst 52, daarna 115, 199, 227, 239 en 240). Elke gecodeerde deeltest rekent in de gate. De acht open deeltesten zijn niet te coderen: drie vragen een kwaliteitsverklaring uit een apart bijlagedocument dat niet in bezit is, drie hebben geen route in de norm, twee geven daglichtfactoren zonder geometrie (zie hieronder en de tabel).
 
 EP-W003c (rolluik met extra warmteweerstand) en EP-W016 (deuren) waren te controleren. Beide routes bestaan: `window_u` rekent U_W+shut (8.22/8.23) en de deur (8.20, 8.18/8.19) als rekenhulp, en het project neemt de uitkomst als U-waarde van het raam of de deur. Ze zijn gecodeerd.
 
 Niet te coderen met de huidige kern of de norm:
+- **EP-W203q, EP-W406w, EP-W406x**: de kwaliteitsverklaringen (Inventum Modul AIR Solo, Modul Air combi 180 en Modul Air red) staan in aparte bijlagedocumenten bij ISSO 54 (p. 66–67). Die zijn niet in bezit; zonder de verklaarde waarden is er niets in te voeren.
+- **EP-W406l** (biomassa die niet aan bijlage R voldoet): geen forfaitaire route, zoals EP-W204d hieronder.
 - **EP-W204d** (pelletkachel die niet aan bijlage R voldoet): tabel 9.30 (2022 p. 337) geeft alleen rendementen voor toestellen die aan bijlage R voldoen. Voor andere toestellen is er geen forfaitaire route; de kern weigert met `biomass_class_unsupported`.
 - **EP-U602g/h**: de daglichtfactoren worden direct gegeven, zonder sectorgeometrie (zie de tabel).
 - **EP-W406j** (booster met COP 3,5 en P_ls 0,03 kW): 13.8.4.4 (2022 p. 607) kent meetgegevens volgens bijlage W of de forfaitaire waarden van 13.162/13.163. Bijlage W leidt de COP-lijn af uit twee meetpunten bij 24 (of 16) °C en 40 °C (W.11–W.13, 2022 p. 1089–1090). Met één COP is er geen route; het forfait kent geen opgegeven COP. De kern weigert terecht.
@@ -186,10 +204,10 @@ De 11 realistische gebouwen (EPWRealB01 tot en met EPWRealD05 en EPURealB01) zij
 | EPW101 | Ventilatiesysteem | 23 | a t/m w (alle) | – |  |
 | EPW102 | Voorverwarming nat. toev.vent. | 2 | a, b | – |  |
 | EPW103 | Zomernachtventilatie | 3 | a, b, c | – |  |
-| EPW104 | Ventilatie overig | 6 | – | a, b, c, d, f, g | open verbrandingstoestellen, badgeiser, ventilatorvermogen, D.4a in een meergezinswoning: routes aanwezig, nog te coderen |
+| EPW104 | Ventilatie overig | 6 | a, b, c, d, f, g | – |  |
 | EPW201 | Afgifte | 5 | a, b, c, d, e | – |  |
 | EPW202 | Distributie | 6 | a, b, c, d, e, f | – |  |
-| EPW203 | Opwekking | 16 | a, b, c, d, e, f, g, h, i, j, l, m, n, o, p | q | q: kwaliteitsverklaring uit bijlage 5 (niet in bezit) |
+| EPW203 | Opwekking | 16 | a, b, c, d, e, f, g, h, i, j, l, m, n, o, p | q | q: kwaliteitsverklaring uit een apart bijlagedocument (niet in bezit) |
 | EPW204 | Opwekking2 | 9 | a, b, c, e, f, g, h, i | d | d: niet te coderen, zie boven |
 | EPW205 | Opwekking gemeenschappelijk | 2 | a, c | – |  |
 | EPW206 | Opwekking woongebouw | 3 | a, b, c | – |  |
@@ -201,8 +219,8 @@ De 11 realistische gebouwen (EPWRealB01 tot en met EPWRealD05 en EPURealB01) zij
 | EPW403 | Douche WTW | 4 | a, b, c, d | – |  |
 | EPW404 | Voorraadvat | 4 | a, b, c, d | – |  |
 | EPW405 | Zonneboiler | 6 | a, b, c, d, e, f | – |  |
-| EPW406 | Opwekking | 21 | a, b, c, d, e, f, g, i, k, m, n, q, u, v | j, l, o, p, t, w, x | j: booster met één COP, geen route (zie boven); l: biomassa die niet aan bijlage R voldoet (geen route, zie EP-W204d); o, p: warmtepompboiler met kwaliteitsverklaring; t: warmtepomp met ketel en een opgegeven aandeel; w, x: verklaringen uit bijlagen 6 en 7 (niet in bezit). Routes deels aanwezig, nog te coderen |
-| EPW407 | Opwekking gemeensch./woong. | 9 | – | a, b, c, d, e, f, g, h, i | collectieve tapwateropwekking: nog te coderen |
+| EPW406 | Opwekking | 21 | a, b, c, d, e, f, g, i, k, m, n, o, p, q, t, u, v | j, l, w, x | j: booster met één COP, geen route (zie boven); l: biomassa die niet aan bijlage R voldoet (geen route, zie EP-W204d); w, x: verklaringen uit aparte bijlagedocumenten (niet in bezit) |
+| EPW407 | Opwekking gemeensch./woong. | 9 | a, b, c, d, e, f, g, h, i | – |  |
 | EPW501 | PV-panelen | 4 | a, b, c, d | – |  |
 | EPU001 | Referentie | 1 | EPU001 | – |  |
 | EPU002 | Gebruiksfunctie | 10 | a, b, c, d, e, f, g, h, i, j | – |  |

@@ -134,7 +134,7 @@ The gate runs:
 - **Reference suites** (`reference_gate`):
   - public calculation reports A–L, as a regression on this kernel's recorded results; the differences from the published values are explained post by post in [docs/nta8800-vergelijking-openbare-rapporten.md](docs/nta8800-vergelijking-openbare-rapporten.md);
   - the RVO voorbeeldwoningen;
-  - 240 of the 266 ISSO 54 v2.0 sub-tests, encoded as *pending*: they must calculate, but cannot be judged until the test set's expected results are available. See [docs/nta8800-isso54-voorbereiding.md](docs/nta8800-isso54-voorbereiding.md).
+  - 258 of the 266 ISSO 54 v2.0 sub-tests, encoded as *pending*: they must calculate, but cannot be judged until the test set's expected results are available. See [docs/nta8800-isso54-voorbereiding.md](docs/nta8800-isso54-voorbereiding.md).
 - **Service, API, MCP and desktop-command tests.**
 - **Front-end tests (Vitest):** end-to-end workflow tests, form-coverage and form-guard tests (form states run through the kernel), accessibility and i18n checks.
 

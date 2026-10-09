@@ -3094,6 +3094,300 @@ CASES += [
 ]
 
 
+# --- EP-W104: further ventilation aspects (p. 22-23) ---
+# EP-W104a: an open conventional (CR) boiler with a pilot flame inside the
+# envelope, 35 kW, 90/70 (HT), radiators against the outer wall, control in
+# the main room, no hydronic balancing; hot water a bath geyser with Gaskeur
+# CW3 of 15 kW, also open with a flue; system A1 (p. 22-23). Both open
+# appliances draw combustion air (table 11.11 gas type B, table 11.12 rows
+# for a central-heating boiler and a bath geyser at their nominal input).
+# The 35 kW acts only there: an individual boiler takes the 9.85 constants
+# for its auxiliary energy, not a nominal power.
+def open_appliance(appliance_id, kind, power, why):
+    return {"id": appliance_id, "kind": kind, "class": "gas_type_b", "nominalInputKw": power, "sourceReference": why}
+
+
+W104A = [
+    unit("a1", "no_ducts"),
+    NO_PASSIVE,
+    setp(f"{BOILER}/kind", "conventional"),
+    setp(f"{BOILER}/pilotFlamePresent", True),
+    setp(f"{BOILER}/equipmentReference", "ISSO 54 v2.0 EP-W104a p. 22: individuele CR-ketel, open toestel met rookgasafvoer, waakvlam, 35 kW"),
+    temperature_class("90_70"),
+    radiators("EP-W104a", "radiators_or_convectors", "two_pipe60_k_or_unknown", "outer_wall", "unknown", why="ISSO 54 v2.0 EP-W104a p. 22-23: radiatoren tegen buitenwand, regeling in het hoofdvertrek, geen waterzijdige inregeling"),
+    setp(f"{NTA}/emission/control", "main_room_thermostat"),
+    hw_generator({"kind": "gas_appliance", "appliance": "water_heater_gaskeur_cw", "measuredClass": "class3"}),
+    setp(f"{HW}/equipmentReference", "ISSO 54 v2.0 EP-W104a p. 23: badgeiser met Gaskeur CW3, 15 kW, open toestel met rookgasafvoer"),
+    setp(
+        f"{VENT}/combustionAppliances",
+        [
+            open_appliance("cr-ketel", "gas_central_heating_boiler", 35.0, "ISSO 54 v2.0 EP-W104a p. 22: CR-ketel, open, 35 kW"),
+            open_appliance("badgeiser", "gas_bath_geyser", 15.0, "ISSO 54 v2.0 EP-W104a p. 23: badgeiser, open, 15 kW"),
+        ],
+    ),
+] + boiler_temperature(90, 70)
+
+
+# EP-W104g: a corner apartment on the lowest layer of a multi-family
+# building: the reference without the roof and the east facade (heated
+# neighbours), perimeter 22 m, building height 10,8 m, construction year
+# 1945 (infiltration), heating pipes insulated "before 1995" (table 9.x row
+# before 1980 or unknown: the test does not narrow it down); D4a with a
+# declared 85 % (NEN-EN 13142, dissipation included), Luka C, insulated duct
+# 1 m, central, bypass 100 % with cold recovery on the declaration; forfait
+# DC fans of 2020, no flow control, no passive cooling, no AHU (p. 23).
+def corner_bottom(project):
+    zone = project["zones"][0]
+    zone["surfaces"] = [s for s in zone["surfaces"] if s["id"] not in ("dak", "gevel-oost")]
+    nta = project["ntaCalculation"]
+    nta["groundFloors"][0]["exposedPerimeterM"] = 22.0
+    nta["groundFloors"][0]["sourceReference"] = "ISSO 54 v2.0 EP-W104g p. 23: perimeter 22 m, oostzijde grenst aan een verwarmde woning"
+    nta["dwellingType"] = "apartment_building"
+    nta["constructionYear"] = 1945
+    nta["distributionSystem"]["pipeTransmittance"]["insulation"] = {"state": "insulated", "period": "before1980_or_unknown"}
+    vent = nta["ventilation"]
+    vent["apartmentBuilding"] = True
+    vent["buildingHeightM"] = 10.8
+    vent["constructionYear"] = 1945
+    vent["infiltration"]["buildingType"] = "storey_end_lower_or_intermediate"
+    vent["fans"] = {"method": "forfait", "current": "dc", "manufactureYear": 2020}
+    vent.pop("maximumCapacityForCooling", None)
+    vent["system"]["unit"] = {
+        "variant": "d4a",
+        "ducts": "luka_a_b_c",
+        "equipmentReference": "ISSO 54 v2.0 EP-W104g p. 23: D4a, Luka C, centraal",
+        "heatRecovery": recovery(
+            declared_recovery(0.85, "en13142", "ISSO 54 v2.0 EP-W104g p. 23: WTW-verklaring 85 % volgens EN 13142, dissipatie verdisconteerd"),
+            {"kind": "full", "coldRecoveryEvidence": "ISSO 54 v2.0 EP-W104g p. 23: koudeterugwinning via de WTW op de kwaliteitsverklaring"},
+            length=1.0,
+        ),
+    }
+
+
+CASES += [
+    ("EPW104a", 22, W104A),
+    # EP-W104b-d, f: changes on the reference EP-W001 (p. 23).
+    ("EPW104b", 23, [installed(150.0, "ISSO 54 v2.0 EP-W104b p. 23: ontwerpdebiet 150 dm3/s")]),
+    ("EPW104c", 23, [declared_fans({"method": "nominal", "nominalPowerW": 100.0}, "ISSO 54 v2.0 EP-W104c p. 23: nominaal vermogen ventilatoren 100 W")]),
+    # EP-W104d: 80 W motor, U.I.cos(phi) = 220 V x 0,6 A x 0,8 = 105,6 W for a
+    # single-phase AC motor (11.136).
+    ("EPW104d", 23, [declared_fans({"method": "motor", "motorPowerW": 80.0, "electricalInputW": 105.6}, "ISSO 54 v2.0 EP-W104d p. 23: 80 W, 220 V, 0,6 A, cos phi 0,8, eenfasewisselstroommotor")]),
+    (
+        "EPW104f",
+        23,
+        [unit("c4b", "luka_a_b_c"), NO_PASSIVE, declared_fans({"method": "nominal", "nominalPowerW": 100.0}, "ISSO 54 v2.0 EP-W104f p. 23: C4b, nominaal vermogen ventilatoren 100 W")],
+    ),
+    ("EPW104g", 23, variant(corner_bottom)),
+]
+
+
+# --- EP-W406o/p/t: further hot-water heat pumps (p. 39) ---
+# EP-W406o/p: an exhaust-air heat-pump water heater with a quality
+# declaration, for hot water only: COP 3 as the declared eta_W;gen (rounded
+# down to 0,05; f_prac 0,95 of 13.152 for a non-forfait value, which is the
+# f_prac the test gives), P_nom 5 and 0,3 kW (13.141), q_ve;hp;W 200 m3/h
+# from the declaration (13.148a). The "aandeel hernieuwbare energie 1000
+# kWh" of the test is not an input: the kernel derives the renewable share
+# itself. EP-W406p needs back-up heating (the test says so): the heat pump's
+# electric element heats the remainder, an electric instantaneous heater
+# (table 13.25, 0,95) as the further generator, since no vessel is given;
+# its power is not given either and 13.141 needs one: 2 kW is assumed
+# (fictitious), enough to cover the remainder.
+def declared_exhaust(test_id, power, backup=False):
+    patch = EXHAUST_C1 + [
+        hw_generator(
+            {
+                "kind": "heat_pump",
+                "exhaustAirSource": True,
+                "declared": {"value": 3.0, "sourceReference": f"ISSO 54 v2.0 {test_id} p. 39: kwaliteitsverklaring COP 3, fprac 0,95"},
+            }
+        ),
+        setp(f"{HW}/nominalPowerKw", power),
+        setp(f"{HW}/exhaustAir", {"ventilationSuitable": True, "declaredFlowM3PerH": 200.0}),
+    ]
+    if backup:
+        patch.append(
+            setp(
+                f"{HW}/additionalGenerators",
+                [
+                    {
+                        "generator": {"kind": "electric_instantaneous"},
+                        "nominalPowerKw": 2.0,
+                        "equipmentReference": f"ISSO 54 v2.0 {test_id} p. 39: bijverwarming nodig, elektrisch; vermogen niet gegeven, 2 kW aangenomen (fictief), geen vat gegeven",
+                    }
+                ],
+            )
+        )
+    return patch
+
+
+# EP-W406t: an outdoor-air heat pump (table 9.28) for heating and hot water
+# with a separate 150 l vessel, label D, T-pieces insulated, inside the
+# envelope, 0,3 kW; it supplies 64,3 % of the hot water (13.146). An HR107
+# with CW4 (10 kW), hot water only, supplies the rest (p. 39).
+W406T = [
+    heat_pump("EP-W406t", "outdoor_air", 45.0, high=True),
+    renewable("EP-W406t", True),
+    hw_generator({"kind": "indirect_heat_pump", "alsoSpaceHeating": True}),
+    setp(f"{HW}/nominalPowerKw", 0.3),
+    setp(f"{HW}/declaredShare", {"points": [{"annualKwh": 1000.0, "share": 0.643}], "sourceReference": "ISSO 54 v2.0 EP-W406t p. 39: de warmtepomp levert 64,3 % van de tapwatervraag"}),
+    setp(f"{HW}/storage", [vessel(150.0, LABEL("d"), 2, True)]),
+    setp(
+        f"{HW}/additionalGenerators",
+        [
+            {
+                "generator": {"kind": "gas_appliance", "appliance": "combi_gaskeur_hr_cw", "measuredClass": "class4"},
+                "nominalPowerKw": 10.0,
+                "equipmentReference": "ISSO 54 v2.0 EP-W406t p. 39: HR107-ketel met CW4, alleen tapwater, 10 kW",
+            }
+        ],
+    ),
+]
+
+CASES += [
+    ("EPW406o", 39, declared_exhaust("EP-W406o", 5.0)),
+    ("EPW406p", 39, declared_exhaust("EP-W406p", 0.3, backup=True)),
+    ("EPW406t", 39, W406T),
+]
+
+
+# --- EP-W407: generation for hot water in an apartment building (p. 41-42) ---
+# The building of EP-W206 (48 apartments, 12 storeys, A_g 4608 m2). a-d are
+# the whole building, e-h the same installations for one middle apartment
+# on an intermediate layer (only the front and back facades are external),
+# i the whole building on a CHP.
+def individual48(project):
+    """EP-W407a: every apartment has the installations of EP-W001."""
+    building48(project)
+    project["ntaCalculation"]["hotWater"]["generator"] = copy.deepcopy(REFERENCE["ntaCalculation"]["hotWater"]["generator"])
+    project["ntaCalculation"]["identicalSystems"] = 48
+
+
+def middle_apartment(project):
+    """One apartment between heated neighbours on all sides but front and back."""
+    zone = project["zones"][0]
+    zone["surfaces"] = [s for s in zone["surfaces"] if s["id"] in ("gevel-zuid", "gevel-noord")]
+    nta = project["ntaCalculation"]
+    del nta["groundFloors"]
+    nta["dwellingType"] = "apartment_building"
+    vent = nta["ventilation"]
+    vent["apartmentBuilding"] = True
+    vent["buildingHeightM"] = 32.4
+    vent["infiltration"]["buildingType"] = "storey_middle_lower_or_intermediate"
+
+
+def collective_hot_water(project, test_id, boiler="hr107", inside=False, storeys=12):
+    """EP-W407b/d: a collective boiler of 100 kW for heating and hot water
+    with an indirectly fired 2000 l vessel, T-pieces insulated (f_sto;dis;ls
+    2; label not given, produced from 2018 as EP-W402), circulation 28/25
+    with 20 mm insulation, none in unheated spaces, fittings insulated, pump
+    unknown and uncontrolled, no heat meters, no delivery sets (p. 41)."""
+    nta = project["ntaCalculation"]
+    gen = nta["generator"]
+    gen["boiler"]["role"] = "collective"
+    gen["boiler"]["kind"] = boiler
+    gen["boiler"]["location"] = "inside_thermal_boundary" if inside else "outside_thermal_boundary"
+    gen["boiler"]["pilotFlamePresent"] = False
+    gen["boiler"]["equipmentReference"] = f"ISSO 54 v2.0 {test_id}: gemeenschappelijke {boiler.upper()}-ketel, 100 kW, {'binnen' if inside else 'buiten'} de verwarmde zone"
+    gen["auxiliary"] = {"electricallyConnectedDevices": 1, "nominalPowerKw": 100.0, "sourceReference": f"ISSO 54 v2.0 {test_id}: 100 kW"}
+    nta["collectiveConnection"] = {"connectedUsableAreaM2": BUILDING48, "sourceReference": f"ISSO 54 v2.0 {test_id}: 48 appartementen, 4608 m2"}
+    system = nta["distributionSystem"]
+    system["installation"] = "collective"
+    system["connectedStoreys"] = storeys
+    system["pump"] = {"method": "calculated", "heatMeterPresent": False, "sourceReference": f"ISSO 54 v2.0 {test_id}: pompvermogen en EEI onbekend, geen regeling, geen warmtemeters"}
+    hot_water = nta["hotWater"]
+    hot_water["collective"] = {"buildingUsableFloorAreaM2": BUILDING48, "sourceReference": f"ISSO 54 v2.0 {test_id}: 48 appartementen, 4608 m2"}
+    hot_water["generator"] = {"kind": "indirect_boiler", "boiler": "vr" if boiler == "vr" else "hr107", "oil": False, "insideBoundary": inside, "alsoSpaceHeating": True}
+    hot_water["storage"] = [vessel(2000.0, {"method": "unknown_label", "producedFrom2018": True}, 2, inside)]
+    hot_water["circulation"] = {
+        "outerDiameterMm": 28.0,
+        "insulation": "mm20",
+        "fittingsInsulated": True,
+        "unheatedLengthM": 0.0,
+        "floorCount": 12,
+        "connectedDwellings": 48,
+        "pump": {"control": "uncontrolled_or_unknown"},
+        "sourceReference": f"ISSO 54 v2.0 {test_id}: circulatie 28/25, 20 mm isolatie, geen leidingen door onverwarmde ruimten, kleppen en beugels geisoleerd, pomp onbekend zonder regeling",
+    }
+    hot_water["equipmentReference"] = f"ISSO 54 v2.0 {test_id}: gemeenschappelijke installatie met indirect gestookt vat van 2000 l"
+
+
+def direct_storage(project, test_id):
+    """EP-W407c: hot water from a collective directly fired gas storage
+    heater above 150 kW (13.8.4.5.4, 0,50); heating as EP-W407b; the vessel
+    data of EP-W407b do not apply (p. 41)."""
+    collective_hot_water(project, test_id)
+    hot_water = project["ntaCalculation"]["hotWater"]
+    hot_water["generator"] = {"kind": "large_direct_storage", "gasFired": True}
+    hot_water["storage"] = []
+    hot_water["equipmentReference"] = f"ISSO 54 v2.0 {test_id}: gemeenschappelijk direct gestookt vat, vermogen groter dan 150 kW"
+
+
+# EP-W407i: a CHP of 15 kW electric and 30 kW thermal for heating (LT) and,
+# through a 2000 l vessel with insulated T-pieces, for hot water; measured
+# eps_th 0,6 and eps_el 0,3 replace the table 9.31 row (p. 42). Built after
+# 2006 is assumed (the test gives no year; the declared factors replace the
+# row either way).
+def chp48(project):
+    building48(project)
+    declared = {"thermal": 0.6, "electric": 0.3, "declarationReference": "ISSO 54 v2.0 EP-W407i p. 42: gemeten epsilon_th 0,6 en epsilon_el 0,3"}
+    nta = project["ntaCalculation"]
+    nta["generator"] = {
+        "kind": "chp",
+        "chp": {"powerKw": 15.0, "builtAfter2006": True, "lowTemperature": True},
+        "declaredEfficiencies": declared,
+        "auxiliary": {"electricallyConnectedDevices": 1, "nominalPowerKw": 30.0, "sourceReference": "ISSO 54 v2.0 EP-W407i p. 42: thermisch vermogen 30 kW"},
+        "equipmentReference": "ISSO 54 v2.0 EP-W407i p. 42: WKK, 15 kW elektrisch, 30 kW thermisch, LT",
+    }
+    nta["collectiveConnection"] = {"connectedUsableAreaM2": BUILDING48, "sourceReference": "ISSO 54 v2.0 EP-W407i p. 42: 48 appartementen, 4608 m2"}
+    system = nta["distributionSystem"]
+    system["installation"] = "collective"
+    system["connectedStoreys"] = 12
+    system["pump"] = {"method": "calculated", "heatMeterPresent": False, "sourceReference": "distributiepomp, vermogen en EEI onbekend"}
+    hot_water = nta["hotWater"]
+    hot_water["collective"] = {"buildingUsableFloorAreaM2": BUILDING48, "sourceReference": "ISSO 54 v2.0 EP-W407i p. 42: 48 appartementen, 4608 m2"}
+    hot_water["generator"] = {
+        "kind": "chp",
+        "chp": {"powerKw": 15.0, "builtAfter2006": True, "lowTemperature": True},
+        "alsoSpaceHeating": True,
+        "declaredEfficiencies": declared,
+        "equipmentReference": "ISSO 54 v2.0 EP-W407i p. 42: de WKK verwarmt een vat van 2000 l",
+    }
+    # 13.8.4.7.4 (2022 p. 621): the losses of the indirectly heated vessel
+    # follow 13.6, as for a boiler; label not given, produced from 2018.
+    hot_water["storage"] = [vessel(2000.0, {"method": "unknown_label", "producedFrom2018": True}, 2, False)]
+    hot_water["equipmentReference"] = "ISSO 54 v2.0 EP-W407i p. 42: WKK met voorraadvat van 2000 l, T-stukken geisoleerd"
+
+
+def apartment_of(change):
+    """EP-W407e-h: the installation of a-d for one middle apartment."""
+
+    def apply(project):
+        change(project)
+        nta = project["ntaCalculation"]
+        # One apartment: the area-scaled inputs of building48 go back to one
+        # dwelling of 96 m2; the collective areas keep the whole building.
+        scale(project, area=96.0, volume=259.2, height=5.4, roof=48.0, floor=48.0, south=43.2, north=43.2, east_west=32.4, windows_=4, perimeter=28.0, storeys=2, building_height=32.4)
+        middle_apartment(project)
+        dwellings(project, 1)
+        nta.pop("identicalSystems", None)
+        if nta["distributionSystem"].get("installation") == "collective":
+            nta["distributionSystem"]["connectedStoreys"] = 12
+
+    return apply
+
+
+W407 = [
+    ("a", individual48),
+    ("b", lambda p: (building48(p), collective_hot_water(p, "EP-W407b"))),
+    ("c", lambda p: (building48(p), direct_storage(p, "EP-W407c"))),
+    ("d", lambda p: (building48(p), collective_hot_water(p, "EP-W407d", boiler="vr", inside=True))),
+]
+CASES += [(f"EPW407{letter}", 41, variant(change)) for letter, change in W407]
+CASES += [(f"EPW407{chr(ord(letter) + 4)}", 42, variant(apartment_of(change))) for letter, change in W407]
+CASES += [("EPW407i", 42, variant(chp48))]
+
+
 def case(test_id, page, patch):
     utility = test_id.startswith("EPU")
     metrics = UTILITY_METRICS if utility else RESIDENTIAL_METRICS

@@ -16,7 +16,7 @@ De gate controleert:
 - **Referentiesuites:**
   - de openbare rapporten A–L, als regressie op de vastgelegde uitkomsten van deze kern; de verschillen met de gepubliceerde waarden zijn per post verklaard;
   - de RVO-voorbeeldwoningen;
-  - 240 van de 266 ISSO 54 v2.0-deeltests, als *pending* tot de verwachte uitkomsten beschikbaar zijn.
+  - 258 van de 266 ISSO 54 v2.0-deeltests, als *pending* tot de verwachte uitkomsten beschikbaar zijn.
 - **Service, API, MCP en desktopcommando's.**
 - **Frontend (Vitest):** de end-to-end werkstroom, formulierdekking, formulierbewaking (formulierstanden door de kern), toegankelijkheid en vertalingen.
 
