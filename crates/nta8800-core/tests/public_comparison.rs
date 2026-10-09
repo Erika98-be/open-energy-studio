@@ -709,3 +709,56 @@ fn case_m_small_dwelling_with_cooling_under_nta_8800_2022() {
     assert!((need - 2449.0).abs() < 1.0, "{need}");
     assert_eq!(performance["tojuliMaxK"].as_f64(), Some(0.0));
 }
+
+/// Case N, a supermarket (2 064,26 m² retail over a basement entrance,
+/// ground floor and first floor, above a strongly ventilated car park),
+/// calculated on 02-02-2021 with Uniec 3.0.7.1 (NTA 8800:2020+A1);
+/// published 55,98 / −27,18 / 126,9 against limits 95,31 / 60,00 / 30,0.
+/// The strongly ventilated spaces count as outside (6.3, 2020+A1 p. 136)
+/// without solar gain, as the report gives them no orientation. The basement
+/// walls (116,07 m², z 3,65 m) are the heated-basement walls of the entrance
+/// floor; with them in A_ls (f_ls 0,7) the kernel's A_ls/A_g (2,64) and Bbl
+/// limits equal the report's. Table 7.10 row 250–500 kg/m², open ceiling
+/// (180 kJ/(m²K), 2020+A1 p. 180). Hot water (3 175 kWh), the VRF COP 2,80
+/// and PV on the meter (146 257 kWh, panel area 1,63 m² taken back from the
+/// yield) agree. BENG 2 (Δ kWh · 1,45 / A_g): heating +2 892 (+2,03; 9,9 %
+/// more heat), its auxiliaries +95 (+0,07), cooling +1 526 (+1,07; the
+/// literal 10.15 loss of 3 026 kWh cold), the 10.87 control energy +88
+/// (+0,06), lighting +1 407 (+0,99; P_n rounded up per annex X, 17 546 →
+/// 18 000 W) and fans −2 881 (−2,02; the report takes q_V;ODA;req of the
+/// cooling balance in 11.139, the kernel that of the heating balance).
+#[test]
+fn case_n_supermarket_under_nta_8800_2020_a1() {
+    let value: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-n.json"
+    ))
+    .unwrap();
+    assert_eq!(value["ntaCalculation"]["normVersion"], "2020+A1");
+    let (performance, indicators) = run_edition(&value, "2020+A1");
+    assert_indicators("N 2020+A1", indicators, [54.57, -24.99, 123.6]);
+    let limits = &performance["bblCheck"]["limits"];
+    let limit = |key: &str| limits[key].as_f64().unwrap();
+    assert!((limit("energyNeedMaxKwhPerM2") - 95.31).abs() < 0.005);
+    assert!((limit("primaryFossilMaxKwhPerM2") - 60.0).abs() < 0.005);
+    assert!((limit("renewableShareMinPercent") - 30.0).abs() < 0.005);
+    let ratio = performance["bblCheck"]["lossAreaRatio"].as_f64().unwrap();
+    assert!((ratio - 2.64).abs() < 0.005, "{ratio}");
+    assert_eq!(
+        performance["spaceHeating"]["generationEfficiency"].as_f64(),
+        Some(2.8)
+    );
+    assert!((used_kwh(&performance, "hotWater") - 3175.0).abs() < 1.0);
+    assert!((used_kwh(&performance, "lighting") - 60961.0).abs() < 1.0);
+    assert!((used_kwh(&performance, "ventilation") - 2283.0).abs() < 1.0);
+    let pv: f64 = performance["pvSystems"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|system| system["annualKwh"].as_f64().unwrap())
+        .sum();
+    assert!((pv - 146257.0).abs() < 1.0, "{pv}");
+    let installed = performance["lighting"][0]["lightingZones"][0]["installedPowerW"]
+        .as_f64()
+        .unwrap();
+    assert_eq!(installed, 18000.0);
+}

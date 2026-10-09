@@ -456,9 +456,37 @@ fn loss_area_weight(boundary: ThermalBoundary) -> Option<f64> {
     }
 }
 
-/// Geometry of the project without any NTA block; `None` for an unreadable project.
+/// The walls of a heated basement, z·P of 8.39 (with z of 8.42 over the wall
+/// parts), border the ground and count in `A_ls` with f_ls 0,7 (6.7.3 c,
+/// 2020+A1 p. 144; 2025+C1 p. 162). They are no project surface of their
+/// own: the floor's `groundFloors` entry carries them. 0 without a heated
+/// basement or with an unusable depth.
+fn basement_wall_loss_area(data: &GroundFloorData) -> f64 {
+    let Some(basement) = &data.heated_basement else {
+        return 0.0;
+    };
+    let perimeter = data.exposed_perimeter_m;
+    let wall_area = basement.depth(perimeter) * perimeter;
+    if wall_area.is_finite() && wall_area > 0.0 {
+        0.7 * wall_area
+    } else {
+        0.0
+    }
+}
+
+/// Geometry of the project; the NTA block is read only for the heated
+/// basement walls of its ground floors. `None` for an unreadable project.
 pub fn project_geometry(project_value: &Value) -> Option<GeometrySummary> {
     let project: ProjectInput = serde_json::from_value(project_value.clone()).ok()?;
+    let basements: HashMap<String, GroundFloorData> = project_value
+        .pointer("/ntaCalculation/groundFloors")
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or_default()
+        .iter()
+        .filter_map(|item| serde_json::from_value::<GroundFloorData>(item.clone()).ok())
+        .map(|item| (item.surface_id.clone(), item))
+        .collect();
     let mut floor = 0.0;
     let mut loss = 0.0;
     let mut envelope = 0.0;
@@ -475,6 +503,17 @@ pub fn project_geometry(project_value: &Value) -> Option<GeometrySummary> {
                         let area = surface.get("area").and_then(Value::as_f64).unwrap_or(0.0);
                         loss += weight * area;
                         envelope += area;
+                    }
+                    if boundary == ThermalBoundary::Ground {
+                        if let Some(data) = surface
+                            .get("id")
+                            .and_then(Value::as_str)
+                            .and_then(|id| basements.get(id))
+                        {
+                            let walls = basement_wall_loss_area(data);
+                            loss += walls;
+                            envelope += walls / 0.7;
+                        }
                     }
                 }
                 None => unclassified += 1,
@@ -3476,6 +3515,7 @@ fn derive_input(
                     match ground_data.get(id) {
                         Some(data) => {
                             used_ground.insert(id.to_owned());
+                            loss_area += basement_wall_loss_area(data);
                             ground_floors.push(SlabOnGround {
                                 id: id.to_owned(),
                                 area_m2: surface.get("area").and_then(Value::as_f64).unwrap_or(0.0),
@@ -6653,6 +6693,40 @@ mod tests {
         assert!((geometry.loss_area_m2 - 232.8).abs() < 1e-9);
         assert!((geometry.loss_area_ratio.unwrap() - 2.425).abs() < 1e-9);
         assert_eq!(geometry.unclassified_surface_count, 0);
+    }
+
+    #[test]
+    fn heated_basement_walls_count_in_the_loss_area() {
+        // 6.7.3 c (2020+A1 p. 144, 2025+C1 p. 162): the walls of a heated
+        // basement border the ground, f_ls 0,7, over z·P of 8.39 (public
+        // case N: A_ls 5 457,41 m² as printed only with them).
+        let loss = |value: &Value| {
+            let result = assess_project_performance(value);
+            (
+                result.derived_input.unwrap().loss_area_m2.unwrap(),
+                result.geometry.unwrap(),
+            )
+        };
+        let base = project();
+        let (derived, geometry) = loss(&base);
+        let mut value = base.clone();
+        let perimeter = value["ntaCalculation"]["groundFloors"][0]["exposedPerimeterM"]
+            .as_f64()
+            .unwrap();
+        value["ntaCalculation"]["groundFloors"][0]["heatedBasement"] = serde_json::json!({
+            "wallDepths": [
+                { "lengthM": perimeter / 2.0, "depthM": 2.0 },
+                { "lengthM": perimeter / 2.0, "depthM": 0.0 }
+            ],
+            "wallResistanceM2kPerW": 3.5
+        });
+        let walls = 0.7 * 1.0 * perimeter;
+        let (with_derived, with_geometry) = loss(&value);
+        assert!((with_derived - derived - walls).abs() < 1e-9);
+        assert!((with_geometry.loss_area_m2 - geometry.loss_area_m2 - walls).abs() < 1e-9);
+        assert!(
+            (with_geometry.envelope_area_m2 - geometry.envelope_area_m2 - perimeter).abs() < 1e-9
+        );
     }
 
     #[test]
