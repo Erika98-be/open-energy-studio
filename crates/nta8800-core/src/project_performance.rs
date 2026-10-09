@@ -6128,8 +6128,7 @@ mod tests {
             let result = if borrowed {
                 serde_path_to_error::deserialize::<_, NtaCalculationInput>(candidate).err()
             } else {
-                serde_path_to_error::deserialize::<_, NtaCalculationInput>(candidate.clone())
-                    .err()
+                serde_path_to_error::deserialize::<_, NtaCalculationInput>(candidate.clone()).err()
             };
             result.map(|error| (error.path().to_string(), error.inner().to_string()))
         };

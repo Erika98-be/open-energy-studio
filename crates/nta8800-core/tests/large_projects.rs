@@ -506,7 +506,10 @@ fn benchmark_large_projects() {
     }
     let dense = dense_utility_building();
     for edition in ["2020+A1", "2022", "2023", "2024", "2025+C1"] {
-        row(&format!("utiliteit dicht ({edition})"), in_edition(&dense, edition));
+        row(
+            &format!("utiliteit dicht ({edition})"),
+            in_edition(&dense, edition),
+        );
     }
     for parts in [1usize, 5, 10, 20] {
         let mut project = scaled_case_h(25);
@@ -590,8 +593,13 @@ fn blanks_in_a_dense_building_are_found_within_budget() {
     let elapsed = start.elapsed();
     assert_eq!(result.status, "incomplete");
     assert_eq!(result.gaps.len(), 10, "{:?}", result.gaps);
-    assert!(result.gaps.iter().all(|gap| gap.code == "nta_value_missing"
-        && gap.path.ends_with("movableShading.control")));
+    assert!(
+        result
+            .gaps
+            .iter()
+            .all(|gap| gap.code == "nta_value_missing"
+                && gap.path.ends_with("movableShading.control"))
+    );
     let limit = budget(45, 5);
     assert!(elapsed < limit, "ten blanks took {elapsed:?}");
 }
@@ -607,9 +615,6 @@ fn dense_survey_calculates_within_budget() {
     let limit = budget(15, 2);
     assert!(elapsed < limit, "dense survey took {elapsed:?}");
 }
-
-
-
 
 /// Writes the serialized result of every project fixture (as is, with
 /// blanks, in every edition) to `$NTA_SNAPSHOT_DIR`, to compare outputs
@@ -672,7 +677,11 @@ fn snapshot_outputs() {
             Value::Null;
     }
     let result = assess_project_performance(&dense);
-    std::fs::write(dir.join("dense.blanks.json"), serde_json::to_vec(&result).unwrap()).unwrap();
+    std::fs::write(
+        dir.join("dense.blanks.json"),
+        serde_json::to_vec(&result).unwrap(),
+    )
+    .unwrap();
     println!("{written} outputs written");
 }
 
@@ -692,4 +701,3 @@ fn collect_number_paths(value: &Value, pointer: String, out: &mut Vec<String>) {
         _ => {}
     }
 }
-
