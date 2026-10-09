@@ -848,7 +848,7 @@
       "system": "air_heating",
       "balancing": "not_applicable",
       "control": "individual_room_thermostats",
-      "sourceReference": "openbare bron Uniec 3.0.7.1 printout (Lidl-supermarkt met parkeerkelder 2064,26 m2, 02-02-2021): luchtverwarming, naverwarming van ingaande lucht, vertrekhoogte 6 < h <= 8 m, autom. temperatuurregeling per ruimte (dT type regeling 2,5 K, automatische regeling -0,5 K)",
+      "sourceReference": "openbare bron Uniec 3.0.7.1 printout (Lidl-supermarkt met parkeerkelder 2064,26 m2, 02-02-2021): luchtverwarming, naverwarming van ingaande lucht, vertrekhoogte 6 < h <= 8 m, autom. temperatuurregeling per ruimte (dT type regeling 2,5 K, automatische regeling -0,5 K); vertrekhoogte > 4 m dus 9.3.3.7 (2020+A1 p. 277-280): h_R 7 m (midden van de klasse), toevoerpositie onbekend dus hoogste gradient 1,0 K/m van tabel 9.8, dT_ctr,1 2,5 K van tabel 9.10 (gelijk aan de uitdraai)",
       "airHeaters": {
         "kind": {
           "kind": "indirect",
@@ -860,8 +860,10 @@
       },
       "edition2023": {
         "kind": {
-          "type": "dwelling_air",
-          "control": "room"
+          "type": "high_room",
+          "heightM": 7.0,
+          "emitter": "warm_air_horizontal",
+          "control": "controlled"
         },
         "roomAutomation": "individual_per_room",
         "pipeSystem": "not_hydronic"

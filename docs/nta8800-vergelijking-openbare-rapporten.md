@@ -716,7 +716,27 @@ Alles komt letterlijk uit de uitdraai, behalve waar hieronder anders staat.
 | PV op de meter | 3 066 kWh | 3 066 kWh | 0,00 |
 | **totaal** | | | **+21,55** (gemeten +21,60) |
 
-De eisen van het Bbl en A_ls/A_g zijn gelijk aan die van het rapport. TOjuli is 0 (actieve koeling). BENG 3 ligt lager (80,6 tegen 88,3), omdat er meer elektriciteit tegenover dezelfde hernieuwbare energie staat (de kern 199,09 tegen 198,54 kWh/m²).
+De eisen van het Bbl en A_ls/A_g zijn gelijk aan die van het rapport. TOjuli is 0 (actieve koeling).
+
+### BENG 3 per term (9 oktober 2026)
+
+BENG 3 is E_ren / (E_ren + E_P) (5.4). Het rapport drukt E_ren per dienst en E_P als primair gebruik min opgewekte elektriciteit.
+
+| Term | Rapport | Kern | Verschil |
+|---|---|---|---|
+| E_ren verwarming (omgevingswarmte warmtepomp) | 3 793 kWh | 3 817 kWh | +24, uit de +11 kWh elektriciteit (× (3,15 − 1)) |
+| E_ren tapwater (omgevingswarmte) | 386 kWh | 386 kWh | 0 |
+| E_ren koeling | 0 kWh | 0 kWh | 0, in beide telt de koeling geen omgevingswarmte |
+| E_ren elektriciteit (PV, × 1,45) | 4 446 kWh | 4 446 kWh | 0 |
+| **E_ren totaal** | **8 625 kWh** (198,54 kWh/m²) | **8 649 kWh** (199,09 kWh/m²) | +24 (+0,3 %) |
+| primair gebruik incl. hulpenergie | 5 586 kWh | 6 525 kWh | +938 |
+| min opgewekte elektriciteit | 4 446 kWh | 4 446 kWh | 0 |
+| **E_P** | **1 140 kWh** | **2 078 kWh** | +938 |
+| BENG 3 | 88,3 % | 80,6 % | |
+
+- **E_P.** De +938 kWh primair is 647 kWh elektriciteit × 1,45. Daarvan komt +547 uit de koeling (10.15 letterlijk) en +88 uit de regelenergie van 10.87; verwarming en tapwater samen +12. De primaire factor van elektriciteit is in beide 1,45.
+- **Gevolg.** Met de E_P van het rapport geeft de E_ren van de kern 8 649 / (8 649 + 1 140) = 88,35 %, tegen 88,3 % in het rapport. Het hele verschil op BENG 3 volgt dus uit BENG 2, net als bij I. Geen hernieuwbare term wijkt af. Met het verlies van 10.15 op 0,15 begrensd en zonder de regelenergie van 10.87 zou de kern ongeveer 1 143 kWh E_P rekenen, BENG 2 26,3 en BENG 3 88,3 %.
+- **Test.** `case_m_small_dwelling_with_cooling_under_nta_8800_2022` controleert nu ook de omgevingswarmte van verwarming en tapwater, E_ren en BENG 3 met de E_P van het rapport.
 
 ### Wat M toevoegt
 
@@ -747,7 +767,7 @@ Geval N is een supermarkt van 2 064,26 m² winkelfunctie, berekend op 02-02-2021
 |---|---|---|---|
 | rapport (Uniec 3.0.7.1) | 55,98 | −27,18 | 126,9 |
 | eis (Bbl, ook in de kern) | 95,31 | 60,00 | 30,0 |
-| kern, uitgave 2020+A1 | 54,57 | −24,99 | 123,6 |
+| kern, uitgave 2020+A1 | 54,57 | −24,31 | 122,6 |
 
 ### Kernfout: wanden van een verwarmde kelder niet in A_ls
 
@@ -767,6 +787,31 @@ Het restverschil bij G is opgelost. 6.7.2 telt in A_ls de geprojecteerde oppervl
 - **Formulier.** "Oppervlakte kelderwanden onder maaiveld ΣA_T;bw" bij de verwarmde kelder; leeg betekent z × P.
 - **Tests.** `heated_basement_forfait_takes_the_entered_wall_area` (`ground.rs`), een uitbreiding van `heated_basement_walls_count_in_the_loss_area` en `case_g_under_nta_8800_2024`, die nu ook de eis 64,52 controleert.
 
+### Afgifte bij een hoge ruimte (9 oktober 2026)
+
+De fixture gaf de luchtverwarming eerst de route van 9.3.3.4, met Δθ_ctr 2,5 en Δθ_roomaut −0,5 uit de uitdraai, samen 2,0 K. Die paragraaf geldt voor woningen tot 4 m vertrekhoogte, en is dus een coderingsfout. De ruimte is 6–8 m hoog. Dan geeft 9.3.3.7 afwijkende waarden voor Δθ_str, Δθ_ctr, Δθ_emb en Δθ_rad (2020+A1 p. 268 en 277–280).
+
+- **Δθ_ctr.** Volgens tabel 9.10 is Δθ_ctr,1 2,5 K voor een niet-gecertificeerde regeling. Het rapport drukt dezelfde 2,5 K af; ook Uniec rekent dus met 9.3.3.7.
+- **Δθ_str.** Formule 9.19 geeft 10 · θ'_str / 16 · (0,5 · h_R − 1,1).
+  - De uitdraai noemt de toevoerpositie niet. Daarom geldt de hoogste gradiënt van de hoofdcategorie in tabel 9.8: warme lucht zonder voorziening, horizontaal, 1,0 K/m (p. 277).
+  - h_R is 7 m, het midden van de klasse 6–8 m. Dat geeft 1,5 K.
+- **Δθ_emb** is 0 voor warme lucht (tabel 9.10). Δθ_roomaut kent 9.3.3.7 niet; de −0,5 K van de uitdraai komt uit 9.3.3.4.
+- **Samen 4,0 K.** Formule 9.16 begrenst het verlies op 0,15 van de behoefte, en die grens wordt in elke maand bereikt. h_R en de gradiënt binnen de klasse maken daardoor niet uit: elke h_R tussen 6 en 8 m met gradiënt 1,0 geeft hetzelfde, net als de plafondtoevoer (0,60 K/m) bij 7 m.
+
+| | vóór (9.3.3.4) | na (9.3.3.7) | rapport |
+|---|---|---|---|
+| Δθ_int;inc | 2,0 K | 4,0 K | – |
+| afgifteverlies | 9 385 kWh (11,7 %) | 12 030 kWh (15 %) | – |
+| warmte voor het systeem | 89 980 kWh | 92 625 kWh | 81 882 kWh |
+| verwarming, elektrisch | 32 136 kWh | 33 080 kWh | 29 244 kWh |
+| BENG 1 / 2 / 3 | 54,57 / −24,99 / 123,6 | 54,57 / −24,31 / 122,6 | 55,98 / −27,18 / 126,9 |
+
+**Wat dit zegt over het verschil in verwarming.** Uniec rekent met minstens 2,5 − 0,5 + Δθ_str ≥ 3,2 K en zit daarmee op of vlak bij de grens van 15 %. Dan is de warmtebehoefte van het werkelijke systeem bij Uniec ongeveer 81 882 / 1,15 ≈ 71 000 kWh, tegen 80 201 in de kern. Zonder Δθ_str (2,0 K, 11,7 %) is het ongeveer 73 000 kWh. Het verschil van 9 à 13 % zit dus in de behoefte, niet in de afgifte.
+
+- **De behoefte in de kern.** Transmissie 156 528 kWh, ventilatie en infiltratie 24 482 kWh (infiltratie in januari 630 m³/h, mechanische toevoer 876 m³/h op 18 °C na de verwarmingsbatterij) en benutte winst 100 728 kWh.
+- **BENG 1.** Op de vaste C1-ventilatie ligt de kern 2,5 % láger dan het rapport. Het verschil ontstaat dus in het werkelijke systeem: ventilatie, infiltratie en de LBK.
+- **Uitdraai.** Die geeft geen behoefte per maand of per post, dus de oorzaak blijft open.
+
 ### Invoer
 
 Alles komt letterlijk uit de uitdraai, behalve waar hieronder anders staat.
@@ -777,7 +822,7 @@ Alles komt letterlijk uit de uitdraai, behalve waar hieronder anders staat.
 - **Lineaire koudebruggen.** Vierendertig aansluitingen staan per vlak in de fixture, met de ψ uit de uitdraai.
 - **Souterrain.** Vloer 204,37 m², Rc 3,70, P 70,00 m, ψ 0,50 over de hele omtrek. Kelderwanden 116,07 m², Rc 3,70, z 3,65 m. In de kern is z·P de wandoppervlakte (8.39). De fixture geeft daarom 31,80 m van de omtrek een diepte van 3,65 m en de rest (de wanden naar de parkeerkelder) 0 m (8.42). Zo is z·P 116,07 m².
 - **Warmtecapaciteit.** "hsb, sfb of staalskeletbouw met staalbeton of niet-massieve betonnen vloeren", geen of open plafond: rij 250–500 kg/m² van tabel 7.10, 180 kJ/(m²K) (2020+A1 p. 179–180).
-- **Verwarming.** VRF-luchtwarmtepomp forfaitair, buitenlucht naar binnenlucht, COP 2,80. Luchtverwarming met naverwarming van de ingaande lucht, vertrekhoogte 6–8 m. Het rapport drukt Δθ 2,5 K voor de regeling en −0,5 K voor de automatische regeling per ruimte. De fixture geeft dat met de luchtverwarming van 9.3.3.4 (Δθ_ctr 2,5, Δθ_roomaut −0,5); tabel 9.7 (naverwarming, luchttemperatuur in de ruimte) zou 1,8 K geven. De afgifteventilatoren zijn indirect, AC, met terugkeer van warme lucht (tabel 9.13). Geen watergedragen distributie.
+- **Verwarming.** VRF-luchtwarmtepomp forfaitair, buitenlucht naar binnenlucht, COP 2,80. Luchtverwarming met naverwarming van de ingaande lucht, vertrekhoogte 6–8 m. Het rapport drukt Δθ 2,5 K voor de regeling en −0,5 K voor de automatische regeling per ruimte. Voor een ruimte hoger dan 4 m gelden de afwijkende waarden van 9.3.3.7 (2020+A1 p. 277–280); zie [Afgifte bij een hoge ruimte](#afgifte-bij-een-hoge-ruimte-9-oktober-2026). De afgifteventilatoren zijn indirect, AC, met terugkeer van warme lucht (tabel 9.13). Geen watergedragen distributie.
 - **Ventilatie.** D.3, centrale WTW met CO2-sturing. Roterende warmtewisselaar 0,70, 100 % bypass, constant-volumeregeling. LBK buiten de thermische zone, met verwarmings- en koelbatterij; kanalen ≤ 20 m en geïsoleerd (tabel 11.19 situatie 1). Geïnstalleerd 1 400 dm³/s. Terugregeling tot 40 % op debietregeling, automatische passieve koelregeling. Forfaitaire gelijkstroomventilatoren. q_v10;lea;ref 0,42.
 - **Koeling.** Compressiekoeling forfaitair (EER 3,00), directe expansie in de LBK, luchtkoeling. Het rapport drukt −2,5 K en +0,5 K; de fixture geeft dat als regeling per ruimte, niet gecertificeerd, met directe expansie. Tien afgifteventilatoren van 10 W.
 - **Tapwater.** Elektrische boiler forfaitair, één vat van 10 l, label A, warme aansluiting ongeïsoleerd.
@@ -790,15 +835,15 @@ Elektriciteit in kWh/jr; tussen haakjes de geleverde warmte of koude. Δ BENG 2 
 
 | Post | Rapport | Kern | Δ BENG 2 |
 |---|---|---|---|
-| verwarming | 29 244 (81 882) | 32 136 (89 980) | +2,03 |
-| hulpenergie verwarming | 1 721 | 1 816 | +0,07 |
+| verwarming | 29 244 (81 882) | 33 080 (92 625) | +2,69 |
+| hulpenergie verwarming | 1 721 | 1 829 | +0,08 |
 | tapwater | 3 175 | 3 175 | 0,00 |
 | koeling | 8 380 (25 140) | 9 906 (29 719) | +1,07 |
 | hulpenergie koeling | 314 | 402 | +0,06 |
 | ventilatoren | 5 164 | 2 283 | −2,02 |
 | verlichting | 59 554 | 60 961 | +0,99 |
 | PV op de meter | 146 257 | 146 257 | 0,00 |
-| **totaal** | | | **+2,20** (gemeten +2,19) |
+| **totaal** | | | **+2,87** (gemeten +2,87) |
 
 - **Ventilatoren.** 5 164 kWh is tot op de kWh f_SFP 0,125 · f_systype 2 · 2 122 m³/h over het hele jaar, gedeeld door f_prac;vent 0,9. Die 2 122 m³/h is q_V;ODA;req van de koudebalans, met maximale benutting van de capaciteit (τ_sysC). De kern neemt die van de warmtebalans, 938 m³/h, en rekent 2 283 kWh. 11.139 (2020+A1 p. 495) zegt niet welke van de twee geldt; zie [vraag 5 aan NEN](nta8800-vragen-nen.md).
 - **Verlichting.** Het rapport rekent met P_n 17 546 W: 17 546 × 3 100 h + 5 161 kWh parasitair = 59 554 kWh. De kern rondt P_n af op twee significante cijfers naar boven volgens bijlage X (2020+A1 p. 631), dus 18 000 W. Dat is hetzelfde verschil als bij I. De afronding staat in 14.3.2, de route met het werkelijk geïnstalleerde vermogen (14.8/14.9), en geldt dus juist voor een opgegeven P_n, niet alleen voor de forfaitaire route van 14.3.4. De zin staat letterlijk gelijk in elke uitgave (2020+A1 p. 631, 2023 p. 646, 2024 14.3.2, 2025+C1 p. 660). Dit is geen open lezing; de kern blijft afronden en er is geen vraag aan NEN voor nodig.
@@ -806,12 +851,12 @@ Elektriciteit in kWh/jr; tussen haakjes de geleverde warmte of koude. Δ BENG 2 
 - **Koeling.** De kern rekent 29 719 kWh koude: netto koudebehoefte 10 242, afgifteverlies volgens 10.15 3 026 (30 %), ontvochtiging 16 263 (12.3, directe expansie als 6/12 °C) en de LBK 189. Het rapport noemt 25 140 kWh.
   - Met het verlies van 10.15 op 0,15 begrensd zou de kern 28 229 kWh koude rekenen, 0,35 minder op BENG 2.
   - Bij I telde Uniec 3.0.9.3 ontvochtiging niet mee. Hier ligt de koude van het rapport ruim boven de netto behoefte van de kern plus 15 % (11 778 kWh), dus Uniec 3.0.7.1 telt hier waarschijnlijk wel ontvochtiging. Hoeveel, is uit de uitdraai niet af te leiden.
-- **Verwarming.** De kern rekent 80 201 kWh warmtebehoefte, 9 385 kWh afgifteverlies (Δθ 2,0 K, 11,7 %) en 394 kWh voor de LBK. Het rapport geeft alleen de warmte voor het systeem, 81 882 kWh. De hulpenergie schaalt mee: de opwekker 0,51 % van de warmte in beide, de afgifteventilatoren 1 361 tegen 1 306 kWh (591,6 W in het rapport). Welk deel van de 9,9 % meer warmte uit de behoefte en welk uit de afgifte komt, is uit de uitdraai niet vast te stellen. BENG 1 ligt in de kern 2,5 % lager; dat wijst erop dat het verschil vooral in de afgifte zit.
+- **Verwarming.** De kern rekent 80 201 kWh warmtebehoefte, 12 030 kWh afgifteverlies (9.3.3.7, Δθ 4,0 K, in elke maand op de grens 0,15 van 9.16) en 394 kWh voor de LBK, samen 92 625 kWh. Het rapport geeft alleen de warmte voor het systeem, 81 882 kWh (13,1 % minder). De hulpenergie schaalt mee: de opwekker 0,51 % van de warmte in beide. Het verschil zit in de behoefte, niet in de afgifte; zie [Afgifte bij een hoge ruimte](#afgifte-bij-een-hoge-ruimte-9-oktober-2026).
 - **BENG 1** is 54,57 tegen 55,98 (−2,5 %), op de vaste C1-ventilatie van 5.3: warmte 93 686 en koude 18 952 kWh. Het rapport geeft geen behoefte per dienst.
-- **BENG 3** ligt lager (123,6 tegen 126,9): er staat meer elektriciteit tegenover dezelfde PV-opbrengst.
+- **BENG 3** ligt lager (122,6 tegen 126,9). De elektriciteit van PV is in beide 212 073 kWh primair; de omgevingswarmte is 59 544 tegen 52 639 kWh, omdat de kern meer warmte levert. De rest volgt uit BENG 2: er staat meer elektriciteit tegenover dezelfde PV-opbrengst.
 
 ### Wat N toevoegt
 
 - **Een fout in de kern** (A_ls zonder kelderwanden), gevonden doordat de eis van het rapport tot op twee decimalen te volgen is.
 - **Een derde lezing.** Naast 10.15 en 10.87 rekent Uniec de forfaitaire ventilatoren met de luchtvolumestroom van de koudebalans. Bij een utiliteitsgebouw met passieve koeling via de ventilatie weegt dat even zwaar als de koeling zelf, maar met het andere teken: −2,02 tegen +1,13 voor de koeling met haar hulpenergie.
-- **De eerste supermarkt en de eerste sterk geventileerde ruimten.** Na verklaring per post blijven verwarming (+2,03, oorzaak niet uit de uitdraai te halen) en de verdeling van de koude (+1,07) over.
+- **De eerste supermarkt en de eerste sterk geventileerde ruimten.** Na verklaring per post blijven verwarming (+2,69, de warmtebehoefte van het werkelijke systeem, niet uit de uitdraai te halen) en de verdeling van de koude (+1,07) over.
