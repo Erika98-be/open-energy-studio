@@ -40,13 +40,14 @@ import { downloadModelIFC } from './core/ifc/IFCModelExporter';
 import { downloadUNIEC3, openUNIEC3FileDialog } from './core/io/UNIEC3Exporter';
 import { downloadVABI, openVABIFileDialog } from './core/io/VABIElementsBridge';
 import { withImportRecord } from './core/io/importLog';
-import { serializeProject, deserializeProjectFile, compareKernelStamp, describeStamp } from './core/io/ProjectSerializer';
+import { serializeProject, deserializeProjectFile, compareKernelStamp, describeStamp, ProjectFileTooNewError } from './core/io/ProjectSerializer';
+import { confirmCloseAll, isMissingFileError, saveProjectText, type ClosingDocument } from './core/io/projectFiles';
 import { migrateLegacyRelabel, relabelNoticeKey } from './core/nta/Registration';
 import { normalizeProject } from './core/energy/normalizeProject';
 import { stepStatuses } from './core/nta/stepStatus';
 import { adjacentStep, routeFromHash, routeToHash, stepDefinition, type Route } from './core/navigation/routes';
 import { selectionForPath } from './core/navigation/projectPaths';
-import { isTauri } from '@tauri-apps/api/core';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { ConfirmProvider, Dialog, ToastProvider, useConfirm, useToast } from './components/ui';
 import { stampProject } from './core/io/KernelStampClient';
 import { forgetRecentProject, readRecentProjects, recordRecentProject } from './core/io/recentProjects';
@@ -442,48 +443,48 @@ function AppContent() {
     };
   }, []);
 
-  // ── Helper: write project to disk (returns filePath or null if cancelled) ──
+  // ── Helper: write project to disk ──
+  // Returns the saved path, 'browser-download', or null when the save was
+  // cancelled or failed. A failed desktop write is shown and never reported
+  // as a save (the document stays dirty, its tab stays open).
   const writeProjectToDisk = useCallback(async (
     project: IProject,
     existingPath: string | null,
     forcePrompt: boolean,
   ): Promise<string | null> => {
     const json = serializeProject(project, await stampProject(project));
-
-    // Save directly if we have a path and aren't forcing a prompt
-    if (existingPath && !forcePrompt) {
-      try {
-        const { writeTextFile } = await import('@tauri-apps/plugin-fs');
-        await writeTextFile(existingPath, json);
-        return existingPath;
-      } catch { /* fall through to Save As dialog */ }
+    const outcome = await saveProjectText(json, `${project.name || 'project'}.oes.json`, existingPath, forcePrompt, {
+      desktop: isTauri(),
+      pickPath: async (defaultPath) => {
+        const { save } = await import('@tauri-apps/plugin-dialog');
+        return save({ defaultPath, filters: [{ name: 'OES Project', extensions: ['oes.json', 'json'] }] });
+      },
+      write: (path, text) => invoke<void>('save_project', { path, text }),
+      download: (fileName, text) => {
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      },
+    });
+    switch (outcome.kind) {
+      case 'saved': return outcome.path;
+      case 'downloaded': return 'browser-download';
+      case 'cancelled': return null;
+      case 'failed':
+        toast.show({
+          tone: 'error',
+          title: t('app.toast.saveFailed'),
+          message: t('project.saveFailed', { message: outcome.message }),
+        });
+        return null;
     }
-
-    // Show Save As dialog
-    try {
-      const { save } = await import('@tauri-apps/plugin-dialog');
-      const { writeTextFile } = await import('@tauri-apps/plugin-fs');
-      const filePath = await save({
-        defaultPath: existingPath || `${project.name || 'project'}.oes.json`,
-        filters: [{ name: 'OES Project', extensions: ['oes.json', 'json'] }],
-      });
-      if (!filePath) return null; // User cancelled
-      await writeTextFile(filePath, json);
-      return filePath;
-    } catch {
-      // Browser fallback (non-Tauri)
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${project.name || 'project'}.oes.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      return 'browser-download';
-    }
-  }, []);
+  }, [t, toast]);
 
   // ── New ──
   const handleNewProject = useCallback(() => {
@@ -523,11 +524,19 @@ function AppContent() {
   // saved location (desktop) or null (browser: a later save downloads a copy).
   const openProjectText = useCallback(async (json: string, filePath: string | null, label: string) => {
     try {
-      const { project: rawProject, kernel: saved } = deserializeProjectFile(json);
+      const { project: rawProject, kernel: saved, unknownFields, fileVersion } = deserializeProjectFile(json);
       const opened = normalizeProject(rawProject);
       const { project: loaded, missing, markedForReview } = migrateLegacyRelabel(opened);
       docDispatch({ type: 'DOC_OPEN', payload: { id: crypto.randomUUID(), project: loaded, filePath } });
       if (filePath) rememberRecent(filePath, loaded);
+      if (unknownFields && unknownFields.length > 0) {
+        // A newer 1.x file: its extra fields are not written back on save.
+        toast.show({
+          tone: 'warn',
+          title: t('app.toast.fileNewer'),
+          message: t('project.fileNewerFields', { version: fileVersion ?? '', fields: unknownFields.join(', ') }),
+        });
+      }
       // Marked invoices are always reported; a notice with only open
       // fields is shown once per project.
       if (markedForReview > 0
@@ -541,7 +550,11 @@ function AppContent() {
           }),
         });
       }
-      const current = await stampProject(loaded);
+      // The stamp covers the file as written, so it is compared with the
+      // project as read, before the defaults of normalizeProject: an older
+      // stamped file then shows no false "input changed".
+      let current = null;
+      try { current = await stampProject(rawProject); } catch { current = null; }
       const [difference] = compareKernelStamp(saved, current);
       if (difference === 'version' && saved && current) {
         toast.show({
@@ -556,24 +569,33 @@ function AppContent() {
       toast.show({
         tone: 'error',
         title: t('app.toast.openFailed'),
-        message: t('project.openFailed', { message: (err as Error).message ?? String(err) }),
+        message: err instanceof ProjectFileTooNewError
+          ? t('project.fileTooNew', { version: err.fileVersion })
+          : t('project.openFailed', { message: errorText(err) }),
       });
     }
   }, [docDispatch, t, toast, rememberRecent]);
 
+  // Desktop: read through the Rust command, which allows a file picked in a
+  // dialog this session or on its recent list (so also after a restart).
+  const readProjectFile = useCallback((path: string) => invoke<string>('read_project_file', { path }), []);
+
   const handleOpenRecent = useCallback(async (filePath: string) => {
+    let json: string;
     try {
-      const { readTextFile } = await import('@tauri-apps/plugin-fs');
-      await openProjectText(await readTextFile(filePath), filePath, filePath);
+      json = await readProjectFile(filePath);
     } catch (err) {
-      setRecentProjects(forgetRecentProject(filePath));
+      // Only a file that is gone leaves the list; any other error keeps it.
+      if (isMissingFileError(err)) setRecentProjects(forgetRecentProject(filePath));
       toast.show({
         tone: 'error',
         title: t('app.toast.openFailed'),
-        message: t('project.openFailed', { message: (err as Error).message ?? String(err) }),
+        message: t('project.openFailed', { message: errorText(err) }),
       });
+      return;
     }
-  }, [openProjectText, t, toast]);
+    await openProjectText(json, filePath, filePath);
+  }, [openProjectText, readProjectFile, t, toast]);
 
   const handleOpenProject = useCallback(async () => {
     if (!isTauri()) {
@@ -590,21 +612,20 @@ function AppContent() {
     }
     try {
       const { open } = await import('@tauri-apps/plugin-dialog');
-      const { readTextFile } = await import('@tauri-apps/plugin-fs');
       const filePath = await open({
         filters: [{ name: 'OES Project', extensions: ['oes.json', 'json'] }],
         multiple: false,
       });
       if (!filePath) return;
-      const json = await readTextFile(filePath as string);
+      const json = await readProjectFile(filePath as string);
       await openProjectText(json, filePath as string, filePath as string);
     } catch (err) {
-      const msg = (err as Error).message;
+      const msg = errorText(err);
       if (msg && !msg.includes('cancelled')) {
         toast.show({ tone: 'error', title: t('app.toast.openFailed'), message: t('project.openFailed', { message: msg }) });
       }
     }
-  }, [openProjectText, t, toast]);
+  }, [openProjectText, readProjectFile, t, toast]);
 
   // ── Import (UNIEC3 / VABI): each opens as a new document ──
   const handleImportUNIEC3 = useCallback(async () => {
@@ -692,6 +713,75 @@ function AppContent() {
   const handleCloseActiveTab = useCallback(() => {
     if (docState.activeDocumentId) void handleCloseTab(docState.activeDocumentId);
   }, [docState.activeDocumentId, handleCloseTab]);
+
+  // ── Closing the window (close button, Alt+F4, quitting from the OS) ──
+  // The same questions as closing each tab with unsaved work. The latest
+  // documents are read through a ref, because the listener is registered once.
+  const closingDocuments = useCallback((): ClosingDocument[] => docState.documents.map((doc) => ({
+    id: doc.id,
+    name: doc.state.project.name || t('app.untitled'),
+    isDirty: doc.state.isDirty,
+    draftDirty: doc.id === docState.activeDocumentId
+      && activeReport.current?.projectId === doc.state.project.id
+      && Boolean(activeReport.current?.draftDirty),
+  })), [docState.documents, docState.activeDocumentId, t]);
+
+  const confirmWindowClose = useCallback(() => confirmCloseAll(closingDocuments(), {
+    confirmDiscardDraft: async (doc) => (await confirmChoice({
+      title: t('app.unappliedDraft.title'),
+      message: t('app.unappliedDraft.message', { name: doc.name }),
+      confirmLabel: t('app.unappliedDraft.discard'),
+      danger: true,
+    })) === 'confirm',
+    askUnsaved: async (doc) => {
+      const choice = await confirmChoice({
+        title: t('app.unsaved.title'),
+        message: t('app.unsaved.message', { name: doc.name }),
+        confirmLabel: t('app.unsaved.save'),
+        denyLabel: t('app.unsaved.discard'),
+      });
+      return choice === 'confirm' ? 'save' : choice === 'cancel' ? 'cancel' : 'discard';
+    },
+    save: async (doc) => {
+      const open = docState.documents.find((candidate) => candidate.id === doc.id);
+      if (!open) return true;
+      const savedPath = await writeProjectToDisk(open.state.project, open.filePath, false);
+      if (savedPath === null) return false;
+      if (savedPath !== 'browser-download') rememberRecent(savedPath, open.state.project);
+      docDispatch({ type: 'DOC_DISPATCH', payload: { id: open.id, action: { type: 'SET_DIRTY', payload: false } } });
+      return true;
+    },
+  }), [closingDocuments, confirmChoice, docState.documents, docDispatch, rememberRecent, t, writeProjectToDisk]);
+
+  const windowClose = useRef({ confirm: confirmWindowClose, documents: closingDocuments });
+  windowClose.current = { confirm: confirmWindowClose, documents: closingDocuments };
+
+  useEffect(() => {
+    if (!isTauri()) {
+      // Browser build: the browser's own "leave site?" question.
+      const beforeUnload = (event: BeforeUnloadEvent) => {
+        if (windowClose.current.documents().some((doc) => doc.isDirty || doc.draftDirty)) {
+          event.preventDefault();
+          event.returnValue = '';
+        }
+      };
+      window.addEventListener('beforeunload', beforeUnload);
+      return () => window.removeEventListener('beforeunload', beforeUnload);
+    }
+    let stop: (() => void) | undefined;
+    let cancelled = false;
+    void (async () => {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      const win = getCurrentWindow();
+      const unlisten = await win.onCloseRequested(async (event) => {
+        if (!windowClose.current.documents().some((doc) => doc.isDirty || doc.draftDirty)) return;
+        event.preventDefault();
+        if (await windowClose.current.confirm()) await win.destroy();
+      });
+      if (cancelled) unlisten(); else stop = unlisten;
+    })();
+    return () => { cancelled = true; stop?.(); };
+  }, []);
 
   // ── Keyboard shortcuts (all screens) ──
   useEffect(() => {
@@ -817,6 +907,13 @@ function AppContent() {
       {feedbackOpen && <FeedbackDialog onClose={() => setFeedbackOpen(false)} />}
     </div>
   );
+}
+
+/** The text of an error: Tauri commands reject with a string, JS with an Error. */
+function errorText(err: unknown): string {
+  if (typeof err === 'string') return err;
+  if (err instanceof Error) return err.message;
+  return String(err);
 }
 
 export default function App() {
