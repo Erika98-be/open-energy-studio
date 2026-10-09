@@ -1,6 +1,6 @@
 {
   "suiteId": "openbare-gevallen",
-  "description": "Herbouwde openbare BENG-rapporten A–K. Verwacht is de vastgelegde uitkomst van deze rekenkern (regressie, banden als in crates/nta8800-core/tests/public_comparison.rs); de gepubliceerde waarden staan er ter vergelijking bij en beslissen niets. Geen officiële referentietoets.",
+  "description": "Herbouwde openbare BENG-rapporten A–L. Verwacht is de vastgelegde uitkomst van deze rekenkern (regressie, banden als in crates/nta8800-core/tests/public_comparison.rs); de gepubliceerde waarden staan er ter vergelijking bij en beslissen niets. Geen officiële referentietoets.",
   "cases": [
     {
       "caseId": "openbaar-a-2025c1",
@@ -711,6 +711,58 @@
           "path": "beng3",
           "value": 101.0,
           "source": "rapport K (Uniec 3.1.5.0, 11-12-2022, NTA 8800:2022)"
+        }
+      ]
+    },
+    {
+      "caseId": "openbaar-l-2022",
+      "normVersion": "2022",
+      "projectFile": "../nta8800-public-comparison-l.json",
+      "source": {
+        "publisher": "openbaar BENG-rapport L (basisschool met gymzaal), bijlage bij een raadsstuk",
+        "documentId": "https://www.centraledorpenraad.nl/wp/wp-content/uploads/B48-uniec3-18363-OBS-De-Weidevogel.pdf",
+        "edition": "Uniec 3.1.5.0, 02-01-2023",
+        "usePermission": "openbaar gepubliceerd; alleen getallen overgenomen, geen rapporttekst",
+        "independentReviewer": "geen: regressie op de eigen uitkomst van de rekenkern (docs/nta8800-vergelijking-openbare-rapporten.md)"
+      },
+      "expected": [
+        {
+          "path": "beng1",
+          "value": 111.44,
+          "unit": "kWh/m2.year",
+          "normReference": "BENG 1, energiebehoefte (5.3)",
+          "absoluteTolerance": 0.05
+        },
+        {
+          "path": "beng2",
+          "value": 18.63,
+          "unit": "kWh/m2.year",
+          "normReference": "BENG 2, primair fossiel energiegebruik (5.2)",
+          "absoluteTolerance": 0.05
+        },
+        {
+          "path": "beng3",
+          "value": 80.2,
+          "unit": "%",
+          "normReference": "BENG 3, aandeel hernieuwbare energie (5.4)",
+          "absoluteTolerance": 0.15
+        }
+      ],
+      "published": [
+        {
+          "path": "beng1",
+          "value": 111.52,
+          "source": "rapport L (Uniec 3.1.5.0, 02-01-2023, NTA 8800:2022)"
+        },
+        {
+          "path": "beng2",
+          "value": 25.36,
+          "source": "rapport L (Uniec 3.1.5.0, 02-01-2023, NTA 8800:2022)"
+        },
+        {
+          "path": "beng3",
+          "value": 76.9,
+          "source": "rapport L (Uniec 3.1.5.0, 02-01-2023, NTA 8800:2022)"
         }
       ]
     }
