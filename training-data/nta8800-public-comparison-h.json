@@ -963,10 +963,10 @@
       "sourceReference": "table 7.13"
     },
     "thermalMass": {
-      "floor": "heavy",
+      "floor": "very_heavy",
       "wall": "light",
       "ceiling": "open_or_none",
-      "sourceReference": "openbare bron Uniec 3.2.9.2 printout (bedrijfsgebouw met sportschool 743,80 m2, 29-05-2024)"
+      "sourceReference": "openbare bron Uniec 3.2.9.2 printout (bedrijfsgebouw met sportschool 743,80 m2, 29-05-2024): vloeren massief beton (zeer zwaar, tabel 7.11), wanden hsb, sfb of staalskeletbouw (licht, tabel 7.12); tabel 7.10 rij 110/180 kJ/m2K (2023 p. 184-186)"
     },
     "internalGains": {
       "method": "utility",
@@ -1092,10 +1092,10 @@
           "sourceReference": "tabellen 7.2/7.3 per functie; verlichting uit hoofdstuk 14"
         },
         "thermalMass": {
-          "floor": "heavy",
+          "floor": "very_heavy",
           "wall": "light",
           "ceiling": "closed_or_suspended",
-          "sourceReference": "openbare bron Uniec 3.2.9.2 printout (bedrijfsgebouw met sportschool 743,80 m2, 29-05-2024): massief beton, staalskelet, plafond gesloten of verlaagd"
+          "sourceReference": "openbare bron Uniec 3.2.9.2 printout (bedrijfsgebouw met sportschool 743,80 m2, 29-05-2024): massief beton, staalskelet, plafond gesloten of verlaagd; vloer zeer zwaar, wand licht (tabel 7.11 en 7.12, 2023 p. 185-186)"
         }
       },
       {
@@ -1187,10 +1187,10 @@
           "sourceReference": "tabellen 7.2/7.3 per functie; verlichting uit hoofdstuk 14"
         },
         "thermalMass": {
-          "floor": "heavy",
+          "floor": "very_heavy",
           "wall": "light",
           "ceiling": "open_or_none",
-          "sourceReference": "openbare bron Uniec 3.2.9.2 printout (bedrijfsgebouw met sportschool 743,80 m2, 29-05-2024): massief beton, staalskelet, plafond geen of open"
+          "sourceReference": "openbare bron Uniec 3.2.9.2 printout (bedrijfsgebouw met sportschool 743,80 m2, 29-05-2024): massief beton, staalskelet, plafond geen of open; vloer zeer zwaar, wand licht (tabel 7.11 en 7.12, 2023 p. 185-186)"
         }
       }
     ],
