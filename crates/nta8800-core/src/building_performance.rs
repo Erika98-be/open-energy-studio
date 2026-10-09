@@ -805,7 +805,12 @@ pub struct FinalEnergyCarrier {
 pub struct ElectricityBalanceMonth {
     pub month: u8,
     pub used_kwh: f64,
+    /// Own production, renewable plus CHP (5.10/5.13).
     pub produced_kwh: f64,
+    /// Renewable own production only (5.14a/5.14b): CHP electricity is
+    /// own production but not renewable. Label element h (Omgevingsregeling
+    /// art. 5.13a lid 1 onder h) uses this value.
+    pub produced_renewable_kwh: f64,
     pub self_used_kwh: f64,
     pub exported_kwh: f64,
 }
@@ -3934,9 +3939,15 @@ fn assess_in_edition(input: &BuildingPerformanceInput) -> BuildingPerformanceAss
             .as_ref()
             .filter(|_| input.permit_application_after_2026_05_29)
             .map(|check| {
+                // Art. 5.11 lid 4/5 onder b: for a dwelling the primary fossil
+                // energy of the label is computed with forfaitaire values for
+                // area measures (the EMG-forfait scenario), and lid 5 onder b
+                // tests that value against annex IXa. Utility: art. 5.12 lid 4
+                // uses the quality declarations, i.e. the first scenario
+                // (label_scenario equals scenario there).
                 a0_check(
                     check,
-                    scenario.map(|item| item.primary_fossil_indicator_kwh_per_m2_year),
+                    label_scenario.map(|item| item.primary_fossil_indicator_kwh_per_m2_year),
                     on_site_fossil_use,
                 )
             }),
@@ -4558,6 +4569,7 @@ fn compute(
             month,
             used_kwh: used_el,
             produced_kwh: produced,
+            produced_renewable_kwh: produced_renewable,
             self_used_kwh: self_used,
             exported_kwh: exported,
         });
@@ -5201,6 +5213,74 @@ mod tests {
     }
 
     #[test]
+    fn label_dwelling_type_follows_the_calculation_scope() {
+        // Omgevingsregeling art. 5.11 lid 1 and 5.13 onder a: a logiesfunctie
+        // niet in een logiesgebouw is labelled like a dwelling, with its
+        // dwelling type, although its building function is not residential.
+        let project: crate::ProjectInput = serde_json::from_value(json!({
+            "id": "p", "name": "p", "buildingFunction": "other",
+            "registration": {"buildingType": "vrijstaande woning"},
+            "zones": [{"id": "z", "floorArea": 100.0, "volume": 250.0, "surfaces": []}]
+        }))
+        .unwrap();
+        let mut derived = input();
+        let general = crate::label_data::general_data(&project, Some(&derived));
+        assert_eq!(general.dwelling_type.as_deref(), Some("vrijstaande woning"));
+        derived.calculation_scope = CalculationScope::Utility;
+        let general = crate::label_data::general_data(&project, Some(&derived));
+        assert!(general.dwelling_type.is_none());
+        // Without a kernel input the building function decides.
+        assert!(crate::label_data::general_data(&project, None)
+            .dwelling_type
+            .is_none());
+    }
+
+    #[test]
+    fn dwelling_a0_tests_the_label_value_not_beng2() {
+        // Omgevingsregeling art. 5.11 lid 4 and lid 5 onder b: for a dwelling
+        // the primary fossil energy of the label is computed with forfaitaire
+        // values for area measures (EMGforf), and the A0 test checks that
+        // value against annex IXa, not BENG 2 with the declaration.
+        let mut sample = external_heat_sample(true);
+        sample.external_supply.heating = Some(AnnexPRoute::Declared {
+            primary_factor: 0.42,
+            renewable_factor: 0.35,
+            co2_kg_per_kwh: 0.05,
+            declaration_reference: "BCRG EMG-verklaring".into(),
+            measured_only: true,
+        });
+        sample.calculation_scope = CalculationScope::Residential;
+        sample.bbl_function = Some(BblFunction::OtherResidential);
+        sample.loss_area_m2 = Some(200.0);
+        sample.loss_area_source_reference = Some("envelope".into());
+        sample.permit_application_after_2026_05_29 = true;
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.issues);
+        let label = result.label_primary_fossil_indicator_kwh_per_m2_year.unwrap();
+        let beng2 = result.primary_fossil_indicator_kwh_per_m2_year.unwrap();
+        assert!(label > beng2);
+        let a0 = result.a0_check.as_ref().unwrap();
+        // Annex IXa, other residential: 27. BENG 2 (26,29) would pass, the
+        // label value with EMGforf (46,56) does not.
+        assert_eq!(a0.primary_fossil_max_kwh_per_m2, 27.0);
+        assert!(beng2 <= a0.primary_fossil_max_kwh_per_m2, "{beng2}");
+        assert!(label > a0.primary_fossil_max_kwh_per_m2, "{label}");
+        assert_eq!(a0.primary_fossil_meets, Some(false));
+        assert_eq!(a0.eligible, Some(false));
+        // Utility (art. 5.12 lid 4): the declaration is the label value, so
+        // the A0 test keeps BENG 2.
+        sample.calculation_scope = CalculationScope::Utility;
+        sample.bbl_function = Some(BblFunction::Office);
+        let utility = assess_building_performance(&sample);
+        let a0 = utility.a0_check.as_ref().unwrap();
+        let beng2 = utility.primary_fossil_indicator_kwh_per_m2_year.unwrap();
+        assert_eq!(
+            a0.primary_fossil_meets,
+            Some(beng2 <= a0.primary_fossil_max_kwh_per_m2)
+        );
+    }
+
+    #[test]
     fn annex_p_declaration_gives_two_scenarios() {
         let forfait = assess_building_performance(&external_heat_sample(false));
         let mut sample = external_heat_sample(true);
@@ -5630,6 +5710,37 @@ mod tests {
         assert!(
             chp.annual_renewable_primary_kwh.unwrap()
                 <= base.annual_renewable_primary_kwh.unwrap() + 1e-9
+        );
+        // Omgevingsregeling art. 5.13a lid 1 onder h: the label element is
+        // the renewable production, so micro-CHP electricity stays out of it
+        // (this sample has no PV).
+        let renewable: f64 = chp
+            .electricity_balance
+            .iter()
+            .map(|month| month.produced_renewable_kwh)
+            .sum();
+        assert!(renewable.abs() < 1e-9, "{renewable}");
+        let elements = crate::label_data::LabelElements::from_performance(&chp);
+        assert_eq!(elements.renewable_production_kwh, Some(0.0));
+        // With PV the element is the PV yield only, not PV plus CHP.
+        let mut with_pv = sample.clone();
+        with_pv.on_site_production = input().on_site_production;
+        let pv = assess_building_performance(&with_pv);
+        let pv_renewable: f64 = pv
+            .electricity_balance
+            .iter()
+            .map(|month| month.produced_renewable_kwh)
+            .sum();
+        let pv_total: f64 = pv
+            .electricity_balance
+            .iter()
+            .map(|month| month.produced_kwh)
+            .sum();
+        assert!(pv_renewable > 0.0);
+        assert!((pv_total - pv_renewable - expected).abs() < 1e-6);
+        assert_eq!(
+            crate::label_data::LabelElements::from_performance(&pv).renewable_production_kwh,
+            Some(pv_renewable)
         );
     }
 
