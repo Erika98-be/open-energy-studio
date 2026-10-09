@@ -190,6 +190,22 @@ fn seeds() -> Value {
             "wallResistanceM2kPerW": 2.5
         } },
         { "heatedBasement": { "depthM": 1.5, "wallResistanceM2kPerW": 2.5 } },
+        // Chapter 14 daylight sectors: every sector kind, including the
+        // F_D;dayl of NEN-EN 15193-1 annex F (2025+C1 p. 672).
+        { "daylight": { "method": "sectors", "sourceReference": "seed", "sectors": [
+            { "kind": "vertical_windows", "sectorWidthM": 4.0, "lintelHeightM": 2.6, "actualDepthM": 5.0,
+              "openingAreaM2": 6.0, "heavilyShaded": false, "control": "automatic_dimming" },
+            { "kind": "rooflights", "rooflightDepthM": 1.0, "rooflightWidthM": 1.0, "clearHeightM": 3.0,
+              "wallDistancesM": [2.0, 2.0, 2.0, 2.0], "openingAreaM2": 1.0, "roomLengthM": 6.0,
+              "roomWidthM": 6.0, "luminaireHeightM": 2.0, "control": "automatic_dimming" },
+            { "kind": "tilted_window", "tiltDeg": 45.0, "windowLengthM": 1.2, "slopeOffsetM": 0.5,
+              "slopeStartHeightM": 2.0, "ceilingHeightM": 3.0, "windowWidthM": 1.0,
+              "rooflight": { "wallDistancesM": [1.0, 1.0, 1.0, 1.0], "roomLengthM": 4.0,
+                "roomWidthM": 4.0, "luminaireHeightM": 2.0 },
+              "control": "automatic_switching_or_unknown" },
+            { "kind": "declared", "areaM2": 10.0, "daylightDependencyFactor": 0.78,
+              "sourceReference": "NEN-EN 15193-1:2017 bijlage F" }
+        ] } },
     ])
 }
 
