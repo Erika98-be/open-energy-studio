@@ -6,12 +6,19 @@
 - In de desktopapp kies je de plaats in een opslagvenster; een project dat al een bestandspad heeft, wordt daar direct overschreven.
 - In de browser wordt het bestand gedownload.
 
+De desktopapp slaat veilig op: ze schrijft eerst een tijdelijk bestand naast het project, zet dat pas daarna op de plaats van het oude en bewaart de vorige versie als `<naam>.oes.json.bak`. Valt de stroom uit of is de schijf vol tijdens het opslaan, dan blijft het oude bestand heel. Mislukt het opslaan (bijvoorbeeld een map zonder schrijfrechten), dan meldt de app **Opslaan mislukt** met de reden. Het project blijft dan als gewijzigd gemarkeerd en het tabblad blijft open; kies **Opslaan als** voor een andere plek.
+
+**Afsluiten.** Sluit je het venster (de sluitknop, Alt+F4 of afsluiten vanuit het besturingssysteem) terwijl een project niet-opgeslagen wijzigingen of niet-toegepaste NTA-invoer heeft, dan stelt de app per project dezelfde vraag als bij het sluiten van een tabblad: **Opslaan**, **Niet opslaan** of **Annuleren**. Bij **Annuleren**, of als het opslaan niet lukt, blijft het venster open. In de browser vraagt de browser zelf of je de pagina wilt verlaten.
+
 Het bestand bevat het volledige project, inclusief de NTA-invoer, de basisopname, het maatwerkadvies en de registratiegegevens. Daarnaast bevat het een stempel van de rekenkern: kernelversie, normversie en de invoervingerafdruk op het moment van opslaan.
 
 **Openen.** Met **Openen** (Ctrl+O, menu Bestand of welkomstscherm) kies je een `.oes.json`- of `.json`-bestand; in de desktopapp met een bestandsvenster, in de browser met de bestandskiezer van de browser. Het project opent in een nieuw tabblad. Bij het openen:
 - vergelijkt de app de opgeslagen stempel met de huidige rekenkern. Is de kern of de normversie anders, dan meldt ze dat; reken dan opnieuw en controleer de verschillen voordat je registreert. Verschilt alleen de invoervingerafdruk, dan is het bestand buiten de app gewijzigd en meldt ze dat ook.
 - geeft ze extra opwekkers en extra tapwatersystemen in de opname een id en zet ze koppelingen van bewijs en foto's die nog op positie staan om naar koppelingen op id (zie [hoofdstuk 7](07-herlabelen-registratie-dossier.md));
 - zet ze oude herlabelprojecten om naar de huidige vorm (zie [hoofdstuk 7](07-herlabelen-registratie-dossier.md)). Facturen zonder herlabelrol krijgen de rol "Te beoordelen", die nog niet als bewijs telt; de app meldt welke velden nog ontbreken.
+- controleert ze de bestandsversie. Een bestand uit een nieuwere versie van Open Energy Studio met een andere hoofdversie (2.x en hoger) opent ze niet; open het met die nieuwere versie. Een nieuwer bestand met dezelfde hoofdversie (1.x) opent ze wel, maar ze noemt de velden die deze versie niet kent: die vallen weg bij opslaan. Een bestand zonder versie geldt als versie 1.0.
+
+**Recente projecten.** Het welkomstscherm toont de projecten die je in de desktopapp hebt geopend of opgeslagen. Die kun je ook na een herstart weer openen: de app onthoudt welke bestanden je via een venster hebt gekozen en leest alleen die. Een project verdwijnt alleen van de lijst als het bestand er niet meer is; bij een andere fout (bijvoorbeeld geen leesrechten) blijft het staan.
 
 ## Voorbeeldprojecten
 
