@@ -40,6 +40,7 @@ import { downloadModelIFC } from './core/ifc/IFCModelExporter';
 import { downloadUNIEC3, openUNIEC3FileDialog } from './core/io/UNIEC3Exporter';
 import { downloadVABI, openVABIFileDialog } from './core/io/VABIElementsBridge';
 import { withImportRecord } from './core/io/importLog';
+import { exportLossesSummary, importErrorText, importIssuesSummary } from './core/io/importText';
 import { serializeProject, deserializeProjectFile, compareKernelStamp, describeStamp, ProjectFileTooNewError } from './core/io/ProjectSerializer';
 import { confirmCloseAll, isMissingFileError, saveProjectText, type ClosingDocument } from './core/io/projectFiles';
 import { migrateLegacyRelabel, relabelNoticeKey } from './core/nta/Registration';
@@ -109,8 +110,17 @@ function ActiveDocumentShell({ files, paletteOpen, setPaletteOpen }: {
   const [printPreviewOpen, setPrintPreviewOpen] = useState(false);
   const [calculationError, setCalculationError] = useState<string | null>(null);
   const [inspectorOpen, setInspectorOpen] = useState(initialInspectorOpen);
+  const exportToast = useToast();
 
   useEffect(() => { setCalculationError(null); }, [project]);
+
+  // A UNIEC3 or VABI export leaves out what the format cannot hold; the adviser is told what.
+  const exportForeign = useCallback((format: 'UNIEC3' | 'VABI') => {
+    const losses = format === 'UNIEC3' ? downloadUNIEC3(project) : downloadVABI(project);
+    if (losses.length > 0) {
+      exportToast.show({ tone: 'warn', title: t('export.losses.title', { format }), message: exportLossesSummary(losses, t) });
+    }
+  }, [exportToast, project, t]);
 
   const toggleInspector = useCallback(() => {
     setInspectorOpen((open) => {
@@ -201,9 +211,9 @@ function ActiveDocumentShell({ files, paletteOpen, setPaletteOpen }: {
     printReport: () => setPrintPreviewOpen(true),
     exportIFC: handleExportIFC,
     exportModelIFC: () => downloadModelIFC(project),
-    exportUNIEC3: () => downloadUNIEC3(project),
+    exportUNIEC3: () => exportForeign('UNIEC3'),
     importUNIEC3: files.onImportUNIEC3,
-    exportVABI: () => downloadVABI(project),
+    exportVABI: () => exportForeign('VABI'),
     importVABI: files.onImportVABI,
     openSettings: files.onOpenSettings,
     openFeedback: files.onOpenFeedback,
@@ -628,23 +638,28 @@ function AppContent() {
   }, [openProjectText, readProjectFile, t, toast]);
 
   // ── Import (UNIEC3 / VABI): each opens as a new document ──
-  const handleImportUNIEC3 = useCallback(async () => {
+  // The imported project goes through the same checks as an opened file, and the record names
+  // the file, its SHA-256 and what the importer filled in or left out (BRL 9501 §4.3.1).
+  const importForeign = useCallback(async (format: 'UNIEC3' | 'VABI') => {
     try {
-      const loaded = withImportRecord(await openUNIEC3FileDialog(), 'UNIEC3');
+      const result = await (format === 'UNIEC3' ? openUNIEC3FileDialog() : openVABIFileDialog());
+      const loaded = normalizeProject(withImportRecord(result.project, format, result.fileName, undefined,
+        { sha256: result.sha256, issues: result.issues }));
       docDispatch({ type: 'DOC_NEW', payload: { id: crypto.randomUUID(), project: loaded } });
+      if (result.issues.length > 0) {
+        toast.show({
+          tone: 'warn',
+          title: t('import.issues.title', { format, count: result.issues.length }),
+          message: importIssuesSummary(result.issues, t),
+        });
+      }
     } catch (err) {
-      toast.show({ tone: 'error', title: t('app.toast.importFailed', { format: 'UNIEC3' }), message: (err as Error).message });
+      if (errorText(err).includes('Geen bestand geselecteerd')) return;
+      toast.show({ tone: 'error', title: t('app.toast.importFailed', { format }), message: importErrorText(err, t) });
     }
   }, [docDispatch, toast, t]);
-
-  const handleImportVABI = useCallback(async () => {
-    try {
-      const loaded = withImportRecord(await openVABIFileDialog(), 'VABI');
-      docDispatch({ type: 'DOC_NEW', payload: { id: crypto.randomUUID(), project: loaded } });
-    } catch (err) {
-      toast.show({ tone: 'error', title: t('app.toast.importFailed', { format: 'VABI' }), message: (err as Error).message });
-    }
-  }, [docDispatch, toast, t]);
+  const handleImportUNIEC3 = useCallback(() => importForeign('UNIEC3'), [importForeign]);
+  const handleImportVABI = useCallback(() => importForeign('VABI'), [importForeign]);
 
   // ── Save (Ctrl+S) — save to existing path, or prompt Save As if new ──
   const handleSaveProject = useCallback(async () => {
