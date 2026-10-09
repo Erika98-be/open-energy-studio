@@ -170,6 +170,19 @@ describe('NTA system sections', () => {
     });
   });
 
+  it('offers a vessel next to a hot-water CHP (13.8.4.7.4: its storage losses follow 13.6)', { timeout: 60000 }, async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<Harness initial={{ hotWater: { generator: { kind: 'electric_boiler' } } }}
+      body={(draft, change) => <>
+        <HotWaterGeneratorFields draft={draft} change={change} base={['hotWater', 'generator']} />
+        <HotWaterStorageFields draft={draft} change={change} />
+      </>} />);
+    await user.selectOptions(screen.getByLabelText('Hot-water generator'), 'chp');
+    await user.click(screen.getByRole('button', { name: 'Add vessel' }));
+    expect(current().hotWater.generator.kind).toBe('chp');
+    expect(current().hotWater.storage).toHaveLength(1);
+  });
+
   it('adds hot-water vessels with every loss route (13.58–13.60)', { timeout: 60000 }, async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness initial={{ hotWater: { generator: { kind: 'measured_two_profiles' } } }}
