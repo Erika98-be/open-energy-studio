@@ -61,6 +61,11 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 
 **Gekozen lezing.** De kern neemt de verdeling binnen de rekenzone als hij deze lijsten zelf vult. Een ingevulde lijst gaat altijd voor.
 
+**Argumenten (review 25).**
+- *Voor de verdeling binnen de rekenzone.* De laatste alinea van 6.6.4 (2025+C1 p. 158; 2023 p. 145) definieert juist "de gebruiksoppervlakte van een gebruiksfunctie binnen een rekenzone": alleen de gemeenschappelijke ruimten binnen de rekenzone tellen mee, en alleen de aangewezen functies "voor zover deze gebruiksfuncties zijn gelegen binnen de rekenzone". Formule 13.19 vermenigvuldigt de gewogen Q_W;nd;spec met A_g;zi van de rekenzone (bepaald volgens 6.6), en 14.4 (p. 656) eist dat de verlichtingszones samen A_g van de rekenzone dekken. Een deel van de ruimte dat aan een functie buiten de rekenzone wordt toebedeeld, ligt dus niet in de rekenzone en hoort niet in de weging.
+- *Voor de gebouwverdeling.* De eerste alinea van 6.6.4 met de opmerking toedeelt een gemeenschappelijke ruimte aan alle aangewezen functies, en tabel 13.1 en de tabellen 14.1 en 14.3 geven waarden per gebruiksfunctie van het gebouw. Wie de functie-indeling voor tapwater en verlichting als kenmerk van het gebouw leest, komt op de gebouwverdeling uit, zoals Uniec 3.2.9.2 doet.
+- De letterlijke woorden "in de beschouwde rekenzone" (13.19) en "die in de rekenzone zijn gelegen" (p. 657 en 661) sluiten aan bij de laatste alinea van 6.6.4; daarom kiest de kern die lezing.
+
 **Gevolg.** Openbaar geval H (Uniec 3.2.9.2, NTA 8800:2023) heeft een gemeenschappelijke ruimte van 49,20 m² in de rekenzone zonder sport, terwijl ook de sportfunctie erop is aangewezen. Uniec neemt voor tapwater en verlichting de gebouwverdeling: 44,35 m² gaat naar sport, ook in de verlichting van de rekenzone zonder sport. Met de verdeling binnen de rekenzone rekent de kern 317 kWh minder tapwater en 248 kWh minder verlichting; BENG 2 wordt 80,74 in plaats van 81,86 (rapport 80,01).
 
 **Vraag.**

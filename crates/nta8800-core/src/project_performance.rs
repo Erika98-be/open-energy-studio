@@ -1582,7 +1582,10 @@ fn fill_from_common_spaces(
                 let mut summed: Vec<crate::monthly_demand::UsageFunctionArea> = Vec::new();
                 for (_, parts) in use_areas {
                     for part in parts {
-                        match summed.iter_mut().find(|item| item.function == part.function) {
+                        match summed
+                            .iter_mut()
+                            .find(|item| item.function == part.function)
+                        {
                             Some(item) => item.area_m2 += part.area_m2,
                             None => summed.push(part.clone()),
                         }

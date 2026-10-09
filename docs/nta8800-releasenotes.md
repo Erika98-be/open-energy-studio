@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Review 25: invulling van tapwater en verlichting uit de gemeenschappelijke ruimten nagelopen
+
+- **Lezing bevestigd.** 13.19 en de weging van t_D, t_N en P_n;spec in hoofdstuk 14 nemen de gebruiksoppervlakte binnen de rekenzone, zoals de laatste alinea van 6.6.4 die definieert (2025+C1 p. 158, 538, 656–661; 2023 p. 145, 527, 647–651). NEN-vraag 6 noemt nu de argumenten voor beide lezingen.
+- **Ingevulde lijsten dekken de rekenzone.** De eigen oppervlakten plus de gemeenschappelijke ruimten mogen 1 % van de zone afwijken (`common_space_area_mismatch`). Een door de kern ingevulde verlichtings- of tapwaterlijst gaf dan `lighting_function_areas_invalid` of `hot_water_function_areas_invalid` op een veld dat de adviseur niet had ingevuld. De kern schaalt de verdeling nu naar A_g van de rekenzone (14.4, 13.19). Test `filled_hot_water_and_lighting_lists_cover_the_zone_within_the_tolerance`.
+- **Geen tapwatervinkje naast meer systemen.** Met extra tapwatersystemen vult de kern de lijst niet (13.20); het formulier biedt het vinkje dan niet meer aan.
+- **Rekenrapport.** Het rapport toont de verdeling van de gemeenschappelijke ruimten en welke lijsten de kern heeft ingevuld (paragraaf "Gemeenschappelijke ruimten (6.6.4)").
+- **Afgedekt.** Een weggelaten lijst zonder gemeenschappelijke ruimten blijft geweigerd op zijn eigen pad (test `omitted_hot_water_and_lighting_lists_without_common_spaces_are_refused`); de numerieke fuzz bereikt nu ook de door de kern ingevulde lijsten.
+
 ### 9 oktober 2026 — Gemeenschappelijke ruimten vullen ook tapwater en verlichting (geen rekenwijziging)
 
 - **Wat.** Met gemeenschappelijke ruimten (`zoneData[].commonSpaces`) vult de kern nu ook een lege lijst `lighting[].functions` en een lege `hotWater.need.areas`, met de verdeling binnen de rekenzone. Een ingevulde lijst gaat voor. De lijsten mogen daarvoor leeg zijn of ontbreken; zonder gemeenschappelijke ruimten blijft een lege lijst geweigerd (`lighting_function_areas_invalid`, `hot_water_function_areas_invalid`).
