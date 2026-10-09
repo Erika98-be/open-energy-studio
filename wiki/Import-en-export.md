@@ -11,6 +11,7 @@
   - de bestanden mogen UTF-8, UTF-16 of windows-1252 zijn;
   - bestanden met een `<!DOCTYPE` worden geweigerd.
 - **Export:** de app meldt welke projectgegevens het formaat niet kan bevatten, zoals de NTA-specifieke invoer.
+- **Vloeren op grond:** de grens grond/kruipruimte/kelder, de perimeter P en een verwarmde kelder (z, wandoppervlak) gaan in geen van beide formaten mee. De export noemt `ntaCalculation.groundFloors` apart; na een import vul je ze opnieuw in.
 - **Overige exports:** IFC, het BENG-rapport, het NTA-rekenrapport, het invoerdossier en het projectdossier.
 
 > De veldcodes van Uniec 3 en VABI zijn afgeleid; er is nog geen echt voorbeeldbestand getest. Zie [[Bekende beperkingen]].

@@ -152,6 +152,11 @@ export function droppedOnExport(project: IProject, format: 'UNIEC3' | 'VABI'): s
     if (NOT_INPUT.has(key) || (EXPORTED.project as readonly string[]).includes(key) || !present(item)) continue;
     dropped.add(key);
   }
+  // Neither format, as far as its files are known here, holds the ground route of NTA 8800 8.3: the
+  // perimeter P, a crawlspace or unheated cellar below, a heated basement with z and its wall area.
+  // Named on its own so the adviser sees the ground data are not in the file.
+  const groundFloors = (project.ntaCalculation as { groundFloors?: unknown[] } | undefined)?.groundFloors;
+  if (Array.isArray(groundFloors) && groundFloors.length > 0) dropped.add('ntaCalculation.groundFloors');
   for (const zone of project.zones ?? []) {
     check(zone, EXPORTED.zone, 'zones[*].');
     if (zone.airTightness?.assumed) dropped.add('zones[*].airTightness.assumed');
@@ -175,7 +180,7 @@ export function droppedOnExport(project: IProject, format: 'UNIEC3' | 'VABI'): s
  */
 export function ntaInputNotInFormat(issues: ImportIssues, tool: string): void {
   issues.add('dropped', 'ntaCalculation',
-    `${tool} bevat geen NTA 8800-rekeninvoer (rekenblok, grens per vlak, onverwarmde ruimten, puntkoudebruggen); vul die aan bij de NTA-invoer.`);
+    `${tool} bevat geen NTA 8800-rekeninvoer (rekenblok, grens per vlak, vloeren op grond met perimeter, kruipruimte of verwarmde kelder, onverwarmde ruimten, puntkoudebruggen); vul die aan bij de NTA-invoer.`);
 }
 
 /** Strips a UTF-8 byte-order mark. */
