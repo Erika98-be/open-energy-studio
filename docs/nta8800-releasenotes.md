@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — ISSO 54: 258 van de 266 deeltesten; voorraadvat bij een WKK voor tapwater
+
+- **Voorraadvat bij een WKK voor tapwater.** De kern weigerde een indirect verwarmd voorraadvat naast een WKK voor tapwater (`hot_water_storage_in_generator_efficiency`). Volgens 13.8.4.7.4 (2022 p. 621) volgen de verliezen van zo'n vat uit 13.6, en opmerking 1 van 13.6.2 (2022 p. 547) zondert een WKK niet uit. Het vat wordt nu toegestaan en gerekend, zoals bij een ketel. Een berekening die al rekende, verandert niet; alleen de eerder geweigerde invoer rekent nu. Test: `hot_water_chp_method_2_uses_the_ht_conversion_factors`.
+- **ISSO 54 v2.0.** EP-W104a–g, EP-W406o, p en t en EP-W407a–i zijn gecodeerd: 258 van de 266 deeltesten, alle `pending_expectation`. De acht open deeltesten zijn niet te coderen:
+  - EP-W203q, EP-W406w en EP-W406x vragen een kwaliteitsverklaring uit een apart bijlagedocument dat niet in bezit is;
+  - EP-W204d, EP-W406j en EP-W406l hebben geen route in de norm;
+  - EP-U602g en h geven daglichtfactoren zonder geometrie.
+
+  Codering en aannames: [voorbereiding ISSO 54](nta8800-isso54-voorbereiding.md).
+
 ### 9 oktober 2026 — Review 21: PV-grenzen in het interpretatieregister, CI op Node 22 (geen rekenwijziging)
 
 - **Interpretatieregister.** De grenzen voor een opgegeven K_pk (weigeren boven 400 W/m², waarschuwen boven 300 W/m²) zijn keuzes van het programma; 16.4 kent geen maximum (2025+C1 p. 679–680). Ze staan nu in de interpretatielijst van hoofdstuk 16 (rapportbijlage en attestdossier) en in de drempels van de plausibiliteitscontrole in [het attestdossier](nta8800-attestdossier.md).
