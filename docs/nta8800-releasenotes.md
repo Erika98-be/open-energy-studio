@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Review 21: PV-grenzen in het interpretatieregister, CI op Node 22 (geen rekenwijziging)
+
+- **Interpretatieregister.** De grenzen voor een opgegeven K_pk (weigeren boven 400 W/m², waarschuwen boven 300 W/m²) zijn keuzes van het programma; 16.4 kent geen maximum (2025+C1 p. 679–680). Ze staan nu in de interpretatielijst van hoofdstuk 16 (rapportbijlage en attestdossier) en in de drempels van de plausibiliteitscontrole in [het attestdossier](nta8800-attestdossier.md).
+- **Test over de projectroute.** `declared_pv_peak_power_warns_on_the_project_route` (project_performance.rs): 290 W/m² rekent zonder melding, 310 W/m² rekent en geeft `plausibility_pv_peak_power` op het veld, 401 W/m² wordt geweigerd (`pv_peak_power_invalid`).
+- **CI.** `ci.yml` draait de gate nu met Node 22, net als de lokale gate en `release.yml`; README en wiki zeggen dat.
+
 ### 9 oktober 2026 — Openbare gevallen I en J: rij van tabel 7.10 gecorrigeerd (geen rekenwijziging)
 
 Alleen de herbouw van twee openbare gevallen (2020+A1) is gecorrigeerd; de rekenkern is niet gewijzigd. Dezelfde soort fout als eerst bij K: de bouwwijze uit de uitdraai was op de verkeerde rij van tabel 7.10 gezet (2020+A1 p. 179–180).

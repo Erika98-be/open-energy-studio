@@ -32,7 +32,7 @@ Program 0.2.0 · Kernel 0.3.0 · Manual stamped for kernel 0.3.0.
 | Tool | Version |
 |---|---|
 | Rust | 1.77.2 minimum (MSRV) for the kernel; 1.88 for the desktop app and the service crate (API/MCP) |
-| Node.js | 20 or later (CI uses 20; development and release builds use 22) |
+| Node.js | 20 or later (CI, development and release builds use 22) |
 | Tauri | 2 |
 
 ## Features
@@ -79,7 +79,7 @@ The kernel has no I/O and is deterministic. The desktop commands and the HTTP/MC
 
 ### Prerequisites
 
-- **Node.js** 20 or later (CI uses 20, release builds 22), and npm.
+- **Node.js** 20 or later (CI and release builds use 22), and npm.
 - **Rust**:
   - the kernel (`crates/nta8800-core`) builds with Rust 1.77.2 or later (MSRV);
   - the desktop app (`src-tauri/`) and the service crate (API/MCP) need Rust 1.88 or later.
