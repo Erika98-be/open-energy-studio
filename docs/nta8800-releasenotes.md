@@ -13,6 +13,21 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Handleiding en formulier bijgewerkt voor rekenkern 0.4.0 (geen rekenwijziging)
+
+- **Handleiding, hoofdstuk 3.**
+  - Een WKK voor tapwater met een indirect verwarmd vat: waar je het vat toevoegt, en dat de kern het vatverlies één keer meetelt (13.8.4.7.4).
+  - De PV-grenzen voor een opgegeven K_pk: een waarschuwing boven 300 W/m² en een weigering boven 400 W/m², met het datablad als bewijs.
+  - De keuze **opgegeven F_D;dayl** bij de daglichtsectoren: welk bewijs nodig is, en dat er geen keuze voor de daglichtregeling is.
+  - `pv_peak_power_invalid` en `lighting_daylight_sector_invalid` staan nu in de tabel met meldingen.
+- **Formulier en meldingen (nl/en).**
+  - Het veld K_pk noemt het datablad en beide grenzen.
+  - De waarschuwing `plausibility_pv_peak_power` zegt wat je controleert.
+  - De factor F_D;dayl zegt dat de daglichtregeling erin zit.
+  - `lighting_daylight_sector_invalid` dekt ook een opgegeven factor.
+  - Test: `nta-kernel-040-messages.test.ts`.
+- **Aantallen.** Het testprotocol en de BRL 9501-gereedheid noemden nog 240 ISSO 54-deeltesten; het zijn er 260 (203 woning, 57 utiliteit).
+
 ### 9 oktober 2026 — Review 22: EP-U602h-daklichten zonder afronding, WKK-vat en opgegeven daglichtsector nagelopen (geen rekenwijziging)
 
 - **ISSO 54 EP-U602h.** De bovenste zone (daklichten, F_D;S 0,68) was als opgegeven F_D;dayl gecodeerd, waardoor de kern 0,5036 afrondde naar 0,50 en F_D 0,75 gaf in plaats van 0,7518. F_D;S 0,68 is de waarde van tabel 14.8 voor 2 % ≤ D < 4 % (2025+C1 p. 674; tabel 14.9 in 2022, p. 650), dus die sector gaat nu door de gewone daklichtroute (14.31–14.36, 14.41/14.42) en geeft 0,7518 exact. Alleen F_D;S 0,3 (EP-U602g en de onderste zone van h) ligt buiten bereik van 14.37 en blijft op de route van NEN-EN 15193-1 (F_D 0,89 tegen 0,8905). Test: `isso54_u602h_rooflight_sector_gives_the_unrounded_14_36_factor` (lighting.rs).
