@@ -3967,6 +3967,7 @@ export const en: Record<string, string> = {
   'nta.form.ground.heatedBasement': "Heated room below ground level (8.3.3.2)",
   'nta.form.ground.basementDepth': "Depth of the floor below ground level z, m",
   'nta.form.ground.basementWallResistance': "R_c of the basement walls, m²K/W",
+  'nta.form.ground.basementWallArea': "Area of the basement walls below ground ΣA_T;bw (annex K), m²; blank = z × P",
   'nta.form.ground.edgeInsulation': "Edge insulation (table D.1)",
   'nta.form.ground.edge.horizontal': "Horizontal",
   'nta.form.ground.edge.vertical': "Vertical",

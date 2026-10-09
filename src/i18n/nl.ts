@@ -3967,6 +3967,7 @@ export const nl: Record<string, string> = {
   'nta.form.ground.heatedBasement': "Verwarmde ruimte onder maaiveld (8.3.3.2)",
   'nta.form.ground.basementDepth': "Diepte vloer onder maaiveld z, m",
   'nta.form.ground.basementWallResistance': "R_c van de kelderwanden, m²K/W",
+  'nta.form.ground.basementWallArea': "Oppervlakte kelderwanden onder maaiveld ΣA_T;bw (bijlage K), m²; leeg = z × P",
   'nta.form.ground.edgeInsulation': "Randisolatie (tabel D.1)",
   'nta.form.ground.edge.horizontal': "Horizontaal",
   'nta.form.ground.edge.vertical': "Verticaal",

@@ -357,6 +357,7 @@ export function GroundFloorDetailFields({ draft, change, base }: SectionProps & 
     {basement && <>
       <NumberField {...field} path={at('heatedBasement', 'depthM')} label={t('nta.form.ground.basementDepth')} />
       <NumberField {...field} path={at('heatedBasement', 'wallResistanceM2kPerW')} label={t('nta.form.ground.basementWallResistance')} />
+      <NumberField {...field} path={at('heatedBasement', 'wallAreaM2')} label={t('nta.form.ground.basementWallArea')} optional />
     </>}
     {edges.map((_, index) => <div key={index} className="nta-form-row" role="group"
       aria-label={`${t('nta.form.ground.edgeInsulation')} ${index + 1}`}>

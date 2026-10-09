@@ -448,13 +448,19 @@ fn case_g_under_nta_8800_2024() {
     .unwrap();
     assert_eq!(value["ntaCalculation"]["normVersion"], "2024");
     let (performance, indicators) = run_edition(&value, "2024");
-    assert_indicators("G 2024", indicators, [65.42, 29.71, 72.1]);
+    assert_indicators("G 2024", indicators, [65.07, 29.31, 72.5]);
+    // A_ls with the entered 130,45 m² basement wall (6.7.2, 8.38 ΣA_T;bw):
+    // 670,80 m² as printed.
+    let limit = performance["bblCheck"]["limits"]["energyNeedMaxKwhPerM2"]
+        .as_f64()
+        .unwrap();
+    assert!((limit - 64.52).abs() < 0.005, "{limit}");
     assert!((used_kwh(&performance, "ventilation") - 300.4).abs() < 1.0);
     let pv = performance["pvSystems"][0]["annualKwh"].as_f64().unwrap();
     assert!((pv - 4164.0).abs() < 1.0, "{pv}");
     let heating = &performance["spaceHeating"];
     assert_eq!(heating["generationEfficiency"].as_f64(), Some(4.25));
-    assert!((used_kwh(&performance, "heating") - 4515.1).abs() < 1.0);
+    assert!((used_kwh(&performance, "heating") - 4436.5).abs() < 1.0);
     let need = performance["hotWater"]["annualNetNeedKwh"]
         .as_f64()
         .unwrap();
