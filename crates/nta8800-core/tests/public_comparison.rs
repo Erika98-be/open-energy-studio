@@ -832,7 +832,9 @@ fn case_n_supermarket_under_nta_8800_2020_a1() {
     // 7.28 with f_L 0,5: the lighting heat of the actual system is
     // 0,5 · 60 961 kWh / 8 760 h = 3 479 W (1,69 W/m²); the C1 run takes the
     // fixed q_L of 3 W/m² for retail (5.4.2).
-    let lighting_gain = performance["lighting"][0]["internalGainW"].as_f64().unwrap();
+    let lighting_gain = performance["lighting"][0]["internalGainW"]
+        .as_f64()
+        .unwrap();
     assert!((lighting_gain - 3479.5).abs() < 0.1, "{lighting_gain}");
     let limits = &performance["bblCheck"]["limits"];
     let limit = |key: &str| limits[key].as_f64().unwrap();
