@@ -4218,7 +4218,7 @@ export interface BuildingPerformanceAssessment {
   }>;
   /** §5.5.3/5.20: the carriers split per energy function. */
   energyByService?: NtaServiceEnergyBreakdown;
-  electricityBalance: Array<{ month: number; usedKwh: number; producedKwh: number; selfUsedKwh: number; exportedKwh: number }>;
+  electricityBalance: Array<{ month: number; usedKwh: number; producedKwh: number; producedRenewableKwh: number; selfUsedKwh: number; exportedKwh: number }>;
   annualPrimaryFossilKwh: number | null;
   annualRenewablePrimaryKwh: number | null;
   annualHeatPumpAmbientHeatKwh: number | null;

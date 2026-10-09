@@ -28,3 +28,18 @@ Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn i
 **Gekozen lezing.** Een gedeclareerde COP voor verwarming valt onder 9.63 met 0,95. Een gedeclareerd tapwaterrendement is geen forfaitaire waarde en krijgt 0,95. Dit komt tot op de kWh overeen met de gepubliceerde rapporten.
 
 **Vraag.** Klopt deze lezing, of blijft een gedeclareerde waarde die de tabelwaarde vervangt binnen 9.62 en 13.8.4.7 met f_prac 1?
+
+## 4. A0 en labelelement h bij een woning (Omgevingsregeling art. 5.11 en 5.13a)
+
+Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet over NTA 8800. Ze staan hier omdat ze dezelfde vorm hebben: een lezing die de kern kiest en die de minister of RVO kan bevestigen.
+
+**A0, voorwaarde b.**
+- **Situatie.** Art. 5.11 lid 4 laat het primair fossiel energiegebruik van een woning bij energiemaatregelen op gebiedsniveau rekenen met forfaitaire waarden (EMGforf). Lid 5 onder b toetst "het primair fossiel energiegebruik" aan bijlage IXa. BENG 2 rekent met de kwaliteitsverklaring.
+- **Gekozen lezing.** Lid 5 onder b toetst dezelfde waarde als lid 4, dus de labelwaarde met EMGforf. Een woning met een warmtenet met kwaliteitsverklaring kan zo BENG 2 ≤ 27 hebben en toch geen A0 krijgen. Voor utiliteit (art. 5.12 lid 4) is de labelwaarde de waarde met kwaliteitsverklaring, dus BENG 2.
+- **Vraag.** Toetst lid 5 onder b de labelwaarde (EMGforf) of de BENG 2-waarde?
+
+**Labelelement h.**
+- **Situatie.** Art. 5.13a lid 1 onder h vraagt "de productie van hernieuwbare energie in kWh".
+- **Gekozen lezing.** De kern geeft de hernieuwbare elektriciteitsopwekking op eigen terrein (PV en andere hernieuwbare opwekking van hoofdstuk 16), zonder de elektriciteit van een (micro-)WKK, die niet hernieuwbaar is (5.14b). Zonnewarmte en omgevingswarmte tellen niet mee in h: ze zitten in het aandeel hernieuwbare energie (element c) en in de belangrijkste hernieuwbare bron (element i). Een zonneboiler staat bovendien al apart bij de installaties (art. 5.13 onder c).
+- **Vraag.** Bedoelt h alleen hernieuwbare elektriciteit, of ook hernieuwbare warmte (zonnewarmte) in kWh?
+

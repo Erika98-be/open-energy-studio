@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — labelelement h, A0 bij woningen en het woningtype op het label
+
+- **Labelelement h (Omgevingsregeling art. 5.13a lid 1 onder h).** De "productie van hernieuwbare energie" telde de elektriciteit van een (micro-)WKK mee. Die is wel eigen opwekking, maar niet hernieuwbaar (5.14b). De elektriciteitsbalans heeft nu per maand `producedRenewableKwh`, en element h is de som daarvan. `producedKwh` blijft de totale eigen opwekking voor de balans van 5.10/5.13. Zonnewarmte telt niet mee in h; dat is een lezing, zie [vragen aan NEN](nta8800-vragen-nen.md) §4.
+- **A0 bij een woning (art. 5.11 lid 4 en lid 5 onder b).** Voorwaarde b toetste BENG 2. Ze toetst nu de labelwaarde, die bij een woning met energiemaatregelen op gebiedsniveau met forfaitaire waarden (EMGforf) wordt berekend. Een woning met een warmtenet met kwaliteitsverklaring en BENG 2 ≤ 27 maar EMGforf > 27 krijgt geen A0 meer. Utiliteit blijft ongewijzigd: daar is de labelwaarde de waarde met kwaliteitsverklaring. Ook dit is een lezing (§4).
+- **Woningtype op het label (art. 5.11 lid 1 en 5.13 onder a).** Of het label een woningtype draagt, volgt nu de rekensoort van de kern (woning of utiliteit) en niet de gebouwfunctie van het project. Een logiesfunctie niet in een logiesgebouw, gerekend als woning, krijgt zo haar woningtype. Zonder kerninvoer beslist de gebouwfunctie.
+- **Effect op de cases.** De openbare gevallen A–J, de RVO-woningen en de ISSO 54-cases rekenen ongewijzigd. Geen van die cases heeft een micro-WKK met A0-toets, een EMG-woning met A0-toets of een logiesfunctie als woning.
+
 ### 10 oktober 2026 — oudere uitgave ook in het geneste prestatieblok; klimaatbron per uitgave (geen rekenwijziging)
 
 - **Status van het geneste blok.** Bij een berekening in een oudere uitgave kreeg alleen de bovenste status `calculated_legacy_edition`. Het geneste `performance`-blok van de project- en opnameroute bleef `calculated_unverified`. Nu krijgt ook dat blok de status van de oudere uitgave, en `registrationEligible: false` als het die heeft. Wie alleen het geneste blok leest, ziet zo geen registreerbaar resultaat meer. Het rapport, het rapportmodel en het EP-Online-overzicht behandelen het resultaat zoals eerder: berekend in een oudere uitgave, niet voor registratie.

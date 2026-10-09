@@ -5255,8 +5255,14 @@ mod tests {
         sample.loss_area_source_reference = Some("envelope".into());
         sample.permit_application_after_2026_05_29 = true;
         let result = assess_building_performance(&sample);
-        assert_eq!(result.status, "calculated_unverified", "{:?}", result.issues);
-        let label = result.label_primary_fossil_indicator_kwh_per_m2_year.unwrap();
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        let label = result
+            .label_primary_fossil_indicator_kwh_per_m2_year
+            .unwrap();
         let beng2 = result.primary_fossil_indicator_kwh_per_m2_year.unwrap();
         assert!(label > beng2);
         let a0 = result.a0_check.as_ref().unwrap();
