@@ -529,6 +529,21 @@ fn registration_context(
             .map(|data| data.envelope.clone())
             .unwrap_or_default(),
         whole_building: single_detached_dwelling(project, project_value, derived),
+        pv_peak_powers_w_per_m2: derived
+            .map(|input| {
+                input
+                    .pv_systems
+                    .iter()
+                    .map(|system| match system.peak_power {
+                        crate::pv::PeakPower::DeclaredSpecific {
+                            peak_power_w_per_m2,
+                            ..
+                        } => Some(peak_power_w_per_m2),
+                        _ => None,
+                    })
+                    .collect()
+            })
+            .unwrap_or_default(),
     }
 }
 

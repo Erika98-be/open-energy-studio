@@ -1555,8 +1555,8 @@
         "id": "pv",
         "peakPower": {
           "method": "declared_specific",
-          "peakPowerWPerM2": 300.0,
-          "panelAreaM2": 209.77
+          "peakPowerWPerM2": 310.0,
+          "panelAreaM2": 203.0
         },
         "azimuthDeg": 270.0,
         "tiltDeg": 20.0,
@@ -1564,7 +1564,7 @@
         "obstructionFactors": [
           1.0
         ],
-        "sourceReference": "openbare bron Uniec 3.1.5.0 printout (basisschool met gymzaal 1653,96 m2, 02-01-2023): 203 m2, eigen waarde 310 Wp/m2, west 20 graden, matig geventileerd, minimale belemmering; de kern weigert K_pk boven 300 W/m2 (fysisch onwaarschijnlijk), dus hetzelfde P_pk 62 930 Wp als 300 W/m2 over 209,77 m2"
+        "sourceReference": "openbare bron Uniec 3.1.5.0 printout (basisschool met gymzaal 1653,96 m2, 02-01-2023): 203 m2, eigen waarde 310 Wp/m2, west 20 graden, matig geventileerd, minimale belemmering"
       }
     ],
     "lighting": [

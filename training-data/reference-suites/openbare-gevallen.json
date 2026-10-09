@@ -572,21 +572,21 @@
       "expected": [
         {
           "path": "beng1",
-          "value": 81.02,
+          "value": 75.51,
           "unit": "kWh/m2.year",
           "normReference": "BENG 1, energiebehoefte (5.3)",
           "absoluteTolerance": 0.05
         },
         {
           "path": "beng2",
-          "value": -13.31,
+          "value": -19.41,
           "unit": "kWh/m2.year",
           "normReference": "BENG 2, primair fossiel energiegebruik (5.2)",
           "absoluteTolerance": 0.05
         },
         {
           "path": "beng3",
-          "value": 112.3,
+          "value": 119.4,
           "unit": "%",
           "normReference": "BENG 3, aandeel hernieuwbare energie (5.4)",
           "absoluteTolerance": 0.15
@@ -624,21 +624,21 @@
       "expected": [
         {
           "path": "beng1",
-          "value": 67.19,
+          "value": 63.75,
           "unit": "kWh/m2.year",
           "normReference": "BENG 1, energiebehoefte (5.3)",
           "absoluteTolerance": 0.05
         },
         {
           "path": "beng2",
-          "value": 54.49,
+          "value": 51.46,
           "unit": "kWh/m2.year",
           "normReference": "BENG 2, primair fossiel energiegebruik (5.2)",
           "absoluteTolerance": 0.05
         },
         {
           "path": "beng3",
-          "value": 26.7,
+          "value": 27.9,
           "unit": "%",
           "normReference": "BENG 3, aandeel hernieuwbare energie (5.4)",
           "absoluteTolerance": 0.15

@@ -4127,6 +4127,7 @@ export const en: Record<string, string> = {
   'registration.issue.plausibility_label_class_jump': "Large jump from the previous label",
   'registration.issue.plausibility_loss_area_ratio': "Als/Ag outside the usual range",
   'registration.issue.plausibility_usable_floor_area': "Usable floor area unusual",
+  'registration.issue.plausibility_pv_peak_power': "PV peak power per m² above 300 W/m²",
   'registration.issue.plausibility_u_value': "Mean U-value unusual",
   'registration.issue.postcode_required': "Postcode missing",
   'registration.issue.previous_label_class_invalid': "Previous label class unknown",

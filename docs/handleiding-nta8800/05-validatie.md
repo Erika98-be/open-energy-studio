@@ -92,6 +92,7 @@ Bij registratie meldt het programma, zonder te blokkeren, onwaarschijnlijke uitk
 - een sprong van drie of meer klassen;
 - EP2, A_ls/A_g of A_g buiten een bandbreedte;
 - een onwaarschijnlijke gemiddelde U;
+- een opgegeven PV-piekvermogen boven 300 W/m² (`plausibility_pv_peak_power`). NTA 8800 16.4 stelt geen maximum; de kern weigert pas boven 400 W/m², als invoerfout;
 - A_g met meer dan twee decimalen (`usable_floor_area_precision`, Praktijkhandboek p. 70).
 
 Ook deze drempels zijn keuzes van het programma.

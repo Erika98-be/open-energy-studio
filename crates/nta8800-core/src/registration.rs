@@ -595,6 +595,9 @@ pub struct RegistrationContext {
     /// dwelling or a whole utility building), so its A_g is the building
     /// A_g for the WLC-GWP threshold.
     pub whole_building: bool,
+    /// Declared K_pk per PV system as entered, W/m² (`None` for the
+    /// table 16.1 and per-panel routes).
+    pub pv_peak_powers_w_per_m2: Vec<Option<f64>>,
 }
 
 /// Name of this program in the registration (Omgevingsregeling art. 5.14 lid 1 onder b).
@@ -1000,6 +1003,14 @@ pub fn plausibility_warnings(
         .any(|area| ((area * 100.0).round() - area * 100.0).abs() > 1e-6)
     {
         found.push(warning("usable_floor_area_precision", "zones"));
+    }
+    for (index, peak) in context.pv_peak_powers_w_per_m2.iter().enumerate() {
+        if peak.is_some_and(|peak| peak > crate::pv::PEAK_POWER_PLAUSIBLE_W_PER_M2) {
+            found.push(warning(
+                "plausibility_pv_peak_power",
+                &format!("pvSystems[{index}].peakPower.peakPowerWPerM2"),
+            ));
+        }
     }
     for summary in &context.envelope {
         let Some(u) = summary.mean_u_w_per_m2k else {
@@ -2221,6 +2232,7 @@ mod tests {
         // decides, without a warning.
         let detached = RegistrationContext {
             whole_building: true,
+            pv_peak_powers_w_per_m2: Vec::new(),
             ..dwelling.clone()
         };
         apartment.building_usable_floor_area_m2 = None;
@@ -2261,6 +2273,7 @@ mod tests {
                 max_rc_m2k_per_w: None,
             }],
             whole_building: false,
+            pv_peak_powers_w_per_m2: vec![None, Some(310.0)],
         };
         let result = assess_registration_with(&registration, &context);
         assert!(result.ready_for_registration, "{:?}", result.issues);
@@ -2273,6 +2286,7 @@ mod tests {
             "plausibility_usable_floor_area",
             "usable_floor_area_precision",
             "plausibility_u_value",
+            "plausibility_pv_peak_power",
         ] {
             assert!(found.contains(&code), "{code}: {found:?}");
         }
@@ -2297,6 +2311,7 @@ mod tests {
             label_class: Some("A"),
             envelope: Vec::new(),
             whole_building: false,
+            pv_peak_powers_w_per_m2: Vec::new(),
         };
         registration.previous_label_class = Some("B".into());
         assert!(assess_registration_with(&registration, &calm)

@@ -261,10 +261,10 @@
       "sourceReference": "tabel 7.13: kantoor en bijeenkomst overig 21/24"
     },
     "thermalMass": {
-      "floor": "light",
+      "floor": "heavy",
       "wall": "light",
       "ceiling": "closed_or_suspended",
-      "sourceReference": "openbare bron Uniec 3.0.9.3 printout (verbouw bedrijfspand Seafarm 439,04 m2, 01-04-2021): hsb/sfb/staalskelet met niet-massieve vloeren, gesloten of verlaagd plafond"
+      "sourceReference": "openbare bron Uniec 3.0.9.3 printout (verbouw bedrijfspand Seafarm 439,04 m2, 01-04-2021): hsb/sfb/staalskelet met staalbeton of niet-massieve betonnen vloeren, gesloten of verlaagd plafond, 1 bouwlaag; tabel 7.10 rij 250 tot 500 kg/m2, 110 kJ/m2K, C_m 48 290 000 J/K (2020+A1 p. 179-180)"
     },
     "internalGains": {
       "method": "utility",
