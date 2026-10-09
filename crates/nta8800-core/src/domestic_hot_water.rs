@@ -2280,11 +2280,17 @@ pub fn validate_hot_water(
             .storage
             .iter()
             .all(|vessel| vessel.not_in_appliance_test);
+    // §13.8.4.7.4 (2022 p. 621, 2025+C1 p. 643): a CHP heating an
+    // indirectly heated vessel has its storage losses from 13.6, like a
+    // boiler; note 1 of §13.6.2 (2022 p. 547) does not exempt it.
     let allows_storage = needs_storage
         || separately_tested
-        || generators
-            .iter()
-            .any(|generator| matches!(generator, HotWaterGenerator::ExternalHeat));
+        || generators.iter().any(|generator| {
+            matches!(
+                generator,
+                HotWaterGenerator::ExternalHeat | HotWaterGenerator::Chp(_)
+            )
+        });
     if needs_storage && system.storage.is_empty() {
         push("hot_water_storage_required", "storage");
     }
@@ -4643,6 +4649,25 @@ mod tests {
         assert!((jan.natural_gas_kwh - jan.generator_output_kwh / 0.49).abs() < 1e-9);
         // 16.13.
         assert!((jan.chp_electricity_kwh - jan.generator_output_kwh * 0.30 / 0.49).abs() < 1e-9);
+        // §13.8.4.7.4: its indirectly heated vessel is calculated per 13.6.
+        let mut with_vessel = input.clone();
+        with_vessel.storage.push(StorageVessel {
+            id: "vat".into(),
+            volume_l: 2000.0,
+            loss: StorageLoss::Label {
+                label: StorageLabel::C,
+            },
+            connection_factor: 2,
+            electric_boiler_insulated_pipe: false,
+            in_heated_zone: false,
+            unheated_ambient_c: None,
+            not_in_appliance_test: false,
+            source_reference: "label".into(),
+        });
+        assert!(validate_hot_water(&with_vessel, context(), "hotWater").is_empty());
+        let stored = assess_hot_water(&with_vessel, context()).unwrap();
+        assert!(stored.months[0].storage_loss_kwh > 0.0);
+        assert!(stored.months[0].generator_output_kwh > jan.generator_output_kwh);
         // No method or both methods are rejected.
         let neither = system(HotWaterGenerator::Chp(Box::new(HotWaterChp {
             declared_efficiencies: None,
