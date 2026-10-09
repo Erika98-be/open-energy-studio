@@ -271,3 +271,36 @@ describe('declared daylight factor (14.36, NEN-EN 15193-1 annex F)', () => {
     await waitFor(() => expect(document.activeElement).toBe(main().getByLabelText(/Daylight dependency factor F_D;dayl/)));
   }, 60000);
 });
+
+describe('PV peak power per m² (16.4a)', () => {
+  it('declares K_pk 350 W/m², shows the plausibility warning on the registration page and goes to the field', async () => {
+    const user = userEvent.setup();
+    // Above 300 W/m² the kernel calculates and warns on the field (test: declared_pv_peak_power_warns_on_the_project_route).
+    const declared = (block: NtaBlock | undefined) =>
+      (block as Record<string, any> | undefined)?.pvSystems?.[0]?.peakPower as Record<string, unknown> | undefined;
+    projectAnswer = (block) => (Number(declared(block)?.peakPowerWPerM2) > 300 ? {
+      ...officeOutput,
+      registration: {
+        source: 'NTA 8800 registratie', validUntil: null, registrationDeadline: null, relabelDeadline: null,
+        softwareAttested: false, dossierComplete: true, readyForRegistration: false, issues: [],
+        plausibility: [{ code: 'plausibility_pv_peak_power', path: 'pvSystems[0].peakPower.peakPowerWPerM2', severity: 'warning' }],
+      },
+    } : officeOutput);
+    await openProject(user, officeProject);
+
+    await openStep(user, /^Installations/, 'Generation (PV)');
+    await user.selectOptions(main().getByLabelText(/peak power P_pk/), 'declared_specific');
+    await typeNumber(user, main().getByLabelText(/^K_pk W\/m²/), '350');
+    await typeNumber(user, main().getByLabelText('panel area m²'), '45');
+    await applyDraft(user);
+    expect(lastNta()!.pvSystems[0].peakPower).toEqual({ method: 'declared_specific', peakPowerWPerM2: 350, panelAreaM2: 45 });
+
+    await openStep(user, /^Registration/);
+    await main().findByText('Plausibility');
+    const warning = await main().findByText(/PV peak power per m² above 300 W\/m²; check the data sheet/);
+    const row = warning.closest('li, tr') as HTMLElement;
+    await user.click(within(row).getByRole('button', { name: /Go to/ }));
+    expect(within(nav()).getByRole('button', { name: /^Installations/ })).toHaveAttribute('aria-current', 'page');
+    await waitFor(() => expect(document.activeElement).toBe(main().getByLabelText(/^K_pk W\/m²/)));
+  }, 60000);
+});
