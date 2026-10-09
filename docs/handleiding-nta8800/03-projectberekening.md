@@ -53,7 +53,7 @@ Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staa
 | Gebruiksfuncties met oppervlakte | functies voor gemengde rekenzones, Bbl-toets en labelklasse | §6.5.3, Bbl art. 4.149 lid 2 |
 | Setpoints (tabel 7.13) | verwarmings- en koelsetpoint; het formulier toetst per zone aan tabel 7.13 (gewogen bij meerdere functies), knop "Tabelwaarden gebruiken" | tabel 7.13 |
 | Thermische massa (tabel 7.10) | klasse vloer en wand, plafondkolom; alleen onder 2022 en 2020+A1 ook de massa per m² gebruiksoppervlakte (kg/m²) | tabellen 7.10–7.12 |
-| Gegevens per rekenzone (Gebouw › Zones, bij meer rekenzones) | per rekenzone **Eigen gegevens voor deze rekenzone**: gebruiksfunctie en woningtype (leeg = die van het blok), delen met een andere gebruiksfunctie en hun oppervlakte, eigen thermische massa, serres, en bij een sportfunctie in de ventilatie een zwembad. Eigen gegevens beginnen als kopie van de interne warmte, de luchtstromen en de ventilatie van het blok, want de kern neemt die dan alleen uit de zone; pas ze per zone aan | §6.3, §6.5.3, tabel 7.10, 7.30b |
+| Gegevens per rekenzone (Gebouw › Zones, bij meer rekenzones) | per rekenzone **Eigen gegevens voor deze rekenzone**: gebruiksfunctie en woningtype (leeg = die van het blok), delen met een andere gebruiksfunctie en hun oppervlakte, gemeenschappelijke ruimten (zie [hieronder](#gemeenschappelijke-ruimten-664)), eigen thermische massa, serres, en bij een sportfunctie in de ventilatie een zwembad. Eigen gegevens beginnen als kopie van de interne warmte, de luchtstromen en de ventilatie van het blok, want de kern neemt die dan alleen uit de zone; pas ze per zone aan | §6.3, §6.5.3, 6.6.4, tabel 7.10, 7.30b |
 | Interne warmtewinst | aantal woningen; bij utiliteit de tabelmethode of een opgegeven W/m² | 7.21–7.29, tabellen 7.2/7.3 |
 | Ramen (zonwinst) | kozijnfractie, belemmering, beweegbare zonwering (F_c, bediening) | §7.6, §17.3, 7.42/7.43 |
 | Belemmering per raam (Gebouw › Schil & ramen) | per buitenraam "Zoals project" of een eigen situatie a–g of opgegeven factoren, met bron; een raam dat niet meer in het project staat, wordt gemeld met **Verwijderen** | 7.13, §17.3.2 |
@@ -207,3 +207,26 @@ Het paneel toont het volledige NTA-invoerblok als JSON. Gebruik dit alleen als e
 | `pv_peak_power_invalid` | PV: een opgegeven K_pk boven 400 W/m², of een paneelvermogen onder de vermogensstap | waarde en datablad controleren |
 | `lighting_daylight_sector_invalid` | een daglichtsector met een onmogelijke geometrie, of een opgegeven F_D;dayl buiten 0–1 of met een oppervlakte van 0 | maten of opgegeven waarden controleren |
 | `air_cavity_below_20_mm_unsupported` | dunne luchtspouw die zwak geventileerd is of een reflecterende laag heeft | opgeven als R-waarde met bron |
+| `common_space_invalid`, `common_space_function_outside_zone`, `common_space_exceeds_zone` | gemeenschappelijke ruimte: geen oppervlakte of een functie dubbel aangevinkt, geen aangewezen functie in de rekenzone, of samen groter dan de rekenzone | zie [Gemeenschappelijke ruimten](#gemeenschappelijke-ruimten-664) |
+
+## Gemeenschappelijke ruimten (6.6.4)
+
+Een gemeenschappelijke ruimte, zoals een centrale entree, gang of toiletgroep, wordt gebruikt door meer dan één gebruiksfunctie. De norm verdeelt haar naar rato van de eigen (initiële) gebruiksoppervlakten van de functies die erop zijn aangewezen (6.2, 2025+C1 p. 142; 6.6.4, p. 158; in 2023 p. 129 en p. 145). Dat gebeurt op twee manieren:
+
+- **Binnen de rekenzone** gaat de ruimte alleen naar de aangewezen functies die in die rekenzone liggen. Daarmee rekent de zone (setpoint, interne warmte, ventilatiecapaciteit, §6.5.3).
+- **Voor het gebouw** gaat de ruimte naar alle aangewezen functies. Daarmee rekenen de Bbl-eisen per functie (§5.3.1).
+
+Zo vult u het in, onder **Gebouw › Zones › Eigen gegevens voor deze rekenzone**:
+
+1. Geef bij de delen met een gebruiksfunctie de **eigen oppervlakte** van elke functie, zonder de gemeenschappelijke ruimte.
+2. Kies **Gemeenschappelijke ruimte toevoegen (6.6.4)** in de rekenzone waar de ruimte ligt. Vul de gebruiksoppervlakte in (NEN 2580) en de bron, bijvoorbeeld de meetstaat of tekening.
+3. Vink de functies aan die op de ruimte zijn aangewezen. Vinkt u niets aan, dan geldt de ruimte voor alle functies van het gebouw.
+
+De rekenkern verdeelt de ruimte en legt de verdeling vast in de uitkomst (`commonSpaces`). Hij schrijft de verdeelde oppervlakten in de functies van de rekenzone en in de ventilatiefuncties van die zone (hoofdstuk 11), en, als u geen Bbl-functies met oppervlakte hebt opgegeven, ook in de Bbl-functies. Een zwembad bij een sportfunctie blijft bij die functie. Oppervlakten per functie voor tapwater en verlichting geeft u zelf op: neem daarvoor de gebouwverdeling uit de uitkomst over.
+
+De kern weigert een gemeenschappelijke ruimte zonder oppervlakte, met een functie die twee keer is aangevinkt (`common_space_invalid`), of waarvan geen enkele aangewezen functie in de rekenzone ligt (`common_space_function_outside_zone`). Ook weigert hij gemeenschappelijke ruimten die samen de hele rekenzone vullen (`common_space_exceeds_zone`).
+
+Een woonzone krijgt geen gemeenschappelijke ruimte in het formulier. In een woongebouw dat als geheel wordt berekend, horen de gemeenschappelijke ruimten bij de woonfunctie.
+
+Openbaar geval H laat zien waarom dit uitmaakt. Daar ligt de gemeenschappelijke ruimte in de rekenzone zonder sport, terwijl ook de sportfunctie erop is aangewezen ([vergelijking](../nta8800-vergelijking-openbare-rapporten.md)). De test `case_h_common_space_input_equals_the_hand_split` rekent geval H met deze invoer en krijgt dezelfde uitkomsten als met de handmatige verdeling.
+

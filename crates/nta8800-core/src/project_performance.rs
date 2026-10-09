@@ -189,9 +189,13 @@ pub struct NtaCalculationInput {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ZoneNtaData {
     pub zone_id: String,
-    /// §6.5.3 functions with areas for a mixed zone.
+    /// §6.5.3 functions with areas for a mixed zone. With `commonSpaces`
+    /// these are the initial (non-common) areas of the zone.
     #[serde(default)]
     pub function_areas: Vec<crate::monthly_demand::UsageFunctionArea>,
+    /// 6.6.4 common spaces lying in this zone; the kernel allocates them.
+    #[serde(default)]
+    pub common_spaces: Vec<crate::common_space::CommonSpace>,
     #[serde(default)]
     pub sunrooms: Vec<crate::monthly_demand::Sunroom>,
     /// 7.3.3 vertical pipes of this zone; `[]` states none, absent falls
@@ -335,6 +339,9 @@ pub struct ProjectPerformanceAssessment {
     pub bacs: Option<crate::bacs_draft::BacsDraftAssessment>,
     /// Label data of Omgevingsregeling art. 5.13.
     pub label_data: Option<crate::label_data::LabelData>,
+    /// 6.6.4 allocation of the common spaces, when the zones give any.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub common_spaces: Option<crate::common_space::CommonSpaceSplit>,
 }
 
 /// A further heating system of the project (§9.2) with the zones it serves.
@@ -1466,6 +1473,110 @@ const RESIDENTIAL_MIN_CONTROL_FACTOR_CD: f64 = 0.52;
 
 const VERTICAL_PIPES_UNKNOWN_DETAIL: &str = "7.3.3: state the pipes, [] for none; when unknown enter one fictitious uninsulated pipe per storey of the zone (dwelling outside a residential building), one per dwelling (residential building) or one per toilet group with N = H/3 shared by usable area over the zones (utility building)";
 
+/// Common spaces of all zones for the 6.6.4 allocation.
+fn common_space_zones<'a>(
+    project: &'a ProjectInput,
+    nta: &'a NtaCalculationInput,
+) -> Vec<crate::common_space::ZoneCommonSpaces<'a>> {
+    project
+        .zones
+        .iter()
+        .map(|zone| {
+            let index = nta
+                .zone_data
+                .iter()
+                .position(|item| item.zone_id == zone.id);
+            let data = index.map(|index| &nta.zone_data[index]);
+            crate::common_space::ZoneCommonSpaces {
+                zone_id: zone.id.as_str(),
+                data_index: index.unwrap_or_default(),
+                floor_area_m2: zone.floor_area,
+                initial: data
+                    .map(|item| item.function_areas.as_slice())
+                    .unwrap_or(&[]),
+                usage_function: data
+                    .and_then(|item| item.usage_function)
+                    .unwrap_or(nta.usage_function),
+                common_spaces: data
+                    .map(|item| item.common_spaces.as_slice())
+                    .unwrap_or(&[]),
+            }
+        })
+        .collect()
+}
+
+/// 6.6.4 allocation of the common spaces of the zones, `None` without any.
+pub fn common_space_split(project_value: &Value) -> Option<crate::common_space::CommonSpaceSplit> {
+    let project: ProjectInput = serde_json::from_value(project_value.clone()).ok()?;
+    let block = project_value.get("ntaCalculation")?;
+    let nta: NtaCalculationInput = serde_json::from_value(without_null_members(block)).ok()?;
+    crate::common_space::allocate(&common_space_zones(&project, &nta))?.ok()
+}
+
+/// Writes the 6.6.4 allocation into the zone function areas, the zone
+/// ventilation functions and `bblFunctions` (when not given). `false` when
+/// the common spaces are refused.
+fn apply_common_spaces(
+    project: &ProjectInput,
+    nta: &mut NtaCalculationInput,
+    gaps: &mut Vec<InputGap>,
+) -> bool {
+    let split = match crate::common_space::allocate(&common_space_zones(project, nta)) {
+        None => return true,
+        Some(Ok(split)) => split,
+        Some(Err(issues)) => {
+            gaps.extend(issues.into_iter().map(|issue| InputGap {
+                code: issue.code,
+                path: format!("ntaCalculation.{}", issue.path),
+                detail: None,
+            }));
+            return false;
+        }
+    };
+    for zone in &split.zones {
+        let Some(data) = nta
+            .zone_data
+            .iter_mut()
+            .find(|item| item.zone_id == zone.zone_id)
+        else {
+            continue;
+        };
+        if data.common_spaces.is_empty() {
+            continue;
+        }
+        // A single-function zone keeps the single-function route.
+        if !(data.function_areas.is_empty() && zone.allocated.len() == 1) {
+            data.function_areas = zone.allocated.clone();
+        }
+        // The chapter 11 functions of the zone are its allocated function
+        // areas (11.2.2.5.1 with 6.5.3); a swimming pool stays with its
+        // function.
+        if let Some(ventilation) = data.ventilation.as_mut() {
+            ventilation.functions = zone
+                .allocated
+                .iter()
+                .map(|part| {
+                    let function = crate::zoning::ventilation_function(part.function);
+                    crate::ventilation::FunctionArea {
+                        function,
+                        area_m2: part.area_m2,
+                        swimming_pool: ventilation
+                            .functions
+                            .iter()
+                            .any(|item| item.function == function && item.swimming_pool),
+                    }
+                })
+                .collect();
+        }
+    }
+    if nta.bbl_functions.is_empty() && split.building.len() > 1 {
+        if let Some(functions) = crate::common_space::bbl_functions(&split) {
+            nta.bbl_functions = functions;
+        }
+    }
+    true
+}
+
 fn gap(code: &'static str, path: impl Into<String>) -> InputGap {
     InputGap {
         code,
@@ -1988,6 +2099,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         registration,
         bacs,
         label_data,
+        common_spaces: common_space_split(project_value),
         gaps,
         warnings,
         geometry: project_geometry(project_value),
@@ -3319,7 +3431,10 @@ fn derive_input(
     if project.zones.is_empty() {
         gaps.push(gap("zone_required", "zones"));
     }
-    let nta = nta?;
+    let mut nta = nta?;
+    if !apply_common_spaces(&project, &mut nta, gaps) {
+        return None;
+    }
     let multi_zone = project.zones.len() > 1;
     let total_zone_area: f64 = project.zones.iter().map(|zone| zone.floor_area).sum();
     if multi_zone

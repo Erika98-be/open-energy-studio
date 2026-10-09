@@ -540,6 +540,64 @@ fn case_h_utility_under_nta_8800_2023() {
     assert!((ambient - 8940.0).abs() < 1.0, "{ambient}");
 }
 
+/// Case H with the common space as input (6.6.4): the zone gives its own
+/// initial function areas and the 49,20 m² common space, and the kernel
+/// allocates it, within RZ-1 over office, assembly and healthcare, for the
+/// building (Bbl limits) over all four functions. The results equal those of
+/// the hand split in the fixture.
+#[test]
+fn case_h_common_space_input_equals_the_hand_split() {
+    let hand: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-h.json"
+    ))
+    .unwrap();
+    let mut input = hand.clone();
+    let nta = &mut input["ntaCalculation"];
+    let rz1 = &mut nta["zoneData"][0];
+    rz1["functionAreas"] = serde_json::json!([
+        {"function": "office", "areaM2": 14.70},
+        {"function": "other_assembly", "areaM2": 26.30},
+        {"function": "other_healthcare", "areaM2": 27.60}
+    ]);
+    rz1["commonSpaces"] = serde_json::json!([{
+        "id": "gemeenschappelijk",
+        "areaM2": 49.20,
+        "sourceReference": "openbare bron Uniec 3.2.9.2 printout: gemeenschappelijke ruimte 49,20 m2 voor alle functies"
+    }]);
+    // The kernel writes the allocated areas over the zone's chapter 11
+    // functions, whatever they were.
+    rz1["ventilation"]["functions"] = rz1["functionAreas"].clone();
+    nta.as_object_mut().unwrap().remove("bblFunctions");
+    let (_, expected) = run_edition(&hand, "2023");
+    let (performance, indicators) = run_edition(&input, "2023");
+    for (got, want) in indicators.iter().zip(expected) {
+        assert!(
+            (got - want).abs() < 0.005,
+            "{indicators:?} against {expected:?}"
+        );
+    }
+    let limits = &performance["bblCheck"]["limits"];
+    assert!((limits["energyNeedMaxKwhPerM2"].as_f64().unwrap() - 44.94).abs() < 0.005);
+    assert!((limits["primaryFossilMaxKwhPerM2"].as_f64().unwrap() - 86.22).abs() < 0.005);
+    let mut copy = input.clone();
+    copy["ntaCalculation"]["normVersion"] = Value::from("2023");
+    let result = assess_project_performance(&copy);
+    let split = serde_json::to_value(result.common_spaces.as_ref().unwrap()).unwrap();
+    let office = split["zones"][0]["allocated"][0]["areaM2"]
+        .as_f64()
+        .unwrap();
+    assert!((office - 25.24).abs() < 0.01, "{split}");
+    let sport = split["building"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|part| part["function"] == "sport")
+        .unwrap()["areaM2"]
+        .as_f64()
+        .unwrap();
+    assert!((sport - 670.35).abs() < 0.01, "{split}");
+}
+
 /// Case I, the second utility case: an office with an assembly function and
 /// a common space (439,04 m², one zone), calculated on 01-04-2021 with
 /// Uniec 3.0.9.3 (NTA 8800:2020+A1 period); published 75,26 / −36,81 / 143,8

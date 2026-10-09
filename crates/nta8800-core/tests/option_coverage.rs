@@ -190,6 +190,9 @@ fn seeds() -> Value {
             "wallResistanceM2kPerW": 2.5
         } },
         { "heatedBasement": { "depthM": 1.5, "wallResistanceM2kPerW": 2.5 } },
+        // 6.6.4 common space of a zone, allocated by the kernel.
+        { "commonSpaces": [{ "id": "seed", "areaM2": 5.0, "servedFunctions": ["office"],
+            "sourceReference": "seed" }] },
         // Chapter 14 daylight sectors: every sector kind, including the
         // F_D;dayl of NEN-EN 15193-1 annex F (2025+C1 p. 672).
         { "daylight": { "method": "sectors", "sourceReference": "seed", "sectors": [

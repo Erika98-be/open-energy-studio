@@ -4377,7 +4377,10 @@ export interface NtaCalculationInput {
   zoneData?: Array<{
     zoneId: string;
     verticalPipes?: Array<{ id: string; storeys?: number; buildingHeightM?: number | null; areaShare?: number | null; insulated: boolean; sharedZones?: number; sourceReference: string }> | null;
+    /** With `commonSpaces`: the zone's own (initial) function areas. */
     functionAreas?: Array<{ function: NtaUsageFunction; areaM2: number }>;
+    /** 6.6.4 common spaces in the zone; the kernel allocates them (empty `servedFunctions`: all functions). */
+    commonSpaces?: NtaCommonSpace[];
     ventilationFlows: MonthlyDemandInput['ventilationFlows'];
     ventilation?: VentilationInput | null;
     internalGains: MonthlyDemandInput['internalGains'];
@@ -4531,6 +4534,26 @@ export interface ProjectPerformanceAssessment {
   } | null;
   /** Omgevingsregeling art. 5.13 label data. */
   labelData?: LabelData | null;
+  /** 6.6.4 allocation of the common spaces; absent without any. */
+  commonSpaces?: CommonSpaceSplit;
+}
+
+/** A common space lying in a calculation zone (6.6.4). */
+export interface NtaCommonSpace {
+  id?: string | null;
+  areaM2: number;
+  servedFunctions?: NtaUsageFunction[];
+  sourceReference: string;
+}
+
+type FunctionAreaList = Array<{ function: NtaUsageFunction; areaM2: number }>;
+
+/** The kernel's allocation of the common spaces (crates/nta8800-core/src/common_space.rs). */
+export interface CommonSpaceSplit {
+  source: string;
+  spaces: Array<{ zoneId: string; id?: string; areaM2: number; withinZone: FunctionAreaList; building: FunctionAreaList }>;
+  zones: Array<{ zoneId: string; initial: FunctionAreaList; allocated: FunctionAreaList }>;
+  building: FunctionAreaList;
 }
 
 /** Registration data of the EP report (crates/nta8800-core/src/registration.rs); all optional. */
