@@ -204,11 +204,16 @@ describe('dropped model data (review 16, fix 6)', () => {
       expect(droppedOnExport(project, 'UNIEC3')).toContain('ntaCalculation');
       expect(uniec3ExportLosses(project)).toContain('ntaCalculation');
       expect(vabiExportLosses(project)).toContain('ntaCalculation');
+      // The ground route (perimeter, crawlspace, heated basement) is named on its own.
+      const ground = (project.ntaCalculation as { groundFloors?: unknown[] }).groundFloors ?? [];
+      expect(droppedOnExport(project, 'UNIEC3').includes('ntaCalculation.groundFloors')).toBe(ground.length > 0);
+      expect(droppedOnExport(project, 'VABI').includes('ntaCalculation.groundFloors')).toBe(ground.length > 0);
     }
     const project = load('2522-woning-aalten.oes.json');
     expect(droppedOnExport({ ...project, importLog: [{ tool: 'X', importedAt: 'now' }] }, 'UNIEC3')).not.toContain('importLog');
     const { issues } = readUNIEC3(exportToUNIEC3(project));
     expect(issues.list.some((issue) => issue.kind === 'dropped' && issue.path === 'ntaCalculation')).toBe(true);
+    expect(issues.list.find((issue) => issue.path === 'ntaCalculation')?.message).toMatch(/verwarmde kelder/);
   });
 });
 

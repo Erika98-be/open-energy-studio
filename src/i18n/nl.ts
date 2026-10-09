@@ -2877,6 +2877,8 @@ export const nl: Record<string, string> = {
   'opname.surface.reed': "Dikte rieten dak",
   'opname.surface.crawlspaceBottom': "Bodem van de kruipruimte geïsoleerd",
   'opname.surface.floorHeightAboveGround': "Hoogte H2: bovenkant begane grondvloer tot maaiveld (NTA 8800:2022 en 2020+A1)",
+  'opname.surface.depthBelowGround': "Hoogte H1: bovenkant vloer tot maaiveld bij het geveldeel tegen de grond (ISSO 82.1 §8.4); de vloer rekent als verwarmde kelder (NTA 8800 8.3.3.2)",
+  'opname.surface.groundFloor': "Vloer waar dit geveldeel tegen de grond bij hoort",
   'opname.surface.proven': "Dikte aangetoond (bewijs)",
   'opname.surface.space': "Onverwarmde ruimte",
   'opname.surface.boundaryKind.unheated_space': "onverwarmde ruimte (uit de lijst)",

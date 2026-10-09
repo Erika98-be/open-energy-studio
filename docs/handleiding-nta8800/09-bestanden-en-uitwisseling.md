@@ -72,6 +72,8 @@ Een bestand dat helemaal niet te lezen is (geen geldige JSON, een verkeerde opbo
 
 UNIEC3 en VABI kunnen niet alles bevatten wat het project bevat: de NTA-invoer (`ntaCalculation`), de basisopname, het maatwerkadvies, de registratie, en bij UNIEC3 de lagen van de constructies. Bij het exporteren toont de app welke onderdelen niet in het bestand komen. Lees je zo'n bestand later weer in, dan staat de ontbrekende NTA-invoer als punt in het importverslag.
 
+**Vloeren op grond.** Geen van beide formaten bevat, voor zover hun bestanden hier bekend zijn, de grondroute van NTA 8800 8.3: de grens van een vlak (grond, kruipruimte, onverwarmde kelder), de perimeter P, de ruimte onder de vloer en een verwarmde kelder met diepte z en wandoppervlak ΣA_T;bw. Een vloer komt als gewoon vlak met zijn R_c in het bestand. De exportmelding noemt daarom `ntaCalculation.groundFloors` apart, en na een import vul je de vloeren op grond opnieuw in bij de NTA-invoer (Thermische schil › Vloeren op grond). Zonder echte voorbeeldbestanden van Uniec 3 en VABI met deze gegevens kan het programma geen veldnamen kiezen die die pakketten zouden lezen.
+
 ## Exports onder Rapport & dossier
 
 | Knop | Uitvoer |

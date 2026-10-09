@@ -2688,6 +2688,10 @@ export interface ResidentialSurvey {
       crawlspaceBottomInsulated?: boolean | null;
       /** H2 (ISSO 82.1 4e druk p. 73): top of the ground floor to ground level, m; used by NTA 8800:2022 and 2020+A1 (8.47). */
       floorHeightAboveGroundM?: number | null;
+      /** H1 (ISSO 82.1 7e druk §8.4 p. 74–75): for a façade part against the ground, top of the floor to ground level, m; the floor becomes a heated basement (NTA 8800 8.3.3.2). */
+      depthBelowGroundM?: number | null;
+      /** The floor (ground, crawlspace or unheated cellar) a façade part against the ground belongs to; needed with several such floors. */
+      groundFloorId?: string | null;
       /** §8.7.2.1: insulated at a renovation or extension (with present_unknown_thickness). */
       renovation?: { year?: number | null; meetsRequirementsOfYear?: boolean } | null;
       /** Utility survey with `zones`: the calculation zone; absent: split over the zones by A_g. */

@@ -250,3 +250,62 @@ fn h2_raises_the_heat_loss_in_2022() {
     };
     assert!(heat(0.8) > heat(0.1));
 }
+
+/// ISSO 82.1 7e druk §8.4 (p. 74–75): a façade part against the ground with
+/// H1 goes with its floor, which then calculates as the floor of a heated
+/// room below ground level (NTA 8800 8.3.3.2) in every edition, on a floor
+/// to the ground and on a floor above a crawlspace (afb. 8.9 and 8.11).
+#[test]
+fn a_facade_part_against_the_ground_calculates_with_its_floor_in_every_edition() {
+    for (name, text) in [RESIDENTIAL[0], RESIDENTIAL[2]] {
+        let base: Value = serde_json::from_str(text).unwrap();
+        let surfaces = base["envelope"]["surfaces"].as_array().unwrap();
+        let floor = surfaces
+            .iter()
+            .find(|surface| {
+                surface["element"] == "floor"
+                    && matches!(
+                        surface["boundary"]["kind"].as_str(),
+                        Some("ground" | "crawlspace" | "unheated_cellar")
+                    )
+            })
+            .unwrap_or_else(|| panic!("{name}: no floor to the ground"))["id"]
+            .clone();
+        for edition in EDITIONS {
+            let mut without = base.clone();
+            if MEASURED_EDITIONS.contains(&edition) {
+                for index in crawl_floors(&without) {
+                    without["envelope"]["surfaces"][index]["floorHeightAboveGroundM"] =
+                        Value::from(0.5);
+                }
+            }
+            let mut with = without.clone();
+            with["envelope"]["surfaces"]
+                .as_array_mut()
+                .unwrap()
+                .push(serde_json::json!({
+                    "id": "kelderwand", "element": "facade", "boundary": {"kind": "ground"},
+                    "grossAreaM2": 20.0, "cavity": false, "insulation": {"kind": "none_or_unknown"},
+                    "depthBelowGroundM": 1.2, "groundFloorId": floor,
+                    "sourceReference": "synthetic survey: wall against the ground",
+                }));
+            let heat = |value: &Value| {
+                let mut value = value.clone();
+                value["normVersion"] = Value::from(edition);
+                let survey: ResidentialSurvey = serde_json::from_value(value).unwrap();
+                let assessment = serde_json::to_value(assess_residential_survey(&survey)).unwrap();
+                let mut codes = Vec::new();
+                collect_codes(&assessment, &mut codes);
+                assert!(
+                    calculated(assessment["status"].as_str().unwrap_or_default()),
+                    "{name} in {edition}: {} {codes:?}",
+                    assessment["status"]
+                );
+                assessment["performance"]["annualHeatingAndCoolingNeedKwh"]
+                    .as_f64()
+                    .unwrap()
+            };
+            assert!(heat(&with) > heat(&without), "{name} in {edition}");
+        }
+    }
+}

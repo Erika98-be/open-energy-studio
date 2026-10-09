@@ -74,6 +74,23 @@ describe('survey answers that had no form', () => {
     expect(draft().envelope.surfaces[0].orientation).toBeUndefined();
   });
 
+  it('asks H1 and the floor for a façade part against the ground (ISSO 82.1 §8.4)', () => {
+    renderWithProviders(<Harness initial={{ envelope: { surfaces: [
+      { id: 'kelderwand', element: 'facade', boundary: { kind: 'ground' }, cavity: false },
+      { id: 'keldervloer', element: 'floor', boundary: { kind: 'ground' }, cavity: false },
+      { id: 'dak', element: 'roof', boundary: { kind: 'outdoor' }, cavity: false }] } }}>
+      {(d, change) => <SurfaceGeometryFields draft={d} change={change} t={t} base={['envelope', 'surfaces', 0]} />}</Harness>);
+    type(/Height H1/, '2.4');
+    select('Floor this façade part against the ground belongs to', 'keldervloer');
+    expect(draft().envelope.surfaces[0]).toMatchObject({ depthBelowGroundM: 2.4, groundFloorId: 'keldervloer' });
+    // Only floors to the ground, a crawlspace or an unheated cellar are offered.
+    const options = [...(screen.getByLabelText('Floor this façade part against the ground belongs to') as HTMLSelectElement).options]
+      .map((option) => option.value);
+    expect(options).toEqual(['', 'keldervloer']);
+    select('Floor this façade part against the ground belongs to', '');
+    expect(draft().envelope.surfaces[0].groundFloorId).toBeUndefined();
+  });
+
   it('adds panels with fresh ids and the kernel insulation shape', () => {
     renderWithProviders(<Harness initial={{ envelope: { surfaces: [{ id: 'gevel' }], panels: [] } }}>
       {(d, change) => <SurveyPanelsFields draft={d} change={change} t={t} />}</Harness>);
