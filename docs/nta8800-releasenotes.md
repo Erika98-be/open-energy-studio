@@ -13,6 +13,19 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 9 oktober 2026 — Openbare gevallen I en J: rij van tabel 7.10 gecorrigeerd (geen rekenwijziging)
+
+Alleen de herbouw van twee openbare gevallen (2020+A1) is gecorrigeerd; de rekenkern is niet gewijzigd. Dezelfde soort fout als eerst bij K: de bouwwijze uit de uitdraai was op de verkeerde rij van tabel 7.10 gezet (2020+A1 p. 179–180).
+
+| Geval | Bouwwijze in het rapport | Rij was → is | Rapport (BENG 1 / 2 / 3) | Kern was | Kern nu |
+|---|---|---|---|---|---|
+| **I**, kantoor met bijeenkomstfunctie | staalskelet met staalbeton of niet-massieve betonnen vloeren, 110 kJ/(m²K) | < 250 → 250–500 kg/m² | 75,26 / −36,81 / 143,8 | 81,02 / −13,31 / 112,3 | 75,51 / −19,41 / 119,4 |
+| **J**, winkelruimte | dragend metselwerk met massieve betonnen vloeren | 500–750 → > 750 kg/m² | 63,92 / 46,11 / 30,1 | 67,19 / 54,49 / 26,7 | 63,75 / 51,46 / 27,9 |
+
+- **BENG 1** van beide gevallen ligt nu binnen 0,3 % van het rapport (was +7,7 % en +5,1 %).
+- **BENG 2** blijft hoger dan het rapport door koeling (ontvochtiging bij directe expansie en de letterlijke lezing van 10.15); zie [vergelijking openbare rapporten](nta8800-vergelijking-openbare-rapporten.md).
+- **Suite en tests.** `openbare-gevallen.json` (`openbaar-i-2020a1`, `openbaar-j-2020a1`) en `case_i_utility_under_nta_8800_2020_a1`, `case_j_retail_under_nta_8800_2020_a1` hebben de nieuwe waarden.
+
 ### 9 oktober 2026 — PV: opgegeven piekvermogen per m² tot 400 W/m², waarschuwing boven 300 W/m²
 
 - **Wat.** De kern weigerde een opgegeven K_pk boven 300 W/m² (`pv_peak_power_invalid`). Die grens stond niet in de norm: 16.4 kent geen maximum (2020+A1 p. 651, 2022 p. 656–657, 2025+C1 p. 679–680). Openbaar geval L (Uniec 3.1.5.0) gaf 310 Wp/m² op.

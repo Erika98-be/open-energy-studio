@@ -413,8 +413,8 @@ Twee openbare rapporten uit de vorige zoekronde, beide uit de periode van NTA 88
 
 | Geval | Rapport | Kern (2020+A1) | Eisen in rapport en kern |
 |---|---|---|---|
-| I | 75,26 / −36,81 / 143,8 | 81,02 / −13,31 / 112,3 | 97,96 / 44,06 / 30,0 |
-| J | 63,92 / 46,11 / 30,1 | 67,19 / 54,49 / 26,7 | 75,19 / 60,00 / 30,0 |
+| I | 75,26 / −36,81 / 143,8 | 75,51 / −19,41 / 119,4 (was 81,02 / −13,31 / 112,3, zie warmtecapaciteit) | 97,96 / 44,06 / 30,0 |
+| J | 63,92 / 46,11 / 30,1 | 63,75 / 51,46 / 27,9 (was 67,19 / 54,49 / 26,7, zie warmtecapaciteit) | 75,19 / 60,00 / 30,0 |
 
 ### Kernfout: tapwaterwarmtepomp forfaitair zonder c_W;gen
 
@@ -429,25 +429,29 @@ Een rekenzone van 439,04 m²: kantoor 251,80, bijeenkomst overig 64,08 en een ge
 - Balansventilatie D.2 met tegenstroom-WTW 0,75 en 100 % bypass; elektrisch doorstroomtoestel (0,95); compressiekoeling EER 3,00 met directe expansie aan het plafond en 20 ventilatoren van 10 W.
 - 125 PV-panelen van 300 Wp, zuidoost 15°, sterk geventileerd. Het paneeloppervlak staat niet in de uitdraai; de fixture neemt 1,5 m² (200 W/m²), zodat de afronding van punt 68 niets afhaalt.
 - Verlichting met een eigen vermogen van 6,00 W/m², hand aan/uit, geen daglichtregeling.
+- **Warmtecapaciteit.** Het rapport geeft "staalskeletbouw met staalbeton of niet-massieve betonnen vloeren", 250 tot 500 kg/m², 110 kJ/(m²K), gesloten verlaagd plafond en C_m;int;eff 48 290 000 J/K (= 110 · 1000 · 439,04). Dat is de rij 250–500 kg/m² van tabel 7.10 (2020+A1 p. 179–180).
+  - De eerste herbouw nam de lichte rij (minder dan 250 kg/m², 55 kJ/(m²K)). Gecorrigeerd op 9 oktober 2026 (fixture: vloer zwaar, wand licht, dezelfde codering als K), na dezelfde fout bij K.
+  - Gevolg: BENG 1 81,02 → 75,51 (rapport 75,26), BENG 2 −13,31 → −19,41, BENG 3 112,3 → 119,4. Koudebehoefte 12 315 → 10 456 kWh, warmtebehoefte 12 678 → 11 716 kWh.
 
-Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 439,04:
+Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 439,04. Tussen haakjes de kern vóór de correctie van de warmtecapaciteit:
 
 | Post | Rapport | Kern | Verschil in BENG 2 |
 |---|---|---|---|
-| Verwarming | 4 807 | 4 840 | +0,11 |
-| Hulpenergie verwarming | 293 | 316 | +0,08 |
+| Verwarming | 4 807 | 4 468 (4 840) | −1,12 (+0,11) |
+| Hulpenergie verwarming | 293 | 289 (316) | −0,01 (+0,08) |
 | Tapwater (met hulpenergie) | 866 | 866 | 0 |
-| Koeling | 4 023 | 10 957 | +22,90 |
+| Koeling | 4 023 | 9 509 (10 957) | +18,12 (+22,90) |
 | Hulpenergie koeling | 628 | 716 | +0,29 |
 | Ventilatoren | 1 411 | 1 411 | 0 |
 | Verlichting | 7 446 | 7 484 | +0,13 |
 | PV (op de meter) | 30 621 | 30 621 | 0 |
-| **BENG 2** | **−36,81** | **−13,31** | **+23,50** |
+| **BENG 2** | **−36,81** | **−19,41 (−13,31)** | **+17,40 (+23,50)** |
 
-- **Koeling.** De kern rekent een koudebehoefte van 12 315 kWh, de ontvochtiging Q_C;dhum van 12.5 (15 311 kWh) en het verlies van 10.15 letterlijk (5 245 kWh): samen 32 871 kWh koude. Het rapport noemt 12 069 kWh als totale koudebehoefte, ongeveer de voelbare behoefte alleen. 12.3 en tabel 12.2 rekenen directe expansie als een systeem van 6/12 °C en dus met ontvochtiging (2020+A1 p. 500–501, 2025+C1 p. 523–524); Uniec 3.0.9.3 telde die niet mee. Per oorzaak: ontvochtiging +5 104 kWh (+16,86), 10.15 +1 748 kWh (+5,77), behoefte +82 kWh (+0,27).
+- **Koeling.** De kern rekent nu een koudebehoefte van 10 456 kWh, plus de ontvochtiging Q_C;dhum van 12.5 en het verlies van 10.15 letterlijk: samen 28 527 kWh koude (was 32 871). Het rapport noemt 12 069 kWh als totale koudebehoefte, wat met EER 3,00 precies de 4 023 kWh geeft; Uniec 3.0.9.3 telde ontvochtiging en 10.15 dus niet mee. 12.3 en tabel 12.2 rekenen directe expansie als een systeem van 6/12 °C en dus met ontvochtiging (2020+A1 p. 500–501, 2025+C1 p. 523–524). Met de zwaardere rij ligt de voelbare behoefte van de kern nu 1 613 kWh onder die van het rapport (was +246); de verdeling van het restverschil over ontvochtiging en 10.15 is zonder de maandwaarden van het rapport niet vast te stellen.
 - **Hulpenergie koeling.** 20 ventilatoren van 10 W over 3 141 bedrijfsuren zijn de 628 kWh van het rapport; de kern telt daar de regelenergie van 10.87 bij (87,6 kWh).
 - **Verlichting.** 14.3.2 rondt P_n naar boven af op twee significante cijfers volgens bijlage X (2020+A1 p. 631): 1 895 → 1 900 W en 739 → 750 W.
-- **BENG 1** is 7,7 % hoger (81,02 tegen 75,26). Het rapport noemt een verliesoppervlakte van 906,83 m²; de opgegeven vlakken tellen op tot 1 041,37 m². Het verschil van 134,54 m² is uit de uitdraai niet te herleiden.
+- **Verwarming** is nu 7 % lager dan het rapport (was 0,7 % hoger). Het rapport geeft alleen het elektriciteitsgebruik, niet de warmtebehoefte, dus de oorzaak is uit de uitdraai niet te herleiden.
+- **BENG 1** ligt nu 0,3 % boven het rapport (75,51 tegen 75,26; was 7,7 %). Het verschil in verliesoppervlakte blijft open: het rapport noemt 906,83 m², de opgegeven vlakken tellen op tot 1 041,37 m².
 
 ### J: winkelruimte onder appartementen (Uniec 3.0.19.4, 06-04-2022)
 
@@ -456,24 +460,27 @@ Een rekenzone van 89,80 m² winkelfunctie onder twee appartementen (die apart zi
 - Ventilatiewarmtepomp voor verwarming (COP 4,50, 35 °C, installatiejaar 2022) met vloerverwarming; een tweede ventilatiewarmtepomp met geïntegreerd vat (0,6 kW) voor tapwater, met tabel 13.25: 1,4.
 - Ventilatiesysteem C.4c (f_ctrl 0,82); compressiekoeling EER 3,00 met vloerkoeling 17/21 en een pomp van 33 W (EEI 0,23).
 - 4 PV-panelen van 360 Wp, zuid 23°, matig geventileerd; paneeloppervlak aangenomen 1,8 m² (200 W/m²). Verlichting 7,00 W/m².
+- **Warmtecapaciteit.** Het rapport geeft "dragend metselwerk met massieve betonnen vloeren", gesloten of verlaagd plafond. Dat is de rij meer dan 750 kg/m² van tabel 7.10, 250 kJ/(m²K) (2020+A1 p. 180), zoals bij D en E.
+  - De eerste herbouw codeerde vloer en wand als zwaar, de rij 500–750 kg/m² (180 kJ/(m²K)). Gecorrigeerd op 9 oktober 2026 (vloer en wand zeer zwaar), bij de controle van I.
+  - Gevolg: BENG 1 67,19 → 63,75 (rapport 63,92), BENG 2 54,49 → 51,46, BENG 3 26,7 → 27,9. Koudebehoefte 1 869 → 1 656 kWh, warmtebehoefte 3 368 → 3 244 kWh.
 
-Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 89,80:
+Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 89,80. Tussen haakjes de kern vóór de correctie van de warmtecapaciteit:
 
 | Post | Rapport | Kern | Verschil in BENG 2 |
 |---|---|---|---|
-| Verwarming | 978 | 1 009 | +0,49 |
-| Hulpenergie verwarming | 26 | 27 | +0,01 |
+| Verwarming | 978 | 971 (1 009) | −0,11 (+0,49) |
+| Hulpenergie verwarming | 26 | 26 (27) | 0 (+0,01) |
 | Tapwater | 90 | 90 | 0 |
-| Koeling | 697 | 1 098 | +6,48 |
+| Koeling | 697 | 948 (1 098) | +4,05 (+6,48) |
 | Hulpenergie koeling | 94 | 181 | +1,41 |
 | Ventilatoren | 44 | 44 | 0 |
 | Verlichting | 2 162 | 2 162 | 0 |
 | PV (op de meter) | 1 235 | 1 235 | 0 |
-| **BENG 2** | **46,11** | **54,49** | **+8,38** |
+| **BENG 2** | **46,11** | **51,46 (54,49)** | **+5,35 (+8,38)** |
 
-- **Koeling.** Vloerkoeling ontvochtigt niet. De kern rekent een behoefte van 1 869 kWh en het verlies van 10.15 letterlijk (1 341 kWh, 72 % van de behoefte), samen met de teruggewonnen pompwarmte 3 294 kWh koude; het rapport 2 092 kWh. Dat is de bekende lezing van 10.15 ([vragen aan NEN](nta8800-vragen-nen.md)).
+- **Koeling.** Vloerkoeling ontvochtigt niet. De kern rekent een behoefte van 1 656 kWh (was 1 869) plus het verlies van 10.15 letterlijk en de teruggewonnen pompwarmte: samen 2 845 kWh koude (was 3 294); het rapport 2 092 kWh. Dat is de bekende lezing van 10.15 ([vragen aan NEN](nta8800-vragen-nen.md)).
 - **Hulpenergie koeling.** De regelenergie van 10.87 (87,6 kWh).
-- **Verwarming.** De kern rekent 4 538 kWh warmte (3 % meer dan 4 400); BENG 1 is 5,1 % hoger (67,19 tegen 63,92).
+- **Verwarming.** De kern rekent 4 370 kWh warmte (0,7 % minder dan 4 400; was 4 538, 3 % meer); BENG 1 ligt 0,3 % onder het rapport (63,75 tegen 63,92; was 5,1 % hoger).
 - **Tapwater** en de **hulpenergie van de warmtepomp** waren eerst ook anders: 200 kWh (de kernfout hierboven) en 101 kWh (A = 87,6 voor een toestel zonder installatiejaar, punt 74). Met de correctie en het installatiejaar 2022 (A = 13,0) zijn ze gelijk aan het rapport.
 
 ### Wat I en J toevoegen
@@ -592,7 +599,7 @@ Per post, elektriciteit in kWh/jr; verschil in BENG 2 = Δ · 1,45 / 1 653,96:
   - een tweede tapwatersysteem;
   - verlichting met nieuwwaardecompensatie;
   - zonwering en belemmering per raam.
-- **Les voor de herbouw.** Tabel 7.10 van 2022 kiest de rij op de bouwwijze. "Staalbeton of niet-massieve betonnen vloeren" hoort bij 250–500 kg/m², niet bij de lichte rij. De herbouw van I (2020+A1) gebruikt de lichte rij voor een vergelijkbare omschrijving; dat is nog te controleren.
+- **Les voor de herbouw.** Tabel 7.10 van 2022 kiest de rij op de bouwwijze. "Staalbeton of niet-massieve betonnen vloeren" hoort bij 250–500 kg/m², niet bij de lichte rij. De herbouw van I (2020+A1) gebruikte de lichte rij voor dezelfde omschrijving; dat is op 9 oktober 2026 gecorrigeerd (zie I).
 - **Geen kernwijziging.** Er is geen rekenwijziging, dus geen ophoging van `KERNEL_VERSION`.
 
 ### Gezochte rapporten (9 oktober 2026, utiliteit 2022–2024)

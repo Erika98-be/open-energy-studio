@@ -514,11 +514,13 @@ fn case_h_utility_under_nta_8800_2023() {
 /// two functions pro rata; with that the kernel's Bbl limits equal the
 /// report's. Hot water (778 kWh, electric instantaneous 0,95), fans
 /// (1 411 kWh), PV (30 621 kWh) and the air-to-air heat-pump COP (2,80)
-/// agree. BENG 2 (Δ kWh · 1,45 / A_g): cooling +6 934 (+22,90): Q_C;dhum of
-/// 12.5 for direct expansion (2020+A1 p. 500–501) +5 104, the literal 10.15
-/// emission loss +1 748, the need +82; the 10.87 control energy +88 (+0,29),
-/// heating +33 (+0,11), its auxiliary energy +23 (+0,08) and lighting +38
-/// (+0,13; P_n rounded up per annex X).
+/// agree. The construction is the table 7.10 row 250 to 500 kg/m², 110
+/// kJ/(m²K) with the closed ceiling (2020+A1 p. 179–180), as printed; BENG 1
+/// is +0,25. BENG 2 (Δ kWh · 1,45 / A_g): cooling +5 486 (+18,12; Q_C;dhum
+/// of 12.5 for direct expansion, 2020+A1 p. 500–501, and the literal 10.15
+/// emission loss), the 10.87 control energy +88 (+0,29), heating −339
+/// (−1,12), its auxiliary energy −4 (−0,01) and lighting +38 (+0,13; P_n
+/// rounded up per annex X).
 #[test]
 fn case_i_utility_under_nta_8800_2020_a1() {
     let value: Value = serde_json::from_str(include_str!(
@@ -527,7 +529,7 @@ fn case_i_utility_under_nta_8800_2020_a1() {
     .unwrap();
     assert_eq!(value["ntaCalculation"]["normVersion"], "2020+A1");
     let (performance, indicators) = run_edition(&value, "2020+A1");
-    assert_indicators("I 2020+A1", indicators, [81.02, -13.31, 112.3]);
+    assert_indicators("I 2020+A1", indicators, [75.51, -19.41, 119.4]);
     let limits = &performance["bblCheck"]["limits"];
     let limit = |key: &str| limits[key].as_f64().unwrap();
     assert!((limit("energyNeedMaxKwhPerM2") - 97.96).abs() < 0.005);
@@ -548,10 +550,12 @@ fn case_i_utility_under_nta_8800_2020_a1() {
 /// 63,92 / 46,11 / 30,1 against limits 75,19 / 60,00 / 30,0. Hot water
 /// (90 kWh: the exhaust-air heat pump at 1,4 without c_W;gen, table 13.25),
 /// the heat-pump auxiliary energy (26 kWh, A 13,0 from 2015), fans (44 kWh),
-/// lighting (2 162 kWh) and PV (1 235 kWh) agree. BENG 2 (Δ kWh · 1,45 /
-/// A_g): cooling +401 (+6,48; the literal 10.15 emission loss), the 10.87
-/// control energy +87 (+1,41) and heating +31 (+0,49) with a 3 % higher
-/// heat. h of (8.47) is not printed and is taken as 0.
+/// lighting (2 162 kWh) and PV (1 235 kWh) agree. The construction is the
+/// table 7.10 row above 750 kg/m², 250 kJ/(m²K) with the closed ceiling
+/// (2020+A1 p. 180), as printed; BENG 1 is −0,17. BENG 2 (Δ kWh · 1,45 /
+/// A_g): cooling +251 (+4,05; the literal 10.15 emission loss), the 10.87
+/// control energy +87 (+1,41) and heating −7 (−0,11). h of (8.47) is not
+/// printed and is taken as 0.
 #[test]
 fn case_j_retail_under_nta_8800_2020_a1() {
     let value: Value = serde_json::from_str(include_str!(
@@ -560,7 +564,7 @@ fn case_j_retail_under_nta_8800_2020_a1() {
     .unwrap();
     assert_eq!(value["ntaCalculation"]["normVersion"], "2020+A1");
     let (performance, indicators) = run_edition(&value, "2020+A1");
-    assert_indicators("J 2020+A1", indicators, [67.19, 54.49, 26.7]);
+    assert_indicators("J 2020+A1", indicators, [63.75, 51.46, 27.9]);
     let limits = &performance["bblCheck"]["limits"];
     let limit = |key: &str| limits[key].as_f64().unwrap();
     assert!((limit("energyNeedMaxKwhPerM2") - 75.19).abs() < 0.005);

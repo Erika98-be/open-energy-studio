@@ -203,10 +203,10 @@
       "sourceReference": "tabel 7.13 winkelfunctie"
     },
     "thermalMass": {
-      "floor": "heavy",
-      "wall": "heavy",
+      "floor": "very_heavy",
+      "wall": "very_heavy",
       "ceiling": "closed_or_suspended",
-      "sourceReference": "openbare bron Uniec 3.0.19.4 printout (commerciele ruimte 89,80 m2 onder appartementen, 07-04-2022): dragend metselwerk met massieve betonnen vloeren, gesloten of verlaagd plafond"
+      "sourceReference": "openbare bron Uniec 3.0.19.4 printout (commerciele ruimte 89,80 m2 onder appartementen, 07-04-2022): dragend metselwerk met massieve betonnen vloeren, gesloten of verlaagd plafond, 1 bouwlaag; tabel 7.10 rij meer dan 750 kg/m2, 250 kJ/m2K (2020+A1 p. 180)"
     },
     "internalGains": {
       "method": "utility",
