@@ -9,6 +9,7 @@ import { CirculationPsiFields, HotWaterCirculationFields } from '../components/N
 import { AdditionalHotWaterSystemsFields, HotWaterExtraGeneratorsFields } from '../components/NtaPerformancePanel/NtaSystemSections';
 import { CoolingSystemsFields } from '../components/NtaPerformancePanel/NtaProjectExtras';
 import { syncVentilation } from '../core/nta/NtaFormModels';
+import { NTA_SECTIONS } from '../components/NtaPerformancePanel/NtaSections';
 import type { IProject } from '../core/energy/types';
 import { renderWithProviders } from './test-utils';
 
@@ -134,6 +135,25 @@ describe('project forms that had no form', () => {
     fireEvent.click(toggles[1]);
     expect(draft().hotWater.need.areas).toEqual([{ function: null, areaM2: null }]);
     expect(screen.getByText('hot-water entries')).toBeTruthy();
+  });
+
+  // Review 25: with several hot-water systems the kernel does not fill (13.20), so the choice is not offered.
+  it('offers no hot-water fill choice next to additional hot-water systems', () => {
+    const block = {
+      calculationScope: 'utility', usageFunction: 'office', internalGains: { method: 'utility' },
+      zoneData: [{ zoneId: 'z1', commonSpaces: [{ areaM2: 20, sourceReference: 'meetstaat' }] }],
+      hotWater: { need: { method: 'utility', areas: [], sourceReference: '' } },
+      additionalHotWaterSystems: [{ need: { method: 'utility', areas: [{ function: 'office', areaM2: 100 }] } }],
+    };
+    const HotWater = NTA_SECTIONS.find((section) => section.id === 'hotWater')!.Component;
+    const view = (initial: Draft) => renderWithProviders(<Harness initial={initial}>
+      {(d, change) => <HotWater draft={d} change={change} update={() => undefined} project={project(['z1'])} />}</Harness>);
+    const single = view({ ...block, additionalHotWaterSystems: [] });
+    expect(screen.getByLabelText(/Let the kernel split the areas/)).toBeTruthy();
+    single.unmount();
+    view(block);
+    expect(screen.queryByLabelText(/Let the kernel split the areas/)).toBeNull();
+    expect(screen.getByLabelText(/Use function \(table 13\.1\)/)).toBeTruthy();
   });
 
   it('offers no fill choice without common spaces', () => {

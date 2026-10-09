@@ -1,7 +1,7 @@
 import type { IProject } from '../energy/types';
 import { legacyEdition, projectCalculated } from '../nta/KernelClient';
 import type {
-  BuildingPerformanceAssessment, LabelData, NtaChapterFiveIndicators, NtaCoolingResult, NtaInterpretationGroup,
+  BuildingPerformanceAssessment, CommonSpaceSplit, LabelData, NtaChapterFiveIndicators, NtaCoolingResult, NtaInterpretationGroup,
   NtaRegistration, ProjectPerformanceAssessment, RegistrationAssessment,
 } from '../nta/KernelClient';
 import { escapeHtml } from './HtmlEscaping';
@@ -24,6 +24,29 @@ const PURPOSE: Record<string, string> = { existing_building: 'bestaand gebouw', 
 const SURVEY: Record<string, string> = { basic: 'basisopname', detailed: 'detailopname' };
 const REPRESENTATION: Record<string, string> = { unique: 'uniek', reference: 'referentiewoning', similar: 'gelijkende woning' };
 const CATEGORY: Record<string, string> = { facade: 'Gevel', roof: 'Dak', floor: 'Vloer', glazing: 'Beglazing' };
+
+function functionAreas(list: Array<{ function: string; areaM2: number }> | undefined): string {
+  return (list ?? []).map((part) => `${escapeHtml(part.function)} ${num(part.areaM2, 2)} m²`).join(' · ');
+}
+
+/**
+ * The kernel's 6.6.4 allocation of the common spaces and the input lists it filled from it, so a reader can
+ * trace function areas the adviser did not enter (review 25).
+ */
+export function commonSpaceSection(split: CommonSpaceSplit | undefined): string {
+  if (!split) return '';
+  const rows = split.spaces.map((space) => `<tr>${cell(space.zoneId)}${cell(space.id ?? '—')}<td class="n">${num(space.areaM2, 2)}</td>
+    <td>${functionAreas(space.withinZone)}</td><td>${functionAreas(space.building)}</td></tr>`).join('');
+  const filled = split.filled ?? [];
+  return `<h2>Gemeenschappelijke ruimten (6.6.4)</h2>
+    <table><thead><tr><th>Zone</th><th>Ruimte</th><th>A<sub>g</sub> [m²]</th><th>Binnen de rekenzone</th><th>Voor het gebouw (Bbl, label)</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <table><tbody>
+      <tr><th>Verdeling binnen de rekenzones, opgeteld</th><td>${functionAreas(split.withinZones)}</td></tr>
+      <tr><th>Verdeling voor het gebouw</th><td>${functionAreas(split.building)}</td></tr>
+      <tr><th>Door de rekenkern ingevulde lijsten</th>${cell(filled.length ? filled.join(', ') : 'geen (alle lijsten opgegeven)')}</tr>
+    </tbody></table>`;
+}
 
 /** NTA 8800 chapter 5 label and record indicators. */
 export function chapterFiveSection(indicators: NtaChapterFiveIndicators | null | undefined): string {
@@ -308,6 +331,7 @@ export function generateNtaCalculationReportHTML(
     ${serviceEnergySection(performance)}
     ${zebSection(performance)}
     ${labelDataSection(assessment.labelData)}
+    ${commonSpaceSection(assessment.commonSpaces)}
     ${ventilationRows ? `<h2>Ventilatie (hoofdstuk 11)</h2><table><thead><tr><th>Zone</th><th>q<sub>V;ODA;req</sub> jan [m³/h]</th><th>Infiltratie jan [m³/h]</th>
       <th>H<sub>ve</sub> jan [W/K]</th><th>Ventilatoren [kWh/jr]</th><th>Vorstbeveiliging [kWh/jr]</th><th>Voorverwarming roosters [kWh/jr]</th></tr></thead>
       <tbody>${ventilationRows}</tbody></table>` : ''}
