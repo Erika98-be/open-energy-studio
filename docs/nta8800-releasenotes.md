@@ -13,6 +13,15 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Leesbare waarden en keuzes in formulieren (geen rekenwijziging)
+
+- **Zonwering per raam.** De soorten zonwering met een kleur (screen, uitvalscherm, rolluik) toonden alleen `dark`, `white` of `other`. i18next las de dubbele punt in sleutels als `device.external_screen:dark` als een naamruimte. Sleutels met een dubbele punt werken nu (`nsSeparator: false`).
+- **Overnemen in projectmodel, vloeren op de grond.** Getallen staan afgerond in de taal van het programma (R_c 2,99 in plaats van 2,986667; Ψ en U op drie decimalen). Een verwarmde kelder, kruipruimte, randisolatie of randkoudebrug staat per onderdeel met naam in plaats van als JSON. De kolom met de vloerwaarde krijgt zijn ruimte.
+- **Bijlage AA.** De keuze van een raam noemt de oriëntatie als woord ("West") in plaats van de code (`W`).
+- **Resultaten.** De tabellen *Finaal energiegebruik* en *Energie per energiefunctie* noemen de energiedrager met naam en code ("Aardgas (gas)") in plaats van alleen de code van tabel 5.2.
+- **Test.** `select-option-labels.test.tsx` loopt alle keuzelijsten van alle NTA-onderdelen langs, op de voorbeelden en de openbare gevallen A–N, in het Nederlands en Engels, plus de basisopname. Een optie mag geen onvertaalde sleutel, het deel na een dubbele punt of (in het Nederlands) de ruwe waarde tonen. `takeover-value-format.test.tsx` legt de opmaak van de overnamewaarden vast.
+- **Handleiding.** `overnemen-vloeren.png` en `zonwering-per-raam.png` staan in de to-dolijst om opnieuw te maken.
+
 ### 10 oktober 2026 — Schermafdrukken in de handleiding (geen rekenwijziging)
 
 - **Nieuw in `docs/handleiding-nta8800/img/`:**
