@@ -9,7 +9,9 @@
 #     prepares the released notes (unreleased items under "Rekenkern
 #     <KERNEL_VERSION>") in the archive, without touching the worktree yet;
 #  2. runs the full gate (scripts/verify-nta.sh), keeping its log and the
-#     reference-suite report;
+#     reference-suite report, and writes the ISSO 54 testset dossier
+#     (testset/: every deeltest as a project file the app opens, with an
+#     outcome overview in Markdown, CSV and JSON; BRL 9501 §3.3);
 #  3. builds the desktop packages (Tauri, .deb) offline;
 #  4. exports the user manual as one HTML file (and a PDF when chromium or
 #     wkhtmltopdf is installed), stamped with both versions (BRL 9501 §4.4);
@@ -143,6 +145,21 @@ else
   gate_status="geslaagd"
 fi
 
+# Every ISSO 54 deeltest as a project file the app opens, with an outcome
+# overview (BRL 9501 §3.3). Exit 3 means only that no case has an expected
+# value yet: the dossier is written all the same.
+step "testsetdossier ISSO 54 (BRL 9501 §3.3, in ${archive}/testset)"
+testset_exit=0
+cargo run --locked --quiet --manifest-path crates/nta8800-service/Cargo.toml \
+  --bin reference_gate -- --suite training-data/reference-suites/isso54-v2.json \
+  --report-dir "$archive/testset/vergelijking" --testset-dir "$archive/testset" \
+  --testset-topics training-data/isso54/onderwerpen.json \
+  --commit "$(git rev-parse HEAD)" || testset_exit=$?
+if [[ $testset_exit -ne 0 && $testset_exit -ne 3 ]]; then
+  printf 'Het testsetdossier kon niet worden gemaakt (code %s).\n' "$testset_exit" >&2
+  exit 1
+fi
+
 packages=()
 if [[ $skip_build -eq 1 ]]; then
   step "pakketten overgeslagen (proef)"
@@ -225,7 +242,7 @@ node scripts/nta-github-release.mjs --out "$archive/github-release.md" --tag "$t
 step "manifest en SHA256SUMS"
 node --input-type=module -e "
   import { readIdentity, sha256File } from './scripts/nta-leveringsdocument.mjs';
-  import { writeFileSync } from 'node:fs';
+  import { readdirSync, writeFileSync } from 'node:fs';
   const manifest = {
     ...readIdentity('.'),
     tag: '$tag',
@@ -237,6 +254,12 @@ node --input-type=module -e "
     manual: '${manual_files[*]}'.split(' ').filter(Boolean).map((path) => ({
       file: path.slice('$archive/'.length), sha256: sha256File(path),
     })),
+    testset: {
+      cases: readdirSync('$archive/testset/projecten').filter((name) => name.endsWith('.oes.json')).length,
+      overview: ['testset.md', 'testset.csv', 'testset.json'].map((name) => ({
+        file: 'testset/' + name, sha256: sha256File('$archive/testset/' + name),
+      })),
+    },
   };
   writeFileSync('$archive/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
 "
