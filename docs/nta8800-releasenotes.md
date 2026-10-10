@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Schermafdrukken in de handleiding (geen rekenwijziging)
+
+- **Nieuw in `docs/handleiding-nta8800/img/`:**
+  - het venster bij een wissel van uitgave (hoofdstuk 10);
+  - de gemeenschappelijke ruimte van een rekenzone (hoofdstuk 3);
+  - *Vloeren op de grond* bij *Overnemen in projectmodel* (hoofdstuk 2);
+  - de tabellen *Belemmering*, *Zonwering* en *Glas per raam* (hoofdstuk 3).
+- **Hoe gemaakt.** Elk onderdeel is los weergegeven met de voorbeeldprojecten of de openbare gevallen D en G, in Firefox zonder scherm. De wissel van uitgave toont een vastgelegd antwoord van de rekenkern op het voorbeeldkantoor (2025+C1 naar 2020+A1).
+- **Handleiding.** De afbeeldingen zitten in de HTML-handleiding en in het venster *Handleiding* in de app. De lijst "Nog te doen: schermafdrukken" in de inhoudsopgave is bijgewerkt; de overige onderdelen vragen het volledige venster met een rekenkern en staan er nog.
+
 ### 10 oktober 2026 — Documentatie bijgewerkt na het werk van 10 oktober (geen rekenwijziging)
 
 - **Testprotocol.** Niveau a noemt ~950 unittests van de kern, niveau k ruim 1 300 frontendtests in 139 bestanden. De tests van bronlabels per uitgave, het overzicht bij een uitgavewissel, het overnemen van vloeren op de grond, de toegankelijkheidscontrole en de doorlooptests van kern 0.4.0 staan in de lijsten. Acceptatietest H4 vraagt het overzicht bij een wissel van uitgave; nieuw is H18, de gemeenschappelijke ruimte (ook in het sjabloon van het testrapport).
