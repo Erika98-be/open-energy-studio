@@ -80,7 +80,7 @@ describe('edition switch', () => {
     renderWithProviders(<Host />);
     fireEvent.change(screen.getByLabelText(/NTA 8800 edition/), { target: { value: '2020+A1' } });
     const dialog = await screen.findByRole('dialog');
-    await within(dialog).findByText(/3 item\(s\)/);
+    await within(dialog).findByText(/3 items;/);
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('/api/v1/nta8800/project/editions/compare');
     const body = JSON.parse(String(init.body));

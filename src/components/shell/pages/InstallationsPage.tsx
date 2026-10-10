@@ -256,7 +256,7 @@ export function InstallationsOverview() {
           service.ref,
           service.id === 'generation' && (project.solarPV.length > 0 || (project.ntaCalculation?.pvSystems ?? []).length > 0)
             ? `${formatNumber(pvPeak.kwp, locale, 2)}${pvPeak.partial ? '+' : ''} kWp` : null,
-          service.id === 'heatPumps' ? `${(project.ntaHeatPumps ?? []).length} ${t('installations.heatPumpCount')}` : null,
+          service.id === 'heatPumps' ? t('installations.heatPumpCount', { count: (project.ntaHeatPumps ?? []).length }) : null,
         ].filter(Boolean).join(' · ');
         return (
           <Card key={service.id} level={2} className="chain-card" title={t(`nav.sub.installations.${service.id}`)} subtitle={subtitle}

@@ -146,12 +146,13 @@ export function Section({ title, children, path, extraPaths }: {
 }) {
   const ref = useRef<HTMLFieldSetElement>(null);
   useLayoutEffect(() => markWideSelects(ref.current));
-  // Lists inside a section can add selects without a render of the section itself.
+  // Lists inside a section can add selects, or change option texts, without a render of the
+  // section itself.
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root || typeof MutationObserver === 'undefined') return undefined;
     const observer = new MutationObserver(() => markWideSelects(root));
-    observer.observe(root, { childList: true, subtree: true });
+    observer.observe(root, { childList: true, characterData: true, subtree: true });
     return () => observer.disconnect();
   }, []);
   return <fieldset ref={ref} className="nta-form-section" data-path={path} data-paths={extraPaths?.length ? extraPaths.join(' ') : undefined}>
