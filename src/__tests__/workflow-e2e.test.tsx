@@ -116,6 +116,14 @@ async function kernelSettled() {
   }, { timeout: 5000, interval: 100 });
 }
 
+/** Confirms the edition-switch review with "Change the edition only" once the comparison has loaded. */
+async function switchEditionOnly(user: User) {
+  const button = await screen.findByRole('button', { name: 'Change the edition only' });
+  await waitFor(() => expect(button).toBeEnabled());
+  await user.click(button);
+  await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Change the NTA 8800 edition' })).toBeNull());
+}
+
 async function applyDraft(user: User, changes?: RegExp) {
   if (changes) expect(screen.getByRole('region', { name: 'NTA input draft' })).toHaveTextContent(changes);
   const runs = projectBodies().length;
@@ -299,6 +307,8 @@ describe('workflow end to end, NTA 8800:2022', () => {
     await openExample(user);
     const edition = await main().findByLabelText('NTA 8800 edition');
     await user.selectOptions(edition, '2022');
+    // The edition-switch review comes first; here only the edition changes.
+    await switchEditionOnly(user);
     expect(main().getByText('Older edition: the result is for comparison only and cannot be registered.')).toBeInTheDocument();
     await applyDraft(user, /change/);
     expect(lastNta()!.normVersion).toBe('2022');
@@ -327,6 +337,7 @@ describe('workflow end to end, NTA 8800:2022', () => {
     // Back to the default edition: the 2022 values are flagged with a remove action.
     await openStep(user, /^Project/);
     await user.selectOptions(await main().findByLabelText('NTA 8800 edition'), '2025+C1');
+    await switchEditionOnly(user);
     await openStep(user, /^Building/, 'Calculation zones');
     expect(main().queryByLabelText(/Mass per m² usable floor area/)).toBeNull();
     const stale = main().getAllByRole('alert').find((alert) => /2022/.test(alert.textContent ?? ''));

@@ -590,6 +590,11 @@ fn input_schema(op: &Operation) -> Value {
             "description": "NTA 8800 edition to calculate with (default 2025+C1, the only registrable one). Written into the input's own edition (ntaCalculation.normVersion, survey or building normVersion, maatwerkadvies base, both relabel projects) when absent and must match it when present; diagnostic routes run with it active. Results record normVersion and targetNormVersion; an older edition gives status calculated_legacy_edition and is never registrable, except a relabel in the original's edition. A reference case is compared in its own case.normVersion (any implemented edition); a request edition must match it. The two diagnostic comparisons (direct-diagnostic, gas-chain-diagnostic) take only 2025+C1."
         }),
     );
+    if op.name == "compare_project_editions" {
+        properties[crate::operations::NORM_VERSION_MEMBER]["description"] = json!(
+            "Target edition to compare the project with (default 2025+C1). The project keeps its own edition in ntaCalculation.normVersion; the result's adjustedProject carries the target."
+        );
+    }
     if op.name == "assess_relabel" {
         properties.insert(
             "current".to_string(),
@@ -602,6 +607,54 @@ fn input_schema(op: &Operation) -> Value {
         "properties": properties,
         "required": required,
         "additionalProperties": false,
+    })
+}
+
+/// JSON Schema of an operation's 200 result. Most results are described in
+/// docs/nta8800-api.md; the edition comparison has its shape here.
+fn result_schema(op: &Operation) -> Value {
+    if op.name != "compare_project_editions" {
+        return json!({ "type": "object" });
+    }
+    let editions: Vec<&str> = nta8800_core::norm_versions::NormVersion::ALL
+        .iter()
+        .map(|version| version.id())
+        .collect();
+    json!({
+        "type": "object",
+        "required": ["fromNormVersion", "toNormVersion", "switchPoints", "items", "adjustedProject", "statusAfterAutomaticChanges", "remainingAfterAutomaticChanges"],
+        "properties": {
+            "fromNormVersion": { "type": "string", "enum": editions, "description": "The project's own edition" },
+            "toNormVersion": { "type": "string", "enum": editions, "description": "The requested edition" },
+            "fromLabel": { "type": "string" },
+            "toLabel": { "type": "string" },
+            "switchPoints": {
+                "type": "array",
+                "description": "Switch points of docs/nta8800-normversies.md whose values or routes differ between the two editions",
+                "items": { "type": "object", "properties": {
+                    "points": { "type": "array", "items": { "type": "string" } },
+                    "subject": { "type": "string" },
+                    "fields": { "type": "array", "items": { "type": "string" } },
+                    "hasInputs": { "type": "boolean" }
+                } }
+            },
+            "items": {
+                "type": "array",
+                "items": { "type": "object", "required": ["category", "code", "path", "points", "fix", "resolvedByAutomaticChanges"], "properties": {
+                    "category": { "type": "string", "enum": ["refused", "required", "ignored", "reinterpreted", "warning"] },
+                    "code": { "type": "string", "description": "Kernel code, or input_ignored_in_edition / input_reinterpreted_in_edition" },
+                    "path": { "type": "string", "description": "Project input path, for example ntaCalculation.groundFloors[0].below.wallHeightAboveGroundM" },
+                    "points": { "type": "array", "items": { "type": "string" }, "description": "Switch point numbers" },
+                    "subject": { "type": ["string", "null"] },
+                    "fix": { "type": "string", "enum": ["drop", "switchOff", "set", "enter", "choose", "review"], "description": "drop, switchOff and set are applied in adjustedProject; the others are left to the adviser" },
+                    "value": { "description": "The value a set or switchOff writes" },
+                    "resolvedByAutomaticChanges": { "type": "boolean" }
+                } }
+            },
+            "adjustedProject": { "type": "object", "description": "The project in the target edition with the automatic changes applied" },
+            "statusAfterAutomaticChanges": { "type": "string" },
+            "remainingAfterAutomaticChanges": { "type": "array", "items": { "type": "object" }, "description": "Gaps of adjustedProject the project did not have in its own edition" }
+        }
     })
 }
 
@@ -643,7 +696,7 @@ pub fn openapi_document() -> Value {
         let mut responses = serde_json::Map::new();
         responses.insert(
             "200".into(),
-            json!({ "description": "Result", "content": { "application/json": { "schema": { "type": "object" } } } }),
+            json!({ "description": "Result", "content": { "application/json": { "schema": result_schema(op) } } }),
         );
         responses.insert("403".into(), json!({ "description": "The Host header names a host the service does not answer (host_not_allowed; protection against DNS rebinding)", "content": { "application/json": { "schema": error } } }));
         if op.method == Method::Post {

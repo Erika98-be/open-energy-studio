@@ -5206,6 +5206,59 @@ export async function calculateProjectPerformanceWithRust(input: IProject): Prom
   throw new Error('Rust project calculation is available in the desktop app and local development server.');
 }
 
+/** One input a change of edition refuses, requires, ignores or reads differently; see crates/nta8800-core/src/edition_switch.rs. */
+export interface EditionSwitchItem {
+  category: 'refused' | 'required' | 'ignored' | 'reinterpreted' | 'warning';
+  code: string;
+  /** Project input path, e.g. `ntaCalculation.groundFloors[0].below.wallHeightAboveGroundM`. */
+  path: string;
+  /** Switch point numbers of docs/nta8800-normversies.md. */
+  points: string[];
+  subject?: string | null;
+  /** `drop`, `switchOff` and `set` are safe and applied in `adjustedProject`; the others are left to the adviser. */
+  fix: 'drop' | 'switchOff' | 'set' | 'enter' | 'choose' | 'review';
+  value?: unknown;
+  resolvedByAutomaticChanges: boolean;
+}
+
+export interface EditionSwitchReport {
+  fromNormVersion: NormVersion;
+  toNormVersion: NormVersion;
+  fromLabel: string;
+  toLabel: string;
+  switchPoints: Array<{ points: string[]; subject: string; fields: string[]; hasInputs: boolean }>;
+  items: EditionSwitchItem[];
+  /** The project in the target edition with the automatic changes applied. */
+  adjustedProject: { ntaCalculation?: Record<string, unknown> } & Record<string, unknown>;
+  statusAfterAutomaticChanges: string;
+  remainingAfterAutomaticChanges: Array<{ code: string; path: string; detail?: string }>;
+}
+
+export const AUTOMATIC_EDITION_FIXES: ReadonlyArray<EditionSwitchItem['fix']> = ['drop', 'switchOff', 'set'];
+
+/** What changes when the project's NTA block moves to edition `target`; the project itself is not changed. */
+export async function compareProjectEditionsWithRust(input: IProject, target: NormVersion): Promise<EditionSwitchReport> {
+  const project = projectRouteInput(input);
+  if (isTauri()) {
+    return invoke<EditionSwitchReport>('compare_project_editions', { project, normVersion: target });
+  }
+  if (import.meta.env.DEV) {
+    const response = await fetch('/api/v1/nta8800/project/editions/compare', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ project, normVersion: target }),
+    });
+    if (!response.ok) throw new Error(`edition comparison failed (${response.status})`);
+    const report = await response.json() as Partial<EditionSwitchReport>;
+    // Anything else than a comparison (an older service) counts as unavailable.
+    if (!Array.isArray(report.items) || !Array.isArray(report.remainingAfterAutomaticChanges)) {
+      throw new Error('edition comparison not available');
+    }
+    return report as EditionSwitchReport;
+  }
+  throw new Error('The edition comparison is available in the desktop app and local development server.');
+}
+
 /** Chapter 13 result; see crates/nta8800-core/src/domestic_hot_water.rs. */
 export interface NtaHotWaterAssessment {
   annualNetNeedKwh: number;

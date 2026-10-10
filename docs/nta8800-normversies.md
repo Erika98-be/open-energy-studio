@@ -80,6 +80,7 @@ Dat wijkt bewust af van "alle parameters doorgeven". De kern rekent synchroon op
 | 16 | Tabel E.11/E.12 biobased λ, riet | vlas/schapenwol/katoen 0,050, kokos 0,055, stro 0,060, hennep 0,100; riet 0,200 geen isolatie (p. 791) | p. 810 | `ForfaitMaterial::lambda` |
 | 17 | (I.3) rieten dak | d/0,2 (p. 814) | d/0,105 (p. 833) | `ForfaitOpaque::calculate` |
 | 18 | (W.9) ondergrens noemer boosterwarmtepomp | geen (p. 1103) | ≥ E_ls (p. 1123) | `calculate_booster` |
+| 18a | P.3 item 6 oppervlaktewater en andere LT-bronnen als collectieve bron | alleen bodem en grondwater (p. 916) | ruimere lijst (p. 936) | `wide_collective_low_temperature_sources`; geen eigen invoer (zie "Niet omgeschakeld") |
 
 ## Verschillen 2023 → 2024 die de kern omschakelt
 
@@ -276,8 +277,23 @@ BENG 1 / 2 / 3 per uitgave, alleen waar een uitgave verschilt van de vorige:
 - **Rechtgezet: de reden achter `forfait_lookup_invalid`.** Een forfaitaire warmtepomp die bij een andere uitgave ongeldig wordt, gaf alleen die code op `generator.forfait`. Nu krijgt elke oorzaak een eigen melding op haar eigen veld, naast `forfait_lookup_invalid`. Voorbeelden zijn `source_temperature_class_mismatch` op `sourceTemperatureC` en `high_test_standard_invalid` op `testStandardEdition` (test `edition_switch_names_the_forfait_field_it_invalidates`). Dat geldt ook voor de hybride warmtepomp.
 - **Rechtgezet: het diagnosepaneel.** Het forfaitaire-COP-paneel schreef bij elke uitgave NEN-EN 14511-2:2022 in het testbewijs. Onder 2020+A1 en 2022 weigert de kern dat, omdat die uitgaven de versie van 2007 noemen (punt 67a). Het paneel volgt nu de uitgave (`heatPumpHighTestStandard`). De meldingtekst noemt beide versies.
 
+## Uitgave wijzigen: omschakelpunten per invoer (10 oktober 2026)
+
+`crates/nta8800-core/src/norm_versions/switches.rs` koppelt elk veld van `NormProfile` aan precies één omschakelpunt uit de tabellen hierboven, met de invoerleden waarop het punt werkt (`area.method`, `wallHeightAboveGroundM`, `testStandardEdition`, …) en de codes die het op een omsluitend pad geeft. Een punt zonder invoerleden verandert alleen getallen of routes. Punt 18a (P.3 item 6) staat sindsdien als eigen rij in de tabel.
+
+`crates/nta8800-core/src/edition_switch.rs` (`compare_project_editions`) gebruikt die koppeling bij het wijzigen van de uitgave van een project:
+1. het rekent het project in de eigen en in de doeluitgave door; wat de doeluitgave weigert of extra vraagt, is wat de kern daar meldt en in de eigen uitgave niet;
+2. het voert veilige aanpassingen uit (een geweigerd lid dat het omschakelpunt noemt verwijderen, een vlag uitzetten, de beproevingsnorm van tabel 9.28 zetten) en rekent opnieuw, tot er niets nieuws meer bijkomt;
+3. een verwijderd lid dat daarna verplicht blijkt of waarvan het weglaten het blok onleesbaar maakt, wordt teruggezet en blijft een keuze van de adviseur;
+4. leden van een route die de doeluitgave niet heeft en niet weigert, staan als "niet gebruikt"; `biomassAbove500Kw` staat als "anders gelezen" (punten 30 en 53);
+5. elke melding krijgt het omschakelpunt dat de code noemt, anders dat met het langste overeenkomende invoerpad, en alleen als de velden van dat punt tussen de twee uitgaven verschillen. Een samenvattende melding op een omsluitend object (`forfait_lookup_invalid`) neemt het punt van de oorzaak eronder over.
+
+De lijst is dus geen handmatige opsomming: de meldingen komen van de kern, de koppeling aan omschakelpunten van de profielen. De handleiding (hoofdstuk 10) beschrijft het venster in de app.
+
 ## Tests
 
+- `crates/nta8800-core/src/norm_versions/switches.rs`: elk profielveld hoort bij één omschakelpunt; elk veld dat tussen twee uitgaven verschilt heeft er een; elke genummerde rij van dit document is een omschakelpunt en omgekeerd; de toeschrijving.
+- `crates/nta8800-core/tests/edition_switch.rs`: de openbare gevallen A, B, C, D, J en L van hun eigen uitgave naar 2025+C1 en terug, en beide voorbeelden tussen elk paar uitgaven. Elke `route_not_in_edition` direct na de omschakeling staat in de lijst, elke weigering of eis heeft een omschakelpunt, en na de automatische aanpassingen blijft precies over wat de lijst aan de adviseur laat. Daarnaast de wandhoogte van 8.47 (punt 59) heen en terug, de PV-paneelroute (punt 68) en de beproevingsnorm (punt 67a).
 - `crates/nta8800-core/tests/edition_deltas.rs` (genegeerd, op aanvraag): de tabel hierboven (`print_edition_delta_table`), alle verschillende uitvoerwaarden van één geval tussen twee uitgaven (`EDITION_DIFF=K,2020+A1,2022`) en de meldingen van één geval in één uitgave (`EDITION_PROBE=D,2023`).
 - `crates/nta8800-core/src/norm_versions/tests.rs`: standaarduitgave, serde, het herstellen van de thread-local (ook na een paniek) en de profielwaarden met paginaverwijzing.
 - Per schakelpunt een eenheidstest in de module van het schakelpunt, met de paginaverwijzing in de test.

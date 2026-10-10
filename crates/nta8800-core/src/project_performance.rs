@@ -4173,9 +4173,18 @@ fn derive_input(
                                     .iter()
                                     .position(|item| item.surface_id == id)
                                     .unwrap_or_default();
+                                // The edition issues of 8.47 are about h, so
+                                // they point at h itself.
+                                let member = match code {
+                                    "route_not_in_edition"
+                                    | "ground_floor_wall_height_required" => {
+                                        ".below.wallHeightAboveGroundM"
+                                    }
+                                    _ => "",
+                                };
                                 gaps.push(gap(
                                     code,
-                                    format!("ntaCalculation.groundFloors[{index}]"),
+                                    format!("ntaCalculation.groundFloors[{index}]{member}"),
                                 ));
                             }
                         }

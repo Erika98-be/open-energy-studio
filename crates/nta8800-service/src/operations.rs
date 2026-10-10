@@ -290,6 +290,27 @@ fn run_project_performance(mut body: Value) -> Result<Value, Outcome> {
     finite_value(&assessment)
 }
 
+/// Compares the project between its own edition (`ntaCalculation.normVersion`)
+/// and the request's `normVersion`, which is active while this runs.
+fn run_compare_project_editions(mut body: Value) -> Outcome {
+    let project = match project_member(&mut body) {
+        Ok(project) => project,
+        Err(outcome) => return outcome,
+    };
+    if !project.get("ntaCalculation").is_some_and(Value::is_object) {
+        return invalid_project_shape_at(
+            "project.ntaCalculation",
+            "The project has no ntaCalculation block to move to another edition".into(),
+        );
+    }
+    let report =
+        nta8800_core::edition_switch::compare_project_editions(&project, norm_versions::current());
+    match finite_value(&report) {
+        Ok(value) => ok(value),
+        Err(outcome) => outcome,
+    }
+}
+
 fn run_calculate_project_performance(body: Value) -> Outcome {
     match run_project_performance(body) {
         Ok(value) => Outcome {
@@ -529,7 +550,11 @@ pub fn may_refuse(op: &Operation) -> bool {
     op.method == Method::Post
         && !matches!(
             op.name,
-            "validate_project" | "assess_relabel" | "get_label_input_hash" | "audit_reference_case"
+            "validate_project"
+                | "assess_relabel"
+                | "get_label_input_hash"
+                | "audit_reference_case"
+                | "compare_project_editions"
         )
 }
 
@@ -751,6 +776,15 @@ static OPERATIONS: &[Operation] = &[
         input: Some(InputSpec { key: "project", description: PROJECT_DOC }),
         category: "project",
         run: run_calculate_project_performance,
+    },
+    Operation {
+        name: "compare_project_editions",
+        method: Method::Post,
+        path: "/v1/nta8800/project/editions/compare",
+        description: "Compare a project between its own NTA 8800 edition (ntaCalculation.normVersion) and the edition in the request's normVersion (default 2025+C1): the inputs the target refuses, newly requires, ignores or reads differently, each with its switch point of docs/nta8800-normversies.md, its path and a fix (drop, switchOff or set are safe and applied in adjustedProject; enter, choose and review are left to the adviser). Calculates the project in both editions; changes nothing in the request",
+        input: Some(InputSpec { key: "project", description: PROJECT_DOC }),
+        category: "project",
+        run: run_compare_project_editions,
     },
     Operation {
         name: "get_energy_by_service",

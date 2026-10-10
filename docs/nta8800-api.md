@@ -130,6 +130,7 @@ Elke `POST` verwacht een JSON-object met één lid (soms twee), genoemd in de de
 | `POST /v1/nta8800/validate` | `validate_project` | `project` | Validate an Open Energy Studio project structure |
 | `POST /v1/nta8800/calculate` | `calculate_beng` | `project` | Legacy endpoint |
 | `POST /v1/nta8800/project/performance` | `calculate_project_performance` | `project` | Calculate a saved .oes project with its ntaCalculation block per NTA 8800:2025+C1:2026 |
+| `POST /v1/nta8800/project/editions/compare` | `compare_project_editions` | `project` | Compare a project between its own edition and the request's `normVersion` (zie *Uitgave wijzigen* hieronder) |
 | `POST /v1/nta8800/project/energy-by-service` | `get_energy_by_service` | `project` | Return delivered, primary fossil and renewable energy per service (verwarming, tapwater, koeling, bevochtiging, ventilatoren, verlichting, hulpenergie), carrier and month (NTA 8800 §5.5.3) |
 | `POST /v1/nta8800/label/data` | `get_label_data` | `project` | Return the label data (labelgegevens) per Omgevingsregeling art. 5.13 and 5.13a |
 | `POST /v1/nta8800/registration/assess` | `assess_registration` | `project` | Check a project's registration block for EP-Online registration per BRL 9500-W/U (29-05-2026) and the Omgevingsregeling |
@@ -169,6 +170,22 @@ Elke `POST` verwacht een JSON-object met één lid (soms twee), genoemd in de de
 | `POST /v1/nta8800/reference/compare` | `compare_reference_case` | `case` | Compare submitted BENG/TOjuli expectations to the unverified Rust project result |
 | `POST /v1/nta8800/reference/direct-diagnostic/compare` | `compare_direct_diagnostic` | `case` | Compare four direct-transmission diagnostic terms to supplied W/K expectations |
 | `POST /v1/nta8800/reference/gas-chain-diagnostic/compare` | `compare_gas_heat_pump_chain_diagnostic` | `case` | Compare all twelve gas heat-pump draft 9.62 and equipment-electricity values plus annual equipment electricity to supplied expectations |
+
+### Uitgave wijzigen (`compare_project_editions`)
+
+Bij deze route is `normVersion` de **doeluitgave** (standaard 2025+C1); het project behoudt zijn eigen uitgave in `ntaCalculation.normVersion`. Een project zonder `ntaCalculation` geeft 400 `invalid_project_shape`. De route antwoordt altijd 200 en verandert niets aan het verzoek. De kern rekent het project in beide uitgaven door (`crates/nta8800-core/src/edition_switch.rs`):
+
+| Veld | Inhoud |
+|---|---|
+| `fromNormVersion`, `toNormVersion` | eigen uitgave en doeluitgave |
+| `switchPoints` | de omschakelpunten van [`nta8800-normversies.md`](nta8800-normversies.md) waarvan de profielwaarden tussen de twee uitgaven verschillen (`points`, `subject`, `fields`, `hasInputs`) |
+| `items[]` | per invoer: `category` (`refused`, `required`, `ignored`, `reinterpreted`, `warning`), de kerncode, het projectpad, de omschakelpunten (`points`), `fix` en `resolvedByAutomaticChanges` |
+| `adjustedProject` | het project in de doeluitgave met de automatische aanpassingen |
+| `statusAfterAutomaticChanges`, `remainingAfterAutomaticChanges` | status en nieuwe gaten van `adjustedProject`: precies de punten die voor de adviseur overblijven |
+
+`fix` is `drop`, `switchOff` of `set` (veilig, toegepast in `adjustedProject`), of `enter`, `choose` of `review` (aan de adviseur). Automatisch verandert alleen een lid dat het omschakelpunt noemt, nooit een omsluitend object of lijstelement. Een geweigerd lid dat na het weglaten verplicht blijkt, of waarvan het weglaten het blok onleesbaar maakt, wordt teruggezet en krijgt `choose`. Verplichte waarden worden nooit verzonnen. Het OpenAPI-document beschrijft de vorm van het resultaat.
+
+De koppeling van een melding aan een omschakelpunt volgt uit de profielen zelf: elk veld van `NormProfile` hoort bij precies één omschakelpunt (`norm_versions::switches`), en een test controleert dat elk veld dat tussen twee uitgaven verschilt en elke genummerde rij van `nta8800-normversies.md` een omschakelpunt heeft.
 
 ### Keuzes bij de pariteit met de desktop-app
 

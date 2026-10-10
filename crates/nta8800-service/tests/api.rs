@@ -173,6 +173,49 @@ async fn health_and_version_identify_the_build() {
 }
 
 #[tokio::test]
+async fn edition_comparison_lists_the_changes_and_keeps_the_request() {
+    let project = without_nulls(fixture("nta8800-example-office.json"));
+    let (status, result) = post(
+        "/v1/nta8800/project/editions/compare",
+        json!({ "project": project, "normVersion": "2020+A1" }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{result}");
+    assert_eq!(result["fromNormVersion"], "2025+C1");
+    assert_eq!(result["toNormVersion"], "2020+A1");
+    assert_eq!(
+        result["adjustedProject"]["ntaCalculation"]["normVersion"],
+        "2020+A1"
+    );
+    let items = result["items"].as_array().unwrap();
+    let panel = items
+        .iter()
+        .find(|item| item["path"].as_str().unwrap().ends_with("panelPeakPowerW"))
+        .expect("PV panel route listed");
+    assert_eq!(panel["points"], json!(["68"]));
+    assert!(result["switchPoints"].as_array().unwrap().len() > 10);
+    // Without a target the comparison is with the default edition.
+    let mut legacy = project.clone();
+    legacy["ntaCalculation"]["normVersion"] = json!("2024");
+    let (status, result) = post(
+        "/v1/nta8800/project/editions/compare",
+        json!({ "project": legacy }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{result}");
+    assert_eq!(result["fromNormVersion"], "2024");
+    assert_eq!(result["toNormVersion"], "2025+C1");
+    // A project without an NTA block cannot change edition.
+    let (status, body) = post(
+        "/v1/nta8800/project/editions/compare",
+        json!({ "project": { "id": "x" } }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    assert_envelope(&body, "invalid_project_shape");
+}
+
+#[tokio::test]
 async fn older_edition_calculates_but_is_not_registrable() {
     let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
     project["ntaCalculation"]["normVersion"] = json!("2024");
