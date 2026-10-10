@@ -83,6 +83,8 @@ Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staa
 
 ![Tabel Zonwering per raam: alle ramen Zoals project behalve het dakraam, dat een eigen handbediende zonwering heeft met type en bron](img/zonwering-per-raam.png)
 
+![Ventilatiesysteem van het voorbeeldkantoor met de vink Gedeclareerde f_ctrl (kwaliteitsverklaring) aan: de uitleg dat de waarde f_ctrl van tabel 11.5 vervangt, het veld f_ctrl met 0,5 en het veld Verklaring met de kwaliteitsverklaring als bron](img/fctrl-gedeclareerd.png)
+
 ![Tabel Glas per raam: alle ramen rekenen met hun eigen g-waarde behalve het dakraam, waarvoor een glastype van tabel 7.4 of vaste lamellen (7.41a) wordt gekozen](img/glas-per-raam.png)
 
 ### Opwekkers voor ruimteverwarming

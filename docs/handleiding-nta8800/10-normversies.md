@@ -7,6 +7,8 @@ Het programma rekent standaard volgens de aangewezen uitgave, **NTA 8800:2025+C1
 - **Per project.** Op de stap **Project**, in het blok *Algemeen* van de NTA-invoer, staat de keuzelijst *Uitgave NTA 8800*. Een project zonder gekozen uitgave rekent in de aangewezen uitgave; de keuzelijst toont die dan ook. Een andere keuze opent eerst het venster **Uitgave van NTA 8800 wijzigen** (zie hieronder). Wat je daar bevestigt, gaat zoals elke wijziging eerst in het concept en geldt na **Toepassen** in de toepasbalk.
 - **Voor nieuwe berekeningen.** Onder *Instellingen › Berekening* kies je de uitgave waarmee **NTA-invoer starten** een nieuw concept begint. Bestaande projecten houden hun eigen uitgave.
 
+![Blok Algemeen van de NTA-invoer op de stap Project met bovenaan links de keuzelijst Uitgave NTA 8800, hier op NTA 8800:2025+C1:2026, de aangewezen uitgave](img/uitgave-keuze.png)
+
 ## Wat er verandert als je de uitgave wijzigt
 
 Kies je in de keuzelijst een andere uitgave, dan rekent de rekenkern het project in de huidige en in de gekozen uitgave door. Het venster **Uitgave van NTA 8800 wijzigen** toont daarna, per groep, welke invoer de gekozen uitgave:
