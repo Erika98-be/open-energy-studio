@@ -12,7 +12,8 @@
   font-family: var(--font-ui);
   position: relative;
 }
-.app-shell--empty { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "main" "status"; }
+/* Doubled class: the narrow-window rule below sets .app-shell columns and would otherwise squash the welcome screen into the nav column. */
+.app-shell.app-shell--empty { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "main" "status"; }
 
 .skip-link {
   position: absolute; left: var(--space-2); top: -60px; z-index: 1000;
