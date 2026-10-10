@@ -283,7 +283,7 @@ BENG 1 / 2 / 3 per uitgave, alleen waar een uitgave verschilt van de vorige:
 
 `crates/nta8800-core/src/edition_switch.rs` (`compare_project_editions`) gebruikt die koppeling bij het wijzigen van de uitgave van een project:
 1. het rekent het project in de eigen en in de doeluitgave door; wat de doeluitgave weigert of extra vraagt, is wat de kern daar meldt en in de eigen uitgave niet;
-2. het voert veilige aanpassingen uit (een geweigerd lid dat het omschakelpunt noemt verwijderen, een vlag uitzetten, de beproevingsnorm van tabel 9.28 zetten) en rekent opnieuw, tot er niets nieuws meer bijkomt;
+2. het voert veilige aanpassingen uit (een geweigerd lid dat het omschakelpunt noemt verwijderen, een vlag uitzetten) en rekent opnieuw, tot er niets nieuws meer bijkomt. De beproevingsnorm van tabel 9.28 (punt 67a) is bewijs bij een testrapport en wordt niet herschreven; het item noemt de norm die de doeluitgave vraagt (review 29);
 3. een verwijderd lid dat daarna verplicht blijkt of waarvan het weglaten het blok onleesbaar maakt, wordt teruggezet en blijft een keuze van de adviseur;
 4. leden van een route die de doeluitgave niet heeft en niet weigert, staan als "niet gebruikt"; `biomassAbove500Kw` staat als "anders gelezen" (punten 30 en 53);
 5. elke melding krijgt het omschakelpunt dat de code noemt, anders dat met het langste overeenkomende invoerpad, en alleen als de velden van dat punt tussen de twee uitgaven verschillen. Een samenvattende melding op een omsluitend object (`forfait_lookup_invalid`) neemt het punt van de oorzaak eronder over.
@@ -293,7 +293,7 @@ De lijst is dus geen handmatige opsomming: de meldingen komen van de kern, de ko
 ## Tests
 
 - `crates/nta8800-core/src/norm_versions/switches.rs`: elk profielveld hoort bij één omschakelpunt; elk veld dat tussen twee uitgaven verschilt heeft er een; elke genummerde rij van dit document is een omschakelpunt en omgekeerd; de toeschrijving.
-- `crates/nta8800-core/tests/edition_switch.rs`: de openbare gevallen A, B, C, D, J en L van hun eigen uitgave naar 2025+C1 en terug, en beide voorbeelden tussen elk paar uitgaven. Elke `route_not_in_edition` direct na de omschakeling staat in de lijst, elke weigering of eis heeft een omschakelpunt, en na de automatische aanpassingen blijft precies over wat de lijst aan de adviseur laat. Daarnaast de wandhoogte van 8.47 (punt 59) heen en terug, de PV-paneelroute (punt 68) en de beproevingsnorm (punt 67a).
+- `crates/nta8800-core/tests/edition_switch.rs`: de openbare gevallen A, B, C, D, J en L van hun eigen uitgave naar 2025+C1 en terug, en beide voorbeelden tussen elk paar uitgaven. Elke `route_not_in_edition` direct na de omschakeling staat in de lijst, elke weigering of eis heeft een omschakelpunt, en na de automatische aanpassingen blijft precies over wat de lijst aan de adviseur laat. Daarnaast de wandhoogte van 8.47 (punt 59) heen en terug, de PV-paneelroute (punt 68) en de beproevingsnorm (punt 67a, genoemd maar niet herschreven).
 - `crates/nta8800-core/tests/edition_deltas.rs` (genegeerd, op aanvraag): de tabel hierboven (`print_edition_delta_table`), alle verschillende uitvoerwaarden van één geval tussen twee uitgaven (`EDITION_DIFF=K,2020+A1,2022`) en de meldingen van één geval in één uitgave (`EDITION_PROBE=D,2023`).
 - `crates/nta8800-core/src/norm_versions/tests.rs`: standaarduitgave, serde, het herstellen van de thread-local (ook na een paniek) en de profielwaarden met paginaverwijzing.
 - Per schakelpunt een eenheidstest in de module van het schakelpunt, met de paginaverwijzing in de test.
