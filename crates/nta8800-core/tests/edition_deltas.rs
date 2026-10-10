@@ -207,10 +207,7 @@ fn portable(
         }
         for path in &routes {
             // A route switched on by a flag (ledFrom2017) is switched off.
-            let pointer = format!(
-                "/{}",
-                path.replace('.', "/").replace('[', "/").replace(']', "")
-            );
+            let pointer = format!("/{}", path.replace(['.', '['], "/").replace(']', ""));
             if let Some(flag @ Value::Bool(true)) = value.pointer_mut(&pointer) {
                 *flag = Value::Bool(false);
                 dropped.push(format!(
