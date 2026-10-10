@@ -2479,42 +2479,43 @@ fn put_back(trial: &mut Value, leaf: &NullLeaf) {
 /// reduced copy then makes the same decisions as on the whole block.
 ///
 /// That reasoning is checked on the whole block afterwards: the repaired
-/// copy, with the dropped elements put back, must deserialize; all reported
-/// blanks put back together must fail it, and all other nulls put back
-/// together must not. When the reduced search does not settle, or a check
-/// fails, the whole block is searched instead.
+/// copy, with the dropped elements put back, must deserialize; each blank
+/// put back on its own must fail it, and all other nulls put back together
+/// must not. When the reduced search does not settle, or a check fails, the
+/// whole block is searched instead. `custom_deserialization_in_the_kernel_is_known`
+/// in `tests/blank_search_equivalence.rs` lists the serde constructs that
+/// could break the assumption (review 27).
 fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
     let reduced = reduce_lists(block);
     if !reduced.dropped {
         return blank_search_exhaustive::<T>(block).search;
     }
     let state = blank_search_exhaustive::<T>(&reduced.value);
-    match confirm_reduced::<T>(block, &reduced.shape, &state) {
-        Some(search) => {
-            REDUCED_SEARCHES[0].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            search
-        }
-        None => {
-            REDUCED_SEARCHES[1].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            blank_search_exhaustive::<T>(block).search
-        }
-    }
+    let confirmed = confirm_reduced::<T>(block, &reduced.shape, &state);
+    REDUCED_SEARCHES.with(|counts| {
+        let (confirmed_count, fell_back) = counts.get();
+        counts.set(if confirmed.is_some() {
+            (confirmed_count + 1, fell_back)
+        } else {
+            (confirmed_count, fell_back + 1)
+        });
+    });
+    confirmed.unwrap_or_else(|| blank_search_exhaustive::<T>(block).search)
 }
 
-/// Reduced blank searches confirmed on the whole block, and those that fell
-/// back to the whole block (process-wide; for the equivalence tests).
-static REDUCED_SEARCHES: [std::sync::atomic::AtomicUsize; 2] = [
-    std::sync::atomic::AtomicUsize::new(0),
-    std::sync::atomic::AtomicUsize::new(0),
-];
+thread_local! {
+    /// Reduced blank searches confirmed on the whole block, and those that
+    /// fell back to the whole block, on this thread (for the equivalence
+    /// tests: a test reads only its own searches).
+    static REDUCED_SEARCHES: std::cell::Cell<(usize, usize)> =
+        const { std::cell::Cell::new((0, 0)) };
+}
 
-/// The counts behind [`REDUCED_SEARCHES`]: (confirmed, fell back).
+/// The counts behind [`REDUCED_SEARCHES`] on this thread: (confirmed, fell
+/// back).
 #[doc(hidden)]
 pub fn reduced_blank_searches() -> (usize, usize) {
-    (
-        REDUCED_SEARCHES[0].load(std::sync::atomic::Ordering::Relaxed),
-        REDUCED_SEARCHES[1].load(std::sync::atomic::Ordering::Relaxed),
-    )
+    REDUCED_SEARCHES.with(|counts| counts.get())
 }
 
 /// The blank search of the NTA block as the project route runs it

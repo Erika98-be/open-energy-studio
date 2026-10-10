@@ -103,6 +103,159 @@ fn fixtures_with_blanks_give_the_same_gaps() {
     );
 }
 
+/// Case H's NTA block (two zones, lists of objects inside lists of objects)
+/// with the edits applied: a pointer and its new value, or None to take the
+/// member out.
+fn case_h_with(edits: &[(&str, Option<Value>)]) -> Value {
+    let project: Value = serde_json::from_str(
+        &std::fs::read_to_string(training_data().join("nta8800-public-comparison-h.json")).unwrap(),
+    )
+    .unwrap();
+    let mut block = project["ntaCalculation"].clone();
+    for (pointer, value) in edits {
+        match value {
+            Some(value) => *block.pointer_mut(pointer).unwrap() = value.clone(),
+            None => {
+                let (parent, key) = pointer.rsplit_once('/').unwrap();
+                block
+                    .pointer_mut(parent)
+                    .unwrap()
+                    .as_object_mut()
+                    .unwrap()
+                    .remove(key)
+                    .unwrap();
+            }
+        }
+    }
+    block
+}
+
+/// Review 27: list shapes the reduction has to map back. A null in the
+/// first element (always kept), in a nested list's later element, in every
+/// element of a list, a whole element or object blanked, an empty list, and
+/// a blank enum tag inside a nested list.
+#[test]
+fn list_shapes_give_the_same_gaps() {
+    let null = || Some(Value::Null);
+    let cases: Vec<(&str, Vec<(&str, Option<Value>)>)> = vec![
+        (
+            "first element",
+            vec![("/zoneData/0/functionAreas/0/areaM2", null())],
+        ),
+        (
+            "first elements of nested lists",
+            vec![
+                ("/lighting/0/lightingZones/0/areaM2", null()),
+                ("/lighting/1/lightingZones/0/areaM2", null()),
+            ],
+        ),
+        (
+            "whole object in a nested list",
+            vec![("/lighting/0/lightingZones/1/power", null())],
+        ),
+        (
+            "whole list element",
+            vec![("/lighting/0/lightingZones/1", null())],
+        ),
+        (
+            "every element of a list",
+            vec![
+                ("/zoneData/0/functionAreas/0/areaM2", null()),
+                ("/zoneData/0/functionAreas/1/areaM2", null()),
+                ("/zoneData/0/functionAreas/2/areaM2", null()),
+            ],
+        ),
+        (
+            "empty list next to a blank",
+            vec![
+                ("/zoneData/0/functionAreas", Some(Value::Array(Vec::new()))),
+                ("/lighting/1/lightingZones/0/areaM2", null()),
+            ],
+        ),
+        (
+            "blank tag in a nested list",
+            vec![("/lighting/0/lightingZones/1/power/method", null())],
+        ),
+    ];
+    for (name, edits) in cases {
+        let before = reduced_blank_searches();
+        let block = case_h_with(&edits);
+        assert_eq!(
+            nta_blank_search(&block, false),
+            nta_blank_search(&block, true),
+            "{name}"
+        );
+        // Every case cuts a list and is confirmed on the whole block.
+        assert_eq!(
+            reduced_blank_searches(),
+            (before.0 + 1, before.1),
+            "{name}: not a confirmed reduced search"
+        );
+    }
+}
+
+/// Review 27: a dropped element (it holds no null) that fails on its own
+/// must not slip past the reduced copy. The whole block then fails before
+/// any blank is put back, the confirmation refuses the reduced result and the
+/// search runs on the whole block.
+#[test]
+fn a_dropped_element_that_fails_on_its_own_falls_back() {
+    let blank = ("/lighting/1/lightingZones/0/areaM2", Some(Value::Null));
+    let faults: Vec<(&str, (&str, Option<Value>))> = vec![
+        (
+            "unknown member",
+            ("/lighting/0/lightingZones/1/bogus", Some(Value::from(1))),
+        ),
+        (
+            "required member left out",
+            ("/lighting/0/lightingZones/1/id", None),
+        ),
+        (
+            "wrong type",
+            (
+                "/lighting/0/lightingZones/1/areaM2",
+                Some(Value::from("68")),
+            ),
+        ),
+        (
+            "unknown enum variant",
+            (
+                "/lighting/0/lightingZones/1/power/method",
+                Some(Value::from("magic")),
+            ),
+        ),
+    ];
+    for (name, fault) in faults {
+        let mut edits = vec![blank.clone()];
+        if fault.0.ends_with("/bogus") {
+            // A new member: added to its object rather than replaced.
+            let mut block = case_h_with(&edits);
+            block
+                .pointer_mut("/lighting/0/lightingZones/1")
+                .unwrap()
+                .as_object_mut()
+                .unwrap()
+                .insert("bogus".into(), Value::from(1));
+            let before = reduced_blank_searches();
+            let reduced = nta_blank_search(&block, false);
+            let after = reduced_blank_searches();
+            assert_eq!(reduced, nta_blank_search(&block, true), "{name}");
+            assert_eq!(after.1, before.1 + 1, "{name}: no fallback");
+            assert!(reduced.1, "{name}: not residual");
+            continue;
+        }
+        edits.push(fault);
+        let block = case_h_with(&edits);
+        let before = reduced_blank_searches();
+        let reduced = nta_blank_search(&block, false);
+        let after = reduced_blank_searches();
+        assert_eq!(reduced, nta_blank_search(&block, true), "{name}");
+        assert_eq!(after.1, before.1 + 1, "{name}: no fallback");
+        // The whole block still fails without the blank: residual.
+        assert!(reduced.1, "{name}: not residual");
+    }
+}
+
 /// A small deterministic generator (xorshift64*), so the property test needs
 /// no crate and repeats exactly.
 struct Rng(u64);
@@ -206,5 +359,95 @@ fn random_blank_sets_give_the_same_gaps() {
     assert!(
         confirmed > 100,
         "{confirmed} confirmed, {fell_back} fell back"
+    );
+}
+
+/// Review 27: the reduced blank search rests on each list element of the
+/// NTA input deserializing on its own. Derived serde code does; a custom
+/// `Deserialize`, `deserialize_with`, `untagged`, `flatten` or `from`/
+/// `try_from` might not. The confirmation on the whole block catches a
+/// wrong result (the search then runs on the whole block), but a new
+/// construct of that kind should be looked at: this test lists the ones in
+/// the kernel source outside test modules and fails on any that is not known.
+#[test]
+fn custom_deserialization_in_the_kernel_is_known() {
+    // (file, construct, count); both are scalars, neither is around a list.
+    let known = [
+        // An explicit null for the BACS capacity (one f64 field).
+        ("bacs_draft.rs", "deserialize_with", 1),
+        // A survey answer that is a flag or a kind (survey route only).
+        ("opname/utility.rs", "untagged", 1),
+    ];
+    let source = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+    let mut files = Vec::new();
+    let mut stack = vec![source.clone()];
+    while let Some(dir) = stack.pop() {
+        for entry in std::fs::read_dir(dir).unwrap() {
+            let path = entry.unwrap().path();
+            if path.is_dir() {
+                stack.push(path);
+            } else if path.extension().is_some_and(|ext| ext == "rs")
+                && !path.to_string_lossy().ends_with("_tests.rs")
+            {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    let mut found = Vec::new();
+    for path in files {
+        let text = std::fs::read_to_string(&path).unwrap();
+        let lines: Vec<&str> = text.lines().collect();
+        // Test modules are left out: from a `#[cfg(test)]` before a `mod`.
+        let end = (0..lines.len())
+            .find(|&index| {
+                lines[index].trim() == "#[cfg(test)]"
+                    && lines.get(index + 1).is_some_and(|next| {
+                        let next = next.trim_start();
+                        next.starts_with("mod ") || next.starts_with("pub mod ")
+                    })
+            })
+            .unwrap_or(lines.len());
+        let name = path
+            .strip_prefix(&source)
+            .unwrap()
+            .to_string_lossy()
+            .replace('\\', "/");
+        for construct in [
+            "impl<'de>",
+            "deserialize_with",
+            "untagged",
+            "flatten",
+            "from =",
+            "try_from =",
+        ] {
+            let count = lines[..end]
+                .iter()
+                .filter(|line| {
+                    let line = line.trim_start();
+                    let attribute = line.starts_with("#[serde(");
+                    match construct {
+                        "impl<'de>" | "deserialize_with" => line.contains(construct),
+                        "from =" => {
+                            attribute && (line.contains("(from =") || line.contains(" from ="))
+                        }
+                        _ => attribute && line.contains(construct),
+                    }
+                })
+                .count();
+            if count > 0 {
+                found.push((name.clone(), construct, count));
+            }
+        }
+    }
+    let known: Vec<(String, &str, usize)> = known
+        .iter()
+        .map(|(file, construct, count)| (file.to_string(), *construct, *count))
+        .collect();
+    assert_eq!(
+        found, known,
+        "custom deserialization changed: check that every list element still \
+         deserializes on its own (see `blank_paths` in project_performance.rs) \
+         and update this list"
     );
 }

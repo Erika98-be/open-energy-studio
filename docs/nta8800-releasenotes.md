@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Review 27: zoektocht naar lege velden strenger gecontroleerd op het hele blok (geen rekenwijziging)
+
+- **Gevonden.** De controle op het hele blok toetste alle gemelde lege velden alleen samen. Bij een lijst waarvan de elementen van elkaar afhangen (een element dat de volgende elementen andere regels geeft), kon de verkleinde kopie daardoor een leeg veld melden dat het hele blok toestaat. Een invoertype van de kern met zo'n lijst bestaat niet; de unittest `reduced_blank_search_holds_for_a_list_whose_elements_depend_on_each_other` maakt er een na en faalde.
+- **Opgelost.** Elk gemeld leeg veld moet het hele blok nu op zichzelf laten falen; anders zoekt de kern op het hele blok. De controle gebeurt ter plekke, zonder kopie per veld: 200 lege velden in het dichte gebouw kosten 1,6 s in plaats van 1,2 s (release-build).
+- **Nieuwe toetsen** in `blank_search_equivalence.rs`: lijstvormen (een leeg veld in het eerste element, geneste lijsten, een leeg element of object, elk element leeg, een lege lijst, een leeg type-veld), weggelaten elementen die op zichzelf fout zijn (onbekend veld, ontbrekend verplicht veld, verkeerd type, onbekende variant; de kern valt dan aantoonbaar terug op het hele blok) en `custom_deserialization_in_the_kernel_is_known`, die faalt zodra de kern een eigen leesregel krijgt die nog niet bekeken is. De tellers van de verkleinde zoektocht gelden nu per thread, zodat elke toets alleen zijn eigen zoektochten telt.
+- **Nagelopen zonder bevinding.** Geen invoertype van het NTA-blok heeft een eigen `Deserialize`, `deserialize_with` om een lijst, `untagged`, `flatten` of `from`/`try_from` (alleen een scalair BACS-veld en een opnameantwoord); `deny_unknown_fields` en getagde enums werken per element. Controles die elementen vergelijken (unieke id's, verwijzingen naar zones of vloeren, bewijsverwijzingen per index) draaien na het lezen en spelen in de zoektocht geen rol. Het terugzetten van paden (`Shape`) klopt voor geneste lijsten, lege lijsten en een leeg veld in het eerste element.
+
 ### 10 oktober 2026 — Lege velden zoeken op een verkleinde kopie van het NTA-blok (geen rekenwijziging)
 
 - **Wat.** De zoektocht naar lege velden (`blank_paths`) draait nu op een kopie van het NTA-blok waarin elke lijst van objecten alleen haar eerste element en de elementen met een leeg veld houdt. Daarna controleert de kern de uitkomst op het hele blok; slaagt dat niet, dan zoekt ze op het hele blok zoals voorheen.
