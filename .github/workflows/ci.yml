@@ -50,6 +50,7 @@ jobs:
             crates/nta8800-core/target/
             crates/nta8800-service/target/
             src-tauri/target/
+            target/msrv-core/
           key: ${{ runner.os }}-gate-${{ hashFiles('crates/*/Cargo.lock', 'src-tauri/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-gate-
 
@@ -61,9 +62,8 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Frontend bundle (needed by the Tauri check)
-        run: npm run build
-
+      # No separate `npm run build` here: the gate builds the frontend itself
+      # before the Tauri check, exactly as in a fresh local checkout.
       - name: NTA gate (scripts/verify-nta.sh)
         env:
           NTA_VITEST_MAX_WORKERS: '2'

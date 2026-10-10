@@ -10,7 +10,8 @@ name: Build and Release
 #              (its notes, e.g. from release/<tag>/github-release.md, are left
 #              untouched); otherwise creates it as a draft pre-release.
 # 3. build   - installers for Linux (deb, rpm, AppImage), macOS (universal
-#              dmg) and Windows (NSIS, MSI), uploaded to that release.
+#              dmg) and Windows (NSIS, MSI), uploaded to that release; an
+#              asset already on it (the .deb from release-nta.sh) is kept.
 # 4. checksums - SHA256SUMS-installers.txt over all uploaded installers.
 # A draft created here stays a draft: publishing is a manual decision.
 
@@ -72,6 +73,20 @@ jobs:
           node scripts/nta-kernel-version.mjs check
           node scripts/nta-manual.mjs check
 
+      # The same check scripts/release-nta.sh makes before tagging: released
+      # sections of the release notes are unchanged since the previous tag.
+      - name: Released sections unchanged since the previous release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          previous="$(git tag -l 'oes-v*-kernel-v*' --sort=-creatordate | grep -vxF "$RELEASE_TAG" | head -n 1 || true)"
+          if [ -z "$previous" ] || ! git cat-file -e "${previous}:docs/nta8800-releasenotes.md" 2>/dev/null; then
+            echo "No earlier release tag with release notes; nothing to compare."
+            exit 0
+          fi
+          git show "${previous}:docs/nta8800-releasenotes.md" > "$RUNNER_TEMP/releasenotes-previous.md"
+          node scripts/nta-kernel-version.mjs check-released "$RUNNER_TEMP/releasenotes-previous.md"
+
       - name: Install Rust stable with Clippy and rustfmt
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -96,9 +111,8 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Frontend bundle (needed by the Tauri check)
-        run: npm run build
-
+      # No separate `npm run build`: the gate builds the frontend itself
+      # before the Tauri check, exactly as scripts/release-nta.sh does.
       - name: NTA gate (scripts/verify-nta.sh)
         env:
           NTA_VITEST_MAX_WORKERS: '2'
@@ -232,8 +246,27 @@ jobs:
             echo "No installers found under $root" >&2
             exit 1
           fi
-          printf 'Uploading %s\n' "${files[@]}"
-          gh release upload "$RELEASE_TAG" "${files[@]}" --clobber --repo "$REPO"
+          # An asset already on the release (the .deb that scripts/release-nta.sh
+          # built and recorded in its leveringsdocument and SHA256SUMS) is kept:
+          # replacing it would break those checksums. GitHub stores spaces in
+          # asset names as dots. To rebuild an asset, delete it from the release first.
+          existing="$(gh release view "$RELEASE_TAG" --repo "$REPO" --json assets --jq '.assets[].name')"
+          upload=()
+          for f in "${files[@]}"; do
+            name="$(basename "$f")"
+            name="${name// /.}"
+            if grep -qxF -- "$name" <<< "$existing"; then
+              echo "Keeping existing release asset $name"
+            else
+              upload+=("$f")
+            fi
+          done
+          if [ "${#upload[@]}" -eq 0 ]; then
+            echo "All installers of this platform are already on the release."
+            exit 0
+          fi
+          printf 'Uploading %s\n' "${upload[@]}"
+          gh release upload "$RELEASE_TAG" "${upload[@]}" --repo "$REPO"
 
   checksums:
     needs: build

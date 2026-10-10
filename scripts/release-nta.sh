@@ -16,7 +16,8 @@
 #  5. only then commits the released notes (one commit), so a failing gate or
 #     build leaves no release commit behind;
 #  6. writes the leveringsdocument, a pre-filled test report
-#     (docs/templates/nta8800-testrapport.md), a manifest and SHA256SUMS;
+#     (docs/templates/nta8800-testrapport.md), the GitHub release text
+#     (github-release.md), a manifest and SHA256SUMS;
 #  7. creates the annotated git tag oes-v<program>-kernel-v<kernel>.
 # When a release fails before its tag, its archive is moved aside to
 # release/<tag>.mislukt-<time>/ so the release can simply be run again.
@@ -214,6 +215,12 @@ node --input-type=module -e "
   const report = template.replace(/\{\{([A-Z_]+)\}\}/g, (match, key) => fields[key] ?? match);
   writeFileSync('$archive/testrapport.md', report);
 "
+
+step "github-release.md (tekst voor de GitHub-release)"
+repo_remote="$(git remote get-url origin 2>/dev/null || true)"
+node scripts/nta-github-release.mjs --out "$archive/github-release.md" --tag "$tag" \
+  --commit "$commit" --notes "$archive/releasenotes.md" --repo-url "$repo_remote" \
+  "${packages[@]}" "${manual_files[@]}" "$archive/leveringsdocument.md" "$archive/testrapport.md"
 
 step "manifest en SHA256SUMS"
 node --input-type=module -e "

@@ -1,0 +1,49 @@
+import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+// CI must run the gate the way a fresh local checkout does, so that CI cannot
+// hide a gate bug (the frontend bundle used to be built by CI before the gate,
+// which hid that the gate needed dist/ before its Tauri check).
+const root = join(__dirname, '../..');
+const read = (path: string) => readFileSync(join(root, path), 'utf8');
+
+/** The step lines of one job, from `  <job>:` to the next job. */
+function job(workflow: string, name: string): string {
+  const start = workflow.indexOf(`\n  ${name}:\n`);
+  expect(start).toBeGreaterThan(-1);
+  const rest = workflow.slice(start + 1);
+  const next = rest.slice(1).search(/\n {2}[a-z][a-z-]*:\n/);
+  return next < 0 ? rest : rest.slice(0, next + 1);
+}
+
+describe('CI runs the same gate as a local checkout', () => {
+  for (const [file, gateJob] of [
+    ['.github/workflows/ci.yml', 'gate'],
+    ['.github/workflows/release.yml', 'verify'],
+  ] as const) {
+    it(`${file}: the ${gateJob} job builds the frontend only through scripts/verify-nta.sh`, () => {
+      const steps = job(read(file), gateJob);
+      expect(steps).toContain('run: scripts/verify-nta.sh');
+      expect(steps).not.toMatch(/run: npm run build/);
+      expect(steps).not.toMatch(/NTA_SKIP_MSRV/);
+      expect(steps).toContain('rustup toolchain install 1.77.2');
+    });
+  }
+
+  it('the release workflow checks the released notes against the previous tag, as release-nta.sh does', () => {
+    const verify = job(read('.github/workflows/release.yml'), 'verify');
+    expect(verify).toContain('check-released');
+    expect(read('scripts/release-nta.sh')).toContain('check-released');
+  });
+
+  it('the release workflow keeps assets that are already on the release', () => {
+    const build = job(read('.github/workflows/release.yml'), 'build');
+    expect(build).toContain('Keeping existing release asset');
+    expect(build).not.toMatch(/gh release upload[^\n]*--clobber/);
+  });
+
+  it('release-nta.sh writes the GitHub release text', () => {
+    expect(read('scripts/release-nta.sh')).toContain('scripts/nta-github-release.mjs --out "$archive/github-release.md"');
+  });
+});
