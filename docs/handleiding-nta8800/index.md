@@ -50,5 +50,3 @@ Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste
 - *Verklaringen voor het energielabel* (elementen k en l) in de stap Registratie;
 - de uitkomst bovenaan een onderdeel van de basisopname na **Opname doorrekenen**;
 - het venster *Handleiding* in de app.
-
-Twee afdrukken van 10 oktober 2026 zijn sindsdien verouderd en moeten opnieuw: `overnemen-vloeren.png` (de waarden staan nu afgerond, een verwarmde kelder per onderdeel in plaats van als JSON) en `zonwering-per-raam.png` (de soorten zonwering tonen nu hun naam, zoals "Screen buiten, donker", in plaats van `dark`).
