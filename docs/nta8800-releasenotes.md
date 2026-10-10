@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Lege velden zoeken op een verkleinde kopie van het NTA-blok (geen rekenwijziging)
+
+- **Wat.** De zoektocht naar lege velden (`blank_paths`) draait nu op een kopie van het NTA-blok waarin elke lijst van objecten alleen haar eerste element en de elementen met een leeg veld houdt. Daarna controleert de kern de uitkomst op het hele blok; slaagt dat niet, dan zoekt ze op het hele blok zoals voorheen.
+- **Sneller.** In het dichte gebouw van de schaalmeting (release-build): 200 lege velden van 19,6 s naar 1,2 s, 50 van 4,9 s naar 0,26 s. De tijd groeit niet meer met de grootte van het blok.
+- **Dezelfde meldingen.** De zoektocht op het hele blok blijft als orakel in de kern. Beide geven dezelfde paden in dezelfde volgorde: getoetst op alle projectfixtures met hun varianten met lege velden, 600 willekeurige sets lege velden, het dichte gebouw en elke formulierstand van de projectformulierwacht. De uitvoer van de 494 snapshotvarianten is byte voor byte gelijk.
+- **Gate.** `blanks_in_a_dense_building_are_found_within_budget` zoekt nu 200 lege velden (budget 60 s in een debug-build; gemeten 6,9 s) in plaats van 10. Nieuw: `tests/blank_search_equivalence.rs`.
+
 ### 10 oktober 2026 — Schaal en prestaties van de rekenkern (geen rekenwijziging)
 
 - **Gemeten.** Een dicht utiliteitsgebouw is gemeten, in alle vijf uitgaven: 50 rekenzones, 2 250 ramen met eigen zonwering en belemmeringen, 1 200 koudebruggen, 30 PV-systemen, een extra verwarmingssysteem en een gemeenschappelijke ruimte. Het rekent in 0,42–0,48 s (release-build).

@@ -629,7 +629,11 @@ fn dense_building_blank_search_matches_the_whole_block_search() {
     }
     let spread = nta_blank_search(&block, false);
     assert!(spread.0.len() > 12, "{spread:?}");
-    assert_eq!(spread, nta_blank_search(&block, true), "leaves spread over the block");
+    assert_eq!(
+        spread,
+        nta_blank_search(&block, true),
+        "leaves spread over the block"
+    );
     block["windowShadings"][5] = Value::Null;
     assert_eq!(
         nta_blank_search(&block, false),

@@ -29,8 +29,7 @@ fn project_fixtures() -> Vec<(String, Value)> {
     paths
         .into_iter()
         .filter_map(|path| {
-            let value: Value =
-                serde_json::from_str(&std::fs::read_to_string(&path).ok()?).ok()?;
+            let value: Value = serde_json::from_str(&std::fs::read_to_string(&path).ok()?).ok()?;
             (value.get("zones").is_some() && value.get("ntaCalculation").is_some()).then(|| {
                 (
                     path.file_stem().unwrap().to_string_lossy().to_string(),
@@ -44,7 +43,10 @@ fn project_fixtures() -> Vec<(String, Value)> {
 fn assert_same(name: &str, block: &Value) {
     let reduced = nta_blank_search(block, false);
     let whole = nta_blank_search(block, true);
-    assert_eq!(reduced, whole, "{name}: reduced search differs from the whole-block search");
+    assert_eq!(
+        reduced, whole,
+        "{name}: reduced search differs from the whole-block search"
+    );
 }
 
 fn collect_pointers(value: &Value, pointer: String, numbers_only: bool, out: &mut Vec<String>) {
@@ -95,7 +97,10 @@ fn fixtures_with_blanks_give_the_same_gaps() {
     // most blocks with a blank in a list of objects take it.
     let (confirmed, fell_back) = reduced_blank_searches();
     println!("reduced searches: {confirmed} confirmed, {fell_back} fell back");
-    assert!(confirmed > 100, "{confirmed} confirmed, {fell_back} fell back");
+    assert!(
+        confirmed > 100,
+        "{confirmed} confirmed, {fell_back} fell back"
+    );
 }
 
 /// A small deterministic generator (xorshift64*), so the property test needs
@@ -192,8 +197,14 @@ fn random_blank_sets_give_the_same_gaps() {
             with_gaps += 1;
         }
     }
-    assert!(with_gaps > cases / 4, "only {with_gaps} cases reported gaps");
+    assert!(
+        with_gaps > cases / 4,
+        "only {with_gaps} cases reported gaps"
+    );
     let (confirmed, fell_back) = reduced_blank_searches();
     println!("reduced searches: {confirmed} confirmed, {fell_back} fell back");
-    assert!(confirmed > 100, "{confirmed} confirmed, {fell_back} fell back");
+    assert!(
+        confirmed > 100,
+        "{confirmed} confirmed, {fell_back} fell back"
+    );
 }
