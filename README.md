@@ -42,14 +42,14 @@ The branch `nta8800-kernel` is ahead of this release: it carries kernel **0.4.0*
 | Area | What it does |
 |---|---|
 | **Calculation kernel** | The NTA 8800 calculation (heat need, BENG 1/2/3, TOjuli, primary energy, the energy label and label data) is a Rust crate, `crates/nta8800-core`. Results carry the kernel version and an input fingerprint. |
-| **Norm editions** | NTA 8800:2025+C1 is the default and the only registrable edition. 2024, 2023, 2022 and 2020+A1 can be calculated as *legacy* editions, which are not registrable. See [docs/nta8800-normversies.md](docs/nta8800-normversies.md). |
-| **Basisopname (survey)** | Survey of existing dwellings (ISSO 82.1) and utility buildings (ISSO 75.1). It derives the project input from the survey answers and can take that input over into the project model. |
+| **Norm editions** | NTA 8800:2025+C1 is the default and the only registrable edition. 2024, 2023, 2022 and 2020+A1 can be calculated as *legacy* editions, which are not registrable. Switching the edition first shows what the new edition refuses or requires, traced to its switch point. See [docs/nta8800-normversies.md](docs/nta8800-normversies.md). |
+| **Basisopname (survey)** | Survey of existing dwellings (ISSO 82.1) and utility buildings (ISSO 75.1). It derives the project input from the survey answers and can take that input over into the project model, including floors to the ground value by value. |
 | **Maatwerkadvies** | Tailored advice following ISSO 82.2/75.2: user profiles, fitting to measured consumption, measure packages and NPV. |
 | **Herlabelen (relabel)** | Compares an original and a changed project per BRL 9500 annex 6a/6b. |
 | **Registration and dossier** | Registration data, label statements, evidence (*Bron & bewijs*) linked to inputs, and a dossier ZIP with a manifest and SHA-256 per file (BRL 9500 annex 3). |
 | **EP-Online overview** | The data overview in the EP-Online export structure, with XSD field limits. |
 | **Reports** | An energy-performance report at summary, standard and detailed level, plus a maatwerkadvies report. |
-| **HTTP API and MCP server** | Every kernel operation is available over a local HTTP API (OpenAPI 3.1) and as MCP tools. See [docs/nta8800-api.md](docs/nta8800-api.md) and [docs/nta8800-mcp.md](docs/nta8800-mcp.md). |
+| **HTTP API and MCP server** | Every kernel operation (46) is available over a local HTTP API (OpenAPI 3.1) and as MCP tools. See [docs/nta8800-api.md](docs/nta8800-api.md) and [docs/nta8800-mcp.md](docs/nta8800-mcp.md). |
 | **Import / export** | Uniec 3 and VABI exchange. Every import records the file name, a SHA-256 and a list of issues. |
 | **Desktop and web** | A Tauri 2 desktop app (Windows, Linux, macOS) and a browser build of the same React UI. |
 | **Manual** | Dutch user manual, available in the app and shipped with every release: [docs/handleiding-nta8800/](docs/handleiding-nta8800/index.md). |
