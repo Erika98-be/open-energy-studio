@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Negen schermafdrukken erbij in de handleiding; versies in de melding van de handleiding (geen rekenwijziging)
+
+- **Schermafdrukken.** De handleiding toont nu ook de melding "Oudere uitgave — niet voor registratie" onder Resultaten, het formulier van bijlage AA, de voortgangslijst en de uitkomst van de basisopname, *ψ uit de leidinggegevens*, de ketelhulpenergie en WKK-omzettingsgetallen uit een kwaliteitsverklaring, *Bron & bewijs*, *Verklaringen voor het energielabel* en het venster *Handleiding*. De uitkomsten in de afbeeldingen zijn vastgelegde antwoorden van de rekenkern uit `training-data/`. Nog open: de gedeclareerde f_ctrl en de keuzelijst *Uitgave NTA 8800*.
+- **Melding in het venster Handleiding.** Bij een andere rekenkern dan waarvoor de handleiding is nagelopen stond er letterlijk "rekenkern {manual} … rekenkern {kernel}", en de verwijzing naar een document toonde "{path}". De teksten gebruiken nu de schrijfwijze van i18next (`{{manual}}`), zodat de versies en het pad erin staan. Test in `manual-view.test.tsx`.
+
 ### 10 oktober 2026 — Leesbare waarden en keuzes in formulieren (geen rekenwijziging)
 
 - **Zonwering per raam.** De soorten zonwering met een kleur (screen, uitvalscherm, rolluik) toonden alleen `dark`, `white` of `other`. i18next las de dubbele punt in sleutels als `device.external_screen:dark` als een naamruimte. Sleutels met een dubbele punt werken nu (`nsSeparator: false`).

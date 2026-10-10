@@ -6,7 +6,11 @@ De basisopname is werkstap 6 **Basisopname** (groep *Bestaande bouw*). Er zijn t
 
 Na het starten loop je de opname door met de voortgangslijst links: Algemeen, (alleen utiliteit) Rekenzones, Thermische schil, Verwarming, Warm tapwater, Ventilatie, Koeling, Zonnestroom (PV) en **Uitkomst & forfaitair**. **Vorige** en **Volgende** gaan een onderdeel terug of verder. **Opname verwijderen** haalt de opname uit het project.
 
+![Basisopname van een woning na Opname doorrekenen: links de voortgangslijst met alle onderdelen zonder fouten, in het midden Uitkomst & forfaitair met de knop Overnemen in projectmodel en de toegepaste standaardwaarden, rechts de kaart Uitkomst opname met labelklasse F](img/opname-voortgang.png)
+
 De opname wordt bij het project bewaard (blok `basisopname`). De kern zet de opname om in NTA 8800-invoer en rekent die door met **Opname doorrekenen**, in de uitgave van NTA 8800 die het project gebruikt (zie [hoofdstuk 8](08-versies-en-verwijzingen.md)). Na het doorrekenen toont de voortgangslijst per onderdeel het aantal fouten. Bovenaan het onderdeel waar je staat verschijnt meteen de uitkomst: de status, het indicatieve label en EP₂, de fouten van dat onderdeel met **Ga naar het veld**, en hoeveel fouten er in andere onderdelen staan. **Volledige uitkomst** opent **Uitkomst & forfaitair**. De kaart *Uitkomst opname* rechts toont hetzelfde in het kort, met **Overnemen in projectmodel**. De volledige uitkomst (status, uitgave, label en BENG 1–3, de toegepaste standaardwaarden en alle meldingen) staat onder **Uitkomst & forfaitair**. Die uitkomst staat los van de projectberekening: het is een aparte, op de opname gebaseerde uitkomst.
+
+![Uitkomst bovenaan het onderdeel Thermische schil na Opname doorrekenen: berekend (onverifieerd), indicatieve labelklasse F met EP₂, geen fouten in dit onderdeel en de knop Volledige uitkomst](img/opname-uitkomst-onderdeel.png)
 
 **Volgorde van bronnen.** Volgens het wijzigingsdocument v1.1 (p. 6) zitten de wijzigingen daarvan in de 7e druk. Waar de bronnen verschillen, geldt daarom de 7e druk met het erratum. De keuzes per tabel staan in [`docs/nta8800-basisopname.md`](../nta8800-basisopname.md).
 

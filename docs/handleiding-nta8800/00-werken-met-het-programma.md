@@ -57,6 +57,10 @@ Het menu **Gereedschap** bevat drie losse rekenhulpen die niets aan het project 
 
 Ze openen als pagina in het werkgebied.
 
+**Handleiding.** Gereedschap › Handleiding, of de knop **Handleiding** in de kop van een pagina, opent deze handleiding in het werkgebied, bij het hoofdstuk dat bij de pagina hoort. Links staan de hoofdstukken en de versies: de programmaversie, de rekenkern waarvoor de handleiding is nagelopen en de rekenkern van de installatie. Verschillen die twee, dan meldt de handleiding dat bovenaan.
+
+![Het venster Handleiding met links de hoofdstukken en de programma- en kernversies, rechts hoofdstuk 0 Werken met het programma](img/handleiding-venster.png)
+
 ## NTA-invoer in de stappen
 
 De invoer van het NTA 8800-formulier staat verdeeld over de stappen waar hij inhoudelijk hoort. Voorbeelden: gebruiksfuncties en setpoints onder *Gebouw › Rekenzones*, opwekker en afgifte onder *Installaties › Verwarming*. De volledige toewijzing staat in [hoofdstuk 3](03-projectberekening.md).

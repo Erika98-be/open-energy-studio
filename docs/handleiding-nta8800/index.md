@@ -40,13 +40,14 @@ De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-document
 
 ## Nog te doen: schermafdrukken
 
-Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste zijn gemaakt vóór 8 oktober 2026. Op 10 oktober 2026 kwamen erbij: het venster bij een wissel van uitgave (`uitgave-wisselen.png`, hoofdstuk 10), de gemeenschappelijke ruimte van een rekenzone (`gemeenschappelijke-ruimte.png`, hoofdstuk 3), *Vloeren op de grond* bij het overnemen van een opname (`overnemen-vloeren.png`, hoofdstuk 2) en de tabellen *Belemmering*, *Zonwering* en *Glas per raam* (`belemmering-per-raam.png`, `zonwering-per-raam.png`, `glas-per-raam.png`, hoofdstuk 3). Die tonen het onderdeel los, zonder de rest van het venster, met de voorbeeldprojecten of de openbare gevallen D en G uit `training-data/` en, bij de wissel van uitgave, een vastgelegd antwoord van de rekenkern. Voor deze onderdelen is nog geen schermafdruk:
-- de keuzelijst *Uitgave NTA 8800* en de melding "Oudere uitgave — niet voor registratie" onder Resultaten ([hoofdstuk 10](10-normversies.md));
-- *Installaties › Koeling* met het formulier van bijlage AA;
-- de basisopname met de voortgangslijst en *Overnemen in projectmodel*;
-- het blok *Bron & bewijs* in het contextpaneel;
-- het blok *ψ uit de leidinggegevens* bij distributie, koeling en circulatie;
-- de ketelhulpenergie en de WKK-omzettingsgetallen uit een kwaliteitsverklaring, en de gedeclareerde f_ctrl bij de ventilatie;
-- *Verklaringen voor het energielabel* (elementen k en l) in de stap Registratie;
-- de uitkomst bovenaan een onderdeel van de basisopname na **Opname doorrekenen**;
-- het venster *Handleiding* in de app.
+Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste zijn gemaakt vóór 8 oktober 2026. Op 10 oktober 2026 kwamen erbij: het venster bij een wissel van uitgave (`uitgave-wisselen.png`, hoofdstuk 10), de gemeenschappelijke ruimte van een rekenzone (`gemeenschappelijke-ruimte.png`, hoofdstuk 3), *Vloeren op de grond* bij het overnemen van een opname (`overnemen-vloeren.png`, hoofdstuk 2) en de tabellen *Belemmering*, *Zonwering* en *Glas per raam* (`belemmering-per-raam.png`, `zonwering-per-raam.png`, `glas-per-raam.png`, hoofdstuk 3). Die tonen het onderdeel los, zonder de rest van het venster, met de voorbeeldprojecten of de openbare gevallen D en G uit `training-data/` en, bij de wissel van uitgave, een vastgelegd antwoord van de rekenkern. Later op 10 oktober 2026 kwamen er op dezelfde manier nog negen bij:
+- de melding "Oudere uitgave — niet voor registratie" onder Resultaten (`resultaten-oudere-uitgave.png`, hoofdstuk 10), met het vastgelegde antwoord van de rekenkern voor de voorbeeldtussenwoning in de uitgave 2022;
+- het formulier van bijlage AA (`bijlage-aa.png`, hoofdstuk 3);
+- de basisopname met de voortgangslijst en *Overnemen in projectmodel* (`opname-voortgang.png`) en de uitkomst bovenaan een onderdeel (`opname-uitkomst-onderdeel.png`, beide hoofdstuk 2), met het vastgelegde antwoord van de rekenkern voor de opname uit 1930;
+- *ψ uit de leidinggegevens* (`psi-leidinggegevens.png`) en de ketelhulpenergie en WKK-omzettingsgetallen uit een kwaliteitsverklaring (`kwaliteitsverklaring-ketel-wkk.png`, beide hoofdstuk 3);
+- *Bron & bewijs* (`bron-en-bewijs.png`) en *Verklaringen voor het energielabel* (`verklaringen-label.png`, beide hoofdstuk 7);
+- het venster *Handleiding* (`handleiding-venster.png`, hoofdstuk 0).
+
+Voor deze onderdelen is nog geen schermafdruk:
+- de gedeclareerde f_ctrl bij de ventilatie: het veld zit in het ventilatieformulier en is niet los te tonen zonder het hele ventilatiesysteem;
+- de keuzelijst *Uitgave NTA 8800* in de stap Project; die staat in het algemene NTA-formulier en vraagt het hele venster.
