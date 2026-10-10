@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Uitvoereisen BRL 9500-W/U en BRL 9501 nagelopen (geen rekenwijziging)
+
+- **Overzicht.** Nieuw document [uitvoereisen](nta8800-uitvoereisen.md): 22 eisen aan de uitvoer, per document met bron (paragraaf en pagina) en status. 20 voldaan, het attestnummer als plaatshouder, de XML-registratie bij EP-Online extern.
+- **Programma apart van de rekenkern.** De omslag van de rapportage noemde de rekenkernversie als versie van het programma. Rapportage, rekenrapport, maatwerkadviesrapport en invoeroverzicht noemen nu het rekenprogramma met zijn programmaversie, de rekenkernversie en het BRL 9501-attestnummer apart (Omgevingsregeling art. 5.14 lid 1 onder b; BRL 9501 §5.2 en §6.1).
+- **Attestnummer als plaatshouder.** Zolang er geen attest is staat er "nog niet toegekend", ook in het EP-Online-gegevensoverzicht (nieuw blok `berekening`) en in het manifest van het projectdossier (nieuw veld `software`).
+- **Standaard voor Woningisolatie in elke rapportage van een woning,** ook in de samenvatting, naast de nettowarmtebehoefte (BRL 9500-W p. 7).
+- **Registratieblok altijd in de rapportage.** Zonder registratiegegevens noemt het welke gegevens ontbreken, zoals de adviseurs met hun vakbekwaamheidsnummer (BRL 9500-W §4.2, p. 18).
+- **Invoer- en bewijsoverzicht** met opnamedatum en opnemend adviseur, of "niet ingevuld" (BRL 9500-W bijlage 3, p. 62).
+- **Maatwerkadviesrapport** noemt de looptijd van de netto contante waarde, de prijsstijging van onderhoud en het basisjaar bij de andere financiële uitgangspunten (BRL 9501 §4.1.3, p. 7).
+- **Rekenrapport** toont de atteststatus in het Nederlands.
+- Test: `src/__tests__/brl-output-requirements.test.ts`.
+
 ### 10 oktober 2026 — Review 30 van de UI-wijzigingen van 10 oktober (geen rekenwijziging)
 
 - **Brede keuzelijsten.** Een keuzelijst die alleen een andere optietekst krijgt (zonder dat de sectie opnieuw tekent) krijgt nu ook twee kolommen; de waarnemer kijkt naar tekstwijzigingen, niet alleen naar toegevoegde elementen.

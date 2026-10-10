@@ -5,6 +5,7 @@ import type {
   NtaRegistration, ProjectPerformanceAssessment, RegistrationAssessment,
 } from '../nta/KernelClient';
 import { escapeHtml } from './HtmlEscaping';
+import { attestText, programIdentity, programText } from './ProgramIdentity';
 import { summarizeExtras } from '../nta/NtaResultSummary';
 import { summarizeServiceEnergy } from '../nta/ServiceEnergy';
 import { dutchCodeCell, dutchDetailHtml, dutchNumber, dutchTimeHtml } from './DutchReportText';
@@ -162,7 +163,8 @@ const MESSAGE_TYPE: Record<string, string> = {
   regular: 'registratie', relabel: 'herlabelen', replacement: 'vervangen onjuist label',
 };
 
-function advisor(value: NtaRegistration['surveyingAdvisor']): string {
+/** An adviser with the vakbekwaamheidsnummer, as BRL 9500-W/U bijlage 3 asks. */
+export function advisor(value: NtaRegistration['surveyingAdvisor']): string {
   if (!value) return '—';
   return `${value.name || '—'} (vakbekwaamheid ${value.competenceNumber || '—'})`;
 }
@@ -181,7 +183,7 @@ export function readinessText(assessment: RegistrationAssessment | null | undefi
 export function registrationSection(registration: NtaRegistration | undefined, assessment: RegistrationAssessment | null | undefined,
   constructionYear?: number | null): string {
   if (!registration) {
-    return '<h2>Registratie</h2><p>Geen registratiegegevens ingevuld (projectgegevens → Registratie).</p>';
+    return '<h2>Registratie</h2><p>Geen registratiegegevens ingevuld (projectgegevens → Registratie): opnemend en registrerend adviseur met hun vakbekwaamheidsnummer, opname- en registratiedatum, BAG-object en EP-Online-nummer ontbreken nog.</p>';
   }
   const issues = [...(assessment?.issues ?? []), ...(assessment?.plausibility ?? [])].map((item) =>
     `<tr>${cell(item.severity === 'error' ? 'fout' : item.severity === 'warning' ? 'plausibiliteit' : 'ontbreekt')}${dutchCodeCell(item.code)}${cell(item.path)}</tr>`).join('');
@@ -249,6 +251,7 @@ export function generateNtaCalculationReportHTML(
     ...(performance?.warnings ?? []),
   ];
   const generatedTime = dutchTimeHtml(generatedAt);
+  const identity = programIdentity(assessment.kernelVersion, assessment.targetNormVersion);
   const head = `<!doctype html><html lang="nl"><head><meta charset="utf-8">
     <title>NTA 8800-rekenrapport — ${escapeHtml(project.name)}</title>
     <style>body{font:14px/1.5 system-ui,sans-serif;max-width:1100px;margin:32px auto;padding:0 20px;color:#202530}
@@ -264,7 +267,8 @@ export function generateNtaCalculationReportHTML(
     Berekend volgens ${escapeHtml(assessment.targetNormVersion)}. Alleen een berekening volgens de aangewezen uitgave (NTA 8800:2025+C1:2026) mag worden geregistreerd; deze uitkomst dient alleen ter vergelijking.</div>` : ''}
     <h2>Herleidbaarheid</h2><table><tbody>
       <tr><th>Doeluitgave</th>${cell(assessment.targetNormVersion)}<th>Rekenkernversie</th>${cell(assessment.kernelVersion)}</tr>
-      <tr><th>Status</th>${cell(assessment.status)}<th>Atteststatus</th>${cell(assessment.attestStatus)}</tr>
+      <tr><th>Rekenprogramma</th>${cell(programText(identity))}<th>BRL 9501-attestnummer</th>${cell(attestText(identity))}</tr>
+      <tr><th>Status</th>${cell(assessment.status)}<th>Atteststatus</th>${cell(assessment.attestStatus === 'unattested' ? 'niet geattesteerd (BRL 9501)' : assessment.attestStatus)}</tr>
       <tr><th>Invoervingerafdruk</th><td colspan="3"><code>${escapeHtml(assessment.inputFingerprint)}</code></td></tr>
       ${assessment.geometry ? `<tr><th>A<sub>g</sub> / A<sub>ls</sub></th><td>${num(assessment.geometry.usableFloorAreaM2, 1)} / ${num(assessment.geometry.lossAreaM2, 1)} m²</td>
         <th>A<sub>ls</sub>/A<sub>g</sub></th><td>${num(assessment.geometry.lossAreaRatio, 3)}</td></tr>` : ''}

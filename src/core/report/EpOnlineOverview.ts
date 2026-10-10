@@ -1,3 +1,4 @@
+import { attestText, programIdentity } from './ProgramIdentity';
 import type { IProject } from '../energy/types';
 import { legacyEdition, type ProjectPerformanceAssessment } from '../nta/KernelClient';
 
@@ -91,6 +92,20 @@ export interface EpOnlineOverview {
     note: string;
     k_reageertOpExterneSignalen: boolean | null;
     l_afgiftesysteemLageTemperatuur: boolean | null;
+  };
+  /**
+   * The calculation behind the overview (BRL 9501 §5.2, §5.3 opmerking 2 and §6.1; Omgevingsregeling
+   * art. 5.14 lid 1 onder b). The export schema has no fields for it, so it stands apart, like the
+   * statements; `attestnummer` is null and `attestnummerTekst` says so while there is no attest.
+   */
+  berekening: {
+    rekenprogramma: string;
+    programmaversie: string;
+    rekenkernversie: string | null;
+    uitgave: string | null;
+    invoervingerafdruk: string | null;
+    attestnummer: string | null;
+    attestnummerTekst: string;
   };
 }
 
@@ -254,6 +269,7 @@ export function buildEpOnlineOverview(
   for (const [field] of EP_ONLINE_FIELDS) {
     if (field in values) ordered[field] = values[field] as EpOnlineValue;
   }
+  const identity = programIdentity(assessment?.kernelVersion, assessment?.targetNormVersion);
   return {
     notice: legacy
       ? `${EP_ONLINE_OVERVIEW_NOTICE} Berekend in de oudere uitgave ${assessment?.targetNormVersion ?? 'NTA 8800, onbekende uitgave'}: niet registreerbaar, daarom zonder energieklasse en indicatoren.`
@@ -269,6 +285,15 @@ export function buildEpOnlineOverview(
         ?? registration.labelStatements?.respondsToExternalSignals ?? null,
       l_afgiftesysteemLageTemperatuur: indicators?.elements?.lowTemperatureHeating
         ?? registration.labelStatements?.lowTemperatureHeating ?? null,
+    },
+    berekening: {
+      rekenprogramma: identity.name,
+      programmaversie: identity.programVersion,
+      rekenkernversie: identity.kernelVersion,
+      uitgave: identity.normEdition,
+      invoervingerafdruk: assessment?.inputFingerprint ?? null,
+      attestnummer: identity.attestNumber,
+      attestnummerTekst: attestText(identity),
     },
   };
 }
