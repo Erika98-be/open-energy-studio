@@ -21,7 +21,7 @@ import { kernelIssues, type StepIssue } from '../../core/nta/stepStatus';
 import { WORKFLOW_STEPS, type Route } from '../../core/navigation/routes';
 import type { IProject } from '../../core/energy/types';
 import { Banner, Button, Card, Segmented, Stepper, cx, type StepItem } from '../ui';
-import { focusPathIn } from './focusPath';
+import { fieldLabelIn, focusPathIn } from './focusPath';
 import { EvidenceReferencePicker } from '../EvidenceLink/EvidenceLink';
 import { FieldPathPrefixProvider, read, Section, type Draft } from '../NtaPerformancePanel/NtaFormFields';
 import { NTA_PATH_PREFIX } from '../NtaPerformancePanel/NtaCalculationForm';
@@ -135,6 +135,21 @@ function EvidenceBlock({ draft, def, container, change }: {
 }) {
   const { t } = useI18n();
   const items = sectionEvidence(draft, def);
+  // The form label of each reference field, read from the rendered section, so a row says
+  // "Bron toestel" instead of `generator.boiler.equipmentReference` (UX finding 4). The kernel
+  // path stays as the tooltip and as the fallback when a field has no label of its own.
+  const [labels, setLabels] = useState<Record<string, string>>({});
+  const pathsKey = items.map((item) => item.path).join('|');
+  useLayoutEffect(() => {
+    const element = container();
+    if (!element) return;
+    const next: Record<string, string> = {};
+    for (const path of pathsKey ? pathsKey.split('|') : []) {
+      const label = fieldLabelIn(element, prefixed(path));
+      if (label) next[path] = label;
+    }
+    setLabels((current) => (JSON.stringify(current) === JSON.stringify(next) ? current : next));
+  });
   if (items.length === 0) return null;
   const open = items.filter((item) => !item.filled).length;
   const goTo = (path: string) => {
@@ -152,16 +167,19 @@ function EvidenceBlock({ draft, def, container, change }: {
       <ul className="nta-evidence__list">
         {items.map((item) => {
           const value = read(draft, parseKernelPath(item.path));
+          const label = labels[item.path];
           return (
             <li key={item.path} className={item.filled ? 'filled' : 'open'}>
-              <code>{item.path}</code>
+              {label
+                ? <span className="nta-evidence__label" title={item.path}>{label}</span>
+                : <code>{item.path}</code>}
               {item.filled
                 ? <span className="nta-evidence__value"><Paperclip aria-hidden="true" /> {String(value)}</span>
                 : <span className="nta-evidence__value">{t('ntaStep.evidence.missing')}</span>}
               {change && <EvidenceReferencePicker path={item.path} value={value}
                 onChange={(next) => change(parseKernelPath(item.path), next)} />}
               <button type="button" className="ui-btn ui-btn--ghost ui-btn--sm" onClick={() => goTo(item.path)}
-                aria-label={`${t('ui.goTo')}: ${item.path}`}>
+                aria-label={`${t('ui.goTo')}: ${label ?? item.path}`}>
                 {t('ui.goTo')} <ArrowRight aria-hidden="true" />
               </button>
             </li>

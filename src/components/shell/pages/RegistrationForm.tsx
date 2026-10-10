@@ -6,7 +6,7 @@
  * identity kept on a relabel) and the BAG ledger update.
  */
 import { NumberInput } from '../../ui/Field';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { Save, Undo2 } from 'lucide-react';
 import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
@@ -88,6 +88,7 @@ export function RegistrationForm() {
   const conflicts = bagConflicts(ledgerEntry, readBagLedger());
   const software = registrationSoftware(registration, kernelVersion);
   const dirty = useMemo(() => JSON.stringify(registration) !== JSON.stringify(stored ?? {}), [registration, stored]);
+  const formId = useId();
 
   const textInput = ({ key, type }: TextField) => (
     <div className="dialog-field" key={key} data-path={`registration.${key}`}>
@@ -275,10 +276,14 @@ export function RegistrationForm() {
       </Card>
 
       <div className="registration-form-actions" role="group" aria-label={t('registration.form.actions')}>
-        {dirty && <span className="registration-form-dirty">{t('registration.form.unsaved')}</span>}
+        {dirty
+          ? <span className="registration-form-dirty">{t('registration.form.unsaved')}</span>
+          : <span id={`${formId}-clean`} className="registration-form-clean">{t('registration.form.nothingToSave')}</span>}
         <Button type="button" variant="ghost" icon={<Undo2 aria-hidden="true" />} disabled={!dirty}
           onClick={() => setRegistration(stored ?? {})}>{t('registration.form.discard')}</Button>
-        <Button type="submit" variant="primary" icon={<Save aria-hidden="true" />}>{t('registration.form.save')}</Button>
+        {/* Nothing changed, nothing to save (UX finding 8). */}
+        <Button type="submit" variant="primary" icon={<Save aria-hidden="true" />} disabled={!dirty}
+          aria-describedby={dirty ? undefined : `${formId}-clean`}>{t('registration.form.save')}</Button>
       </div>
     </form>
   );

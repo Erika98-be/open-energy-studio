@@ -249,7 +249,7 @@ describe('workflow end to end, default edition', () => {
     await applyDraft(user);
     // The file is added to the source text; the description that was there stays.
     expect((lastNta()!.windowSolar as { sourceReference: string }).sourceReference)
-      .toMatch(/^synthetic: minimal obstruction .*; evidence:ev-\d+$/);
+      .toMatch(/^voorbeeld: minimale belemmering .*; evidence:ev-\d+$/);
 
     await openStep(user, /^Report/, 'BRL 9500 checklist');
     expect(main().getByText('gevel-noord.jpg', { exact: false })).toBeInTheDocument();
