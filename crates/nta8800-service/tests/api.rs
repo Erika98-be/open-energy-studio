@@ -183,7 +183,10 @@ async fn edition_comparison_lists_the_changes_and_keeps_the_request() {
     assert_eq!(status, StatusCode::OK, "{result}");
     assert_eq!(result["fromNormVersion"], "2025+C1");
     assert_eq!(result["toNormVersion"], "2020+A1");
-    assert_eq!(result["adjustedProject"]["ntaCalculation"]["normVersion"], "2020+A1");
+    assert_eq!(
+        result["adjustedProject"]["ntaCalculation"]["normVersion"],
+        "2020+A1"
+    );
     let items = result["items"].as_array().unwrap();
     let panel = items
         .iter()

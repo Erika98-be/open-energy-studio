@@ -38,7 +38,11 @@ pub struct SwitchPoint {
     pub has_route: Option<fn(&NormProfile) -> bool>,
 }
 
-const fn values(points: &'static [&'static str], subject: &'static str, fields: &'static [&'static str]) -> SwitchPoint {
+const fn values(
+    points: &'static [&'static str],
+    subject: &'static str,
+    fields: &'static [&'static str],
+) -> SwitchPoint {
     SwitchPoint {
         points,
         subject,
@@ -87,19 +91,50 @@ const fn routed(
 
 /// Every switch point, in the order of the documentation.
 pub const SWITCH_POINTS: &[SwitchPoint] = &[
-    routed(&["1"], "f_BACS 1,05 (5.5.8/15.3)", &["bacs_factor_route"], &["bacsFactor"], |p| p.bacs_factor_route),
+    routed(
+        &["1"],
+        "f_BACS 1,05 (5.5.8/15.3)",
+        &["bacs_factor_route"],
+        &["bacsFactor"],
+        |p| p.bacs_factor_route,
+    ),
     values(&["2"], "opslagcorrectie (5.14a/b)", &["storage_credit"]),
     values(
         &["3"],
         "K_CO2 tabel 5.3",
-        &["k_co2_electricity", "k_co2_gas", "k_co2_oil", "k_co2_biomass", "k_co2_district_heat_forfait"],
+        &[
+            "k_co2_electricity",
+            "k_co2_gas",
+            "k_co2_oil",
+            "k_co2_biomass",
+            "k_co2_district_heat_forfait",
+        ],
     ),
     values(&["4"], "K_CO2 AVI tabel 5.6", &["k_co2_waste_incineration"]),
     values(&["5"], "nieuwe indicatoren", &["indicators_2025"]),
-    values(&["6"], "Ψ tabel 9.16 collectief ≤ 500 m²", &["psi_collective_combined_small"]),
-    values(&["7"], "f_cor.bron.col (9.62)", &["collective_source_correction"]),
-    inputs(&["8", "46", "50"], "bronwarmte warmtepomp", &["heat_pump_source_route"], &["realisedFrom2013"]),
-    routed(&["9"], "dakrand als belemmering (17.3.2 f)", &["roof_edge_obstruction"], &["obstruction"], |p| p.roof_edge_obstruction),
+    values(
+        &["6"],
+        "Ψ tabel 9.16 collectief ≤ 500 m²",
+        &["psi_collective_combined_small"],
+    ),
+    values(
+        &["7"],
+        "f_cor.bron.col (9.62)",
+        &["collective_source_correction"],
+    ),
+    inputs(
+        &["8", "46", "50"],
+        "bronwarmte warmtepomp",
+        &["heat_pump_source_route"],
+        &["realisedFrom2013"],
+    ),
+    routed(
+        &["9"],
+        "dakrand als belemmering (17.3.2 f)",
+        &["roof_edge_obstruction"],
+        &["obstruction"],
+        |p| p.roof_edge_obstruction,
+    ),
     routed(
         &["10"],
         "zonwerend glas, vaste en draaibare lamellen",
@@ -107,52 +142,159 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
         &["glazingType", "fixedLouvres", "fixedLouvres.control"],
         |p| p.permanent_shading_routes,
     ),
-    values(&["11"], "f_gebouw;si;W (13.157)/(13.160)", &["hot_water_building_share"]),
+    values(
+        &["11"],
+        "f_gebouw;si;W (13.157)/(13.160)",
+        &["hot_water_building_share"],
+    ),
     values(&["12"], "tabel 13.18 c_W,EU;gen", &["table_13_18"]),
-    values(&["13"], "gemeten motorrendement (11.136)", &["motor_efficiency_free_choice"]),
+    values(
+        &["13"],
+        "gemeten motorrendement (11.136)",
+        &["motor_efficiency_free_choice"],
+    ),
     inputs(
         &["14"],
         "bijlage AA",
         &["annex_aa", "annex_aa_requirement_floor"],
         &["effectiveMassKgPerM2", "roofAreaM2"],
     ),
-    values(&["15"], "F_A;iso biobased (tabel E.5)", &["bio_based_ageing_one"]),
-    values(&["16"], "biobased λ, riet (tabel E.11/E.12)", &["bio_based_lambda_2025"]),
+    values(
+        &["15"],
+        "F_A;iso biobased (tabel E.5)",
+        &["bio_based_ageing_one"],
+    ),
+    values(
+        &["16"],
+        "biobased λ, riet (tabel E.11/E.12)",
+        &["bio_based_lambda_2025"],
+    ),
     values(&["17"], "rieten dak (I.3)", &["reed_thatch_divisor"]),
     values(&["18"], "boosterwarmtepomp (W.9)", &["booster_bounds"]),
-    values(&["18a"], "LT-bronnen als collectieve bron (P.3 item 6)", &["wide_collective_low_temperature_sources"]),
-    routed(&["19"], "tabel 13.2 keukenrijen", &["kitchen_diameter_rows"], &["kitchenPipeDiameter"], |p| p.kitchen_diameter_rows),
+    values(
+        &["18a"],
+        "LT-bronnen als collectieve bron (P.3 item 6)",
+        &["wide_collective_low_temperature_sources"],
+    ),
+    routed(
+        &["19"],
+        "tabel 13.2 keukenrijen",
+        &["kitchen_diameter_rows"],
+        &["kitchenPipeDiameter"],
+        |p| p.kitchen_diameter_rows,
+    ),
     values(&["20"], "τ_argII tabel 11.7", &["tau_ventilative_cooling"]),
     values(&["21"], "f_argII", &["ventilative_cooling_operation"]),
-    inputs(&["22"], "spuiopening uit C_d en C_e (11.71a)", &["discharge_opening_route"], &["area.method"]),
-    values(&["23"], "f_τ woonfunctie tabel 11.8", &["dwelling_occupancy_factor"]),
+    inputs(
+        &["22"],
+        "spuiopening uit C_d en C_e (11.71a)",
+        &["discharge_opening_route"],
+        &["area.method"],
+    ),
+    values(
+        &["23"],
+        "f_τ woonfunctie tabel 11.8",
+        &["dwelling_occupancy_factor"],
+    ),
     values(&["24"], "θ_e;argII tabel 17.1", &["argii_temperature_c"]),
     values(&["25"], "ΔT_fan", &["fan_temperature_rise_k"]),
     values(&["26"], "Ψ detail 17 tabel I.1", &["psi_detail_17"]),
-    values(&["27"], "λ houtvezel en cellulose tabel E.10", &["wood_fibre_cellulose_lambda"]),
-    values(&["28", "70"], "referentievermogen (P.25)", &["reference_power_divisor"]),
-    values(&["29"], "rendement geothermie", &["geothermal_efficiency_fixed"]),
+    values(
+        &["27"],
+        "λ houtvezel en cellulose tabel E.10",
+        &["wood_fibre_cellulose_lambda"],
+    ),
+    values(
+        &["28", "70"],
+        "referentievermogen (P.25)",
+        &["reference_power_divisor"],
+    ),
+    values(
+        &["29"],
+        "rendement geothermie",
+        &["geothermal_efficiency_fixed"],
+    ),
     SwitchPoint {
         reinterpreted: true,
-        ..inputs(&["30", "53"], "biomassagrens bmA", &["biomass_threshold_kw"], &["biomassAbove500Kw"])
+        ..inputs(
+            &["30", "53"],
+            "biomassagrens bmA",
+            &["biomass_threshold_kw"],
+            &["biomassAbove500Kw"],
+        )
     },
-    inputs(&["31"], "bijlage AA als bewijs koelcapaciteit", &["annex_aa_route"], &["capacity.method"]),
-    values(&["32"], "renovatiestandaard tabel 5.7", &["renovation_standard"]),
-    routed(&["33"], "tabel 14.3 led vanaf 2017", &["led_2017_column"], &["ledFrom2017"], |p| p.led_2017_column),
-    routed(&["34"], "roeden in U_w (8.17)/(8.18)", &["glazing_bar_term"], &["glazingBars"], |p| p.glazing_bar_term),
-    inputs(&["35"], "f_sh;with woningen (7.6.6.1.4)", &["dwelling_shading_heating_off"], &["movableShading.control"]),
-    values(&["36"], "restwarmte f_Pren (5.47)/(5.55)", &["residual_heat_pren_primary"]),
-    inputs(&["37"], "lichtkoepels U_rc → U_C", &["rooflight_route"], &["elements"]),
+    inputs(
+        &["31"],
+        "bijlage AA als bewijs koelcapaciteit",
+        &["annex_aa_route"],
+        &["capacity.method"],
+    ),
+    values(
+        &["32"],
+        "renovatiestandaard tabel 5.7",
+        &["renovation_standard"],
+    ),
+    routed(
+        &["33"],
+        "tabel 14.3 led vanaf 2017",
+        &["led_2017_column"],
+        &["ledFrom2017"],
+        |p| p.led_2017_column,
+    ),
+    routed(
+        &["34"],
+        "roeden in U_w (8.17)/(8.18)",
+        &["glazing_bar_term"],
+        &["glazingBars"],
+        |p| p.glazing_bar_term,
+    ),
+    inputs(
+        &["35"],
+        "f_sh;with woningen (7.6.6.1.4)",
+        &["dwelling_shading_heating_off"],
+        &["movableShading.control"],
+    ),
+    values(
+        &["36"],
+        "restwarmte f_Pren (5.47)/(5.55)",
+        &["residual_heat_pren_primary"],
+    ),
+    inputs(
+        &["37"],
+        "lichtkoepels U_rc → U_C",
+        &["rooflight_route"],
+        &["elements"],
+    ),
     SwitchPoint {
         codes: &["panel_build_year_required"],
-        ..routed(&["38"], "paneel-U naar bouwjaar (I.13/I.14)", &["panel_build_year_tables"], &["buildYear"], |p| {
-            p.panel_build_year_tables
-        })
+        ..routed(
+            &["38"],
+            "paneel-U naar bouwjaar (I.13/I.14)",
+            &["panel_build_year_tables"],
+            &["buildYear"],
+            |p| p.panel_build_year_tables,
+        )
     },
-    values(&["39"], "NEN 1087-factor zonder roosterspecificatie", &["unspecified_screen_factor"]),
-    values(&["40"], "A_w;cros (11.77)", &["cross_area_roof_all_sectors"]),
-    values(&["41"], "distributie verwarming 9.4", &["distribution_2024_rules"]),
-    values(&["42"], "tabel 9.16 gecombineerde leidingen", &["table_9_16_combined_rows"]),
+    values(
+        &["39"],
+        "NEN 1087-factor zonder roosterspecificatie",
+        &["unspecified_screen_factor"],
+    ),
+    values(
+        &["40"],
+        "A_w;cros (11.77)",
+        &["cross_area_roof_all_sectors"],
+    ),
+    values(
+        &["41"],
+        "distributie verwarming 9.4",
+        &["distribution_2024_rules"],
+    ),
+    values(
+        &["42"],
+        "tabel 9.16 gecombineerde leidingen",
+        &["table_9_16_combined_rows"],
+    ),
     routed(
         &["43"],
         "f_H;dis;rbl 0,5 in ongeïsoleerde schil",
@@ -160,9 +302,24 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
         &["uninsulatedPipesInUninsulatedShell"],
         |p| p.distribution_half_recoverable_route,
     ),
-    values(&["44"], "tabel 13.4 onbekende diameter", &["table_13_4_system_rows"]),
-    inputs(&["45"], "serieschakeling tapwater", &["hot_water_series_routes"], &["series", "kind"]),
-    routed(&["47"], "afgifte verwarming 9.3 (2023)", &["emission_tables_2023"], &["emission.edition2023"], |p| p.emission_tables_2023),
+    values(
+        &["44"],
+        "tabel 13.4 onbekende diameter",
+        &["table_13_4_system_rows"],
+    ),
+    inputs(
+        &["45"],
+        "serieschakeling tapwater",
+        &["hot_water_series_routes"],
+        &["series", "kind"],
+    ),
+    routed(
+        &["47"],
+        "afgifte verwarming 9.3 (2023)",
+        &["emission_tables_2023"],
+        &["emission.edition2023"],
+        |p| p.emission_tables_2023,
+    ),
     routed(
         &["48"],
         "afgifte koeling 10.3.3 (2023)",
@@ -187,20 +344,74 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
             ],
         )
     },
-    inputs(&["52"], "flexmodus", &["flex_mode_route"], &["kind", "generators"]),
-    values(&["54"], "bijgeplaatste preferente opwekker (9.58)", &["preference_beta_building_share"]),
-    inputs(&["55"], "tabel 9.14 ontwerptemperatuurklassen", &["design_classes_60_and_70"], &["designTemperatureClass"]),
-    inputs(&["56"], "ventilatorvermogen NEN-EN 16430", &["tested_emission_fan_power"], &["testedPowerW"]),
-    inputs(&["57"], "tabel 7.5 onbekende kleur", &["unknown_shade_colour_rows"], &["colour"]),
-    routed(&["58"], "tabel 7.10 naar massa per m²", &["thermal_mass_by_kg_per_m2"], &["massKgPerM2"], |p| p.thermal_mass_by_kg_per_m2),
+    inputs(
+        &["52"],
+        "flexmodus",
+        &["flex_mode_route"],
+        &["kind", "generators"],
+    ),
+    values(
+        &["54"],
+        "bijgeplaatste preferente opwekker (9.58)",
+        &["preference_beta_building_share"],
+    ),
+    inputs(
+        &["55"],
+        "tabel 9.14 ontwerptemperatuurklassen",
+        &["design_classes_60_and_70"],
+        &["designTemperatureClass"],
+    ),
+    inputs(
+        &["56"],
+        "ventilatorvermogen NEN-EN 16430",
+        &["tested_emission_fan_power"],
+        &["testedPowerW"],
+    ),
+    inputs(
+        &["57"],
+        "tabel 7.5 onbekende kleur",
+        &["unknown_shade_colour_rows"],
+        &["colour"],
+    ),
+    routed(
+        &["58"],
+        "tabel 7.10 naar massa per m²",
+        &["thermal_mass_by_kg_per_m2"],
+        &["massKgPerM2"],
+        |p| p.thermal_mass_by_kg_per_m2,
+    ),
     SwitchPoint {
         codes: &["ground_floor_wall_height_required"],
-        ..inputs(&["59"], "hoogte h boven maaiveld (8.47)", &["crawl_wall_height_fixed"], &["wallHeightAboveGroundM"])
+        ..inputs(
+            &["59"],
+            "hoogte h boven maaiveld (8.47)",
+            &["crawl_wall_height_fixed"],
+            &["wallHeightAboveGroundM"],
+        )
     },
-    values(&["60"], "F_A;iso minerale-wolvlokken", &["mineral_wool_flakes_ageing"]),
-    inputs(&["61"], "bekende hogere λ_equi (I.2)", &["lambda_equi_known_route"], &["knownLambdaEquivalent"]),
-    inputs(&["62"], "zwembad (11.57)", &["swimming_pool_route"], &["swimmingPool"]),
-    inputs(&["63"], "η_hr volgens NEN-EN 13053", &["en_13053_route"], &["efficiency.standard"]),
+    values(
+        &["60"],
+        "F_A;iso minerale-wolvlokken",
+        &["mineral_wool_flakes_ageing"],
+    ),
+    inputs(
+        &["61"],
+        "bekende hogere λ_equi (I.2)",
+        &["lambda_equi_known_route"],
+        &["knownLambdaEquivalent"],
+    ),
+    inputs(
+        &["62"],
+        "zwembad (11.57)",
+        &["swimming_pool_route"],
+        &["swimmingPool"],
+    ),
+    inputs(
+        &["63"],
+        "η_hr volgens NEN-EN 13053",
+        &["en_13053_route"],
+        &["efficiency.standard"],
+    ),
     routed(
         &["64"],
         "f_sto;dis;ls elektroboiler",
@@ -208,18 +419,46 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
         &["electricBoilerInsulatedPipe"],
         |p| p.electric_boiler_insulated_pipe_factor,
     ),
-    values(&["65"], "ϑ_sto;amb ventilatieretourluchtwarmtepomp", &["storage_ambient_exhaust_air"]),
-    inputs(&["66"], "C_W;mixed air (13.153b)", &["mixed_air_route"], &["mixedAir"]),
-    routed(&["67"], "onderhoudsfactor MF tabel 14.4", &["lighting_maintenance_factor"], &["constantIlluminance"], |p| {
-        p.lighting_maintenance_factor
-    }),
+    values(
+        &["65"],
+        "ϑ_sto;amb ventilatieretourluchtwarmtepomp",
+        &["storage_ambient_exhaust_air"],
+    ),
+    inputs(
+        &["66"],
+        "C_W;mixed air (13.153b)",
+        &["mixed_air_route"],
+        &["mixedAir"],
+    ),
+    routed(
+        &["67"],
+        "onderhoudsfactor MF tabel 14.4",
+        &["lighting_maintenance_factor"],
+        &["constantIlluminance"],
+        |p| p.lighting_maintenance_factor,
+    ),
     SwitchPoint {
         codes: &["high_test_standard_invalid"],
-        ..inputs(&["67a"], "beproeving hoge-COP-rij tabel 9.28", &["heat_pump_high_test_standard"], &["testStandardEdition"])
+        ..inputs(
+            &["67a"],
+            "beproeving hoge-COP-rij tabel 9.28",
+            &["heat_pump_high_test_standard"],
+            &["testStandardEdition"],
+        )
     },
-    inputs(&["68"], "piekvermogen PV (16.4)", &["pv_kpk_per_m2_floor"], &["panelPeakPowerW", "peakPower.method"]),
+    inputs(
+        &["68"],
+        "piekvermogen PV (16.4)",
+        &["pv_kpk_per_m2_floor"],
+        &["panelPeakPowerW", "peakPower.method"],
+    ),
     values(&["69"], "λ_equi;ntr (I.2)", &["lambda_equi_ntr"]),
-    inputs(&["71"], "restwarmte bijlage P", &["residual_heat_fixed_factors"], &["auxiliarySpecific"]),
+    inputs(
+        &["71"],
+        "restwarmte bijlage P",
+        &["residual_heat_fixed_factors"],
+        &["auxiliarySpecific"],
+    ),
     inputs(
         &["72"],
         "kleine systemen bijlage P",
@@ -228,14 +467,42 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
     ),
     SwitchPoint {
         codes: &["generator_power_required"],
-        ..values(&["73"], "β preferente opwekker onbekend", &["unknown_beta_route"])
+        ..values(
+            &["73"],
+            "β preferente opwekker onbekend",
+            &["unknown_beta_route"],
+        )
     },
-    values(&["74"], "forfaitaire hulpenergie (9.85)", &["device_aux_a_from_2015_kwh", "heat_pump_aux_constants"]),
+    values(
+        &["74"],
+        "forfaitaire hulpenergie (9.85)",
+        &["device_aux_a_from_2015_kwh", "heat_pump_aux_constants"],
+    ),
     values(&["75"], "f_systype E1 (11.142)", &["fan_systype_combined"]),
-    inputs(&["76"], "tabellen I.1/I.2", &["psi_columns_and_default", "psi_detail_14"], &["column", "position"]),
-    inputs(&["77"], "werkelijke leidinglengte woningen", &["residential_actual_pipe_length"], &["actualPipeLengthM"]),
-    inputs(&["78"], "debiet uit kwaliteitsverklaring (13.148a)", &["declared_exhaust_air_flow_route"], &["declaredFlowM3PerH"]),
-    inputs(&["79"], "koudeterugwinning met 100 % bypass", &["cold_recovery_route"], &["coldRecoveryEvidence"]),
+    inputs(
+        &["76"],
+        "tabellen I.1/I.2",
+        &["psi_columns_and_default", "psi_detail_14"],
+        &["column", "position"],
+    ),
+    inputs(
+        &["77"],
+        "werkelijke leidinglengte woningen",
+        &["residential_actual_pipe_length"],
+        &["actualPipeLengthM"],
+    ),
+    inputs(
+        &["78"],
+        "debiet uit kwaliteitsverklaring (13.148a)",
+        &["declared_exhaust_air_flow_route"],
+        &["declaredFlowM3PerH"],
+    ),
+    inputs(
+        &["79"],
+        "koudeterugwinning met 100 % bypass",
+        &["cold_recovery_route"],
+        &["coldRecoveryEvidence"],
+    ),
 ];
 
 /// The profile as a field map; `version` is left out.
@@ -268,7 +535,12 @@ pub fn switch_points_between(a: NormVersion, b: NormVersion) -> Vec<&'static Swi
     let differing = differing_fields(a, b);
     SWITCH_POINTS
         .iter()
-        .filter(|point| point.fields.iter().any(|field| differing.iter().any(|d| d == field)))
+        .filter(|point| {
+            point
+                .fields
+                .iter()
+                .any(|field| differing.iter().any(|d| d == field))
+        })
         .collect()
 }
 
@@ -290,7 +562,12 @@ pub fn path_ends_with(path: &str, suffix: &str) -> bool {
 /// The switch point between two editions a finding belongs to: of the
 /// switch points whose fields differ, the one that names the code, else the
 /// one with the longest matching input suffix.
-pub fn attribute(code: &str, path: &str, a: NormVersion, b: NormVersion) -> Option<&'static SwitchPoint> {
+pub fn attribute(
+    code: &str,
+    path: &str,
+    a: NormVersion,
+    b: NormVersion,
+) -> Option<&'static SwitchPoint> {
     let between = switch_points_between(a, b);
     if let Some(point) = between.iter().find(|point| point.codes.contains(&code)) {
         return Some(point);
@@ -321,12 +598,20 @@ mod tests {
                 .iter()
                 .filter(|point| point.fields.contains(&field.as_str()))
                 .collect();
-            assert_eq!(owners.len(), 1, "{field} belongs to {} switch points", owners.len());
+            assert_eq!(
+                owners.len(),
+                1,
+                "{field} belongs to {} switch points",
+                owners.len()
+            );
         }
         let names = profile_field_names();
         for point in SWITCH_POINTS {
             for field in point.fields {
-                assert!(names.iter().any(|name| name == field), "{field} is not a profile field");
+                assert!(
+                    names.iter().any(|name| name == field),
+                    "{field} is not a profile field"
+                );
             }
         }
     }
@@ -337,7 +622,9 @@ mod tests {
             for b in &NormVersion::ALL[i + 1..] {
                 for field in differing_fields(*a, *b) {
                     assert!(
-                        SWITCH_POINTS.iter().any(|point| point.fields.contains(&field.as_str())),
+                        SWITCH_POINTS
+                            .iter()
+                            .any(|point| point.fields.contains(&field.as_str())),
                         "{field} differs between {} and {} without a switch point",
                         a.id(),
                         b.id()
@@ -352,8 +639,12 @@ mod tests {
         let doc = include_str!("../../../../docs/nta8800-normversies.md");
         let mut rows = Vec::new();
         for line in doc.lines() {
-            let Some(rest) = line.strip_prefix("| ") else { continue };
-            let Some((first, _)) = rest.split_once(" |") else { continue };
+            let Some(rest) = line.strip_prefix("| ") else {
+                continue;
+            };
+            let Some((first, _)) = rest.split_once(" |") else {
+                continue;
+            };
             let numbered = first.chars().next().is_some_and(|c| c.is_ascii_digit())
                 && first.chars().all(|c| c.is_ascii_alphanumeric());
             if numbered {
@@ -362,12 +653,17 @@ mod tests {
         }
         for point in SWITCH_POINTS {
             for id in point.points {
-                assert!(rows.iter().any(|row| row == id), "point {id} has no row in docs/nta8800-normversies.md");
+                assert!(
+                    rows.iter().any(|row| row == id),
+                    "point {id} has no row in docs/nta8800-normversies.md"
+                );
             }
         }
         for row in &rows {
             assert!(
-                SWITCH_POINTS.iter().any(|point| point.points.contains(&row.as_str())),
+                SWITCH_POINTS
+                    .iter()
+                    .any(|point| point.points.contains(&row.as_str())),
                 "row {row} of docs/nta8800-normversies.md has no switch point"
             );
         }
@@ -375,10 +671,20 @@ mod tests {
 
     #[test]
     fn a_switch_point_with_a_route_differs_in_that_route_somewhere() {
-        for point in SWITCH_POINTS.iter().filter(|point| point.has_route.is_some()) {
+        for point in SWITCH_POINTS
+            .iter()
+            .filter(|point| point.has_route.is_some())
+        {
             let route = point.has_route.unwrap();
-            let values: Vec<bool> = NormVersion::ALL.iter().map(|v| route(v.profile())).collect();
-            assert!(values.contains(&true) && values.contains(&false), "{:?}", point.points);
+            let values: Vec<bool> = NormVersion::ALL
+                .iter()
+                .map(|v| route(v.profile()))
+                .collect();
+            assert!(
+                values.contains(&true) && values.contains(&false),
+                "{:?}",
+                point.points
+            );
         }
     }
 

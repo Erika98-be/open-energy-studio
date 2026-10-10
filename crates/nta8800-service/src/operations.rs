@@ -303,10 +303,8 @@ fn run_compare_project_editions(mut body: Value) -> Outcome {
             "The project has no ntaCalculation block to move to another edition".into(),
         );
     }
-    let report = nta8800_core::edition_switch::compare_project_editions(
-        &project,
-        norm_versions::current(),
-    );
+    let report =
+        nta8800_core::edition_switch::compare_project_editions(&project, norm_versions::current());
     match finite_value(&report) {
         Ok(value) => ok(value),
         Err(outcome) => outcome,

@@ -1146,7 +1146,10 @@ mod tests {
             compare_project_editions_blocking(fixture(DWELLING), Some(json!("2022"))).unwrap();
         assert_eq!(report["fromNormVersion"], "2025+C1");
         assert_eq!(report["toNormVersion"], "2022");
-        assert_eq!(report["adjustedProject"]["ntaCalculation"]["normVersion"], "2022");
+        assert_eq!(
+            report["adjustedProject"]["ntaCalculation"]["normVersion"],
+            "2022"
+        );
         let error =
             compare_project_editions_blocking(fixture(DWELLING), Some(json!("2019"))).unwrap_err();
         assert!(error.starts_with("invalid_norm_version: "), "{error}");

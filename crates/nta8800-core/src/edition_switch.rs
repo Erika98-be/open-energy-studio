@@ -164,7 +164,12 @@ fn set_edition(project: &mut Value, version: NormVersion) {
     }
 }
 
-fn point_of(code: &str, path: &str, from: NormVersion, to: NormVersion) -> Option<&'static SwitchPoint> {
+fn point_of(
+    code: &str,
+    path: &str,
+    from: NormVersion,
+    to: NormVersion,
+) -> Option<&'static SwitchPoint> {
     switches::attribute(code, path, from, to)
 }
 
@@ -179,7 +184,10 @@ fn automatic_fix(
 ) -> Option<(SwitchFix, Option<Value>)> {
     let point = point?;
     if gap.path.ends_with(']')
-        || !point.inputs.iter().any(|input| switches::path_ends_with(&gap.path, input))
+        || !point
+            .inputs
+            .iter()
+            .any(|input| switches::path_ends_with(&gap.path, input))
     {
         return None;
     }
@@ -214,7 +222,9 @@ fn apply(project: &mut Value, path: &str, fix: SwitchFix, value: &Option<Value>)
 
 fn restore(project: &mut Value, path: &str, old: Value) {
     let pointer = pointer_of(path);
-    let Some((parent, last)) = pointer.rsplit_once('/') else { return };
+    let Some((parent, last)) = pointer.rsplit_once('/') else {
+        return;
+    };
     match project.pointer_mut(parent) {
         Some(Value::Object(map)) => {
             map.insert(last.to_string(), old);
@@ -291,7 +301,10 @@ pub fn compare_project_editions(project: &Value, to: NormVersion) -> EditionSwit
     for _ in 0..MAX_ROUNDS {
         let mut changed = false;
         for gap in new_gaps(&result.gaps, &baseline) {
-            if items.iter().any(|item| item.code == gap.code && item.path == gap.path) {
+            if items
+                .iter()
+                .any(|item| item.code == gap.code && item.path == gap.path)
+            {
                 continue;
             }
             let point = point_of(gap.code, &gap.path, from, to);
@@ -357,7 +370,9 @@ pub fn compare_project_editions(project: &Value, to: NormVersion) -> EditionSwit
 
     // Members the target has no route for and does not refuse.
     for point in SWITCH_POINTS {
-        let Some(has_route) = point.has_route else { continue };
+        let Some(has_route) = point.has_route else {
+            continue;
+        };
         if has_route(to.profile()) || !has_route(from.profile()) {
             continue;
         }
@@ -367,7 +382,10 @@ pub fn compare_project_editions(project: &Value, to: NormVersion) -> EditionSwit
             if let Some(nta) = candidate.get("ntaCalculation") {
                 member_paths(nta, "ntaCalculation", name, &mut paths);
             }
-            for path in paths.into_iter().filter(|path| switches::path_ends_with(path, input)) {
+            for path in paths
+                .into_iter()
+                .filter(|path| switches::path_ends_with(path, input))
+            {
                 if items.iter().any(|item| item.path == path) {
                     continue;
                 }
@@ -448,13 +466,20 @@ pub fn compare_project_editions(project: &Value, to: NormVersion) -> EditionSwit
     items.retain(|item| {
         !item.points.is_empty()
             || item.fix.automatic()
-            || !matches!(item.category, SwitchCategory::Refused | SwitchCategory::Required)
-            || remaining.iter().any(|gap| gap.code == item.code && gap.path == item.path)
+            || !matches!(
+                item.category,
+                SwitchCategory::Refused | SwitchCategory::Required
+            )
+            || remaining
+                .iter()
+                .any(|gap| gap.code == item.code && gap.path == item.path)
     });
-    for item in items
-        .iter_mut()
-        .filter(|item| matches!(item.category, SwitchCategory::Refused | SwitchCategory::Required))
-    {
+    for item in items.iter_mut().filter(|item| {
+        matches!(
+            item.category,
+            SwitchCategory::Refused | SwitchCategory::Required
+        )
+    }) {
         item.resolved_by_automatic_changes = !remaining
             .iter()
             .any(|gap| gap.code == item.code && gap.path == item.path);
@@ -487,14 +512,19 @@ mod tests {
 
     #[test]
     fn pointer_of_a_gap_path() {
-        assert_eq!(pointer_of("ntaCalculation.groundFloors[0].below.h"), "/ntaCalculation/groundFloors/0/below/h");
+        assert_eq!(
+            pointer_of("ntaCalculation.groundFloors[0].below.h"),
+            "/ntaCalculation/groundFloors/0/below/h"
+        );
         assert_eq!(pointer_of("a.b[2][3].c"), "/a/b/2/3/c");
     }
 
     #[test]
     fn the_same_edition_changes_nothing() {
-        let project: Value =
-            serde_json::from_str(include_str!("../../../training-data/nta8800-example-office.json")).unwrap();
+        let project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-office.json"
+        ))
+        .unwrap();
         let report = compare_project_editions(&project, project_edition(&project));
         assert!(report.items.is_empty(), "{:?}", report.items);
         assert!(report.switch_points.is_empty());

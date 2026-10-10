@@ -11,12 +11,36 @@ use std::collections::BTreeSet;
 
 /// The cases with the edition of their report.
 const CASES: [(&str, &str, &str); 6] = [
-    ("A", "2020+A1", include_str!("../../../training-data/nta8800-public-comparison-a.json")),
-    ("B", "2022", include_str!("../../../training-data/nta8800-public-comparison-b.json")),
-    ("C", "2023", include_str!("../../../training-data/nta8800-public-comparison-c.json")),
-    ("D", "2020+A1", include_str!("../../../training-data/nta8800-public-comparison-d.json")),
-    ("J", "2020+A1", include_str!("../../../training-data/nta8800-public-comparison-j.json")),
-    ("L", "2022", include_str!("../../../training-data/nta8800-public-comparison-l.json")),
+    (
+        "A",
+        "2020+A1",
+        include_str!("../../../training-data/nta8800-public-comparison-a.json"),
+    ),
+    (
+        "B",
+        "2022",
+        include_str!("../../../training-data/nta8800-public-comparison-b.json"),
+    ),
+    (
+        "C",
+        "2023",
+        include_str!("../../../training-data/nta8800-public-comparison-c.json"),
+    ),
+    (
+        "D",
+        "2020+A1",
+        include_str!("../../../training-data/nta8800-public-comparison-d.json"),
+    ),
+    (
+        "J",
+        "2020+A1",
+        include_str!("../../../training-data/nta8800-public-comparison-j.json"),
+    ),
+    (
+        "L",
+        "2022",
+        include_str!("../../../training-data/nta8800-public-comparison-l.json"),
+    ),
 ];
 
 type Key = (String, String);
@@ -56,15 +80,26 @@ fn check(name: &str, project: &Value, to: NormVersion) -> String {
     let listed: BTreeSet<Key> = report
         .items
         .iter()
-        .filter(|item| matches!(item.category, SwitchCategory::Refused | SwitchCategory::Required))
+        .filter(|item| {
+            matches!(
+                item.category,
+                SwitchCategory::Refused | SwitchCategory::Required
+            )
+        })
         .map(|item| (item.code.clone(), item.path.clone()))
         .collect();
-    for key in first.iter().filter(|(code, _)| code == "route_not_in_edition") {
+    for key in first
+        .iter()
+        .filter(|(code, _)| code == "route_not_in_edition")
+    {
         assert!(listed.contains(key), "{label}: {key:?} not listed");
     }
     // Every listed refusal or requirement is traced to a switch point.
     for item in &report.items {
-        if matches!(item.category, SwitchCategory::Refused | SwitchCategory::Required) {
+        if matches!(
+            item.category,
+            SwitchCategory::Refused | SwitchCategory::Required
+        ) {
             assert!(
                 !item.points.is_empty(),
                 "{label}: {} at {} has no switch point",
@@ -78,7 +113,12 @@ fn check(name: &str, project: &Value, to: NormVersion) -> String {
     let open: BTreeSet<Key> = report
         .items
         .iter()
-        .filter(|item| matches!(item.category, SwitchCategory::Refused | SwitchCategory::Required))
+        .filter(|item| {
+            matches!(
+                item.category,
+                SwitchCategory::Refused | SwitchCategory::Required
+            )
+        })
         .filter(|item| !item.resolved_by_automatic_changes)
         .map(|item| (item.code.clone(), item.path.clone()))
         .collect();
@@ -94,15 +134,30 @@ fn check(name: &str, project: &Value, to: NormVersion) -> String {
         .collect();
     assert_eq!(recalculated, remaining, "{label}: adjusted project");
     // The open items are never fixed automatically.
-    for item in report.items.iter().filter(|item| !item.resolved_by_automatic_changes) {
-        if matches!(item.category, SwitchCategory::Refused | SwitchCategory::Required) {
-            assert!(!item.fix.automatic(), "{label}: {} left open with an automatic fix", item.path);
+    for item in report
+        .items
+        .iter()
+        .filter(|item| !item.resolved_by_automatic_changes)
+    {
+        if matches!(
+            item.category,
+            SwitchCategory::Refused | SwitchCategory::Required
+        ) {
+            assert!(
+                !item.fix.automatic(),
+                "{label}: {} left open with an automatic fix",
+                item.path
+            );
         }
     }
     format!(
         "{label}: {} items ({} automatic), {} open, status {}",
         report.items.len(),
-        report.items.iter().filter(|item| item.fix.automatic()).count(),
+        report
+            .items
+            .iter()
+            .filter(|item| item.fix.automatic())
+            .count(),
         remaining.len(),
         report.status_after_automatic_changes
     )
@@ -150,8 +205,10 @@ fn a_panel_route_without_its_member_is_left_to_the_adviser() {
     // 2020+A1 has no PV panel route (point 68). Dropping the panel power
     // would leave `peakPower.method: panels` without its member, so the
     // choice stays with the adviser.
-    let office: Value =
-        serde_json::from_str(include_str!("../../../training-data/nta8800-example-office.json")).unwrap();
+    let office: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-example-office.json"
+    ))
+    .unwrap();
     let report = compare_project_editions(&office, NormVersion::V2020A1);
     let panel = report
         .items
@@ -160,7 +217,10 @@ fn a_panel_route_without_its_member_is_left_to_the_adviser() {
         .expect("panel power listed");
     assert_eq!(panel.points, vec!["68"]);
     assert!(!panel.fix.automatic());
-    assert!(report.adjusted_project.pointer("/ntaCalculation/pvSystems/0/peakPower/panelPeakPowerW").is_some());
+    assert!(report
+        .adjusted_project
+        .pointer("/ntaCalculation/pvSystems/0/peakPower/panelPeakPowerW")
+        .is_some());
 }
 
 #[test]
@@ -168,7 +228,9 @@ fn the_table_9_28_test_standard_is_set_to_the_target_edition() {
     // Case D's heat pump on the table 9.28 row, valid in 2025+C1.
     let mut d = in_edition(&case(3), NormVersion::V2025C1);
     let pointer = "/ntaCalculation/generator/forfait/highEfficiencyEvidence/testStandardEdition";
-    let slot = d.pointer_mut(pointer).expect("case D has a table 9.28 test report");
+    let slot = d
+        .pointer_mut(pointer)
+        .expect("case D has a table 9.28 test report");
     *slot = json!("NEN-EN 14511-2:2022");
     assert_test_standard(&d, pointer);
 }
@@ -182,7 +244,10 @@ fn assert_test_standard(project: &Value, pointer: &str) {
         .expect("test standard listed");
     assert_eq!(item.points, vec!["67a"]);
     assert_eq!(item.value, Some(json!("NEN-EN 14511-2:2007")));
-    assert_eq!(report.adjusted_project.pointer(pointer), Some(&json!("NEN-EN 14511-2:2007")));
+    assert_eq!(
+        report.adjusted_project.pointer(pointer),
+        Some(&json!("NEN-EN 14511-2:2007"))
+    );
 }
 
 #[test]
