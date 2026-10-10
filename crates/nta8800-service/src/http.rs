@@ -647,7 +647,7 @@ fn result_schema(op: &Operation) -> Value {
                     "points": { "type": "array", "items": { "type": "string" }, "description": "Switch point numbers" },
                     "subject": { "type": ["string", "null"] },
                     "fix": { "type": "string", "enum": ["drop", "switchOff", "set", "enter", "choose", "review"], "description": "drop, switchOff and set are applied in adjustedProject; the others are left to the adviser" },
-                    "value": { "description": "The value a set or switchOff writes" },
+                    "value": { "description": "The value a set or switchOff writes; with choose, the value the target edition asks for (named, never written: the table 9.28 test standard is evidence)" },
                     "resolvedByAutomaticChanges": { "type": "boolean" }
                 } }
             },
