@@ -103,10 +103,13 @@ fn fixtures_with_blanks_give_the_same_gaps() {
     );
 }
 
+/// A JSON pointer with its new value, or None to take the member out.
+type Edit<'a> = (&'a str, Option<Value>);
+
 /// Case H's NTA block (two zones, lists of objects inside lists of objects)
 /// with the edits applied: a pointer and its new value, or None to take the
 /// member out.
-fn case_h_with(edits: &[(&str, Option<Value>)]) -> Value {
+fn case_h_with(edits: &[Edit]) -> Value {
     let project: Value = serde_json::from_str(
         &std::fs::read_to_string(training_data().join("nta8800-public-comparison-h.json")).unwrap(),
     )
@@ -137,7 +140,7 @@ fn case_h_with(edits: &[(&str, Option<Value>)]) -> Value {
 #[test]
 fn list_shapes_give_the_same_gaps() {
     let null = || Some(Value::Null);
-    let cases: Vec<(&str, Vec<(&str, Option<Value>)>)> = vec![
+    let cases: Vec<(&str, Vec<Edit>)> = vec![
         (
             "first element",
             vec![("/zoneData/0/functionAreas/0/areaM2", null())],
@@ -201,7 +204,7 @@ fn list_shapes_give_the_same_gaps() {
 #[test]
 fn a_dropped_element_that_fails_on_its_own_falls_back() {
     let blank = ("/lighting/1/lightingZones/0/areaM2", Some(Value::Null));
-    let faults: Vec<(&str, (&str, Option<Value>))> = vec![
+    let faults: Vec<(&str, Edit)> = vec![
         (
             "unknown member",
             ("/lighting/0/lightingZones/1/bogus", Some(Value::from(1))),
