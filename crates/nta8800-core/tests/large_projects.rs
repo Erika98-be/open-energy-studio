@@ -585,7 +585,8 @@ fn dense_utility_building_calculates_within_budget() {
 /// elements that hold a blank) and checks it on the whole block, so its cost
 /// follows the blanks rather than the blanks times the block. Two hundred
 /// blanks in the dense building: 6,9 s in a debug build, 1,2 s in release
-/// (10 October 2026; 19,6 s in release before).
+/// (10 October 2026; 19,6 s in release before), 1,6 s in release since
+/// review 27 checks each blank on the whole block.
 #[test]
 fn blanks_in_a_dense_building_are_found_within_budget() {
     let project = with_blank_shadings(&in_edition(&dense_utility_building(), "2025+C1"), 200);
