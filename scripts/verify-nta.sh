@@ -64,6 +64,11 @@ if [ "${NTA_SKIP_MSRV:-0}" != "1" ]; then
     --manifest-path crates/nta8800-core/Cargo.toml
 fi
 
+step "frontend bundle"
+# Tauri's generate_context! needs ../dist, so a fresh checkout (or a release
+# from one) must build the frontend before the Tauri steps.
+npm run build
+
 step "Tauri check"
 cargo check --locked --manifest-path src-tauri/Cargo.toml --quiet
 
@@ -84,8 +89,5 @@ NTA_FORM_GUARD_OUT="$nta_form_guard_docs" \
 step "project-form states through the kernel"
 NTA_FORM_GUARD_DOCS="$(realpath "$nta_form_guard_docs")" \
   cargo test --locked --manifest-path crates/nta8800-core/Cargo.toml --quiet --test project_form_guard
-
-step "frontend bundle"
-npm run build
 
 printf '\nAll configured technical NTA gates passed; reference verification and attestation require separate evidence.\n'

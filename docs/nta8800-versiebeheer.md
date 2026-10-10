@@ -57,6 +57,21 @@ Eén ophoging per uitgaveronde volstaat: latere uitkomstwijzigingen vóór de vr
 
 Het archief staat in `release/<tag>/` (niet in git). Pushen van de tag en publiceren van het archief zijn een aparte, handmatige stap. `--dry-run` doet alles zonder commit en tag, en schrijft naar `release/dry-run-<tag>/`. Draai een echte vrijgave zonder `NTA_SKIP_MSRV`, zodat de MSRV-stap in het gate-log staat.
 
+### Uitgave 0.3.0 / rekenkern 0.4.0 — stappen
+
+Op 10 oktober 2026 is deze uitgave als proef doorlopen: programmaversie opgehoogd naar 0.3.0 en `scripts/release-nta.sh --dry-run` met de Rust 1.77.2-stap. Dat leverde `release/dry-run-oes-v0.3.0-kernel-v0.4.0/` op met `handleiding-nta8800-0.3.0.html`, `Open Energy Studio_0.3.0_amd64.deb`, een leveringsdocument en testrapport met 0.3.0 / 0.4.0 en `SHA256SUMS`. De proef vond één fout: in een verse checkout liep de gate vast op de Tauri-stap omdat `dist/` nog niet bestond; de gate bouwt de frontend nu eerst.
+
+Stappen voor de echte uitgave, in deze volgorde, vanaf een schone `nta8800-kernel`:
+
+1. `node scripts/bump-version.js 0.3.0` — zet `package.json`, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` en `src-tauri/Cargo.lock` op 0.3.0.
+2. Werk de versietabel bij in `README.md`, `wiki/Home.md`, `wiki/Versiebeheer-en-releases.md` en `wiki/_Footer.md` (programma 0.3.0, rekenkern 0.4.0, handleiding gestempeld voor rekenkern 0.4.0, tag `oes-v0.3.0-kernel-v0.4.0`) en de voorbeeldwaarde in de tabel "Opbouw van het versienummer" hierboven.
+3. `git commit -am "Program version 0.3.0"` (met de gebruikelijke Co-Authored-By-regel als dat de werkwijze is).
+4. `scripts/release-nta.sh` — zonder `NTA_SKIP_MSRV`; dit draait de volledige gate, bouwt het `.deb`, zet de onuitgebrachte releasenotes onder "Rekenkern 0.4.0" (eigen commit) en maakt de lokale tag `oes-v0.3.0-kernel-v0.4.0`. Het archief komt in `release/oes-v0.3.0-kernel-v0.4.0/`.
+5. Schrijf `release/oes-v0.3.0-kernel-v0.4.0/github-release.md` (de tekst van de GitHub-release; het script maakt die niet), naar het voorbeeld van `release/oes-v0.2.0-kernel-v0.3.0/github-release.md`.
+6. `git push origin nta8800-kernel` en `git push origin oes-v0.3.0-kernel-v0.4.0` — vraagt GitHub-credentials; dat doet de gebruiker zelf.
+7. `gh release create oes-v0.3.0-kernel-v0.4.0 --verify-tag --prerelease --title "Open Energy Studio 0.3.0, NTA 8800 kernel 0.4.0" --notes-file release/oes-v0.3.0-kernel-v0.4.0/github-release.md release/oes-v0.3.0-kernel-v0.4.0/pakketten/*.deb release/oes-v0.3.0-kernel-v0.4.0/handleiding/*.html release/oes-v0.3.0-kernel-v0.4.0/leveringsdocument.md release/oes-v0.3.0-kernel-v0.4.0/testrapport.md release/oes-v0.3.0-kernel-v0.4.0/SHA256SUMS` — of maak de release via de GitHub-website. Daarna bouwt `.github/workflows/release.yml` de pakketten voor Windows en macOS (zie hieronder).
+8. Controleer in de Actions-run dat **verify** slaagt (tag = `oes-v<package.json>-kernel-v<KERNEL_VERSION>`).
+
 ### Na het pushen van de tag: GitHub Actions
 
 Een gepushte tag `oes-v*` (of een oude `v*`-tag) start `.github/workflows/release.yml`:
@@ -103,5 +118,5 @@ Een nieuwere programmaversie moet projecten van een oudere versie kunnen lezen, 
 - **Testresultaten per wijziging:**
   - de lokale gate `scripts/verify-nta.sh`, met Rust-tests, Clippy, de minimale Rust-versie, frontendtests en de productiebouw;
   - de vaste fuzz- en robuustheidstests;
-  - de referentiesuites in `training-data/reference-suites/` (openbare gevallen A–F, RVO-voorbeeldwoningen). Elke gate schrijft hun rapport, met commit, `KERNEL_VERSION` en SHA-256 per invoer en uitvoer, naar `nta-evidence/gate/reference/`; een vrijgave bewaart het in haar archief.
+  - de referentiesuites in `training-data/reference-suites/` (openbare gevallen A–N, RVO-voorbeeldwoningen, ISSO 54 versie 2.0). Elke gate schrijft hun rapport, met commit, `KERNEL_VERSION` en SHA-256 per invoer en uitvoer, naar `nta-evidence/gate/reference/`; een vrijgave bewaart het in haar archief.
 - **Nog niet aanwezig:** de EDR-testen van ISSO-publicatie 54 versie 5.0:2026 (BRL 9501 §4.2, p. 7), waarvan de uitkomsten bij elke vrijgave moeten worden bewaard. Zie het [attestdossier](nta8800-attestdossier.md).

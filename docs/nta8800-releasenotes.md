@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Proefuitgave 0.3.0 / rekenkern 0.4.0: gate bouwt de frontend vóór Tauri (geen rekenwijziging)
+
+- **Gate in een verse checkout.** `scripts/verify-nta.sh` bouwde de frontend pas als laatste stap, terwijl de Tauri-stappen `dist/` al nodig hebben (`generate_context!`). In een verse checkout, en dus bij `scripts/release-nta.sh` vanaf een schone clone, liep de gate daardoor vast. De stap "frontend bundle" staat nu vóór "Tauri check"; `src/__tests__/gate-order.test.ts` bewaakt die volgorde. De CI-workflows bouwden al vooraf en werken ongewijzigd.
+- **Stappenplan.** `docs/nta8800-versiebeheer.md` heeft nu de stappen voor de uitgave programma 0.3.0 / rekenkern 0.4.0, inclusief push en GitHub-release, na een proefrun met de opgehoogde versie (archief, handleiding, pakket en leveringsdocument droegen 0.3.0 / 0.4.0).
+
 ### 10 oktober 2026 — Review 31: programmaversie op één plek bijgehouden (geen rekenwijziging)
 
 - **Versie ophogen.** `npm run bump` (`scripts/bump-version.js`) zette de programmaversie in `package.json`, `tauri.conf.json` en `src-tauri/Cargo.toml`, maar niet in `src-tauri/Cargo.lock`. De gate bouwt met `--locked` en zou na het ophogen falen. Het script werkt nu ook de lockfile bij.
