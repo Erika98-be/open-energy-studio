@@ -224,7 +224,7 @@ fn a_panel_route_without_its_member_is_left_to_the_adviser() {
 }
 
 #[test]
-fn the_table_9_28_test_standard_is_set_to_the_target_edition() {
+fn the_table_9_28_test_standard_is_named_but_never_rewritten() {
     // Case D's heat pump on the table 9.28 row, valid in 2025+C1.
     let mut d = in_edition(&case(3), NormVersion::V2025C1);
     let pointer = "/ntaCalculation/generator/forfait/highEfficiencyEvidence/testStandardEdition";
@@ -243,11 +243,20 @@ fn assert_test_standard(project: &Value, pointer: &str) {
         .find(|item| item.code == "high_test_standard_invalid")
         .expect("test standard listed");
     assert_eq!(item.points, vec!["67a"]);
+    // The standard the target asks for is named ...
     assert_eq!(item.value, Some(json!("NEN-EN 14511-2:2007")));
+    // ... but the test report's own standard is evidence: the measured COPs
+    // were tested to it, so the switch never rewrites it.
+    assert!(!item.fix.automatic());
+    assert!(!item.resolved_by_automatic_changes);
     assert_eq!(
         report.adjusted_project.pointer(pointer),
-        Some(&json!("NEN-EN 14511-2:2007"))
+        project.pointer(pointer)
     );
+    assert!(report
+        .remaining_after_automatic_changes
+        .iter()
+        .any(|gap| gap.code == "high_test_standard_invalid"));
 }
 
 #[test]

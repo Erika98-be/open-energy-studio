@@ -8,6 +8,7 @@ import type { IProject } from '../core/energy/types';
 import office from '../../training-data/nta8800-example-office.json';
 import { renderWithProviders } from './test-utils';
 import { auditAccessibility } from './a11yAudit';
+import { ShellActionsProvider, type ShellActions } from '../components/shell/ShellActions';
 
 // Edition-switch guidance: a change of edition shows what the kernel then
 // refuses or requires (compare_project_editions) before anything is written.
@@ -64,9 +65,9 @@ function Host() {
 
 const draft = () => JSON.parse(screen.getByTestId('draft').textContent ?? '{}') as Record<string, any>;
 
-function stubKernel() {
+function stubKernel(make: () => EditionSwitchReport = report) {
   vi.stubEnv('DEV', true);
-  const fetchMock = vi.fn(async () => new Response(JSON.stringify(report())));
+  const fetchMock = vi.fn(async () => new Response(JSON.stringify(make())));
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
 }
@@ -130,5 +131,46 @@ describe('edition switch', () => {
     dialog = await screen.findByRole('dialog');
     fireEvent.click(await within(dialog).findByRole('button', { name: 'Change the edition only' }));
     await waitFor(() => expect(draft().normVersion).toBe('2023'));
+  });
+
+  // Review 29.
+  it('names the test standard the new edition asks for but leaves the evidence to the adviser', async () => {
+    stubKernel(() => ({
+      ...report(),
+      items: [{ category: 'refused', code: 'high_test_standard_invalid',
+        path: 'ntaCalculation.generator.forfait.highEfficiencyEvidence.testStandardEdition',
+        points: ['67a'], subject: 'beproeving hoge-COP-rij tabel 9.28', fix: 'choose', value: 'NEN-EN 14511-2:2007',
+        resolvedByAutomaticChanges: false }],
+      adjustedProject: { ...project, ntaCalculation: { ...base, normVersion: '2020+A1' } } as never,
+      remainingAfterAutomaticChanges: [{ code: 'high_test_standard_invalid',
+        path: 'ntaCalculation.generator.forfait.highEfficiencyEvidence.testStandardEdition' }],
+    }));
+    renderWithProviders(<Host />);
+    fireEvent.change(screen.getByLabelText(/NTA 8800 edition/), { target: { value: '2020+A1' } });
+    const dialog = await screen.findByRole('dialog');
+    expect(await within(dialog).findByText(/asks for NEN-EN 14511-2:2007\. This is evidence/)).toBeTruthy();
+    expect(within(dialog).queryByRole('button', { name: 'Adjust automatically and change' })).toBeNull();
+  });
+
+  it('goes to a field the new edition requires only after changing the edition', async () => {
+    stubKernel();
+    const navigate = vi.fn();
+    const actions = { navigate } as unknown as ShellActions;
+    renderWithProviders(<ShellActionsProvider value={actions}><Host /></ShellActionsProvider>);
+    fireEvent.change(screen.getByLabelText(/NTA 8800 edition/), { target: { value: '2020+A1' } });
+    const dialog = await screen.findByRole('dialog');
+    // A refused input is still there in the current edition: going there keeps it.
+    fireEvent.click(await within(dialog).findByRole('button', { name: /Go to ntaCalculation\.pvSystems\[0\]/ }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(draft().normVersion ?? '2025+C1').toBe('2025+C1');
+    expect(navigate).toHaveBeenLastCalledWith(expect.objectContaining({ focusPath: expect.stringContaining('panelPeakPowerW') }));
+    // The 8.47 wall height is only shown in 2022 and earlier: changing the edition first.
+    fireEvent.change(screen.getByLabelText(/NTA 8800 edition/), { target: { value: '2020+A1' } });
+    const again = await screen.findByRole('dialog');
+    fireEvent.click(await within(again).findByRole('button', { name: /Change only the edition and go to ntaCalculation\.groundFloors\[0\]/ }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(draft().normVersion).toBe('2020+A1');
+    expect(draft().pvSystems[0].peakPower.panelPeakPowerW).toBe(400);
+    expect(navigate).toHaveBeenLastCalledWith(expect.objectContaining({ focusPath: expect.stringContaining('wallHeightAboveGroundM') }));
   });
 });

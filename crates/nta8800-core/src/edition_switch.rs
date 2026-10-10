@@ -7,9 +7,12 @@
 //! until nothing new turns up:
 //! - a member the target refuses (`route_not_in_edition`) is dropped, or a
 //!   flag that switches the route on is switched off, unless dropping it
-//!   makes the member required;
-//! - the dated NEN-EN 14511-2 of a table 9.28 test report is set to the one
-//!   the target names.
+//!   makes the member required.
+//!
+//! The dated NEN-EN 14511-2 of a table 9.28 test report is evidence: it
+//! says what the measured COPs were tested to. It is never rewritten; the
+//! item names the standard the target asks for and leaves the choice (a
+//! report to that standard, or another table row) to the adviser.
 //!
 //! Required values are never invented; they stay listed. Every finding is
 //! traced to its switch point through [`crate::norm_versions::switches`].
@@ -47,7 +50,9 @@ pub enum SwitchFix {
     Drop,
     /// Switch the flag off (applied automatically).
     SwitchOff,
-    /// Set the member to `value` (applied automatically).
+    /// Set the member to `value` (applied automatically). No switch point
+    /// produces it at present: the one value that differs by edition, the
+    /// table 9.28 test standard, is evidence and is left to the adviser.
     Set,
     /// Enter a value; the kernel does not invent one.
     Enter,
@@ -180,7 +185,6 @@ fn automatic_fix(
     gap: &InputGap,
     point: Option<&SwitchPoint>,
     project: &Value,
-    to: NormVersion,
 ) -> Option<(SwitchFix, Option<Value>)> {
     let point = point?;
     if gap.path.ends_with(']')
@@ -194,16 +198,19 @@ fn automatic_fix(
     let pointer = pointer_of(&gap.path);
     let current = project.pointer(&pointer)?;
     match gap.code {
-        "high_test_standard_invalid" => {
-            let standard = to.profile().heat_pump_high_test_standard;
-            (current != standard).then(|| (SwitchFix::Set, Some(json!(standard))))
-        }
         "route_not_in_edition" => match current {
             Value::Bool(true) => Some((SwitchFix::SwitchOff, Some(json!(false)))),
             _ => Some((SwitchFix::Drop, None)),
         },
         _ => None,
     }
+}
+
+/// The value the target edition asks for, shown with a finding the adviser
+/// resolves (the table 9.28 test standard); never applied automatically.
+fn suggestion(gap: &InputGap, to: NormVersion) -> Option<Value> {
+    (gap.code == "high_test_standard_invalid")
+        .then(|| json!(to.profile().heat_pump_high_test_standard))
 }
 
 fn apply(project: &mut Value, path: &str, fix: SwitchFix, value: &Option<Value>) -> Option<Value> {
@@ -311,7 +318,7 @@ pub fn compare_project_editions(project: &Value, to: NormVersion) -> EditionSwit
             let automatic = if kept.contains(&gap.path) {
                 None
             } else {
-                automatic_fix(&gap, point, &candidate, to)
+                automatic_fix(&gap, point, &candidate)
             };
             let (fix, value) = match automatic {
                 Some((fix, value)) => {
@@ -322,7 +329,7 @@ pub fn compare_project_editions(project: &Value, to: NormVersion) -> EditionSwit
                     (fix, value)
                 }
                 None if is_required(gap.code) => (SwitchFix::Enter, None),
-                None => (SwitchFix::Choose, None),
+                None => (SwitchFix::Choose, suggestion(&gap, to)),
             };
             items.push(EditionSwitchItem {
                 category: if is_required(gap.code) {

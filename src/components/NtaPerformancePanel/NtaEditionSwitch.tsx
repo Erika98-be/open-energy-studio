@@ -81,9 +81,18 @@ export function EditionSwitchDialog({ draft, project, target, onCancel, onSwitch
   const open = report?.remainingAfterAutomaticChanges.length ?? 0;
   const adjusted = report?.adjustedProject.ntaCalculation as Draft | undefined;
   const goTo = shell ? (path: string) => { onCancel(); shell.navigate(routeForPath(path)); } : null;
-  const fixText = (item: EditionSwitchItem) => item.fix === 'set'
-    ? t('nta.editionSwitch.fix.set', { value: previewValue(item.value, locale) })
-    : t(`nta.editionSwitch.fix.${item.fix}`);
+  // A field the new edition requires is often only shown in that edition
+  // (the 8.47 wall height of 2022): going there first changes the edition.
+  const switchAndGoTo = shell ? (path: string) => { onSwitch(null); shell.navigate(routeForPath(path)); } : null;
+  const fixText = (item: EditionSwitchItem) => {
+    if (item.fix === 'set') return t('nta.editionSwitch.fix.set', { value: previewValue(item.value, locale) });
+    // A value the new edition asks for but that is evidence (the dated
+    // standard of a test report) is named, never written.
+    if (item.fix === 'choose' && item.value != null) {
+      return t('nta.editionSwitch.fix.chooseValue', { value: previewValue(item.value, locale) });
+    }
+    return t(`nta.editionSwitch.fix.${item.fix}`);
+  };
 
   return <Dialog title={t('nta.editionSwitch.title')} onClose={onCancel} width={760}
     footer={<>
@@ -117,9 +126,13 @@ export function EditionSwitchDialog({ draft, project, target, onCancel, onSwitch
               <div className="nta-form-note">
                 {fixText(item)}
                 {item.resolvedByAutomaticChanges && !AUTOMATIC_EDITION_FIXES.includes(item.fix) && <> {t('nta.editionSwitch.resolved')}</>}
-                {goTo && <> <button type="button" className="ui-btn ui-btn--ghost ui-btn--sm"
-                  aria-label={t('nta.editionSwitch.goToItem', { path: item.path })}
-                  onClick={() => goTo(item.path)}>{t('nta.editionSwitch.goTo')}</button></>}
+                {item.category === 'required'
+                  ? switchAndGoTo && <> <button type="button" className="ui-btn ui-btn--ghost ui-btn--sm"
+                    aria-label={t('nta.editionSwitch.switchAndGoToItem', { path: item.path })}
+                    onClick={() => switchAndGoTo(item.path)}>{t('nta.editionSwitch.switchAndGoTo')}</button></>
+                  : goTo && <> <button type="button" className="ui-btn ui-btn--ghost ui-btn--sm"
+                    aria-label={t('nta.editionSwitch.goToItem', { path: item.path })}
+                    onClick={() => goTo(item.path)}>{t('nta.editionSwitch.goTo')}</button></>}
               </div>
             </li>)}
           </ul>
