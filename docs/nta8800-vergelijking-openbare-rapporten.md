@@ -118,7 +118,7 @@ C is berekend volgens NTA 8800:2023; B valt in de periode van 2022 (zie [A, B en
 
 De test staat in `crates/nta8800-core/tests/public_comparison.rs` (`cases_b_and_c_under_nta_8800_2023`).
 
-De vragen over 10.15 en 10.87 staan in [nta8800-vragen-nen.md](nta8800-vragen-nen.md).
+De vragen over 10.15 en 10.87 (koeling), de luchtstroom van de forfaitaire ventilatorenergie (vraag 5, geval N) en de gemeenschappelijke ruimte bij tapwater en verlichting (vraag 6, geval H) staan in [nta8800-vragen-nen.md](nta8800-vragen-nen.md).
 
 ## A, B en D in hun eigen editie (7 oktober 2026)
 

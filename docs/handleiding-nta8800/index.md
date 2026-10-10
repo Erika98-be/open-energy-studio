@@ -11,16 +11,16 @@ Deze handleiding beschrijft het NTA 8800-deel van Open Energy Studio:
 - herlabelen;
 - het projectdossier.
 
-Ze is geschreven als programmadocumentatie voor een softwareattest (BRL 9501). Ze volgt de code van de branch `nta8800-kernel` per 9 oktober 2026, na het UI-herontwerp (werkstappen in plaats van het lint) en met de oudere uitgaven van NTA 8800 in de kern.
+Ze is geschreven als programmadocumentatie voor een softwareattest (BRL 9501). Ze volgt de code van de branch `nta8800-kernel` per 10 oktober 2026, na het UI-herontwerp (werkstappen in plaats van het lint) en met de oudere uitgaven van NTA 8800 in de kern.
 
 De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-documenten. Verwijzingen noemen alleen paragraaf-, formule-, tabel- en paginanummers. Houd de bronnen zelf bij de hand.
 
 ## Inhoud
 
-0. [Werken met het programma](00-werken-met-het-programma.md): welkomstscherm, werkstappen, Ctrl+K, contextpaneel, Controle en Ga naar, Basis/Alle velden, de toepasbalk, Gereedschap, thema's en sneltoetsen.
+0. [Werken met het programma](00-werken-met-het-programma.md): welkomstscherm, werkstappen, Ctrl+K, contextpaneel, Controle en Ga naar, Basis/Alle velden, de toepasbalk, Gereedschap, thema's, toegankelijkheid en sneltoetsen.
 1. [Reikwijdte en status](01-reikwijdte-en-status.md): wat het programma berekent, wat niet, en de attestering.
-2. [Basisopname](02-basisopname.md): woningen (ISSO 82.1) en utiliteitsgebouwen (ISSO 75.1), met rekenzones.
-3. [Projectberekening](03-projectberekening.md): het projectmodel en alle onderdelen van het NTA-invoerformulier.
+2. [Basisopname](02-basisopname.md): woningen (ISSO 82.1) en utiliteitsgebouwen (ISSO 75.1), met rekenzones, een geveldeel tegen de grond, en *Overnemen in projectmodel*, ook voor vloeren op de grond.
+3. [Projectberekening](03-projectberekening.md): het projectmodel, alle onderdelen van het NTA-invoerformulier en de gemeenschappelijke ruimten (6.6.4).
 4. [Uitvoer](04-uitvoer.md): indicatoren, label, Bbl-toets, energie per functie, meldingen en de bijlage met interpretaties.
 5. [Validatie en meldingen](05-validatie.md): statussen, gaten en waarschuwingen, invoergrenzen en het vangnet voor niet-eindige uitkomsten.
 6. [Maatwerkadvies](06-maatwerkadvies.md): sjablonen, handmatige wijzigingen, pakketten en het adviesrapport.
@@ -30,7 +30,7 @@ De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-document
    - de registratiegegevens en de dossierexport.
 8. [Versies en verwijzingen](08-versies-en-verwijzingen.md): kernversie, invoervingerafdruk, het bewaren van oudere builds en de overige documentatie.
 9. [Bestanden en uitwisseling](09-bestanden-en-uitwisseling.md): opslaan en openen van `.oes.json`, de voorbeeldprojecten, UNIEC3-export en -import en de exports onder Rapport & dossier › Exports.
-10. [Normversies](10-normversies.md): rekenen in NTA 8800:2025+C1, 2024, 2023, 2022 of 2020+A1, invoer per uitgave en waarom een oudere uitgave niet registreerbaar is.
+10. [Normversies](10-normversies.md): rekenen in NTA 8800:2025+C1, 2024, 2023, 2022 of 2020+A1, invoer per uitgave, het overzicht bij een wissel van uitgave en waarom een oudere uitgave niet registreerbaar is.
 
 ## Belangrijk vooraf
 
@@ -51,4 +51,7 @@ Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. Ze zijn g
 - de ketelhulpenergie en de WKK-omzettingsgetallen uit een kwaliteitsverklaring, en de gedeclareerde f_ctrl bij de ventilatie;
 - *Verklaringen voor het energielabel* (elementen k en l) in de stap Registratie;
 - de uitkomst bovenaan een onderdeel van de basisopname na **Opname doorrekenen**;
-- het venster *Handleiding* in de app.
+- het venster *Handleiding* in de app;
+- het overzicht bij een wissel van uitgave ([hoofdstuk 10](10-normversies.md));
+- *Gemeenschappelijke ruimte toevoegen (6.6.4)* bij de eigen gegevens van een rekenzone ([hoofdstuk 3](03-projectberekening.md));
+- *Vloeren op de grond* bij *Overnemen in projectmodel* ([hoofdstuk 2](02-basisopname.md)).

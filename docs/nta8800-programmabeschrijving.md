@@ -1,6 +1,6 @@
 # Globale beschrijving van het NTA 8800-rekenprogramma
 
-**Stand:** 9 oktober 2026, op `nta8800-kernel`.
+**Stand:** 10 oktober 2026, op `nta8800-kernel`.
 **Status:** werkdocument voor de attesteringsinstelling. Het programma is niet geattesteerd.
 
 BRL 9501 van 29-05-2026 vraagt bij de aanvraag naast de handleiding een globale beschrijving van het rekenprogramma (§3.0, p. 5). Dit is die beschrijving. Ze geeft het overzicht en verwijst voor de details naar de deeldocumenten in `docs/`. Eisen uit de BRL worden alleen met artikel en pagina genoemd.
@@ -50,9 +50,9 @@ De interface is alleen een invoer- en weergavelaag. Elke uitkomst die in een rap
 
 ## 4. Normversies en interpretaties
 
-- **Normversies.** De rekenkern rekent standaard volgens NTA 8800:2025+C1:2026, de aangewezen versie. Voor vergelijking en herberekening rekent ze ook volgens 2024, 2023, 2022 en 2020+A1. De verschillen staan als genummerde schakelpunten, met paginaverwijzingen, in [normversies](nta8800-normversies.md). Een oudere versie geeft status `calculated_legacy_edition` en is niet registreerbaar.
+- **Normversies.** De rekenkern rekent standaard volgens NTA 8800:2025+C1:2026, de aangewezen versie. Voor vergelijking en herberekening rekent ze ook volgens 2024, 2023, 2022 en 2020+A1. De verschillen staan als genummerde schakelpunten, met paginaverwijzingen, in [normversies](nta8800-normversies.md). Een oudere versie geeft status `calculated_legacy_edition` en is niet registreerbaar. Elk bronlabel in uitvoer, rapport en dossier noemt de berekende versie. Wie de versie van een project wisselt, krijgt eerst van de kern (`compare_project_editions`) wat de nieuwe versie weigert, eist, negeert of anders leest, elk met zijn schakelpunt; alleen veilige wijzigingen gaan automatisch. Op de openbare gevallen is elk verschil van meer dan 0,5 % tussen opeenvolgende versies herleid tot een schakelpunt.
 - **Interpretaties.** Waar de norm meer dan één lezing toelaat, legt de kern haar keuze vast in `kernel_interpretations()`. Die keuzes staan in elk gedetailleerd rapport.
-- **Open vragen aan NEN.** De open vragen, met name 10.15, 10.87 en f_prac, staan in [vragen aan NEN](nta8800-vragen-nen.md).
+- **Open vragen aan NEN.** De open vragen, met name 10.15, 10.87, f_prac, de luchtstroom van de forfaitaire ventilatorenergie (vraag 5) en de verdeling van gemeenschappelijke ruimten over tapwater en verlichting (vraag 6), staan in [vragen aan NEN](nta8800-vragen-nen.md).
 - **Vergelijking met andere programma's.** Hoe de uitkomsten zich verhouden tot die van andere programma's staat in de [vergelijking met openbare rapporten](nta8800-vergelijking-openbare-rapporten.md) en de [vergelijking met de RVO-voorbeeldwoningen](nta8800-vergelijking-rvo-voorbeeldwoningen.md).
 
 ## 5. Verificatie
@@ -60,16 +60,16 @@ De interface is alleen een invoer- en weergavelaag. Elke uitkomst die in een rap
 De gate `scripts/verify-nta.sh` loopt bij elke wijziging. Er wordt alleen vastgelegd als hij slaagt. Hij draait:
 
 - de unittests van de kern, met paginaverwijzingen naar de norm;
-- de differentiële tests tussen de normversies;
+- de differentiële tests tussen de normversies, de controle dat elk bronlabel de berekende versie noemt (`tests/edition_labels.rs`) en het overzicht bij een versiewissel (`tests/edition_switch.rs`);
 - de **optiedekkingstest** (`crates/nta8800-core/tests/option_coverage.rs`). Die leidt elke invoeroptie af uit de invoertypen zelf en rekent haar door in alle vijf normversies. Elke run moet rekenen of weigeren met een benoemde code met tekst, zonder paniek en zonder niet-eindige getallen.
 - de **openbare gevallen** A–N, waarvan H–L en N utiliteitsgebouwen (`tests/public_comparison.rs`), nagerekend in hun eigen normversie;
 - de **numerieke fuzz** (`tests/numeric_fuzz.rs`): elk getal uit de voorbeelden en openbare gevallen krijgt randwaarden, in alle vijf normversies, met controles op eindigheid, plausibiliteit en monotonie;
 - de **referentiesuites** (`reference_gate`): de openbare gevallen en de RVO-voorbeeldwoningen met een oordeel, en de gecodeerde ISSO 54-deeltesten (260 van 266, versie 2.0) die rekenen zonder verwachting (`pending_expectation`);
 - de **formulierbewaking**: ongeveer 2 400 toestanden van de projectformulieren en alle opnamesecties gaan door de kern; geen afgekeurde vorm, geen achtergebleven veld, elk gat met een route;
-- de robuustheidstests;
+- de robuustheidstests, de schaaltests (hoofdstuk 8) en de gelijkwaardigheid van de zoektocht naar lege velden met de oude zoektocht (`tests/blank_search_equivalence.rs`);
 - de service- en API-tests;
 - de tests van de desktop-opdrachten;
-- de frontendtests, waaronder de controle dat elke meldcode van de kern een Nederlandse en Engelse tekst heeft.
+- de frontendtests (139 bestanden), waaronder de controle dat elke meldcode van de kern een Nederlandse en Engelse tekst heeft, en een toegankelijkheidscontrole van alle NTA-formulieren en dialogen (namen, foutkoppeling, *Ga naar* en toetsenbord).
 
 Daarnaast zijn er:
 - **MSRV-test.** De kern wordt ook getest met Rust 1.77.2, de oudste ondersteunde versie.

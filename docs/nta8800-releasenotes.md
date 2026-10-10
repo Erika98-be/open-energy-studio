@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Documentatie bijgewerkt na het werk van 10 oktober (geen rekenwijziging)
+
+- **Testprotocol.** Niveau a noemt ~950 unittests van de kern, niveau k ruim 1 300 frontendtests in 139 bestanden. De tests van bronlabels per uitgave, het overzicht bij een uitgavewissel, het overnemen van vloeren op de grond, de toegankelijkheidscontrole en de doorlooptests van kern 0.4.0 staan in de lijsten. Acceptatietest H4 vraagt het overzicht bij een wissel van uitgave; nieuw is H18, de gemeenschappelijke ruimte (ook in het sjabloon van het testrapport).
+- **README en wiki.** Gemeenschappelijke ruimten, kelder en grond, opgegeven F_D;dayl, het overnemen van vloeren op de grond, een geveldeel tegen de grond, het overzicht bij een uitgavewissel, bronlabels per uitgave, de 46 bewerkingen van API en MCP, rekentijden en de NEN-vragen 5 en 6.
+- **Programmabeschrijving en BRL 9501-gereedheid.** Stand 10 oktober 2026, met de uitgavewissel, de schaal- en gelijkwaardigheidstests, de toegankelijkheidscontrole en de NEN-vragen 5 en 6 (E3).
+- **Handleiding.** De inhoudsopgave noemt de gemeenschappelijke ruimten, het overnemen van vloeren op de grond, toegankelijkheid en het overzicht bij een uitgavewissel, plus drie nog te maken schermafdrukken.
+
 ### 10 oktober 2026 — Review 29: uitgave wijzigen herschrijft geen bewijs meer (geen rekenwijziging)
 
 - **Beproevingsnorm van tabel 9.28 (punt 67a).** "Automatisch aanpassen" zette de gedateerde NEN-EN 14511-2 van een testrapport op de versie van de nieuwe uitgave. Die norm zegt volgens welke versie de gemeten COP's zijn bepaald; het testrapport verandert niet mee met de uitgave. Het overzicht noemt nu de norm die de nieuwe uitgave vraagt (`choose` met `value`), laat de invoer staan en laat de keuze (een rapport volgens die norm of een andere tabelrij) aan de adviseur. Test `the_table_9_28_test_standard_is_named_but_never_rewritten`.
