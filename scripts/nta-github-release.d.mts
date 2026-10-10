@@ -14,3 +14,4 @@ export function renderGithubRelease(values: {
   repoUrl?: string;
 }): string;
 export function githubUrl(remote: string): string;
+export function shortCommit(commit: string): string;
