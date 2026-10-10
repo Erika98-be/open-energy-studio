@@ -123,7 +123,7 @@ Waar de BRL een eis aan de **attesthouder als organisatie** stelt (hoofdstukken 
 
 ## 3. Wat BRL 9500 en MWA van de software vragen
 
-Het [attestdossier](nta8800-attestdossier.md) loopt BRL 9500-W/U, BRL 9500-MWA-W/U, het Bbl en de Omgevingsregeling per eis na. Daar staan de bronnen en de code. Samengevat staat het overgrote deel als "aanwezig", met deze uitzonderingen:
+Het [attestdossier](nta8800-attestdossier.md) loopt BRL 9500-W/U, BRL 9500-MWA-W/U, het Bbl en de Omgevingsregeling per eis na. Daar staan de bronnen en de code. De eisen aan de *uitvoer* (rapportage, rekenrapport, invoeroverzicht, EP-Online-overzicht, projectdossier, maatwerkadvies en leveringsdocument) staan per document in de [uitvoereisen](nta8800-uitvoereisen.md): 22 eisen, waarvan 20 voldaan, het attestnummer als plaatshouder "nog niet toegekend" en de XML-registratie extern (stand 10 oktober 2026). Samengevat staat het overgrote deel als "aanwezig", met deze uitzonderingen:
 
 | Eis | Status | Toelichting |
 |---|---|---|

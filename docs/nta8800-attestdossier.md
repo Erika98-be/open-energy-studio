@@ -29,6 +29,8 @@ Versie 2.0 is geen attestbewijs voor NTA 8800:2025+C1:2026. Gebruik haar hoogste
 
 ## Eisen uit BRL 9500-W/U, Bbl en Omgevingsregeling aan de software
 
+De eisen aan de uitvoer, per document (rapportage, rekenrapport, invoeroverzicht, EP-Online-overzicht, projectdossier, maatwerkadvies, leveringsdocument), staan in de [uitvoereisen](nta8800-uitvoereisen.md).
+
 Deze tabel volgt uit een leesanalyse van BRL 9500-W en -U van 29-05-2026 (de aangewezen versie; tekst en paginering gelijk aan het concept van 14-10-2025, alleen de datum en de NTA-verwijzing verschillen), BRL 9500-MWA-W/U van 24-03-2026 (in werking per 29-05-2026), het Besluit bouwwerken leefomgeving (art. 6.29) en de Omgevingsregeling (art. 5.11–5.14, bijlagen IX–Xa). Het Besluit en de Regeling energieprestatie gebouwen, waar eerdere versies van deze tabel naar verwezen, zijn per 1 januari 2024 ingetrokken; hun bepalingen staan sindsdien in het Bbl en de Omgevingsregeling. Op 5 oktober 2026 zijn de gebruikte bepalingen nagelopen tegen de officiële geconsolideerde teksten (Omgevingsregeling BWBR0045528 versie 2026-10-01, Bbl BWBR0041297 versie 2026-09-24): de klassegrenzen van bijlagen IX en X, de A0-waarden van bijlagen IXa en Xa (met de voorwaarden van art. 5.11/5.12 lid 5), het forfaitaire scenario voor woningen (art. 5.11 lid 4) en de kwaliteitsverklaringen voor utiliteit (art. 5.12 lid 4) komen overeen met de code. De eisen zijn in eigen woorden samengevat; de paginaverwijzingen gelden voor de W-versie, de U-versie volgt dezelfde paragrafen.
 
 | Eis (bron) | Status | Waar in de code |
