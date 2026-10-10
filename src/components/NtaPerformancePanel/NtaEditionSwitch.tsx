@@ -111,7 +111,7 @@ export function EditionSwitchDialog({ draft, project, target, onCancel, onSwitch
           <h4 id={`edition-switch-${category}`}>{t(`nta.editionSwitch.category.${category}`)}</h4>
           <ul className="nta-edition-switch__list">
             {items.map((item) => <li key={`${item.code} ${item.path}`}>
-              <KernelCode code={item.code} prefixes={['nta.editionSwitch.code.', 'nta.gap.', 'nta.warning.', 'kernel.issue.']} />
+              <KernelCode code={item.code} prefixes={['nta.gap.', 'nta.warning.', 'kernel.issue.']} />
               {' '}<code>{item.path}</code>
               {item.points.length > 0 && <small> {t('nta.editionSwitch.point', { points: item.points.join(', '), subject: item.subject ?? '' })}</small>}
               <div className="nta-form-note">
