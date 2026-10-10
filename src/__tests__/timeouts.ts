@@ -11,5 +11,11 @@
  */
 export const UI_WAIT_MS = 5000;
 
+/**
+ * Limit per test unless the test sets its own (vitest.config.ts). Heavy single-page tests such as
+ * the form coverage sweep take seconds alone and overran 20 s under heavy load.
+ */
+export const TEST_TIMEOUT_MS = 60_000;
+
 /** Limit for a whole workflow test that clicks and types through several pages. */
 export const SLOW_UI_TEST_MS = 180_000;

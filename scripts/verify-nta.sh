@@ -84,7 +84,7 @@ step "UI tests"
 nta_form_guard_docs="$nta_evidence_dir/form-guard/project-forms.jsonl"
 rm -f "$nta_form_guard_docs"
 NTA_FORM_GUARD_OUT="$nta_form_guard_docs" \
-  npx vitest run --testTimeout=20000 --maxWorkers="${NTA_VITEST_MAX_WORKERS:-4}"
+  npx vitest run --maxWorkers="${NTA_VITEST_MAX_WORKERS:-4}"
 
 step "project-form states through the kernel"
 NTA_FORM_GUARD_DOCS="$(realpath "$nta_form_guard_docs")" \
