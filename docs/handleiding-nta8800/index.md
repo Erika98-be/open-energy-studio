@@ -38,7 +38,7 @@ De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-document
 - Een energielabel ontstaat pas na registratie door een gecertificeerd adviseur (BRL 9500), met een geattesteerd rekenprogramma.
 - De voorbeeldprojecten in `training-data/` zijn fictief.
 
-## Nog te doen: schermafdrukken
+## Schermafdrukken
 
 Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste zijn gemaakt vóór 8 oktober 2026. Op 10 oktober 2026 kwamen erbij: het venster bij een wissel van uitgave (`uitgave-wisselen.png`, hoofdstuk 10), de gemeenschappelijke ruimte van een rekenzone (`gemeenschappelijke-ruimte.png`, hoofdstuk 3), *Vloeren op de grond* bij het overnemen van een opname (`overnemen-vloeren.png`, hoofdstuk 2) en de tabellen *Belemmering*, *Zonwering* en *Glas per raam* (`belemmering-per-raam.png`, `zonwering-per-raam.png`, `glas-per-raam.png`, hoofdstuk 3). Die tonen het onderdeel los, zonder de rest van het venster, met de voorbeeldprojecten of de openbare gevallen D en G uit `training-data/` en, bij de wissel van uitgave, een vastgelegd antwoord van de rekenkern. Later op 10 oktober 2026 kwamen er op dezelfde manier nog negen bij:
 - de melding "Oudere uitgave — niet voor registratie" onder Resultaten (`resultaten-oudere-uitgave.png`, hoofdstuk 10), met het vastgelegde antwoord van de rekenkern voor de voorbeeldtussenwoning in de uitgave 2022;
@@ -48,6 +48,4 @@ Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste
 - *Bron & bewijs* (`bron-en-bewijs.png`) en *Verklaringen voor het energielabel* (`verklaringen-label.png`, beide hoofdstuk 7);
 - het venster *Handleiding* (`handleiding-venster.png`, hoofdstuk 0).
 
-Voor deze onderdelen is nog geen schermafdruk:
-- de gedeclareerde f_ctrl bij de ventilatie: het veld zit in het ventilatieformulier en is niet los te tonen zonder het hele ventilatiesysteem;
-- de keuzelijst *Uitgave NTA 8800* in de stap Project; die staat in het algemene NTA-formulier en vraagt het hele venster.
+Nog later op 10 oktober 2026 kwamen op dezelfde manier de gedeclareerde f_ctrl bij het ventilatiesysteem (`fctrl-gedeclareerd.png`, hoofdstuk 3) en de keuzelijst *Uitgave NTA 8800* in het blok *Algemeen* (`uitgave-keuze.png`, hoofdstuk 10) erbij, beide met het voorbeeldkantoor. Daarmee heeft elk onderdeel een schermafdruk.

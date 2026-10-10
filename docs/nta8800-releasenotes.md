@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Laatste indelingspunten en de laatste schermafdrukken (geen rekenwijziging)
+
+- **Installaties › Overzicht.** Bij 1024 px liep de rij installatiekaarten door naar een tweede regel die met een losse "›" begon. Het scheidingsteken staat nu achter een kaart; een kaart aan het eind van een regel staat tegen de rand van de lijst, zodat zijn teken wegvalt.
+- **Bron & bewijs.** Een regel bevat het pad, de waarde, de bestandskeuze en **Ga naar**, maar het raster had drie kolommen; **Ga naar** stond daardoor op een eigen regel onder elk item. Het raster heeft nu vier kolommen.
+- **Opname overnemen.** In *Vloeren op de grond* liep "hoort bij" tegen de keuzelijst aan, en de opsommingstekens onder *Niet overgenomen* stonden buiten het venster. Beide zijn rechtgezet. Het venster is 720 px breed en ziet er bij 1024, 1280, 1366 en 1920 px gelijk uit.
+- **Handleiding.** Twee schermafdrukken erbij: de gedeclareerde f_ctrl bij het ventilatiesysteem (hoofdstuk 3) en de keuzelijst *Uitgave NTA 8800* (hoofdstuk 10). Daarmee heeft elk onderdeel in de lijst van de inhoudsopgave een schermafdruk.
+- **Controle.** `responsive-layout.test.ts` bewaakt het scheidingsteken en de vier kolommen van *Bron & bewijs*.
+
 ### 10 oktober 2026 — Indeling bij smalle en brede vensters (geen rekenwijziging)
 
 - **Bovenbalk onder 1280 px.** De documenttabs werden tot hun eerste letter samengedrukt en de knop voor een nieuw tabblad tot een stip. Zoeken, Opslaan en Herberekenen tonen daar nu alleen hun pictogram; hun tekst blijft de toegankelijke naam. De knop voor een nieuw tabblad krimpt niet meer.

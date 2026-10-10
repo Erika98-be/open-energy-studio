@@ -41,13 +41,14 @@
 .nta-evidence__badge { padding: 1px 8px; border-radius: 10px; border: 1px solid var(--warn); color: var(--warn-text); font-size: var(--fs-xs); }
 .nta-evidence__ok { color: var(--ok-text); font-size: var(--fs-xs); }
 .nta-evidence__list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.nta-evidence__list li { display: grid; grid-template-columns: minmax(0, 14rem) minmax(0, 1fr) auto; align-items: center; gap: var(--space-2); }
+/* Four parts per row: path, value, picker and "Ga naar" (with three columns "Ga naar" wrapped onto a row of its own). */
+.nta-evidence__list li { display: grid; grid-template-columns: minmax(0, 14rem) minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2); }
 .nta-evidence__list code { overflow: hidden; color: var(--fg-3); font-family: var(--font-mono); font-size: var(--fs-2xs); text-overflow: ellipsis; white-space: nowrap; }
 .nta-evidence__value { display: inline-flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; color: var(--fg-2); text-overflow: ellipsis; white-space: nowrap; }
 .nta-evidence__value svg { width: 14px; height: 14px; flex: none; }
 .nta-evidence__list li.filled .nta-evidence__value { color: var(--accent); }
 .nta-evidence__list li.open .nta-evidence__value { color: var(--warn-text); }
-@media (max-width: 720px) { .nta-evidence__list li { grid-template-columns: minmax(0, 1fr) auto; } .nta-evidence__list code { grid-column: 1 / -1; } }
+@media (max-width: 720px) { .nta-evidence__list li { grid-template-columns: minmax(0, 1fr) auto auto; } .nta-evidence__list code { grid-column: 1 / -1; } }
 
 /* "Geavanceerd · n secties — … · alle op standaard" */
 .nta-advanced { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-card); }

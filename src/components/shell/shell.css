@@ -336,10 +336,13 @@
 /* ── F5 Installaties (mockup 03) ───────────────────────────────────── */
 .chain-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); align-items: start; }
 .chain-card .ui-card__actions { display: flex; align-items: center; gap: 6px; }
-.chain-stages { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 22px; }
+/* The '›' between stages trails each stage. A stage that ends a row ends at the list's edge, so its
+   separator falls outside the 4px padding and is clipped: no stray '›' at the start of a wrapped row
+   (responsive audit, 1024 px). The padding keeps the focus ring visible. */
+.chain-stages { list-style: none; margin: -4px; padding: 4px; overflow: hidden; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 22px; }
 .chain-stages:empty { display: none; }
 .chain-stages li { position: relative; display: flex; min-width: 0; }
-.chain-stages li + li::before { content: '›'; position: absolute; left: -15px; top: 50%; transform: translateY(-50%); color: var(--fg-3); font-size: var(--fs-md); }
+.chain-stages li:not(:last-child)::after { content: '›'; position: absolute; right: -15px; top: 50%; transform: translateY(-50%); color: var(--fg-3); font-size: var(--fs-md); }
 .chain-stage { all: unset; box-sizing: border-box; flex: 1; min-width: 0; display: grid; gap: 3px; align-content: start; padding: 10px 12px; border-radius: var(--radius-sm);
   border: 1px solid var(--line); background: var(--surface-sunken); cursor: default; }
 .chain-stage--nta { cursor: pointer; border-style: dashed; }

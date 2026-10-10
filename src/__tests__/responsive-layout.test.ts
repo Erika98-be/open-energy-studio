@@ -11,6 +11,7 @@ const shell = read('components/shell/shell.css');
 const ui = read('components/ui/ui.css');
 const nta = read('components/NtaPerformancePanel/NtaPerformancePanel.css');
 const index = read('index.css');
+const ntaStep = read('components/shell/ntaStep.css');
 
 /** The declarations of the first rule whose selector list contains `selector`. */
 function declarations(css: string, selector: string): string {
@@ -68,5 +69,22 @@ describe('responsive layout', () => {
     const inner = declarations(index, '.dialog-field .ui-input .ui-input__control');
     expect(inner).toMatch(/border:\s*0/);
     expect(inner).toMatch(/background:\s*transparent/);
+  });
+  it('puts the separator after a stage, clipped at the end of a row', () => {
+    // At 1024 px the stage cards on Installaties › Overzicht wrapped with a stray '›' at the start of
+    // the second row. The separator now trails a stage; a stage that ends a row ends at the list's
+    // edge, so its separator falls outside the padding and is clipped.
+    expect(() => declarations(shell, '.chain-stages li + li::before')).toThrow();
+    const separator = declarations(shell, '.chain-stages li:not(:last-child)::after');
+    expect(separator).toMatch(/right:\s*-15px/);
+    const list = declarations(shell, '.chain-stages');
+    expect(list).toMatch(/overflow:\s*hidden/);
+    expect(list).toMatch(/padding:\s*4px/);
+    expect(list).toMatch(/margin:\s*-4px/);
+  });
+  it('keeps "Ga naar" on the row of its Bron & bewijs item', () => {
+    // A row holds path, value, picker and "Ga naar"; with three grid columns "Ga naar" wrapped onto a row of its own.
+    expect(declarations(ntaStep, '.nta-evidence__list li')).toMatch(/grid-template-columns:\s*minmax\(0, 14rem\) minmax\(0, 1fr\) auto auto/);
+    expect(declarations(media(ntaStep, '(max-width: 720px)'), '.nta-evidence__list li')).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) auto auto/);
   });
 });
