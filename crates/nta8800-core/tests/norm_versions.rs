@@ -445,6 +445,28 @@ fn example_projects_2020a1_differ_from_2022_only_where_the_editions_differ() {
     }
 }
 
+/// §5.5.8 f_BACS is new in 2025+C1: the warning that f_BACS 1,0 lacks the
+/// 290 kW evidence belongs to that edition only (edition-delta audit,
+/// 10 October 2026).
+#[test]
+fn bacs_evidence_warning_is_2025_only() {
+    const SPORTS_HALL: &str =
+        include_str!("../../../training-data/nta8800-public-comparison-k.json");
+    let warned = |edition: &str| {
+        let mut value: Value = serde_json::from_str(SPORTS_HALL).unwrap();
+        value["ntaCalculation"]["normVersion"] = json!(edition);
+        let result = assess_project_performance(&value);
+        result
+            .warnings
+            .iter()
+            .any(|warning| warning.code == "bacs_factor_without_capacity_evidence")
+    };
+    assert!(warned("2025+C1"));
+    for edition in ["2024", "2023", "2022", "2020+A1"] {
+        assert!(!warned(edition), "{edition}");
+    }
+}
+
 /// The 16.4b panel route is not in NTA 8800:2020+A1 (p. 651): the example
 /// panels become a declared K_pk of 200 W/m² over the same peak power.
 fn project_2020_compatible(json: &str, edition: &str) -> Value {
