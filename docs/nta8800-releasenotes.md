@@ -13,6 +13,21 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Verschillen per uitgave op de openbare gevallen nagelopen (geen rekenwijziging)
+
+- **Wat.** De openbare gevallen A–N, de voorbeeldprojecten en ISSO 54 EPW001/EPU001 zijn in alle vijf uitgaven doorgerekend. Elke afwijking van meer dan 0,5 % op een BENG-waarde tussen twee opeenvolgende uitgaven is herleid tot een schakelpunt; de tabel staat in [normversies](nta8800-normversies.md), "Verschillen per uitgave op de openbare gevallen". De genegeerde test `tests/edition_deltas.rs` maakt de tabel opnieuw.
+- **Geen rekenfout gevonden.** Elk verschil heeft een schakelpunt in de juiste uitgave en op de juiste post. Voorbeelden:
+  - de hulpenergie van 9.85 tussen 2020+A1 en 2022;
+  - f_sh;with = 0 bij handbediende zonwering vanaf 2024 (geval F, behoefte −9 %);
+  - f_τ van kleine woningen vanaf 2024 (geval M);
+  - de afgiftetabellen van 2024 (geval I, koelenergie +21 %).
+- **Melding f_BACS.** `bacs_factor_without_capacity_evidence` (§5.5.8) verscheen ook bij een berekening in 2024, 2023, 2022 of 2020+A1, die geen f_BACS kennen. De melding geldt nu alleen in 2025+C1.
+- **Reden van een geweigerde forfaitaire warmtepomp.** Wordt de tabelrij ongeldig, dan gaf de projectroute alleen `forfait_lookup_invalid` op `generator.forfait`. Nu staat er ook de oorzaak op het eigen veld, met "Ga naar" naar dat veld. Voorbeelden:
+  - `source_temperature_class_mismatch` op `sourceTemperatureC` (een grondwaterbron vraagt vanaf 2023 een brontemperatuur);
+  - `high_test_standard_invalid` op `testStandardEdition`.
+  Dat geldt ook voor de hybride warmtepomp.
+- **Testnorm van tabel 9.28 in het diagnosepaneel.** Het forfaitaire-COP-paneel schreef bij elke uitgave NEN-EN 14511-2:2022 in het testbewijs. NTA 8800:2020+A1 en 2022 noemen de versie van 2007 (2022 p. 14, 316), dus de kern weigerde de hoge-COP-rij daar altijd. Het paneel volgt nu de uitgave van het project. De meldingtekst en het label van het testrapport noemen geen jaartal meer vast.
+
 ### 10 oktober 2026 — Review 28: formulieren en rapporten sinds uitgave 0.3.0 (geen rekenwijziging)
 
 - **Getallen bij "Overnemen in projectmodel".** De voorvertoning en de koppeling van vloeren toonden getallen met een decimale punt (38.5); ze volgen nu de taal van het programma (38,5).

@@ -467,6 +467,45 @@ fn bacs_evidence_warning_is_2025_only() {
     }
 }
 
+/// A forfait heat pump that an edition switch makes invalid names the
+/// field, not only `forfait_lookup_invalid`: public case D (2020+A1,
+/// grondwater) needs a source temperature below 15 °C from 2023 (table 9.27
+/// source rows, 2023 p. 322), and a table 9.28 test report dated as the
+/// edition names it (edition-delta audit, 10 October 2026).
+#[test]
+fn edition_switch_names_the_forfait_field_it_invalidates() {
+    const HOLIDAY_HOME: &str =
+        include_str!("../../../training-data/nta8800-public-comparison-d.json");
+    let mut value: Value = serde_json::from_str(HOLIDAY_HOME).unwrap();
+    value["ntaCalculation"]["normVersion"] = json!("2023");
+    // Routes 2023 does not have (table 7.10 by kg/m², 13.6.3 f 1,5).
+    value["ntaCalculation"]["thermalMass"]
+        .as_object_mut()
+        .unwrap()
+        .remove("massKgPerM2");
+    value["ntaCalculation"]["hotWater"]["storage"][0]["electricBoilerInsulatedPipe"] = json!(false);
+    let result = assess_project_performance(&value);
+    let paths: Vec<(&str, &str)> = result
+        .gaps
+        .iter()
+        .map(|gap| (gap.code, gap.path.as_str()))
+        .collect();
+    assert!(
+        paths.contains(&(
+            "source_temperature_class_mismatch",
+            "ntaCalculation.generator.forfait.sourceTemperatureC"
+        )),
+        "{paths:?}"
+    );
+    assert!(
+        paths.contains(&(
+            "high_test_standard_invalid",
+            "ntaCalculation.generator.forfait.highEfficiencyEvidence.testStandardEdition"
+        )),
+        "{paths:?}"
+    );
+}
+
 /// The 16.4b panel route is not in NTA 8800:2020+A1 (p. 651): the example
 /// panels become a declared K_pk of 200 W/m² over the same peak power.
 fn project_2020_compatible(json: &str, edition: &str) -> Value {

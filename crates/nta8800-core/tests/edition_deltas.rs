@@ -7,24 +7,78 @@ use nta8800_core::project_performance::assess_project_performance;
 use serde_json::{json, Value};
 
 const PROJECTS: [(&str, &str); 18] = [
-    ("A", include_str!("../../../training-data/nta8800-public-comparison-a.json")),
-    ("B", include_str!("../../../training-data/nta8800-public-comparison-b.json")),
-    ("C", include_str!("../../../training-data/nta8800-public-comparison-c.json")),
-    ("D", include_str!("../../../training-data/nta8800-public-comparison-d.json")),
-    ("E", include_str!("../../../training-data/nta8800-public-comparison-e.json")),
-    ("F", include_str!("../../../training-data/nta8800-public-comparison-f.json")),
-    ("G", include_str!("../../../training-data/nta8800-public-comparison-g.json")),
-    ("H", include_str!("../../../training-data/nta8800-public-comparison-h.json")),
-    ("I", include_str!("../../../training-data/nta8800-public-comparison-i.json")),
-    ("J", include_str!("../../../training-data/nta8800-public-comparison-j.json")),
-    ("K", include_str!("../../../training-data/nta8800-public-comparison-k.json")),
-    ("L", include_str!("../../../training-data/nta8800-public-comparison-l.json")),
-    ("M", include_str!("../../../training-data/nta8800-public-comparison-m.json")),
-    ("N", include_str!("../../../training-data/nta8800-public-comparison-n.json")),
-    ("woning", include_str!("../../../training-data/nta8800-example-terraced-dwelling.json")),
-    ("kantoor", include_str!("../../../training-data/nta8800-example-office.json")),
-    ("EPW001", include_str!("../../../training-data/isso54/EPW001.json")),
-    ("EPU001", include_str!("../../../training-data/isso54/EPU001.json")),
+    (
+        "A",
+        include_str!("../../../training-data/nta8800-public-comparison-a.json"),
+    ),
+    (
+        "B",
+        include_str!("../../../training-data/nta8800-public-comparison-b.json"),
+    ),
+    (
+        "C",
+        include_str!("../../../training-data/nta8800-public-comparison-c.json"),
+    ),
+    (
+        "D",
+        include_str!("../../../training-data/nta8800-public-comparison-d.json"),
+    ),
+    (
+        "E",
+        include_str!("../../../training-data/nta8800-public-comparison-e.json"),
+    ),
+    (
+        "F",
+        include_str!("../../../training-data/nta8800-public-comparison-f.json"),
+    ),
+    (
+        "G",
+        include_str!("../../../training-data/nta8800-public-comparison-g.json"),
+    ),
+    (
+        "H",
+        include_str!("../../../training-data/nta8800-public-comparison-h.json"),
+    ),
+    (
+        "I",
+        include_str!("../../../training-data/nta8800-public-comparison-i.json"),
+    ),
+    (
+        "J",
+        include_str!("../../../training-data/nta8800-public-comparison-j.json"),
+    ),
+    (
+        "K",
+        include_str!("../../../training-data/nta8800-public-comparison-k.json"),
+    ),
+    (
+        "L",
+        include_str!("../../../training-data/nta8800-public-comparison-l.json"),
+    ),
+    (
+        "M",
+        include_str!("../../../training-data/nta8800-public-comparison-m.json"),
+    ),
+    (
+        "N",
+        include_str!("../../../training-data/nta8800-public-comparison-n.json"),
+    ),
+    (
+        "woning",
+        include_str!("../../../training-data/nta8800-example-terraced-dwelling.json"),
+    ),
+    (
+        "kantoor",
+        include_str!("../../../training-data/nta8800-example-office.json"),
+    ),
+    (
+        "EPW001",
+        include_str!("../../../training-data/isso54/EPW001.json"),
+    ),
+    (
+        "EPU001",
+        include_str!("../../../training-data/isso54/EPU001.json"),
+    ),
 ];
 
 pub const EDITIONS: [&str; 5] = ["2020+A1", "2022", "2023", "2024", "2025+C1"];
@@ -65,7 +119,9 @@ fn remove_path(value: &mut Value, path: &str) -> bool {
             None => steps.push((part.to_string(), None)),
         }
     }
-    let Some((last, last_index)) = steps.pop() else { return false };
+    let Some((last, last_index)) = steps.pop() else {
+        return false;
+    };
     let mut node = value;
     for (key, index) in steps {
         node = match index {
@@ -96,7 +152,10 @@ fn remove_path(value: &mut Value, path: &str) -> bool {
 fn portable(
     json: &str,
     edition: &str,
-) -> (nta8800_core::project_performance::ProjectPerformanceAssessment, Vec<String>) {
+) -> (
+    nta8800_core::project_performance::ProjectPerformanceAssessment,
+    Vec<String>,
+) {
     let mut value: Value = serde_json::from_str(json).unwrap();
     value["ntaCalculation"]["normVersion"] = json!(edition);
     let mut dropped = Vec::new();
@@ -154,7 +213,10 @@ fn portable(
             );
             if let Some(flag @ Value::Bool(true)) = value.pointer_mut(&pointer) {
                 *flag = Value::Bool(false);
-                dropped.push(format!("{} = false", path.trim_start_matches("ntaCalculation.")));
+                dropped.push(format!(
+                    "{} = false",
+                    path.trim_start_matches("ntaCalculation.")
+                ));
                 continue;
             }
             if remove_path(&mut value, path) {
@@ -173,7 +235,11 @@ thread_local! {
 fn run(json: &str, edition: &str) -> Result<Row, String> {
     let (result, dropped) = portable(json, edition);
     DROPPED.with(|cell| *cell.borrow_mut() = dropped);
-    let mut codes: Vec<String> = result.warnings.iter().map(|warning| warning.code.to_string()).collect();
+    let mut codes: Vec<String> = result
+        .warnings
+        .iter()
+        .map(|warning| warning.code.to_string())
+        .collect();
     if let Some(performance) = &result.performance {
         let p = serde_json::to_value(performance).unwrap();
         let mut out = Vec::new();
@@ -184,14 +250,38 @@ fn run(json: &str, edition: &str) -> Result<Row, String> {
     codes.dedup();
     WARNINGS.with(|cell| *cell.borrow_mut() = codes);
     let Some(performance) = result.performance.as_ref() else {
-        let codes: Vec<String> = result.gaps.iter().take(3).map(|gap| format!("{gap:?}")).collect();
+        let codes: Vec<String> = result
+            .gaps
+            .iter()
+            .take(3)
+            .map(|gap| format!("{gap:?}"))
+            .collect();
         return Err(format!("{}: {}", result.status, codes.join("; ")));
     };
     let p = serde_json::to_value(performance).unwrap();
-    if p.pointer("/primaryFossilIndicatorKwhPerM2Year").and_then(Value::as_f64).is_none() {
-        let gaps: Vec<String> = result.gaps.iter().take(3).map(|gap| format!("{gap:?}")).collect();
-        let issues: String = p.pointer("/issues").cloned().unwrap_or(Value::Null).to_string().chars().take(400).collect();
-        return Err(format!("{} without BENG: {} | issues {issues}", result.status, gaps.join("; ")));
+    if p.pointer("/primaryFossilIndicatorKwhPerM2Year")
+        .and_then(Value::as_f64)
+        .is_none()
+    {
+        let gaps: Vec<String> = result
+            .gaps
+            .iter()
+            .take(3)
+            .map(|gap| format!("{gap:?}"))
+            .collect();
+        let issues: String = p
+            .pointer("/issues")
+            .cloned()
+            .unwrap_or(Value::Null)
+            .to_string()
+            .chars()
+            .take(400)
+            .collect();
+        return Err(format!(
+            "{} without BENG: {} | issues {issues}",
+            result.status,
+            gaps.join("; ")
+        ));
     }
     let read = |key: &str| p.pointer(key).and_then(Value::as_f64).unwrap_or(f64::NAN);
     let mut services = Vec::new();
@@ -255,9 +345,15 @@ fn leaves(value: &Value, path: String, out: &mut Vec<(String, f64)>) {
 #[test]
 #[ignore = "prints the outputs that differ between two editions"]
 fn diff_two_editions() {
-    let Ok(spec) = std::env::var("EDITION_DIFF") else { return };
+    let Ok(spec) = std::env::var("EDITION_DIFF") else {
+        return;
+    };
     let parts: Vec<&str> = spec.split(',').collect();
-    let json = PROJECTS.iter().find(|(name, _)| *name == parts[0]).unwrap().1;
+    let json = PROJECTS
+        .iter()
+        .find(|(name, _)| *name == parts[0])
+        .unwrap()
+        .1;
     let filter = parts.get(3).copied().unwrap_or("");
     let outputs: Vec<Vec<(String, f64)>> = [parts[1], parts[2]]
         .iter()
@@ -265,14 +361,21 @@ fn diff_two_editions() {
             let (result, dropped) = portable(json, edition);
             println!("{edition}: {} dropped {dropped:?}", result.status);
             let mut out = Vec::new();
-            leaves(&serde_json::to_value(&result).unwrap(), String::new(), &mut out);
+            leaves(
+                &serde_json::to_value(&result).unwrap(),
+                String::new(),
+                &mut out,
+            );
             out
         })
         .collect();
-    let second: std::collections::HashMap<&str, f64> =
-        outputs[1].iter().map(|(path, number)| (path.as_str(), *number)).collect();
+    let second: std::collections::HashMap<&str, f64> = outputs[1]
+        .iter()
+        .map(|(path, number)| (path.as_str(), *number))
+        .collect();
     for (path, a) in &outputs[0] {
-        if !path.contains(filter) || path.contains("/months/") || path.contains("/monthly") {
+        let monthly = path.contains("/months/") || path.contains("/monthly");
+        if !path.contains(filter) || (monthly && parts.get(4) != Some(&"months")) {
             continue;
         }
         if let Some(b) = second.get(path.as_str()) {
@@ -288,14 +391,24 @@ fn diff_two_editions() {
 #[test]
 #[ignore = "prints the issues of one case in one edition"]
 fn probe_one_edition() {
-    let Ok(spec) = std::env::var("EDITION_PROBE") else { return };
+    let Ok(spec) = std::env::var("EDITION_PROBE") else {
+        return;
+    };
     let (name, edition) = spec.split_once(',').unwrap();
     let json = PROJECTS.iter().find(|(case, _)| *case == name).unwrap().1;
     let (result, dropped) = portable(json, edition);
     println!("{} dropped {dropped:?}", result.status);
     let value = serde_json::to_value(&result).unwrap();
-    for key in ["/gaps", "/warnings", "/performance/issues", "/performance/spaceHeating/issues"] {
-        println!("{key}: {}", value.pointer(key).cloned().unwrap_or(Value::Null));
+    for key in [
+        "/gaps",
+        "/warnings",
+        "/performance/issues",
+        "/performance/spaceHeating/issues",
+    ] {
+        println!(
+            "{key}: {}",
+            value.pointer(key).cloned().unwrap_or(Value::Null)
+        );
     }
 }
 
@@ -332,7 +445,11 @@ fn print_edition_delta_table() {
                         row.beng[2],
                         row.need,
                         services.join(", "),
-                        if flags.is_empty() { String::new() } else { format!(" |{flags}") }
+                        if flags.is_empty() {
+                            String::new()
+                        } else {
+                            format!(" |{flags}")
+                        }
                     );
                     DROPPED.with(|cell| {
                         let dropped = cell.borrow();
@@ -342,8 +459,10 @@ fn print_edition_delta_table() {
                     });
                     let codes = WARNINGS.with(|cell| cell.borrow().clone());
                     if let Some(prev) = &previous_codes {
-                        let added: Vec<&String> = codes.iter().filter(|code| !prev.contains(code)).collect();
-                        let removed: Vec<&String> = prev.iter().filter(|code| !codes.contains(code)).collect();
+                        let added: Vec<&String> =
+                            codes.iter().filter(|code| !prev.contains(code)).collect();
+                        let removed: Vec<&String> =
+                            prev.iter().filter(|code| !codes.contains(code)).collect();
                         if !added.is_empty() || !removed.is_empty() {
                             println!("         codes +{added:?} -{removed:?}");
                         }
