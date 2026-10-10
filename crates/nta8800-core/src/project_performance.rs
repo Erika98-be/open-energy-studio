@@ -2739,6 +2739,26 @@ fn confirm_reduced<T: serde::de::DeserializeOwned>(
             return None;
         }
     }
+    // The group check above only shows that some blank fails the whole
+    // block. Each blank must fail it on its own, as in the whole-block
+    // search: a list whose elements depend on a dropped element could make
+    // the reduced copy refuse a null the whole block accepts (review 27).
+    let blanks: Vec<&NullLeaf> = leaves
+        .iter()
+        .zip(&state.blank)
+        .filter(|(_, blank)| **blank)
+        .map(|(leaf, _)| leaf)
+        .collect();
+    if blanks.len() > 1 {
+        // In place and restored after each try: a copy of a large block per
+        // blank doubled the cost of the check.
+        let mut work = work;
+        for leaf in blanks {
+            if !put_back_fails(&mut work, leaf, &fails)? {
+                return None;
+            }
+        }
+    }
     Some(BlankSearch {
         paths: leaves
             .iter()
@@ -2748,6 +2768,42 @@ fn confirm_reduced<T: serde::de::DeserializeOwned>(
             .collect(),
         residual: state.search.residual,
     })
+}
+
+/// Whether `work` fails with this one null put back, tried in place: the
+/// leaf's value is taken out (or replaced by a null) and restored afterwards.
+/// A restored member may come back in another order in its object, which
+/// does not decide whether a derived input deserializes. None when the leaf
+/// is not where its steps say.
+fn put_back_fails(
+    work: &mut Value,
+    leaf: &NullLeaf,
+    fails: &impl Fn(&Value) -> bool,
+) -> Option<bool> {
+    let (last, parents) = leaf.steps.split_last()?;
+    let held = match (last, walk_mut(work, parents)?) {
+        // A removed null the repair left out: putting it back changes nothing.
+        (PathStep::Key(key), Value::Object(map)) if leaf.removed => match map.remove(key) {
+            Some(value) => value,
+            None => return Some(fails(work)),
+        },
+        (PathStep::Key(key), Value::Object(map)) => {
+            std::mem::replace(map.get_mut(key.as_str())?, Value::Null)
+        }
+        (PathStep::Index(index), Value::Array(items)) => {
+            std::mem::replace(items.get_mut(*index)?, Value::Null)
+        }
+        _ => return None,
+    };
+    let failed = fails(work);
+    match (last, walk_mut(work, parents)?) {
+        (PathStep::Key(key), Value::Object(map)) => {
+            map.insert(key.clone(), held);
+        }
+        (PathStep::Index(index), Value::Array(items)) => *items.get_mut(*index)? = held,
+        _ => return None,
+    }
+    Some(failed)
 }
 
 /// The blank search on the block as it is (see the design note above
@@ -6438,6 +6494,78 @@ mod tests {
             }
         }
         assert!(errors > 0);
+    }
+
+    /// Review 27: a list whose elements depend on an earlier element breaks
+    /// the reduced search's assumption (each element deserializes on its
+    /// own). No kernel input type has such a list; the confirmation on the
+    /// whole block must still keep the reduced search from reporting a gap
+    /// the whole block does not have.
+    #[test]
+    fn reduced_blank_search_holds_for_a_list_whose_elements_depend_on_each_other() {
+        #[derive(serde::Deserialize)]
+        #[allow(dead_code)]
+        struct Strict {
+            a: f64,
+            #[serde(default)]
+            open: bool,
+        }
+        #[derive(serde::Deserialize)]
+        #[allow(dead_code)]
+        struct Loose {
+            #[serde(default)]
+            a: Option<f64>,
+        }
+        /// Elements need `a` until one has `open: true`; after it `a` may be
+        /// left out.
+        struct Items;
+        impl<'de> serde::Deserialize<'de> for Items {
+            fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+                struct Elements;
+                impl<'de> serde::de::Visitor<'de> for Elements {
+                    type Value = Items;
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                        formatter.write_str("a list")
+                    }
+                    fn visit_seq<A: serde::de::SeqAccess<'de>>(
+                        self,
+                        mut seq: A,
+                    ) -> Result<Items, A::Error> {
+                        let mut open = false;
+                        loop {
+                            if open {
+                                if seq.next_element::<Loose>()?.is_none() {
+                                    break;
+                                }
+                            } else {
+                                match seq.next_element::<Strict>()? {
+                                    Some(element) => open = element.open,
+                                    None => break,
+                                }
+                            }
+                        }
+                        Ok(Items)
+                    }
+                }
+                deserializer.deserialize_seq(Elements)
+            }
+        }
+        #[derive(serde::Deserialize)]
+        #[allow(dead_code)]
+        struct Outer {
+            items: Items,
+            y: f64,
+        }
+        // The second element opens the list, so the blank `a` of the third
+        // is allowed; `y` is the only gap. The reduced copy drops the second
+        // element (it holds no null) and would call the third `a` a gap too.
+        let block = serde_json::json!({
+            "items": [{"a": 1.0}, {"a": 1.0, "open": true}, {"a": null}],
+            "y": null
+        });
+        let whole = blank_search_exhaustive::<Outer>(&block).search;
+        assert_eq!(whole.paths, ["y"]);
+        assert_eq!(blank_paths::<Outer>(&block), whole);
     }
 
     #[test]
