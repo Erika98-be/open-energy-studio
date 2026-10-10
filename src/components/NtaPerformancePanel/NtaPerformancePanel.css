@@ -21,6 +21,9 @@
 .nta-performance details { margin-top: 12px; }
 .nta-performance summary { cursor: pointer; font-weight: 600; }
 .nta-performance-table { overflow-x: auto; }
+/* The per-window tables sit in a section's field grid; they take the whole row
+   instead of one 200 px field column. */
+.nta-form-grid > .nta-performance-table { grid-column: 1 / -1; }
 .nta-performance table { border-collapse: collapse; margin-top: 8px; min-width: 100%; font-variant-numeric: tabular-nums; }
 .nta-performance th, .nta-performance td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: right; }
 .nta-performance th[scope="row"], .nta-performance thead th:first-child { text-align: left; }

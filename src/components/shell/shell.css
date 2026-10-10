@@ -72,7 +72,7 @@
 .top-bar .document-tab:hover:not(.active) { background: var(--surface-hover); }
 .top-bar .document-tab::after, .top-bar .document-tab.active::after { display: none; }
 .top-bar .document-tab-dirty { color: var(--accent); }
-.top-bar .document-tab-add { align-self: center; color: var(--fg-3); }
+.top-bar .document-tab-add { align-self: center; color: var(--fg-3); flex: none; }
 
 /* Dropdown menus (Bestand, Gereedschap) */
 .shell-menu {
@@ -259,6 +259,16 @@
   .top-bar-search { width: 200px; flex-basis: 200px; min-width: 120px; }
   .top-bar-brand { width: auto; }
   .top-bar-actions .ui-kbd { display: none; }
+}
+/* Below 1280 px the document tabs were squeezed to their first letter and the
+   new-tab button to a dot: search, Opslaan and Herberekenen become icon buttons.
+   Their text stays for screen readers (clipped, not removed). */
+@media (max-width: 1279px) {
+  .top-bar-search { width: auto; flex: none; min-width: 0; }
+  .top-bar .top-bar-label {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
 }
 @media (max-width: 1100px) {
   .overview-grid { grid-template-columns: minmax(0, 1fr); }
