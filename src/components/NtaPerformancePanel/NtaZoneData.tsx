@@ -67,7 +67,8 @@ export function CommonSpacesFields({ draft, change, base }: SectionProps & { bas
       return <fieldset key={index} className="nta-form-row"><legend>{t('nta.zoneData.commonSpace.title')}</legend>
         <NumberField {...field} path={[...base, index, 'areaM2']} label={t('nta.zoneData.commonSpace.area')} unit="m²" />
         <span className="nta-form-note">{t('nta.zoneData.commonSpace.served')}</span>
-        {USAGE_FUNCTIONS.map((key) => <label key={key} className="nta-form-check">
+        {/* A common space of a utility zone serves utility functions; a residential part is a separate calculation. */}
+        {FUNCTION_AREA_FUNCTIONS.map((key) => <label key={key} className="nta-form-check">
           <input type="checkbox" checked={served.includes(key)} onChange={(event) => {
             const next = event.target.checked ? [...served, key] : served.filter((item) => item !== key);
             change([...base, index, 'servedFunctions'], next.length > 0 ? next : undefined);

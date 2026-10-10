@@ -75,8 +75,12 @@ export function surveyTakeover(derived: BuildingPerformanceInput, current: Loose
 }
 
 /** A short display of a value in the diff preview. */
-export function previewValue(value: unknown): string {
+export function previewValue(value: unknown, locale?: string): string {
   if (value === undefined) return '—';
+  // A plain number follows the UI language (decimal comma in Dutch); objects stay JSON.
+  if (typeof value === 'number' && locale && Number.isFinite(value)) {
+    return value.toLocaleString(locale, { maximumFractionDigits: 6 });
+  }
   const text = typeof value === 'string' ? value : JSON.stringify(value);
   return text.length > 60 ? `${text.slice(0, 57)}…` : text;
 }

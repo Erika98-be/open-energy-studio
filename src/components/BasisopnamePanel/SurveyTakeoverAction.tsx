@@ -22,7 +22,7 @@ const MAX_ROWS = 60;
  * project floor the adviser pairs them with, value by value.
  */
 export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const shared = useNtaDraft();
   const { state } = useEnergy();
   const [open, setOpen] = useState(false);
@@ -96,8 +96,8 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
             <tbody>
               {preview.changes.slice(0, MAX_ROWS).map((row) => <tr key={row.path}>
                 <td><code>{row.path}</code></td>
-                <td>{previewValue(row.from)}</td>
-                <td>{previewValue(row.to)}</td>
+                <td>{previewValue(row.from, locale)}</td>
+                <td>{previewValue(row.to, locale)}</td>
               </tr>)}
             </tbody>
           </table>}
@@ -107,14 +107,14 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
           <h4>{t('opname.takeover.ground.title')}</h4>
           <p className="nta-form-note">{t('opname.takeover.ground.intro')}</p>
           {floors.map((floor) => <div key={floor.id} className="nta-form-row">
-            <label>{t('opname.takeover.ground.pair', { floor: floor.id, area: floor.areaM2 ?? '—' })}
+            <label>{t('opname.takeover.ground.pair', { floor: floor.id, area: floor.areaM2 == null ? '—' : previewValue(floor.areaM2, locale) })}
               <select value={pairs[floor.id] ?? ''} onChange={(event) => pair(floor.id, event.target.value || null)}>
                 <option value="">{t('opname.takeover.ground.none')}</option>
                 {surfaces.map((surface) => {
                   // One project floor takes one survey floor.
                   const other = floors.find((item) => item.id !== floor.id && pairs[item.id] === surface.id);
                   return <option key={surface.id} value={surface.id} disabled={other != null}>
-                    {`${surface.name} (${surface.areaM2} m²)`}
+                    {`${surface.name} (${previewValue(surface.areaM2, locale)} m²)`}
                     {other ? ` ${t('opname.takeover.ground.pairedElsewhere', { floor: other.id })}` : ''}
                   </option>;
                 })}
@@ -137,8 +137,8 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
                     <td><input type="checkbox" checked={accepted.has(item.key)} onChange={() => toggle(item.key)}
                       aria-label={t('opname.takeover.ground.acceptItem', { item: label })} /></td>
                     <td><code>{label}</code>{item.status === 'conflict' && <> <small>{t('opname.takeover.ground.conflict')}</small></>}</td>
-                    <td>{previewValue(item.from)}</td>
-                    <td>{item.to === undefined ? t('opname.takeover.ground.remove') : previewValue(item.to)}</td>
+                    <td>{previewValue(item.from, locale)}</td>
+                    <td>{item.to === undefined ? t('opname.takeover.ground.remove') : previewValue(item.to, locale)}</td>
                   </tr>;
                 })}
               </tbody>

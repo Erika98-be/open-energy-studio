@@ -84,6 +84,22 @@ function KindSelect({ draft, path, label, kinds, prefix, template, change, t }: 
 }
 
 /** Photos of one survey item (BRL 9500 Bijlage 3), linked by JSON pointer into the stored survey. */
+/**
+ * H1 and the floor of a façade part against the ground (ISSO 82.1 §8.4) only apply to a façade with
+ * boundary ground; once the element or boundary changes they are hidden, so they are dropped rather
+ * than kept out of sight in the survey (review 28).
+ */
+export function withoutStaleGroundWall(surface: Draft): Draft {
+  const next: Draft = { ...surface };
+  if (next.element === undefined) delete next.element;
+  const kind = (next.boundary as Draft | undefined)?.kind;
+  if (next.element !== 'facade' || kind !== 'ground') {
+    delete next.depthBelowGroundM;
+    delete next.groundFloorId;
+  }
+  return next;
+}
+
 export function SurveyPhotos({ path }: { path: Path }) {
   return <EvidenceAttach photo pointer={surveyPointer(path)} />;
 }
@@ -905,12 +921,13 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
         return <div key={index} className="opname-item" role="group" aria-label={String(surface.id ?? index)}>
           <strong>{String(surface.id ?? index)}</strong>
           <SelectField {...field} path={[...base, 'element']} label={t('opname.surface.element')}
-            options={opts(t, 'opname.surface.elementKind', ['facade', 'roof', 'floor'])} />
+            options={opts(t, 'opname.surface.elementKind', ['facade', 'roof', 'floor'])}
+            onChange={(_, value) => change(base, withoutStaleGroundWall({ ...surface, element: value }))} />
           <label>{t('opname.surface.boundary')}
             <select value={String(read(draft, [...base, 'boundary', 'kind']) ?? '')}
-              onChange={(event) => change([...base, 'boundary'], event.target.value === 'unheated_space'
+              onChange={(event) => change(base, withoutStaleGroundWall({ ...surface, boundary: event.target.value === 'unheated_space'
                 ? { kind: 'unheated_space', spaceId: String(unheatedSpaces[0]?.id ?? '') }
-                : { kind: event.target.value })}>
+                : { kind: event.target.value } }))}>
               {['outdoor',
                 // A roof has no ground route (NTA 8800 8.3; ISSO 82.1 §8.4 knows a floor and a façade part against the ground).
                 ...(read(draft, [...base, 'element']) !== 'roof' || read(draft, [...base, 'boundary', 'kind']) === 'ground' ? ['ground'] : []),

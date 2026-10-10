@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Review 28: formulieren en rapporten sinds uitgave 0.3.0 (geen rekenwijziging)
+
+- **Getallen bij "Overnemen in projectmodel".** De voorvertoning en de koppeling van vloeren toonden getallen met een decimale punt (38.5); ze volgen nu de taal van het programma (38,5).
+- **Kelderwand in de basisopname.** Werd een gevelvlak tegen de grond een ander element of kreeg het een andere grens, dan bleven H1 en de gekozen vloer verborgen in de opname staan. Ze vervallen nu met die wijziging.
+- **Gemeenschappelijke ruimte.** De lijst "bedient" bood ook de woonfunctie aan; een woongedeelte is een aparte berekening, dus de lijst biedt nu alleen utiliteitsfuncties, net als de functieoppervlakten.
+- **Nagelopen zonder bevinding.** Lijsten met index als sleutel (de getalvelden volgen hun waarde zodra ze niet bewerkt worden), leeg tegenover weggelaten in wat naar de kern gaat, opslaan en openen (het NTA-blok gaat ongewijzigd mee), ongedaan maken, de exportmelding voor Uniec 3/VABI (het NTA-blok staat al in de lijst), ontbrekende vertalingen (de bestaande i18n-toetsen) en HTML-escaping van bronvermeldingen in de rapporten.
+
 ### 10 oktober 2026 — Review 27: zoektocht naar lege velden strenger gecontroleerd op het hele blok (geen rekenwijziging)
 
 - **Gevonden.** De controle op het hele blok toetste alle gemelde lege velden alleen samen. Bij een lijst waarvan de elementen van elkaar afhangen (een element dat de volgende elementen andere regels geeft), kon de verkleinde kopie daardoor een leeg veld melden dat het hele blok toestaat. Een invoertype van de kern met zo'n lijst bestaat niet; de unittest `reduced_blank_search_holds_for_a_list_whose_elements_depend_on_each_other` maakt er een na en faalde.
