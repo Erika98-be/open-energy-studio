@@ -33,13 +33,14 @@ fn resolve(raw: &Value, suite_dir: &Path) -> ReferenceCase {
     let mut raw = raw.clone();
     let object = raw.as_object_mut().unwrap();
     let file = object.remove("projectFile").unwrap();
-    let patch: Vec<PatchStep> =
-        serde_json::from_value(object.remove("projectPatch").unwrap_or(Value::Array(vec![])))
-            .unwrap();
-    let mut project: Value = serde_json::from_slice(
-        &fs::read(suite_dir.join(file.as_str().unwrap())).unwrap(),
+    let patch: Vec<PatchStep> = serde_json::from_value(
+        object
+            .remove("projectPatch")
+            .unwrap_or(Value::Array(vec![])),
     )
     .unwrap();
+    let mut project: Value =
+        serde_json::from_slice(&fs::read(suite_dir.join(file.as_str().unwrap())).unwrap()).unwrap();
     apply_patch(&mut project, patch).unwrap();
     object.insert("project".into(), project);
     serde_json::from_value(raw).unwrap()
@@ -79,10 +80,16 @@ fn opened_project_files_calculate_as_the_suite() {
         let first = testset::calculate(&case.project);
         let text = testset::project_file(&case.project, &first);
         let opened = testset::open_project_file(&text).unwrap();
-        assert_eq!(opened, case.project, "{case_id}: the file holds the suite project");
+        assert_eq!(
+            opened, case.project,
+            "{case_id}: the file holds the suite project"
+        );
         let answer = testset::calculate(&opened);
         let stamp: Value = serde_json::from_str::<Value>(&text).unwrap()["kernel"].clone();
-        assert_eq!(answer["inputFingerprint"], stamp["inputFingerprint"], "{case_id}");
+        assert_eq!(
+            answer["inputFingerprint"], stamp["inputFingerprint"],
+            "{case_id}"
+        );
         assert_eq!(answer["kernelVersion"], stamp["kernelVersion"], "{case_id}");
         let performance = &answer["performance"];
         for (path, key) in [
@@ -99,13 +106,10 @@ fn opened_project_files_calculate_as_the_suite() {
         }
         checked.push(case_id);
     }
-    // EPW101a is not the first of its series; write or check it as well.
+    // A fixture outside the sample is written or checked here.
     for fixture in FIXTURES {
         if !checked.iter().any(|id| id == fixture) {
-            let raw = cases
-                .iter()
-                .find(|case| case["caseId"] == fixture)
-                .unwrap();
+            let raw = cases.iter().find(|case| case["caseId"] == fixture).unwrap();
             let case = resolve(raw, suite_dir);
             let text = testset::project_file(&case.project, &testset::calculate(&case.project));
             check_fixture(fixture, &text);
@@ -135,8 +139,7 @@ fn check_fixture(case_id: &str, text: &str) {
     .unwrap();
     let written: Value = serde_json::from_str(text).unwrap();
     assert_eq!(
-        kept["project"],
-        written["project"],
+        kept["project"], written["project"],
         "{case_id}: fixture is stale; rewrite it with NTA_WRITE_TESTSET_FIXTURE=1"
     );
     assert_eq!(kept["type"], written["type"]);
