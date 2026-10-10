@@ -26,6 +26,9 @@ pub struct SwitchPoint {
     /// Input members the switch acts on, as the trailing members of a gap
     /// path without indices (`area.method`, `wallHeightAboveGroundM`).
     pub inputs: &'static [&'static str],
+    /// Codes the switch point gives on an enclosing path (a requirement
+    /// reported on the floor rather than on its member).
+    pub codes: &'static [&'static str],
     /// The input keeps its place but means something else per edition
     /// (`biomassAbove500Kw`: above the edition's own threshold).
     pub reinterpreted: bool,
@@ -41,6 +44,7 @@ const fn values(points: &'static [&'static str], subject: &'static str, fields: 
         subject,
         fields,
         inputs: &[],
+        codes: &[],
         reinterpreted: false,
         has_route: None,
     }
@@ -57,6 +61,7 @@ const fn inputs(
         subject,
         fields,
         inputs,
+        codes: &[],
         reinterpreted: false,
         has_route: None,
     }
@@ -74,6 +79,7 @@ const fn routed(
         subject,
         fields,
         inputs,
+        codes: &[],
         reinterpreted: false,
         has_route: Some(has_route),
     }
@@ -137,7 +143,12 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
     inputs(&["35"], "f_sh;with woningen (7.6.6.1.4)", &["dwelling_shading_heating_off"], &["movableShading.control"]),
     values(&["36"], "restwarmte f_Pren (5.47)/(5.55)", &["residual_heat_pren_primary"]),
     inputs(&["37"], "lichtkoepels U_rc → U_C", &["rooflight_route"], &["elements"]),
-    routed(&["38"], "paneel-U naar bouwjaar (I.13/I.14)", &["panel_build_year_tables"], &["buildYear"], |p| p.panel_build_year_tables),
+    SwitchPoint {
+        codes: &["panel_build_year_required"],
+        ..routed(&["38"], "paneel-U naar bouwjaar (I.13/I.14)", &["panel_build_year_tables"], &["buildYear"], |p| {
+            p.panel_build_year_tables
+        })
+    },
     values(&["39"], "NEN 1087-factor zonder roosterspecificatie", &["unspecified_screen_factor"]),
     values(&["40"], "A_w;cros (11.77)", &["cross_area_roof_all_sectors"]),
     values(&["41"], "distributie verwarming 9.4", &["distribution_2024_rules"]),
@@ -159,19 +170,33 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
         &["cooling.emission.edition2023"],
         |p| p.cooling_emission_tables_2023,
     ),
-    inputs(
-        &["49", "51"],
-        "tabellen 9.27/9.29 en P.5",
-        &["heat_pump_tables_2022"],
-        &["designSupplyTemperatureC", "source", "efficiency.source", "efficiency.supplyTemperatureC"],
-    ),
+    SwitchPoint {
+        // From 2023 a (ground)water source needs its temperature class.
+        codes: &["source_temperature_class_mismatch"],
+        ..inputs(
+            &["49", "51"],
+            "tabellen 9.27/9.29 en P.5",
+            &["heat_pump_tables_2022"],
+            &[
+                "designSupplyTemperatureC",
+                "source",
+                "sourceTemperatureC",
+                "sourceTemperatureEvidenceReference",
+                "efficiency.source",
+                "efficiency.supplyTemperatureC",
+            ],
+        )
+    },
     inputs(&["52"], "flexmodus", &["flex_mode_route"], &["kind", "generators"]),
     values(&["54"], "bijgeplaatste preferente opwekker (9.58)", &["preference_beta_building_share"]),
     inputs(&["55"], "tabel 9.14 ontwerptemperatuurklassen", &["design_classes_60_and_70"], &["designTemperatureClass"]),
     inputs(&["56"], "ventilatorvermogen NEN-EN 16430", &["tested_emission_fan_power"], &["testedPowerW"]),
     inputs(&["57"], "tabel 7.5 onbekende kleur", &["unknown_shade_colour_rows"], &["colour"]),
     routed(&["58"], "tabel 7.10 naar massa per m²", &["thermal_mass_by_kg_per_m2"], &["massKgPerM2"], |p| p.thermal_mass_by_kg_per_m2),
-    inputs(&["59"], "hoogte h boven maaiveld (8.47)", &["crawl_wall_height_fixed"], &["wallHeightAboveGroundM"]),
+    SwitchPoint {
+        codes: &["ground_floor_wall_height_required"],
+        ..inputs(&["59"], "hoogte h boven maaiveld (8.47)", &["crawl_wall_height_fixed"], &["wallHeightAboveGroundM"])
+    },
     values(&["60"], "F_A;iso minerale-wolvlokken", &["mineral_wool_flakes_ageing"]),
     inputs(&["61"], "bekende hogere λ_equi (I.2)", &["lambda_equi_known_route"], &["knownLambdaEquivalent"]),
     inputs(&["62"], "zwembad (11.57)", &["swimming_pool_route"], &["swimmingPool"]),
@@ -188,7 +213,10 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
     routed(&["67"], "onderhoudsfactor MF tabel 14.4", &["lighting_maintenance_factor"], &["constantIlluminance"], |p| {
         p.lighting_maintenance_factor
     }),
-    inputs(&["67a"], "beproeving hoge-COP-rij tabel 9.28", &["heat_pump_high_test_standard"], &["testStandardEdition"]),
+    SwitchPoint {
+        codes: &["high_test_standard_invalid"],
+        ..inputs(&["67a"], "beproeving hoge-COP-rij tabel 9.28", &["heat_pump_high_test_standard"], &["testStandardEdition"])
+    },
     inputs(&["68"], "piekvermogen PV (16.4)", &["pv_kpk_per_m2_floor"], &["panelPeakPowerW", "peakPower.method"]),
     values(&["69"], "λ_equi;ntr (I.2)", &["lambda_equi_ntr"]),
     inputs(&["71"], "restwarmte bijlage P", &["residual_heat_fixed_factors"], &["auxiliarySpecific"]),
@@ -198,7 +226,10 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
         &["small_system_forfait_route"],
         &["distribution", "auxiliary", "network"],
     ),
-    values(&["73"], "β preferente opwekker onbekend", &["unknown_beta_route"]),
+    SwitchPoint {
+        codes: &["generator_power_required"],
+        ..values(&["73"], "β preferente opwekker onbekend", &["unknown_beta_route"])
+    },
     values(&["74"], "forfaitaire hulpenergie (9.85)", &["device_aux_a_from_2015_kwh", "heat_pump_aux_constants"]),
     values(&["75"], "f_systype E1 (11.142)", &["fan_systype_combined"]),
     inputs(&["76"], "tabellen I.1/I.2", &["psi_columns_and_default", "psi_detail_14"], &["column", "position"]),
@@ -256,11 +287,15 @@ pub fn path_ends_with(path: &str, suffix: &str) -> bool {
     members.len() >= wanted.len() && members[members.len() - wanted.len()..] == wanted[..]
 }
 
-/// The switch point between two editions an input path belongs to: of the
-/// switch points whose fields differ, the one with the longest matching
-/// input suffix.
-pub fn attribute(path: &str, a: NormVersion, b: NormVersion) -> Option<&'static SwitchPoint> {
-    switch_points_between(a, b)
+/// The switch point between two editions a finding belongs to: of the
+/// switch points whose fields differ, the one that names the code, else the
+/// one with the longest matching input suffix.
+pub fn attribute(code: &str, path: &str, a: NormVersion, b: NormVersion) -> Option<&'static SwitchPoint> {
+    let between = switch_points_between(a, b);
+    if let Some(point) = between.iter().find(|point| point.codes.contains(&code)) {
+        return Some(point);
+    }
+    between
         .into_iter()
         .filter_map(|point| {
             point
@@ -350,6 +385,7 @@ mod tests {
     #[test]
     fn attribution_takes_the_longest_input_suffix() {
         let point = attribute(
+            "route_not_in_edition",
             "ntaCalculation.cooling.emission.edition2023",
             NormVersion::V2023,
             NormVersion::V2025C1,
@@ -357,6 +393,7 @@ mod tests {
         .expect("attributed");
         assert_eq!(point.points, &["48"]);
         let point = attribute(
+            "route_not_in_edition",
             "ntaCalculation.groundFloors[0].below.wallHeightAboveGroundM",
             NormVersion::V2022,
             NormVersion::V2025C1,
@@ -364,10 +401,19 @@ mod tests {
         .expect("attributed");
         assert_eq!(point.points, &["59"]);
         assert!(attribute(
+            "route_not_in_edition",
             "ntaCalculation.groundFloors[0].below.wallHeightAboveGroundM",
             NormVersion::V2024,
             NormVersion::V2025C1,
         )
         .is_none());
+        let point = attribute(
+            "ground_floor_wall_height_required",
+            "ntaCalculation.groundFloors[0]",
+            NormVersion::V2025C1,
+            NormVersion::V2022,
+        )
+        .expect("attributed by code");
+        assert_eq!(point.points, &["59"]);
     }
 }

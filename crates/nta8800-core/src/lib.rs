@@ -44,6 +44,7 @@ pub mod declared_heating_table;
 pub mod diagnostic_reference;
 pub mod direct_transmission;
 pub mod domestic_hot_water;
+pub mod edition_switch;
 pub mod envelope_elements;
 pub mod epus_draft;
 pub mod final_energy_draft;
