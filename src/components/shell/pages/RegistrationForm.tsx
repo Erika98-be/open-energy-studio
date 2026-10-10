@@ -87,7 +87,12 @@ export function RegistrationForm() {
   };
   const conflicts = bagConflicts(ledgerEntry, readBagLedger());
   const software = registrationSoftware(registration, kernelVersion);
+  // Saving also restamps the program identity (Omgevingsregeling art. 5.14 lid 1 onder b), so a
+  // stored stamp from another kernel version is a change to save even with the fields unchanged.
+  const stampOutdated = stored?.software != null && kernelVersion != null
+    && JSON.stringify(stored.software) !== JSON.stringify(software);
   const dirty = useMemo(() => JSON.stringify(registration) !== JSON.stringify(stored ?? {}), [registration, stored]);
+  const canSave = dirty || stampOutdated;
   const formId = useId();
 
   const textInput = ({ key, type }: TextField) => (
@@ -278,12 +283,14 @@ export function RegistrationForm() {
       <div className="registration-form-actions" role="group" aria-label={t('registration.form.actions')}>
         {dirty
           ? <span className="registration-form-dirty">{t('registration.form.unsaved')}</span>
-          : <span id={`${formId}-clean`} className="registration-form-clean">{t('registration.form.nothingToSave')}</span>}
+          : stampOutdated
+            ? <span className="registration-form-dirty">{t('registration.form.stampOutdated')}</span>
+            : <span id={`${formId}-clean`} className="registration-form-clean">{t('registration.form.nothingToSave')}</span>}
         <Button type="button" variant="ghost" icon={<Undo2 aria-hidden="true" />} disabled={!dirty}
           onClick={() => setRegistration(stored ?? {})}>{t('registration.form.discard')}</Button>
         {/* Nothing changed, nothing to save (UX finding 8). */}
-        <Button type="submit" variant="primary" icon={<Save aria-hidden="true" />} disabled={!dirty}
-          aria-describedby={dirty ? undefined : `${formId}-clean`}>{t('registration.form.save')}</Button>
+        <Button type="submit" variant="primary" icon={<Save aria-hidden="true" />} disabled={!canSave}
+          aria-describedby={canSave ? undefined : `${formId}-clean`}>{t('registration.form.save')}</Button>
       </div>
     </form>
   );

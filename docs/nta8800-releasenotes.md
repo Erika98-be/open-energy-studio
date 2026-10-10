@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Review 30 van de UI-wijzigingen van 10 oktober (geen rekenwijziging)
+
+- **Brede keuzelijsten.** Een keuzelijst die alleen een andere optietekst krijgt (zonder dat de sectie opnieuw tekent) krijgt nu ook twee kolommen; de waarnemer kijkt naar tekstwijzigingen, niet alleen naar toegevoegde elementen.
+- **Meervoud.** De samenvatting bij het wisselen van uitgave ("1 punt", "3 punten") en het aantal warmtepompen op Installaties › Overzicht gebruiken nu meervoudsvormen in plaats van "punt(en)" en "warmtepomp(en)".
+- **Registratie opslaan.** Is de registratie opgeslagen met een andere rekenkernversie, dan blijft **Opslaan** beschikbaar en zegt de balk "Opgeslagen met een andere rekenkernversie; opslaan legt de huidige vast". Zonder dat bleef het oude programmakenmerk staan zolang er geen veld veranderde. **Verwerpen** blijft uit: er zijn geen gewijzigde velden.
+- Test: `src/__tests__/review30-ui.test.tsx`.
+
 ### 10 oktober 2026 — UX-bevindingen 1–9 uit de rondgang als nieuwe adviseur (geen rekenwijziging)
 
 - **Technische foutmelding:** de ruwe fout (bijvoorbeeld "Rust API: HTTP 500") staat achter een dichtgeklapte uitklapper *Technische details*; de Nederlandse melding zegt wat er is en wat je kunt doen.
