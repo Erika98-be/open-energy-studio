@@ -83,7 +83,8 @@ function Page({ example, step, sub }: { example: ExampleKind; step: StepId; sub?
 }
 
 /** Workflow pages; the 3D model needs WebGL and the manual is covered on its own. */
-const PAGES = [...WORKFLOW_STEPS, TOOL_STEP].flatMap((step) => (step.subs.length ? step.subs.map((sub) => ({ step: step.id, sub: sub.id })) : [{ step: step.id, sub: undefined }]))
+const PAGES: Array<{ step: StepId; sub?: string }> = [...WORKFLOW_STEPS, TOOL_STEP]
+  .flatMap((step): Array<{ step: StepId; sub?: string }> => (step.subs.length ? step.subs.map((sub) => ({ step: step.id, sub: sub.id })) : [{ step: step.id }]))
   .filter((page) => page.sub !== 'model3d' && page.sub !== 'manual');
 
 const root = resolve(__dirname, '../..');
