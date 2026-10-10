@@ -31,6 +31,7 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
   - de tabellen *Belemmering*, *Zonwering* en *Glas per raam* (hoofdstuk 3).
 - **Hoe gemaakt.** Elk onderdeel is los weergegeven met de voorbeeldprojecten of de openbare gevallen D en G, in Firefox zonder scherm. De wissel van uitgave toont een vastgelegd antwoord van de rekenkern op het voorbeeldkantoor (2025+C1 naar 2020+A1).
 - **Handleiding.** De afbeeldingen zitten in de HTML-handleiding en in het venster *Handleiding* in de app. De lijst "Nog te doen: schermafdrukken" in de inhoudsopgave is bijgewerkt; de overige onderdelen vragen het volledige venster met een rekenkern en staan er nog.
+- **Opnieuw gemaakt na de leesbare waarden.** `overnemen-vloeren.png` toont de afgeronde waarden en de verwarmde kelder per onderdeel, `zonwering-per-raam.png` de naam van de zonwering ("Screen buiten, donker …") in plaats van `dark`. In de tabel *Vloeren op de grond* breekt een afgerond getal niet meer over twee regels (3,87 stond als "3,8 / 7").
 
 ### 10 oktober 2026 — Documentatie bijgewerkt na het werk van 10 oktober (geen rekenwijziging)
 

@@ -128,4 +128,6 @@
 .opname-takeover__diff td { overflow-wrap: anywhere; }
 .opname-takeover__ground-table th[scope='row'] { min-width: 14em; font-weight: normal; }
 .opname-takeover__ground-table td:first-child { width: 1%; }
+/* A rounded number never splits over two lines (3,87 showed as "3,8 / 7"). */
+.opname-takeover__ground-table td { overflow-wrap: break-word; }
 .opname-takeover__value { margin: 0; padding: 0; list-style: none; }
