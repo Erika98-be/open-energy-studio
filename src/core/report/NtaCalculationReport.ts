@@ -263,7 +263,7 @@ export function generateNtaCalculationReportHTML(
     ${legacyEdition(assessment) ? `<div class="notice legacy-edition" role="note"><strong>Oudere uitgave — niet voor registratie.</strong>
     Berekend volgens ${escapeHtml(assessment.targetNormVersion)}. Alleen een berekening volgens de aangewezen uitgave (NTA 8800:2025+C1:2026) mag worden geregistreerd; deze uitkomst dient alleen ter vergelijking.</div>` : ''}
     <h2>Herleidbaarheid</h2><table><tbody>
-      <tr><th>Doeluitgave</th>${cell(assessment.targetNormVersion)}<th>Kernelversie</th>${cell(assessment.kernelVersion)}</tr>
+      <tr><th>Doeluitgave</th>${cell(assessment.targetNormVersion)}<th>Rekenkernversie</th>${cell(assessment.kernelVersion)}</tr>
       <tr><th>Status</th>${cell(assessment.status)}<th>Atteststatus</th>${cell(assessment.attestStatus)}</tr>
       <tr><th>Invoervingerafdruk</th><td colspan="3"><code>${escapeHtml(assessment.inputFingerprint)}</code></td></tr>
       ${assessment.geometry ? `<tr><th>A<sub>g</sub> / A<sub>ls</sub></th><td>${num(assessment.geometry.usableFloorAreaM2, 1)} / ${num(assessment.geometry.lossAreaM2, 1)} m²</td>

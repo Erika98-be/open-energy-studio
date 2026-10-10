@@ -189,7 +189,7 @@ function introduction(doc: ReportDocument, project: IProject, assessment: Projec
       <tr><th>Rekenroute</th>${td(scope)}<th>Bouwjaar</th>${td(assessment.labelData?.general.constructionYear ?? registration?.constructionYear ?? '—')}</tr>
       <tr><th>Soort opname</th>${td(registration?.surveyType === 'detailed' ? 'detailopname' : registration?.surveyType === 'basic' ? 'basisopname' : '—')}<th>Opdrachtgever</th>${td(registration?.client ?? '—')}</tr>`)
     + doc.table('Uitgangspunten van de berekening', '', `
-      <tr><th>Bepalingsmethode</th>${td(assessment.targetNormVersion)}<th>Rekenkern</th>${td(`Open Energy Studio, kernelversie ${assessment.kernelVersion}`)}</tr>
+      <tr><th>Bepalingsmethode</th>${td(assessment.targetNormVersion)}<th>Rekenkern</th>${td(`Open Energy Studio, rekenkernversie ${assessment.kernelVersion}`)}</tr>
       <tr><th>Status</th>${td(STATUS[assessment.status] ?? assessment.status)}<th>Attest</th>${td(assessment.attestStatus === 'unattested' ? 'niet geattesteerd (BRL 9501)' : assessment.attestStatus)}</tr>
       <tr><th>Datum rapport</th><td>${dutchTimeHtml(generatedAt)}</td><th>Invoervingerafdruk</th><td><code>${escapeHtml(assessment.inputFingerprint)}</code></td></tr>`)
     + `<div class="notice"><strong>Onverifieerde berekening — geen officieel energielabel${attest.attested ? '' : ', niet geattesteerd'}.</strong>
@@ -851,7 +851,7 @@ export function generateEnergyPerformanceReportHTML(project: IProject, assessmen
   }
   chapters += doc.chapter('versie', 'Versie en herleidbaarheid', doc.table('Versiegegevens', '', `
       <tr><th>Bepalingsmethode</th>${td(assessment.targetNormVersion)}</tr>
-      <tr><th>Kernelversie</th>${td(assessment.kernelVersion)}</tr>
+      <tr><th>Rekenkernversie</th>${td(assessment.kernelVersion)}</tr>
       <tr><th>Invoervingerafdruk</th><td><code>${escapeHtml(assessment.inputFingerprint)}</code></td></tr>
       <tr><th>Rapport gegenereerd</th><td>${dutchTimeHtml(generatedAt)}</td></tr>`)
     + (performance ? `<ul class="note">${[...new Set([...performance.spaceHeating.demand.omittedCorrections, ...performance.spaceHeating.omittedTerms])]
