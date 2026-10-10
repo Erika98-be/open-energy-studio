@@ -121,3 +121,11 @@
 .opname-panel .opname-section-outcome .opname-issues {
   margin: 0 0 8px;
 }
+
+/* Survey takeover: the label column keeps its room, values wrap instead of squeezing it. */
+.opname-takeover__diff { width: 100%; table-layout: auto; border-collapse: collapse; }
+.opname-takeover__diff th, .opname-takeover__diff td { vertical-align: top; padding: 2px 6px; text-align: left; }
+.opname-takeover__diff td { overflow-wrap: anywhere; }
+.opname-takeover__ground-table th[scope='row'] { min-width: 14em; font-weight: normal; }
+.opname-takeover__ground-table td:first-child { width: 1%; }
+.opname-takeover__value { margin: 0; padding: 0; list-style: none; }

@@ -134,6 +134,8 @@ describe('annex AA form', () => {
     await user.click(bedroom.getByLabelText('Living room, kitchen or dining room (double internal load)'));
     await user.click(bedroom.getByRole('button', { name: 'Add window' }));
     expect(bedroom.getByLabelText('Window')).toHaveValue('w-west');
+    // The window's orientation reads as a word, not its code.
+    expect((bedroom.getByLabelText('Window') as HTMLSelectElement).selectedOptions[0].textContent).toBe('Raam west · 1.50 m² · West');
     // Both windows are assigned now.
     expect(bedroom.getByText('Every project window is already assigned to a room.')).toBeInTheDocument();
 

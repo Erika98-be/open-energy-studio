@@ -29,6 +29,11 @@ interface NtaPerformancePanelProps {
 export function NtaPerformancePanel({ query: suppliedQuery }: NtaPerformancePanelProps = {}) {
   const { state, dispatch } = useEnergy();
   const { t, locale } = useI18n();
+  // Kernel carrier codes (el, gas, oil, bm, dh, dw, dc; table 5.2) with their name.
+  const carrierLabel = (code: string) => {
+    const text = t(`results.carrier.${code}`);
+    return text === `results.carrier.${code}` ? code : `${text} (${code})`;
+  };
   const project: IProject = state.project;
   const ownQuery = useKernelQuery(project, suppliedQuery === undefined);
   // The full form starts from the draft of the steps when it holds unapplied changes.
@@ -227,7 +232,7 @@ export function NtaPerformancePanel({ query: suppliedQuery }: NtaPerformancePane
               <thead><tr><th scope="col">{locale === 'nl' ? 'Energiedrager' : 'Energy carrier'}</th>
                 <th scope="col">{locale === 'nl' ? 'Finaal (kWh/jaar)' : 'Final (kWh/year)'}</th></tr></thead>
               <tbody>{performance.finalEnergyByCarrier.map((item) => <tr key={item.carrier}>
-                <th scope="row">{item.carrier}</th><td>{formatNumber(item.annualKwh, locale, 2)}</td>
+                <th scope="row">{carrierLabel(item.carrier)}</th><td>{formatNumber(item.annualKwh, locale, 2)}</td>
               </tr>)}</tbody>
             </table></div>}
           </details>}
@@ -235,7 +240,7 @@ export function NtaPerformancePanel({ query: suppliedQuery }: NtaPerformancePane
           <summary>{t('nta.performance.byService')}</summary>
           <div className="nta-performance-table"><table>
             <thead><tr><th scope="col">{t('nta.performance.byService.function')}</th>
-              {services.carriers.map((carrier) => <th scope="col" key={carrier}>{carrier}</th>)}
+              {services.carriers.map((carrier) => <th scope="col" key={carrier}>{carrierLabel(carrier)}</th>)}
               <th scope="col">{t('nta.performance.byService.primaryFossil')}</th>
               <th scope="col">{t('nta.performance.byService.renewable')}</th></tr></thead>
             <tbody>

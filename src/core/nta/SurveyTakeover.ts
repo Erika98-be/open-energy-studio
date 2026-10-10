@@ -85,6 +85,58 @@ export function previewValue(value: unknown, locale?: string): string {
   return text.length > 60 ? `${text.slice(0, 57)}…` : text;
 }
 
+/** Members whose values are fine (Ψ, U, ventilation openings, air changes) get three decimals. */
+const FINE_NUMBER = /(WPerMk|WPerM2k|PerHour|M2PerM)$/;
+
+/** A number for display: two decimals, three for fine members, in the UI language. */
+export function formatTakeoverNumber(value: number, locale?: string, key?: string): string {
+  if (!Number.isFinite(value)) return String(value);
+  const digits = key && FINE_NUMBER.test(key) ? 3 : 2;
+  return value.toLocaleString(locale ?? 'nl-NL', { maximumFractionDigits: digits });
+}
+
+/** One line of a ground-floor value: an optional member label and its text. */
+export interface TakeoverValueLine { label?: string; text: string }
+
+/**
+ * A ground-floor value as readable lines: numbers rounded (R_c, P, areas and
+ * depths to two decimals), enum values and member names through `label`
+ * (keys `key.<member>` and `value.<enum>`, falling back to the raw name),
+ * objects as one line per member, lists numbered. The source reference of a
+ * list item is left out; the project keeps it.
+ */
+export function groundValueLines(
+  value: unknown, locale: string | undefined, label: (key: string) => string | undefined, field?: string,
+): TakeoverValueLine[] {
+  const name = (member: string) => label(`key.${member}`) ?? member;
+  const text = (item: unknown, member?: string): string => {
+    if (item === undefined || item === null) return '—';
+    if (typeof item === 'number') return formatTakeoverNumber(item, locale, member);
+    if (typeof item === 'boolean') return label(`value.${item}`) ?? String(item);
+    if (typeof item === 'string') return label(`value.${item}`) ?? item;
+    if (Array.isArray(item)) return item.length === 0 ? (label('empty') ?? '—') : `${item.length} ×`;
+    return Object.entries(item as Record<string, unknown>)
+      .filter(([key]) => key !== 'sourceReference')
+      .map(([key, inner]) => `${name(key)} ${text(inner, key)}`).join('; ');
+  };
+  if (value === undefined || value === null || typeof value !== 'object') return [{ text: text(value, field) }];
+  if (Array.isArray(value)) {
+    if (value.length === 0) return [{ text: label('empty') ?? '—' }];
+    return value.map((item, index) => ({ label: `${index + 1}`, text: text(item) }));
+  }
+  const lines: TakeoverValueLine[] = [];
+  for (const [key, inner] of Object.entries(value as Record<string, unknown>)) {
+    if (key === 'sourceReference') continue;
+    if (Array.isArray(inner) && inner.some((item) => item && typeof item === 'object')) {
+      if (inner.length === 0) lines.push({ label: name(key), text: label('empty') ?? '—' });
+      inner.forEach((item, index) => lines.push({ label: `${name(key)} ${index + 1}`, text: text(item) }));
+    } else {
+      lines.push({ label: name(key), text: text(inner, key) });
+    }
+  }
+  return lines;
+}
+
 /*
  * Ground floors. The takeover leaves the geometry to the project, so the
  * survey's floors to the ground (perimeter P, crawlspace or unheated cellar,
