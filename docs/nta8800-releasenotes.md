@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Indeling bij smalle en brede vensters (geen rekenwijziging)
+
+- **Bovenbalk onder 1280 px.** De documenttabs werden tot hun eerste letter samengedrukt en de knop voor een nieuw tabblad tot een stip. Zoeken, Opslaan en Herberekenen tonen daar nu alleen hun pictogram; hun tekst blijft de toegankelijke naam. De knop voor een nieuw tabblad krimpt niet meer.
+- **Stappenbalk.** In een smal werkgebied liepen de verbindingslijnen door de namen van de stappen (Installaties › Verwarming bij 1024 px). Een stap krimpt niet meer onder zijn naam; de balk schuift horizontaal.
+- **Tabellen per raam.** *Belemmering per raam*, *Zonwering per raam* en *Glas per raam* stonden in één veldkolom van 200 px, ook bij 1920 px, met afgebroken raam- en vlaknamen. Ze nemen nu de hele breedte van het blok.
+- **Getalvelden in formulieren.** Een getalveld in een formulierregel (bijvoorbeeld Bouwjaar op Registratie) kreeg een tweede rand binnen de eigen rand. Het heeft nu één rand.
+- **Controle.** `responsive-layout.test.ts` bewaakt deze regels in de stijlbladen. De handmatige test H19 in het testprotocol doorloopt de schermen bij 1024, 1280, 1366 en 1920 px.
+
 ### 10 oktober 2026 — Plaatshouders in teksten en het welkomstscherm in smalle vensters (geen rekenwijziging)
 
 - **Melding na het openen van een oud herlabelproject.** De melding toonde letterlijk "{count}" en "{fields}" in plaats van het aantal gemarkeerde facturen en de nog in te vullen velden. De tekst gebruikt nu de plaatshouders die i18next invult.

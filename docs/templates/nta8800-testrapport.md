@@ -75,6 +75,7 @@ Het gatelog staat in `gate.log`, het referentierapport in `evidence/reference/`.
 | H16 | API | ☐ | |
 | H17 | MCP | ☐ | |
 | H18 | Gemeenschappelijke ruimte | ☐ | |
+| H19 | Vensterbreedtes | ☐ | |
 
 ## Afwijkingen
 
