@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Plaatshouders in teksten en het welkomstscherm in smalle vensters (geen rekenwijziging)
+
+- **Melding na het openen van een oud herlabelproject.** De melding toonde letterlijk "{count}" en "{fields}" in plaats van het aantal gemarkeerde facturen en de nog in te vullen velden. De tekst gebruikt nu de plaatshouders die i18next invult.
+- **Vaste controle op plaatshouders.** `i18n-placeholders.test.ts` leest elke `t()`-aanroep in de broncode. Hij faalt als een label met enkele accolades via `t()` wordt ingevuld, als een `{{naam}}` niet wordt meegegeven of een variabele niet wordt gebruikt, en als Nederlands, Engels of een andere taal andere plaatshouders heeft. `i18n-placeholders-rendered.test.tsx` toont elke NTA-sectie, elke werkstap, elk hoofdstuk van de handleiding en de rapporten in het Nederlands en het Engels, en faalt op elke zichtbare `{{…}}` of `{naam}`.
+- **Welkomstscherm in vensters smaller dan 1360 px.** Een regel voor smalle vensters zette de kolommen van het venster terug naar die van een open project. Het welkomstscherm kwam dan in de smalle navigatiekolom terecht. De regel voor het lege venster gaat nu altijd voor; `shell-empty-layout.test.ts` bewaakt dat.
+- **Handleiding.** De schermafdruk van het welkomstscherm (hoofdstuk 0) is opnieuw gemaakt: de huidige versie, de volle breedte en drie recente projecten.
+
 ### 10 oktober 2026 — Negen schermafdrukken erbij in de handleiding; versies in de melding van de handleiding (geen rekenwijziging)
 
 - **Schermafdrukken.** De handleiding toont nu ook de melding "Oudere uitgave — niet voor registratie" onder Resultaten, het formulier van bijlage AA, de voortgangslijst en de uitkomst van de basisopname, *ψ uit de leidinggegevens*, de ketelhulpenergie en WKK-omzettingsgetallen uit een kwaliteitsverklaring, *Bron & bewijs*, *Verklaringen voor het energielabel* en het venster *Handleiding*. De uitkomsten in de afbeeldingen zijn vastgelegde antwoorden van de rekenkern uit `training-data/`. Nog open: de gedeclareerde f_ctrl en de keuzelijst *Uitgave NTA 8800*.
