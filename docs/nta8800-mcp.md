@@ -57,6 +57,7 @@ Herstart daarna Claude Desktop.
     - Bij een weigering van de kern krijg je de beoordeling, met `status`, `gaps` en `issues`.
     - Een onbekende tool geeft `unknown_tool`.
     - Een onbekend lid naast het invoerlid en `normVersion` geeft `invalid_request_shape` met het pad van dat lid, zoals bij de HTTP-API.
+- **`compare_project_editions`:** hier is `normVersion` de doeluitgave; het project behoudt zijn eigen uitgave. De tool toont wat die uitgave weigert, extra vraagt, niet gebruikt of anders leest, met omschakelpunt, pad en aanpassing, plus het aangepaste project (zie [API, Uitgave wijzigen](nta8800-api.md#uitgave-wijzigen-compare_project_editions)).
 - **`resources/list` en `resources/read`:** zie hieronder. Een onbekende URI geeft de JSON-RPC-fout *resource not found*.
 
 Een tool die lang rekent, draait buiten de protocol-lus, zodat de server bereikbaar blijft.

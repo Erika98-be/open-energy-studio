@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Uitgave wijzigen met overzicht vooraf (geen rekenwijziging)
+
+- **Wat.** Wie de uitgave van een project wijzigt, ziet eerst wat de nieuwe uitgave weigert, extra vraagt, niet gebruikt of anders leest. Elke regel noemt de melding, het pad, het omschakelpunt uit `docs/nta8800-normversies.md` en de aanpassing, met **Ga naar**.
+- **Automatisch aanpassen.** Alleen veilige, mechanische aanpassingen: een geweigerd lid verwijderen, een keuze uitzetten, of de beproevingsnorm van tabel 9.28 op die van de uitgave zetten (punt 67a). Een lid dat daarna verplicht blijkt of waarvan het weglaten het blok onleesbaar maakt, blijft staan. Verplichte waarden worden nooit ingevuld. Wijzigen is één stap in het concept; ongedaan maken herstelt alles.
+- **Kern en service.** Nieuwe module `edition_switch.rs` rekent het project in beide uitgaven door en zet veilige aanpassingen door tot er niets nieuws meer komt. `norm_versions/switches.rs` koppelt elk veld van `NormProfile` aan één omschakelpunt; tests bewaken dat elk veld dat tussen uitgaven verschilt en elke genummerde rij van de documentatie een omschakelpunt heeft. Punt 18a (P.3 item 6) is als rij toegevoegd. Nieuwe route `POST /v1/nta8800/project/editions/compare`, MCP-tool en Tauri-opdracht `compare_project_editions`, met een resultaatschema in het OpenAPI-document.
+- **Pad van de 8.47-meldingen.** `route_not_in_edition` en `ground_floor_wall_height_required` van een vloer op grond staan nu op `groundFloors[i].below.wallHeightAboveGroundM` in plaats van op de hele vloer, zodat **Ga naar** het veld zelf vindt.
+- **Tests.** `tests/edition_switch.rs`: de openbare gevallen A, B, C, D, J en L van hun eigen uitgave naar 2025+C1 en terug, en beide voorbeelden tussen elk paar uitgaven. Elke weigering direct na de omschakeling staat in de lijst, elke regel heeft een omschakelpunt, en na de automatische aanpassingen blijft precies over wat de lijst aan de adviseur laat. Daarnaast `src/__tests__/nta-edition-switch.test.tsx` (venster, beide wijzigknoppen, ongedaan maken, onbereikbare kern, toegankelijkheid) en een API- en Tauri-test.
+
 ### 10 oktober 2026 — Verschillen per uitgave op de openbare gevallen nagelopen (geen rekenwijziging)
 
 - **Wat.** De openbare gevallen A–N, de voorbeeldprojecten en ISSO 54 EPW001/EPU001 zijn in alle vijf uitgaven doorgerekend. Elke afwijking van meer dan 0,5 % op een BENG-waarde tussen twee opeenvolgende uitgaven is herleid tot een schakelpunt; de tabel staat in [normversies](nta8800-normversies.md), "Verschillen per uitgave op de openbare gevallen". De genegeerde test `tests/edition_deltas.rs` maakt de tabel opnieuw.
