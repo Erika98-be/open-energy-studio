@@ -506,7 +506,7 @@ mod tests {
         assert_eq!(row.verdict.as_deref(), Some("buiten de band"));
         assert_eq!(row.expected[1].expected, json!("A"));
         assert!(!row.expected[1].within_tolerance);
-        assert!(csv(&[row.clone()]).contains("indicativeLabelClass=A"));
+        assert!(csv(std::slice::from_ref(&row)).contains("indicativeLabelClass=A"));
         assert!(markdown(&[row], &[]).contains("indicativeLabelClass A"));
     }
 
