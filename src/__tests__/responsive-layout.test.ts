@@ -11,6 +11,7 @@ const shell = read('components/shell/shell.css');
 const ui = read('components/ui/ui.css');
 const nta = read('components/NtaPerformancePanel/NtaPerformancePanel.css');
 const index = read('index.css');
+const ntaStep = read('components/shell/ntaStep.css');
 
 /** The declarations of the first rule whose selector list contains `selector`. */
 function declarations(css: string, selector: string): string {
@@ -80,5 +81,10 @@ describe('responsive layout', () => {
     expect(list).toMatch(/overflow:\s*hidden/);
     expect(list).toMatch(/padding:\s*4px/);
     expect(list).toMatch(/margin:\s*-4px/);
+  });
+  it('keeps "Ga naar" on the row of its Bron & bewijs item', () => {
+    // A row holds path, value, picker and "Ga naar"; with three grid columns "Ga naar" wrapped onto a row of its own.
+    expect(declarations(ntaStep, '.nta-evidence__list li')).toMatch(/grid-template-columns:\s*minmax\(0, 14rem\) minmax\(0, 1fr\) auto auto/);
+    expect(declarations(media(ntaStep, '(max-width: 720px)'), '.nta-evidence__list li')).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) auto auto/);
   });
 });
