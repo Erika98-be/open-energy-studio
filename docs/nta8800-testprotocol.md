@@ -60,7 +60,7 @@ CARGO_NET_OFFLINE=true NTA_SKIP_MSRV=1 scripts/verify-nta.sh   # zonder, voor tu
 | h | Robuustheid | Afwijkende en kapotte invoer, achtergehouden resultaten, null gelijk aan afwezig (`tests/robustness.rs`, `tests/null_as_absent.rs`), opname in alle uitgaven (`tests/survey_editions.rs`), overnemen van vloeren op de grond uit de opname (`tests/survey_takeover.rs`), opname- en formuliervormen (`tests/survey_form_shapes.rs`, `tests/project_form_shapes.rs`), bewijskoppelingen (`tests/evidence_link_registration.rs`) | `cargo test --locked --manifest-path crates/nta8800-core/Cargo.toml` | alle tests groen | gatelog | ~1 min |
 | i | Service, API en MCP | Operaties, foutmodel, gelijktijdigheid en wachtrij, time-outs, `Retry-After`, Host-controle, onbekende velden (`tests/api.rs`); MCP over stdio inclusief kapotte JSON-RPC (`tests/mcp_stdio.rs`); geheugengrens per verzoek (`tests/memory_bound.rs`) | `cargo test --locked --manifest-path crates/nta8800-service/Cargo.toml` | alle tests groen | gatelog | ~1 min |
 | j | Desktop-opdrachten | Kernopdrachten met uitgave en paniekafvang, atomair opslaan met `.bak`, recente bestanden na herstart (`src-tauri/src/lib.rs`, `src-tauri/src/project_files.rs`) | `cargo test --locked --manifest-path src-tauri/Cargo.toml --lib` | alle tests groen | gatelog | < 1 min |
-| k | Frontendtests (Vitest) | Ruim 1 300 tests in 139 bestanden in `src/__tests__/`; zie de lijst hieronder | `npx vitest run --testTimeout=20000 --maxWorkers=4` | alle tests groen | gatelog | 5–10 min |
+| k | Frontendtests (Vitest) | Ruim 1 300 tests in 139 bestanden in `src/__tests__/`; zie de lijst hieronder | `npx vitest run --maxWorkers=4` (limiet per test 60 s uit `vitest.config.ts`) | alle tests groen | gatelog | 5–10 min |
 | l | MSRV | De kern op Rust 1.77.2, de oudste ondersteunde versie | `cd crates/nta8800-core && CARGO_TARGET_DIR=target/msrv-core cargo +1.77.2 test --locked --offline` | alle tests groen | gatelog (stap "core on Rust 1.77.2") | ~3 min |
 | m | Versie- en handleidingstempel | Een uitkomstwijziging heeft een MINOR-stap van `KERNEL_VERSION`, uitgebrachte secties van de releasenotes zijn ongewijzigd, en de handleiding is gestempeld voor de huidige kern | `node scripts/nta-kernel-version.mjs check` en `node scripts/nta-manual.mjs check` | beide melden overeenstemming | gatelog (eerste twee stappen) | seconden |
 
@@ -69,6 +69,7 @@ CARGO_NET_OFFLINE=true NTA_SKIP_MSRV=1 scripts/verify-nta.sh   # zonder, voor tu
 - rustfmt en clippy (`-D warnings`) op kern en service;
 - de TypeScript-controle (`npx tsc --noEmit`);
 - de frontendbundel (`npm run build`), vóór de Tauri-stappen; CI roept alleen `scripts/verify-nta.sh` aan en bouwt de frontend niet apart (`ci-parity.test.ts`);
+- **bestand tegen belasting:** UI-tests wachten via gedeelde limieten in `src/__tests__/timeouts.ts` (findBy/waitFor 5 s, per test 60 s, werkstroomtests 180 s); tijdsbudgetten schalen met een basislijn uit dezelfde run (`large-project-ui.test.tsx`). Een test die alleen onder belasting faalt, is een fout in de test of de app en wordt niet opgelost door hem los opnieuw te draaien;
 - de stap "project-form states through the kernel": de documenten die de formulierbewaking schreef, gaan door `tests/project_form_guard.rs`.
 
 **Belangrijkste frontendtests (k):**

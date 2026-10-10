@@ -10,6 +10,7 @@ import { write, type Draft, type Path } from '../components/NtaPerformancePanel/
 import type { MwaPatchOperation } from '../core/nta/KernelClient';
 import { withoutNulls } from '../core/nta/KernelInput';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 type Body = (draft: Draft, change: (path: Path, value: unknown) => void) => ReactElement;
 
@@ -87,7 +88,7 @@ describe('annex P details without JSON editors', () => {
       method: 'calculated', sourceReference: '', vessels: [{ volumeL: 300 }], pipes: [{ lengthM: 10 }],
       exchanger: { nominalPowerKw: 150, insulated: true },
     });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits collective solar, flex and sorption generators and clears stale fields', async () => {
     const user = userEvent.setup();
@@ -132,7 +133,7 @@ describe('annex P details without JSON editors', () => {
     });
     await user.selectOptions(screen.getByLabelText('Heat source (table P.10)'), 'collective_heat');
     expect(withoutNulls(generator())).toEqual({ kind: 'sorption_chiller', heat: { source: 'collective_heat', sourceReference: '' } });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits an area PV system with the chapter 16 fields', async () => {
     const user = userEvent.setup();
@@ -153,7 +154,7 @@ describe('annex P details without JSON editors', () => {
     expect(current().externalSupply.areaElectricity[0].obstructionFactors).toEqual([]);
     await user.selectOptions(screen.getByLabelText('gebied-pv-1 — peak power P_pk'), 'table16_1');
     expect(current().externalSupply.areaElectricity[0].peakPower).toEqual({ method: 'table16_1', moduleType: null, panelAreaM2: null });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('lighting, floor edges and measure patches without JSON', () => {
@@ -194,7 +195,7 @@ describe('lighting, floor edges and measure patches without JSON', () => {
     });
     await user.click(screen.getByRole('button', { name: 'Add lighting zone' }));
     expect(current().lighting[0].lightingZones.map((item: Draft) => item.id)).toEqual(['lighting-1', 'lighting-2']);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('enters a declared F_D;dayl sector without a daylight control (NEN-EN 15193-1 annex F)', async () => {
     const user = userEvent.setup();
@@ -213,7 +214,7 @@ describe('lighting, floor edges and measure patches without JSON', () => {
         kind: 'declared', areaM2: 48, daylightDependencyFactor: 0.781, sourceReference: 'rapport 12',
       }],
     });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits the floor-edge ψ values of 8.36', async () => {
     const user = userEvent.setup();
@@ -224,7 +225,7 @@ describe('lighting, floor edges and measure patches without JSON', () => {
     await user.type(screen.getByLabelText('Edge part length ℓ_j, m 1'), '12.5');
     await user.type(screen.getByLabelText('ψ_gr;j, W/(m·K)'), '0.08');
     expect(current().groundFloors[0].edgeThermalBridges.bridges).toEqual([{ lengthM: 12.5, psiWPerMk: 0.08, sourceReference: '' }]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits measure patches row by row', async () => {
     expect(parsePatchValue('0.15')).toBe(0.15);
@@ -259,7 +260,7 @@ describe('lighting, floor edges and measure patches without JSON', () => {
     expect(current().patch[0].value).toBe(7);
     await user.selectOptions(screen.getByLabelText('Operation'), 'remove');
     expect(current().patch).toEqual([{ op: 'remove', path: '/constructions/0/uValue' }]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('keeps each patch row its own value after a removal and reopens a saved null as null', async () => {
     const user = userEvent.setup();
@@ -283,5 +284,5 @@ describe('lighting, floor edges and measure patches without JSON', () => {
     // The remaining rows keep their own values and types.
     expect((screen.getByLabelText('New value') as HTMLInputElement).value).toBe('second');
     expect(types().map((select) => select.value)).toEqual(['text', 'null']);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

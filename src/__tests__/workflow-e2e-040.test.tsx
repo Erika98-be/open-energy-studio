@@ -13,6 +13,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { clearSessionEvidence } from '../core/nta/Evidence';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 const root = resolve(__dirname, '../..');
 const json = (file: string) => JSON.parse(readFileSync(resolve(root, 'training-data', file), 'utf8')) as Record<string, unknown>;
@@ -172,7 +173,7 @@ describe('common spaces (6.6.4)', () => {
     expect(preview()).toContain('office 333,33 m²');
     expect(preview()).toContain('hotWater.need.areas');
     expect(preview()).toContain('lighting[0].functions');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('heated basement walls (6.7.3 c, annex K)', () => {
@@ -207,7 +208,7 @@ describe('heated basement walls (6.7.3 c, annex K)', () => {
     await waitFor(() => expect(page()).toMatch(/≤ 66[.,]0/));
     await openStep(user, /^Project/);
     await waitFor(() => expect(page()).toMatch(/100[.,]0 m² · 1[.,]867/));
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('declared daylight factor (14.36, NEN-EN 15193-1 annex F)', () => {
@@ -247,7 +248,7 @@ describe('declared daylight factor (14.36, NEN-EN 15193-1 annex F)', () => {
     await waitFor(() => expect(preview()).toContain('Invoeroverzicht'), { timeout: 10000 });
     expect(preview()).toContain('lighting[1].lightingZones[1].daylight.sectors[1].daylightDependencyFactor');
     expect(preview()).toContain('daglichtrapport bijlage F');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('sends a factor of 1,2 and goes from the kernel\'s refusal to the field', async () => {
     const user = userEvent.setup();
@@ -271,7 +272,7 @@ describe('declared daylight factor (14.36, NEN-EN 15193-1 annex F)', () => {
     await user.click(await main().findByRole('button', { name: /Go to/ }));
     expect(within(nav()).getByRole('button', { name: /^Installations/ })).toHaveAttribute('aria-current', 'page');
     await waitFor(() => expect(document.activeElement).toBe(main().getByLabelText(/Daylight dependency factor F_D;dayl/)));
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('PV peak power per m² (16.4a)', () => {
@@ -304,7 +305,7 @@ describe('PV peak power per m² (16.4a)', () => {
     await user.click(within(row).getByRole('button', { name: /Go to/ }));
     expect(within(nav()).getByRole('button', { name: /^Installations/ })).toHaveAttribute('aria-current', 'page');
     await waitFor(() => expect(document.activeElement).toBe(main().getByLabelText(/^K_pk W\/m²/)));
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('basic survey: façade part against the ground (ISSO 82.1 §8.4)', () => {
@@ -359,7 +360,7 @@ describe('basic survey: façade part against the ground (ISSO 82.1 §8.4)', () =
     const before = structuredClone(lastNta()!.groundFloors);
     await applyDraft(user);
     expect(lastNta()!.groundFloors).toEqual(before);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('a wall to the ground in the project (8.3)', () => {
@@ -393,5 +394,5 @@ describe('a wall to the ground in the project (8.3)', () => {
     await user.click(await main().findByRole('button', { name: /Go to/ }));
     expect(within(nav()).getByRole('button', { name: /^Building/ })).toHaveAttribute('aria-current', 'page');
     expect(within(nav()).getByRole('button', { name: 'Envelope & windows' })).toHaveAttribute('aria-current', 'page');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

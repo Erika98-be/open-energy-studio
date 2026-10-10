@@ -6,6 +6,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { save } from '@tauri-apps/plugin-dialog';
 import App from '../App';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 const windowMock = vi.hoisted(() => ({
   handler: null as null | ((event: { preventDefault: () => void }) => Promise<void> | void),
@@ -63,7 +64,7 @@ describe('saving in the desktop app', () => {
     })), { timeout: 10_000 });
     expect(await screen.findByText(/Read-only file system/, undefined, { timeout: 10_000 })).toBeInTheDocument();
     expect(createObjectURL).not.toHaveBeenCalled();
-  }, 30_000);
+  }, SLOW_UI_TEST_MS);
 
   it('listens for the window closing and lets a clean window close', async () => {
     vi.mocked(invoke).mockRejectedValue(new Error('no kernel in this test'));
@@ -75,5 +76,5 @@ describe('saving in the desktop app', () => {
     // Nothing unsaved: the close goes ahead without a question.
     expect(preventDefault).not.toHaveBeenCalled();
     expect(windowMock.destroy).not.toHaveBeenCalled();
-  }, 30_000);
+  }, SLOW_UI_TEST_MS);
 });

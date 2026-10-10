@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — UI-tests bestand tegen een belaste machine (geen rekenwijziging)
+
+- **Wat er misging.** In gates naast andere gates faalden UI-tests die los wel slaagden: `ux-findings.test.tsx` (findBy met de standaard 1 s, terwijl een kernantwoord al 400 ms debounce heeft), `workflow-e2e.test.tsx` (rapportvoorbeeld via waitFor met 1 s), `workflow-e2e-040.test.tsx` (testlimiet van 60 s voor een hele werkstroom) en `large-project-ui.test.tsx` (vaste tijdsbudgetten).
+- **Gedeelde wachttijden.** `src/__tests__/timeouts.ts`: findBy/waitFor wachten standaard 5 s (`UI_WAIT_MS`, ingesteld in `setup.ts`), de limiet per test is 60 s (`TEST_TIMEOUT_MS`, in `vitest.config.ts`; de gate geeft geen eigen `--testTimeout=20000` meer mee), en lange werkstroomtests hebben één limiet van 180 s (`SLOW_UI_TEST_MS`) in plaats van losse 30 en 60 s. Onder zware belasting overschreed ook de formulierdekkingstest (`nta-form-coverage.test.ts`) de oude 20 s.
+- **Tijdsbudget met een basislijn.** `large-project-ui.test.tsx` meet eerst dezelfde pagina voor geval H (2 zones) en staat voor het 20-voudige project het maximum van 15 s en 80 × die basislijn toe. Lineair werk groeit ongeveer 20-voudig, een kwadratische opzoeking per rij ongeveer 400-voudig en faalt dus nog steeds.
+- **Getoetst.** De hele UI-suite slaagde drie keer onder kunstmatige belasting (8 cpu-belasters naast 4 Vitest-workers, en twee suites tegelijk), waar hij vóór deze wijziging op twee tests faalde.
+
 ### 10 oktober 2026 — Gelijke actieversies in beide workflows; verzendklare brief met de NEN-vragen (geen rekenwijziging)
 
 - **Actieversies.** `release.yml` gebruikt nu dezelfde versies als `ci.yml`: `actions/checkout` en `actions/setup-node` v6, `actions/upload-artifact` v7 en `azure/trusted-signing-action` v1. Bij v1 heet de invoer voor het ondertekeningsaccount `signing-account-name`; die naam staat nu ook in `release.yml`. `src/__tests__/ci-parity.test.ts` eist dat beide workflows elke gedeelde actie met dezelfde versie vastleggen.

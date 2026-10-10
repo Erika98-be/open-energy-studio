@@ -15,6 +15,7 @@ import userEvent from '@testing-library/user-event';
 import { strFromU8, unzipSync } from 'fflate';
 import App from '../App';
 import { clearSessionEvidence } from '../core/nta/Evidence';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 const root = resolve(__dirname, '../..');
 const json = (file: string) => JSON.parse(readFileSync(resolve(root, 'training-data', file), 'utf8')) as Record<string, unknown>;
@@ -149,7 +150,7 @@ describe('workflow end to end, default edition', () => {
     await user.click(main().getByRole('button', { name: 'Start NTA input' }));
     const edition = await main().findByLabelText('NTA 8800 edition');
     expect(edition).toHaveValue('2025+C1');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('takes a calculated basic survey over into the project model through the draft', async () => {
     const user = userEvent.setup();
@@ -175,7 +176,7 @@ describe('workflow end to end, default edition', () => {
     expect(lastNta()!.hotWater).toMatchObject({ generator: { kind: 'gas_appliance', appliance: 'without_gaskeur' } });
     expect((derived.hotWater as { generator: { kind: string } }).generator.kind).toBe('gas_appliance');
     expect(lastNta()!.generator).not.toEqual(before!.generator);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('sets an obstruction for one window and applies it with the bar', async () => {
     const user = userEvent.setup();
@@ -191,7 +192,7 @@ describe('workflow end to end, default edition', () => {
     expect(lastNta()!.windowObstructions).toEqual([
       { windowId: 'win-N', obstruction: { method: 'overhang', relativeHeight: 0.5 }, sourceReference: 'gevelaanzicht' },
     ]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('enters annex AA rooms with the project windows on the cooling page', async () => {
     const user = userEvent.setup();
@@ -213,7 +214,7 @@ describe('workflow end to end, default edition', () => {
     const capacity = (lastNta()!.activeCooling as { capacity: { method: string; calculation: { rooms: Array<{ areaM2: number; windows: unknown[] }> } } }).capacity;
     expect(capacity.method).toBe('annex_aa');
     expect(capacity.calculation.rooms[0]).toMatchObject({ areaM2: 28, windows: [expect.objectContaining({ windowId: window.value })] });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('shows the kernel results and composes the report at each level', async () => {
     const user = userEvent.setup();
@@ -236,7 +237,7 @@ describe('workflow end to end, default edition', () => {
     await user.click(main().getByRole('radio', { name: /^Summary/ }));
     expect(balance).toBeDisabled();
     expect(preview()).not.toContain('Bouwkundige uitgangspunten');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('links an evidence file to a source field and lists it in the checklist and the dossier ZIP', async () => {
     const user = userEvent.setup();
@@ -269,7 +270,7 @@ describe('workflow end to end, default edition', () => {
     expect(entry).toBeDefined();
     expect(entry!.supports.join(' ')).toMatch(/windowSolar/);
     expect(strFromU8(archive[entry!.archivePath])).toBe('gevelfoto');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('inspector', () => {
@@ -298,7 +299,7 @@ describe('inspector', () => {
     const register = main().getByText('raam-zuid.jpg', { exact: false }).closest('tr')!;
     expect(register).toHaveTextContent(/win-S/);
     expect(register).not.toHaveTextContent(/not in the project|no longer/i);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('workflow end to end, NTA 8800:2022', () => {
@@ -362,5 +363,5 @@ describe('open points', () => {
     await user.click(goTo);
     expect(within(nav()).getByRole('button', { name: /^Building/ })).toHaveAttribute('aria-current', 'page');
     await waitFor(() => expect(document.activeElement).toBe(main().getByLabelText('Heating setpoint °C')));
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

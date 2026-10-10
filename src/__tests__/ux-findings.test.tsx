@@ -13,6 +13,7 @@ import { nl } from '../i18n/nl';
 import { kernelCodeLabelsNl } from '../i18n/kernelCodeLabels';
 import i18next from '../i18n/i18n';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 // The UX findings of 10 October 2026 (docs/ui-redesign/ontwerp.md, "UX-bevindingen").
 
@@ -49,7 +50,7 @@ describe('UX findings of 10 October 2026', () => {
     renderWithProviders(<ResultsView />);
     expect(await screen.findByRole('button', { name: 'Go to Check › Check overview' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Recalculate' })).toBeInTheDocument();
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('3: keeps report export and print off without a kernel result, and says why', () => {
     renderWithProviders(<ReportBuilder project={createDefaultProject()} assessment={null} pending={false} />);
@@ -111,7 +112,7 @@ describe('UX findings of 10 October 2026', () => {
     await user.type(screen.getByLabelText('BAG object id'), '0363010000000001');
     expect(save).toBeEnabled();
     expect(save).not.toHaveAccessibleDescription('No changes to save');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('9: says why the gas reference comparison is off', async () => {
     const user = userEvent.setup();
@@ -123,5 +124,5 @@ describe('UX findings of 10 October 2026', () => {
     await user.click(screen.getByRole('button', { name: 'Load synthetic example' }));
     expect(compare).toBeEnabled();
     expect(compare).not.toHaveAccessibleDescription(/Load a case first/);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

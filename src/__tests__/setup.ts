@@ -1,5 +1,9 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import { configure } from '@testing-library/react';
+import { UI_WAIT_MS } from './timeouts';
+
+configure({ asyncUtilTimeout: UI_WAIT_MS });
 
 // Mock Tauri APIs that components may import
 vi.mock('@tauri-apps/api/core', () => ({
