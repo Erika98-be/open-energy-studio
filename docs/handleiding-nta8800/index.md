@@ -40,18 +40,13 @@ De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-document
 
 ## Nog te doen: schermafdrukken
 
-Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. Ze zijn gemaakt vóór 8 oktober 2026. Voor deze onderdelen is nog geen schermafdruk:
+Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste zijn gemaakt vóór 8 oktober 2026. Op 10 oktober 2026 kwamen erbij: het venster bij een wissel van uitgave (`uitgave-wisselen.png`, hoofdstuk 10), de gemeenschappelijke ruimte van een rekenzone (`gemeenschappelijke-ruimte.png`, hoofdstuk 3), *Vloeren op de grond* bij het overnemen van een opname (`overnemen-vloeren.png`, hoofdstuk 2) en de tabellen *Belemmering*, *Zonwering* en *Glas per raam* (`belemmering-per-raam.png`, `zonwering-per-raam.png`, `glas-per-raam.png`, hoofdstuk 3). Die tonen het onderdeel los, zonder de rest van het venster, met de voorbeeldprojecten of de openbare gevallen D en G uit `training-data/` en, bij de wissel van uitgave, een vastgelegd antwoord van de rekenkern. Voor deze onderdelen is nog geen schermafdruk:
 - de keuzelijst *Uitgave NTA 8800* en de melding "Oudere uitgave — niet voor registratie" onder Resultaten ([hoofdstuk 10](10-normversies.md));
-- *Gebouw › Schil & ramen* met de tabel *Belemmering per raam*;
 - *Installaties › Koeling* met het formulier van bijlage AA;
 - de basisopname met de voortgangslijst en *Overnemen in projectmodel*;
 - het blok *Bron & bewijs* in het contextpaneel;
-- *Gebouw › Schil & ramen* met de tabellen *Zonwering per raam* en *Glas per raam*;
 - het blok *ψ uit de leidinggegevens* bij distributie, koeling en circulatie;
 - de ketelhulpenergie en de WKK-omzettingsgetallen uit een kwaliteitsverklaring, en de gedeclareerde f_ctrl bij de ventilatie;
 - *Verklaringen voor het energielabel* (elementen k en l) in de stap Registratie;
 - de uitkomst bovenaan een onderdeel van de basisopname na **Opname doorrekenen**;
-- het venster *Handleiding* in de app;
-- het overzicht bij een wissel van uitgave ([hoofdstuk 10](10-normversies.md));
-- *Gemeenschappelijke ruimte toevoegen (6.6.4)* bij de eigen gegevens van een rekenzone ([hoofdstuk 3](03-projectberekening.md));
-- *Vloeren op de grond* bij *Overnemen in projectmodel* ([hoofdstuk 2](02-basisopname.md)).
+- het venster *Handleiding* in de app.
