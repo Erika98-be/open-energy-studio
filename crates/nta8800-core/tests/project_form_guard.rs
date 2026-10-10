@@ -16,7 +16,7 @@
 
 mod support;
 
-use nta8800_core::project_performance::assess_project_performance;
+use nta8800_core::project_performance::{assess_project_performance, nta_blank_search};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 use support::{check_outcome, checked, entries, panic_message};
@@ -150,6 +150,22 @@ fn check_doc(doc: &Value) -> (Option<String>, BTreeSet<String>) {
         Ok(value) => value,
         Err(error) => return (Some(format!("{label}: {error}")), BTreeSet::new()),
     };
+    // The blank search runs on a reduced copy of the block and confirms it
+    // on the whole block; it must report what the search on the whole
+    // block reports (blank_search_equivalence.rs).
+    let block = &project["ntaCalculation"];
+    if has_null(block) {
+        let reduced = nta_blank_search(block, false);
+        let whole = nta_blank_search(block, true);
+        if reduced != whole {
+            return (
+                Some(format!(
+                    "{label}: blank search {reduced:?} differs from the whole-block search {whole:?}"
+                )),
+                BTreeSet::new(),
+            );
+        }
+    }
     let status = value["status"].as_str().unwrap_or("").to_string();
     let codes = match check_outcome(true, &value, &status) {
         Ok((_, codes)) => codes,
@@ -169,6 +185,15 @@ fn check_doc(doc: &Value) -> (Option<String>, BTreeSet<String>) {
         }
     }
     (None, codes)
+}
+
+fn has_null(value: &Value) -> bool {
+    match value {
+        Value::Null => true,
+        Value::Object(map) => map.values().any(has_null),
+        Value::Array(items) => items.iter().any(has_null),
+        _ => false,
+    }
 }
 
 /// A null object member means the same as an absent one (review 9). A
