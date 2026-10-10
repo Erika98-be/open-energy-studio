@@ -4,7 +4,7 @@
  * with the evidence register and the EP-Online data overview, and every
  * export. The report content itself stays with `ReportView`/`ReportBuilder`.
  */
-import { useState, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { Box, Download, FileArchive, FileDown, FileText, Pencil, Printer } from 'lucide-react';
 import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
@@ -224,6 +224,7 @@ export function ExportsPage({ actions }: {
   const { t } = useI18n();
   const { project, pending, assessment } = useDeliveryContext();
   const dossier = useDossier(project, assessment, pending);
+  const reportWaitId = useId();
   const [error, setError] = useState<string | null>(null);
   const exportCalculation = () => {
     setError(null);
@@ -234,8 +235,13 @@ export function ExportsPage({ actions }: {
     {(error ?? dossier.error) && <Banner tone="err">{error ?? dossier.error}</Banner>}
     <div className="delivery-exports">
       <ExportCard icon={<FileText aria-hidden="true" />} title={t('delivery.exports.report')} hint={t('delivery.exports.reportHint')}>
-        <Button icon={<FileDown aria-hidden="true" />} onClick={actions.exportReport}>{t('report.export')}</Button>
-        <Button icon={<Printer aria-hidden="true" />} onClick={actions.printReport}>{t('report.print')}</Button>
+        {/* The report needs a kernel result (UX finding 3); the input dossier below does not. */}
+        <Button icon={<FileDown aria-hidden="true" />} onClick={actions.exportReport} disabled={!assessment}
+          aria-describedby={!assessment ? reportWaitId : undefined}>{t('report.export')}</Button>
+        <Button icon={<Printer aria-hidden="true" />} onClick={actions.printReport} disabled={!assessment}
+          aria-describedby={!assessment ? reportWaitId : undefined}>{t('report.print')}</Button>
+        {!assessment && <p id={reportWaitId} className="delivery-note">
+          {t(pending ? 'report.builder.pending' : 'report.builder.waitForResult')}</p>}
       </ExportCard>
       <ExportCard icon={<FileText aria-hidden="true" />} title={t('delivery.exports.calculation')} hint={t('report.ntaCalculationScope')}>
         <Button icon={<FileDown aria-hidden="true" />} onClick={exportCalculation}>{t('report.exportNtaCalculation')}</Button>

@@ -71,7 +71,7 @@ De overige onderdelen volgen ISSO 75.1:
 ### Rekenzones (§6.5, afb. 6.6 met tabel 6.4)
 
 Kleine functies (tot 25 %) worden samengevoegd met de hoofdfunctie (p. 39–40). Volgens afb. 6.6 en tabel 6.4 (p. 53–54) moet een gebouw soms toch in meer rekenzones worden opgedeeld:
-- bij een verschil in setpoint van meer dan 4 K;
+- bij een verschil in instelwaarde van meer dan 4 K;
 - bij een verschil in ventilatiecapaciteit van meer dan een factor 4.
 
 Zonder zones meldt de opname dan `calculation_zone_split_required`.
@@ -113,7 +113,7 @@ Na **Opname doorrekenen** staat de knop **Overnemen in projectmodel** onder Uitk
 
 | Overgenomen | Niet overgenomen |
 |---|---|
-| verwarming (opwekker, distributie, afgifte, collectieve aansluiting), tapwater, koeling, ventilatie, PV, verlichting, BACS, gebruiksfunctie, setpoints, thermische massa en interne warmte | geometrie en oppervlakten: zones, vlakken en ramen blijven die van het projectmodel |
+| verwarming (opwekker, distributie, afgifte, collectieve aansluiting), tapwater, koeling, ventilatie, PV, verlichting, BACS, gebruiksfunctie, instelwaarden, thermische massa en interne warmte | geometrie en oppervlakten: zones, vlakken en ramen blijven die van het projectmodel |
 | per aangevinkte waarde: de gegevens van een vloer op de grond (zie hieronder) | bij een opname met meer rekenzones: de zonegegevens (setpoints, massa, interne warmte, ventilatie) |
 | | aanvullende verwarmingssystemen |
 

@@ -44,6 +44,7 @@
 /* Four parts per row: path, value, picker and "Ga naar" (with three columns "Ga naar" wrapped onto a row of its own). */
 .nta-evidence__list li { display: grid; grid-template-columns: minmax(0, 14rem) minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2); }
 .nta-evidence__list code { overflow: hidden; color: var(--fg-3); font-family: var(--font-mono); font-size: var(--fs-2xs); text-overflow: ellipsis; white-space: nowrap; }
+.nta-evidence__label { overflow: hidden; color: var(--fg-2); font-size: var(--fs-sm); text-overflow: ellipsis; white-space: nowrap; }
 .nta-evidence__value { display: inline-flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; color: var(--fg-2); text-overflow: ellipsis; white-space: nowrap; }
 .nta-evidence__value svg { width: 14px; height: 14px; flex: none; }
 .nta-evidence__list li.filled .nta-evidence__value { color: var(--accent); }

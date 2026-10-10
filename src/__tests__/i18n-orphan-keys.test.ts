@@ -55,7 +55,10 @@ describe('i18n keys', () => {
     // A literal counts as a key prefix only when it has a dot ("nta.annexP.carrier"):
     // a one-word literal such as 'nta' or 'overview' would cover a whole namespace.
     for (const literal of literals) if (literal.includes('.') && keyPrefixes.has(literal)) prefixes.add(`${literal}.`);
-    const unused = keys.filter((key) => !literals.has(key)
+    // A plural form (`key_zero`, `key_one`, `key_other`) is used when its base key is: i18next
+    // picks the form from `count` (t('nav.state.errors', { count })).
+    const base = (key: string) => key.replace(/_(zero|one|two|few|many|other)$/, '');
+    const unused = keys.filter((key) => !literals.has(key) && !literals.has(base(key))
       && ![...prefixes].some((prefix) => key.startsWith(prefix))
       && !(key in ALLOWED_UNUSED));
     expect(unused).toEqual([]);

@@ -79,7 +79,7 @@ describe('survey wizard (F8)', () => {
     await user.click(within(card).getByRole('button', { name: 'Calculate survey' }));
     expect(await within(card).findByText('C')).toBeInTheDocument();
     expect(within(card).getByText('Indicative')).toBeInTheDocument();
-    expect(within(card).getByText('1 default value(s)')).toBeInTheDocument();
+    expect(within(card).getByText('1 default value')).toBeInTheDocument();
     expect(within(progress).getByRole('button', { name: /Thermal envelope.*1 error/ })).toBeInTheDocument();
 
     await user.click(within(card).getByRole('button', { name: 'Details and default values' }));

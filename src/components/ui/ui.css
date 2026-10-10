@@ -552,3 +552,8 @@ button.ui-stepper__btn:focus-visible { outline: none; box-shadow: var(--focus-ri
   animation: ui-shimmer 1.4s ease-in-out infinite;
 }
 @keyframes ui-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+/* Raw technical error behind a disclosure (UX finding 1, 10 October 2026). */
+.ui-tech-details { margin-top: 6px; font-size: 12px; color: var(--text-2, inherit); }
+.ui-tech-details summary { cursor: pointer; }
+.ui-tech-details code { display: block; margin-top: 4px; white-space: pre-wrap; overflow-wrap: anywhere; }

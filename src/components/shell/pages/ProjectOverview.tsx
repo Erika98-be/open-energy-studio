@@ -107,8 +107,8 @@ export function ProjectOverview({ project, statuses, actions }: {
         <Card className="overview-progress" title={t('overview.progress')} level={2}
           subtitle={kernel?.phase === 'stale' ? t('status.kernel.stale') : t('overview.fromKernel')}
           actions={<>
-            {warnings > 0 && <Pill tone="warn" icon={<AlertTriangle aria-hidden="true" />}>{t('nav.state.warnings', { count: String(warnings) })}</Pill>}
-            <Pill tone={errors > 0 ? 'err' : 'neutral'}>{t('nav.state.errors', { count: String(errors) })}</Pill>
+            {warnings > 0 && <Pill tone="warn" icon={<AlertTriangle aria-hidden="true" />}>{t('nav.state.warnings', { count: warnings })}</Pill>}
+            <Pill tone={errors > 0 ? 'err' : 'neutral'}>{t('nav.state.errors', { count: errors })}</Pill>
           </>} flush>
           <table className="overview-table">
             <tbody>

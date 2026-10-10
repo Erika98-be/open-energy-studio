@@ -67,7 +67,7 @@ describe('survey takeover of floors to the ground', () => {
     expect([...chosen]).toEqual([byField.heatedBasement.key]);
     const next = applyGroundFloors(current, derived, pairs, chosen);
     expect(entryOf(next)).toMatchObject({ exposedPerimeterM: 10, constructionResistanceM2kPerW: 3.87, heatedBasement: fixture.projectEntry.heatedBasement });
-    expect(entryOf(next).sourceReference).toBe(`synthetic: Rc 3,7 + Rsi 0,17; ${fixture.projectEntry.sourceReference}`);
+    expect(entryOf(next).sourceReference).toBe(`voorbeeld: Rc 3,7 + Rsi 0,17; ${fixture.projectEntry.sourceReference}`);
 
     // Taken over by choice, the conflict is replaced.
     const all = new Set([...chosen, byField.exposedPerimeterM.key]);
