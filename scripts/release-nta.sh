@@ -150,11 +150,17 @@ fi
 # value yet: the dossier is written all the same.
 step "testsetdossier ISSO 54 (BRL 9501 §3.3, in ${archive}/testset)"
 testset_exit=0
+# The same commit wording as the gate (verify-nta.sh): a dry run from a dirty
+# worktree must not present the dossier as made from a clean commit.
+testset_commit="$(git rev-parse HEAD)"
+if [[ -n "$(git status --porcelain)" ]]; then
+  testset_commit="${testset_commit} (met lokale wijzigingen)"
+fi
 cargo run --locked --quiet --manifest-path crates/nta8800-service/Cargo.toml \
   --bin reference_gate -- --suite training-data/reference-suites/isso54-v2.json \
   --report-dir "$archive/testset/vergelijking" --testset-dir "$archive/testset" \
   --testset-topics training-data/isso54/onderwerpen.json \
-  --commit "$(git rev-parse HEAD)" || testset_exit=$?
+  --commit "$testset_commit" || testset_exit=$?
 if [[ $testset_exit -ne 0 && $testset_exit -ne 3 ]]; then
   printf 'Het testsetdossier kon niet worden gemaakt (code %s).\n' "$testset_exit" >&2
   exit 1
