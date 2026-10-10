@@ -809,7 +809,7 @@ export const en: Record<string, string> = {
   'kernel.forfait.baseRow': 'Base electric heat pump row',
   'kernel.forfait.highRow': 'Higher efficiency row (table 9.28 test)',
   'kernel.forfait.productReference': 'Tested product or combination',
-  'kernel.forfait.testReportReference': 'NEN-EN 14511-2:2022 test report',
+  'kernel.forfait.testReportReference': 'NEN-EN 14511-2 test report (table 9.28)',
   'kernel.forfait.choose': 'Choose a source class',
   'kernel.forfait.source.ground': 'Ground loop',
   'kernel.forfaitMonthly.open': 'Draft monthly input',

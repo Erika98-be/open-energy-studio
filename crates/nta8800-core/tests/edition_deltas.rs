@@ -108,6 +108,17 @@ fn portable(
             }
         }
     }
+    // EDITION_SET=/json/pointer=value;… sets members up front (probe runs).
+    if let Ok(sets) = std::env::var("EDITION_SET") {
+        for set in sets.split(';').filter(|set| !set.is_empty()) {
+            let (pointer, raw) = set.split_once('=').unwrap();
+            let (parent, key) = pointer.rsplit_once('/').unwrap();
+            if let Some(Value::Object(map)) = value.pointer_mut(parent) {
+                map.insert(key.to_string(), serde_json::from_str(raw).unwrap());
+                dropped.push(format!("{pointer} = {raw} (EDITION_SET)"));
+            }
+        }
+    }
     let standard = if matches!(edition, "2020+A1" | "2022") {
         "NEN-EN 14511-2:2007"
     } else {
@@ -155,9 +166,23 @@ fn portable(
     (result, dropped)
 }
 
+thread_local! {
+    static WARNINGS: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
 fn run(json: &str, edition: &str) -> Result<Row, String> {
     let (result, dropped) = portable(json, edition);
     DROPPED.with(|cell| *cell.borrow_mut() = dropped);
+    let mut codes: Vec<String> = result.warnings.iter().map(|warning| warning.code.to_string()).collect();
+    if let Some(performance) = &result.performance {
+        let p = serde_json::to_value(performance).unwrap();
+        let mut out = Vec::new();
+        collect_codes(&p, &mut out);
+        codes.extend(out);
+    }
+    codes.sort();
+    codes.dedup();
+    WARNINGS.with(|cell| *cell.borrow_mut() = codes);
     let Some(performance) = result.performance.as_ref() else {
         let codes: Vec<String> = result.gaps.iter().take(3).map(|gap| format!("{gap:?}")).collect();
         return Err(format!("{}: {}", result.status, codes.join("; ")));
@@ -189,6 +214,22 @@ fn run(json: &str, edition: &str) -> Result<Row, String> {
         need: read("/annualHeatingAndCoolingNeedKwh"),
         services,
     })
+}
+
+/// Every `code` in the output (issues and warnings of the chapters).
+fn collect_codes(value: &Value, out: &mut Vec<String>) {
+    match value {
+        Value::Object(map) => {
+            if let Some(Value::String(code)) = map.get("code") {
+                out.push(code.clone());
+            }
+            for item in map.values() {
+                collect_codes(item, out);
+            }
+        }
+        Value::Array(items) => items.iter().for_each(|item| collect_codes(item, out)),
+        _ => {}
+    }
 }
 
 fn leaves(value: &Value, path: String, out: &mut Vec<(String, f64)>) {
@@ -242,12 +283,29 @@ fn diff_two_editions() {
     }
 }
 
+/// Prints the issues and gaps of one case in one edition:
+/// `EDITION_PROBE=D,2023 cargo test --test edition_deltas -- --ignored probe`.
+#[test]
+#[ignore = "prints the issues of one case in one edition"]
+fn probe_one_edition() {
+    let Ok(spec) = std::env::var("EDITION_PROBE") else { return };
+    let (name, edition) = spec.split_once(',').unwrap();
+    let json = PROJECTS.iter().find(|(case, _)| *case == name).unwrap().1;
+    let (result, dropped) = portable(json, edition);
+    println!("{} dropped {dropped:?}", result.status);
+    let value = serde_json::to_value(&result).unwrap();
+    for key in ["/gaps", "/warnings", "/performance/issues", "/performance/spaceHeating/issues"] {
+        println!("{key}: {}", value.pointer(key).cloned().unwrap_or(Value::Null));
+    }
+}
+
 #[test]
 #[ignore = "prints the cross-edition delta table"]
 fn print_edition_delta_table() {
     for (name, json) in PROJECTS {
         println!("\n== {name}");
         let mut previous: Option<Row> = None;
+        let mut previous_codes: Option<Vec<String>> = None;
         for edition in EDITIONS {
             match run(json, edition) {
                 Ok(row) => {
@@ -282,11 +340,21 @@ fn print_edition_delta_table() {
                             println!("         dropped (not in edition): {}", dropped.join(", "));
                         }
                     });
+                    let codes = WARNINGS.with(|cell| cell.borrow().clone());
+                    if let Some(prev) = &previous_codes {
+                        let added: Vec<&String> = codes.iter().filter(|code| !prev.contains(code)).collect();
+                        let removed: Vec<&String> = prev.iter().filter(|code| !codes.contains(code)).collect();
+                        if !added.is_empty() || !removed.is_empty() {
+                            println!("         codes +{added:?} -{removed:?}");
+                        }
+                    }
+                    previous_codes = Some(codes);
                     previous = Some(row);
                 }
                 Err(error) => {
                     println!("{edition:8} not calculated: {error}");
                     previous = None;
+                    previous_codes = None;
                 }
             }
         }

@@ -87,6 +87,9 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
     if lookup.status == "invalid" || lookup.corrected_cop.is_none() {
         issues.push(issue("forfait_lookup_invalid", "forfait"));
     }
+    for item in &lookup.issues {
+        issues.push(issue(item.code, format!("forfait.{}", item.path)));
+    }
     if input
         .forfait
         .design_supply_temperature_c
