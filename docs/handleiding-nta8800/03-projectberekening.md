@@ -51,7 +51,7 @@ Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staa
 |---|---|---|
 | Algemeen | rekenscope (woningbouw of utiliteit), bouwjaar, bron A_g, gebruiksfunctie en woningtype, Bbl-functie, actieve koeling (systeem, capaciteitsbewijs of bijlage AA, zie [hieronder](#koelvermogen-volgens-bijlage-aa)), vergunningaanvraag na 29 mei 2026, fossiele toestellen buiten de berekening | tabellen 7.13–7.15, §5.7.1, bijlage AA |
 | Gebruiksfuncties met oppervlakte | functies voor gemengde rekenzones, Bbl-toets en labelklasse | §6.5.3, Bbl art. 4.149 lid 2 |
-| Setpoints (tabel 7.13) | verwarmings- en koelsetpoint; het formulier toetst per zone aan tabel 7.13 (gewogen bij meerdere functies), knop "Tabelwaarden gebruiken" | tabel 7.13 |
+| Instelwaarden (tabel 7.13) | instelwaarden voor verwarmen en koelen; het formulier toetst per zone aan tabel 7.13 (gewogen bij meerdere functies), knop "Tabelwaarden gebruiken" | tabel 7.13 |
 | Thermische massa (tabel 7.10) | klasse vloer en wand, plafondkolom; alleen onder 2022 en 2020+A1 ook de massa per m² gebruiksoppervlakte (kg/m²) | tabellen 7.10–7.12 |
 | Gegevens per rekenzone (Gebouw › Rekenzones; bij utiliteit ook bij één rekenzone) | per rekenzone **Eigen gegevens voor deze rekenzone**: gebruiksfunctie en woningtype (leeg = die van het blok), delen met een andere gebruiksfunctie en hun oppervlakte, gemeenschappelijke ruimten (zie [hieronder](#gemeenschappelijke-ruimten-664)), eigen thermische massa, serres, en bij een sportfunctie in de ventilatie een zwembad. Eigen gegevens beginnen als kopie van de interne warmte, de luchtstromen en de ventilatie van het blok, want de kern neemt die dan alleen uit de zone; pas ze per zone aan | §6.3, §6.5.3, 6.6.4, tabel 7.10, 7.30b |
 | Interne warmtewinst | aantal woningen; bij utiliteit de tabelmethode of een opgegeven W/m² | 7.21–7.29, tabellen 7.2/7.3 |
@@ -200,7 +200,7 @@ Het paneel toont het volledige NTA-invoerblok als JSON. Gebruik dit alleen als e
 | Melding | Betekenis | Oplossing |
 |---|---|---|
 | `nta_value_missing` | een getal in het invoerblok is leeg; het pad staat erbij | vul het veld in of verwijder het onderdeel |
-| `setpoints_table_7_13_mismatch` | setpoints wijken af van tabel 7.13 | knop "Tabelwaarden gebruiken" |
+| `setpoints_table_7_13_mismatch` | instelwaarden wijken af van tabel 7.13 | knop "Tabelwaarden gebruiken" |
 | `vertical_pipes_unknown` | verticale leidingen niet opgegeven | kies "geen" of geef de leidingen op |
 | `thermal_bridge_methods_mixed` | forfaitaire en gedetailleerde koudebruggen gemengd (§8.2.1) | kies één methode voor het hele gebouw |
 | `window_dynamic_and_shading_exclusive` | dynamisch raam én beweegbare zonwering (§A.2) | neem de zonwering op in de toestanden van bijlage A |
@@ -228,7 +228,7 @@ Het paneel toont het volledige NTA-invoerblok als JSON. Gebruik dit alleen als e
 
 Een gemeenschappelijke ruimte, zoals een centrale entree, gang of toiletgroep, wordt gebruikt door meer dan één gebruiksfunctie. De norm verdeelt haar naar rato van de eigen (initiële) gebruiksoppervlakten van de functies die erop zijn aangewezen (6.2, 2025+C1 p. 142; 6.6.4, p. 158; in 2023 p. 129 en p. 145). Dat gebeurt op twee manieren:
 
-- **Binnen de rekenzone** gaat de ruimte alleen naar de aangewezen functies die in die rekenzone liggen. Daarmee rekent de zone (setpoint, interne warmte, ventilatiecapaciteit, §6.5.3).
+- **Binnen de rekenzone** gaat de ruimte alleen naar de aangewezen functies die in die rekenzone liggen. Daarmee rekent de zone (instelwaarde, interne warmte, ventilatiecapaciteit, §6.5.3).
 - **Voor het gebouw** gaat de ruimte naar alle aangewezen functies. Daarmee rekenen de Bbl-eisen per functie (§5.3.1).
 
 Zo vult u het in, onder **Gebouw › Rekenzones › Eigen gegevens voor deze rekenzone** (ook bij een project met één rekenzone):

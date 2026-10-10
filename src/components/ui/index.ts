@@ -11,7 +11,7 @@ export type {
   FieldProps, NumberInputProps, DecimalInputProps, SelectOption, SelectProps, SegmentedProps, TriStateValue, CheckProps, FileButtonProps,
 } from './Field';
 export {
-  Card, CardSection, Pill, StatusPill, Tag, Banner, EmptyState, ErrorState, Skeleton, StaleBanner,
+  Card, CardSection, Pill, StatusPill, Tag, Banner, EmptyState, ErrorState, Skeleton, StaleBanner, TechnicalDetails,
 } from './Display';
 export type { Tone, CardProps, PillProps, BannerProps } from './Display';
 export { ToastProvider, useToast } from './Toast';

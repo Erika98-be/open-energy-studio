@@ -146,7 +146,7 @@ function EvidenceBlock({ draft, def, container, change }: {
       <div className="nta-evidence__head">
         <strong>{t('ntaStep.evidence')}</strong>
         {open > 0
-          ? <span className="nta-evidence__badge">{t('ntaStep.evidence.open', { n: open })}</span>
+          ? <span className="nta-evidence__badge">{t('ntaStep.evidence.open', { count: open })}</span>
           : <span className="nta-evidence__ok">{t('ntaStep.evidence.complete')}</span>}
       </div>
       <ul className="nta-evidence__list">
@@ -274,7 +274,7 @@ export function NtaStepSections({ route }: { route: Route }) {
       id,
       label: <>{t(PART_KEYS[id])}{own.length > 0 && <span className={cx('nta-part-count', errors > 0 && 'nta-part-count--error')}>{own.length}</span>}</>,
       status: id === part ? 'current' : errors > 0 ? 'error' : warnings > 0 ? 'warn' : 'done',
-      statusText: [errors > 0 && t('ntaStep.check.errors', { n: errors }), warnings > 0 && t('ntaStep.check.warnings', { n: warnings })]
+      statusText: [errors > 0 && t('ntaStep.check.errors', { count: errors }), warnings > 0 && t('ntaStep.check.warnings', { count: warnings })]
         .filter(Boolean).join(', ') || undefined,
     };
   });

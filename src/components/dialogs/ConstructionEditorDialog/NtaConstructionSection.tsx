@@ -9,6 +9,7 @@ import {
   type NtaConstructionDraft, type NtaForfaitDraft, type NtaLayerDraft,
 } from '../../../core/nta/NtaFormModels';
 import { DecimalInput } from '../../ui';
+import { TechnicalDetails } from '../../ui/Display';
 
 export interface NtaConstructionResult {
   rc: number | null;
@@ -169,7 +170,7 @@ export function NtaConstructionSection({ layers, onApply }: {
           {t('nta.construction.apply')}</button>
       </>}
     </div>
-    {error && <p role="alert">{t('kernel.unavailable')} <small>{error}</small></p>}
+    {error && <div role="alert">{t('kernel.unavailable')}<TechnicalDetails>{error}</TechnicalDetails></div>}
     {result?.status === 'invalid' && <ul role="alert">
       {result.issues.map((item, index) => <li key={index}><strong>{item.code}</strong> <code>{item.path}</code></li>)}
     </ul>}

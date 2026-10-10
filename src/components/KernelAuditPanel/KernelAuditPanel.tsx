@@ -6,6 +6,7 @@ import type { IProject } from '../../core/energy/types';
 import { assessProjectWithRust, type KernelAssessment } from '../../core/nta/KernelClient';
 import { KernelDetail } from '../KernelCode/KernelCode';
 import './KernelAuditPanel.css';
+import { TechnicalDetails } from '../ui/Display';
 
 type AuditQuery =
   | { project: IProject; kind: 'loading' }
@@ -52,7 +53,7 @@ export function KernelAuditPanel({ project }: { project: IProject }) {
       {!loading && error && (
         <div className="kernel-audit-unavailable" role="alert">
           <CircleHelp size={18} />
-          <span>{t('kernel.unavailable')} <small>{error}</small></span>
+          <div>{t('kernel.unavailable')}<TechnicalDetails>{error}</TechnicalDetails></div>
         </div>
       )}
       {!loading && assessment && <>

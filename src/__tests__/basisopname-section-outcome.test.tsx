@@ -45,7 +45,7 @@ describe('survey outcome in the current section', () => {
     const outcome = await screen.findByRole('status', { name: 'Outcome for this part' });
     expect(outcome).toHaveTextContent('Survey calculated:');
     expect(outcome).toHaveTextContent('D');
-    expect(outcome).toHaveTextContent('1 more error(s) in other parts');
+    expect(outcome).toHaveTextContent('1 more error in another part');
     // Only General's own error, with a way to its field.
     await user.click(within(outcome).getByRole('button', { name: 'Go to the field' }));
     expect(calls[calls.length - 1]).toEqual(['general', 'basisopname.constructionYear']);

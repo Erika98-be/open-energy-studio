@@ -15,6 +15,7 @@ import { summarizeExtras } from '../../core/nta/NtaResultSummary';
 import { summarizeServiceEnergy } from '../../core/nta/ServiceEnergy';
 import { kernelNote } from '../../core/nta/KernelNoteText';
 import './NtaPerformancePanel.css';
+import { TechnicalDetails } from '../ui/Display';
 
 /** Short month name in the UI language. */
 export function shortMonth(month: number, locale: string): string {
@@ -113,7 +114,7 @@ export function NtaPerformancePanel({ query: suppliedQuery }: NtaPerformancePane
       {!loading && error && (
         <div className="nta-performance-unavailable" role="alert">
           <CircleHelp size={18} />
-          <span>{t('kernel.unavailable')} <small>{error}</small></span>
+          <div>{t('kernel.unavailable')}<TechnicalDetails>{error}</TechnicalDetails></div>
         </div>
       )}
 
