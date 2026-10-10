@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useProjectEdition } from '../../../context/EnergyContext';
 import { useI18n } from '../../../i18n/i18n';
+import { formatNumber } from '../../../i18n/format';
 import type { IConstructionLayer } from '../../../core/energy/types';
 import { calculateConstructionsWithRust, type EnvelopeAssessment } from '../../../core/nta/KernelClient';
 import {
@@ -28,7 +29,7 @@ export function NtaConstructionSection({ layers, onApply }: {
   layers: IConstructionLayer[];
   onApply: (result: NtaConstructionResult) => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [mode, setMode] = useState<'layers' | 'forfait'>('layers');
   const [draft, setDraft] = useState<NtaConstructionDraft>(() => constructionDraft({ layers }));
   const [forfait, setForfait] = useState<NtaForfaitDraft>({
@@ -162,8 +163,8 @@ export function NtaConstructionSection({ layers, onApply }: {
     <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
       <button type="button" className="btn btn-sm" disabled={busy} onClick={calculate}>{t('nta.construction.calculate')}</button>
       {element && <>
-        <span role="status">{t('nta.construction.result')}: U = {element.uRounded.toFixed(2)} W/m²K
-          {element.rCRounded != null && <> · R<sub>c</sub> = {element.rCRounded.toFixed(2)} m²K/W</>}</span>
+        <span role="status">{t('nta.construction.result')}: U = {formatNumber(element.uRounded, locale, 2)} W/m²K
+          {element.rCRounded != null && <> · R<sub>c</sub> = {formatNumber(element.rCRounded, locale, 2)} m²K/W</>}</span>
         <button type="button" className="btn btn-sm" onClick={() => onApply({ rc: element.rCRounded, u: element.uRounded, route: element.route, rse: element.opaque?.exteriorSurfaceResistance ?? 0.04 })}>
           {t('nta.construction.apply')}</button>
       </>}

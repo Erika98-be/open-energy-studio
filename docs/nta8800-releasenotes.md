@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Rondgang als nieuwe adviseur (geen rekenwijziging)
+
+- **Open punten.** De lijst zegt "Geen open punten van de rekenkern" alleen nog als de kern heeft geantwoord; daarvoor staat er "Nog geen antwoord van de rekenkern", "Berekenen…" of "Rekenkern niet bereikbaar".
+- **Getallen in de taal van de interface** in de warmtepompdimensionering, de constructie-editor, de installatie-eigenschappen, de vlakeditor en de maandgrafiek (was een decimale punt).
+- **Eén naam voor de kern:** *rekenkern* en *rekenkernversie* in de Nederlandse interface, de rapporten en de handleiding. De melding bij een onbereikbare kern noemt Herberekenen; meldingen die naar het oude NTA-paneel verwezen, noemen nu Resultaten, Controle › Controleoverzicht of de stap Project.
+- **Handleiding:** paden gelijk aan het programma (Gebouw › Rekenzones, Controle › Controleoverzicht, vloeren op grond onder Gebouw › Schil & ramen).
+- Overige bevindingen die een ontwerpbesluit vragen staan in `docs/ui-redesign/ontwerp.md`, "UX-bevindingen (10 oktober 2026)". Test: `src/__tests__/walkthrough-review.test.tsx`.
+
 ### 10 oktober 2026 — Keuzelijsten met lange teksten (geen rekenwijziging)
 
 - **Uitgave NTA 8800.** De keuzelijst in het blok *Algemeen* toonde "NTA 8800:2025+C1:2026 (aangew…": de tekst paste niet in één kolom van het formulier. Alleen keuzelijsten van `SelectField` met een tekst boven 34 tekens kregen twee kolommen, en deze tekst telde precies 34 tekens.

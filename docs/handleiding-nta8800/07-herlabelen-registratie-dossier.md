@@ -71,7 +71,7 @@ Herlabelen kan alleen bij bestaande bouw. Het geldt voor verbeteringen die binne
 3. Zet het berichttype op *herlabelen*. Vul in:
    - de verbeteringsdatum;
    - het oorspronkelijke certificaatnummer en EP-Online-nummer;
-   - de **Kernelversie oorspronkelijke opname (herlabelen)**; zonder dit veld meldt de kern `original_kernel_version_required`;
+   - de **Rekenkernversie oorspronkelijke opname (herlabelen)**; zonder dit veld meldt de kern `original_kernel_version_required`;
    - eventueel de verwijzing naar het oorspronkelijke dossier;
    - bij gewijzigde PV of zonthermie het vinkje **PV of zonthermie exclusief en fysiek verbonden met dit gebouw (herlabelen)** (BRL 9500-W p. 23);
    - bij utiliteit het vinkje **Utiliteit: met opdrachtgever en stukken vastgesteld dat er geen 6b-wijzigingen zijn (herlabelen)** (BRL 9500-U p. 19).

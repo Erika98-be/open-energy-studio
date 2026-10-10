@@ -10,7 +10,7 @@ De desktopapp slaat veilig op: ze schrijft eerst een tijdelijk bestand naast het
 
 **Afsluiten.** Sluit je het venster (de sluitknop, Alt+F4 of afsluiten vanuit het besturingssysteem) terwijl een project niet-opgeslagen wijzigingen of niet-toegepaste NTA-invoer heeft, dan stelt de app per project dezelfde vraag als bij het sluiten van een tabblad: **Opslaan**, **Niet opslaan** of **Annuleren**. Bij **Annuleren**, of als het opslaan niet lukt, blijft het venster open. In de browser vraagt de browser zelf of je de pagina wilt verlaten.
 
-Het bestand bevat het volledige project, inclusief de NTA-invoer, de basisopname, het maatwerkadvies en de registratiegegevens. Daarnaast bevat het een stempel van de rekenkern: kernelversie, normversie en de invoervingerafdruk op het moment van opslaan.
+Het bestand bevat het volledige project, inclusief de NTA-invoer, de basisopname, het maatwerkadvies en de registratiegegevens. Daarnaast bevat het een stempel van de rekenkern: rekenkernversie, normversie en de invoervingerafdruk op het moment van opslaan.
 
 **Openen.** Met **Openen** (Ctrl+O, menu Bestand of welkomstscherm) kies je een `.oes.json`- of `.json`-bestand; in de desktopapp met een bestandsvenster, in de browser met de bestandskiezer van de browser. Het project opent in een nieuw tabblad. Bij het openen:
 - vergelijkt de app de opgeslagen stempel met de huidige rekenkern. Is de kern of de normversie anders, dan meldt ze dat; reken dan opnieuw en controleer de verschillen voordat je registreert. Verschilt alleen de invoervingerafdruk, dan is het bestand buiten de app gewijzigd en meldt ze dat ook.
@@ -72,7 +72,7 @@ Een bestand dat helemaal niet te lezen is (geen geldige JSON, een verkeerde opbo
 
 UNIEC3 en VABI kunnen niet alles bevatten wat het project bevat: de NTA-invoer (`ntaCalculation`), de basisopname, het maatwerkadvies, de registratie, en bij UNIEC3 de lagen van de constructies. Bij het exporteren toont de app welke onderdelen niet in het bestand komen. Lees je zo'n bestand later weer in, dan staat de ontbrekende NTA-invoer als punt in het importverslag.
 
-**Vloeren op grond.** Geen van beide formaten bevat, voor zover hun bestanden hier bekend zijn, de grondroute van NTA 8800 8.3: de grens van een vlak (grond, kruipruimte, onverwarmde kelder), de perimeter P, de ruimte onder de vloer en een verwarmde kelder met diepte z en wandoppervlak ΣA_T;bw. Een vloer komt als gewoon vlak met zijn R_c in het bestand. De exportmelding noemt daarom `ntaCalculation.groundFloors` apart, en na een import vul je de vloeren op grond opnieuw in bij de NTA-invoer (Thermische schil › Vloeren op grond). Zonder echte voorbeeldbestanden van Uniec 3 en VABI met deze gegevens kan het programma geen veldnamen kiezen die die pakketten zouden lezen.
+**Vloeren op grond.** Geen van beide formaten bevat, voor zover hun bestanden hier bekend zijn, de grondroute van NTA 8800 8.3: de grens van een vlak (grond, kruipruimte, onverwarmde kelder), de perimeter P, de ruimte onder de vloer en een verwarmde kelder met diepte z en wandoppervlak ΣA_T;bw. Een vloer komt als gewoon vlak met zijn R_c in het bestand. De exportmelding noemt daarom `ntaCalculation.groundFloors` apart, en na een import vul je de vloeren op grond opnieuw in bij de NTA-invoer (Gebouw › Schil & ramen › Vloeren op grond). Zonder echte voorbeeldbestanden van Uniec 3 en VABI met deze gegevens kan het programma geen veldnamen kiezen die die pakketten zouden lezen.
 
 ## Exports onder Rapport & dossier
 

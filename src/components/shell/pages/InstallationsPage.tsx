@@ -338,7 +338,7 @@ export function ServicePage({ sub, extra, focusPath }: { sub: ServiceId; extra?:
       const items = (project[list.key] as SystemItem[]).map((item, index) => ({ item, index }));
       const sample = items[0] ? figures(list.key, items[0].item) : [];
       const columns: Array<Column<{ item: SystemItem; index: number }>> = [
-        { key: 'name', header: t('properties.name'), render: ({ item }) => item.name },
+        { key: 'name', header: <span className="ui-nocase">{t('properties.name')}</span>, render: ({ item }) => item.name },
         ...sample.map(([label], column) => ({ key: `fig${column}`, header: <span className="ui-nocase">{label}</span>, render: ({ item }: { item: SystemItem }) => figures(list.key, item)[column]?.[1] ?? '' })),
         { key: 'actions', header: <span className="visually-hidden">{t('envelope.actions')}</span>, width: 84, render: ({ item }) => <ItemActions compact itemType={list.itemType} id={item.id} name={item.name} /> },
       ];

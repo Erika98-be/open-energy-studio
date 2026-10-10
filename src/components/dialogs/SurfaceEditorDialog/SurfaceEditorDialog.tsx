@@ -1,5 +1,6 @@
 import { useState, useId } from 'react';
 import { useI18n } from '../../../i18n/i18n';
+import { formatNumber } from '../../../i18n/format';
 import { useEnergy } from '../../../context/EnergyContext';
 import { ISurface, SurfaceType, Orientation, ThermalBoundary } from '../../../core/energy/types';
 import { DialogShell } from '../DialogShell';
@@ -16,7 +17,7 @@ const thermalBoundaries: ThermalBoundary[] = ['outdoor', 'ground', 'unheated_spa
 
 export function SurfaceEditorDialog({ editId, onClose }: SurfaceEditorDialogProps) {
   const fieldId = useId();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { state, dispatch } = useEnergy();
   const { project } = state;
 
@@ -162,7 +163,7 @@ export function SurfaceEditorDialog({ editId, onClose }: SurfaceEditorDialogProp
             <option value="">--</option>
             {project.constructions.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name} (U={c.uValue.toFixed(3)})
+                {c.name} (U={formatNumber(c.uValue, locale, 3)})
               </option>
             ))}
           </select>

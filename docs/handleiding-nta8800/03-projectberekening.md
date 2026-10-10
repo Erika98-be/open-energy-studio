@@ -34,18 +34,18 @@ Elke opgegeven waarde vraagt een bron, zoals een tekening, productblad, normtabe
 ## Hulppanelen
 
 Naast de NTA-invoer zijn er vier hulppanelen. Ze staan bij de stap waar ze inhoudelijk horen:
-- *Invoercontrole*: Controle › Overzicht;
+- *Invoercontrole*: Controle › Controleoverzicht;
 - *Onverwarmde ruimtes*: Gebouw › Onverwarmde ruimten;
 - *NTA-warmtepompen* en de *gaswarmtepomp-referentievergelijking* (uitklapbaar): Installaties › Warmtepompen.
 
-- **Invoercontrole.** Een structuurcontrole van het projectmodel door de rekenkern: fouten, aandachtspunten en de indeling van de warmtepompen. Het paneel toont ook de herkomst van de controle (doelnorm, kernelversie en invoervingerafdruk). Het is geen NTA 8800-berekening en geen energielabel.
+- **Invoercontrole.** Een structuurcontrole van het projectmodel door de rekenkern: fouten, aandachtspunten en de indeling van de warmtepompen. Het paneel toont ook de herkomst van de controle (doelnorm, rekenkernversie en invoervingerafdruk). Het is geen NTA 8800-berekening en geen energielabel.
 - **Onverwarmde ruimtes.** Hier leg je per onverwarmde ruimte een reductiefactor b (0 t/m 1) met een bron vast. Een afgeleide b_U (8.53–8.59) geef je op via de NTA-invoer. Het paneel toont ook een diagnose van de transmissie via deze ruimtes (A·U, L·Ψ en χ met de opgegeven b); die diagnose is geen geverifieerde uitkomst.
 - **NTA-warmtepompen.** Een lijst van losse warmtepompen met brontype en bediende zones. De invoercontrole classificeert ze, maar de energieberekening gebruikt ze niet: die rekent met de opwekkers uit het NTA-invoerformulier. Bij het verwijderen van een zone verdwijnt die zone uit de lijst van bediende zones.
 - **Gaswarmtepomp-referentievergelijking.** Je laadt een case met 25 verwachte waarden (een synthetisch voorbeeld of een eigen JSON-bestand) en vergelijkt die met de conceptberekening voor gaswarmtepompen. Een overeenkomst bewijst geen NTA-conformiteit en levert geen BENG-uitkomst of label op.
 
 ## Het NTA-invoerformulier
 
-Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staan verdeeld over de werkstappen (zie [hoofdstuk 0](00-werken-met-het-programma.md#nta-invoer-in-de-stappen)); Controle › NTA-invoer toont de overige secties en het paneel *NTA 8800-berekening (Rust-kern)*. Wijzigingen gaan in één concept; **Toepassen** in de toepasbalk onderaan schrijft ze in het project, **Ongedaan maken** draait de laatste wijziging terug. Lege velden staan na het formulier in de melding **Nog leeg (n): …**. Ze gaan niet mee naar de rekenkern; een verplicht veld verschijnt na de berekening als invoergat.
+Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staan verdeeld over de werkstappen (zie [hoofdstuk 0](00-werken-met-het-programma.md#nta-invoer-in-de-stappen)); Controle › NTA-invoer toont de overige secties en het paneel *NTA 8800-berekening (rekenkern)*. Wijzigingen gaan in één concept; **Toepassen** in de toepasbalk onderaan schrijft ze in het project, **Ongedaan maken** draait de laatste wijziging terug. Lege velden staan na het formulier in de melding **Nog leeg (n): …**. Ze gaan niet mee naar de rekenkern; een verplicht veld verschijnt na de berekening als invoergat.
 
 | Onderdeel | Inhoud | Normbasis |
 |---|---|---|
@@ -53,7 +53,7 @@ Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staa
 | Gebruiksfuncties met oppervlakte | functies voor gemengde rekenzones, Bbl-toets en labelklasse | §6.5.3, Bbl art. 4.149 lid 2 |
 | Setpoints (tabel 7.13) | verwarmings- en koelsetpoint; het formulier toetst per zone aan tabel 7.13 (gewogen bij meerdere functies), knop "Tabelwaarden gebruiken" | tabel 7.13 |
 | Thermische massa (tabel 7.10) | klasse vloer en wand, plafondkolom; alleen onder 2022 en 2020+A1 ook de massa per m² gebruiksoppervlakte (kg/m²) | tabellen 7.10–7.12 |
-| Gegevens per rekenzone (Gebouw › Zones, bij meer rekenzones) | per rekenzone **Eigen gegevens voor deze rekenzone**: gebruiksfunctie en woningtype (leeg = die van het blok), delen met een andere gebruiksfunctie en hun oppervlakte, gemeenschappelijke ruimten (zie [hieronder](#gemeenschappelijke-ruimten-664)), eigen thermische massa, serres, en bij een sportfunctie in de ventilatie een zwembad. Eigen gegevens beginnen als kopie van de interne warmte, de luchtstromen en de ventilatie van het blok, want de kern neemt die dan alleen uit de zone; pas ze per zone aan | §6.3, §6.5.3, 6.6.4, tabel 7.10, 7.30b |
+| Gegevens per rekenzone (Gebouw › Rekenzones; bij utiliteit ook bij één rekenzone) | per rekenzone **Eigen gegevens voor deze rekenzone**: gebruiksfunctie en woningtype (leeg = die van het blok), delen met een andere gebruiksfunctie en hun oppervlakte, gemeenschappelijke ruimten (zie [hieronder](#gemeenschappelijke-ruimten-664)), eigen thermische massa, serres, en bij een sportfunctie in de ventilatie een zwembad. Eigen gegevens beginnen als kopie van de interne warmte, de luchtstromen en de ventilatie van het blok, want de kern neemt die dan alleen uit de zone; pas ze per zone aan | §6.3, §6.5.3, 6.6.4, tabel 7.10, 7.30b |
 | Interne warmtewinst | aantal woningen; bij utiliteit de tabelmethode of een opgegeven W/m² | 7.21–7.29, tabellen 7.2/7.3 |
 | Ramen (zonwinst) | kozijnfractie, belemmering, beweegbare zonwering (F_c, bediening) | §7.6, §17.3, 7.42/7.43 |
 | Belemmering per raam (Gebouw › Schil & ramen) | per buitenraam "Zoals project" of een eigen situatie a–g of opgegeven factoren, met bron; een raam dat niet meer in het project staat, wordt gemeld met **Verwijderen** | 7.13, §17.3.2 |
@@ -231,7 +231,7 @@ Een gemeenschappelijke ruimte, zoals een centrale entree, gang of toiletgroep, w
 - **Binnen de rekenzone** gaat de ruimte alleen naar de aangewezen functies die in die rekenzone liggen. Daarmee rekent de zone (setpoint, interne warmte, ventilatiecapaciteit, §6.5.3).
 - **Voor het gebouw** gaat de ruimte naar alle aangewezen functies. Daarmee rekenen de Bbl-eisen per functie (§5.3.1).
 
-Zo vult u het in, onder **Gebouw › Zones › Eigen gegevens voor deze rekenzone** (ook bij een project met één rekenzone):
+Zo vult u het in, onder **Gebouw › Rekenzones › Eigen gegevens voor deze rekenzone** (ook bij een project met één rekenzone):
 
 1. Geef bij de delen met een gebruiksfunctie de **eigen oppervlakte** van elke functie, zonder de gemeenschappelijke ruimte.
 2. Kies **Gemeenschappelijke ruimte toevoegen (6.6.4)** in de rekenzone waar de ruimte ligt. Vul de gebruiksoppervlakte in (NEN 2580) en de bron, bijvoorbeeld de meetstaat of tekening.

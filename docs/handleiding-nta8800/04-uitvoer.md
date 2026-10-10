@@ -3,7 +3,7 @@
 Na het toepassen van de NTA-invoer rekent de kern zelf. Dat gebeurt een korte tijd na de laatste wijziging; **Herberekenen** (Ctrl+Enter) start meteen een nieuwe run. De uitkomsten verschijnen op vier plekken:
 - de statusbalk en het tabblad *Voorbeeld* van het contextpaneel;
 - de stap Resultaten (dashboard met de subpagina's Per dienst, Per zone, Maandwaarden en Herkomst);
-- het paneel *NTA 8800-berekening (Rust-kern)* onder Controle › NTA-invoer;
+- het paneel *NTA 8800-berekening (rekenkern)* onder Controle › NTA-invoer;
 - de stap Rapport & dossier.
 
 Rekent het project in een oudere uitgave van NTA 8800, dan melden de projectstatus, het dashboard van Resultaten, het rekenpaneel, de statusbalk en het rapport "Oudere uitgave — niet voor registratie", met de uitgave waarin is gerekend (zie [hoofdstuk 10](10-normversies.md)).
