@@ -3,6 +3,8 @@ import { nl } from '../../i18n/nl';
 import { DEFAULT_NORM_VERSION } from '../nta/KernelClient';
 import { escapeHtml } from './HtmlEscaping';
 import { dutchTimeHtml } from './DutchReportText';
+import { advisor } from './NtaCalculationReport';
+import { programIdentity, programIdentityRows } from './ProgramIdentity';
 
 type PumpEntry = { context: string; pump: INtaHeatPumpInput };
 
@@ -158,6 +160,7 @@ function ntaSourceRows(value: unknown, path = 'ntaCalculation'): SourceRow[] {
 export function generateNtaInputDossierHTML(project: IProject, generatedAt: Date = new Date()): string {
   const pumps = allHeatPumps(project);
   const generatedTime = dutchTimeHtml(generatedAt);
+  const registration = project.registration;
   return `<!doctype html><html lang="nl"><head><meta charset="utf-8">
     <title>NTA 8800 invoer- en bewijsoverzicht — ${escapeHtml(project.name)}</title>
     <style>body{font:14px/1.5 system-ui,sans-serif;max-width:1100px;margin:32px auto;padding:0 20px;color:#202530}
@@ -171,6 +174,10 @@ export function generateNtaInputDossierHTML(project: IProject, generatedAt: Date
       <tr><th>Doeluitgave</th>${cell(nl[`nta.edition.${project.ntaCalculation?.normVersion ?? DEFAULT_NORM_VERSION}`])}<th>Gebouwfunctie</th>${cell(project.buildingFunction)}</tr>
       <tr><th>Adres</th>${cell(project.address || 'Niet vastgelegd')}<th>Plaats</th>${cell(project.city || 'Niet vastgelegd')}</tr>
       <tr><th>Rekenzones</th>${cell(project.zones.length)}<th>Warmtepompregistraties</th>${cell(pumps.length)}</tr>
+    </tbody></table>
+    <h2>Opname en rekenprogramma</h2><table><tbody>
+      <tr><th>Opnamedatum</th>${cell(registration?.surveyDate || 'niet ingevuld')}<th>Opnemend adviseur</th>${cell(registration?.surveyingAdvisor ? advisor(registration.surveyingAdvisor) : 'niet ingevuld')}</tr>
+      ${programIdentityRows(programIdentity(null, nl[`nta.edition.${project.ntaCalculation?.normVersion ?? DEFAULT_NORM_VERSION}`]))}
     </tbody></table>
     <h2>NTA-rekeninvoer en bronnen</h2>
     ${project.ntaCalculation ? `<table><thead><tr><th>Pad</th><th>Bron</th><th>Waarden</th></tr></thead><tbody>

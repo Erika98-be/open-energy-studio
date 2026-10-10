@@ -7,6 +7,7 @@ import { attestMark, type AttestMark } from '../nta/Attest';
 import { kernelVerdict } from '../nta/KernelVerdict';
 import { nl } from '../../i18n/nl';
 import { escapeHtml } from './HtmlEscaping';
+import { attestText, programIdentity, programIdentityRows, programText } from './ProgramIdentity';
 import { dutchCodeCell, dutchDetailHtml, dutchNumber, dutchTimeHtml, dutchTimestamp } from './DutchReportText';
 import { indicatorDecimals, kernelReportModel } from './KernelReportModel';
 import {
@@ -189,7 +190,7 @@ function introduction(doc: ReportDocument, project: IProject, assessment: Projec
       <tr><th>Rekenroute</th>${td(scope)}<th>Bouwjaar</th>${td(assessment.labelData?.general.constructionYear ?? registration?.constructionYear ?? '—')}</tr>
       <tr><th>Soort opname</th>${td(registration?.surveyType === 'detailed' ? 'detailopname' : registration?.surveyType === 'basic' ? 'basisopname' : '—')}<th>Opdrachtgever</th>${td(registration?.client ?? '—')}</tr>`)
     + doc.table('Uitgangspunten van de berekening', '', `
-      <tr><th>Bepalingsmethode</th>${td(assessment.targetNormVersion)}<th>Rekenkern</th>${td(`Open Energy Studio, rekenkernversie ${assessment.kernelVersion}`)}</tr>
+      ${programIdentityRows(programIdentity(assessment.kernelVersion, assessment.targetNormVersion, attest.attestNumber))}
       <tr><th>Status</th>${td(STATUS[assessment.status] ?? assessment.status)}<th>Attest</th>${td(assessment.attestStatus === 'unattested' ? 'niet geattesteerd (BRL 9501)' : assessment.attestStatus)}</tr>
       <tr><th>Datum rapport</th><td>${dutchTimeHtml(generatedAt)}</td><th>Invoervingerafdruk</th><td><code>${escapeHtml(assessment.inputFingerprint)}</code></td></tr>`)
     + `<div class="notice"><strong>Onverifieerde berekening — geen officieel energielabel${attest.attested ? '' : ', niet geattesteerd'}.</strong>
@@ -216,7 +217,8 @@ function results(doc: ReportDocument, project: IProject, assessment: ProjectPerf
   const labelRows = `<tr><th>Indicatieve labelklasse</th>${td(performance.indicativeLabelClass ?? '—')}<th>Labelbron</th>${td(performance.labelSource)}</tr>
     <tr><th>Primair fossiel (label)</th><td class="n">${n(performance.labelPrimaryFossilIndicatorKwhPerM2Year ?? performance.primaryFossilIndicatorKwhPerM2Year, 2)} kWh/m²·jr</td>
       <th>Hernieuwbaar aandeel (label)</th><td class="n">${n(performance.labelPrimaryFossilIndicatorKwhPerM2Year != null ? performance.labelRenewableSharePercent : performance.renewableSharePercent, 1)} %</td></tr>
-    <tr><th>CO<sub>2</sub>-emissie</th><td class="n">${n(performance.co2KgPerM2, 1)} kg/m²·jr</td><th>Warmtebehoefte (5.3a)</th><td class="n">${n(performance.chapter5?.heatingNeedKwhPerM2, 2)} kWh/m²·jr</td></tr>
+    <tr><th>CO<sub>2</sub>-emissie</th><td class="n">${n(performance.co2KgPerM2, 1)} kg/m²·jr</td><th>Nettowarmtebehoefte E<sub>H;nd</sub> (5.3a)</th><td class="n">${n(performance.chapter5?.heatingNeedKwhPerM2, 2)} kWh/m²·jr</td></tr>
+    ${residential(assessment) ? standardInsulationRow(performance) : ''}
     ${elements ? Object.entries(elements).filter(([key, value]) => value != null && typeof value !== 'object' && !STATEMENT_ELEMENTS.has(key)).map(([key, value]) =>
       `<tr><th colspan="2">${escapeHtml(LABEL_ELEMENT[key] ?? key)}</th><td colspan="2">${escapeHtml(labelElementValue(key, value))}</td></tr>`).join('') : ''}
     ${project.registration ? labelStatementRows(assessment.labelData?.indicators?.elements, project.registration.labelStatements) : ''}`;
@@ -233,7 +235,25 @@ function results(doc: ReportDocument, project: IProject, assessment: ProjectPerf
       <tr><th>A0 mogelijk</th><td colspan="3">${a0.eligible == null ? 'niet te toetsen' : a0.eligible ? 'ja (onverifieerd)' : 'nee'}</td></tr>`) : '';
   return doc.chapter('resultaten', 'Eisen en resultaten', resultTable + labelTable + a0Table + warningTable
     + `<p class="note">De gekozen lezingen van de rekenkern waar de norm meerdere uitleggen toelaat staan in de bijlage "Interpretaties".</p>`
-    + (project.registration ? registrationSection(project.registration, assessment.registration, assessment.labelData?.general.constructionYear).replace(/<h2>Registratie<\/h2>/, '<h3>Registratie</h3>') : ''));
+    // Always present: the names of the surveying and registering adviser belong on the output
+    // (BRL 9500-W §4.2, p. 17–18); without registration data the section says they are missing.
+    + registrationSection(project.registration, assessment.registration, assessment.labelData?.general.constructionYear).replace(/<h2>Registratie<\/h2>/, '<h3>Registratie</h3>'));
+}
+
+function residential(assessment: ProjectPerformanceAssessment): boolean {
+  return (assessment.derivedInput as unknown as Loose | null)?.calculationScope === 'residential';
+}
+
+/**
+ * BRL 9500-W (definition of the energieprestatie-rapport, p. 7): the report states how the net
+ * heat need relates to the Standaard voor Woningisolatie (NTA 8800 §5.3.2), at every report level.
+ */
+function standardInsulationRow(performance: BuildingPerformanceAssessment): string {
+  const indicators = performance.chapter5;
+  const value = indicators?.standardInsulationKwhPerM2 == null
+    ? 'niet bepaald door de rekenkern'
+    : `grens ${n(indicators.standardInsulationKwhPerM2)} kWh/m²·jr — ${indicators.meetsStandardInsulation == null ? 'niet te toetsen' : indicators.meetsStandardInsulation ? 'nettowarmtebehoefte binnen de standaard' : 'nettowarmtebehoefte boven de standaard'}`;
+  return `<tr><th colspan="2">Standaard voor Woningisolatie (NTA 8800 §5.3.2)</th><td colspan="2">${escapeHtml(value)}</td></tr>`;
 }
 
 /** Label elements k and l are statements, shown by `labelStatementRows`, not in the generic element rows. */
@@ -804,13 +824,15 @@ export function generateEnergyPerformanceReportHTML(project: IProject, assessmen
   const generatedAt = options.generatedAt ?? new Date();
   const attest = options.attestNumber === undefined ? attestMark() : attestMark(options.attestNumber);
   const doc = new ReportDocument();
+  const identity = programIdentity(assessment.kernelVersion, assessment.targetNormVersion, attest.attestNumber);
   const levelText = options.level === 'summary' ? 'samenvatting' : options.level === 'standard' ? 'standaard' : 'gedetailleerd';
   const runHeader = `<div class="run"><span>${escapeHtml(project.name || 'Project')} — Rapportage Energieprestatie (NTA 8800)</span>
     <span>${escapeHtml(dutchTimestamp(generatedAt))} · kern ${escapeHtml(assessment.kernelVersion)}${attest.attestNumber ? ` · attest ${escapeHtml(attest.attestNumber)}` : ''}</span></div>`;
   const cover = `<header class="cover"><h1>Rapportage Energieprestatie</h1><p class="sub">${escapeHtml(assessment.targetNormVersion)} — ${escapeHtml(project.name || 'Project')}</p>
     <dl><dt>Adres</dt><dd>${escapeHtml([project.address, project.city].filter(Boolean).join(', ') || '—')}</dd>
     <dt>Rapportniveau</dt><dd>${levelText}</dd><dt>Datum</dt><dd>${dutchTimeHtml(generatedAt)}</dd>
-    <dt>Rekenkern</dt><dd>Open Energy Studio ${escapeHtml(assessment.kernelVersion)} (${attest.attestNumber ? `BRL 9501-attest ${escapeHtml(attest.attestNumber)}` : 'niet geattesteerd'})</dd></dl>${attestMarkSlot(attest)}</header>`;
+    <dt>Rekenprogramma</dt><dd>${escapeHtml(programText(identity))}, rekenkern ${escapeHtml(assessment.kernelVersion)} (${attest.attestNumber ? `BRL 9501-attest ${escapeHtml(attest.attestNumber)}` : 'niet geattesteerd'})</dd>
+    <dt>BRL 9501-attestnummer</dt><dd>${escapeHtml(attestText(identity))}</dd></dl>${attestMarkSlot(attest)}</header>`;
   let chapters = introduction(doc, project, assessment, generatedAt, attest);
   const performance = assessment.performance;
   if (kernelVerdict(assessment) !== 'calculated' || !performance) {
@@ -850,8 +872,10 @@ export function generateEnergyPerformanceReportHTML(project: IProject, assessmen
     if (options.level !== 'summary') chapters += inputOverviewChapter(doc, assessment);
   }
   chapters += doc.chapter('versie', 'Versie en herleidbaarheid', doc.table('Versiegegevens', '', `
+      <tr><th>Rekenprogramma</th>${td(programText(identity))}</tr>
       <tr><th>Bepalingsmethode</th>${td(assessment.targetNormVersion)}</tr>
       <tr><th>Rekenkernversie</th>${td(assessment.kernelVersion)}</tr>
+      <tr><th>BRL 9501-attestnummer</th>${td(attestText(identity))}</tr>
       <tr><th>Invoervingerafdruk</th><td><code>${escapeHtml(assessment.inputFingerprint)}</code></td></tr>
       <tr><th>Rapport gegenereerd</th><td>${dutchTimeHtml(generatedAt)}</td></tr>`)
     + (performance ? `<ul class="note">${[...new Set([...performance.spaceHeating.demand.omittedCorrections, ...performance.spaceHeating.omittedTerms])]

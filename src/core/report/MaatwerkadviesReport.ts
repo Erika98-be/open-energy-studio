@@ -1,6 +1,7 @@
 import type { IProject } from '../energy/types';
 import type { MaatwerkadviesAssessment, MwaVariantResult, NtaMaatwerkadvies } from '../nta/KernelClient';
 import { escapeHtml } from './HtmlEscaping';
+import { attestText, programIdentity, programText } from './ProgramIdentity';
 import { dutchCodeCell, dutchCodeHtml, dutchDetailHtml, dutchNumber, dutchTimeHtml } from './DutchReportText';
 import { measureEvidenceNotes } from '../nta/MwaTemplates';
 import { nl } from '../../i18n/nl';
@@ -83,6 +84,17 @@ function variantRow(result: MwaVariantResult): string {
     ${n(savings?.energyCostEur)}${n(result.investmentEur)}${n(result.simplePaybackYears, 1)}${n(result.netPresentValueEur)}</tr>`;
 }
 
+/**
+ * The NCW period: the adviser's horizon, or the common one the kernel chose (the longest
+ * lifetime). BRL 9501 §4.1.3 (p. 7): the inputs of a financial figure stand with its result.
+ */
+function horizonText(definition: NtaMaatwerkadvies, assessment: MaatwerkadviesAssessment): string {
+  const given = definition.economics?.horizonYears;
+  if (given != null) return `${num(given)} jaar (opgegeven)`;
+  const used = assessment.packages[0]?.horizonYears ?? assessment.measures[0]?.horizonYears;
+  return used == null ? '—' : `${num(used)} jaar (langste levensduur van de maatregelen)`;
+}
+
 /** BRL 9500-MWA-W/U §3.1 report: current use, packages, savings, costs and advice. */
 export function generateMaatwerkadviesReportHTML(
   project: IProject,
@@ -90,6 +102,7 @@ export function generateMaatwerkadviesReportHTML(
   assessment: MaatwerkadviesAssessment,
 ): string {
   const generatedTime = dutchTimeHtml();
+  const identity = programIdentity(assessment.kernelVersion, assessment.targetNormVersion);
   const head = `<!doctype html><html lang="nl"><head><meta charset="utf-8">
     <title>Maatwerkadvies — ${escapeHtml(project.name)}</title>
     <style>body{font:14px/1.5 system-ui,sans-serif;max-width:1100px;margin:32px auto;padding:0 20px;color:#202530}
@@ -102,6 +115,7 @@ export function generateMaatwerkadviesReportHTML(
     <h2>Herleidbaarheid</h2><table><tbody>
       <tr><th>Doeluitgave</th>${cell(assessment.targetNormVersion)}<th>Rekenkernversie</th>${cell(assessment.kernelVersion)}</tr>
       <tr><th>Status</th>${cell(status(assessment.status))}<th>Atteststatus</th>${cell(status(assessment.attestStatus))}</tr>
+      <tr><th>Rekenprogramma</th>${cell(programText(identity))}<th>BRL 9501-attestnummer</th>${cell(attestText(identity))}</tr>
       <tr><th>Invoervingerafdruk</th><td colspan="3"><code>${escapeHtml(assessment.inputFingerprint)}</code></td></tr>
     </tbody></table>`;
   if (assessment.status === 'invalid' || !assessment.current) {
@@ -193,6 +207,7 @@ export function generateMaatwerkadviesReportHTML(
       <tr><th>Gastarief</th><td>€ ${num(tariffs.gasEurPerM3, 3)}/m³</td><th>Elektriciteit levering / teruglevering</th><td>€ ${num(tariffs.electricityEurPerKwh, 3)} / € ${num(tariffs.electricityExportEurPerKwh ?? 0, 3)} per kWh</td></tr>
       <tr><th>Warmte</th><td>€ ${num(tariffs.districtHeatEurPerKwh ?? 0, 3)}/kWh</td><th>Bron tarieven</th>${cell(tariffs.sourceReference)}</tr>
       <tr><th>Discontovoet / prijsstijging</th><td>${num((definition.economics?.discountRate ?? 0.03) * 100, 1)} % / ${num((definition.economics?.energyPriceChange ?? 0) * 100, 1)} %</td><th>Bron</th>${cell(definition.economics?.sourceReference ?? '—')}</tr>
+      <tr><th>Looptijd netto contante waarde</th><td>${horizonText(definition, assessment)}</td><th>Prijsstijging onderhoud / basisjaar</th><td>${num((definition.economics?.maintenancePriceChange ?? 0) * 100, 1)} % / ${escapeHtml(definition.economics?.baseYear ?? '—')}</td></tr>
     </tbody></table>
     <h3>Interpretaties van de rekenkern</h3>
     <p>De rekenkern legt zijn interpretaties vast in het Engels, zoals ze in de broncode staan; ze zijn hier ongewijzigd opgenomen.</p>

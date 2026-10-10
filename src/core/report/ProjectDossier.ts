@@ -10,6 +10,7 @@ import { labelInputSha256, relabelDeadline } from '../nta/Registration';
 import { isProductionPath } from '../nta/RelabelText';
 import { measureEvidenceNotes } from '../nta/MwaTemplates';
 import { buildEpOnlineOverview } from './EpOnlineOverview';
+import { attestText, programIdentity, type ProgramIdentity } from './ProgramIdentity';
 
 /**
  * Project dossier of an EP adviser (BRL 9500-W Bijlage 3, p. 61–63;
@@ -333,6 +334,12 @@ export interface DossierManifest {
   projectName: string;
   kernel: KernelStamp | null;
   attestStatus: string | null;
+  /**
+   * The program that made the files (Omgevingsregeling art. 5.14 lid 1 onder b; BRL 9501 §5.2
+   * and §6.1): name and program version apart from the rekenkern, and the attest number, or
+   * `attestNumberText` "nog niet toegekend" while there is none.
+   */
+  software: ProgramIdentity & { attestNumberText: string };
   files: DossierManifestEntry[];
   /** Table of contents of the evidence (Bijlage 3 "bewijsmateriaal met inhoudsopgave"): file, hash and what it supports. */
   evidence: DossierEvidenceEntry[];
@@ -356,6 +363,11 @@ export interface DossierEvidenceEntry {
 export interface DossierBundle {
   files: Record<string, Uint8Array>;
   manifest: DossierManifest;
+}
+
+function dossierSoftware(assessment: ProjectPerformanceAssessment | null | undefined): DossierManifest['software'] {
+  const identity = programIdentity(assessment?.kernelVersion, assessment?.targetNormVersion);
+  return { ...identity, attestNumberText: attestText(identity) };
 }
 
 /** Builds the dossier files and a manifest with the SHA-256 of each file. */
@@ -420,6 +432,7 @@ export async function buildProjectDossier(
     projectName: project.name,
     kernel,
     attestStatus: assessment?.attestStatus ?? null,
+    software: dossierSoftware(assessment),
     files: entries,
     evidence: evidenceEntries,
     missingEvidence,
