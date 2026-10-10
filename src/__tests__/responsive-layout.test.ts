@@ -87,4 +87,11 @@ describe('responsive layout', () => {
     expect(declarations(ntaStep, '.nta-evidence__list li')).toMatch(/grid-template-columns:\s*minmax\(0, 14rem\) minmax\(0, 1fr\) auto auto/);
     expect(declarations(media(ntaStep, '(max-width: 720px)'), '.nta-evidence__list li')).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\) auto auto/);
   });
+
+  it('gives a select with long option texts two grid columns, and one again on a narrow screen', () => {
+    // "NTA 8800:2025+C1:2026 (aangewezen)" was cut off in one column of the Algemeen block.
+    expect(declarations(nta, '.nta-form-section label[data-wide-select]')).toMatch(/grid-column:\s*span 2/);
+    expect(declarations(nta, '.nta-form-wide')).toMatch(/grid-column:\s*span 2/);
+    expect(declarations(media(nta, '(max-width: 720px)'), '.nta-form-section label[data-wide-select]')).toMatch(/grid-column:\s*auto/);
+  });
 });

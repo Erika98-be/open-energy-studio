@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Keuzelijsten met lange teksten (geen rekenwijziging)
+
+- **Uitgave NTA 8800.** De keuzelijst in het blok *Algemeen* toonde "NTA 8800:2025+C1:2026 (aangew…": de tekst paste niet in één kolom van het formulier. Alleen keuzelijsten van `SelectField` met een tekst boven 34 tekens kregen twee kolommen, en deze tekst telde precies 34 tekens.
+- **Alle keuzelijsten.** Elke sectie en de basisopname markeren nu na het tekenen de keuzelijsten waarvan de langste keuze meer dan 26 tekens telt (`markWideSelects` in `NtaFormFields.tsx`). Zo'n keuzelijst krijgt twee kolommen, ook als de sectie haar eigen keuzelijst bouwt; dat waren er ruim dertig, waaronder het type opwekker, de koudeopwekker, de serieopstelling, de ventilatie-invoer en de beweegbare zonwering. Keuzelijsten in een tabelcel houden hun kolom. Onder 720 px vensterbreedte blijft het één kolom.
+- **Handleiding.** De schermafdruk `uitgave-keuze.png` (hoofdstuk 10) is opnieuw gemaakt en toont nu het hele blok *Algemeen* met de volledige uitgave.
+- **Controle.** `select-width.test.tsx` rendert elke NTA-sectie op beide voorbeelden, in het Nederlands en het Engels, en beide opnames, en faalt op een lange keuzelijst buiten een tabel die niet twee kolommen krijgt. De test faalt zonder de markering. `responsive-layout.test.ts` bewaakt de CSS-regel.
+
 ### 10 oktober 2026 — Laatste indelingspunten en de laatste schermafdrukken (geen rekenwijziging)
 
 - **Installaties › Overzicht.** Bij 1024 px liep de rij installatiekaarten door naar een tweede regel die met een losse "›" begon. Het scheidingsteken staat nu achter een kaart; een kaart aan het eind van een regel staat tegen de rand van de lijst, zodat zijn teken wegvalt.
