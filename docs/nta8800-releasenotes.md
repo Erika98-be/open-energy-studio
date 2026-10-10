@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Gelijke actieversies in beide workflows; verzendklare brief met de NEN-vragen (geen rekenwijziging)
+
+- **Actieversies.** `release.yml` gebruikt nu dezelfde versies als `ci.yml`: `actions/checkout` en `actions/setup-node` v6, `actions/upload-artifact` v7 en `azure/trusted-signing-action` v1. Bij v1 heet de invoer voor het ondertekeningsaccount `signing-account-name`; die naam staat nu ook in `release.yml`. `src/__tests__/ci-parity.test.ts` eist dat beide workflows elke gedeelde actie met dezelfde versie vastleggen.
+- **Brief aan NEN en RVO.** [docs/nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md) zet de zes open vragen uit [nta8800-vragen-nen.md](nta8800-vragen-nen.md) in een formele brief, met per vraag de plaats in de norm (alleen nummers), de twee lezingen, het gevolg in de openbare gevallen en de vraag zelf. De gegevens van de afzender staan als invulvelden. De gereedheidslijst (E3) verwijst ernaar.
+
 ### 10 oktober 2026 — CI gelijk aan een verse lokale gate; github-release.md door het vrijgavescript (geen rekenwijziging)
 
 - **CI zonder eigen frontendbuild.** `ci.yml` (gate) en `release.yml` (verify) bouwden de frontend vóór `scripts/verify-nta.sh`. Daardoor bleef verborgen dat de gate in een verse checkout op de Tauri-stap vastliep. Die aparte stap is weg: CI draait nu alleen het gatescript, net als een lokale checkout. `src/__tests__/ci-parity.test.ts` bewaakt dat.

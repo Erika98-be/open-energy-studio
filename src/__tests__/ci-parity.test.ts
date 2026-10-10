@@ -46,4 +46,32 @@ describe('CI runs the same gate as a local checkout', () => {
   it('release-nta.sh writes the GitHub release text', () => {
     expect(read('scripts/release-nta.sh')).toContain('scripts/nta-github-release.mjs --out "$archive/github-release.md"');
   });
+
+  it('both workflows pin the same version of every action they share', () => {
+    const pins = (workflow: string) => {
+      const found = new Map<string, Set<string>>();
+      for (const [, action, version] of workflow.matchAll(/uses:\s*([^@\s]+)@(\S+)/g)) {
+        found.set(action, (found.get(action) ?? new Set()).add(version));
+      }
+      return found;
+    };
+    const ci = pins(read('.github/workflows/ci.yml'));
+    const release = pins(read('.github/workflows/release.yml'));
+    const shared = [...ci.keys()].filter((action) => release.has(action));
+    expect(shared).toEqual(expect.arrayContaining(['actions/checkout', 'actions/setup-node', 'azure/trusted-signing-action']));
+    for (const action of shared) {
+      // The action name rides along so a failure names the action that differs.
+      const versions = [...new Set([...ci.get(action)!, ...release.get(action)!])];
+      expect([action, versions]).toEqual([action, [...ci.get(action)!].slice(0, 1)]);
+    }
+  });
+
+  it('the signing step uses the input names of the pinned trusted-signing-action major', () => {
+    for (const file of ['.github/workflows/ci.yml', '.github/workflows/release.yml']) {
+      const workflow = read(file);
+      expect(workflow).toContain('azure/trusted-signing-action@v1');
+      expect(workflow).toContain('signing-account-name:');
+      expect(workflow).not.toContain('trusted-signing-account-name:');
+    }
+  });
 });
