@@ -167,9 +167,19 @@ pub struct TestsetRow {
 #[serde(rename_all = "camelCase")]
 pub struct ExpectedValue {
     pub path: String,
-    pub expected: f64,
-    pub actual: f64,
+    /// A number for a metric, the class letter for `indicativeLabelClass`.
+    pub expected: Value,
+    pub actual: Value,
     pub within_tolerance: bool,
+}
+
+impl ExpectedValue {
+    fn expected_text(&self) -> String {
+        match &self.expected {
+            Value::String(text) => text.clone(),
+            other => other.to_string(),
+        }
+    }
 }
 
 /// `isso54-v2-EPW101c` → `EP-W101c`; other ids unchanged.
@@ -221,7 +231,7 @@ pub fn row(
         };
         *delivered.entry(service.to_string()).or_insert(0.0) += kwh;
     }
-    let expected: Vec<ExpectedValue> = comparison
+    let mut expected: Vec<ExpectedValue> = comparison
         .and_then(|c| c.get("metrics"))
         .and_then(Value::as_array)
         .into_iter()
@@ -229,19 +239,27 @@ pub fn row(
         .filter_map(|metric| {
             Some(ExpectedValue {
                 path: metric.get("path")?.as_str()?.to_string(),
-                expected: metric.get("expected")?.as_f64()?,
-                actual: metric.get("actual")?.as_f64()?,
+                expected: json!(metric.get("expected")?.as_f64()?),
+                actual: json!(metric.get("actual")?.as_f64()?),
                 within_tolerance: metric.get("withinTolerance")?.as_bool()?,
             })
         })
         .collect();
-    let verdict = (!expected.is_empty()).then(|| {
-        if expected.iter().all(|value| value.within_tolerance) {
-            "binnen de band".to_string()
-        } else {
-            "buiten de band".to_string()
-        }
-    });
+    // An expected label class is part of the verdict as the comparison makes it.
+    if let Some(class) = comparison.and_then(|c| c.get("labelClass")) {
+        let text = |key: &str| class.get(key).and_then(Value::as_str).unwrap_or("");
+        expected.push(ExpectedValue {
+            path: text("path").to_string(),
+            expected: json!(text("expected")),
+            actual: json!(text("actual")),
+            within_tolerance: class.get("matches").and_then(Value::as_bool) == Some(true),
+        });
+    }
+    let verdict = verdict(
+        comparison
+            .and_then(|c| c.get("status"))
+            .and_then(Value::as_str),
+    );
     TestsetRow {
         case_id: case_id.to_string(),
         test_id: test_id(case_id),
@@ -266,6 +284,34 @@ pub fn row(
         output_sha256: sha256(&serde_json::to_vec(assessment).expect("value serializes")),
         expected,
         verdict,
+    }
+}
+
+/// The verdict of a case from the status of its reference comparison, so the
+/// overview says what the gate says: a label-class mismatch fails the case
+/// as a metric outside its band does, and a case with expectations that did
+/// not calculate is never shown as still waiting for expected values.
+pub fn verdict(status: Option<&str>) -> Option<String> {
+    match status? {
+        "compared_pass" => Some("binnen de band".into()),
+        "compared_fail" => Some("buiten de band".into()),
+        "pending_expectation" => None,
+        other => Some(format!("niet vergeleken ({other})")),
+    }
+}
+
+/// The name of a case's project file in `projecten/`. A case id is a plain
+/// name, so no file lands outside the dossier or under another case's name.
+pub fn project_file_name(case_id: &str) -> Result<String, String> {
+    let plain = !case_id.is_empty()
+        && !case_id.starts_with('.')
+        && case_id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+    if plain {
+        Ok(format!("{case_id}.oes.json"))
+    } else {
+        Err(format!("caseId is not a plain file name: {case_id:?}"))
     }
 }
 
@@ -302,7 +348,7 @@ pub fn csv(rows: &[TestsetRow]) -> String {
         let expected = row
             .expected
             .iter()
-            .map(|value| format!("{}={}", value.path, value.expected))
+            .map(|value| format!("{}={}", value.path, value.expected_text()))
             .collect::<Vec<_>>()
             .join(" ");
         out.push_str(&format!(
@@ -361,7 +407,7 @@ pub fn markdown(rows: &[TestsetRow], header: &[(&str, String)]) -> String {
         let expected = row
             .expected
             .iter()
-            .map(|value| format!("{} {}", value.path, comma(value.expected.to_string())))
+            .map(|value| format!("{} {}", value.path, comma(value.expected_text())))
             .collect::<Vec<_>>()
             .join(", ");
         out.push_str(&format!(
@@ -418,7 +464,8 @@ mod tests {
             "performance": {"needIndicatorKwhPerM2Year": 50.0, "energyByService": {"annual": [
                 {"service": "heating", "carrier": "gas", "deliveredKwh": 100.0},
                 {"service": "heating", "carrier": "el", "deliveredKwh": 5.0}]}}});
-        let comparison = json!({"metrics": [{"path": "beng1", "expected": 50.2, "actual": 50.0, "withinTolerance": true}]});
+        let comparison = json!({"status": "compared_pass",
+            "metrics": [{"path": "beng1", "expected": 50.2, "actual": 50.0, "withinTolerance": true}]});
         let row = row(
             "isso54-v2-EPW001",
             "t".into(),
@@ -439,5 +486,62 @@ mod tests {
         );
         assert!(pending.verdict.is_none() && pending.expected.is_empty());
         assert!(csv(&[pending]).lines().nth(1).unwrap().ends_with(";;"));
+    }
+
+    // Review 32: the verdict is the comparison's, not a recount of the metrics.
+    #[test]
+    fn a_label_class_mismatch_fails_the_case() {
+        let assessment = json!({"status": "calculated_legacy_edition", "performance": {}});
+        let comparison = json!({"status": "compared_fail",
+            "metrics": [{"path": "beng1", "expected": 50.0, "actual": 50.0, "withinTolerance": true}],
+            "labelClass": {"path": "indicativeLabelClass", "expected": "A", "actual": "B", "matches": false}});
+        let row = row(
+            "c",
+            String::new(),
+            "f",
+            "{}",
+            &assessment,
+            Some(&comparison),
+        );
+        assert_eq!(row.verdict.as_deref(), Some("buiten de band"));
+        assert_eq!(row.expected[1].expected, json!("A"));
+        assert!(!row.expected[1].within_tolerance);
+        assert!(csv(&[row.clone()]).contains("indicativeLabelClass=A"));
+        assert!(markdown(&[row], &[]).contains("indicativeLabelClass A"));
+    }
+
+    #[test]
+    fn a_case_with_expectations_that_did_not_calculate_is_not_pending() {
+        let assessment = json!({"status": "incomplete"});
+        let comparison = json!({"status": "calculation_unavailable", "metrics": []});
+        let row = row(
+            "c",
+            String::new(),
+            "f",
+            "{}",
+            &assessment,
+            Some(&comparison),
+        );
+        assert_eq!(
+            row.verdict.as_deref(),
+            Some("niet vergeleken (calculation_unavailable)")
+        );
+        let pending = json!({"status": "pending_expectation", "metrics": []});
+        assert!(
+            super::row("c", String::new(), "f", "{}", &assessment, Some(&pending))
+                .verdict
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn project_file_names_stay_in_the_dossier() {
+        assert_eq!(
+            project_file_name("isso54-v2-EPW101c").unwrap(),
+            "isso54-v2-EPW101c.oes.json"
+        );
+        for bad in ["", "../x", "a/b", "a\\b", ".hidden", "a b"] {
+            assert!(project_file_name(bad).is_err(), "{bad:?}");
+        }
     }
 }

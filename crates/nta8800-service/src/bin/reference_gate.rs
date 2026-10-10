@@ -539,6 +539,16 @@ fn write_testset(
     };
     let projects = dir.join("projecten");
     fs::create_dir_all(&projects).map_err(|error| error.to_string())?;
+    // The dossier lists exactly the files it writes: an earlier run's files
+    // would be counted and hashed with it in the release manifest.
+    if fs::read_dir(&projects)
+        .map_err(|error| error.to_string())?
+        .next()
+        .is_some()
+    {
+        return Err(format!("{} is not empty", projects.display()));
+    }
+    let mut file_names = HashSet::new();
     let mut rows = Vec::new();
     for path in suites {
         let bytes = fs::read(path).map_err(|error| format!("{}: {error}", path.display()))?;
@@ -549,7 +559,10 @@ fn write_testset(
             let case_id = resolved.case.case_id.clone();
             let project = resolved.case.project;
             let first = testset::calculate(&project);
-            let file_name = format!("{case_id}.oes.json");
+            let file_name = testset::project_file_name(&case_id)?;
+            if !file_names.insert(file_name.clone()) {
+                return Err(format!("Duplicate caseId: {case_id}"));
+            }
             let text = testset::project_file(&project, &first);
             // What the app sends after opening the file; the overview is its answer.
             let opened = testset::open_project_file(&text)?;
@@ -1124,6 +1137,46 @@ mod tests {
         assert!(text.contains("| suite-case | NTA 8800:2025+C1:2026 | compared_pass | `beng2` |"));
         assert!(text.contains("Gepubliceerde waarden"));
         assert!(text.contains(&case.output_sha256));
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    // Review 32: the dossier holds only the files of this run, one per case.
+    #[test]
+    fn testset_dossier_refuses_stale_files_duplicates_and_unsafe_ids() {
+        let dir = suite_dir();
+        let write_suite = |cases: Vec<Value>| {
+            let suite = dir.join("suite.json");
+            fs::write(
+                &suite,
+                json!({"suiteId":"s", "description":"d", "cases":cases}).to_string(),
+            )
+            .unwrap();
+            suite
+        };
+        let suite = write_suite(vec![suite_case(8.2, json!([]))]);
+        let report = run_with(&[], std::slice::from_ref(&suite), None);
+        let out = dir.join("dossier");
+        assert_eq!(
+            write_testset(&out, None, std::slice::from_ref(&suite), &report),
+            Ok(1)
+        );
+        let rows: Value =
+            serde_json::from_slice(&fs::read(out.join("testset.json")).unwrap()).unwrap();
+        assert_eq!(rows[0]["verdict"], "binnen de band");
+        // A second run into the same folder would mix in the first run's files.
+        let again = write_testset(&out, None, std::slice::from_ref(&suite), &report);
+        assert!(again.unwrap_err().contains("is not empty"));
+
+        let suite = write_suite(vec![suite_case(8.2, json!([])), suite_case(8.2, json!([]))]);
+        let duplicate = write_testset(&dir.join("d2"), None, std::slice::from_ref(&suite), &report);
+        assert!(duplicate.unwrap_err().contains("Duplicate caseId"));
+
+        let mut escaping = suite_case(8.2, json!([]));
+        escaping["caseId"] = json!("../escaped");
+        let suite = write_suite(vec![escaping]);
+        let unsafe_id = write_testset(&dir.join("d3"), None, std::slice::from_ref(&suite), &report);
+        assert!(unsafe_id.unwrap_err().contains("not a plain file name"));
+        assert!(!dir.join("d3/escaped.oes.json").exists());
         fs::remove_dir_all(dir).unwrap();
     }
 

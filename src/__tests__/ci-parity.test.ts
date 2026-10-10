@@ -47,6 +47,14 @@ describe('CI runs the same gate as a local checkout', () => {
     expect(read('scripts/release-nta.sh')).toContain('scripts/nta-github-release.mjs --out "$archive/github-release.md"');
   });
 
+  it('release-nta.sh stamps the testset dossier with the commit as the gate does, dirty marker included', () => {
+    const script = read('scripts/release-nta.sh');
+    const step = script.slice(script.indexOf('testsetdossier ISSO 54'), script.indexOf('packages=()'));
+    expect(step).toContain('--commit "$testset_commit"');
+    expect(step).toContain('(met lokale wijzigingen)');
+    expect(read('scripts/verify-nta.sh')).toContain('(met lokale wijzigingen)');
+  });
+
   it('both workflows pin the same version of every action they share', () => {
     const pins = (workflow: string) => {
       const found = new Map<string, Set<string>>();

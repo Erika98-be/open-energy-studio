@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 32: oordeel in het testsetdossier gelijk aan de vergelijking, dossiermap beveiligd (geen rekenwijziging)
+
+- **Oordeel.** Het testsetdossier telde alleen de getallen na. Een afwijkende labelklasse (`compared_fail` bij getallen binnen de band) stond er daardoor als *binnen de band*. Een deeltest met verwachting die niet rekende, stond er met een leeg oordeel, alsof de verwachting nog ontbrak. Het oordeel komt nu uit de status van de vergelijking: *binnen de band*, *buiten de band* of *niet vergeleken (status)*. De verwachte labelklasse staat in de kolom *verwacht*.
+- **Dossiermap.** `reference_gate --testset-dir` weigert nu een `caseId` die geen gewone bestandsnaam is (zoals `../x`), een dubbele `caseId` en een map `projecten/` die al bestanden bevat. Zo komt geen bestand buiten het dossier terecht, overschrijft geen deeltest een andere, en telt het manifest alleen de bestanden van deze run.
+- **Commit.** Bij een proefvrijgave uit een werkmap met wijzigingen schrijft `release-nta.sh` in het dossier nu "(met lokale wijzigingen)" achter de commit, net als de gate.
+- **Getoetst.** Twee runs van het dossier over alle 260 deeltesten geven bytegelijke bestanden. Tests: `testset.rs` (labelklasse, niet berekend, bestandsnamen), `reference_gate` (oude bestanden, dubbele en onveilige `caseId`) en `ci-parity.test.ts` (commitstempel).
+
 ### 10 oktober 2026 — Testsetdossier ISSO 54 voor de attesteringsinstelling (geen rekenwijziging)
 
 - **Waarom.** BRL 9501 §3.3 (p. 5–6): de instelling controleert een deel van de uitkomsten en voert minstens één test per deelgebied zelf in; invoer en uitkomst van elke deeltest moeten beschikbaar zijn.
