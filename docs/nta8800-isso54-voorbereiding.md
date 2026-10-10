@@ -263,7 +263,8 @@ De 11 realistische gebouwen (EPWRealB01 tot en met EPWRealD05 en EPURealB01) zij
    Daarna het blok `pending` weghalen. Een geval met beide wordt geweigerd. Dit kan in `scripts/isso54-suite.py` met een tabel per test-id.
 5. **Meer grootheden vergelijken.** Grootheden die 5.0 per deeltest vraagt en die de kern al levert, zoals de energie per dienst en drager, toevoegen. Het referentieharnas kent daarvoor de paden `serviceAnnual/<dienst>/<drager>/usedKwh` en verwante paden (`crates/nta8800-core/src/reference.rs`).
 6. **Draaien.** De gate draait de suite. `reference-report.md` in `nta-evidence/gate/reference/` geeft per deeltest de verwachting, de uitkomst, het verschil en het oordeel, met de commit, `KERNEL_VERSION` en de SHA-256 van invoer en uitvoer. Dat rapport is het bewijs voor BRL 9501 §3.3, §4.2, §6.2 en §6.3.
-7. **Afwijkingen verklaren.** Elke afwijking boven de band verklaren en vastleggen. Ligt de oorzaak in de testset, dan dat melden aan InstallQ en ISSO.
+7. **Testsetdossier.** `scripts/release-nta.sh` schrijft per vrijgave `release/<tag>/testset/` met elke deeltest als projectbestand en een uitkomstenoverzicht (zie het [testprotocol](nta8800-testprotocol.md), §3). Zodra de suite `expected` heeft, vult het overzicht de kolommen *verwacht* en *oordeel* zelf. Bij een nieuwe testreeks het onderwerp toevoegen aan `training-data/isso54/onderwerpen.json` (eigen woorden).
+8. **Afwijkingen verklaren.** Elke afwijking boven de band verklaren en vastleggen. Ligt de oorzaak in de testset, dan dat melden aan InstallQ en ISSO.
 
 ## Verschillen tussen versie 2.0 en 5.0
 

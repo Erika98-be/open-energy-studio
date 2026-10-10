@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Testsetdossier ISSO 54 voor de attesteringsinstelling (geen rekenwijziging)
+
+- **Waarom.** BRL 9501 §3.3 (p. 5–6): de instelling controleert een deel van de uitkomsten en voert minstens één test per deelgebied zelf in; invoer en uitkomst van elke deeltest moeten beschikbaar zijn.
+- **Wat.** `reference_gate --testset-dir <map> [--testset-topics <bestand>]` schrijft per suitegeval een projectbestand dat het programma opent (`projecten/<caseId>.oes.json`, het eigen bestandsformaat met rekenkernstempel) en een uitkomstenoverzicht (`testset.md`, `.csv`, `.json`) met onderwerp, uitgave, status, BENG 1/2/3, TOjuli, geleverde energie per dienst, SHA-256 van invoer en uitvoer, en de kolommen *verwacht* en *oordeel*, die zich vullen zodra een deeltest een verwachting heeft. De onderwerpen per testreeks staan in eigen woorden in `training-data/isso54/onderwerpen.json`.
+- **Bij elke vrijgave.** `scripts/release-nta.sh` maakt het dossier in `release/<tag>/testset/` (ook bij `--dry-run`); het manifest telt de projectbestanden en geeft de SHA-256 van het overzicht.
+- **Getoetst.** De getallen komen van het projectbestand zoals het is weggeschreven en weer geopend, via de bewerking van de HTTP-route; voor alle 260 deeltesten gelijk aan het referentierapport. `crates/nta8800-service/tests/testset_roundtrip.rs` (twaalf deeltesten, woning en utiliteit) en `src/__tests__/testset-project-files.test.ts` (de app opent drie bestanden en stuurt het project ongewijzigd naar de kern).
+
 ### 10 oktober 2026 — UI-tests bestand tegen een belaste machine (geen rekenwijziging)
 
 - **Wat er misging.** In gates naast andere gates faalden UI-tests die los wel slaagden: `ux-findings.test.tsx` (findBy met de standaard 1 s, terwijl een kernantwoord al 400 ms debounce heeft), `workflow-e2e.test.tsx` (rapportvoorbeeld via waitFor met 1 s), `workflow-e2e-040.test.tsx` (testlimiet van 60 s voor een hele werkstroom) en `large-project-ui.test.tsx` (vaste tijdsbudgetten).
