@@ -28,6 +28,8 @@ export const existingLabelsNl: Record<string, string> = {
   'opname.resultCard.issues_one': '{{count}} fout in de opname',
   'opname.resultCard.issues_other': '{{count}} fouten in de opname',
   'opname.resultCard.defaults': '{{count}} waarde(n) forfaitair',
+  'opname.resultCard.defaults_one': '{{count}} waarde forfaitair',
+  'opname.resultCard.defaults_other': '{{count}} waarden forfaitair',
   'opname.resultCard.details': 'Details en forfaitaire waarden',
   'opname.sectionOutcome': 'Uitkomst voor dit onderdeel',
   'opname.sectionOutcome.calculated': 'Opname doorgerekend:',

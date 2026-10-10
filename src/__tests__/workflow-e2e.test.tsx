@@ -162,7 +162,7 @@ describe('workflow end to end, default edition', () => {
     await user.click(await main().findByRole('button', { name: 'Take over into project model' }));
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByText('Take the survey over into the project model')).toBeInTheDocument();
-    expect(dialog.getByText(/\d+ change\(s\)/)).toBeInTheDocument();
+    expect(dialog.getByText(/\d+ changes?\b/)).toBeInTheDocument();
     await user.click(dialog.getByRole('button', { name: 'Take over into draft' }));
     expect(await screen.findByText('Survey taken over into the draft; apply it with the bar at the bottom.')).toBeInTheDocument();
 

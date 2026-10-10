@@ -121,8 +121,12 @@ export const evidenceLinkLabelsEn: Record<string, string> = {
   'evidenceLink.elementHint': 'Link drawings, photos or declarations that support this element.',
   'evidenceLink.supports': 'Supports',
   'evidenceLink.dangling': '{{count}} source reference(s) to evidence no longer in the register',
+  'evidenceLink.dangling_one': '{{count}} source reference to evidence that is no longer in the register',
+  'evidenceLink.dangling_other': '{{count}} source references to evidence that is no longer in the register',
   'evidenceLink.unused': 'not linked',
   'evidenceLink.unresolved': '{{count}} link(s) to an element or survey item no longer in the project',
+  'evidenceLink.unresolved_one': '{{count}} link to an element or survey item that is no longer in the project',
+  'evidenceLink.unresolved_other': '{{count}} links to an element or survey item that are no longer in the project',
   'evidenceLink.unresolvedItem': 'no longer in the project',
 
   'opname.takeover.button': 'Take over into project model',
