@@ -300,6 +300,25 @@ fn calculate_project_performance_blocking(
     )
 }
 
+/// What changes for the project in edition `norm_version` (default 2025+C1);
+/// the project keeps its own edition.
+#[tauri::command]
+async fn compare_project_editions(
+    project: Value,
+    norm_version: Option<Value>,
+) -> Result<Value, String> {
+    off_main(move || compare_project_editions_blocking(project, norm_version)).await
+}
+
+fn compare_project_editions_blocking(
+    project: Value,
+    norm_version: Option<Value>,
+) -> Result<Value, String> {
+    let target = requested(norm_version)?.unwrap_or_default();
+    let report = nta8800_core::edition_switch::compare_project_editions(&project, target);
+    serde_json::to_value(report).map_err(|error| error.to_string())
+}
+
 #[tauri::command]
 async fn diagnose_declared_heating_table(
     input: nta8800_core::declared_heating_table::DeclaredHeatingTableInput,
@@ -1047,6 +1066,7 @@ pub fn run() {
             calculate_constructions,
             calculate_building_performance,
             calculate_project_performance,
+            compare_project_editions,
             kernel_interpretations,
             diagnose_bacs_draft,
             diagnose_indicators_draft,
@@ -1118,6 +1138,18 @@ mod tests {
         let error =
             calculate_project_performance_blocking(project, Some(json!("2024"))).unwrap_err();
         assert!(error.starts_with("norm_version_conflict: "), "{error}");
+    }
+
+    #[test]
+    fn edition_comparison_keeps_the_project_and_targets_the_request() {
+        let report =
+            compare_project_editions_blocking(fixture(DWELLING), Some(json!("2022"))).unwrap();
+        assert_eq!(report["fromNormVersion"], "2025+C1");
+        assert_eq!(report["toNormVersion"], "2022");
+        assert_eq!(report["adjustedProject"]["ntaCalculation"]["normVersion"], "2022");
+        let error =
+            compare_project_editions_blocking(fixture(DWELLING), Some(json!("2019"))).unwrap_err();
+        assert!(error.starts_with("invalid_norm_version: "), "{error}");
     }
 
     #[test]

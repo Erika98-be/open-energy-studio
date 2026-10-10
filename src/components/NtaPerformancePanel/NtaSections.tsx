@@ -10,7 +10,8 @@
 import { NumberInput } from '../ui/Field';
 import { ThermalMassPerM22022Field } from './NtaEdition2022Fields';
 import type { ComponentType } from 'react';
-import { DEFAULT_NORM_VERSION, IMPLEMENTED_NORM_VERSIONS } from '../../core/nta/KernelClient';
+import { DEFAULT_NORM_VERSION } from '../../core/nta/KernelClient';
+import { EditionSwitchField } from './NtaEditionSwitch';
 import type { IProject } from '../../core/energy/types';
 import type { StepId } from '../../core/navigation/routes';
 import { HeatingEmission2023Fields } from './NtaEdition2023Fields';
@@ -288,8 +289,7 @@ function GeneralSection(props: NtaSectionProps) {
   const { draft } = props;
   const f = fieldOf(props);
   return <>
-    <SelectField {...f} path={['normVersion']} label={t('nta.form.normVersion')} fallback={DEFAULT_NORM_VERSION}
-      options={IMPLEMENTED_NORM_VERSIONS.map((edition) => [edition, t(`nta.edition.${edition}`)])} />
+    <EditionSwitchField draft={draft} project={props.project} change={props.change} update={props.update} />
     {read(draft, ['normVersion']) != null && read(draft, ['normVersion']) !== DEFAULT_NORM_VERSION
       && <p className="nta-form-note" role="note">{t('nta.form.normVersionLegacy')}</p>}
     <SelectField {...f} path={['calculationScope']} label={t('nta.form.scope')}
