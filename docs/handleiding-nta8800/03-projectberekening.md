@@ -223,6 +223,8 @@ Zo vult u het in, onder **Gebouw › Zones › Eigen gegevens voor deze rekenzon
 2. Kies **Gemeenschappelijke ruimte toevoegen (6.6.4)** in de rekenzone waar de ruimte ligt. Vul de gebruiksoppervlakte in (NEN 2580) en de bron, bijvoorbeeld de meetstaat of tekening.
 3. Vink de functies aan die op de ruimte zijn aangewezen. Vinkt u niets aan, dan geldt de ruimte voor alle functies van het gebouw.
 
+![Eigen gegevens van een rekenzone met drie delen met een eigen gebruiksoppervlakte en een gemeenschappelijke ruimte van 49,2 m² die is aangewezen op kantoorfunctie, bijeenkomstfunctie overig en gezondheidszorgfunctie overig](img/gemeenschappelijke-ruimte.png)
+
 De rekenkern verdeelt de ruimte en legt de verdeling vast in de uitkomst (`commonSpaces`). Hij schrijft de verdeelde oppervlakten in de functies van de rekenzone en in de ventilatiefuncties van die zone (hoofdstuk 11), en, als u ze niet zelf hebt opgegeven, ook in de Bbl-functies en de labelfuncties (beide met de gebouwverdeling). Een zwembad bij een sportfunctie blijft bij die functie; staat de sportfunctie er in twee delen, met en zonder zwembad, dan houden die delen hun verhouding. Ook de oppervlakten per functie voor tapwater en verlichting kan de kern invullen. Vink daarvoor bij **Tapwater** en bij **Verlichting** aan: **Oppervlakten per functie uit de gemeenschappelijke ruimten laten verdelen (6.6.4)**. De lijst blijft dan leeg en de kern neemt de verdeling binnen de rekenzone:
 
 - **Verlichting:** per rekenzone de verdeelde oppervlakten van die zone. De branduren t_D en t_N en het forfaitaire vermogen P_n;spec wegen naar de functies die in de rekenzone liggen (hoofdstuk 14, 2025+C1 p. 657 en 661).

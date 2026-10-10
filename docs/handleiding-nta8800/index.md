@@ -40,7 +40,7 @@ De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-document
 
 ## Nog te doen: schermafdrukken
 
-Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. Ze zijn gemaakt vóór 8 oktober 2026. Voor deze onderdelen is nog geen schermafdruk:
+Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste zijn gemaakt vóór 8 oktober 2026. Op 10 oktober 2026 kwamen erbij: het venster bij een wissel van uitgave (`uitgave-wisselen.png`, hoofdstuk 10), de gemeenschappelijke ruimte van een rekenzone (`gemeenschappelijke-ruimte.png`, hoofdstuk 3) en *Vloeren op de grond* bij het overnemen van een opname (`overnemen-vloeren.png`, hoofdstuk 2). Die drie tonen het onderdeel los, met het voorbeeldkantoor, het voorbeeld van een tussenwoning en een vastgelegd antwoord van de rekenkern. Voor deze onderdelen is nog geen schermafdruk:
 - de keuzelijst *Uitgave NTA 8800* en de melding "Oudere uitgave — niet voor registratie" onder Resultaten ([hoofdstuk 10](10-normversies.md));
 - *Gebouw › Schil & ramen* met de tabel *Belemmering per raam*;
 - *Installaties › Koeling* met het formulier van bijlage AA;
@@ -51,7 +51,4 @@ Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. Ze zijn g
 - de ketelhulpenergie en de WKK-omzettingsgetallen uit een kwaliteitsverklaring, en de gedeclareerde f_ctrl bij de ventilatie;
 - *Verklaringen voor het energielabel* (elementen k en l) in de stap Registratie;
 - de uitkomst bovenaan een onderdeel van de basisopname na **Opname doorrekenen**;
-- het venster *Handleiding* in de app;
-- het overzicht bij een wissel van uitgave ([hoofdstuk 10](10-normversies.md));
-- *Gemeenschappelijke ruimte toevoegen (6.6.4)* bij de eigen gegevens van een rekenzone ([hoofdstuk 3](03-projectberekening.md));
-- *Vloeren op de grond* bij *Overnemen in projectmodel* ([hoofdstuk 2](02-basisopname.md)).
+- het venster *Handleiding* in de app.

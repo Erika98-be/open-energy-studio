@@ -16,6 +16,8 @@ Kies je in de keuzelijst een andere uitgave, dan rekent de rekenkern het project
 - **anders leest**, zoals *biomassa boven de grens*, waarvan de grens per uitgave verschilt;
 - en welke **nieuwe waarschuwingen** de gekozen uitgave geeft.
 
+![Venster Uitgave van NTA 8800 wijzigen bij de overstap van het voorbeeldkantoor van 2025+C1 naar 2020+A1: twee geweigerde en twee niet gebruikte invoervelden, elk met omschakelpunt, en de knoppen Annuleren, Alleen uitgave wijzigen en Automatisch aanpassen en wijzigen](img/uitgave-wisselen.png)
+
 Elke regel noemt de melding, het invoerpad, het omschakelpunt uit [`docs/nta8800-normversies.md`](../nta8800-normversies.md) (bijvoorbeeld "Punt 59") en wat je eraan kunt doen. Met **Ga naar** sluit je het venster zonder de uitgave te wijzigen en ga je naar het veld. Onderaan staat het aantal omschakelpunten zonder eigen invoer: daar veranderen alleen getallen of routes, zoals de CO₂-factoren van tabel 5.3.
 
 Je hebt drie knoppen:
