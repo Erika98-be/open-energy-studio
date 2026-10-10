@@ -80,6 +80,7 @@ Dat wijkt bewust af van "alle parameters doorgeven". De kern rekent synchroon op
 | 16 | Tabel E.11/E.12 biobased λ, riet | vlas/schapenwol/katoen 0,050, kokos 0,055, stro 0,060, hennep 0,100; riet 0,200 geen isolatie (p. 791) | p. 810 | `ForfaitMaterial::lambda` |
 | 17 | (I.3) rieten dak | d/0,2 (p. 814) | d/0,105 (p. 833) | `ForfaitOpaque::calculate` |
 | 18 | (W.9) ondergrens noemer boosterwarmtepomp | geen (p. 1103) | ≥ E_ls (p. 1123) | `calculate_booster` |
+| 18a | P.3 item 6 oppervlaktewater en andere LT-bronnen als collectieve bron | alleen bodem en grondwater (p. 916) | ruimere lijst (p. 936) | `wide_collective_low_temperature_sources`; geen eigen invoer (zie "Niet omgeschakeld") |
 
 ## Verschillen 2023 → 2024 die de kern omschakelt
 

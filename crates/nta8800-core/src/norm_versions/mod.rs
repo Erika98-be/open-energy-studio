@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 use std::cell::Cell;
 
 pub mod request;
+pub mod switches;
 mod v2020a1;
 mod v2022;
 mod v2023;
@@ -147,7 +148,7 @@ pub fn supported_editions() -> Vec<EditionInfo> {
 }
 
 /// Route of annex AA (TOjuli capacity proof) per edition.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum AnnexAaVariant {
     /// 2024 p. 1115–1127: July monthly irradiance, SWM step and the t_max
     /// table by orientation.
@@ -157,7 +158,7 @@ pub enum AnnexAaVariant {
 }
 
 /// Collective heat-pump source route (9.6.3.1.3 / 9.6.8.1.1.2.3).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum HeatPumpSourceRoute {
     /// 2024 p. 323, with INT-V1: every source of at least 15 °C counts as
     /// external heat; source auxiliary energy Q/EER with EER 23 (aquifer
@@ -184,7 +185,7 @@ impl HeatPumpSourceRoute {
 }
 
 /// Table 13.18 lookup between columns.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum Table1318Lookup {
     /// 2024 p. 614: no interpolation rule; the column at or below the demand
     /// is used (interpretation, see docs/nta8800-normversies.md).
@@ -194,8 +195,10 @@ pub enum Table1318Lookup {
 }
 
 /// Version-dependent values and routes. Each field names the place where it
-/// switches; the edition files give the value and the page.
-#[derive(Debug, Clone, Copy, PartialEq)]
+/// switches; the edition files give the value and the page. Serialized
+/// with the field names, so [`switches`] can list the fields two editions
+/// differ in.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct NormProfile {
     pub version: NormVersion,
     /// 5.5.8/15.3: f_BACS 1,05 for utility buildings without adequate BACS.
