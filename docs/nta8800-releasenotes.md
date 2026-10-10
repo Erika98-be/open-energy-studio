@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — Review 31: programmaversie op één plek bijgehouden (geen rekenwijziging)
+
+- **Versie ophogen.** `npm run bump` (`scripts/bump-version.js`) zette de programmaversie in `package.json`, `tauri.conf.json` en `src-tauri/Cargo.toml`, maar niet in `src-tauri/Cargo.lock`. De gate bouwt met `--locked` en zou na het ophogen falen. Het script werkt nu ook de lockfile bij.
+- **Eén versie overal.** Nieuwe test `review31-output-identity.test.ts`: de programmaversie is gelijk in `package.json`, het desktoppakket, `Cargo.toml` en `Cargo.lock`, en gelijk aan wat de rapporten en het leveringsdocument noemen. Het leveringsdocument gebruikt voor een ontbrekend attestnummer dezelfde woorden als de rapporten.
+- **Getoetst en in orde:** escaping van namen en vakbekwaamheidsnummers van de adviseurs in de rapportage, het rekenrapport en het invoeroverzicht; de Standaard voor Woningisolatie alleen bij woningen; het blok `berekening` laat de XML-vorm van het EP-Online-overzicht ongemoeid. Het attestdossier en hoofdstuk 7 van de handleiding beschrijven het blok `berekening` nu.
+
 ### 10 oktober 2026 — Uitvoereisen BRL 9500-W/U en BRL 9501 nagelopen (geen rekenwijziging)
 
 - **Overzicht.** Nieuw document [uitvoereisen](nta8800-uitvoereisen.md): 22 eisen aan de uitvoer, per document met bron (paragraaf en pagina) en status. 20 voldaan, het attestnummer als plaatshouder, de XML-registratie bij EP-Online extern.
