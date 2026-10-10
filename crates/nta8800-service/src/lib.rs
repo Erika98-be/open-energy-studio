@@ -7,6 +7,7 @@
 
 pub mod http;
 pub mod operations;
+pub mod testset;
 
 use axum::{extract::Json, http::StatusCode};
 use serde::Serialize;
