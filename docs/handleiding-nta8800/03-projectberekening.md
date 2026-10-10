@@ -79,6 +79,12 @@ Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staa
 | PV (§16) | piekvermogen (uit panelen volgens 16.4b, uit tabel 16.1, of een opgegeven K_pk in W/m² volgens 16.4a met het datablad als bron), belemmering per systeem. Een opgegeven K_pk boven 300 W/m² geeft bij registratie een waarschuwing (`plausibility_pv_peak_power`): controleer het datablad. Boven 400 W/m² weigert de kern de invoer (`pv_peak_power_invalid`). Beide grenzen zijn keuzes van het programma; 16.4 stelt geen maximum; een PV-systeem dat het hele gebouw deelt (**PV-systeem gedeeld door het gebouw**) met de gebruiksoppervlakte van het gebouw en bron | hoofdstuk 16, §17.3, 6.6.7 |
 | Bevestigingen | f_BACS met bron, BACS-blok, externe levering (bijlage P), alle posten en opwekking opgenomen, opgegeven stromen, C1-ventilatie, opslag | §5.5, §5.8, 5.14a, bijlage P |
 
+![Tabel Belemmering per raam onder Gebouw › Schil & ramen: per buitenraam Zoals project of een eigen situatie, hier een overstek boven de ramen van de achtergevel met de relatieve hoogte h/a en de bron](img/belemmering-per-raam.png)
+
+![Tabel Zonwering per raam: alle ramen Zoals project behalve het dakraam, dat een eigen handbediende zonwering heeft met type en bron](img/zonwering-per-raam.png)
+
+![Tabel Glas per raam: alle ramen rekenen met hun eigen g-waarde behalve het dakraam, waarvoor een glastype van tabel 7.4 of vaste lamellen (7.41a) wordt gekozen](img/glas-per-raam.png)
+
 ### Opwekkers voor ruimteverwarming
 
 Het formulier kent deze opwekkers:
