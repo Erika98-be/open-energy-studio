@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — CI gelijk aan een verse lokale gate; github-release.md door het vrijgavescript (geen rekenwijziging)
+
+- **CI zonder eigen frontendbuild.** `ci.yml` (gate) en `release.yml` (verify) bouwden de frontend vóór `scripts/verify-nta.sh`. Daardoor bleef verborgen dat de gate in een verse checkout op de Tauri-stap vastliep. Die aparte stap is weg: CI draait nu alleen het gatescript, net als een lokale checkout. `src/__tests__/ci-parity.test.ts` bewaakt dat.
+- **Uitgebrachte releasenotes ook in CI.** De verify-stap van `release.yml` controleert nu, net als `scripts/release-nta.sh`, dat de uitgebrachte secties van de releasenotes sinds de vorige tag ongewijzigd zijn.
+- **Het `.deb` uit het vrijgavescript blijft staan.** De build-stap van `release.yml` uploadde met `--clobber`, zodat het Linux-`.deb` dat de gebruiker met het leveringsdocument had geüpload werd vervangen door een ander bestand met een andere SHA-256. Bestanden die al bij de release staan, worden nu niet meer vervangen.
+- **github-release.md uit het script.** `scripts/release-nta.sh` schrijft de tekst voor de GitHub-release zelf (`scripts/nta-github-release.mjs`): versies, attest-status, de items van de rekenkernsectie en de SHA-256 van pakketten, handleiding, leveringsdocument en testrapport. Stap 5 van de vrijgavelijst in `docs/nta8800-versiebeheer.md` is daarmee een controle in plaats van handwerk.
+- **MSRV-cache.** De gate-cache in `ci.yml` neemt `target/msrv-core/` mee.
+
 ### 10 oktober 2026 — Proefuitgave 0.3.0 / rekenkern 0.4.0: gate bouwt de frontend vóór Tauri (geen rekenwijziging)
 
 - **Gate in een verse checkout.** `scripts/verify-nta.sh` bouwde de frontend pas als laatste stap, terwijl de Tauri-stappen `dist/` al nodig hebben (`generate_context!`). In een verse checkout, en dus bij `scripts/release-nta.sh` vanaf een schone clone, liep de gate daardoor vast. De stap "frontend bundle" staat nu vóór "Tauri check"; `src/__tests__/gate-order.test.ts` bewaakt die volgorde. De CI-workflows bouwden al vooraf en werken ongewijzigd.

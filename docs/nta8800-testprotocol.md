@@ -68,7 +68,7 @@ CARGO_NET_OFFLINE=true NTA_SKIP_MSRV=1 scripts/verify-nta.sh   # zonder, voor tu
 
 - rustfmt en clippy (`-D warnings`) op kern en service;
 - de TypeScript-controle (`npx tsc --noEmit`);
-- de frontendbundel (`npm run build`);
+- de frontendbundel (`npm run build`), vóór de Tauri-stappen; CI roept alleen `scripts/verify-nta.sh` aan en bouwt de frontend niet apart (`ci-parity.test.ts`);
 - de stap "project-form states through the kernel": de documenten die de formulierbewaking schreef, gaan door `tests/project_form_guard.rs`.
 
 **Belangrijkste frontendtests (k):**
@@ -207,6 +207,7 @@ De herstellingen staan per ronde in de [releasenotes](nta8800-releasenotes.md).
 - het referentierapport (`evidence/reference/reference-report.json` en `.md`);
 - de formulierdocumenten (`evidence/form-guard/`);
 - de pakketten, de handleiding, het leveringsdocument en `manifest.json`;
+- de tekst voor de GitHub-release (`github-release.md`), met de SHA-256 van de bestanden die bij de release horen;
 - `SHA256SUMS`;
 - een vooringevuld testrapport (`testrapport.md`) volgens het sjabloon [nta8800-testrapport](templates/nta8800-testrapport.md), met versies, commit, tag, datum en gatestatus al ingevuld.
 
