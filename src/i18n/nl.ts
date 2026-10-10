@@ -648,6 +648,7 @@ export const nl: Record<string, string> = {
   'nta.editionSwitch.loading': 'Het project wordt in beide uitgaven doorgerekend…',
   'nta.editionSwitch.unavailable': 'De vergelijking is niet beschikbaar: de rekenkern is niet bereikbaar. U kunt de uitgave toch wijzigen; de kern meldt daarna elke afwijking afzonderlijk.',
   'nta.editionSwitch.none': 'Er verandert geen invoer. Alleen de getallen en routes van de uitgave gelden.',
+  'nta.editionSwitch.summary': '{{count}} punten; {{automatic}} automatisch aan te passen, daarna {{open}} voor u.',
   'nta.editionSwitch.summary_one': '{{count}} punt; {{automatic}} automatisch aan te passen, daarna {{open}} voor u.',
   'nta.editionSwitch.summary_other': '{{count}} punten; {{automatic}} automatisch aan te passen, daarna {{open}} voor u.',
   'nta.editionSwitch.category.refused': 'Geweigerd in de nieuwe uitgave',

@@ -648,6 +648,7 @@ export const en: Record<string, string> = {
   'nta.editionSwitch.loading': 'Calculating the project in both editions…',
   'nta.editionSwitch.unavailable': 'The comparison is not available: the kernel cannot be reached. You can still change the edition; the kernel then reports each difference on its own.',
   'nta.editionSwitch.none': 'No input changes. Only the values and routes of the edition apply.',
+  'nta.editionSwitch.summary': '{{count}} items; {{automatic}} can be adjusted automatically, {{open}} remain for you.',
   'nta.editionSwitch.summary_one': '{{count}} item; {{automatic}} can be adjusted automatically, {{open}} remain for you.',
   'nta.editionSwitch.summary_other': '{{count}} items; {{automatic}} can be adjusted automatically, {{open}} remain for you.',
   'nta.editionSwitch.category.refused': 'Refused in the new edition',
