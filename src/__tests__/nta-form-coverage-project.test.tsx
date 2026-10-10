@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { FieldPathPrefixProvider, write, type Draft, type Path } from '../components/NtaPerformancePanel/NtaFormFields';
 import { CommonSpaceFillField, LightingZoneField, SwimmingPoolFields, ZoneDataFields } from '../components/NtaPerformancePanel/NtaZoneData';
 import { NtaLightingSection } from '../components/NtaPerformancePanel/NtaExtraSections';
@@ -83,7 +83,10 @@ describe('project forms that had no form', () => {
     fireEvent.change(screen.getByLabelText(/Source of the common space/), { target: { value: 'NEN 2580-meetstaat' } });
     // No function ticked: all functions of the building; ticking writes the list, unticking the last drops it.
     expect('servedFunctions' in draft().zoneData[0].commonSpaces[0]).toBe(false);
-    const office = screen.getAllByLabelText('Office').find((element) => (element as HTMLInputElement).type === 'checkbox')!;
+    // Review 28: only utility functions can be served; a residential part is a separate calculation.
+    const fieldset = screen.getByText(/Usable floor area of the common space/).closest('fieldset')!;
+    expect(within(fieldset).queryByLabelText('Residential')).toBeNull();
+    const office =screen.getAllByLabelText('Office').find((element) => (element as HTMLInputElement).type === 'checkbox')!;
     fireEvent.click(office);
     expect(draft().zoneData[0].commonSpaces).toEqual([{ areaM2: 49.2, sourceReference: 'NEN 2580-meetstaat', servedFunctions: ['office'] }]);
     fireEvent.click(office);
