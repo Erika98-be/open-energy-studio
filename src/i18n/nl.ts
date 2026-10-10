@@ -2500,7 +2500,7 @@ export const nl: Record<string, string> = {
   "mwa.template.problem.peakPowerRequired": "Vul het piekvermogen van elk PV-systeem in.",
   "mwa.template.problem.obstructionEvidenceRequired": "Minimale belemmering (situatie a) vraagt een onderbouwing.",
   "mwa.template.problem.ventilationSystemRequired": "Deze ventilatiemaatregel is in een eerdere vorm bewaard zonder ventilatiesysteem. Kies het nieuwe systeem opnieuw.",
-  "relabel.migrationNotice": "Dit herlabelproject is bewaard vóór de nieuwe herlabeleisen (BRL 9500-W §4.2.3–4.2.4). Facturen gemarkeerd voor beoordeling als herlabelbewijs: {count}; kies hun rol in het bewijsregister. Vul nog in: {fields}.",
+  "relabel.migrationNotice": "Dit herlabelproject is bewaard vóór de nieuwe herlabeleisen (BRL 9500-W §4.2.3–4.2.4). Facturen gemarkeerd voor beoordeling als herlabelbewijs: {{count}}; kies hun rol in het bewijsregister. Vul nog in: {{fields}}.",
   "relabel.migrationField.originalCertificateNumber": "certificaatnummer van het oorspronkelijke label",
   "relabel.migrationField.originalEpOnlineNumber": "EP-Online-nummer van het oorspronkelijke label",
   "relabel.migrationField.relabelComparison": "herlabelvergelijking (opnieuw vergelijken met het oorspronkelijke projectbestand)",

@@ -2500,7 +2500,7 @@ export const en: Record<string, string> = {
   "mwa.template.problem.peakPowerRequired": "Enter the peak power of every PV system.",
   "mwa.template.problem.obstructionEvidenceRequired": "Minimal obstruction (situation a) needs evidence.",
   "mwa.template.problem.ventilationSystemRequired": "This ventilation measure was saved in an earlier form without a ventilation system. Choose the new system again.",
-  "relabel.migrationNotice": "This relabel project was saved before the new relabel requirements (BRL 9500-W §4.2.3–4.2.4). Invoices marked for review as relabel proof: {count}; choose their role in the evidence register. Still to fill in: {fields}.",
+  "relabel.migrationNotice": "This relabel project was saved before the new relabel requirements (BRL 9500-W §4.2.3–4.2.4). Invoices marked for review as relabel proof: {{count}}; choose their role in the evidence register. Still to fill in: {{fields}}.",
   "relabel.migrationField.originalCertificateNumber": "certificate number of the original label",
   "relabel.migrationField.originalEpOnlineNumber": "EP-Online number of the original label",
   "relabel.migrationField.relabelComparison": "relabel comparison (compare again with the original project file)",
