@@ -69,4 +69,16 @@ describe('responsive layout', () => {
     expect(inner).toMatch(/border:\s*0/);
     expect(inner).toMatch(/background:\s*transparent/);
   });
+  it('puts the separator after a stage, clipped at the end of a row', () => {
+    // At 1024 px the stage cards on Installaties › Overzicht wrapped with a stray '›' at the start of
+    // the second row. The separator now trails a stage; a stage that ends a row ends at the list's
+    // edge, so its separator falls outside the padding and is clipped.
+    expect(() => declarations(shell, '.chain-stages li + li::before')).toThrow();
+    const separator = declarations(shell, '.chain-stages li:not(:last-child)::after');
+    expect(separator).toMatch(/right:\s*-15px/);
+    const list = declarations(shell, '.chain-stages');
+    expect(list).toMatch(/overflow:\s*hidden/);
+    expect(list).toMatch(/padding:\s*4px/);
+    expect(list).toMatch(/margin:\s*-4px/);
+  });
 });

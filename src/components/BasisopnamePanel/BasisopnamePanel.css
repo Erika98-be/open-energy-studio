@@ -131,3 +131,8 @@
 /* A rounded number never splits over two lines (3,87 showed as "3,8 / 7"). */
 .opname-takeover__ground-table td { overflow-wrap: break-word; }
 .opname-takeover__value { margin: 0; padding: 0; list-style: none; }
+/* The pairing choice keeps a gap after its label ("hoort bij" ran into the select), and the
+   skipped list keeps its bullets inside the dialog (responsive audit, 10 October 2026). */
+.opname-takeover__ground .nta-form-row label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.opname-takeover__ground h4 { margin: 12px 0 4px; }
+.opname-takeover__skipped { margin: 4px 0 0; padding-left: 1.25em; }
