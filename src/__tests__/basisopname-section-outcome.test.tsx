@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import { BasisopnamePanel, type SurveySection } from '../components/BasisopnamePanel/BasisopnamePanel';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -54,7 +55,7 @@ describe('survey outcome in the current section', () => {
     expect(calls[calls.length - 1]).toEqual(['result', undefined]);
     // On the outcome page itself the section block is not repeated.
     expect(screen.queryByRole('status', { name: 'Outcome for this part' })).toBeNull();
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('says so when the section has no errors', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ json: async () => ({ ...assessment, issues: [], status: 'calculated_unverified' }) })));
@@ -66,5 +67,5 @@ describe('survey outcome in the current section', () => {
     const outcome = await screen.findByRole('status', { name: 'Outcome for this part' });
     expect(outcome).toHaveTextContent('No errors in General.');
     expect(within(outcome).queryByRole('button', { name: 'Go to the field' })).toBeNull();
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

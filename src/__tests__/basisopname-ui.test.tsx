@@ -3,6 +3,7 @@ import { act, screen, waitFor } from '@testing-library/react';
 import { useEnergy } from '../context/EnergyContext';
 import { BasisopnamePanel } from '../components/BasisopnamePanel/BasisopnamePanel';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 function Editor() {
   const { state } = useEnergy();
@@ -52,7 +53,7 @@ describe('basisopname panel', () => {
     // Vertical pipes: explicitly none.
     await user.selectOptions(screen.getByLabelText('Vertical pipes (§7.2.4)'), 'none');
     expect(stored()!.survey.verticalPipes).toEqual([]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits ventilation controls, system E, heating strips, solar-control glass and the 90/70 declaration', async () => {
     const user = userEvent.setup();
@@ -86,7 +87,7 @@ describe('basisopname panel', () => {
     expect(survey.envelope.windows[0].solarControl).toEqual({ gValue: 0.3, sourceReference: '' });
     expect(survey.heating.designClass).toBe('c90_70');
     expect(survey.heating.heatPumpAbove70Declaration).toBe('BCRG 1');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits table 9.3/9.6 generators and the table 9.12 distribution', async () => {
     const user = userEvent.setup();
@@ -131,7 +132,7 @@ describe('basisopname panel', () => {
     const heating = stored()!.survey.heating;
     expect(heating.distributionType).toEqual({ kind: 'one_pipe', emitterCount: 8 });
     expect(heating.pipeInsulation).toEqual({ insulated: true, insulationYear: 1990, fittingsInsulated: true });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('clears hidden heat-pump and local-heater answers when the source or appliance changes', async () => {
     const user = userEvent.setup();
@@ -172,7 +173,7 @@ describe('basisopname panel', () => {
     const local = stored()!.survey.heating.generator;
     expect(local.appliance).toBe('oil_heater');
     expect(local).not.toHaveProperty('fuel');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits houseboats, sunrooms and rooflights in the dwelling survey', async () => {
     const user = userEvent.setup();
@@ -258,7 +259,7 @@ describe('basisopname panel', () => {
     expect(survey.cooling).toMatchObject({
       balanced: 'dynamic', balancingEvidenceReference: 'inregelrapport', maxPipeLengthM: 80,
     });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('adds a dwelling cooling system in the ISSO 82.1 chapter 10 shape', async () => {
     const user = userEvent.setup();
@@ -349,7 +350,7 @@ describe('basisopname panel', () => {
     expect(stored()!.survey.envelope.surfaces[0].zoneId).toBeNull();
     expect(stored()!.survey.lighting[0].zoneId).toBe('kantoorx');
     expect(screen.queryAllByLabelText('Calculation zone')).toHaveLength(0);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('does not show an assessment for a survey changed during the request', async () => {
     let resolveResponse!: (value: { json: () => Promise<unknown> }) => void;

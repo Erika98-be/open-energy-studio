@@ -39,6 +39,7 @@ import terraced from '../../training-data/nta8800-example-terraced-dwelling.json
 import takeoverFixture from '../../training-data/nta8800-survey-takeover-ground.json';
 import { auditAccessibility } from './a11yAudit';
 import { renderWithProviders } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 // Accessibility and keyboard audit of the NTA forms and dialogs (10 October 2026). The shared
 // audit (a11yAudit.ts) runs over every NTA section on both examples with their lists opened, both
@@ -145,7 +146,7 @@ describe('accessibility audit: survey, takeover, registration and shell dialogs'
       renderWithProviders(<Registration example={example} />);
       await screen.findByRole('heading', { level: 1 });
       expect(auditAccessibility(document.body)).toEqual([]);
-    }, 30000);
+    }, SLOW_UI_TEST_MS);
   }
 
   it('the settings, project and command-palette dialogs', () => {

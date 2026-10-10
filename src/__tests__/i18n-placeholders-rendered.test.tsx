@@ -23,6 +23,7 @@ import i18next from '../i18n/i18n';
 import office from '../../training-data/nta8800-example-office.json';
 import terraced from '../../training-data/nta8800-example-terraced-dwelling.json';
 import { renderWithProviders } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 // No visible text shows an unfilled placeholder: "{{name}}" left by t() without the
 // variable, or "{name}" left by a single-brace label given to t(). Covers the NTA
@@ -153,7 +154,7 @@ describe('no unfilled placeholder is shown', () => {
         await i18next.changeLanguage('en');
       }
       expect(problems).toEqual([]);
-    }, 60000);
+    }, SLOW_UI_TEST_MS);
   }
 
   it('the reports on both examples', () => {

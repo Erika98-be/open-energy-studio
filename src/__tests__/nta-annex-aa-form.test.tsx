@@ -13,6 +13,7 @@ import {
 } from '../core/nta/annexAaForm';
 import { NtaCalculationForm } from '../components/NtaPerformancePanel/NtaCalculationForm';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 const codes = (issues: ReturnType<typeof checkAnnexAa>) => issues.map((issue) => `${issue.code}@${issue.path.join('.')}`);
 const P = 'activeCooling.capacity.calculation';
@@ -158,7 +159,7 @@ describe('annex AA form', () => {
       ],
     });
     expect(checkAnnexAa(calculation, { edition2024: false, windowIds: ['w-south', 'w-west'] })).toEqual([]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('shows the kernel messages at the fields and keeps unknown windows visible', async () => {
     renderWithProviders(<NtaCalculationForm project={projectWithWindows()} initial={block({
@@ -191,7 +192,7 @@ describe('annex AA form', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
     expect((saved as unknown as { activeCooling: { capacity: { calculation: unknown } } }).activeCooling.capacity.calculation)
       .toEqual({ constructionYear: 1960, rooms: [] });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('notes that editions before 2024 have no annex AA route', () => {
     renderWithProviders(<NtaCalculationForm project={projectWithWindows()} initial={block(undefined, '2023')}
@@ -262,7 +263,7 @@ describe('annex AA per rekenzone', () => {
     expect(capacity.zoneCalculations).toEqual([
       expect.objectContaining({ zoneId: 'zone-2', rooms: [expect.objectContaining({ windows: [{ windowId: 'w-north' }] })] }),
     ]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('moves a calculation without zone to the chosen zone', async () => {
     const user = userEvent.setup();
@@ -277,5 +278,5 @@ describe('annex AA per rekenzone', () => {
     const capacity = (saved as unknown as { activeCooling: { capacity: Record<string, unknown> } }).activeCooling.capacity;
     expect(capacity.calculation).toBeUndefined();
     expect(capacity.zoneCalculations).toEqual([{ zoneId: 'zone-2', constructionYear: 2010, rooms: [] }]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

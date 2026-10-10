@@ -7,6 +7,7 @@ import { useEnergy } from '../context/EnergyContext';
 import { softwareIdentity } from '../core/nta/Registration';
 import i18next from '../i18n/i18n';
 import { renderWithProviders } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 vi.mock('../core/io/KernelStampClient', () => ({
   stampProject: vi.fn(async () => ({ kernelVersion: '0.4.0', targetNormVersion: 'nta8800_2025_c1_2026', inputFingerprint: 'x' })),
@@ -56,5 +57,5 @@ describe('review 30', () => {
     expect(screen.getByText('Saved with another kernel version; saving records the current one')).toBeInTheDocument();
     // Discarding has nothing to discard: the fields are unchanged.
     expect(screen.getByRole('button', { name: 'Discard' })).toBeDisabled();
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

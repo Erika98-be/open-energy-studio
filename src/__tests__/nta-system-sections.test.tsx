@@ -12,6 +12,7 @@ import {
   solarWaterHeaterTemplate, spaceGeneratorTemplate, testedSolarMethod, windowObstructionTemplate,
 } from '../core/nta/NtaSystemTemplates';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 const project = {
   id: 'p', name: 'p', description: '', buildingFunction: 'residential', address: '', city: '',
@@ -299,7 +300,7 @@ describe('NTA system sections', () => {
     expect(draft.generator.forfait.qualityDeclaration).toEqual({
       declarationReference: 'BCRG 91849/03', generationEfficiency: 4.35, energyFraction: 1, auxiliaryKwhPerYear: 30 });
     expect(draft.hotWater.generator.declared).toEqual({ value: 1.3, sourceReference: '' });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('assigns zones to a further heating system (§9.2)', async () => {
     const user = userEvent.setup();

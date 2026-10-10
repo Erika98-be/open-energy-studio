@@ -10,6 +10,7 @@ import { write, type Draft, type Path } from '../components/NtaPerformancePanel/
 import { withoutNulls } from '../core/nta/KernelInput';
 import { annexPGeneratorKindTemplate, annexPRouteTemplate, coolingSystemTemplate } from '../core/nta/NtaSystemTemplates';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 const project = {
   id: 'p', name: 'p', description: '', buildingFunction: 'office', address: '', city: '',
@@ -88,7 +89,7 @@ describe('NTA project input forms', () => {
       auxiliary: { distribution: { method: 'forfait', network: 'secondary' } },
       sourceReference: '',
     });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits measured cold, a collective source and area electricity', async () => {
     const user = userEvent.setup();
@@ -111,7 +112,7 @@ describe('NTA project input forms', () => {
       collectiveHeatPumpSource: { temperatureClass: 'below20_c', supplierReference: 'factuur 12' },
       areaElectricity: [{ kind: 'declared', id: 'gebied-1', annualKwh: 800, sourceReference: '' }],
     });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits a sunroom and a steam humidifier', async () => {
     const user = userEvent.setup();
@@ -136,7 +137,7 @@ describe('NTA project input forms', () => {
       zoneId: 'zone-b', humidification: { humidifier: { kind: 'steam', carrier: 'gas_or_oil' }, rotaryWheel: false, equipmentReference: '' },
       servedAreaM2: 650,
     }]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('switches between one cooling system and several per zone', async () => {
     const user = userEvent.setup();
@@ -158,7 +159,7 @@ describe('NTA project input forms', () => {
     await user.click(screen.getByLabelText('Several cooling systems, each for its own zones (§10.2)'));
     expect(current().coolingSystems).toEqual([]);
     expect(current().cooling.generators[0].generator.kind).toBe('compression');
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('keeps further cooling generators and clears hidden outdoor-air values', async () => {
     const user = userEvent.setup();
@@ -192,7 +193,7 @@ describe('NTA project input forms', () => {
     expect(withoutNulls(draft.heatPumpRenewable)).toEqual({
       sourceBelow20C: false, exhaustAirSource: false, combinedOutdoorAndExhaustAir: false, sourceReference: '',
     });
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 
   it('edits solar space heating, the collective installation and declared flows', async () => {
     const user = userEvent.setup();
@@ -218,5 +219,5 @@ describe('NTA project input forms', () => {
     });
     expect(draft.declaredUses).toEqual([{ id: 'gebruik-1', service: 'lighting', carrier: 'el', monthlyKwh: [40, ...Array(11).fill(null)], sourceReference: '' }]);
     expect(draft.onSiteProduction).toEqual([{ id: 'opwekking-1', kind: 'pv', monthlyKwh: Array(12).fill(null), sourceReference: '' }]);
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });

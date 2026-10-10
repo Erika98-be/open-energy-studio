@@ -11,6 +11,7 @@ import { labelPathBars } from '../components/shell/pages/existing/MwaViews';
 import { WORKFLOW_STEPS } from '../core/navigation/routes';
 import type { MaatwerkadviesAssessment, MwaVariantResult } from '../core/nta/KernelClient';
 import { renderWithProviders, userEvent } from './test-utils';
+import { SLOW_UI_TEST_MS } from './timeouts';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -87,7 +88,7 @@ describe('survey wizard (F8)', () => {
     expect(calls[calls.length - 1]).toEqual(['envelope', 'basisopname.envelope.surfaces[0].areaM2']);
     // The kernel result is kept while moving between sections.
     expect(within(card).getByText('C')).toBeInTheDocument();
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('maatwerkadvies tabs (F8)', () => {
@@ -143,7 +144,7 @@ describe('maatwerkadvies tabs (F8)', () => {
     const inspector = screen.getByRole('region', { name: 'Chosen package Schil + WP' });
     expect(within(inspector).getByLabelText('Label from E to A')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Advice report (HTML)' })).toBeInTheDocument();
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
 
 describe('relabel stepper (F8)', () => {
@@ -199,5 +200,5 @@ describe('relabel stepper (F8)', () => {
     const evidence = screen.getByRole('region', { name: /4 · Evidence roles/ });
     expect(within(evidence).getByText('Photo of PV or solar thermal with shading').parentElement).toHaveTextContent('1');
     expect(screen.getByText('No registration check from the calculation core yet. Choose Recalculate.')).toBeInTheDocument();
-  }, 60000);
+  }, SLOW_UI_TEST_MS);
 });
