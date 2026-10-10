@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { NumberInput } from '../ui/Field';
 import { formatKernelPath } from '../../core/nta/pathUtil';
 
@@ -86,7 +86,7 @@ export function SelectField({ draft, path, label, onChange, options, disabled = 
   const kernelPath = useFieldPath(path);
   const selected = options.find(([key]) => key === String(value))?.[1];
   // Long option texts get two grid columns, and the full text as tooltip, so they are not cut off.
-  const wide = options.some(([, text]) => text.length > 34);
+  const wide = options.some(([, text]) => text.length > WIDE_SELECT_CHARS);
   return <label className={wide ? 'nta-form-wide' : undefined} data-path={kernelPath ?? undefined}>{label}
     <select value={value == null ? '' : String(value)} title={selected} disabled={disabled}
       onChange={(event) => onChange(path, event.target.value || null)}>
@@ -118,10 +118,43 @@ export function TriStateField({ draft, path, label, onChange, yes, no }: FieldPr
   </label>;
 }
 
+/**
+ * Option texts longer than this are cut off in one grid column (minimum
+ * 200 px, about 26 characters after the padding and the arrow), so the field
+ * takes two columns.
+ */
+export const WIDE_SELECT_CHARS = 26;
+
+/**
+ * Marks the label of every select whose longest option text is longer than
+ * WIDE_SELECT_CHARS with `data-wide-select`, so CSS gives it two grid
+ * columns. Done on the DOM after each render because many sections build
+ * their own selects; selects in table cells keep their column.
+ */
+export function markWideSelects(root: HTMLElement | null) {
+  if (!root) return;
+  for (const select of Array.from(root.querySelectorAll('select'))) {
+    const label = select.closest('label');
+    if (!label || !root.contains(label) || select.closest('td, th')) continue;
+    const longest = Math.max(0, ...Array.from(select.options).map((option) => (option.textContent ?? '').trim().length));
+    label.toggleAttribute('data-wide-select', longest > WIDE_SELECT_CHARS);
+  }
+}
+
 export function Section({ title, children, path, extraPaths }: {
   title: string; children: ReactNode; path?: string; extraPaths?: string[];
 }) {
-  return <fieldset className="nta-form-section" data-path={path} data-paths={extraPaths?.length ? extraPaths.join(' ') : undefined}>
+  const ref = useRef<HTMLFieldSetElement>(null);
+  useLayoutEffect(() => markWideSelects(ref.current));
+  // Lists inside a section can add selects without a render of the section itself.
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root || typeof MutationObserver === 'undefined') return undefined;
+    const observer = new MutationObserver(() => markWideSelects(root));
+    observer.observe(root, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+  return <fieldset ref={ref} className="nta-form-section" data-path={path} data-paths={extraPaths?.length ? extraPaths.join(' ') : undefined}>
     <legend>{title}</legend><div className="nta-form-grid">{children}</div>
   </fieldset>;
 }
