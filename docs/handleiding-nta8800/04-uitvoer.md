@@ -1,6 +1,6 @@
 # 4. Uitvoer
 
-Na het toepassen van de NTA-invoer rekent de kern zelf. Dat gebeurt een korte tijd na de laatste wijziging; **Herberekenen** (Ctrl+Enter) start meteen een nieuwe run. De uitkomsten verschijnen op vier plekken:
+Na het toepassen van de NTA-invoer rekent de kern zelf. Dat gebeurt een korte tijd na de laatste wijziging; **Herberekenen** (Ctrl+Enter) start meteen een nieuwe run. Staan er onder *Resultaten* nog geen uitkomsten, dan staat daar ook de knop **Herberekenen**, en een verwijzing naar *Controle › Controleoverzicht* als de kern de invoer nog niet compleet vindt. De uitkomsten verschijnen op vier plekken:
 - de statusbalk en het tabblad *Voorbeeld* van het contextpaneel;
 - de stap Resultaten (dashboard met de subpagina's Per dienst, Per zone, Maandwaarden en Herkomst);
 - het paneel *NTA 8800-berekening (rekenkern)* onder Controle › NTA-invoer;
@@ -112,6 +112,7 @@ Elke berekeningsstap staat als "formule → waarden → uitkomst" met het formul
 **Voorbeeld, export en afdrukken**
 - Het voorbeeld onder de keuzes toont het rapport zoals het wordt geëxporteerd.
 - **Rapportage exporteren (HTML)** slaat het rapport op; in de desktop-app via het opslagvenster.
+- Zolang de rekenkern geen uitkomst heeft, staan exporteren en afdrukken uit; de pagina zegt dat het rapport nog niet kan worden samengesteld. Het NTA-invoerdossier kun je dan wel al exporteren.
 - **Afdrukken of opslaan als PDF** opent het rapport in een venster en start het afdrukken. Het rapport is opgemaakt voor A4: inhoudsopgave, genummerde tabellen, elk hoofdstuk op een nieuwe pagina en een kopregel met project, datum en kernversie.
 - De app onthoudt je laatste keuze van niveau en hoofdstukken.
 

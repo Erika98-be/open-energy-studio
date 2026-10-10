@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 10 oktober 2026 — UX-bevindingen 1–9 uit de rondgang als nieuwe adviseur (geen rekenwijziging)
+
+- **Technische foutmelding:** de ruwe fout (bijvoorbeeld "Rust API: HTTP 500") staat achter een dichtgeklapte uitklapper *Technische details*; de Nederlandse melding zegt wat er is en wat je kunt doen.
+- **Resultaten zonder uitkomst:** **Herberekenen**, en **Ga naar Controle › Controleoverzicht** als de kern de invoer onvolledig of ongeldig vindt.
+- **Rapport zonder uitkomst:** één melding; exporteren en afdrukken van het rapport staan uit met uitleg (ook onder Exports), het invoerdossier blijft beschikbaar.
+- **Bron & bewijs:** elke regel toont het formulierlabel van het bronveld; het kernpad staat in de tooltip.
+- **Aantallen:** meervoudsvormen ("geen fouten", "1 fout", "3 fouten") in plaats van "fout(en)".
+- **Voorbeeldprojecten:** de bronteksten zijn Nederlands (alleen tekstvelden).
+- **Instelwaarde:** *instelwaarde* in plaats van *setpoint* in de Nederlandse interface en meldingen.
+- **Registratie:** **Opslaan** staat uit zolang er niets is gewijzigd.
+- **Gaswarmtepomp-referentievergelijking:** de uitgeschakelde knop zegt waarom.
+
 ### 10 oktober 2026 — Rondgang als nieuwe adviseur (geen rekenwijziging)
 
 - **Open punten.** De lijst zegt "Geen open punten van de rekenkern" alleen nog als de kern heeft geantwoord; daarvoor staat er "Nog geen antwoord van de rekenkern", "Berekenen…" of "Rekenkern niet bereikbaar".
