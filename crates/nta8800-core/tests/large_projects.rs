@@ -581,18 +581,19 @@ fn dense_utility_building_calculates_within_budget() {
     assert!(run.elapsed < limit, "dense building took {:?}", run.elapsed);
 }
 
-/// The blank search deserializes the whole NTA block per try, so its cost
-/// grows with the blanks times the size of the block. Ten blanks in the
-/// dense building: 4,4 s in a debug build, 0,9 s in release (10 October
-/// 2026).
+/// The blank search runs on a reduced copy of the NTA block (the list
+/// elements that hold a blank) and checks it on the whole block, so its cost
+/// follows the blanks rather than the blanks times the block. Two hundred
+/// blanks in the dense building: 6,9 s in a debug build, 1,2 s in release
+/// (10 October 2026; 19,6 s in release before).
 #[test]
 fn blanks_in_a_dense_building_are_found_within_budget() {
-    let project = with_blank_shadings(&in_edition(&dense_utility_building(), "2025+C1"), 10);
+    let project = with_blank_shadings(&in_edition(&dense_utility_building(), "2025+C1"), 200);
     let start = Instant::now();
     let result = assess_project_performance(&project);
     let elapsed = start.elapsed();
     assert_eq!(result.status, "incomplete");
-    assert_eq!(result.gaps.len(), 10, "{:?}", result.gaps);
+    assert_eq!(result.gaps.len(), 200, "{:?}", result.gaps);
     assert!(
         result
             .gaps
@@ -600,8 +601,41 @@ fn blanks_in_a_dense_building_are_found_within_budget() {
             .all(|gap| gap.code == "nta_value_missing"
                 && gap.path.ends_with("movableShading.control"))
     );
-    let limit = budget(45, 5);
-    assert!(elapsed < limit, "ten blanks took {elapsed:?}");
+    let limit = budget(60, 6);
+    assert!(elapsed < limit, "200 blanks took {elapsed:?}");
+}
+
+/// The blank search runs on a reduced copy of the block and checks it on the
+/// whole block; on the dense building it reports the same as the search on
+/// the whole block (`blank_search_equivalence.rs` covers the fixtures):
+/// blanks in the window shadings, leaves spread over every list, and a whole
+/// list element blanked.
+#[test]
+fn dense_building_blank_search_matches_the_whole_block_search() {
+    use nta8800_core::project_performance::nta_blank_search;
+    let mut block = dense_utility_building()["ntaCalculation"].clone();
+    for index in 0..12 {
+        block["windowShadings"][index * 37]["movableShading"]["control"] = Value::Null;
+    }
+    assert_eq!(
+        nta_blank_search(&block, false),
+        nta_blank_search(&block, true),
+        "twelve shading controls"
+    );
+    let mut numbers = Vec::new();
+    collect_number_paths(&block, String::new(), &mut numbers);
+    for pointer in numbers.iter().step_by(997) {
+        *block.pointer_mut(pointer).unwrap() = Value::Null;
+    }
+    let spread = nta_blank_search(&block, false);
+    assert!(spread.0.len() > 12, "{spread:?}");
+    assert_eq!(spread, nta_blank_search(&block, true), "leaves spread over the block");
+    block["windowShadings"][5] = Value::Null;
+    assert_eq!(
+        nta_blank_search(&block, false),
+        nta_blank_search(&block, true),
+        "a list element blanked"
+    );
 }
 
 /// The 1985 office survey with 400 windows calculates within budget

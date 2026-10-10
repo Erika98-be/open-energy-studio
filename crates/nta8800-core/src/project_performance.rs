@@ -2465,7 +2465,294 @@ fn put_back(trial: &mut Value, leaf: &NullLeaf) {
     }
 }
 
+/// The blank search of [`blank_search_exhaustive`], run on a reduced copy
+/// of the block.
+///
+/// The search deserializes the whole block per try, so on a large block its
+/// cost grows with the blanks times the block size (the scale audit of
+/// 10 October 2026: 200 blanks in a 2 250-window building took 20 s). Every
+/// list of objects in the block is cut down to its first element and the
+/// elements that hold a null leaf; the dropped elements hold no null, so
+/// the search never changes them, and a derived `Vec<T>` deserializes each
+/// element on its own (no kernel input type has a custom list
+/// deserializer or a fixed-size list of structs). The search on the
+/// reduced copy then makes the same decisions as on the whole block.
+///
+/// That reasoning is checked on the whole block afterwards: the repaired
+/// copy, with the dropped elements put back, must deserialize; all reported
+/// blanks put back together must fail it, and all other nulls put back
+/// together must not. When the reduced search does not settle, or a check
+/// fails, the whole block is searched instead.
 fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
+    let reduced = reduce_lists(block);
+    if !reduced.dropped {
+        return blank_search_exhaustive::<T>(block).search;
+    }
+    let state = blank_search_exhaustive::<T>(&reduced.value);
+    match confirm_reduced::<T>(block, &reduced.shape, &state) {
+        Some(search) => {
+            REDUCED_SEARCHES[0].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            search
+        }
+        None => {
+            REDUCED_SEARCHES[1].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            blank_search_exhaustive::<T>(block).search
+        }
+    }
+}
+
+/// Reduced blank searches confirmed on the whole block, and those that fell
+/// back to the whole block (process-wide; for the equivalence tests).
+static REDUCED_SEARCHES: [std::sync::atomic::AtomicUsize; 2] = [
+    std::sync::atomic::AtomicUsize::new(0),
+    std::sync::atomic::AtomicUsize::new(0),
+];
+
+/// The counts behind [`REDUCED_SEARCHES`]: (confirmed, fell back).
+#[doc(hidden)]
+pub fn reduced_blank_searches() -> (usize, usize) {
+    (
+        REDUCED_SEARCHES[0].load(std::sync::atomic::Ordering::Relaxed),
+        REDUCED_SEARCHES[1].load(std::sync::atomic::Ordering::Relaxed),
+    )
+}
+
+/// The blank search of the NTA block as the project route runs it
+/// (`exhaustive` false) or on the whole block (`exhaustive` true): the
+/// reported paths and whether the block still fails otherwise. For the
+/// equivalence tests only.
+#[doc(hidden)]
+pub fn nta_blank_search(block: &Value, exhaustive: bool) -> (Vec<String>, bool) {
+    let search = if exhaustive {
+        blank_search_exhaustive::<NtaCalculationInput>(block).search
+    } else {
+        blank_paths::<NtaCalculationInput>(block)
+    };
+    (search.paths, search.residual)
+}
+
+/// What [`blank_search_exhaustive`] decided, kept to check a search on a
+/// reduced block against the whole block.
+struct SearchState {
+    search: BlankSearch,
+    /// The repaired copy (every null leaf filled), when the repair settled.
+    work: Value,
+    settled: bool,
+    leaves: Vec<NullLeaf>,
+    /// Per leaf: refused by the kernel (before blank tags hide the leaves
+    /// next to them).
+    blank: Vec<bool>,
+    /// Per leaf: reported.
+    reported: Vec<bool>,
+}
+
+/// Where a reduced block's lists come from in the whole block.
+enum Shape {
+    /// Unchanged below this point.
+    Same,
+    /// An object with changed members below it.
+    Object(Vec<(String, Shape)>),
+    /// A list: the original index of each kept element.
+    List { kept: Vec<usize>, items: Vec<Shape> },
+}
+
+static SAME: Shape = Shape::Same;
+
+struct Reduced {
+    value: Value,
+    shape: Shape,
+    has_null: bool,
+    dropped: bool,
+}
+
+/// The block with every list of objects cut down to its first element and
+/// the elements that hold a null leaf.
+fn reduce_lists(value: &Value) -> Reduced {
+    match value {
+        Value::Null => Reduced {
+            value: Value::Null,
+            shape: Shape::Same,
+            has_null: true,
+            dropped: false,
+        },
+        Value::Object(map) => {
+            let mut out = serde_json::Map::new();
+            let mut members = Vec::new();
+            let (mut has_null, mut dropped) = (false, false);
+            for (key, item) in map {
+                let reduced = reduce_lists(item);
+                has_null |= reduced.has_null;
+                dropped |= reduced.dropped;
+                if !matches!(reduced.shape, Shape::Same) {
+                    members.push((key.clone(), reduced.shape));
+                }
+                out.insert(key.clone(), reduced.value);
+            }
+            Reduced {
+                value: Value::Object(out),
+                shape: if members.is_empty() {
+                    Shape::Same
+                } else {
+                    Shape::Object(members)
+                },
+                has_null,
+                dropped,
+            }
+        }
+        Value::Array(list) => {
+            let reduced: Vec<Reduced> = list.iter().map(reduce_lists).collect();
+            let mut kept = Vec::new();
+            let mut values = Vec::new();
+            let mut items = Vec::new();
+            let (mut has_null, mut dropped, mut changed) = (false, false, false);
+            for (index, (original, item)) in list.iter().zip(reduced).enumerate() {
+                has_null |= item.has_null;
+                if index > 0 && original.is_object() && !item.has_null {
+                    dropped = true;
+                    changed = true;
+                    continue;
+                }
+                dropped |= item.dropped;
+                changed |= !matches!(item.shape, Shape::Same);
+                kept.push(index);
+                values.push(item.value);
+                items.push(item.shape);
+            }
+            Reduced {
+                value: Value::Array(values),
+                shape: if changed {
+                    Shape::List { kept, items }
+                } else {
+                    Shape::Same
+                },
+                has_null,
+                dropped,
+            }
+        }
+        other => Reduced {
+            value: other.clone(),
+            shape: Shape::Same,
+            has_null: false,
+            dropped: false,
+        },
+    }
+}
+
+/// The steps of a reduced block's location in the whole block.
+fn whole_steps(shape: &Shape, steps: &[PathStep]) -> Option<Vec<PathStep>> {
+    let mut shape = shape;
+    let mut out = Vec::with_capacity(steps.len());
+    for step in steps {
+        match (shape, step) {
+            (Shape::List { kept, items }, PathStep::Index(index)) => {
+                out.push(PathStep::Index(*kept.get(*index)?));
+                shape = items.get(*index)?;
+            }
+            (Shape::Object(members), PathStep::Key(key)) => {
+                out.push(step.clone());
+                shape = members
+                    .iter()
+                    .find(|(name, _)| name == key)
+                    .map_or(&SAME, |(_, shape)| shape);
+            }
+            (Shape::Same, _) => out.push(step.clone()),
+            _ => return None,
+        }
+    }
+    Some(out)
+}
+
+/// The whole block with the reduced block's values in place: the dropped
+/// list elements come from `whole`. None when the reduced block no longer
+/// has the shape it was cut to (the repair replaced a cut list).
+fn merge_reduced(whole: &Value, reduced: &Value, shape: &Shape) -> Option<Value> {
+    match shape {
+        Shape::Same => Some(reduced.clone()),
+        Shape::Object(members) => {
+            let mut out = reduced.as_object()?.clone();
+            for (key, shape) in members {
+                let merged = merge_reduced(whole.get(key)?, out.get(key)?, shape)?;
+                out.insert(key.clone(), merged);
+            }
+            Some(Value::Object(out))
+        }
+        Shape::List { kept, items } => {
+            let reduced = reduced.as_array()?;
+            if reduced.len() != kept.len() {
+                return None;
+            }
+            let mut out = whole.as_array()?.clone();
+            for ((index, item), shape) in kept.iter().zip(reduced).zip(items) {
+                let merged = merge_reduced(out.get(*index)?, item, shape)?;
+                out[*index] = merged;
+            }
+            Some(Value::Array(out))
+        }
+    }
+}
+
+/// The reduced search's result in the whole block's paths, when the whole
+/// block confirms it (see [`blank_paths`]).
+fn confirm_reduced<T: serde::de::DeserializeOwned>(
+    block: &Value,
+    shape: &Shape,
+    state: &SearchState,
+) -> Option<BlankSearch> {
+    if !state.settled {
+        return None;
+    }
+    let fails = |candidate: &Value| {
+        #[cfg(test)]
+        BLANK_SEARCH_DESERIALIZATIONS.with(|count| count.set(count.get() + 1));
+        <T as serde::Deserialize>::deserialize(candidate).is_err()
+    };
+    let work = merge_reduced(block, &state.work, shape)?;
+    if fails(&work) {
+        return None;
+    }
+    let leaves = state
+        .leaves
+        .iter()
+        .map(|leaf| {
+            Some(NullLeaf {
+                steps: whole_steps(shape, &leaf.steps)?,
+                path: String::new(),
+                removed: leaf.removed,
+            })
+        })
+        .collect::<Option<Vec<_>>>()?;
+    for refused in [true, false] {
+        let group: Vec<&NullLeaf> = leaves
+            .iter()
+            .zip(&state.blank)
+            .filter(|(_, blank)| **blank == refused)
+            .map(|(leaf, _)| leaf)
+            .collect();
+        if group.is_empty() {
+            continue;
+        }
+        let mut trial = work.clone();
+        for leaf in group {
+            put_back(&mut trial, leaf);
+        }
+        if fails(&trial) != refused {
+            return None;
+        }
+    }
+    Some(BlankSearch {
+        paths: leaves
+            .iter()
+            .zip(&state.reported)
+            .filter(|(_, reported)| **reported)
+            .map(|(leaf, _)| render_path(&leaf.steps))
+            .collect(),
+        residual: state.search.residual,
+    })
+}
+
+/// The blank search on the block as it is (see the design note above
+/// [`without_null_members`]). [`blank_paths`] runs it on a reduced copy.
+fn blank_search_exhaustive<T: serde::de::DeserializeOwned>(block: &Value) -> SearchState {
     let first_error = |candidate: &Value| -> FirstError {
         #[cfg(test)]
         BLANK_SEARCH_DESERIALIZATIONS.with(|count| count.set(count.get() + 1));
@@ -2602,23 +2889,31 @@ fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
     // variant the repair happened to choose: only the tag is reported, and
     // the user fills the rest once the variant is known.
     let tags = blank_tags(&work, &slots, &leaves, &blank, &first_error);
+    let mut reported = blank.clone();
     for (index, leaf) in leaves.iter().enumerate() {
-        if blank[index]
+        if reported[index]
             && tags
                 .iter()
                 .any(|(tag, parent)| leaf.path != *tag && is_under(&leaf.path, parent))
         {
-            blank[index] = false;
+            reported[index] = false;
         }
     }
-    BlankSearch {
-        paths: leaves
-            .into_iter()
-            .zip(blank)
-            .filter(|(_, blank)| *blank)
-            .map(|(leaf, _)| leaf.path)
-            .collect(),
-        residual: absent || !settled,
+    SearchState {
+        search: BlankSearch {
+            paths: leaves
+                .iter()
+                .zip(&reported)
+                .filter(|(_, reported)| **reported)
+                .map(|(leaf, _)| leaf.path.clone())
+                .collect(),
+            residual: absent || !settled,
+        },
+        work,
+        settled,
+        leaves,
+        blank,
+        reported,
     }
 }
 
