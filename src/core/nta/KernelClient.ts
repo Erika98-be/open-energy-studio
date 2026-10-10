@@ -4318,6 +4318,12 @@ export interface NtaProjectHeatingSystem {
 /** Edition of NTA 8800 a calculation follows (`ntaCalculation.normVersion`); absent is the current one. */
 export type NormVersion = '2020+A1' | '2022' | '2023' | '2024' | '2025+C1';
 export const DEFAULT_NORM_VERSION: NormVersion = '2025+C1';
+
+/** Table 9.28: the dated NEN-EN 14511-2 the minimum COP is tested to, per
+ * edition (2020+A1 p. 314 and 2022 p. 316: 2007; from 2023 p. 322: 2022). */
+export function heatPumpHighTestStandard(edition: NormVersion | null | undefined): string {
+  return edition === '2020+A1' || edition === '2022' ? 'NEN-EN 14511-2:2007' : 'NEN-EN 14511-2:2022';
+}
 /** Editions the kernel can calculate; only the default one is registrable (BRL 9500). */
 export const IMPLEMENTED_NORM_VERSIONS: NormVersion[] = ['2025+C1', '2024', '2023', '2022', '2020+A1'];
 

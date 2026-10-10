@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useProjectEdition } from '../../context/EnergyContext';
 import type { BuildingFunction, INtaHeatPumpInput } from '../../core/energy/types';
-import { diagnoseForfaitHeatPumpDraftWithRust, type ForfaitHeatPumpDraftAssessment, type ForfaitHeatPumpDraftInput } from '../../core/nta/KernelClient';
+import { diagnoseForfaitHeatPumpDraftWithRust, heatPumpHighTestStandard, type ForfaitHeatPumpDraftAssessment, type ForfaitHeatPumpDraftInput } from '../../core/nta/KernelClient';
 import { useI18n } from '../../i18n/i18n';
 import './HeatPumpForfaitDiagnosticPanel.css';
 import { DecimalInput } from '../ui';
@@ -138,7 +138,7 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       highEfficiencyEvidence: highRow ? {
         productReference: productReference.trim(),
         testReportReference: testReportReference.trim(),
-        testStandardEdition: 'NEN-EN 14511-2:2022',
+        testStandardEdition: heatPumpHighTestStandard(edition),
         points: conditions.map((item) => ({ condition: item.condition, measuredCop: Number(testCops[item.condition]) })),
       } : null,
       sourceTemperatureC: sourceTemperatureValue,

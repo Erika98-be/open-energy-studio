@@ -809,7 +809,7 @@ export const nl: Record<string, string> = {
   'kernel.forfait.baseRow': 'Basisrij elektrische warmtepomp',
   'kernel.forfait.highRow': 'Hogere rendementsrij (tabel 9.28-test)',
   'kernel.forfait.productReference': 'Beproefd product of combinatie',
-  'kernel.forfait.testReportReference': 'NEN-EN 14511-2:2022-testrapport',
+  'kernel.forfait.testReportReference': 'NEN-EN 14511-2-testrapport (tabel 9.28)',
   'kernel.forfait.choose': 'Kies een bronklasse',
   'kernel.forfait.source.ground': 'Bodemlus',
   'kernel.forfaitMonthly.open': 'Maandinvoer concept',

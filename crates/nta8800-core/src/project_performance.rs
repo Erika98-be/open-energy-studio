@@ -1291,8 +1291,13 @@ fn plausibility_warnings(project_value: &Value) -> Vec<InputGap> {
     }
 
     // §5.5.8: f_BACS = 1,0 in a utility building needs every heating and
-    // cooling system shown at most 290 kW (or class A/B automation).
-    if !residential && nta.bacs.is_none() && nta.bacs_factor < 1.05 {
+    // cooling system shown at most 290 kW (or class A/B automation). Older
+    // editions have no f_BACS, so the warning is 2025+C1 only.
+    if nta.norm_version.profile().bacs_factor_route
+        && !residential
+        && nta.bacs.is_none()
+        && nta.bacs_factor < 1.05
+    {
         warnings.push(InputGap {
             detail: Some(
                 "§5.5.8: without the bacs block (system powers ≤ 290 kW or BACS evidence) f_BACS is 1,05".into(),

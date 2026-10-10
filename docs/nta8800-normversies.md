@@ -238,8 +238,47 @@ Het interpretatiedocument bij NTA 8800:2024 (INT-V1:2024) brengt deze punten al 
 - **Bijlage AB** en de nieuwe indicatoren: alleen 2025+C1; in 2024 zijn ze `null`.
 - **c_source van bijlage V** (gecontroleerd 9 oktober 2026): tabel V.1 (1,00 / 1,02 / 1,04 naar de mate van regeneratie) en tabel V.3 (1,00 recirculatie, 1,04 doublet) hebben dezelfde getallen in 2020+A1 (p. 1069 en 1072), 2022, 2023, 2024 en 2025+C1 (p. 1114). De kern laat daarom in elke uitgave alleen 1,00, 1,02 en 1,04 toe; er is geen schakelpunt.
 
+## Verschillen per uitgave op de openbare gevallen (10 oktober 2026)
+
+De openbare gevallen A–N, de twee voorbeeldprojecten en ISSO 54 EPW001/EPU001 zijn in alle vijf uitgaven doorgerekend met `cargo test --release --test edition_deltas -- --ignored --nocapture print_edition_delta_table`. Invoer van een route die een uitgave niet kent (`route_not_in_edition`) laat de test weg of zet hem uit (`ledFrom2017 = false`). Het testrapport van tabel 9.28 krijgt de NEN-EN 14511-2 die de uitgave noemt (punt 67a). Elke afwijking van meer dan 0,5 % op een BENG-waarde tussen twee opeenvolgende uitgaven is herleid tot een schakelpunt.
+
+BENG 1 / 2 / 3 per uitgave, alleen waar een uitgave verschilt van de vorige:
+
+| Geval | 2020+A1 | 2022 | 2023 | 2024 = 2025+C1 | Oorzaak |
+|---|---|---|---|---|---|
+| A | n.b. (h, punt 59) | n.b. (h, punt 59) | 94,00 / 34,72 / 74,8 | 94,00 / 34,37 / 74,9 | afgifte verwarming en koeling (punten 47, 48), distributie (punt 41) |
+| B | n.b. (h) | n.b. (h) | 52,96 / 29,10 / 62,5 | 52,96 / 28,84 / 62,6 | idem |
+| C | n.b. (h) | n.b. (h) | 64,70 / 31,79 / 69,0 | 64,70 / 31,54 / 69,0 | idem |
+| D | 86,35 / 39,07 / 83,6 | 86,35 / 41,79 / 82,6 | n.b. | n.b. | 2022: hulpenergie warmtepomp (punt 74); vanaf 2023 vraagt de bron "grondwater < 15 °C" een brontemperatuur met bewijs (tabel 9.27, 2023 p. 322) |
+| E | 88,61 / 31,72 / 72,5 | 88,61 / 31,68 / 72,6 | gelijk aan 2022 | 88,61 / 31,49 / 72,6 | 2022: koudeterugwinning (11.106a, punt 79); 2024: punten 41, 47, 48 |
+| F | 74,06 / 3,79 / 96,3 | gelijk | gelijk | 67,25 / 1,53 / 98,4 | f_sh;with = 0 op de warmtebalans bij handbediende rolluiken (punt 35, 2024 p. 181); behoefte −9 % |
+| G | 65,16 / 28,37 / 73,2 | 65,16 / 29,35 / 72,5 | gelijk aan 2022 | 65,07 / 29,31 / 72,5 | 2022: hulpenergie warmtepomp (punt 74) |
+| H | 30,20 / 81,53 / 30,1 | 30,20 / 81,86 / 30,0 | gelijk aan 2022 | 30,20 / 81,62 / 29,8 | 2022: punt 74; 2024: afgifte verwarming (punt 47) |
+| I | 75,51 / −19,41 / 119,4 | 75,51 / −18,58 / 118,4 | gelijk aan 2022 | 75,51 / −11,06 / 110,0 | 2022: punt 74; 2024: afgifte koeling naar tabel 10.35 (punt 48), koelenergie +21 % |
+| J | 63,75 / 51,46 / 27,9 | 63,75 / 52,73 / 27,4 | n.b. (h) | n.b. (h) | 2022: punt 74 |
+| K | 29,57 / −1,29 / 101,6 | 29,57 / −0,90 / 101,1 | 29,57 / −0,51 / 100,6 | 29,57 / −0,64 / 100,8 | 2022: punt 74; 2023: f_sto;dis;ls 1,5 vervalt (punt 64); 2024: punten 41, 47, 48 |
+| L | 111,44 / 17,72 / 81,0 | 111,44 / 18,63 / 80,2 | n.b. (h) | n.b. (h) | 2022: punt 74 |
+| M | 170,87 / 48,26 / 80,3 | 170,87 / 47,85 / 80,6 | gelijk aan 2022 | 166,86 / 45,97 / 80,9 | 2022: punt 74 en de PV-afronding (punt 68); 2024: f_τ = min(0,38 + 0,006·A_g; 0,8) = 0,64 bij 43 m² (punt 23) |
+| N | 54,57 / −24,31 / 122,6 | 54,57 / −24,23 / 122,3 | gelijk aan 2022 | 54,57 / −25,57 / 124,2 | 2022: punt 74 en punt 68; 2024: punten 47, 48 |
+| woning | n.b. (paneelroute, punt 68) | 51,37 / 80,56 / 22,3 | gelijk | gelijk | geen invoer op een route die verschilt |
+| kantoor | n.b. (paneelroute) | 74,55 / 61,43 / 43,7 | gelijk aan 2022 | 74,55 / 48,33 / 49,6 | ledkolom van tabel 14.3 (punt 33): verlichting 17 000 → 13 000 kWh |
+| EPW001 | 74,15 / 104,61 / 0,0 | 74,15 / 105,07 / 0,0 | gelijk aan 2022 | 74,15 / 105,13 / 0,0 | 2022: A 13,0 → 43,8 kWh van de ketel (punt 74) |
+| EPU001 | 95,43 / 135,82 / 0,0 | 95,43 / 136,28 / 0,0 | gelijk aan 2022 | 95,43 / 135,79 / 0,0 | idem; 2024: punt 48 |
+
+"n.b." is niet berekend; "(h)" betekent dat de kruipruimte in 2022 en 2020+A1 de werkelijke hoogte h vraagt en vanaf 2023 de vaste 0,125 m (punt 59). Beide kanten weigeren de invoer van de andere, zoals bedoeld.
+
+**Wat de controle opleverde:**
+- **Alle afwijkingen zijn herleid.** Er is geen verschil zonder schakelpunt gevonden, en geen schakelpunt dat in een verkeerde uitgave of op een verkeerde post werkt.
+  - 2024 → 2025+C1 geeft op alle gevallen dezelfde BENG-waarden. De utiliteitsgevallen geven f_BACS 1,0 op; de nieuwe schakelpunten van 2025+C1 (f_BACS, opslagkrediet, nieuwe indicatoren) raken BENG 1–3 hier niet.
+  - 2022 → 2023 verandert alleen K (f_sto;dis;ls).
+  - 2020+A1 → 2022 is in elk geval met een warmtepomp of ketel de hulpenergie van 9.85 (punt 74); de tekst is nagelezen (2020 p. 334–336, 2022 p. 338).
+- **Rechtgezet: de melding over f_BACS in oudere uitgaven.** `bacs_factor_without_capacity_evidence` (§5.5.8) verscheen ook in 2024, 2023, 2022 en 2020+A1, die geen f_BACS kennen. De melding geldt nu alleen in 2025+C1 (test `bacs_evidence_warning_is_2025_only`).
+- **Rechtgezet: de reden achter `forfait_lookup_invalid`.** Een forfaitaire warmtepomp die bij een andere uitgave ongeldig wordt, gaf alleen die code op `generator.forfait`. Nu krijgt elke oorzaak een eigen melding op haar eigen veld, naast `forfait_lookup_invalid`. Voorbeelden zijn `source_temperature_class_mismatch` op `sourceTemperatureC` en `high_test_standard_invalid` op `testStandardEdition` (test `edition_switch_names_the_forfait_field_it_invalidates`). Dat geldt ook voor de hybride warmtepomp.
+- **Rechtgezet: het diagnosepaneel.** Het forfaitaire-COP-paneel schreef bij elke uitgave NEN-EN 14511-2:2022 in het testbewijs. Onder 2020+A1 en 2022 weigert de kern dat, omdat die uitgaven de versie van 2007 noemen (punt 67a). Het paneel volgt nu de uitgave (`heatPumpHighTestStandard`). De meldingtekst noemt beide versies.
+
 ## Tests
 
+- `crates/nta8800-core/tests/edition_deltas.rs` (genegeerd, op aanvraag): de tabel hierboven (`print_edition_delta_table`), alle verschillende uitvoerwaarden van één geval tussen twee uitgaven (`EDITION_DIFF=K,2020+A1,2022`) en de meldingen van één geval in één uitgave (`EDITION_PROBE=D,2023`).
 - `crates/nta8800-core/src/norm_versions/tests.rs`: standaarduitgave, serde, het herstellen van de thread-local (ook na een paniek) en de profielwaarden met paginaverwijzing.
 - Per schakelpunt een eenheidstest in de module van het schakelpunt, met de paginaverwijzing in de test.
 - `crates/nta8800-core/tests/norm_versions.rs`: de projectroute (status, vingerafdruk, registratie, niet-geïmplementeerde en onbekende uitgaven) en verschiltests van de voorbeeldprojecten in 2024 tegen 2025+C1 en 2023 tegen 2024. Daarin verandert alleen wat de lijsten hierboven voorspellen: in 2023 tegen 2024 verandert de woning niet en het kantoor alleen in TOjuli (ΔT_fan, punt 25). Het voorbeeldkantoor gebruikt de ledkolom van tabel 14.3; die invoer wordt in 2023 geweigerd (punt 33), dus de verschiltest zet hem in beide uitgaven op "overig". De invoer `kitchenPipeDiameter` wordt buiten 2023 geweigerd.
