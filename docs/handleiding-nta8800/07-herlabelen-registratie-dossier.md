@@ -23,7 +23,7 @@ De registratiegegevens staan in werkstap 10 **Registratie**, in het formulier on
 
 ![Kaart Verklaringen voor het energielabel in de stap Registratie met de vragen k (reageren op externe signalen, ja) en l (afgiftesysteem voor lage temperatuur, nee)](img/verklaringen-label.png)
 
-Wijzigingen in het formulier gaan pas in het project na **Opslaan**; **Verwerpen** zet het formulier terug. Zolang er niets is gewijzigd staan beide knoppen uit, met de tekst *Geen wijzigingen om op te slaan*.
+Wijzigingen in het formulier gaan pas in het project na **Opslaan**; **Verwerpen** zet het formulier terug. Zolang er niets is gewijzigd staan beide knoppen uit, met de tekst *Geen wijzigingen om op te slaan*. Is de registratie opgeslagen met een andere rekenkernversie, dan blijft **Opslaan** aan met de tekst *Opgeslagen met een andere rekenkernversie; opslaan legt de huidige vast*: opslaan legt dan het programmakenmerk van de huidige rekenkern vast.
 
 **Ingelezen gegevens.** Bij registratie moet blijken of de adviseur gegevens met een ander hulpmiddel in het programma heeft ingelezen, en met welk hulpmiddel (BRL 9501 van 29-05-2026, §4.3.1, opmerking, p. 8). Automatisch inlezen mag niet: elke import in dit programma start de adviseur zelf. De UNIEC3- en VABI-import schrijven daarom een regel in het importlogboek van het project (`importLog`, met hulpmiddel, bestandsnaam, tijdstip, SHA-256 van het bestand en de punten om na te lopen; zie [hoofdstuk 9](09-bestanden-en-uitwisseling.md)). De registratiecontrole en het rekenrapport tonen het resultaat in de regel *Gegevens ingelezen*: "nee", of "ja, met …". Het importlogboek telt niet mee als labelinvoer bij herlabelen.
 
