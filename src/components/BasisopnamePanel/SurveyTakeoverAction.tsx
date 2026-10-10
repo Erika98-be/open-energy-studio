@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
-import { useI18n } from '../../i18n/i18n';
+import i18next, { useI18n } from '../../i18n/i18n';
 import { useEnergy } from '../../context/EnergyContext';
 import { changedPaths, useNtaDraft } from '../../context/NtaDraftProvider';
 import type { OpnameAssessment } from '../../core/nta/KernelClient';
 import { parseKernelPath } from '../../core/nta/pathUtil';
 import {
-  applyGroundFloors, canTakeOver, defaultGroundSelection, groundFloorItems, previewValue, projectGroundSurfaces,
+  applyGroundFloors, canTakeOver, defaultGroundSelection, formatTakeoverNumber, groundFloorItems, groundValueLines, previewValue,
+  projectGroundSurfaces,
   proposeGroundPairs, surveyGroundFloors, surveyTakeover,
 } from '../../core/nta/SurveyTakeover';
 import { read, type Draft } from '../NtaPerformancePanel/NtaFormFields';
@@ -63,6 +64,14 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
     return next;
   });
   const surfaceName = (id: string) => surfaces.find((surface) => surface.id === id)?.name ?? id;
+  const groundLabel = (key: string) => i18next.exists(`opname.takeover.ground.${key}`) ? t(`opname.takeover.ground.${key}`) : undefined;
+  const groundValue = (value: unknown, field: string) => {
+    const lines = groundValueLines(value, locale, groundLabel, field);
+    if (lines.length === 1 && lines[0].label == null) return lines[0].text;
+    return <ul className="opname-takeover__value">
+      {lines.map((line, index) => <li key={index}>{line.label != null && <span>{line.label}: </span>}{line.text}</li>)}
+    </ul>;
+  };
 
   if (!shared) return null;
   return (
@@ -107,14 +116,14 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
           <h4>{t('opname.takeover.ground.title')}</h4>
           <p className="nta-form-note">{t('opname.takeover.ground.intro')}</p>
           {floors.map((floor) => <div key={floor.id} className="nta-form-row">
-            <label>{t('opname.takeover.ground.pair', { floor: floor.id, area: floor.areaM2 == null ? '—' : previewValue(floor.areaM2, locale) })}
+            <label>{t('opname.takeover.ground.pair', { floor: floor.id, area: floor.areaM2 == null ? '—' : formatTakeoverNumber(floor.areaM2, locale) })}
               <select value={pairs[floor.id] ?? ''} onChange={(event) => pair(floor.id, event.target.value || null)}>
                 <option value="">{t('opname.takeover.ground.none')}</option>
                 {surfaces.map((surface) => {
                   // One project floor takes one survey floor.
                   const other = floors.find((item) => item.id !== floor.id && pairs[item.id] === surface.id);
                   return <option key={surface.id} value={surface.id} disabled={other != null}>
-                    {`${surface.name} (${previewValue(surface.areaM2, locale)} m²)`}
+                    {`${surface.name} (${formatTakeoverNumber(surface.areaM2, locale)} m²)`}
                     {other ? ` ${t('opname.takeover.ground.pairedElsewhere', { floor: other.id })}` : ''}
                   </option>;
                 })}
@@ -123,7 +132,7 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
           </div>)}
           {surfaces.length === 0 && <p className="nta-form-note">{t('opname.takeover.ground.noSurfaces')}</p>}
           {preview.ground.length > 0 &&
-            <table className="opname-takeover__diff" aria-label={t('opname.takeover.ground.title')}>
+            <table className="opname-takeover__diff opname-takeover__ground-table" aria-label={t('opname.takeover.ground.title')}>
               <thead><tr>
                 <th scope="col">{t('opname.takeover.ground.accept')}</th>
                 <th scope="col">{t('opname.takeover.path')}</th>
@@ -136,9 +145,9 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
                   return <tr key={item.key} className={item.status === 'conflict' ? 'opname-takeover__conflict' : undefined}>
                     <td><input type="checkbox" checked={accepted.has(item.key)} onChange={() => toggle(item.key)}
                       aria-label={t('opname.takeover.ground.acceptItem', { item: label })} /></td>
-                    <td><code>{label}</code>{item.status === 'conflict' && <> <small>{t('opname.takeover.ground.conflict')}</small></>}</td>
-                    <td>{previewValue(item.from, locale)}</td>
-                    <td>{item.to === undefined ? t('opname.takeover.ground.remove') : previewValue(item.to, locale)}</td>
+                    <th scope="row">{label}{item.status === 'conflict' && <> <small>{t('opname.takeover.ground.conflict')}</small></>}</th>
+                    <td>{groundValue(item.from, item.field)}</td>
+                    <td>{item.to === undefined ? t('opname.takeover.ground.remove') : groundValue(item.to, item.field)}</td>
                   </tr>;
                 })}
               </tbody>
