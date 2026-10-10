@@ -36,6 +36,8 @@ Alleen een berekening volgens de aangewezen uitgave mag in EP-Online worden gere
 - de projectstatus op de stap Project, het dashboard onder **Resultaten**, het rekenpaneel, de statusbalk en het NTA-rekenrapport melden "Oudere uitgave — niet voor registratie", met de uitgave waarin is gerekend;
 - de registratiecontrole weigert het project met `legacy_edition_not_registrable`. De enige uitzondering is herlabelen in de uitgave van de oorspronkelijke berekening (zie hieronder).
 
+![Resultaten van de voorbeeldtussenwoning berekend volgens NTA 8800:2022: onder de melding onverifieerde berekening staat de melding Oudere uitgave — niet voor registratie, daaronder het indicatieve label en BENG 1, 2 en 3 en TOjuli](img/resultaten-oudere-uitgave.png)
+
 ## Invoer die alleen in een uitgave bestaat
 
 Sommige invoer bestaat maar in een deel van de uitgaven. Het formulier toont die velden alleen onder de uitgaven die ze kennen. Voorbeelden:

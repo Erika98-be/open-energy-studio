@@ -118,6 +118,8 @@ Waar het formulier een waarde uit een kwaliteitsverklaring toelaat (§9.1), verv
 - het opwekkingsrendement van een warmtepomp of tapwatertoestel;
 - de belemmering, de zonwering en het glas per raam.
 
+![Hulpenergie van een ketel uit een kwaliteitsverklaring (A, B, C en B_nom van 9.85) en de omzettingsgetallen ε_chp;th en ε_chp;el van een WKK uit een kwaliteitsverklaring, elk met de verklaring als bron](img/kwaliteitsverklaring-ketel-wkk.png)
+
 Elke opgegeven waarde vraagt een bron: nummer en uitgever van de verklaring, of de tekening, het productblad of de opname. Leg het bestand zelf vast in het bewijsregister en koppel het aan het veld met **Bron & bewijs** (zie [hoofdstuk 7](07-herlabelen-registratie-dossier.md#bewijsregister)); het projectdossier bevat dan de gebruikte verklaringen (BRL 9500 bijlage 3). Zonder bron geeft de kern een invoergat en gebruikt hij de opgegeven waarde niet.
 
 ### Leidinggegevens
@@ -126,6 +128,8 @@ Bij distributie (verwarming en koeling) en bij de circulatieleiding van warm tap
 - Alle maten zijn in **meters**: 15 mm is 0,015 m. Een diameter of diepte boven 1 m wordt geweigerd met *Leidinggegevens: een diameter of diepte is groter dan 1 m …*.
 - Bij verwarming (9.33–9.35) en koeling (10.24–10.26) mag een eigen warmteovergangscoëfficiënt worden opgegeven; bij tapwater ligt die vast op 8,0 W/(m²·K) (13.27/13.29).
 - Bij tapwater geef je ψ óf op óf bereken je hem, niet allebei.
+
+![Het blok ψ uit de leidinggegevens voor een geïsoleerde leiding in de constructie, met de diameters zonder en met isolatie, de λ van de isolatie en van de constructie en de diepte, alle maten in meters](img/psi-leidinggegevens.png)
 
 ### Forfaitaire koudebruggen met een onverwarmde ruimte
 
@@ -174,6 +178,8 @@ Kies bij **Actieve koeling** als capaciteitsbewijs *bijlage AA (berekening per r
 - **Ruimte verwijderen** haalt de ruimte weg.
 
 **Controle.** Het formulier controleert dezelfde punten als de rekenkern, met dezelfde meldcodes. Het toont een melding direct bij het veld: een ontbrekende oppervlakte, een negatief vermogen, een onbekend of dubbel toegekend raam, of een dubbele ruimtenaam. De toets AA.10–AA.13 zelf doet de rekenkern na **Toepassen**.
+
+![Actieve koeling met als capaciteitsbewijs bijlage AA: bouwjaar, de tabel met verblijfsruimten (woonkamer en slaapkamer met oppervlakte, geïnstalleerd vermogen en ramen) en de gegevens van de woonkamer met het toegekende raam](img/bijlage-aa.png)
 
 **Meer rekenzones.** Bijlage AA wordt per gekoelde rekenzone bepaald. Heeft het project meer dan één rekenzone, dan toont het formulier per zone een eigen berekening, met **Berekening bijlage AA voor … toevoegen**. Elke zone biedt alleen haar eigen buitenramen aan. Staat er nog een berekening zonder zone (bijvoorbeeld van voordat het project werd opgesplitst), dan kies je met **Toewijzen aan …** bij welke zone die hoort. Een gekoelde zone zonder eigen berekening krijgt de melding dat het capaciteitsbewijs ontbreekt.
 
