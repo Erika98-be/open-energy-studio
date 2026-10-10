@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { readIdentity } from '../../scripts/nta-leveringsdocument.mjs';
 import { releaseNotes } from '../../scripts/nta-kernel-version.mjs';
-import { githubUrl, releasedItems, renderGithubRelease } from '../../scripts/nta-github-release.mjs';
+import { githubUrl, releasedItems, renderGithubRelease, shortCommit } from '../../scripts/nta-github-release.mjs';
 
 const root = join(__dirname, '../..');
 const notes = readFileSync(join(root, 'docs/nta8800-releasenotes.md'), 'utf8');
@@ -47,6 +47,20 @@ describe('GitHub release body (scripts/nta-github-release.mjs)', () => {
     expect(text).toContain(`| \`Open Energy Studio_0.2.0_amd64.deb\` | \`${'a'.repeat(64)}\` |`);
     expect(text).toContain('https://github.com/owner/repo/blob/oes-v');
     expect(text).not.toMatch(/\{\{|undefined/);
+  });
+
+  it('keeps the local-changes marker of a dry run from a dirty worktree', () => {
+    // release-nta.sh stamps the same marker in the leveringsdocument, testrapport and manifest.
+    expect(shortCommit('0123456789abcdef0123')).toBe('`0123456789ab`');
+    expect(shortCommit('0123456789abcdef0123 (met lokale wijzigingen)')).toBe(
+      '`0123456789ab` (met lokale wijzigingen)',
+    );
+    const identity = readIdentity(root);
+    const text = renderGithubRelease({
+      identity, tag: 't', commit: '0123456789abcdef0123 (met lokale wijzigingen)',
+      notesText: notes, repoUrl: '', assets: [],
+    });
+    expect(text).toContain('commit `0123456789ab` (met lokale wijzigingen) |');
   });
 
   it('reads the repository URL from an https or ssh remote', () => {

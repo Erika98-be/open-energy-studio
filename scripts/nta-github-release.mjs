@@ -32,6 +32,17 @@ export function releasedItems(notesText, kernelVersion) {
   return { section, items };
 }
 
+/**
+ * The commit as shown in the release body: the hash shortened to 12 characters,
+ * with any marker release-nta.sh adds (such as "(met lokale wijzigingen)" on a
+ * dry run from a dirty worktree) kept after it.
+ */
+export function shortCommit(commit) {
+  const [hash, ...rest] = commit.trim().split(/\s+/);
+  const marker = rest.join(' ');
+  return marker ? `\`${hash.slice(0, 12)}\` ${marker}` : `\`${hash.slice(0, 12)}\``;
+}
+
 /** Fills the release body. Every asset is listed with its SHA-256. */
 export function renderGithubRelease(values) {
   const { identity, tag, commit, notesText, assets, repoUrl } = values;
@@ -47,7 +58,7 @@ export function renderGithubRelease(values) {
     `| NTA 8800 kernel (\`KERNEL_VERSION\`) | **${identity.kernelVersion}** |`,
     `| Norm edition (default, registrable) | ${identity.targetNormVersion} |`,
     `| Attest number (BRL 9501) | ${attest} |`,
-    `| Source | tag \`${tag}\`, commit \`${commit.slice(0, 12)}\` |`,
+    `| Source | tag \`${tag}\`, commit ${shortCommit(commit)} |`,
     '',
   ];
   if (!identity.attestNumber) {
