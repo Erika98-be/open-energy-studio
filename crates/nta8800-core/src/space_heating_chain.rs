@@ -29,7 +29,7 @@ use crate::annex_v::{
 };
 use crate::boiler_forfait_draft::{
     assess_boiler_forfait_monthly_draft, BoilerForfaitDraftInput, BoilerForfaitMonthlyDraftInput,
-    BoilerRole,
+    BoilerLocation, BoilerRole,
 };
 use crate::climate::{MONTH_HOURS, OUTDOOR_TEMPERATURE_C};
 use crate::final_energy_draft::MonthlyEnergy;
@@ -226,7 +226,8 @@ pub struct DistributionSystem {
     #[serde(default)]
     pub pipes_also_for_hot_water: bool,
     /// Collective installation making hot water through a delivery set:
-    /// `ϑ_H,mean ≥ 65 °C` and the whole month in operation.
+    /// `ϑ_H,mean ≥ 65 °C` and the whole month in operation. The heating
+    /// pipes then serve hot water too ([`DistributionSystem::serves_hot_water`]).
     #[serde(default)]
     pub collective_hot_water_delivery_set: bool,
     /// `n_si` of 9.37, at least 1.
@@ -718,6 +719,32 @@ pub struct BiomassGenerator {
     pub auxiliary: Option<OtherGeneratorAuxiliary>,
 }
 
+/// §9.6 (2025+C1 p. 322, 2024 p. 304) and note b of table 9.25 (p. 328,
+/// 2024 p. 310): the generators of a system for more than 500 m² stand in a
+/// technical room seen as an adjacent space, so a boiler entered inside the
+/// thermal boundary takes the outside row.
+fn placed_boiler(boiler: &BoilerForfaitDraftInput, large_system: bool) -> BoilerForfaitDraftInput {
+    let mut placed = boiler.clone();
+    if large_system {
+        placed.location = BoilerLocation::OutsideThermalBoundary;
+    }
+    placed
+}
+
+/// The same rule for a central biomass boiler of table 9.30 (p. 341);
+/// stoves stand in the room they heat.
+fn placed_biomass(
+    appliance: BiomassAppliance,
+    location: BiomassLocation,
+    large_system: bool,
+) -> BiomassLocation {
+    if large_system && appliance == BiomassAppliance::CentralBoiler {
+        BiomassLocation::OutsideThermalBoundary
+    } else {
+        location
+    }
+}
+
 /// Table 9.30 forfait efficiency; `None` where the table has no value.
 pub fn biomass_efficiency(appliance: BiomassAppliance, location: BiomassLocation) -> Option<f64> {
     use BiomassAppliance::*;
@@ -908,6 +935,8 @@ struct HeatPumpBuildingContext {
     heating_need_kwh: f64,
     cooling_need_kwh: f64,
     usable_floor_area_m2: f64,
+    /// [`GeneratorConditions::large_system`], for an annex Q backup boiler.
+    large_system: bool,
 }
 
 /// `η_el = 1/f_P;del;el` (table 5.2) for V.1.
@@ -1938,8 +1967,7 @@ fn calculate_distribution(
     // delivery sets, ϑ_H;mean ≥ 65 °C (9.30) and L_zi = 0 for heating-only
     // pipes. NTA 8800:2023 (p. 290–294) has none of these rules.
     let rules_2024 = crate::norm_versions::profile().distribution_2024_rules;
-    let full_month =
-        rules_2024 && (system.pipes_also_for_hot_water || system.collective_hot_water_delivery_set);
+    let full_month = rules_2024 && system.serves_hot_water();
     // Table 9.X: pump fraction 0,10 for dwellings with an individual installation.
     let pump_fraction = if system.usage_function == ReductionFunction::Residential
         && system.installation == Installation::Individual
@@ -2013,7 +2041,7 @@ fn calculate_distribution(
     }
     // Table 9.16 rows for combined collective pipes: 2024 p. 292; absent
     // in NTA 8800:2023 (p. 296).
-    let shared = system.pipes_also_for_hot_water
+    let shared = system.serves_hot_water()
         && system.installation == Installation::Collective
         && crate::norm_versions::profile().table_9_16_combined_rows;
     let psi_zone = system.pipe_transmittance.value(connected_area_m2, shared);
@@ -2056,8 +2084,9 @@ fn calculate_distribution(
         }
         let share = zone.area_m2 / zone_area;
         // 9.4.1: L_zi = 0 when the pipes serve space heating only (2024
-        // p. 284–285; not in NTA 8800:2023 p. 290–291).
-        let zone_length = if system.pipes_also_for_hot_water || !rules_2024 {
+        // p. 284–286; not in NTA 8800:2023 p. 290–291); pipes feeding a
+        // delivery set serve hot water too.
+        let zone_length = if system.serves_hot_water() || !rules_2024 {
             in_zone_with_fittings * share
         } else {
             0.0
@@ -2585,6 +2614,7 @@ fn assess_chain_pass(
             let appliances = f64::from(input.identical_systems.unwrap_or(1).max(1));
             conditions.generator_losses_recoverable =
                 residential && !conditions.collective && connected_area / appliances <= 500.0;
+            conditions.large_system = connected_area / appliances > 500.0;
         }
         // 7.3/7.7: the recoverable losses (9.2.5) reduce the heating need and
         // add to the cooling need; the heating limit (9.28) and the
@@ -2799,6 +2829,7 @@ fn assess_chain_pass(
                     .map(|zone| zone.annual_cooling_need_kwh.unwrap_or(0.0))
                     .sum(),
                 usable_floor_area_m2: zone_area,
+                large_system: conditions.large_system,
             };
             generation_efficiency = generate_identical(
                 input,
@@ -2925,7 +2956,14 @@ fn assess_chain_pass(
         demand,
         additional_zone_demands,
         issues,
-        warnings: biomass_class_warnings(input),
+        warnings: {
+            let mut warnings = biomass_class_warnings(input);
+            let appliances = f64::from(input.identical_systems.unwrap_or(1).max(1));
+            if connected_area / appliances > 500.0 {
+                warnings.extend(large_system_warnings(&input.generator));
+            }
+            warnings
+        },
     }
 }
 
@@ -3011,6 +3049,10 @@ struct GeneratorConditions {
     /// 9.2.5.1: generator losses are recoverable only for individual
     /// appliances in dwellings and never above 500 m².
     generator_losses_recoverable: bool,
+    /// §9.6 and note b of table 9.25: a system for more than 500 m² stands
+    /// in a technical room seen as an adjacent space, so outside the thermal
+    /// boundary (2025+C1 p. 322 and 328).
+    large_system: bool,
 }
 
 impl Generator {
@@ -3152,6 +3194,7 @@ fn generator_conditions(
         levelled_c: None,
         collective: collective_installation(input),
         generator_losses_recoverable: false,
+        large_system: false,
     }
 }
 
@@ -3312,6 +3355,54 @@ fn biomass_class_warnings(input: &SpaceHeatingChainInput) -> Vec<ChainIssue> {
         }
     }
     warnings
+}
+
+/// `generator_large_system_outside`: a boiler entered inside the thermal
+/// boundary of a system for more than 500 m², taken outside ([`placed_boiler`]).
+fn large_system_warnings(generator: &Generator) -> Vec<ChainIssue> {
+    let inside =
+        |boiler: &BoilerForfaitDraftInput| boiler.location == BoilerLocation::InsideThermalBoundary;
+    let paths = |generator: &Generator, prefix: &str| -> Vec<String> {
+        match generator {
+            Generator::GasBoiler(item) if inside(&item.boiler) => {
+                vec![format!("{prefix}.boiler.location")]
+            }
+            Generator::HybridHeatPump(item) if inside(&item.boiler) => {
+                vec![format!("{prefix}.boiler.location")]
+            }
+            Generator::HeatPumpAnnexQ(item) => match &item.backup {
+                Some(AnnexQBackup::GasBoiler { boiler }) if inside(boiler) => {
+                    vec![format!("{prefix}.backup.boiler.location")]
+                }
+                _ => Vec::new(),
+            },
+            Generator::Biomass(item)
+                if item.appliance == BiomassAppliance::CentralBoiler
+                    && item.location == BiomassLocation::InsideThermalBoundary =>
+            {
+                vec![format!("{prefix}.location")]
+            }
+            _ => Vec::new(),
+        }
+    };
+    let found = match generator {
+        Generator::Multiple(set) => set
+            .generators
+            .iter()
+            .enumerate()
+            .flat_map(|(index, part)| {
+                paths(
+                    &part.generator,
+                    &format!("generator.generators[{index}].generator"),
+                )
+            })
+            .collect(),
+        generator => paths(generator, "generator"),
+    };
+    found
+        .into_iter()
+        .map(|path| issue("generator_large_system_outside", path))
+        .collect()
 }
 
 /// Moves the biomass of a generator to its table 5.2 class.
@@ -3499,7 +3590,7 @@ fn generate_annex_q_share(
     let mut backup_gas: Option<Vec<(f64, Option<f64>)>> = None;
     if let Some(AnnexQBackup::GasBoiler { boiler }) = &generator.backup {
         let assessed = assess_boiler_forfait_monthly_draft(&BoilerForfaitMonthlyDraftInput {
-            boiler: boiler.clone(),
+            boiler: placed_boiler(boiler, building.large_system),
             generator_output_kwh: backup_outputs.clone(),
             generator_output_reference: "annex Q supplementary share".into(),
         });
@@ -3575,6 +3666,17 @@ fn generate_annex_q_share(
 }
 
 impl DistributionSystem {
+    /// The pipes inside the connected parts carry heat for hot water too.
+    /// A collective delivery set is fed by the heating pipes, so it counts
+    /// as such: 13.4 c) puts the loss of those pipes in 9.4.2 (2025+C1
+    /// p. 545, 2024 p. 529), and it is the combined row of table 9.16
+    /// (2025+C1 p. 310, 2024 p. 292). The pipes then do not serve space
+    /// heating only, so L_zi counts (9.4.1 and 9.27: 2025+C1 p. 302 and 304,
+    /// 2024 p. 284 and 286).
+    pub fn serves_hot_water(&self) -> bool {
+        self.pipes_also_for_hot_water || self.collective_hot_water_delivery_set
+    }
+
     /// ϑ_ztu of the unheated space with pipes and vessels: the entered
     /// values, else 7.82 with `b_U`, else 13 °C.
     pub fn unheated_ambient(&self, month: usize, setpoint_c: f64) -> f64 {
@@ -4560,7 +4662,7 @@ fn generate(
                 ));
             }
             let result = assess_boiler_forfait_monthly_draft(&BoilerForfaitMonthlyDraftInput {
-                boiler: generator.boiler.clone(),
+                boiler: placed_boiler(&generator.boiler, conditions.large_system),
                 generator_output_kwh: outputs.to_vec(),
                 generator_output_reference: "derived by space_heating_chain".into(),
             });
@@ -4855,7 +4957,7 @@ fn generate(
                     building_fraction: Some(building_fraction),
                 },
                 forfait: generator.forfait.clone(),
-                boiler: generator.boiler.clone(),
+                boiler: placed_boiler(&generator.boiler, conditions.large_system),
                 source_system: generator.source_system,
                 source_system_reference: generator.source_system_reference.clone(),
                 declared_operating_limits_present: generator.declared_operating_limits_present,
@@ -5007,7 +5109,14 @@ fn generate(
                 0.0
             };
             validate_other_auxiliary(generator.auxiliary.as_ref(), automatic, issues);
-            match biomass_efficiency(generator.appliance, generator.location) {
+            match biomass_efficiency(
+                generator.appliance,
+                placed_biomass(
+                    generator.appliance,
+                    generator.location,
+                    conditions.large_system,
+                ),
+            ) {
                 None => issues.push(issue(
                     "biomass_efficiency_unavailable",
                     "generator.location",
@@ -8250,6 +8359,97 @@ mod tests {
             .iter()
             .any(|item| item.code == "route_not_in_edition"
                 && item.path == "distributionSystem.uninsulatedPipesInUninsulatedShell"));
+    }
+
+    /// A collective delivery set is fed by the heating pipes, so those pipes
+    /// serve hot water too: 13.4 c) (2025+C1 p. 545) puts their loss in
+    /// 9.4.2, L_zi counts (p. 302, 304) and table 9.16 takes the combined
+    /// row (p. 310), also when "pipes also for hot water" is not ticked.
+    #[test]
+    fn a_delivery_set_keeps_the_zone_pipes_and_the_combined_row() {
+        let mut input = collective_boiler_chain();
+        input.distribution = Distribution::Calculated {
+            heating_limit_extra_kwh: Some(vec![0.0; 12]),
+            source_reference: "9.26".into(),
+        };
+        let distribution = input.distribution_system.as_mut().unwrap();
+        distribution.collective_hot_water_delivery_set = true;
+        distribution.actual_pipe_length_m = Some(100.0);
+        distribution.unheated_pipe_length_m = Some(0.0);
+        distribution.valves_insulated = true;
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        let summary = result.distribution.as_ref().unwrap();
+        // Table 9.16 combined row, insulated: 0,4 (heating row from 1995: 0,3).
+        assert_eq!(summary.psi_zone_w_per_mk, 0.4);
+        // July: whole month, ϑ_H;mean = 65 °C, all 100 m in the zone with
+        // L_equi = 0,03/Ψ · L (9.27b):
+        // Q = 0,4 · (65 − θ_op) · (100 + 7,5) · 744 / 1000.
+        let demand = crate::monthly_demand::assess_monthly_demand(&input.demand);
+        let operative = demand.monthly[6].heating.calculation_temperature_c;
+        let expected = 0.4 * (65.0 - operative) * 107.5 * 744.0 / 1000.0;
+        let july = result.monthly[6].distribution_loss_kwh;
+        assert!(expected > 1000.0, "{expected}");
+        assert!((july - expected).abs() < 1e-6, "{july} vs {expected}");
+        // Ticking "pipes also for hot water" as well changes nothing.
+        let mut both = input.clone();
+        both.distribution_system
+            .as_mut()
+            .unwrap()
+            .pipes_also_for_hot_water = true;
+        let both = assess_space_heating_chain(&both);
+        for (one, two) in result.monthly.iter().zip(&both.monthly) {
+            assert_eq!(one.distribution_loss_kwh, two.distribution_loss_kwh);
+        }
+    }
+
+    /// §9.6 (p. 322) and note b of table 9.25 (p. 328): a system for more
+    /// than 500 m² stands in an adjacent space, so a HR-107 boiler entered
+    /// inside takes the outside row, LT 0,925 instead of 0,975 (table 9.25,
+    /// p. 327), with a warning; the area per identical appliance decides.
+    #[test]
+    fn a_boiler_for_more_than_500_m2_takes_the_outside_row() {
+        let small = boiler_chain();
+        let base = assess_space_heating_chain(&small);
+        assert_eq!(base.generation_efficiency, Some(0.975));
+        assert!(base.warnings.is_empty(), "{:?}", base.warnings);
+
+        let mut large = small.clone();
+        large.collective_connection = Some(CollectiveConnection {
+            connected_usable_area_m2: 600.0,
+            source_reference: "building plan".into(),
+        });
+        let result = assess_space_heating_chain(&large);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        assert_eq!(result.generation_efficiency, Some(0.925));
+        let jan = &result.monthly[0];
+        assert!((jan.natural_gas_kwh - jan.generator_output_kwh / 0.925).abs() < 1e-9);
+        assert_eq!(
+            result
+                .warnings
+                .iter()
+                .map(|item| (item.code, item.path.as_str()))
+                .collect::<Vec<_>>(),
+            [(
+                "generator_large_system_outside",
+                "generator.boiler.location"
+            )]
+        );
+
+        // Two identical appliances of 300 m² each are small systems.
+        let mut split = large.clone();
+        split.identical_systems = Some(2);
+        let split = assess_space_heating_chain(&split);
+        assert_eq!(split.generation_efficiency, Some(0.975));
+        assert!(split.warnings.is_empty(), "{:?}", split.warnings);
     }
 
     #[test]

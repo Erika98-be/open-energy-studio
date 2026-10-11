@@ -1012,6 +1012,8 @@ Zelfde proef op de andere gevallen met een verwarmingsbatterij (alleen in een sc
 
 H en K hebben geen verwarmingsbatterij en veranderen niet. L en O komen met de fysische waarde dicht bij het rapport; bij L verklaart het het grootste deel van het verschil in verwarming dat bij L open stond. N gaat de andere kant op, maar daar verwarmt de LBK de hele zone en lag de kern al boven het rapport (zie N). Uniec 3.1.5.0 lijkt dus de fysische waarde te gebruiken. Dit is als [vraag 7 aan NEN](nta8800-vragen-nen.md) opgenomen; tot het antwoord blijft de kern bij de gedrukte waarde.
 
+Review 42 (11 oktober 2026) legde de rest van de verwarmingsketen van O naast de norm van 2022: de afgifte (9.12a met Δθ_int;inc 3,2 K uit de tabellen 9.2–9.4 van 2022, p. 272–275, meestal op de grens 0,15; 1 794 kWh), de distributie (9.26, in 2022 nog zonder L_zi = 0 voor alleen-verwarming, Ψ 0,3 over 245,62 m binnen en 43,34 m buiten de zone; 1 526 kWh), de pomp (389 kWh, gelijk aan het rapport) en 9.84 met f_prac 0,95. Daar zit geen tweede verschil. Na de fysische c_a blijft +385 kWh warmte voor het systeem over (2,2 %), in dezelfde orde als het verschil in BENG 1 (+1,1 %) uit de aannames voor b_U en de kruipruimte.
+
 ### Wat O toevoegt
 
 - **Het eerste warmtenet.** Externe warmtelevering met een kwaliteitsverklaring voor verwarming en tapwater, f_prac 0,95 op beide, en de afleverset. Tapwater, hulpenergie, ventilatoren, verlichting en PV kloppen tot op de kWh.
