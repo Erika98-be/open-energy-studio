@@ -3585,8 +3585,10 @@ fn assess_in_edition(input: &BuildingPerformanceInput) -> BuildingPerformanceAss
         ));
     }
     // §5.3.2 (p. 75–76): the standard voor woningisolatie needs the
-    // construction year of the dwelling.
+    // construction year of the dwelling. An older edition reports no
+    // chapter 5 block (see `assess_building_performance`), so no standard.
     if valid
+        && norm_versions::profile().indicators_2025
         && matches!(input.calculation_scope, CalculationScope::Residential)
         && dwelling_count(input) == Some(1)
         && input.construction_year.is_none()
@@ -5151,6 +5153,22 @@ mod tests {
             .warnings
             .iter()
             .any(|item| item.code == "standard_insulation_construction_year_missing"));
+        // An older edition reports no chapter 5 block, so no standard to
+        // miss the year for (2022 has no standard at all, p. 72–73).
+        for version in [
+            NormVersion::V2024,
+            NormVersion::V2023,
+            NormVersion::V2022,
+        ] {
+            sample.norm_version = version;
+            let result = assess_building_performance(&sample);
+            assert!(result.chapter5.is_none());
+            assert!(!result
+                .warnings
+                .iter()
+                .any(|item| item.code == "standard_insulation_construction_year_missing"));
+        }
+        sample.norm_version = NormVersion::V2025C1;
         sample.construction_year = Some(1975);
         let result = assess_building_performance(&sample);
         assert!(!result
