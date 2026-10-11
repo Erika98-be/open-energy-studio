@@ -1351,6 +1351,7 @@ export const nl: Record<string, string> = {
   'nta.gap.product_boiler_output_without_operating_hours': 'Ketellevering in een maand zonder bedrijfstijd (tabel 9.15)',
   'nta.gap.cooling_part_load_above_full_load': 'Deellast koeling boven 100 % (10.58): de NEN-EN 14825-curve wordt geëxtrapoleerd; controleer het vermogen',
   'nta.gap.annex_aa_capacity_insufficient': 'Bijlage AA: koelcapaciteit onvoldoende (AA.10/AA.12); TOjuli wordt berekend (§5.7.1)',
+  'nta.gap.tojuli_sunroom_facade_left_out': 'TOjuli: de gevel naar de aangrenzende serre, zijn transmissie en de serrewinst blijven buiten de verdeling per oriëntatie (§5.7.2 stap A; vraag 8 aan NEN)',
   'nta.gap.annex_aa_window_unknown': 'Bijlage AA: raam-id niet gevonden in de rekenzone (gebruik het raam-id van het project)',
   'nta.gap.annex_aa_window_assigned_twice': 'Bijlage AA: raam bij meer dan één vertrek opgegeven',
   'nta.gap.solar_limitation_not_met': 'Beperking van de zoninstraling (§5.7.1 methode 3) blijkt niet uit de raamgegevens',

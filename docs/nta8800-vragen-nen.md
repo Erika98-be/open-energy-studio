@@ -2,7 +2,7 @@
 
 Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)).
 
-Alle zeven vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle acht vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -85,3 +85,15 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Vraag.**
 - Is c_a = 0,000 027 9 kWh/(kg·K) in 11.115 en 11.119 een drukfout voor 0,000 279 kWh/(kg·K)?
 - Zo niet: waarom telt de batterij een tiende van de warmte die de toevoerlucht volgens 11.3.2 en tabel 11.15 krijgt?
+
+## 8. Gevel aan een aangrenzende onverwarmde serre bij TOjuli (5.7.2, p. 115–118)
+
+**Situatie.** Stap A van 5.7.2 laat constructies naar een aangrenzende onverwarmde ruimte buiten A_T;or, maar maakt een uitzondering voor een aangrenzende onverwarmde serre (AOS): het geveldeel dat aan de serre grenst, telt mee bij zijn oriëntatie (p. 115). Stap 2 telt voor die oriëntatie H_C;D;juli;k en Q_C;sol;juli;k op van constructies tussen de rekenzone en "de buitenlucht of serre" (p. 116–117). Stap 1 bepaalt H_C;D;juli;k echter volgens 8.2, en een constructie naar een serre valt niet onder 8.2 maar onder 8.4 (H_U met b_U). Stap B noemt geen component voor H_U. De zonnewinst via de serre is de indirecte winst van 7.30b.
+
+**Gekozen lezing.** Zolang dit niet vaststaat, laat de kern het serregeveldeel, zijn transmissie en de indirecte serrewinst buiten de verdeling per oriëntatie, net als bij een gewone aangrenzende onverwarmde ruimte. Een rekenzone met een serre krijgt bij een berekende TOjuli de melding `tojuli_sunroom_facade_left_out`.
+
+**Gevolg.** Geen openbaar geval heeft een serre. Ligt de serre op de enige gevel van een oriëntatie, dan kan die oriëntatie onder de 3 m² van stap A blijven en niet worden beoordeeld, terwijl de serre juist zonnewinst geeft.
+
+**Vraag.**
+- Welke warmteoverdrachtscoëfficiënt hoort in 5.40 en in de julibalans bij het geveldeel naar de serre: U·A alsof het een buitengevel is, b_U·H_zi;ztu volgens 8.4, of geen?
+- Telt de indirecte zonnewinst van 7.30b als Q_C;sol;juli;k van dat geveldeel, op zijn oriëntatie?

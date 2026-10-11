@@ -7,6 +7,9 @@
 //! an unheated or heated adjacent space (AOR/AVR) take no part: they are
 //! neither in `A_T` nor in `H_C;D` of 5.40, and step B lists no component for
 //! them, so their transmission is left out of the per-orientation balance.
+//! The facade to an adjacent unheated sunroom (AOS), which step A does
+//! count, is left out the same way until NEN answers question 8
+//! (docs/nta8800-vragen-nen.md); the zone gets `tojuli_sunroom_facade_left_out`.
 //! Step B/2: thermal bridges with explicit ψ/χ belong to the orientation of
 //! their construction parts; a bridge on parts of several orientations is
 //! split equally over them. Bridges without orientation and horizontal parts
@@ -735,6 +738,14 @@ pub fn assess_tojuli(input: &MonthlyDemandInput, options: TojuliOptions<'_>) -> 
                 )
             })
             .into_iter()
+            // Step A (p. 115) counts the facade to an adjacent unheated
+            // sunroom in A_T;or, but steps 1–2 give it no H_C;D (8.2 has no
+            // sunroom term). Until NEN answers, the facade, its transmission
+            // and the 7.30b gains stay out of the split, as for an AOR.
+            .chain(
+                (!input.sunrooms.is_empty())
+                    .then(|| issue("tojuli_sunroom_facade_left_out", "sunrooms")),
+            )
             .collect(),
         annex_aa: insufficient_annex_aa,
         issues: Vec::new(),
@@ -1168,6 +1179,39 @@ mod tests {
         assert_eq!(utility.meets_bbl_limit, None);
         let dwelling = assess_tojuli(&input, TojuliOptions::default());
         assert!(dwelling.meets_bbl_limit.is_some());
+    }
+
+    /// Review 40: §5.7.2 step A counts a sunroom facade in A_T;or, but no
+    /// H_C;D exists for it (question 8 to NEN); the zone says so.
+    #[test]
+    fn a_zone_with_a_sunroom_reports_the_left_out_facade() {
+        let mut input = demand();
+        let plain = assess_tojuli(&input, TojuliOptions::default());
+        assert!(plain
+            .warnings
+            .iter()
+            .all(|item| item.code != "tojuli_sunroom_facade_left_out"));
+        input.sunrooms.push(crate::monthly_demand::Sunroom {
+            id: "serre".into(),
+            glazing_g_heating: 0.6,
+            glazing_g_cooling: 0.6,
+            exterior_frame_fraction: 0.2,
+            reduction_factor: 0.8,
+            zone_conductance_w_per_k: 10.0,
+            distribution_factor: 1.0,
+            surfaces: Vec::new(),
+            source_reference: "survey".into(),
+        });
+        let with_sunroom = assess_tojuli(&input, TojuliOptions::default());
+        assert_eq!(with_sunroom.status, "calculated_unverified");
+        let warning = with_sunroom
+            .warnings
+            .iter()
+            .find(|item| item.code == "tojuli_sunroom_facade_left_out")
+            .expect("warning");
+        assert_eq!(warning.path, "sunrooms");
+        // The split itself is unchanged.
+        assert_eq!(with_sunroom.max_tojuli_k, plain.max_tojuli_k);
     }
 
     #[test]
