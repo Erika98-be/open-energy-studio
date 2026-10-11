@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 53: nieuwe invoer en meldingen van reviews 40–52 bereikbaar in de workflow (geen rekenwijziging)
+Review van de invoer en meldingen die reviews 40–52 en de gedeelde serre toevoegden: formulieren, Ga naar, lijsten en handleiding.
+
+- **Meldingen van de gebouwberekening in *Open punten*.** Waarschuwingen van de berekening zelf (`performance.warnings`, bijvoorbeeld `generator_large_system_outside`, `tojuli_sunroom_facade_left_out`, `annex_aa_capacity_insufficient`) stonden alleen in het kernpaneel en het rapport, zonder Ga naar en zonder telling in de stappen. De projectroute zet ze nu ook in `warnings`, op het pad van de projectinvoer (bijvoorbeeld `ntaCalculation.generator.boiler.location`, `ntaCalculation.sunrooms`, `ntaCalculation.constructionYear`), met het pad in de berekening als toelichting. Het kernpaneel en de rapporten tonen elke melding één keer.
+- **Gedeelde serre in het formulier.** Twee rekenzones delen één serre als ze dezelfde serre-id hebben; dat was nergens te zien, en twee zones die elk hun eerste serre toevoegden kregen allebei `serre-1` en deelden dus ongewild. Nu:
+  - krijgt een nieuwe serre een id dat nog geen zone gebruikt;
+  - kies je de serre uit de onverwarmde ruimten van het project als die er zijn;
+  - toont elke zone met een gedeelde serre *Gedeelde serre, ook bij …*, met een uitleg onder de lijst.
+- **Kelderwand per wanddeel.** De diepte per wanddeel (8.42/D.12, review 44) kon de kern rekenen maar niet in het formulier worden opgegeven. **Diepte per wanddeel opgeven** vervangt nu de ene diepte z door wanddelen met lengte en diepte; het laatste wanddeel verwijderen zet de ene diepte terug.
+- **Gecontroleerd zonder bevinding:** de koudebrugmethode van het gebouw, de zwak geventileerde smalle luchtlaag, de stoomopwekker gas/olie, de collectieve afleverset en de nieuwe meldcodes hebben Nederlandse en Engelse teksten en een Ga naar naar hun veld.
+- Handleiding hoofdstuk 0 en 3 en `docs/nta8800-maandbehoefte.md` bijgewerkt.
+
 ### 11 oktober 2026 — Overzicht: welke uitkomsten in rekenkern 0.4.0 veranderen (geen rekenwijziging)
 Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de items zelf geven de details en de normverwijzingen. Dit item verandert zelf niets.
 

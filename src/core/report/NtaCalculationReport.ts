@@ -7,6 +7,7 @@ import type {
 import { escapeHtml } from './HtmlEscaping';
 import { attestText, programIdentity, programText } from './ProgramIdentity';
 import { summarizeExtras } from '../nta/NtaResultSummary';
+import { buildingOnlyWarnings } from '../nta/buildingWarnings';
 import { summarizeServiceEnergy } from '../nta/ServiceEnergy';
 import { dutchCodeCell, dutchDetailHtml, dutchNumber, dutchTimeHtml } from './DutchReportText';
 
@@ -248,7 +249,7 @@ export function generateNtaCalculationReportHTML(
   // Project plausibility and the kernel's own warnings (e.g. 10.15, 13.25).
   const warnings: Array<{ code: string; path: string; detail?: string | null }> = [
     ...(assessment.warnings ?? []),
-    ...(performance?.warnings ?? []),
+    ...buildingOnlyWarnings(assessment),
   ];
   const generatedTime = dutchTimeHtml(generatedAt);
   const identity = programIdentity(assessment.kernelVersion, assessment.targetNormVersion);

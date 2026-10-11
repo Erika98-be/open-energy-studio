@@ -5,6 +5,7 @@ import type {
 } from '../nta/KernelClient';
 import { attestMark, type AttestMark } from '../nta/Attest';
 import { kernelVerdict } from '../nta/KernelVerdict';
+import { buildingOnlyWarnings } from '../nta/buildingWarnings';
 import { nl } from '../../i18n/nl';
 import { escapeHtml } from './HtmlEscaping';
 import { attestText, programIdentity, programIdentityRows, programText } from './ProgramIdentity';
@@ -223,7 +224,7 @@ function results(doc: ReportDocument, project: IProject, assessment: ProjectPerf
       `<tr><th colspan="2">${escapeHtml(LABEL_ELEMENT[key] ?? key)}</th><td colspan="2">${escapeHtml(labelElementValue(key, value))}</td></tr>`).join('') : ''}
     ${project.registration ? labelStatementRows(assessment.labelData?.indicators?.elements, project.registration.labelStatements) : ''}`;
   const labelTable = doc.table('Indicatieve labelklasse en labelgegevens (Omgevingsregeling art. 5.11–5.13a)', '', labelRows);
-  const warnings: Array<{ code: string; path: string; detail?: string | null }> = [...(assessment.warnings ?? []), ...(performance.warnings ?? [])];
+  const warnings: Array<{ code: string; path: string; detail?: string | null }> = [...(assessment.warnings ?? []), ...buildingOnlyWarnings(assessment)];
   const warningTable = warnings.length
     ? doc.table('Meldingen (houden de berekening niet tegen)', '<tr><th>Melding</th><th>Pad</th><th>Toelichting</th></tr>',
       warnings.map((item) => `<tr>${dutchCodeCell(item.code)}${td(item.path)}<td>${dutchDetailHtml(item.detail)}</td></tr>`).join(''))

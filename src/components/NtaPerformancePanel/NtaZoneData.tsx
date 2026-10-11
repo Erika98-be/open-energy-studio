@@ -216,7 +216,7 @@ export function ZoneDataFields({ draft, change, project }: SectionProps & { proj
             options={[['open_or_none', t('nta.form.mass.open')], ['closed_or_suspended', t('nta.form.mass.closed')]]} />
           <TextField {...field} path={[...base, 'thermalMass', 'sourceReference']} label={t('nta.zoneData.thermalMass.source')} />
         </>}
-        <SunroomsFields draft={draft} change={change} base={[...base, 'sunrooms']} />
+        <SunroomsFields draft={draft} change={change} base={[...base, 'sunrooms']} project={project} />
         {read(draft, [...base, 'ventilation']) != null &&
           <SwimmingPoolFields draft={draft} change={change} base={[...base, 'ventilation']} />}
         <button type="button" className="nta-form-remove"

@@ -77,7 +77,7 @@ De invoer van het NTA 8800-formulier staat verdeeld over de stappen waar hij inh
 
 ## Controle en Ga naar
 
-Stap 4 **Controle** verzamelt alle meldingen van de rekenkern: fouten, waarschuwingen en ontbrekende invoer, gegroepeerd per stap. Elke melding heeft **Ga naar**. Die opent de juiste stap, subpagina en (bij verwarming) het juiste deel van de keten, en zet de focus op het veld. Een veld met een melding krijgt een rode (fout) of gele (waarschuwing) rand.
+Stap 4 **Controle** verzamelt alle meldingen van de rekenkern: fouten, waarschuwingen en ontbrekende invoer, gegroepeerd per stap. Daar horen ook de meldingen van de berekening zelf bij (bijvoorbeeld een ketel voor meer dan 500 m² of de gevel naar een serre bij TOjuli): die staan bij de invoer waar ze vandaan komen, met het pad in de berekening als toelichting. Elke melding heeft **Ga naar**. Die opent de juiste stap, subpagina en (bij verwarming) het juiste deel van de keten, en zet de focus op het veld. Een veld met een melding krijgt een rode (fout) of gele (waarschuwing) rand.
 
 ![Controle](img/controle.png)
 

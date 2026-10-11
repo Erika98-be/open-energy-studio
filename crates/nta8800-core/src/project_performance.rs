@@ -1941,6 +1941,97 @@ fn building_issue_gaps(
     gaps
 }
 
+/// Warnings of the building calculation (`performance.warnings`, e.g. a
+/// boiler of a system over 500 m² or the TOjuli sunroom facade) carry a path
+/// in the derived input. Each becomes a project warning at the project input
+/// that feeds it, so the workflow lists it with "Ga naar"; the derived path
+/// stays in `detail` as `derivedInput.<path>`.
+fn building_warning_gaps(
+    result: &BuildingPerformanceAssessment,
+    derived: &BuildingPerformanceInput,
+    project_value: &Value,
+    existing: &[InputGap],
+) -> Vec<InputGap> {
+    let mut warnings: Vec<InputGap> = Vec::new();
+    for item in &result.warnings {
+        let path = match tojuli_project_path(&item.path, result, project_value) {
+            Some(path) => path,
+            // Copied from the NTA input, also when it is absent there.
+            None if item.path == "constructionYear" => "ntaCalculation.constructionYear".into(),
+            None => project_path_for_derived(&item.path, derived, project_value),
+        };
+        let known = existing
+            .iter()
+            .chain(warnings.iter())
+            .any(|gap| gap.code == item.code && gap.path == path);
+        if !known {
+            warnings.push(InputGap {
+                detail: Some(format!("derivedInput.{}", item.path)),
+                ..gap(item.code, path)
+            });
+        }
+    }
+    warnings
+}
+
+/// `tojuli[i].…` of the building calculation: the TOjuli assessment of one
+/// zone. Its sunrooms are the zone's own (`zoneData`) or the block's, its
+/// active-cooling evidence is `ntaCalculation.activeCooling`; anything else
+/// is the zone.
+fn tojuli_project_path(
+    path: &str,
+    result: &BuildingPerformanceAssessment,
+    project_value: &Value,
+) -> Option<String> {
+    let (member, index, rest) = split_member(path);
+    if member != "tojuli" {
+        return None;
+    }
+    let zone_id = index
+        .and_then(|index| result.tojuli.get(index))
+        .map(|zone| zone.zone_id.as_str());
+    let rest = rest.strip_prefix('.').unwrap_or(rest);
+    let (part, _, _) = split_member(rest);
+    if part == "activeCooling" {
+        return Some(format!("ntaCalculation.{rest}"));
+    }
+    let zone_data = zone_id.and_then(|zone_id| {
+        project_value
+            .pointer("/ntaCalculation/zoneData")
+            .and_then(Value::as_array)
+            .and_then(|items| {
+                items
+                    .iter()
+                    .position(|item| item.get("zoneId").and_then(Value::as_str) == Some(zone_id))
+            })
+    });
+    if part == "sunrooms" {
+        let own = zone_data.filter(|index| {
+            project_value
+                .pointer(&format!("/ntaCalculation/zoneData/{index}/sunrooms"))
+                .is_some_and(|value| !value.is_null())
+        });
+        return Some(match own {
+            Some(index) => format!("ntaCalculation.zoneData[{index}].sunrooms"),
+            None => "ntaCalculation.sunrooms".to_string(),
+        });
+    }
+    let zone_index = zone_id.and_then(|zone_id| {
+        project_value
+            .get("zones")
+            .and_then(Value::as_array)
+            .and_then(|items| {
+                items
+                    .iter()
+                    .position(|item| item.get("id").and_then(Value::as_str) == Some(zone_id))
+            })
+    });
+    Some(match zone_index {
+        Some(index) => format!("zones[{index}]"),
+        None => "zones".to_string(),
+    })
+}
+
 /// Splits `a.b[2].c` into its first member, the index directly after it and
 /// the rest (`.c`, with its leading separator).
 fn split_member(path: &str) -> (&str, Option<usize>, &str) {
@@ -2347,6 +2438,10 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
     let (range_gaps, range_warnings) = input_range_findings(project_value);
     let mut warnings = plausibility_warnings(project_value);
     warnings.extend(range_warnings);
+    if let (Some(input), Some(result)) = (&derived, &performance) {
+        let found = building_warning_gaps(result, input, project_value, &warnings);
+        warnings.extend(found);
+    }
     let blocked_by_range = !range_gaps.is_empty();
     gaps.extend(range_gaps);
     let mut assessment = ProjectPerformanceAssessment {
@@ -7267,6 +7362,70 @@ mod tests {
         assert_eq!(warning.path, "ntaCalculation.sunrooms[0]");
     }
 
+    /// Review 53: warnings of the building calculation reach the project
+    /// warnings at the input that feeds them, so the workflow lists them
+    /// with "Ga naar"; the derived path stays in `detail`.
+    #[test]
+    fn building_warnings_become_project_warnings_at_their_input() {
+        let mut value: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-terraced-dwelling.json"
+        ))
+        .unwrap();
+        value["zones"][0]["surfaces"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({
+                "id": "wall-serre", "name": "Wand serre", "type": "wall",
+                "thermalBoundary": "unheated_space", "unheatedSpaceId": "serre",
+                "area": 10.0, "orientation": "S", "constructionId": "c-wall",
+                "zoneId": "z1", "windows": []
+            }));
+        value["unheatedSpaces"] = serde_json::json!([{
+            "id": "serre", "name": "Serre", "reductionFactor": 0.8,
+            "factorSourceReference": "8.4.1"
+        }]);
+        value["ntaCalculation"]["sunrooms"] = serde_json::json!([{
+            "id": "serre", "glazingGHeating": 0.6, "glazingGCooling": 0.6,
+            "exteriorFrameFraction": 0.2, "reductionFactor": 0.8,
+            "zoneConductanceWPerK": 10.0, "surfaces": [], "sourceReference": "x"
+        }]);
+        let result = assess_project_performance(&value);
+        assert!(result.status.starts_with("calculated"), "{:?}", result.gaps);
+        let lifted = result
+            .warnings
+            .iter()
+            .find(|item| item.code == "tojuli_sunroom_facade_left_out")
+            .unwrap();
+        assert_eq!(lifted.path, "ntaCalculation.sunrooms");
+        assert_eq!(
+            lifted.detail.as_deref(),
+            Some("derivedInput.tojuli[0].sunrooms")
+        );
+        // The building calculation keeps its own warning and path.
+        assert!(result
+            .performance
+            .unwrap()
+            .warnings
+            .iter()
+            .any(|item| item.code == "tojuli_sunroom_facade_left_out"
+                && item.path == "tojuli[0].sunrooms"));
+
+        // A boiler serving more than 500 m² (§9.6) points at its location.
+        let mut office: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-office.json"
+        ))
+        .unwrap();
+        office["zones"][0]["floorArea"] = Value::from(800.0);
+        let result = assess_project_performance(&office);
+        assert!(result
+            .warnings
+            .iter()
+            .any(|item| item.code == "generator_large_system_outside"
+                && item.path == "ntaCalculation.generator.boiler.location"
+                && item.detail.as_deref()
+                    == Some("derivedInput.spaceHeating.generator.boiler.location")));
+    }
+
     #[test]
     fn a_sunroom_partition_reports_the_gain_interpretation() {
         // vragen-nen 11: forfait route (7.6.1) or windows in the partition
@@ -7322,10 +7481,25 @@ mod tests {
         // and 35 W/K for a C system: about 152 m³/h (51 W/K) at f_ctrl 1,
         // but demand control (table 11.5, lowest 0,52) may bring it to
         // 26,5 W/K, so 35 W/K is plausible.
+        // Only the project's own plausibility findings; warnings lifted from
+        // the building calculation carry `derivedInput.` in their detail.
+        let own = |result: &ProjectPerformanceAssessment| -> Vec<InputGap> {
+            result
+                .warnings
+                .iter()
+                .filter(|item| {
+                    !item
+                        .detail
+                        .as_deref()
+                        .is_some_and(|detail| detail.starts_with("derivedInput."))
+                })
+                .cloned()
+                .collect()
+        };
         let mut value = project();
         let result = assess_project_performance(&value);
         assert_eq!(result.status, "calculated_unverified");
-        let codes: Vec<_> = result.warnings.iter().map(|item| item.code).collect();
+        let codes: Vec<_> = own(&result).iter().map(|item| item.code).collect();
         assert_eq!(codes, ["declared_hot_water_efficiency_above_one"]);
         // 20 W/K is below even the demand-controlled flow.
         for flow in value["ntaCalculation"]["ventilationFlows"]
@@ -7336,8 +7510,8 @@ mod tests {
                 month["conductanceWPerK"] = Value::from(20.0);
             }
         }
-        let low = assess_project_performance(&value);
-        let codes: Vec<_> = low.warnings.iter().map(|item| item.code).collect();
+        let low = own(&assess_project_performance(&value));
+        let codes: Vec<_> = low.iter().map(|item| item.code).collect();
         assert_eq!(
             codes,
             [
@@ -7345,11 +7519,7 @@ mod tests {
                 "declared_ventilation_below_required_flow"
             ]
         );
-        assert!(low.warnings[1]
-            .detail
-            .as_ref()
-            .unwrap()
-            .contains("26.5 W/K"));
+        assert!(low[1].detail.as_ref().unwrap().contains("26.5 W/K"));
 
         // Utility: f_BACS 1,0 without the bacs block and an open ceiling.
         let mut office: Value = serde_json::from_str(include_str!(

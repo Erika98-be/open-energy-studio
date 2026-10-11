@@ -14,6 +14,7 @@ import { NtaCalculationForm } from './NtaCalculationForm';
 import { summarizeExtras } from '../../core/nta/NtaResultSummary';
 import { summarizeServiceEnergy } from '../../core/nta/ServiceEnergy';
 import { kernelNote } from '../../core/nta/KernelNoteText';
+import { buildingOnlyWarnings } from '../../core/nta/buildingWarnings';
 import './NtaPerformancePanel.css';
 import { TechnicalDetails } from '../ui/Display';
 
@@ -88,6 +89,7 @@ export function NtaPerformancePanel({ query: suppliedQuery }: NtaPerformancePane
 
 
   const performance = assessment?.performance ?? null;
+  const buildingWarnings = buildingOnlyWarnings(assessment);
   const calculated = projectCalculated(assessment?.status) && performance;
   const heating = performance?.spaceHeating;
   const issues = performance?.issues ?? [];
@@ -166,10 +168,10 @@ export function NtaPerformancePanel({ query: suppliedQuery }: NtaPerformancePane
         </div>
       )}
 
-      {!loading && calculated && (performance?.warnings?.length ?? 0) > 0 && (
+      {!loading && calculated && buildingWarnings.length > 0 && (
         <div className="nta-performance-gaps" data-testid="nta-performance-warnings">
           <p role="status"><AlertCircle size={16} /> {t('nta.performance.buildingWarnings')}</p>
-          <ul>{(performance?.warnings ?? []).map((item, index) => (
+          <ul>{buildingWarnings.map((item, index) => (
             <li key={`${item.code}-${index}`}><KernelCode code={item.code} /><code>{item.path}</code></li>
           ))}</ul>
         </div>

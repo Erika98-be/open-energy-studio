@@ -814,7 +814,7 @@ export const NTA_SECTIONS: NtaSectionDef[] = [
   { id: 'dynamicWindows', step: 'building', sub: 'envelope', titleKey: 'nta.form.dynamic.title', Component: DynamicWindowsSection,
     paths: ['dynamicWindows'], advanced: true },
   { id: 'sunrooms', step: 'building', sub: 'unheated', titleKey: 'nta.form.sunroom.title',
-    Component: ({ draft, change }) => <SunroomsFields draft={draft} change={change} />, paths: ['sunrooms'] },
+    Component: ({ draft, change, project }) => <SunroomsFields draft={draft} change={change} project={project} />, paths: ['sunrooms'] },
   { id: 'roofTilts', step: 'building', sub: 'envelope', titleKey: 'nta.form.roofTilts', Component: RoofTiltsSection,
     paths: ['surfaceTilts'], when: listed('surfaceTilts') },
   { id: 'groundFloors', step: 'building', sub: 'envelope', titleKey: 'nta.form.groundFloors', Component: GroundFloorsSection,
