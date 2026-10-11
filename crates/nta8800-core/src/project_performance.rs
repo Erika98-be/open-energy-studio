@@ -1568,7 +1568,10 @@ fn chapter8_warnings(
             };
             warnings.push(InputGap {
                 detail: Some(detail),
-                ..gap("sunroom_partition_gain_interpreted", format!("{base}[{index}]"))
+                ..gap(
+                    "sunroom_partition_gain_interpreted",
+                    format!("{base}[{index}]"),
+                )
             });
         }
     }
@@ -7268,9 +7271,17 @@ mod tests {
         value["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"] =
             serde_json::json!({"method": "detailed", "bridges": []});
         assert!(found(&value).is_none());
-        value["zones"][0]["surfaces"].as_array_mut().unwrap().last_mut().unwrap()["windows"] =
+        value["zones"][0]["surfaces"]
+            .as_array_mut()
+            .unwrap()
+            .last_mut()
+            .unwrap()["windows"] =
             serde_json::json!([{"id": "w-serre", "area": 2.0, "uValue": 1.4, "gValue": 0.6}]);
-        assert!(found(&value).unwrap().detail.unwrap().starts_with("1 window(s)"));
+        assert!(found(&value)
+            .unwrap()
+            .detail
+            .unwrap()
+            .starts_with("1 window(s)"));
     }
 
     #[test]
