@@ -114,6 +114,22 @@ export const existingLabelsNl: Record<string, string> = {
   'relabel.page.recheckMissing': 'geen hercontrole: geen herlabelmelding of geen leesbaar origineel',
   'relabel.page.recheckDiffers': 'wijkt af van de bewaarde vergelijking',
   'relabel.page.noIssues': 'Geen openstaande herlabelpunten.',
+  // Review 36: survey surfaces, names, removal and the JSON view.
+  'opname.surface.id': 'Naam van het vlak',
+  'opname.surface.remove': 'Vlak verwijderen',
+  'opname.surface.removeBlocked': 'Er ligt nog {{count}} raam, deur, paneel of lichtkoepel in dit vlak; verplaats of verwijder die eerst.',
+  'opname.surface.removeBlocked_one': 'Er ligt nog {{count}} raam, deur, paneel of lichtkoepel in dit vlak; verplaats of verwijder die eerst.',
+  'opname.surface.removeBlocked_other': 'Er liggen nog {{count}} ramen, deuren, panelen of lichtkoepels in dit vlak; verplaats of verwijder die eerst.',
+  'opname.addSurface': 'Vlak toevoegen',
+  'opname.idInvalid': 'Lege of dubbele naam: de verwijzingen blijven bij de vorige naam tot de naam uniek is.',
+  'opname.discardConfirm.title': 'Opname verwijderen?',
+  'opname.discardConfirm.message': 'De hele opname gaat uit het project. Gekoppelde foto\'s blijven in het bewijsregister, maar niet gekoppeld ({{count}}).',
+  'opname.discardConfirm.message_one': 'De hele opname gaat uit het project. {{count}} gekoppeld bestand blijft in het bewijsregister, maar niet meer gekoppeld.',
+  'opname.discardConfirm.message_other': 'De hele opname gaat uit het project. {{count}} gekoppelde bestanden blijven in het bewijsregister, maar niet meer gekoppeld.',
+  'opname.discardConfirm.messageNone': 'De hele opname gaat uit het project.',
+  'opname.jsonStale': 'De opname is gewijzigd sinds je de JSON begon te bewerken; JSON toepassen overschrijft die wijzigingen.',
+  'opname.jsonReload': 'JSON opnieuw laden',
+  'opname.jsonNotObject': 'De opname moet één JSON-object zijn ({ … }).',
 };
 
 export const existingLabelsEn: Record<string, string> = {
@@ -227,4 +243,20 @@ export const existingLabelsEn: Record<string, string> = {
   'relabel.page.recheckMissing': 'no re-check: not a relabel message or no readable original',
   'relabel.page.recheckDiffers': 'differs from the stored comparison',
   'relabel.page.noIssues': 'No open relabel points.',
+  // Review 36: survey surfaces, names, removal and the JSON view.
+  'opname.surface.id': 'Surface name',
+  'opname.surface.remove': 'Remove surface',
+  'opname.surface.removeBlocked': '{{count}} window, door, panel or rooflight still lies in this surface; move or remove it first.',
+  'opname.surface.removeBlocked_one': '{{count}} window, door, panel or rooflight still lies in this surface; move or remove it first.',
+  'opname.surface.removeBlocked_other': '{{count}} windows, doors, panels or rooflights still lie in this surface; move or remove them first.',
+  'opname.addSurface': 'Add surface',
+  'opname.idInvalid': 'Empty or duplicate name: the references stay with the previous name until the name is unique.',
+  'opname.discardConfirm.title': 'Discard survey?',
+  'opname.discardConfirm.message': 'The whole survey leaves the project. Linked photos stay in the evidence register, unlinked ({{count}}).',
+  'opname.discardConfirm.message_one': 'The whole survey leaves the project. {{count}} linked file stays in the evidence register, unlinked.',
+  'opname.discardConfirm.message_other': 'The whole survey leaves the project. {{count}} linked files stay in the evidence register, unlinked.',
+  'opname.discardConfirm.messageNone': 'The whole survey leaves the project.',
+  'opname.jsonStale': 'The survey changed since you started editing the JSON; Apply JSON overwrites those changes.',
+  'opname.jsonReload': 'Reload JSON',
+  'opname.jsonNotObject': 'The survey must be one JSON object ({ … }).',
 };

@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 36: basisopname op locatie: vlakken, namen, verwijderen en foto's (geen rekenwijziging)
+- **Vlakken van de schil.** De opname had geen knop om een vlak toe te voegen, te hernoemen of te verwijderen: elke opname bleef de zes vlakken van de voorbeeldwoning houden (ook de woningscheidende wand), en een ander vlak kon alleen via de JSON-weergave. Er is nu **Vlak toevoegen**, **Naam van het vlak** en **Vlak verwijderen**. Bij een nieuwe naam gaan ramen, deuren, panelen, lichtkoepels, de vloer bij een geveldeel tegen de grond en de gekoppelde foto's mee; een vlak met ramen, deuren, panelen of lichtkoepels kan niet weg.
+- **Namen die halverwege leeg of dubbel zijn.** Wie de naam van een rekenzone wiste en opnieuw typte, of onderweg de naam van een andere zone passeerde (`zone1` op weg naar `zone12`), liet de verwijzingen van vlakken en verlichtingszones achter bij een naam die niet meer bestond. De verwijzingen blijven nu bij de laatste goede naam en volgen zodra de naam weer uniek is; het formulier meldt een lege of dubbele naam.
+- **Opname verwijderen** vraagt nu eerst om bevestiging; één klik wiste de hele opname zonder vraag. De koppelingen van foto's naar de opname vervallen; de foto's blijven in het bewijsregister als "niet gekoppeld", zoals bij het verwijderen van één onderdeel.
+- **JSON-weergave.** JSON die geen object is (`null`, een lijst, een getal) werd overgenomen en brak daarna het formulier; die wordt nu geweigerd met een melding. Is de opname gewijzigd sinds de JSON-bewerking begon, dan zegt de weergave dat toepassen die wijzigingen overschrijft, met **JSON opnieuw laden**.
+- **Foto's.** HEIF-, TIFF- en BMP-foto's tellen als foto (ze konden niet via *Bestaand bewijsstuk koppelen* aan een opname-onderdeel worden gekoppeld); een foto die de browser niet kan tonen (HEIC, TIFF) toont een paperclip in plaats van een gebroken afbeelding.
+- Handleiding hoofdstuk 2 bijgewerkt. Test: `src/__tests__/survey-review36.test.tsx`.
+
 ### 11 oktober 2026 — Bewijsregister: koppeling vanuit het contextpaneel blijft bewaard bij opslaan van het registratieformulier (geen rekenwijziging)
 - Had het registratieformulier niet-opgeslagen wijzigingen in het bewijsregister en koppelde de adviseur intussen een bewijsstuk vanuit het contextpaneel, dan won bij *Opslaan* de lijst uit het formulier en ging de nieuwe koppeling stil verloren (vervolg op review 35). Het formulier voegt het bewijsregister nu per bewijsstuk samen: koppelingen en bestanden die elders zijn toegevoegd blijven, de wijzigingen en verwijderingen van de adviseur ook. Is hetzelfde bewijsstuk aan beide kanten gewijzigd, dan blijft de versie van de adviseur staan en toont het formulier een melding met de bestandsnaam.
 - Handleiding hoofdstuk 7 bijgewerkt.
