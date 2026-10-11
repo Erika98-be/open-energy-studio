@@ -127,17 +127,31 @@ describe('NTA project input forms', () => {
     await user.click(screen.getByRole('button', { name: 'Add humidifier' }));
     await user.selectOptions(screen.getByLabelText('Calculation zone'), 'zone-b');
     await user.selectOptions(screen.getByLabelText('Humidifier type'), 'steam');
-    await user.selectOptions(screen.getByLabelText('Steam generator'), 'gas_or_oil');
+    await user.selectOptions(screen.getByLabelText('Steam generator'), 'oil');
     await user.type(screen.getByLabelText('Area served by the steam humidifier, m² (12.2.1; empty: heating-system area)'), '650');
     const draft = withoutNulls(current());
     expect(draft.sunrooms).toEqual([{
       id: 'serre-1', glazingGHeating: 0.6, reductionFactor: 0.8, distributionFactor: 1, surfaces: [{ areaM2: 12 }], sourceReference: '',
     }]);
     expect(draft.humidifiers).toEqual([{
-      zoneId: 'zone-b', humidification: { humidifier: { kind: 'steam', carrier: 'gas_or_oil' }, rotaryWheel: false, equipmentReference: '' },
+      zoneId: 'zone-b', humidification: { humidifier: { kind: 'steam', carrier: 'oil' }, rotaryWheel: false, equipmentReference: '' },
       servedAreaM2: 650,
     }]);
   }, SLOW_UI_TEST_MS);
+
+  it('offers gas and oil steam generators and keeps an earlier gas-or-oil choice visible (12.3, table 5.2)', () => {
+    const steam = (carrier: string) => ({ humidifiers: [{ zoneId: 'zone-b',
+      humidification: { humidifier: { kind: 'steam', carrier }, rotaryWheel: false, equipmentReference: '' } }] });
+    const options = () => [...(screen.getByLabelText('Steam generator') as HTMLSelectElement).options].map((option) => option.value);
+    const { unmount } = renderWithProviders(<Harness initial={steam('gas')}
+      body={(draft, change) => <HumidifiersFields draft={draft} change={change} project={project} />} />);
+    expect(options()).toEqual(expect.arrayContaining(['electricity', 'gas', 'oil']));
+    expect(options()).not.toContain('gas_or_oil');
+    unmount();
+    renderWithProviders(<Harness initial={steam('gas_or_oil')}
+      body={(draft, change) => <HumidifiersFields draft={draft} change={change} project={project} />} />);
+    expect((screen.getByLabelText('Steam generator') as HTMLSelectElement).value).toBe('gas_or_oil');
+  });
 
   it('switches between one cooling system and several per zone', async () => {
     const user = userEvent.setup();
