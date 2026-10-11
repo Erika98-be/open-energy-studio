@@ -80,6 +80,7 @@ Invoer voor de zontoetreding per raam:
 ## Kelderdiepte per wanddeel (8.42/D.12) en vochtfactor (E.8/E.9)
 
 - `heatedBasement.wallDepths` geeft z_j per wanddeel. Dan is z = Σℓ_j·z_j/Σℓ_j, en Σℓ_j moet gelijk zijn aan de omtrek P. `depthM` mag dan niet ook worden opgegeven.
+- De vloer rekent met die gemiddelde z (8.40/8.41 met 8.42). De wanden rekenen per wanddeel: Σz_j·ℓ_j·U_bw;j (8.39), met U_bw;j van 8.45 op de eigen diepte z_j (2025+C1 p. 255 en 260). In de forfaitaire route (8.38) wordt ΣA_T;bw naar z_j·ℓ_j over de wanddelen verdeeld. Een wanddeel met z_j = 0 heeft geen wand onder maaiveld. De periodieke termen van D.10/D.11 nemen de gemiddelde z van D.12.
 - Voor kruipruimten en onverwarmde kelders zijn z_j een klasse (0 of 0,5 m) en h_j vast 0,125 m (8.47). D.17 en D.18 vallen daar samen met de enkele waarde.
 - `moistureConversion` bij een opgegeven isolatie-λ_D rekent F_M = e^{f·(x₂ − 0)}: E.8 voor Ψ, E.9 voor u. De coëfficiënt komt uit tabel 4 van NEN-EN-ISO 10456. Deze F_M vervangt tabel E.2.
 

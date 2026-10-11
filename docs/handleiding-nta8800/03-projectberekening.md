@@ -135,6 +135,17 @@ Bij distributie (verwarming en koeling) en bij de circulatieleiding van warm tap
 
 ![Het blok ψ uit de leidinggegevens voor een geïsoleerde leiding in de constructie, met de diameters zonder en met isolatie, de λ van de isolatie en van de constructie en de diepte, alle maten in meters](img/psi-leidinggegevens.png)
 
+### Koudebrugmethode van het gebouw
+
+Lineaire koudebruggen reken je voor het hele gebouw op één manier (8.2.1): met een ψ-waarde per koudebrug, of forfaitair met de toeslag ΔU_for (8.3) op alle delen van H_D. Kies onder **Lineaire koudebruggen van het gebouw (8.2.1)** in de stap *Gebouw → Schil & ramen*:
+- *Volgt de vloerrand van de grondvloeren*: de keuze bij **Vloerrand** van de vloeren op grond beslist, zoals voorheen.
+- *Forfaitair: ΔU_for (8.3)*: ook voor een gebouw zonder vloer op de grond, zoals een bovenwoning. Een vloer op grond moet dan ook forfaitair (0,5·P) zijn en de koudebruggenlijst blijft leeg.
+- *ψ-waarden per koudebrug (8.1)*: een vloer op grond moet dan ψ-waarden per randdeel hebben.
+
+Kiezen de vloerrand en het gebouw verschillend, dan meldt de kern `thermal_bridge_methods_mixed`.
+
+De koudebrug van de vloerrand naar de grond (ψ_gr, 8.36/8.39) hoort bij de vloer op grond, niet in de koudebruggenlijst van de zone; een koudebrug met begrenzing *grond* in die lijst wordt geweigerd (`thermal_bridge_ground_on_floor_edge`). Heeft een vloerrand *ψ-waarden per randdeel* zonder randdelen, dan waarschuwt de kern dat H_g geen randverlies heeft.
+
 ### Forfaitaire koudebruggen met een onverwarmde ruimte
 
 Rekent het gebouw met forfaitaire koudebruggen (ΔU_for) en grenst een rekenzone aan een onverwarmde ruimte, dan volgt de kern 8.4.1 opmerking 5 met bijlage C.10:
