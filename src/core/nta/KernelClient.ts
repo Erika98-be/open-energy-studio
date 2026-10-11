@@ -2259,7 +2259,7 @@ export type ConstructionLayer =
       reflectiveFacingUp?: boolean;
       hermeticallySealed?: boolean;
     }
-  | { kind: 'narrow_cavity'; thicknessMm: number; widthMm: number }
+  | { kind: 'narrow_cavity'; thicknessMm: number; widthMm: number; weaklyVentilated?: boolean }
   | { kind: 'tubular_cavity'; thicknessMm: number; widthMm: number; orientation: 'horizontal' | 'vertical' }
   | { kind: 'attic'; roof: 'tiles_without_underlay' | 'tiles_or_slates_with_underlay' | 'tiles_with_underlay_and_reflective_foil' | 'boarding_and_felt' }
   | {

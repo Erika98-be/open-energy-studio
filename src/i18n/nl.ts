@@ -2315,6 +2315,8 @@ export const nl: Record<string, string> = {
   'nta.construction.layerKind': "Soort laag",
   'nta.construction.kind.material': "materiaal",
   'nta.construction.kind.cavity': "luchtspouw",
+  'nta.construction.kind.narrowCavity': "smalle luchtlaag (tabel F.1)",
+  'nta.construction.narrowWidth': "breedte b",
   'nta.construction.thickness': "Dikte (m of mm)",
   'nta.construction.lambdaOrVentilation': "λ_calc W/(m·K) of ventilatie",
   'nta.construction.cavity.unventilated': "niet geventileerd",

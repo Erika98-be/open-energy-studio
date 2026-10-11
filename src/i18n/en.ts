@@ -2315,6 +2315,8 @@ export const en: Record<string, string> = {
   'nta.construction.layerKind': "Layer type",
   'nta.construction.kind.material': "material",
   'nta.construction.kind.cavity': "air cavity",
+  'nta.construction.kind.narrowCavity': "narrow air layer (table F.1)",
+  'nta.construction.narrowWidth': "width b",
   'nta.construction.thickness': "Thickness (m or mm)",
   'nta.construction.lambdaOrVentilation': "λ_calc W/(m·K) or ventilation",
   'nta.construction.cavity.unventilated': "unventilated",

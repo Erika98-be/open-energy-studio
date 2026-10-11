@@ -13,7 +13,7 @@ Elke opgegeven waarde vraagt een bron, zoals een tekening, productblad, normtabe
 |---|---|---|
 | Zone | gebruiksoppervlakte A_g, volume, bouwlagen | §6.6 |
 | Vlak | thermische begrenzing (buitenlucht, grond, onverwarmde ruimte, aangrenzend verwarmd, intern), oriëntatie, constructie | §6.7, §8.2 |
-| Constructie | U-waarde, of R_c uit lagen via **Constructie bewerken**: het onderdeel *NTA 8800 U/R_c* rekent met de kern (bijlage C, forfaitair bijlage I). Een niet-geventileerde luchtspouw dunner dan 20 mm zonder reflecterende laag rekent de kern zelf (bijlage D.2 van NEN-EN-ISO 6946, voetnoten c en e van tabel C.3/C.4); een zwak geventileerde of reflecterende dunne spouw geef je op als R-waarde met bron | §8.2, bijlagen C en I |
+| Constructie | U-waarde, of R_c uit lagen via **Constructie bewerken**: het onderdeel *NTA 8800 U/R_c* rekent met de kern (bijlage C, forfaitair bijlage I). Een niet-geventileerde luchtspouw dunner dan 20 mm zonder reflecterende laag rekent de kern zelf (bijlage D.2 van NEN-EN-ISO 6946, voetnoten c en e van tabel C.3/C.4); een zwak geventileerde smalle luchtlaag in een constructie met U ≤ 1,0 kies je als laagsoort *smalle luchtlaag (tabel F.1)* met **zwak geventileerd** (halve tabelwaarde, F.2); een reflecterende dunne spouw geef je op als R-waarde met bron | §8.2, bijlagen C en I |
 | Raam | oppervlakte, U, g (loodrecht) | §7.6, §8.2 |
 | Koudebrug | lineair (ψ, lengte) en puntvormig (χ), met begrenzing | §8.2 |
 | Onverwarmde ruimte | reductiefactor b met bron, of afgeleid via de NTA-invoer. Ook te combineren met forfaitaire koudebruggen (zie [hieronder](#forfaitaire-koudebruggen-met-een-onverwarmde-ruimte)) | §8.4 (8.53–8.59) |

@@ -103,9 +103,12 @@ export function NtaConstructionSection({ layers, onApply }: {
           <td style={cell}>
             <select aria-label={`${t('nta.construction.layerKind')} ${index + 1}`} value={layer.kind} onChange={(event) => updateLayer(index, event.target.value === 'air_cavity'
               ? { kind: 'air_cavity', name: layer.name, thicknessMm: 40, ventilation: 'unventilated' }
-              : { kind: 'material', name: layer.name, thicknessM: 0.1, lambda: 0.04, sourceReference: '' })}>
+              : event.target.value === 'narrow_cavity'
+                ? { kind: 'narrow_cavity', name: layer.name, thicknessMm: 10, widthMm: 50, weaklyVentilated: false }
+                : { kind: 'material', name: layer.name, thicknessM: 0.1, lambda: 0.04, sourceReference: '' })}>
               <option value="material">{t('nta.construction.kind.material')}</option>
               <option value="air_cavity">{t('nta.construction.kind.cavity')}</option>
+              <option value="narrow_cavity">{t('nta.construction.kind.narrowCavity')}</option>
             </select>
           </td>
           <td style={cell}><input aria-label={`${t('dialog.construction.material')} ${index + 1}`} value={layer.name} onChange={(event) => updateLayer(index, { ...layer, name: event.target.value })} /></td>
@@ -116,6 +119,15 @@ export function NtaConstructionSection({ layers, onApply }: {
               onChange={(event) => updateLayer(index, { ...layer, lambda: Number(event.target.value) })} /></td>
             <td style={cell}><input aria-label={`${t('nta.form.source')} ${index + 1}`} value={layer.sourceReference}
               onChange={(event) => updateLayer(index, { ...layer, sourceReference: event.target.value })} /></td>
+          </> : layer.kind === 'narrow_cavity' ? <>
+            <td style={cell}><DecimalInput step="1" aria-label={`mm ${index + 1}`} value={layer.thicknessMm}
+              onChange={(event) => updateLayer(index, { ...layer, thicknessMm: Number(event.target.value) })} /> mm</td>
+            <td style={cell}><label>{t('nta.construction.narrowWidth')}{' '}
+              <DecimalInput step="1" aria-label={`${t('nta.construction.narrowWidth')} ${index + 1}`} value={layer.widthMm}
+                onChange={(event) => updateLayer(index, { ...layer, widthMm: Number(event.target.value) })} /> mm</label>
+              <label><input type="checkbox" aria-label={`${t('nta.construction.cavity.weakly')} ${index + 1}`} checked={layer.weaklyVentilated}
+                onChange={(event) => updateLayer(index, { ...layer, weaklyVentilated: event.target.checked })} /> {t('nta.construction.cavity.weakly')}</label></td>
+            <td style={cell} />
           </> : <>
             <td style={cell}><DecimalInput step="1" aria-label={`mm ${index + 1}`} value={layer.thicknessMm}
               onChange={(event) => updateLayer(index, { ...layer, thicknessMm: Number(event.target.value) })} /> mm</td>

@@ -2,7 +2,7 @@
 
 ## Stand 11 oktober 2026
 
-**Controle per hoofdstuk tegen de normtekst (reviews 40–50).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
+**Controle per hoofdstuk tegen de normtekst (reviews 40–51).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
 - **Gecontroleerd:**
   - hoofdstuk 5 (indicatoren, primaire-energiefactoren, hernieuwbaar aandeel, f_BACS, labelklasse), review 45;
   - hoofdstukken 6 en 7 (zonering, oppervlakten, maandbalans, interne en zonnewinst, serres), review 46;
@@ -16,7 +16,7 @@
   - hoofdstuk 17 (tabellen 17.1, 17.2, 17.4 en 17.7–17.15, cel voor cel tegen de tekstlaag, 7 584 cellen in de beschaduwingstabellen), bijlage AB (ZEB, AB.1–AB.73 en tabellen AB.1–AB.3), de WKK-methoden 1 en 2 (9.65–9.83, tabellen 9.31 en 9.36–9.38, 13.182/13.183), bijlage P (tabellen P.0–P.12 en P.16, P.19–P.30) en de bijlagen C, E, F, G, H, I en L van de constructies, review 50.
 - **Gevonden en opgelost:** fouten op routes die geen referentiegeval gebruikt, plus de kelderwanden per wanddeel (8.39/8.45) en f_prac op een verklaard tapwaterrendement (13.152). Review 50 vond in de bijlagen alleen dat thermokussens onder een vloer met een spouw de spouwwaarde 0,18 van I.2.1.4 erbij kregen; de kussenregel geldt "in afwijking van het voorgaande", dus R_c = 0,15 + 1,8 (p. 833). Van de 290 gevallen van de referentiepoort bewegen er drie: openbaar geval N en de ISSO 54-deeltests EP-W406q en EP-W006g; zie het overzichtsitem bovenaan "Onuitgebracht" in de releasenotes.
 - **Interpretaties:** vragen 8–12 aan NEN kwamen uit deze controle; samen met vragen 1–7 staan ze in [vragen aan NEN](nta8800-vragen-nen.md) en de [brief](nta8800-vragen-nen-brief.md). De kern houdt haar gekozen lezing tot er een antwoord is.
-- **Steekproefsgewijs** in deze ronde: van bijlage P de tabellen en de formules van de opwekkers; de rekenroute per maand (P.72–P.83) en de distributieverliezen per leidingdeel (P.13–P.18) rusten op de herberekening van 5 oktober. De uurroute van 17.3.8 blijft buiten de kern zolang de uurgegevens van NEN 5060 ontbreken.
+- **Review 51** legde de rest van bijlage P naast de tekst: de distributieverliezen per leidingdeel (P.13–P.18 met tabel P.1 en P.16, p. 957–963 en 1026) en de rekenroute per maand (P.72–P.83 met tabellen P.14 en P.15, p. 1019–1025), en vergeleek ze met 2024 en 2023. Geen verschil in de rekenregels; alleen de rij "één leiding in een sleuf" van tabel P.1 is nieuw in 2025+C1, met dezelfde factor 1,00 die de kern al gebruikte. Daarnaast kreeg de zwak geventileerde smalle luchtlaag (F.2, halve tabel F.1-waarde, p. 814) een invoer. De uurroute van 17.3.8 blijft buiten de kern zolang de uurgegevens van NEN 5060 ontbreken.
 
 **Openbare gevallen.** Geval O (gezondheidszorgfunctie op externe warmtelevering met kwaliteitsverklaring, 2022) is toegevoegd; de referentiepoort heeft nu 30 vergeleken gevallen en 290 in totaal. Het resterende verschil in BENG 2 van geval O (en van L) wordt verklaard door vraag 7 (de warmtecapaciteit van lucht in 11.115/11.119).
 
@@ -521,7 +521,7 @@ Interpretatievragen:
 16. P.25 rekent met `Q_HD;in;tot`, de warmte van alle opwekkers samen (p. 968). De kern neemt dat letterlijk, dus inclusief de bijdrage van collectieve zonnecollectoren.
 17. De flexmodus begrenst de flexwarmte op 15 % van de productie van het net (5.8). Met `networkProductionKwh` geldt de opgegeven netproductie (warmte en tapwater samen); zonder die opgave neemt de kern de warmte van de functie die wordt berekend. `f_Pren` van een flexopwekker wordt op 0 begrensd: onder het omslagpunt is de elektriciteit buiten de flexuren groter dan de warmte, en dat is geen negatief hernieuwbaar aandeel.
 18. Hulpenergie tapwater (P.6.9.4.3, p. 1013): met `alsoServesHeating` is de stand-by 0 W, omdat die bij verwarming hoort (P.6.8.4.1 a). Met `withoutAuxiliaryEnergy` (zoals een traditionele gasketel) zijn stand-by en ventilator 0 W en 0 W/kW.
-19. Afwijkend van tabel P.1: het geval "één leiding in een sleuf" (`single_pipe_in_trench`, f_x 1,00) en de opgegeven `groundConductivity`/`surfaceCoefficient`. De norm noemt onder P.59 formule P.32 waar P.33 (`Q_XD;in;mi`) bedoeld is (p. 1008); de kern gebruikt P.33.
+19. Afwijkend van tabel P.1: de opgegeven `groundConductivity`/`surfaceCoefficient`. Het geval "één leiding in een sleuf" (`single_pipe_in_trench`, f_x 1,00) staat in tabel P.1 van 2025+C1 (p. 963); in 2024 en 2023 ontbreekt die rij en neemt de kern dezelfde neutrale factor. De norm noemt onder P.59 formule P.32 waar P.33 (`Q_XD;in;mi`) bedoeld is (p. 1008); de kern gebruikt P.33.
 
 ## Stand 2 oktober 2026: bijlagen AA, A en B, en TO-juli stap B
 

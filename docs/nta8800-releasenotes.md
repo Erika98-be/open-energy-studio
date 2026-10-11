@@ -31,8 +31,18 @@ Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de
   - **Serre:** de begrenzing van de serrewinst bij een gedeelde serre (review 46).
   - **Koeling:** de condensorwarmte bij een verklaarde EER of ζ met waterzijdige warmteafvoer (review 48).
   - **Forfaitaire R_c:** thermokussens onder een vloer met een spouw krijgen geen spouwwaarde meer (review 50).
+  - **Constructies:** nieuwe keuze voor een zwak geventileerde smalle luchtlaag, met de halve waarde van tabel F.1 (review 51; bestaande projecten ongewijzigd).
   - **Eerdere items van 9 oktober:** PV boven 300/400 W/m², WKK met voorraadvat, opgegeven F_D;dayl, kelderwanden in A_ls, wanden en daken aan de grond, gemeenschappelijke ruimten (6.6.4).
 - **Open interpretaties.** De keuzes achter vragen 1–12 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
+
+### 11 oktober 2026 — Review 51: rest van bijlage P (P.13–P.18, P.72–P.83) en de zwak geventileerde smalle luchtlaag (F.2)
+Review 51 sloot de twee open punten van review 50.
+- **Bijlage P zonder verschil nagerekend** tegen 2025+C1 en vergeleken met 2024 en 2023:
+  - de distributieverliezen per maand en per buitentemperatuur (P.13–P.15, p. 957–958), de kruipruimtetemperatuur P.16 en de leidingweerstand in de grond en in lucht P.17/P.18 met tabel P.1 (p. 959–963) en tabel P.16 (p. 1026);
+  - de warmte-, tapwater- en koudebehoefte van het gebied per jaar en per maand (P.72–P.78, met θ_in;ref 18 °C in P.74) en de rekenwaarden per perceel P.79–P.83 met tabellen P.14 en P.15 (p. 1019–1025).
+  - De rekenregels zijn in 2024 en 2023 gelijk. Alleen de rij "één leiding in een sleuf" (f_x 1,00) van tabel P.1 is nieuw in 2025+C1; de kern gebruikte die factor al en houdt hem in de oudere uitgaven aan. De broncommentaar en punt 19 van de interpretatielijst in de verificatiestatus zeggen dat nu zo.
+- **Zwak geventileerde smalle luchtlaag (F.2, p. 814).** Een zwak geventileerde luchtlaag krijgt de helft van de waarde van tabel F.1. Die regel had geen invoer, dus de kern paste hem nooit toe. De laag `narrow_cavity` heeft nu `weaklyVentilated` (standaard uit, dus bestaande invoer rekent gelijk), en **Constructie bewerken** biedt de laagsoort *smalle luchtlaag (tabel F.1)* met dikte, breedte en **zwak geventileerd**. **Gevolg:** alleen nieuwe invoer met die keuze; de referentierapporten zijn byte-gelijk.
+- Tests: de laagweerstand in `constructions.rs` (d 10 mm, d/b 2: 0,20, zwak geventileerd 0,10; zonder het veld 0,20), die op de oude code faalt omdat het veld werd geweigerd, en de vertaling naar de kern in `nta-form-models.test.ts`.
 
 ### 11 oktober 2026 — Review 50: hoofdstuk 17, bijlage AB, de WKK-methoden, bijlage P en de constructiebijlagen; thermokussens zonder spouwwaarde (I.2.1.4)
 Review 50 rondde de controle per hoofdstuk af met wat in de stand van 11 oktober nog niet opnieuw naast de tekst van 2025+C1 lag. Zonder verschil nagerekend:
