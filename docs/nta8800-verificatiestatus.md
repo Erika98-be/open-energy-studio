@@ -618,7 +618,7 @@ Een verificatie tegen de gelicentieerde NTA 8800:2025+C1:2026 vond afwijkingen i
    - condensorwaterdistributie 10.83 voor watergekoelde machines.
    
    Bij vrije koeling telt alleen pompenergie.
-5. **Afwijkende EER/ζ.** Voor een waarde uit een kwaliteitsverklaring gebruikt de code `f_prpr = 0,9` (10.54). Alleen voor tabelwaarden is 1,0 voorgeschreven.
+5. **Afwijkende EER/ζ.** Voor een waarde uit een kwaliteitsverklaring gebruikt de code `f_prpr = 0,9` (10.54). Alleen voor tabelwaarden is 1,0 voorgeschreven. Dit is vraag 12 aan NEN.
 6. **`Q_hr;out` (10.80) in methode 3** gebruikt de tabel-EER zonder `f_C;PL`/`f_EER;corr`, die alleen in methoden 1/2 bestaan.
 7. **Koelgrens.**
    - Met minder dan twee bruikbare maanden of een niet-stijgende lijn kiest de code 25 °C (de minste uren).

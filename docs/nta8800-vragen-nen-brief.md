@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij elf punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij twaalf punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -122,6 +122,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Lezing B.** In de berekende route krijgen ramen in de scheiding directe zonnewinst volgens 7.32 met g_gl van het raam maal g_gl van de serrebeglazing, naast 7.30b; in de forfaitaire route krijgt de scheiding zonnewinst als uitwendige scheidingsconstructie (7.32/7.33) en vervalt 7.30b voor die serre.
 - **Gevolg.** Geen openbaar geval of ISSO 54-deeltest heeft een serre. Lezing B verlaagt de warmtebehoefte en verhoogt de koudebehoefte van een zone met ramen naar een serre.
 - **Vraag.** Krijgen ramen in de scheiding naar een AOS directe zonnewinst met de zontoetredingsfactor van de serre, en hoe wordt in de forfaitaire route de zonnewinst door die scheiding bepaald (7.32/7.33 of 7.30b, en met welke F_sky)?
+
+### Vraag 12. Praktijkfactor f_prpr bij een kwaliteitsverklaring van een koudeopwekker (§10.1, p. 365; 10.5.4–10.5.6, p. 401–419)
+
+- **Plaats.** §10.1 (p. 365) laat een kwaliteitsverklaring een waarde van tabel 10.29 of 10.30 vervangen. Voor de tabelwaarden geldt f_prpr = 1 (p. 419); methode 1 (10.54) en methode 2 (10.65/10.66) rekenen productwaarden met f_prpr 0,9, en methode 2 met 0,60 bij directe condensatie tegen de buitenlucht. Voor een gedeclareerde waarde in methode 3 noemt de norm geen f_prpr. Dezelfde tekst staat in 2022, 2023 en 2024.
+- **Lezing A (onze keuze).** Een gedeclareerde EER of ζ is een productwaarde en krijgt f_prpr 0,9.
+- **Lezing B.** Een gedeclareerde waarde vervangt de tabelwaarde en houdt f_prpr 1.
+- **Gevolg.** Geen openbaar geval of ISSO 54-deeltest heeft een gedeclareerde koudeopwekker. Lezing B verlaagt het aandrijfenergiegebruik van zo'n opwekker met 10 %; een kamerairco met een verklaarde EER zou dan gunstiger uitkomen dan dezelfde airco met volledige NEN-EN 14511-gegevens in methode 2 (f_prpr 0,60).
+- **Vraag.** Welke f_prpr hoort bij een gedeclareerde EER of ζ die een waarde van tabel 10.29 of 10.30 vervangt?
 
 ---
 

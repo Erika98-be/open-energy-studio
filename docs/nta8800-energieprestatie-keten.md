@@ -261,7 +261,7 @@ Module `space_cooling` (p. 366–426) rekent per maand `Q_C;gen;in = Σ(Q_C;nd +
   - Externe koude (10.78): drager `dc`, `f_P` = 1,45/3, `f_Pren` = 0.
   - Vrije koeling (10.86, tabel 10.34).
   - Regeneratietoeslag voor een bodemopslag die als warmtepompbron dient (10.84/10.85).
-  - Verklaarde EER-waarden worden afgerond op 0,05 (elektrisch) of 0,025 (gas).
+  - Verklaarde EER-waarden worden afgerond op 0,05 (elektrisch) of 0,025 (gas). De aandrijfenergie rekent met de verklaarde waarde maal f_prpr 0,9; de tabelwaarden zelf hebben f_prpr 1 (p. 419). Welke factor bij een verklaarde waarde hoort, zegt de norm niet: vraag 12 aan NEN. De afgevoerde condensorwarmte (10.80/10.81) rekent met de verklaarde waarde zelf, zonder f_prpr, net als bij methoden 1 en 2.
 - **Hulpenergie opwekking.** Volgens 10.79:
   - geen condensorventilator in methode 3 en bij directe condensatie;
   - condensorwaterdistributie volgens tabel 10.33 bij watergekoelde machines;

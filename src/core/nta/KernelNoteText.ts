@@ -41,6 +41,12 @@ const DUTCH: Record<string, string> = {
     'Bijlage M: lpg, steenkool en bruinkool van tabel M.3 worden geweigerd (boiler_fuel_without_primary_factor), omdat tabellen 5.2/5.3 (p. 94, p. 97) er geen f_P;del of K_CO2 voor geven.',
   'annex M: β above 1 (M.24/M.25) is refused as a capacity shortfall, as annex N does; the plausibility bounds P_int ≥ 0,05·P_n and f_gen;ls;P0 ≤ 0,1 are program choices':
     'Bijlage M: β boven 1 (M.24/M.25) wordt als te klein vermogen geweigerd, zoals bijlage N dat doet; de plausibiliteitsgrenzen P_int ≥ 0,05·P_n en f_gen;ls;P0 ≤ 0,1 zijn keuzes van het programma.',
+  'annex M: β (M.25, p. 878) uses the output with the control factor, Q_gen;out = f_ctr;ls·Q_H;gen;out of M.24 (the heat the boiler delivers); M.25 prints Q_H;gen;out, which is f_ctr;ls (1,00–1,06) lower':
+    'Bijlage M: β (M.25, p. 878) gebruikt de levering met de regelingsfactor, Q_gen;out = f_ctr;ls·Q_H;gen;out van M.24 (de warmte die de ketel levert); M.25 noemt Q_H;gen;out, dat een factor f_ctr;ls (1,00–1,06) lager is.',
+  'annex M: the recoverable loss to the space (M.15, p. 876) is M.16 plus M.19, the auxiliary energy that reaches the heated space; read literally, M.20 (p. 877) makes Q_gen;aux;rbl the share already returned to the medium in M.1, which would count it twice':
+    'Bijlage M: het terugwinbare verlies naar de ruimte (M.15, p. 876) is M.16 plus M.19, de hulpenergie die de verwarmde ruimte bereikt; letterlijk gelezen maakt M.20 (p. 877) van Q_gen;aux;rbl het deel dat in M.1 al aan het medium is teruggegeven, waardoor het dubbel zou tellen.',
+  'annex M: η_gen;Pn in M.12 (p. 875) of a condensing boiler, which has no single full-load value, is η_gen;Pn;60 of M.8 (uncorrected)':
+    'Bijlage M: η_gen;Pn in M.12 (p. 875) is bij een condenserende ketel, die geen enkelvoudig vollastrendement heeft, η_gen;Pn;60 van M.8 (ongecorrigeerd).',
   'annex M: stand-by losses (M.4/M.6) burn fuel in every hour of the month even when the 9.7 feedback of recoverable losses brings the generator output to 0 (a grossly oversized boiler in a small zone); the norm is followed literally':
     'Bijlage M: stand-byverliezen (M.4/M.6) verbruiken elk uur van de maand brandstof, ook als de terugkoppeling van terugwinbare verliezen (9.7) de levering van de opwekker op 0 brengt (een sterk overgedimensioneerde ketel in een kleine zone); de norm wordt letterlijk gevolgd.',
   'tables 5.2/5.4 (biomass classes): a type-plate power above 500 kW classes the boiler as bmA regardless of the entered 500 kW flag':
