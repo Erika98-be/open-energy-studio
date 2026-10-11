@@ -28,6 +28,7 @@ const PROJECTS: &[&str] = &[
     "nta8800-public-comparison-l.json",
     "nta8800-public-comparison-m.json",
     "nta8800-public-comparison-n.json",
+    "nta8800-public-comparison-o.json",
     "isso54/EPW001.json",
     "isso54/EPU001.json",
 ];

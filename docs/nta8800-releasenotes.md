@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Openbaar geval O: gezondheidszorgfunctie op een warmtenet; vraag 7 aan NEN (geen rekenwijziging)
+
+- **Nieuw geval O.** Een openbaar BENG-rapport van een gezondheidszorgfunctie zonder bedgebied van 451,50 m² op de begane grond van een woongebouw (Uniec 3.1.5.0, 24-02-2023, NTA 8800:2022) is nagebouwd: `training-data/nta8800-public-comparison-o.json`, de test `case_o_healthcare_on_district_heat_under_nta_8800_2022` en `openbaar-o-2022` in de suite van de openbare gevallen (30 vergeleken gevallen, 290 in totaal). Het is het eerste openbare geval met externe warmtelevering met een kwaliteitsverklaring voor verwarming en tapwater, met een gezondheidszorgfunctie en met een aangrenzende onverwarmde ruimte. O rekent ook in de edities-tests mee (`edition_labels.rs`, `edition_deltas.rs`; rij in [normversies](nta8800-normversies.md)).
+- **Uitkomst.** Kern 88,25 / 47,75 / 44,2 tegen rapport 87,26 / 49,49 / 45,1, label A+++ in beide. Eis, A_ls/A_g, tapwater, hulpenergie, ventilatoren, verlichting en PV kloppen tot op de kWh; f_prac 0,95 op de verklaring zit in beide. Het hele verschil in BENG 2 (−1,74) zit in de verwarming.
+- **Vraag 7 aan NEN.** De verwarmingsbatterij van de LBK rekent met c_a = 0,000 027 9 kWh/(kg·K) zoals gedrukt in 11.115/11.119 (2022 p. 486–487, 2025+C1 p. 505–506), een tiende van de 1 005 J/(kg·K) die de norm elders gebruikt. Met de fysische waarde zou O 49,80 geven (rapport 49,49) en L 23,82 in plaats van 18,63 (rapport 25,36). De kern houdt de gedrukte waarde tot NEN antwoordt; de vraag staat in [vragen aan NEN](nta8800-vragen-nen.md) en in de [brief](nta8800-vragen-nen-brief.md), die nu zeven vragen heeft.
+- **Gezocht.** Ook op 11 oktober 2026 is geen openbaar rapport met Uniec 3.4 (uitgave 2025+C1) gevonden; de zoekronde staat in de [vergelijking](nta8800-vergelijking-openbare-rapporten.md).
+
 ### 11 oktober 2026 — Review 34: onbetrouwbare invoer bij openen en importeren (geen rekenwijziging)
 
 - **Projectbestand met BOM.** Een projectbestand dat met een Windows-editor opnieuw is opgeslagen begint met een UTF-8 byte-order mark. De browserversie las dat al, maar de desktopapp weigerde het met "Unexpected token". Beide openen het nu.

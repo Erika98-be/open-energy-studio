@@ -1,6 +1,6 @@
 # Vergelijking met openbare BENG-rapporten — 5 oktober 2026
 
-Dit is **geen officiële referentietoets**. Veertien openbaar gepubliceerde BENG-rapporten (gevallen A–N) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
+Dit is **geen officiële referentietoets**. Vijftien openbaar gepubliceerde BENG-rapporten (gevallen A–O) zijn in de app nagebouwd en met de rekenkern doorgerekend. Die rapporten zijn gemaakt met geattesteerde software (Uniec) onder oudere NTA 8800-edities. Verschillen zijn daarom deels verwacht. De officiële toetsing voor BRL 9501 loopt via ISSO-publicatie 54 versie 5.0:2026, die niet openbaar is.
 
 De herbouwde invoer staat als fictieve, geanonimiseerde fixtures in `training-data/nta8800-public-comparison-{a,b,c,d,f}.json`. Adressen en namen zijn verwijderd. De test `crates/nta8800-core/tests/public_comparison.rs` legt de huidige uitkomsten vast als regressie; de gepubliceerde waarden zijn alleen context.
 
@@ -17,6 +17,7 @@ De herbouwde invoer staat als fictieve, geanonimiseerde fixtures in `training-da
 | H | [openbaar rapport H (utiliteitsgebouw met sportschool)](https://heusden.bestuurlijkeinformatie.nl/Document/View/3256b603-e6fb-4fa0-ab2c-b63fa0af6d28) | Uniec 3.2.9.2, 29-05-2024, NTA 8800:2023 (zie [G en H](#g-in-2024-en-h-het-eerste-utiliteitsgebouw-in-2023-9-oktober-2026)) |
 | M | [openbaar rapport M (kleine vrijstaande woning met kap en koeling)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-20303/1/bijlage/BS_7192605_1664526905911_PR18758_-_Parklaan_104a_te_Soest_-_BENG.pdf.pdf) | Uniec 3.1.3.1, 15-09-2022, NTA 8800:2022 (zie [M](#m-een-kleine-woning-met-koeling-in-2022-9-oktober-2026)) |
 | N | [openbaar rapport N (supermarkt met parkeerkelder)](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2025/til-2025-22714/1/bijlage/07.Stoks15_Lidl-Dutilhweg_2feb2021_Volledig.pdf) | Uniec 3.0.7.1, 02-02-2021, NTA 8800:2020+A1 (zie [N](#n-een-supermarkt-boven-een-parkeerkelder-in-2020a1-9-oktober-2026)) |
+| O | [openbaar rapport O (gezondheidszorgfunctie op een warmtenet), bijlage 2b](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-13830/1/bijlage/62.4617.151.ur.nbu_OVB-K4_BENG_MPG.pdf) | Uniec 3.1.5.0, 24-02-2023, NTA 8800:2022 (zie [O](#o-een-gezondheidszorgfunctie-op-een-warmtenet-in-2022-11-oktober-2026)) |
 
 De rapporten noemen de editie niet zelf. De editie volgt uit de rekendatum en de aanwijzingsperiode (`NormVersion::designation_period`): 2020+A1 tot 1 juni 2022, 2022 tot 1 juli 2023, 2023 tot 1 juli 2024, 2024 tot 29 mei 2026. De Uniec-versie past daarbij (3.0 voor 2020+A1, 3.1 voor 2022, 3.2 voor 2023).
 
@@ -947,3 +948,85 @@ Elektriciteit in kWh/jr; tussen haakjes de geleverde warmte of koude. Δ BENG 2 
 - **Een derde lezing.** Naast 10.15 en 10.87 rekent Uniec de forfaitaire ventilatoren met de luchtvolumestroom van de koudebalans. Bij een utiliteitsgebouw met passieve koeling via de ventilatie weegt dat even zwaar als de koeling zelf, maar met het andere teken: −2,02 tegen +1,13 voor de koeling met haar hulpenergie.
 - **De eerste supermarkt en de eerste sterk geventileerde ruimten.** Na verklaring per post blijven verwarming (+2,69) en de verdeling van de koude (+1,07) over.
 - **Een vierde verschil met Uniec 3.0.x.** De verwarming komt uit de verlichtingswarmte: Uniec lijkt de vaste q_L van 5.4.2 ook buiten BENG 1 te gebruiken. Dat verklaart ook de −7 % bij I. De norm is hier duidelijk (opmerking 3 bij 5.4.1), dus de kern verandert niet en er is geen vraag aan NEN.
+
+## O, een gezondheidszorgfunctie op een warmtenet in 2022 (11 oktober 2026)
+
+Geval O is een gezondheidszorgfunctie zonder bedgebied van 451,50 m² op de begane grond van een woongebouw, berekend op 24-02-2023 met Uniec 3.1.5.0. Dat valt in de periode van NTA 8800:2022. Het rapport is bijlage 2b bij een rapportage voor een omgevingsvergunning; de berekening van het woongebouw zelf (bijlage 2a, 115 woningen) is niet nagebouwd. O is het eerste openbare geval met externe warmtelevering, en met een kwaliteitsverklaring van het warmtenet voor verwarming én warm tapwater. De test is `case_o_healthcare_on_district_heat_under_nta_8800_2022` in `crates/nta8800-core/tests/public_comparison.rs`; de suite heeft het geval als `openbaar-o-2022`.
+
+| | BENG 1 | BENG 2 | BENG 3 |
+|---|---|---|---|
+| rapport (Uniec 3.1.5.0) | 87,26 | 49,49 | 45,1 |
+| eis (Bbl, ook in de kern) | 90,58 | 50,00 | 40,0 |
+| kern, uitgave 2022 | 88,25 | 47,75 | 44,2 |
+| kern met c_a 0,000 279 in 11.115/11.119 (niet ingevoerd, zie hieronder) | 88,25 | 49,80 | 45,3 |
+
+Het label is in beide A+++.
+
+### Invoer
+
+- **Gebouw.** Eén rekenzone van 451,50 m², gezondheidszorgfunctie overig (geen bedgebied), 1 bouwlaag, betonnen wand-vloerskeletbouw met massieve en niet-massieve vloeren en een gesloten plafond (tabel 7.10, meer dan 750 kg/m², 2022 p. 182). Buitenwerkse gebouwhoogte 32,00 m.
+- **Schil.** Gevels Rc 4,70, dak 54,07 m² Rc 6,30, vloer boven een kruipruimte 459,24 m² Rc 3,70 met P 106,85 m en h 0,00 m; Rc uit het beslisschema (bijlage I). Ramen U 1,2 en g 0,55, minimale belemmering, geen zonwering. Geen lineaire bruggen in de uitdraai, dus de forfaitaire toeslag.
+- **Aangrenzende onverwarmde ruimte.** 130,43 m² gevel grenst aan de fietsenberging, in Uniec "AOR … FOR". De uitdraai geeft geen b_U. Aangenomen is de rekenwaarde H_ue = 5·A_T;iu van I.8 (2022 p. 814), die bij de forfaitaire Rc-waarden van bijlage I mag. Dat geeft b_U = 1 / (1 + U_C/5) = 0,961 (C.10, 2022 p. 749). Met b_U 1,0 wordt BENG 1 88,32.
+- **Infiltratie.** Een meetwaarde per gebouw, q_v10;lea;ref 0,30.
+- **Verwarming.** Externe warmtelevering, productspecifiek: primair warmtenet met een BCRG-verklaring (f_P;del 0,35, f_P;ren 0,60, k_CO2 0,068; berekende en eventueel gemeten waarden, dus f_prac 0,95 in 9.84). Installatie met individuele aflevering, tweepijps 45 °C, inregeling onbekend, leidinglengte forfaitair (245,62 m binnen en 43,34 m buiten de verwarmde zone, gelijk aan 9.36 met 15 %), geïsoleerd. Distributiepomp 238 W, EEI 0,23, warmtemeter aanwezig. Vloerverwarming, vertrekhoogte ≤ 4 m, automatische regeling per ruimte.
+- **Tapwater.** Dezelfde externe warmtelevering met dezelfde verklaring (f_prac 0,95 in 13.152), één afleverset, geen circulatie, uittapleidingen langer dan 3 m.
+- **Ventilatie.** D.3, centrale WTW met CO₂-sturing, forfaitair. Langzaam roterende warmtewisselaar 0,70, 100 % bypass, toevoerkanaal geïsoleerd. Luchtbehandelingskast in de thermische zone met verwarmings- en koelbatterij, geen kanalen buiten de zone. Geen koelopwekker; het rapport rekent geen koeling en de kern ook niet.
+- **Verlichting.** Eigen waarde 10,00 W/m² over 451,50 m², parasitair forfaitair, centraal aan, geen daglichtregeling.
+- **PV.** 15 panelen van 380 Wp, zuidwest, 12°, sterk geventileerd, minimale belemmering. De bijgevoegde BCRG-verklaring geeft 1,85 m² en 205,41 Wp/m² (kolom NTA 8800:2022).
+- **Aannames waar de uitdraai zwijgt.** Kruipruimteventilatie 0,0012 m²/m, R van de kruipruimtewand 4,70 en een ongeïsoleerde kruipruimtevloer, zoals bij K en L; vertrekhoogte 3,0 m voor het volume; ventilatoren gelijkstroom met fabricagejaar 2023.
+
+### Per post
+
+Energie in kWh/jr; tussen haakjes het primair fossiel aandeel. Δ BENG 2 = Δ primair / A_g.
+
+| Post | Rapport | Kern | Δ BENG 2 |
+|---|---|---|---|
+| verwarming, externe warmte | 18 374 (6 431) | 16 134 (5 647) | −1,74 |
+| hulpenergie verwarming | 389 | 389 | 0,00 |
+| tapwater, externe warmte | 2 079 (728) | 2 079 (728) | 0,00 |
+| hulpenergie tapwater | 88 | 88 | 0,00 |
+| ventilatoren | 1 485 | 1 485 | 0,00 |
+| verlichting | 13 129 | 13 129 | 0,00 |
+| PV op de meter | 4 619 | 4 619 | 0,00 |
+| **totaal** | | | **−1,74** (gemeten −1,74) |
+
+- **Eis en verliesoppervlakte.** De eis van BENG 1 (90,58) en A_ls/A_g 1,82 zijn gelijk aan het rapport: A_ls is 820,13 m², met de wand naar de fietsenberging op f_ls 1 en de vloer op 0,7.
+- **Externe warmte.** De praktijkfactor 0,95 zit in beide: de warmte voor het systeem is 17 456 kWh in het rapport, 18 374 kWh na 0,95. Voor tapwater is dat 1 975 tegen 2 079 kWh, tot op de kWh gelijk in de kern.
+- **Verwarming** is het hele verschil. De kern rekent 11 998 kWh warmtebehoefte, 1 794 kWh afgifteverlies, 1 526 kWh distributieverlies en 279 kWh voor de verwarmingsbatterij van de LBK; samen 15 327 kWh voor het systeem, tegen 17 456 kWh in het rapport.
+- **BENG 1** is 88,25 tegen 87,26 (+1,1 %), op de vaste C1-ventilatie van 5.3 (warmte 30 883, koude 8 959 kWh). Het rapport geeft geen behoefte per dienst; de aannames voor b_U en de kruipruimte liggen in deze orde.
+- **BENG 3** volgt uit de verwarming: Uniec telt de hernieuwbare warmte op de warmte voor het systeem (17 456 · 0,60 = 10 473 kWh), de kern op haar eigen 15 327 kWh.
+
+### Verwarmingsbatterij van de LBK: c_a in 11.115 en 11.119
+
+De kern rekent de warmte van de verwarmingsbatterij met formule 11.119 en de koude van de koelbatterij met 11.115. De norm geeft daarbij c_a = 0,000 027 9 kWh/(kg·K) (2022 p. 486 en 487; 2025+C1 p. 505 en 506, ongewijzigd). Dat is een tiende van de warmtecapaciteit van lucht die de norm elders gebruikt: ρ_a·c_a = 1,205 kg/m³ · 1 005 J/(kg·K) = 1 211 J/(m³·K) bij 8.49 en 8.57 (2022 p. 237 en 243), dus c_a = 1 005 J/(kg·K) = 0,000 279 kWh/(kg·K). De kern volgt de gedrukte waarde, zoals bij elke letterlijke lezing.
+
+In O verwarmt de batterij de toevoerlucht van ongeveer 13,4 °C na de WTW naar 18 °C (tabel 11.15). De zone krijgt daardoor lucht van 18 °C en de warmtebehoefte van de zone daalt met ongeveer 1 600 kWh. Met de gedrukte c_a telt de batterij daar 279 kWh voor; met de fysische waarde 2 794 kWh. Met die waarde rekent de kern 17 841 kWh warmte voor het systeem (rapport 17 456) en BENG 2 49,80 (rapport 49,49).
+
+Zelfde proef op de andere gevallen met een verwarmingsbatterij (alleen in een scratchpadkopie van de kern; niets ingevoerd):
+
+| Geval | Rapport BENG 2 | Kern, gedrukte c_a | Kern, c_a 0,000 279 |
+|---|---|---|---|
+| L (school, LBK buiten de zone) | 25,36 | 18,63 | 23,82 |
+| N (supermarkt, verwarming via de LBK) | −27,18 | −24,31 | −23,02 |
+| O | 49,49 | 47,75 | 49,80 |
+
+H en K hebben geen verwarmingsbatterij en veranderen niet. L en O komen met de fysische waarde dicht bij het rapport; bij L verklaart het het grootste deel van het verschil in verwarming dat bij L open stond. N gaat de andere kant op, maar daar verwarmt de LBK de hele zone en lag de kern al boven het rapport (zie N). Uniec 3.1.5.0 lijkt dus de fysische waarde te gebruiken. Dit is als [vraag 7 aan NEN](nta8800-vragen-nen.md) opgenomen; tot het antwoord blijft de kern bij de gedrukte waarde.
+
+### Wat O toevoegt
+
+- **Het eerste warmtenet.** Externe warmtelevering met een kwaliteitsverklaring voor verwarming en tapwater, f_prac 0,95 op beide, en de afleverset. Tapwater, hulpenergie, ventilatoren, verlichting en PV kloppen tot op de kWh.
+- **De eerste gezondheidszorgfunctie** en de eerste aangrenzende onverwarmde ruimte in een openbaar geval; de eis en A_ls/A_g kloppen tot op twee decimalen.
+- **Een nieuwe open lezing:** c_a in 11.115/11.119. Het verschil in BENG 2 is na deze ene post 0,31.
+- **Uitgaven.** O rekent in alle vijf uitgaven; zie [normversies](nta8800-normversies.md), "Verschillen per uitgave op de openbare gevallen".
+
+### Gezochte rapporten (11 oktober 2026)
+
+Gezocht met onder meer "Uniec 3.4" met "BENG berekening" en 2026, "NTA 8800:2025" met "BENG rapportage" en "ter inzage", BENG-berekeningen van appartementengebouwen met een collectieve warmtepomp (Uniec 3.3), en van woningen op een warmtenet ("externe warmtelevering", geanonimiseerd).
+
+| Rapport | Periode | Uitkomst |
+|---|---|---|
+| [Zomerhofkwartier kavel 4.0, rapportage energiezuinigheid en milieu, Uniec 3.1.5.0, 24-02-2023](https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-13830/1/bijlage/62.4617.151.ur.nbu_OVB-K4_BENG_MPG.pdf) | 2022 | bijlage 2b (gezondheidszorgfunctie, 10 blz.) nagebouwd als O; bijlage 2a (woongebouw met 6 maisonnettes en 109 appartementen op WKO en warmtenet, 280 blz.) niet: herbouw van 115 woningen uit de uitdraai vraagt te veel aannames |
+| [Onderzoek consequenties NTA 8800 / concept BENG-eisen, 27-02-2019](https://omgevingsweb.nl/wp-content/uploads/po-assets/282874.pdf) | vóór 2020 | niet bruikbaar: onderzoek naar de conceptmethode, geen Uniec-uitdraai |
+| [BENG en MPG Berekening, exb-2022-48764](https://repository.officiele-overheidspublicaties.nl/externebijlagen/exb-2022-48764/1/bijlage/exb-2022-48764.pdf), [Rijksstraatweg, 24-01-2022](https://www.planviewer.nl/imro/files/NL.IMRO.0531.pb25Rijksstrwg52-3001/b_NL.IMRO.0531.pb25Rijksstrwg52-3001_bd10.pdf), [Schagen, 28 appartementen](https://www.schagen.nl/sites/default/files/2022-12/05%20Beng%20berekening.pdf) | 2020+A1, 2022 | al eerder bekeken (zie de vorige rondes) |
+
+Ook in deze ronde is geen openbaar rapport met Uniec 3.4 gevonden, dus nog geen vergelijking in de standaarduitgave 2025+C1. Uniec 3.4 was volgens de leverancier begin 2026 nog een bèta in afwachting van het BRL 9501-attest en is pas sinds 29 mei 2026 verplicht; ter-inzage-leggingen met zulke berekeningen zijn nog niet gevonden.

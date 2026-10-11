@@ -6,7 +6,7 @@
 use nta8800_core::project_performance::assess_project_performance;
 use serde_json::{json, Value};
 
-const PROJECTS: [(&str, &str); 18] = [
+const PROJECTS: [(&str, &str); 19] = [
     (
         "A",
         include_str!("../../../training-data/nta8800-public-comparison-a.json"),
@@ -62,6 +62,10 @@ const PROJECTS: [(&str, &str); 18] = [
     (
         "N",
         include_str!("../../../training-data/nta8800-public-comparison-n.json"),
+    ),
+    (
+        "O",
+        include_str!("../../../training-data/nta8800-public-comparison-o.json"),
     ),
     (
         "woning",

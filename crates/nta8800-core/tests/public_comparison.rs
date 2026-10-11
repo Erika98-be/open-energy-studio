@@ -1167,3 +1167,67 @@ fn case_n_supermarket_under_nta_8800_2020_a1() {
         .unwrap();
     assert_eq!(installed, 18000.0);
 }
+
+/// Case O, a healthcare function without a bed area (451,50 m², one zone)
+/// on the ground floor of an apartment building, calculated on 24-02-2023
+/// with Uniec 3.1.5.0 (NTA 8800:2022); published 87,26 / 49,49 / 45,1
+/// against limits 90,58 / 50,00 / 40,0, label A+++. The first public case on
+/// external heat delivery: a quality declaration for heating and hot water
+/// (f_P;del 0,35, f_P;ren 0,60, k_CO2 0,068, calculated values so f_prac
+/// 0,95 in 9.84 and 13.152). Hot water (2 079 kWh heat), fans (1 485 kWh),
+/// lighting (13 129 kWh), auxiliary energy (389 + 88 kWh), PV on the meter
+/// (4 619 kWh), the limits and A_ls/A_g (1,82, with the wall to the bicycle
+/// store at f_ls 1 and the floor at 0,7) agree. BENG 2 is 1,74 lower, all
+/// heating: 16 134 against 18 374 kWh heat (Δ · 0,35 / A_g). The kernel's
+/// AHU heating coil takes 279 kWh with c_a as printed in 11.119 (0,000 027 9
+/// kWh/(kg·K), 2022 p. 487); with the physical 0,000 279 it is 2 794 kWh
+/// and BENG 2 49,80 — see question 7 to NEN.
+#[test]
+fn case_o_healthcare_on_district_heat_under_nta_8800_2022() {
+    let value: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-public-comparison-o.json"
+    ))
+    .unwrap();
+    assert_eq!(value["ntaCalculation"]["normVersion"], "2022");
+    let (performance, indicators) = run_edition(&value, "2022");
+    assert_indicators("O 2022", indicators, [88.25, 47.75, 44.2]);
+    assert_eq!(performance["indicativeLabelClass"], "A+++");
+    let limits = &performance["bblCheck"]["limits"];
+    let limit = |key: &str| limits[key].as_f64().unwrap();
+    assert!((limit("energyNeedMaxKwhPerM2") - 90.58).abs() < 0.005);
+    assert!((limit("primaryFossilMaxKwhPerM2") - 50.0).abs() < 0.005);
+    assert!((limit("renewableShareMinPercent") - 40.0).abs() < 0.005);
+    let ratio = performance["bblCheck"]["lossAreaRatio"].as_f64().unwrap();
+    assert!((ratio - 820.13 / 451.5).abs() < 0.0005, "{ratio}");
+    let declared = &performance["externalSupply"]["declared"];
+    assert_eq!(declared["practiceHeat"].as_f64(), Some(0.95));
+    assert_eq!(declared["practiceHotWater"].as_f64(), Some(0.95));
+    assert_eq!(
+        declared["districtHeat"]["primaryFactor"].as_f64(),
+        Some(0.35)
+    );
+    assert!((used_kwh(&performance, "heating") - 16134.0).abs() < 1.0);
+    assert!((used_kwh(&performance, "hotWater") - 2079.0).abs() < 1.0);
+    assert!((used_kwh(&performance, "ventilation") - 1485.0).abs() < 1.0);
+    assert!((used_kwh(&performance, "lighting") - 13129.0).abs() < 1.0);
+    let auxiliary = performance["spaceHeating"]["annualAuxiliaryElectricityKwh"]
+        .as_f64()
+        .unwrap();
+    assert!((auxiliary - 389.0).abs() < 1.0, "{auxiliary}");
+    assert!((used_kwh(&performance, "auxiliary") - 476.4).abs() < 1.0);
+    let pv = performance["pvSystems"][0]["annualKwh"].as_f64().unwrap();
+    assert!((pv - 4619.0).abs() < 1.0, "{pv}");
+    // The forfait pipe length of 9.36 with 15 % outside the heated zone is
+    // the report's 245,62 + 43,34 m.
+    let pipe = performance["spaceHeating"]["distribution"]["pipeLengthM"]
+        .as_f64()
+        .unwrap();
+    assert!((pipe - 288.96).abs() < 0.01, "{pipe}");
+    let coil: f64 = performance["spaceHeating"]["monthly"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|month| month["ahuHeatingLoadKwh"].as_f64().unwrap())
+        .sum();
+    assert!((coil - 279.4).abs() < 0.5, "{coil}");
+}
