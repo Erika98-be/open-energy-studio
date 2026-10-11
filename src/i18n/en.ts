@@ -4393,6 +4393,7 @@ export const en: Record<string, string> = {
   'import.error.vabi_no_project_xml': 'No project.xml found in the EPA file.',
   'import.error.vabi_doctype': 'The XML file contains a DOCTYPE; for safety it is not read.',
   'import.error.vabi_xml_invalid': 'Invalid VABI EPA XML file.',
+  'import.error.file_too_large': '{{file}} is too large to import ({{bytes}} bytes; at most {{max}}). An UNIEC3 or VABI file is a few MB.',
   'import.error.vabi_no_object': 'No Object element found in the EPA file.',
   'import.log.title': 'Import record',
   'import.log.intro': 'Data read in with another program (BRL 9501 §4.3.1), with what was assumed or not carried over on import.',

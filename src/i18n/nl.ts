@@ -4393,6 +4393,7 @@ export const nl: Record<string, string> = {
   'import.error.vabi_no_project_xml': 'Geen project.xml gevonden in het EPA-bestand.',
   'import.error.vabi_doctype': 'Het XML-bestand bevat een DOCTYPE; dat wordt om veiligheidsredenen niet ingelezen.',
   'import.error.vabi_xml_invalid': 'Ongeldig VABI EPA XML-bestand.',
+  'import.error.file_too_large': '{{file}} is te groot om in te lezen ({{bytes}} bytes; hoogstens {{max}}). Een UNIEC3- of VABI-bestand is enkele MB.',
   'import.error.vabi_no_object': 'Geen Object-element gevonden in het EPA-bestand.',
   'import.log.title': 'Importverslag',
   'import.log.intro': 'Gegevens die met een ander programma zijn ingelezen (BRL 9501 §4.3.1), met wat bij het inlezen is aangenomen of niet overgenomen.',

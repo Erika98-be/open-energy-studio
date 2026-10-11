@@ -1,6 +1,14 @@
 import type { IProject } from '../energy/types';
 import { sha256Hex } from '../nta/Evidence';
-import type { ImportIssues, ImportResult } from './importIssues';
+import { ImportFormatError, type ImportIssues, type ImportResult } from './importIssues';
+import { IMPORT_UNZIP_LIMITS } from './safeUnzip';
+
+/**
+ * Largest file an import reads: an UNIEC3 or VABI file is a few MB, so a
+ * larger one is the wrong file. Checked before reading, so a picked disk
+ * image or video does not fill the memory of the tab.
+ */
+export const MAX_IMPORT_FILE_BYTES = IMPORT_UNZIP_LIMITS.maxTotalBytes;
 
 /** Lets the adviser pick one file; rejects when the dialog closes without one. */
 export function pickFile(accept: string): Promise<File> {
@@ -23,9 +31,14 @@ export function pickFile(accept: string): Promise<File> {
  * import record can say what came from which file (BRL 9501 §4.3.1).
  */
 export async function importFile(
-  file: Pick<File, 'name' | 'arrayBuffer'>,
+  file: Pick<File, 'name' | 'size' | 'arrayBuffer'>,
   read: (bytes: Uint8Array) => { project: IProject; issues: ImportIssues },
 ): Promise<ImportResult> {
+  if (!Number.isFinite(file.size) || file.size > MAX_IMPORT_FILE_BYTES) {
+    throw new ImportFormatError('file_too_large',
+      `${file.name} is te groot om in te lezen (${file.size} bytes; hoogstens ${MAX_IMPORT_FILE_BYTES}).`,
+      { file: file.name, bytes: file.size, max: MAX_IMPORT_FILE_BYTES });
+  }
   const bytes = new Uint8Array(await file.arrayBuffer());
   const sha256 = await sha256Hex(bytes);
   const { project, issues } = read(bytes);

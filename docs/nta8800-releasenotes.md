@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 34: onbetrouwbare invoer bij openen en importeren (geen rekenwijziging)
+
+- **Projectbestand met BOM.** Een projectbestand dat met een Windows-editor opnieuw is opgeslagen begint met een UTF-8 byte-order mark. De browserversie las dat al, maar de desktopapp weigerde het met "Unexpected token". Beide openen het nu.
+- **JSON zonder object.** Een bestand met `null`, een lijst of een los getal gaf een onduidelijke JavaScript-fout. Het geeft nu "Invalid file format: expected a JSON object".
+- **Te groot importbestand.** Een UNIEC3- of VABI-import weigert nu een bestand boven 256 MB voordat het wordt ingelezen, met een NL/EN-melding die bestand en grens noemt. Zo vult een per ongeluk gekozen video of schijfkopie het geheugen niet.
+- **Nagelopen zonder bevinding:** de begrenzing van HTTP- en MCP-verzoeken (grootte, aantal JSON-waarden, regellengte), de uitpakgrenzen van archieven, het lezen van getallen en codes bij UNIEC3 en VABI, de vormcontrole bij openen (een verkeerd type op een veld van de voorbeeldprojecten buiten het NTA-blok geeft nooit een onduidelijke JavaScript-fout) en de robuustheidsfuzz van de rekenkern met 4 000 proeven per fixture.
+
 ### 11 oktober 2026 — Review 33: handleiding bijgewerkt voor het testsetdossier en de lege lijst Open punten (geen rekenwijziging)
 
 - **Testsetdossier.** Hoofdstuk 5 beschrijft nu het testsetdossier in het releasearchief: de deeltesten als projectbestanden die je in het programma opent, het overzicht met de kolommen *verwacht* en *oordeel*, en de markering "(met lokale wijzigingen)" bij een proefrun.
