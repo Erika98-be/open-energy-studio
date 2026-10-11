@@ -41,6 +41,12 @@ use crate::solar_shading::Balance;
 use serde::{Deserialize, Serialize};
 
 pub const JULY: u8 = 7;
+
+/// Readings of §5.7 where the norm leaves a choice.
+pub const INTERPRETATIONS: &[&str] = &[
+    "5.7.2 step A (p. 115) with 8.4.1 note 5 (p. 266): in the forfait route (H_U;for = 0) a partition to an adjacent unheated space counts as an external construction, in A_T;or and in H_C;D;juli of its own orientation, without solar gain, so the split matches H_D;for of 8.2; with a calculated b_U it stays out of the split (vragen-nen 9)",
+    "5.7.2 step A (p. 115) counts the facade to an adjacent unheated sunroom in A_T;or, but steps 1–2 give it no H_C;D; the kernel leaves the facade, its transmission and the 7.30b gains out of the split and warns tojuli_sunroom_facade_left_out (vragen-nen 8)",
+];
 /// Bbl 4.149b paragraph 1: not greater than 1,20 (NTA §5.7.1, p. 114,
 /// refers to the Omgevingsregeling for the same limit).
 pub const TOJULI_LIMIT_K: f64 = 1.20;

@@ -2,7 +2,7 @@
 
 Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)).
 
-Alle acht vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle negen vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -27,7 +27,7 @@ Alle acht vragen staan ook in een verzendklare brief aan NEN en RVO, met per vra
 
 **Situatie.** Formule 9.62 (tabelroute) heeft f_prac 1; formule 9.63 (gegevens volgens NEN-EN 14511/14825 via bijlage Q) heeft 0,95. §9.1 (p. 285) laat een kwaliteitsverklaring de tabelwaarde vervangen. Op p. 615 staat dat een kwaliteitsverklaring voor verwarming is opgesteld volgens bijlage Q. Voor tapwater geeft 13.152 f_prac 1,0 aan de forfaitaire waarden van 13.8.4.5–13.8.4.7 en 0,95 in alle overige gevallen.
 
-**Gekozen lezing.** Een gedeclareerde COP voor verwarming valt onder 9.63 met 0,95. Een gedeclareerd tapwaterrendement is geen forfaitaire waarde en krijgt 0,95. Dit komt tot op de kWh overeen met de gepubliceerde rapporten.
+**Gekozen lezing.** Een gedeclareerde COP voor verwarming valt onder 9.63 met 0,95. Een gedeclareerd tapwaterrendement is geen forfaitaire waarde en krijgt 0,95. Dit komt tot op de kWh overeen met de gepubliceerde rapporten. Sinds review 41 geldt dat in de kern voor elk gedeclareerd tapwaterrendement: ook voor een gastoestel (tabel 13.25, of gemeten volgens bijlage T) en voor een ketel met indirect verwarmd voorraadvat (tabel 13.28, p. 645).
 
 **Vraag.** Klopt deze lezing, of blijft een gedeclareerde waarde die de tabelwaarde vervangt binnen 9.62 en 13.8.4.7 met f_prac 1?
 
@@ -97,3 +97,15 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Vraag.**
 - Welke warmteoverdrachtscoëfficiënt hoort in 5.40 en in de julibalans bij het geveldeel naar de serre: U·A alsof het een buitengevel is, b_U·H_zi;ztu volgens 8.4, of geen?
 - Telt de indirecte zonnewinst van 7.30b als Q_C;sol;juli;k van dat geveldeel, op zijn oriëntatie?
+
+## 9. Scheidingsconstructie naar een aangrenzende onverwarmde ruimte bij TOjuli in de forfaitaire route (5.7.2, p. 115; 8.4.1, p. 266)
+
+**Situatie.** Stap A van 5.7.2 laat elementen tussen een rekenzone en een aangrenzende onverwarmde ruimte (AOR) buiten A_T;or, omdat ze geen uitwendige scheidingsconstructie naar de buitenlucht zijn (p. 115). Bij de forfaitaire verrekening van 8.4.1 is H_U;for = 0 en telt de scheidingsconstructie mee in H_D;for met U_iu;equi volgens C.1.3; opmerking 5 (p. 266) zegt dat de AOR dan geacht wordt te zijn vervangen door buitenlucht en dat de scheidingsconstructie als uitwendige scheidingsconstructie wordt beschouwd. Stap 1 van 5.7.2 haalt H_C;D;juli;or uit 8.2, dus uit H_D, waarin de scheidingsconstructie dan zit.
+
+**Gekozen lezing.** In de forfaitaire route telt de kern de scheidingsconstructie mee in A_T;or en in H_C;D;juli;or van haar eigen oriëntatie, zonder zonnewinst (de AOR schermt de zon af). Zo sluit de verdeling per oriëntatie aan op H_D;for van 8.2. Met een berekende b_U (H_U volgens 8.4) blijft de scheidingsconstructie buiten de verdeling, zoals stap A zegt.
+
+**Gevolg.** Alleen geval O gebruikt de forfaitaire route met een AOR op een gevel (130,43 m² naar de fietsenberging); het rapport geeft voor deze gezondheidszorgfunctie geen TOjuli, dus het geval beslist het niet. Bij de andere lezing valt die gevel buiten A_T;or; een oriëntatie met alleen zo'n gevel wordt dan niet beoordeeld (A_T;or ≤ 3 m²), en een oriëntatie met ook buitengevels krijgt een kleinere A_T;or en een kleiner aandeel in de verdeelde posten van stap B.
+
+**Vraag.**
+- Geldt in de forfaitaire route van 8.4.1 de scheidingsconstructie naar een AOR voor 5.7.2 stap A als uitwendige scheidingsconstructie (zoals opmerking 5 zegt), of blijft ze buiten A_T;or zoals stap A voor een AOR voorschrijft?
+- Zo ja: hoort haar transmissie (U_iu;equi·A) bij H_C;D;juli van haar oriëntatie?
