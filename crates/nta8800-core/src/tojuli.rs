@@ -1263,4 +1263,68 @@ mod tests {
         assert_eq!(round_up(0.83), 0.83);
         assert_eq!(round_up(-0.2), 0.0);
     }
+
+    /// Review 52, independent recalculation of 5.7.1 method 3 in 2024
+    /// (p. 106): screens and awnings of tables 7.5/7.6 limit solar gain, the
+    /// test needs more than 95 % of the assessed glazing, north-facing
+    /// vertical windows are not assessed and horizontal ones are.
+    #[test]
+    fn review52_solar_limitation_share_in_2024() {
+        use crate::climate::Orientation;
+        use crate::norm_versions::{with_version, NormVersion};
+        use crate::solar_shading::{MovableShading, ShadeColour, ShadingControl, ShadingDevice};
+        let base = demand();
+        let template = base.windows[0].clone();
+        let window =
+            |area: f64, orientation: Orientation, tilt: f64, device: Option<ShadingDevice>| {
+                let mut window = template.clone();
+                window.area_m2 = area;
+                window.orientation = orientation;
+                window.tilt_deg = tilt;
+                window.g_perpendicular = 0.70;
+                window.glazing = None;
+                window.dynamic = None;
+                window.movable_shading = device.map(|device| MovableShading {
+                    reduction_factor: f64::NAN,
+                    device: Some(device),
+                    control: ShadingControl::ManualResidential,
+                    source_reference: "survey".into(),
+                });
+                window
+            };
+        let screen = Some(ShadingDevice::ExternalScreen {
+            colour: ShadeColour::Unknown,
+        });
+        let share = |windows: Vec<crate::monthly_demand::Window>| {
+            let mut input = base.clone();
+            input.window_inventory_complete = true;
+            input.windows = windows;
+            with_version(NormVersion::V2024, || shaded_glazing_share(&input))
+        };
+        let north = share(vec![
+            window(19.0, Orientation::South, 90.0, screen),
+            window(5.0, Orientation::North, 90.0, None),
+        ]);
+        assert!((north - 1.0).abs() < 1e-12, "{north}");
+        let mixed = share(vec![
+            window(10.0, Orientation::South, 90.0, screen),
+            window(5.0, Orientation::West, 90.0, None),
+            window(
+                2.0,
+                Orientation::North,
+                0.0,
+                Some(ShadingDevice::FoldingArmAwning),
+            ),
+            window(20.0, Orientation::North, 90.0, None),
+        ]);
+        assert!((mixed - 12.0 / 17.0).abs() < 1e-12, "{mixed}");
+        // A north-east window is assessed (only the windows between NW and
+        // NE are left out, OPMERKING 1), and exactly 95 % is not "> 95 %".
+        let north_east = share(vec![
+            window(19.0, Orientation::South, 90.0, screen),
+            window(1.0, Orientation::NorthEast, 90.0, None),
+        ]);
+        assert!((north_east - 0.95).abs() < 1e-12, "{north_east}");
+        assert!(north_east <= SHADED_GLAZING_AREA_SHARE);
+    }
 }

@@ -4085,4 +4085,52 @@ mod tests {
         let again: Window = serde_json::from_value(written).unwrap();
         assert!(again.g_perpendicular.is_nan());
     }
+
+    /// Review 52, independent recalculation of 7.30b with 7.34–7.38
+    /// (2025+C1 p. 182, 185–187): this zone has H_zi;ztu 6 W/K of the
+    /// sunroom's 6 + 14 W/K, so F = 0,3 (7.36); February (672 h,
+    /// ϑ_e 4,82 °C of table 17.1), setpoint 20 °C for both zones. 7.38 caps
+    /// on b_U·Σ H·Δθ·t over both zones; the cooling balance has no cap.
+    #[test]
+    fn review52_shared_sunroom_with_unequal_shares() {
+        let mut input = sample();
+        input.sunrooms.push(Sunroom {
+            id: "atrium".into(),
+            glazing_g_heating: 0.55,
+            glazing_g_cooling: 0.35,
+            exterior_frame_fraction: 0.25,
+            reduction_factor: 0.7,
+            zone_conductance_w_per_k: 6.0,
+            distribution_factor: 0.3,
+            surfaces: vec![
+                SunroomSurface {
+                    area_m2: 30.0,
+                    absorptance: 0.7,
+                    azimuth_deg: 180.0,
+                    tilt_deg: 0.0,
+                },
+                SunroomSurface {
+                    area_m2: 8.0,
+                    absorptance: 0.5,
+                    azimuth_deg: 180.0,
+                    tilt_deg: 90.0,
+                },
+            ],
+            source_reference: "drawing".into(),
+        });
+        let solar = |g: f64, month: u8, hours: f64| {
+            let absorbed = 0.7 * 30.0 * climate::irradiance_at(180.0, 0.0, month).unwrap()
+                + 0.5 * 8.0 * climate::irradiance_at(180.0, 90.0, month).unwrap();
+            g * (1.0 - 0.25) * absorbed * 0.001 * hours
+        };
+        let february = solar(0.55, 2, 672.0);
+        let cap = (0.7 * (6.0 + 14.0) * (20.0 - 4.82) * 0.001 * 672.0 / february).min(1.0);
+        assert!(cap < 1.0, "the cap binds in this example");
+        let expected = (1.0 - 0.7) * 0.3 * cap * february;
+        let heating = sunroom_gains_kwh(&input, 1, Balance::Heating);
+        assert!((heating - expected).abs() < 1e-9, "{heating} vs {expected}");
+        let july = (1.0 - 0.7) * 0.3 * solar(0.35, 7, 744.0);
+        let cooling = sunroom_gains_kwh(&input, 6, Balance::Cooling);
+        assert!((cooling - july).abs() < 1e-9, "{cooling} vs {july}");
+    }
 }

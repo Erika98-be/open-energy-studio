@@ -3684,4 +3684,61 @@ mod tests {
             cooling_limit_c(&zones[0].limit_need_kwh.unwrap())
         );
     }
+
+    /// Review 52, independent recalculation of 10.76, 10.80 and 10.83 with
+    /// §10.1 (2025+C1 p. 365, 417–423) in method 3: a declared 5,04 of an
+    /// electric generator rounds down to 5,00 (dry cooler, p_dis 0,045), a
+    /// declared 3,18 to 3,15 (open tower, 0,018); the table 10.29 value 3,00
+    /// has f_prpr 1. Q_hr = Q_C·(1 + 1/EER) without f_prpr, 10.82 is 0 in
+    /// method 3, and the control energy does not depend on the heat
+    /// rejection.
+    #[test]
+    fn review52_method_3_condenser_heat_and_drive_energy() {
+        let run = |rejection: HeatRejection, declared: Option<f64>| {
+            let input = system(vec![generator(
+                CoolingGeneratorKind::Compression {
+                    heat_rejection: Some(rejection),
+                    declared: declared.map(|value| DeclaredEfficiency {
+                        value,
+                        source_reference: "quality statement".into(),
+                    }),
+                    performance: None,
+                },
+                None,
+            )]);
+            assert!(validate_cooling(&input, "cooling").is_empty());
+            assess_cooling(&input, context(&rated_zones()))
+        };
+        let mut control = Vec::new();
+        for (rejection, declared, eer, practice, p_dis) in [
+            (HeatRejection::DryCooler, Some(5.04), 5.00, 0.9, 0.045),
+            (
+                HeatRejection::OpenCoolingTower,
+                Some(3.18),
+                3.15,
+                0.9,
+                0.018,
+            ),
+            (HeatRejection::OpenCoolingTower, None, 3.00, 1.0, 0.018),
+        ] {
+            let result = run(rejection, declared);
+            for month in &result.months {
+                let cold = month.generator_cold_kwh;
+                let drive = cold / (eer * practice);
+                assert!(
+                    (month.electricity_kwh - drive).abs() < 1e-9,
+                    "{rejection:?}"
+                );
+                let rejected = cold * (1.0 + 1.0 / eer) * p_dis;
+                control.push(month.auxiliary_electricity_kwh - rejected);
+            }
+        }
+        for (index, value) in control.iter().enumerate() {
+            assert!(
+                (value - control[index % 12]).abs() < 1e-9,
+                "month {}",
+                index % 12
+            );
+        }
+    }
 }

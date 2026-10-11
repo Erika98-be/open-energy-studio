@@ -1562,4 +1562,41 @@ mod tests {
         given.depth_m = 2.0;
         assert_eq!(serde_json::to_value(&given).unwrap()["depthM"], 2.0);
     }
+
+    /// Review 52, independent recalculation of 8.38/8.39 with 8.32–8.35,
+    /// 8.40–8.42 and 8.45 (2025+C1 p. 251–260), written from the norm:
+    /// 60 m² floor, P 30 m, R_si + R_c 3,67, wall R_c 2,5, 12 m at 3,0 m and
+    /// 18 m at 0,8 m; an uninsulated 50 m² basement at one depth of 2,0 m;
+    /// and the 8.38 forfait with ΣA_T;bw 40 m² shared over the parts by
+    /// z_j·ℓ_j and ΔU_for 0,1.
+    #[test]
+    fn review52_heated_basement_against_an_independent_implementation() {
+        let basement = |parts: Vec<(f64, f64)>, wall: f64| HeatedBasement {
+            depth_m: f64::NAN,
+            wall_depths: parts
+                .into_iter()
+                .map(|(length_m, depth_m)| BasementWallDepth { length_m, depth_m })
+                .collect(),
+            wall_resistance_m2k_per_w: wall,
+            forfait_delta_u_w_per_m2k: None,
+            wall_area_m2: None,
+        };
+        let mut detailed = slab(60.0, 30.0, 0.17 + 3.5);
+        detailed.heated_basement = Some(basement(vec![(12.0, 3.0), (18.0, 0.8)], 2.5));
+        let h = slab_on_ground_conductance(&detailed).unwrap();
+        assert!((h - 24.916_903_109_339_266).abs() < 1e-9, "{h}");
+
+        let mut single = slab(50.0, 30.0, 0.17 + 0.2);
+        single.heated_basement = Some(basement(vec![(30.0, 2.0)], 0.3));
+        let h = slab_on_ground_conductance(&single).unwrap();
+        assert!((h - 77.211_189_431_206_15).abs() < 1e-9, "{h}");
+
+        let mut forfait = detailed.clone();
+        forfait.edge_thermal_bridges = EdgeThermalBridges::Forfait;
+        let walls = forfait.heated_basement.as_mut().unwrap();
+        walls.forfait_delta_u_w_per_m2k = Some(0.1);
+        walls.wall_area_m2 = Some(40.0);
+        let h = slab_on_ground_conductance(&forfait).unwrap();
+        assert!((h - 41.113_996_237_256_025).abs() < 1e-9, "{h}");
+    }
 }
