@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Local mirror of the CI gates for the NTA 8800 kernel and UI.
-# Stops at the first failing gate. Set NTA_SKIP_MSRV=1 to skip the Rust 1.77.2 run.
+# Stops at the first failing gate. Set NTA_SKIP_MSRV=1 to skip the Rust 1.77.2 run,
+# NTA_SKIP_KERNEL_E2E=1 to skip the app run against the real kernel (kernel_once).
 # The reference-suite report is written to $NTA_EVIDENCE_DIR (default
 # nta-evidence/gate, ignored by git); scripts/release-nta.sh keeps it per release.
 set -euo pipefail
@@ -85,6 +86,15 @@ nta_form_guard_docs="$nta_evidence_dir/form-guard/project-forms.jsonl"
 rm -f "$nta_form_guard_docs"
 NTA_FORM_GUARD_OUT="$nta_form_guard_docs" \
   npx vitest run --maxWorkers="${NTA_VITEST_MAX_WORKERS:-4}"
+
+if [ "${NTA_SKIP_KERNEL_E2E:-0}" != "1" ]; then
+  # The full app against the real kernel, without the API server: kernel_once answers
+  # each /api call in-process. Reuses the service crate's target dir (built above).
+  step "app against the real kernel (kernel_once)"
+  cargo build --locked --quiet --manifest-path crates/nta8800-service/Cargo.toml --example kernel_once
+  OES_KERNEL_ONCE="$(pwd)/crates/nta8800-service/target/debug/examples/kernel_once" \
+    npx vitest run src/__tests__/real-kernel-e2e.test.tsx
+fi
 
 step "project-form states through the kernel"
 NTA_FORM_GUARD_DOCS="$(realpath "$nta_form_guard_docs")" \

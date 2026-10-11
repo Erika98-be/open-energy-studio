@@ -32,7 +32,7 @@ Het venster heeft vijf delen:
    - *Eigenschappen*: de gegevens van het geselecteerde element (zone, constructie, vlak, raam, systeem). Je kunt ze hier direct wijzigen. Selecteer je een element, dan opent dit tabblad, ook als *Voorbeeld* open stond. Bij een vlak, raam, koudebrug of zone staat hier ook het blok **Bron & bewijs** met de bestanden die bij dat element horen;
    - *Voorbeeld*: label, BENG 1–3, TO<sub>juli</sub>, maandbehoefte en kerngetallen van de laatste doorrekening;
    - *Controle*: de open punten van de rekenkern voor deze stap, elk met **Ga naar**. Zonder meldingen staat er "Geen fouten of aandachtspunten.", zolang de rekenkern nog niet heeft geantwoord "Nog geen antwoord van de rekenkern.".
-5. **Statusbalk** onderaan: de status van de rekenkern (actueel, verouderd, bezig), kern- en normversie, BENG 1–3, TO<sub>juli</sub> en het label. Klik op een waarde om Resultaten te openen.
+5. **Statusbalk** onderaan: de status van de rekenkern (actueel, verouderd, bezig), de versie van de rekenkern en de uitgave van NTA 8800 waarmee het project rekent (bijvoorbeeld "Kern 0.4.0 · NTA 8800 2025+C1"; in een breed venster met de volledige naam van de uitgave), BENG 1–3, TO<sub>juli</sub> en het label. Zolang de rekenkern nog niet heeft geantwoord, staat alleen de uitgave er. Bij een oudere uitgave staat daarnaast "… — niet voor registratie". Klik op een waarde om Resultaten te openen.
 
 Onder de werkstappen staan **Gereedschap** en **Instellingen** (Ctrl+,).
 
