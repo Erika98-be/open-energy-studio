@@ -4402,6 +4402,7 @@ export const en: Record<string, string> = {
   'import.log.file': 'File',
   'import.log.date': 'Imported',
   'import.log.sha256': 'SHA-256',
+  'import.log.source': 'Source version',
   'import.log.noIssues': 'Everything carried over without assumptions.',
   'export.losses.title': '{{format}} export: not everything carried over',
   'export.losses.intro': 'This format cannot hold the following input; it is missing from the file:',

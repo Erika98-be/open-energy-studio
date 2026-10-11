@@ -4402,6 +4402,7 @@ export const nl: Record<string, string> = {
   'import.log.file': 'Bestand',
   'import.log.date': 'Ingelezen',
   'import.log.sha256': 'SHA-256',
+  'import.log.source': 'Bronversie',
   'import.log.noIssues': 'Alles overgenomen zonder aannames.',
   'export.losses.title': '{{format}}-export: niet alles overgenomen',
   'export.losses.intro': 'Dit formaat kan de volgende invoer niet bevatten; die ontbreekt in het bestand:',

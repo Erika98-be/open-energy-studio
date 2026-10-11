@@ -324,6 +324,8 @@ export interface ProjectImportRecord {
   importedAt?: string;
   /** SHA-256 (hex) of the file as read, so the source file can be identified later. */
   sha256?: string;
+  /** Program and NTA 8800 version the file names (Uniec 3 meta.json, VABI Algemeen); not carried over as the edition. */
+  sourceVersion?: string;
   /** Values the importer filled in, limited or left out; empty when it copied everything. */
   issues?: ProjectImportIssue[];
 }

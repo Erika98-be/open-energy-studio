@@ -1,6 +1,5 @@
-import type { IProject } from '../energy/types';
 import { sha256Hex } from '../nta/Evidence';
-import { ImportFormatError, type ImportIssues, type ImportResult } from './importIssues';
+import { ImportFormatError, type ImportResult, type ReadResult } from './importIssues';
 import { IMPORT_UNZIP_LIMITS } from './safeUnzip';
 
 /**
@@ -27,12 +26,13 @@ export function pickFile(accept: string): Promise<File> {
 
 /**
  * Reads a picked file with `read`, and returns the project with the file's
- * name, its SHA-256 (of the exact bytes read) and the import issues, so the
- * import record can say what came from which file (BRL 9501 §4.3.1).
+ * name, its SHA-256 (of the exact bytes read), the version the file names
+ * and the import issues, so the import record can say what came from which
+ * file (BRL 9501 §4.3.1).
  */
 export async function importFile(
   file: Pick<File, 'name' | 'size' | 'arrayBuffer'>,
-  read: (bytes: Uint8Array) => { project: IProject; issues: ImportIssues },
+  read: (bytes: Uint8Array) => ReadResult,
 ): Promise<ImportResult> {
   if (!Number.isFinite(file.size) || file.size > MAX_IMPORT_FILE_BYTES) {
     throw new ImportFormatError('file_too_large',
@@ -41,8 +41,8 @@ export async function importFile(
   }
   const bytes = new Uint8Array(await file.arrayBuffer());
   const sha256 = await sha256Hex(bytes);
-  const { project, issues } = read(bytes);
-  return { project, fileName: file.name, sha256, issues: issues.list };
+  const { project, issues, sourceVersion } = read(bytes);
+  return { project, fileName: file.name, sha256, ...(sourceVersion ? { sourceVersion } : {}), issues: issues.list };
 }
 
 /** Saves bytes as a download (browser build and the desktop webview). */
