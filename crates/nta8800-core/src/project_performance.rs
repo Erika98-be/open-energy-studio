@@ -1063,20 +1063,30 @@ fn input_range_findings(project_value: &Value) -> (Vec<InputGap>, Vec<InputGap>)
             );
         }
     }
-    // q_v10 and the dwelling counts may sit at several places in the NTA
-    // block (block level, per zone, per ventilation system).
+    // q_v10, the dwelling counts and the connected area of a collective
+    // installation may sit at several places in the NTA block (block level,
+    // per zone, per ventilation or heating system).
     let mut keyed = Vec::new();
     if let Some(nta) = project_value.get("ntaCalculation") {
         collect_keys(
             nta,
             "ntaCalculation",
-            &["qv10DmPerSM2", "dwellingCount"],
+            &["qv10DmPerSM2", "dwellingCount", "connectedUsableAreaM2"],
             &mut keyed,
         );
     }
     for (key, path, value) in &keyed {
         match key.as_str() {
             "qv10DmPerSM2" => found.check(*value, &QV10_BOUND, "qv10_out_of_range", path.clone()),
+            // Review 55: the connected area of a collective installation
+            // takes the zone-area bounds; 10³⁰⁰ m² made the 9.4 auxiliary
+            // energy non-finite instead of naming the input.
+            "connectedUsableAreaM2" => found.check(
+                *value,
+                &AREA_BOUND,
+                "connected_area_out_of_range",
+                path.clone(),
+            ),
             _ if total_area > 0.0
                 && *value > 0.0
                 && total_area / *value < MIN_AREA_PER_DWELLING_M2 =>

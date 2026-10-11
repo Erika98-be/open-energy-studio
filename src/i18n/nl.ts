@@ -1287,6 +1287,7 @@ export const nl: Record<string, string> = {
   'nta.gap.non_finite_result': "De berekening gaf een niet-eindig getal (NaN of oneindig); het resultaat wordt achtergehouden. Controleer de invoer op het gemelde pad.",
   'nta.gap.zone_area_out_of_range': "Gebruiksoppervlakte van de zone buiten het bereik dat het programma accepteert (waarschuwing boven 1.000.000 m², geblokkeerd boven 10.000.000 m²)",
   'nta.gap.surface_area_out_of_range': "Oppervlakte van vlak of raam buiten het bereik dat het programma accepteert (waarschuwing boven 500.000 m², geblokkeerd boven 10.000.000 m²)",
+  'nta.gap.connected_area_out_of_range': "Aangesloten gebruiksoppervlakte van de collectieve installatie buiten het bereik dat het programma accepteert (waarschuwing boven 1.000.000 m², geblokkeerd boven 10.000.000 m²)",
   'nta.gap.u_value_out_of_range': "U-waarde buiten het bereik dat het programma accepteert (waarschuwing boven 10 W/m²K, geblokkeerd boven 100 W/m²K)",
   'nta.gap.qv10_out_of_range': "q_v10 buiten het bereik dat het programma accepteert (waarschuwing boven 10 dm³/s·m², geblokkeerd boven 1000)",
   'nta.gap.declared_use_out_of_range': "Opgegeven maandgebruik per m² buiten het bereik dat het programma accepteert (waarschuwing boven 5000 kWh per m² per maand, geblokkeerd boven 1.000.000 kWh per m² per maand)",
