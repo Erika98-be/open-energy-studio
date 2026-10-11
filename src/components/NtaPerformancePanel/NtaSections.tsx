@@ -544,6 +544,21 @@ function GroundFloorsSection(props: NtaSectionProps) {
   </>;
 }
 
+function ThermalBridgeRouteSection({ draft, change }: NtaSectionProps) {
+  const { t } = useI18n();
+  return <>
+    <label data-path="ntaCalculation.thermalBridgeRoute">{t('nta.form.thermalBridgeRoute')}
+      <select value={String(read(draft, ['thermalBridgeRoute']) ?? '')}
+        onChange={(event) => change(['thermalBridgeRoute'], event.target.value || null)}>
+        <option value="">{t('nta.form.thermalBridgeRoute.fromFloors')}</option>
+        <option value="forfait">{t('nta.form.thermalBridgeRoute.forfait')}</option>
+        <option value="detailed">{t('nta.form.thermalBridgeRoute.detailed')}</option>
+      </select>
+    </label>
+    <p className="nta-form-note">{t('nta.form.thermalBridgeRoute.note')}</p>
+  </>;
+}
+
 function VerticalPipesSection({ draft, change, project }: NtaSectionProps) {
   const { t } = useI18n();
   // The route (storeys or building height) follows the zone's use function, as in the kernel.
@@ -804,6 +819,8 @@ export const NTA_SECTIONS: NtaSectionDef[] = [
     paths: ['surfaceTilts'], when: listed('surfaceTilts') },
   { id: 'groundFloors', step: 'building', sub: 'envelope', titleKey: 'nta.form.groundFloors', Component: GroundFloorsSection,
     paths: ['groundFloors'], when: listed('groundFloors') },
+  { id: 'thermalBridgeRoute', step: 'building', sub: 'envelope', titleKey: 'nta.form.thermalBridgeRoute', Component: ThermalBridgeRouteSection,
+    paths: ['thermalBridgeRoute'] },
   { id: 'verticalPipes', step: 'installations', sub: 'heating', part: 'distribution', titleKey: 'nta.form.verticalPipes',
     Component: VerticalPipesSection, paths: ['verticalPipes'], advanced: true },
   { id: 'ventilation', step: 'installations', sub: 'ventilation', titleKey: 'nta.form.ventilation', Component: VentilationModeSection,
