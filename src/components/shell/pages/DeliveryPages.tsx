@@ -204,6 +204,21 @@ export function DossierPage({ actions }: { actions: Pick<ShellActions, 'navigate
           ))}
         </tbody>
       </table>
+      {/* Label elements k and l: no field in the export schema, so listed apart (review 35). */}
+      <table className="delivery-checklist" data-testid="ep-online-statements">
+        <caption>{t('delivery.epOnline.statements')}</caption>
+        <tbody>
+          {([
+            ['respondsToExternalSignals', overview.labelStatements.k_reageertOpExterneSignalen],
+            ['lowTemperatureHeating', overview.labelStatements.l_afgiftesysteemLageTemperatuur],
+          ] as const).map(([key, answer]) => (
+            <tr key={key}>
+              <td>{t(`reg.labelStatements.${key}`)}</td>
+              <td>{answer == null ? <Pill tone="warn">{t('delivery.epOnline.unanswered')}</Pill> : answer ? yes : no}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </Card>
   </>;
 }

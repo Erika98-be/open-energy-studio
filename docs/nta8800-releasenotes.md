@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 35: registratiegegevens blijven bewaard buiten de stap, bewijsregister en checklist (geen rekenwijziging)
+- **Registratieformulier:** de niet-opgeslagen gegevens in werkstap 10 horen nu bij het document, zoals het NTA-concept. Ze gingen verloren zodra de adviseur een andere stap opende; nu blijven ze staan. Sluiten van het tabblad of het programma vraagt eerst of je zonder opslaan wilt sluiten. Registratiegegevens die een andere stap opslaat (de herlabelvergelijking, een koppeling vanuit het contextpaneel) laten de wijzigingen in het formulier staan.
+- **Geen schijnwijzigingen:** een veld dat je invult en weer leegmaakt, een vinkje aan en weer uit, of een verklaring k/l die je terugzet naar *niet beantwoord*, telt niet meer als wijziging; *Opslaan* en *Verwerpen* blijven dan uit.
+- **Bewijsregister:** in *Onderbouwt (JSON-paden, komma-gescheiden)* kon je geen tweede pad typen, omdat het veld de komma direct weghaalde (`/zones/0, /zones/1` werd één pad `/zones/0/zones/1`). Het veld houdt nu de getypte tekst vast. Het GPS-veld en dit veld tonen na *Verwerpen* weer de opgeslagen waarde.
+- **Checklist BRL 9500:** onder het EP-Online-gegevensoverzicht staan nu de antwoorden op de verklaringen k en l, met *niet beantwoord* voor een open vraag. Het exportschema heeft er geen veld voor; de ZIP had ze al.
+- Handleiding hoofdstukken 0 en 7 bijgewerkt.
+
 ### 11 oktober 2026 — Openbaar geval O: gezondheidszorgfunctie op een warmtenet; vraag 7 aan NEN (geen rekenwijziging)
 
 - **Nieuw geval O.** Een openbaar BENG-rapport van een gezondheidszorgfunctie zonder bedgebied van 451,50 m² op de begane grond van een woongebouw (Uniec 3.1.5.0, 24-02-2023, NTA 8800:2022) is nagebouwd: `training-data/nta8800-public-comparison-o.json`, de test `case_o_healthcare_on_district_heat_under_nta_8800_2022` en `openbaar-o-2022` in de suite van de openbare gevallen (30 vergeleken gevallen, 290 in totaal). Het is het eerste openbare geval met externe warmtelevering met een kwaliteitsverklaring voor verwarming en tapwater, met een gezondheidszorgfunctie en met een aangrenzende onverwarmde ruimte. O rekent ook in de edities-tests mee (`edition_labels.rs`, `edition_deltas.rs`; rij in [normversies](nta8800-normversies.md)).

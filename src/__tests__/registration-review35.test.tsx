@@ -5,11 +5,12 @@
  */
 import { useState } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { useEnergy } from '../context/EnergyContext';
 import { RegistrationDraftProvider, useRegistrationDraft } from '../context/RegistrationDraftProvider';
 import { RegistrationForm } from '../components/shell/pages/RegistrationForm';
 import { EvidenceRegister } from '../components/dialogs/ProjectInfoDialog/EvidenceRegister';
+import { DossierPage } from '../components/shell/pages/DeliveryPages';
 import { confirmCloseAll, documentsNeedingConfirmation, type ClosingDocument } from '../core/io/projectFiles';
 import type { NtaEvidenceItem } from '../core/nta/KernelClient';
 import { renderWithProviders, userEvent } from './test-utils';
@@ -118,6 +119,25 @@ describe('registration draft', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
     expect(JSON.parse(screen.getByTestId('registration').textContent ?? 'null'))
       .toMatchObject({ bagObjectId: '0363010000000001', originalKernelVersion: '0.3.0' });
+  }, SLOW_UI_TEST_MS);
+});
+
+describe('EP-Online overview on the checklist', () => {
+  it('shows the answers to label statements k and l next to the export fields', async () => {
+    const user = userEvent.setup();
+    function Answer() {
+      const { state, dispatch } = useEnergy();
+      return <button type="button" onClick={() => dispatch({ type: 'UPDATE_PROJECT_INFO', payload: {
+        registration: { ...(state.project.registration ?? {}), labelStatements: { respondsToExternalSignals: true } },
+      } })}>answer k</button>;
+    }
+    renderWithProviders(<><Answer /><DossierPage actions={{ navigate: () => undefined }} /></>);
+    await user.click(screen.getByRole('button', { name: 'answer k' }));
+    const statements = within(screen.getByTestId('ep-online-statements'));
+    expect(statements.getByText(/^Statements k and l/)).toBeInTheDocument();
+    const rows = screen.getByTestId('ep-online-statements').querySelectorAll('tr');
+    expect(rows[0].textContent).toMatch(/^k\..*yes$/);
+    expect(rows[1].textContent).toMatch(/^l\..*not answered$/);
   }, SLOW_UI_TEST_MS);
 });
 
