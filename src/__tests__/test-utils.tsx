@@ -7,13 +7,14 @@ import { EnergyProvider } from '../context/EnergyContext';
 import { NtaDraftProvider } from '../context/NtaDraftProvider';
 import { RegistrationDraftProvider } from '../context/RegistrationDraftProvider';
 import { SurveyResultProvider } from '../context/SurveyResultProvider';
+import { MaatwerkadviesResultProvider } from '../context/MaatwerkadviesResultProvider';
 import { I18nProvider } from '../i18n/I18nProvider';
 
 function AllProviders({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
       <EnergyProvider>
-        <NtaDraftProvider><RegistrationDraftProvider><SurveyResultProvider>{children}</SurveyResultProvider></RegistrationDraftProvider></NtaDraftProvider>
+        <NtaDraftProvider><RegistrationDraftProvider><SurveyResultProvider><MaatwerkadviesResultProvider>{children}</MaatwerkadviesResultProvider></SurveyResultProvider></RegistrationDraftProvider></NtaDraftProvider>
       </EnergyProvider>
     </I18nProvider>
   );

@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Maatwerkadvies: resultaat per document en kolommen als het rapport (geen rekenwijziging)
+- **Resultaat blijft staan.** Het paneel hield het resultaat van **Doorrekenen** zelf vast, dus na het verlaten van de stap Maatwerkadvies stond er weer "niet berekend". Het resultaat wordt nu per document bewaard (`MaatwerkadviesResultProvider`), met de regel van review 38: alleen getoond zolang het document nog de kernelinvoer heeft waaruit het is berekend, nooit bij een ander document, en niet als het binnenkomt na een wijziging. Het wordt niet in het projectbestand opgeslagen.
+- **Kolommen.** De resultatentabel op het scherm miste de kolommen TO<sub>juli</sub> [K] en Warmte [kWh] die het rapport wel heeft. Ze staan er nu, met dezelfde afronding (2 en 0 decimalen); de tabel scrolt horizontaal op een smal scherm.
+- Tests: `src/__tests__/mwa-result-persist.test.tsx` (vier tests; drie falen op de oude code). Handleiding hoofdstuk 6 bijgewerkt.
+
 ### 11 oktober 2026 — Review 38: maatwerkadvies (geen rekenwijziging)
 - **Resultaat hoort bij zijn invoer.** Het paneel hield het laatste resultaat vast tot het advies zelf werd gewijzigd. Na een wissel van normuitgave, ongedaan maken, een ander document of een wijziging tijdens het doorrekenen bleef zo een resultaat staan dat niet bij de getoonde invoer hoorde; document B kon het resultaat van document A tonen. Het resultaat wordt nu bewaard met de kernelinvoer waaruit het is berekend en alleen getoond zolang het document die invoer nog heeft. Terug in het eerste document staat het weer.
 - **Adviesrapport.**
