@@ -2,7 +2,7 @@
 
 Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)).
 
-Alle elf vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle twaalf vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -133,3 +133,13 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Vraag.**
 - Krijgen ramen in de scheiding naar een AOS in de berekende route directe zonnewinst volgens 7.32 met de zontoetredingsfactor van de serrebeglazing (7.6.6.1.1), naast de winst van 7.30b?
 - Wordt in de forfaitaire route de zonnewinst door de scheiding naar een AOS bepaald als bij een uitwendige scheidingsconstructie (7.32/7.33, met welke F_sky en zontoetreding), en vervalt 7.30b dan voor die serre?
+
+## 12. Praktijkfactor f_prpr bij een kwaliteitsverklaring van een koudeopwekker (§10.1, p. 365; 10.5.4–10.5.6, p. 401–419)
+
+**Situatie.** §10.1 laat een kwaliteitsverklaring een waarde van tabel 10.29 of 10.30 vervangen, naar beneden afgerond op 0,05 (elektrisch) of 0,025 (gas). Voor de waarden volgens tabellen 10.29 en 10.30 geldt f_prpr = 1 (p. 419). Methode 1 (10.54) rekent productwaarden volgens NEN-EN 14825 met f_prpr 0,9; methode 2 (10.65/10.66) productwaarden volgens NEN-EN 14511 met 0,60 bij directe condensatie tegen de buitenlucht en anders 0,9. Welke f_prpr bij een gedeclareerde EER of ζ in methode 3 hoort, staat er niet bij. Dezelfde tekst staat in 2022, 2023 en 2024.
+
+**Gekozen lezing.** Een gedeclareerde EER of ζ is een productwaarde en krijgt f_prpr 0,9, zoals in methode 1 en de meeste gevallen van methode 2. Alleen de tabelwaarden zelf krijgen f_prpr 1.
+
+**Gevolg.** Geen openbaar geval en geen ISSO 54-deeltest heeft een gedeclareerde koudeopwekker. Bij lezing f_prpr 1 daalt het aandrijfenergiegebruik van een gedeclareerde koudeopwekker met 10 % (een verklaarde EER van 4,37 telt dan als 4,35 in plaats van 3,915). Opvallend is dat een kamerairco met een verklaarde EER in methode 3 bij lezing f_prpr 1 gunstiger uitkomt dan dezelfde airco met volledige NEN-EN 14511-gegevens in methode 2, waar f_prpr 0,60 geldt.
+
+**Vraag.** Welke f_prpr hoort bij een gedeclareerde EER of ζ die volgens §10.1 een waarde van tabel 10.29 of 10.30 vervangt: 1, zoals bij de tabelwaarden, of die van methode 1/2 (0,9, of 0,60 bij directe condensatie tegen de buitenlucht)?
