@@ -13,7 +13,7 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
-### 11 oktober 2026 — Review 54: kritische codereview van reviews 44–53 (geen rekenwijziging voor geldige invoer)
+### 11 oktober 2026 — Review 54: kritische codereview van reviews 44–53 (geen rekenwijziging)
 Codereview van alles wat na review 43 is samengevoegd (reviews 44–53, de gedeelde serre van 7.38 en het vervolg op review 53). Gevonden en hersteld, elk met een test die op de oude code faalt:
 
 - **Lijst van aangrenzende zones niet gecontroleerd.** `borderingZones` van een serre (7.38) komt ook via de directe invoer van de maandbehoefte (API en MCP) binnen. Een negatieve H_zi,j;ztu, een zone die twee keer voorkomt, een onzinnige instelwaarde of waarden die samen overlopen (1e308 en −1e308 geven ∞ − ∞) gaven een ongeldige of NaN-begrenzing. De kern weigert zo'n lijst nu met `sunroom_invalid` op `sunrooms[i].borderingZones`.
