@@ -1009,9 +1009,12 @@ pub struct ChainMonth {
     /// 12.1: latent heat of atomising humidifiers delivered by this
     /// heating system (in `generator_output_kwh`), kWh.
     pub humidification_load_kwh: f64,
-    /// 12.3: steam humidifier energy, kWh.
+    /// 12.3: steam humidifier energy, kWh; fuel is natural gas.
     pub humidification_electricity_kwh: f64,
     pub humidification_fuel_kwh: f64,
+    /// 12.3: oil-fired steam humidifiers, kWh (carrier oil, table 5.2).
+    #[serde(skip_serializing_if = "is_zero")]
+    pub humidification_oil_kwh: f64,
     /// 11.120 Q_H;AHU;in;req of air handling unit reheating coils, kWh.
     pub ahu_heating_load_kwh: f64,
     /// 16.12 E_el;chp;out;H: electricity of a heating CHP, kWh.
@@ -1040,6 +1043,10 @@ pub struct ZoneHumidifier {
     /// to the space-heating system (as 9.2.5.1), the earlier reading.
     #[serde(default)]
     pub served_area_m2: Option<f64>,
+}
+
+fn is_zero(value: &f64) -> bool {
+    *value == 0.0
 }
 
 fn humidity_function(function: crate::monthly_demand::UsageFunction) -> HumidityFunction {
@@ -1237,6 +1244,7 @@ impl ChainMonth {
         self.humidification_load_kwh += other.humidification_load_kwh;
         self.humidification_electricity_kwh += other.humidification_electricity_kwh;
         self.humidification_fuel_kwh += other.humidification_fuel_kwh;
+        self.humidification_oil_kwh += other.humidification_oil_kwh;
         self.ahu_heating_load_kwh += other.ahu_heating_load_kwh;
         self.chp_electricity_kwh += other.chp_electricity_kwh;
         self.chp_excess_kwh += other.chp_excess_kwh;
@@ -2631,7 +2639,7 @@ fn assess_chain_pass(
         // Chapter 12: humidifiers per zone.
         // Q_H;hum;rbl (12.4) of steam humidifiers joins the recoverable
         // losses of its zone (7.3–7.8).
-        let mut humidification = [[0.0_f64; 3]; 12];
+        let mut humidification = [[0.0_f64; 4]; 12];
         let mut humidifier_recoverable = vec![[0.0_f64; 12]; zone_sources.len()];
         for (h_index, humidifier) in input.humidifiers.iter().enumerate() {
             let path = format!("humidifiers[{h_index}]");
@@ -2671,6 +2679,7 @@ fn assess_chain_pass(
                     humidification[index][0] += month.heating_system_load_kwh;
                     humidification[index][1] += month.steam_electricity_kwh;
                     humidification[index][2] += month.steam_fuel_kwh;
+                    humidification[index][3] += month.steam_oil_kwh;
                     humidifier_recoverable[zone_index][index] += month.recoverable_kwh;
                 }
             }
@@ -2807,6 +2816,7 @@ fn assess_chain_pass(
                 hot_water_load_kwh: hot_water_load,
                 humidification_electricity_kwh: humidification[index][1],
                 humidification_fuel_kwh: humidification[index][2],
+                humidification_oil_kwh: humidification[index][3],
             });
         }
         zone_recoverable_losses = valid_zones

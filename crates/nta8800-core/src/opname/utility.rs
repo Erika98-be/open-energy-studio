@@ -4609,8 +4609,9 @@ fn humidifier_value(survey: &UtilitySurvey, zone_id: &str) -> Option<Value> {
         HumidifierAnswer::ElectricSteam => Humidifier::Steam {
             carrier: SteamCarrier::Electricity,
         },
+        // The survey does not ask gas or oil; booked as natural gas.
         HumidifierAnswer::NonElectricSteam => Humidifier::Steam {
-            carrier: SteamCarrier::GasOrOil,
+            carrier: SteamCarrier::Gas,
         },
         HumidifierAnswer::Adiabatic => Humidifier::Atomising,
     };

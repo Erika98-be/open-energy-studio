@@ -4310,9 +4310,10 @@ fn compute(
             };
             by.add(function, carrier, value, item.carrier.primary_factor());
         }
-        // Chapter 12: steam humidifiers (12.3), carrier electricity or gas.
+        // Chapter 12: steam humidifiers (12.3), carrier electricity, gas or oil.
         used_el += heating.monthly[index].humidification_electricity_kwh;
         used_gas += heating.monthly[index].humidification_fuel_kwh;
+        used_oil += heating.monthly[index].humidification_oil_kwh;
         by.add(
             F_HUMIDIFICATION,
             C_EL,
@@ -4324,6 +4325,12 @@ fn compute(
             C_GAS,
             heating.monthly[index].humidification_fuel_kwh,
             F_P_GAS,
+        );
+        by.add(
+            F_HUMIDIFICATION,
+            C_OIL,
+            heating.monthly[index].humidification_oil_kwh,
+            F_P_OIL,
         );
         // Chapter 11: fans (11.132), frost protection (11.105) and grille
         // preheating (11.125); not weighted by f_BACS.
