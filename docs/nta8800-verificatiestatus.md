@@ -1,4 +1,32 @@
-# NTA 8800 verificatiestatus — 5 oktober 2026
+# NTA 8800 verificatiestatus — 11 oktober 2026
+
+## Stand 11 oktober 2026
+
+**Controle per hoofdstuk tegen de normtekst (reviews 40–48).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
+- **Gecontroleerd:**
+  - hoofdstuk 5 (indicatoren, primaire-energiefactoren, hernieuwbaar aandeel, f_BACS, labelklasse), review 45;
+  - hoofdstukken 6 en 7 (zonering, oppervlakten, maandbalans, interne en zonnewinst, serres), review 46;
+  - hoofdstuk 8 (transmissie, koudebruggen, grond met bijlage D, onverwarmde ruimten), review 44;
+  - hoofdstuk 9 (afgifte, distributie, opwekkers, hulpenergie) met de formules van bijlage M en Q, reviews 42 en 48;
+  - hoofdstuk 10 (koudeopwekkers, methoden 1–3, hulpenergie) en §5.7 TOjuli, reviews 40 en 48;
+  - hoofdstuk 11 (ventilatie en infiltratie), review 43;
+  - hoofdstuk 12 en de bijlagen B, M, N, Q, V, W, X en AA (tabellen), review 47;
+  - hoofdstuk 13 (tapwater) en hoofdstuk 16 (PV), review 41;
+  - hoofdstuk 14 (verlichting), review 45.
+- **Gevonden en opgelost:** fouten op routes die geen referentiegeval gebruikt, plus de kelderwanden per wanddeel (8.39/8.45) en f_prac op een verklaard tapwaterrendement (13.152). Van de 290 gevallen van de referentiepoort bewegen er drie: openbaar geval N en de ISSO 54-deeltests EP-W406q en EP-W006g; zie het overzichtsitem bovenaan "Onuitgebracht" in de releasenotes.
+- **Interpretaties:** vragen 8–12 aan NEN kwamen uit deze controle; samen met vragen 1–7 staan ze in [vragen aan NEN](nta8800-vragen-nen.md) en de [brief](nta8800-vragen-nen-brief.md). De kern houdt haar gekozen lezing tot er een antwoord is.
+- **Niet opnieuw tegen de tekst gelegd** in deze ronde: hoofdstuk 17 (klimaat, alleen tabel 17.1 als invoer van hoofdstuk 7), de bijlagen P, AB en de WKK-methoden (wel in de herberekeningen van 5 oktober), en de bijlagen C, E–I en L van de constructies (gecontroleerd op 2 oktober; review 44 nam C.10 en bijlage D mee).
+
+**Openbare gevallen.** Geval O (gezondheidszorgfunctie op externe warmtelevering met kwaliteitsverklaring, 2022) is toegevoegd; de referentiepoort heeft nu 30 vergeleken gevallen en 290 in totaal. Het resterende verschil in BENG 2 van geval O (en van L) wordt verklaard door vraag 7 (de warmtecapaciteit van lucht in 11.115/11.119).
+
+**Overig sinds 5 oktober** (details in de releasenotes, reviews 32–39):
+- het ISSO 54-testsetdossier per vrijgave;
+- robuustheid van bestanden en invoer;
+- concepten van registratie, opname en maatwerkadvies blijven per document bewaard;
+- het contract van API en MCP is per operatie getoetst;
+- de UNIEC3/VABI-uitwisseling is als heen-en-terug over alle trainingsprojecten getoetst.
+
+**Openstaand** blijft wat hieronder onder "Stand 5 oktober" staat: de verwachte uitkomsten van ISSO 54 versie 5.0, het EP-Online-aanleverschema, het uurklimaat van 17.3.8 en het attestnummer. Daarbij komen de antwoorden van NEN op vragen 1–12 en echte Uniec 3- en VABI-bestanden om de veldnamen van de uitwisseling tegen te toetsen.
 
 ## Stand 5 oktober 2026
 

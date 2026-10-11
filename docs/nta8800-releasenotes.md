@@ -13,6 +13,26 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Overzicht: welke uitkomsten in rekenkern 0.4.0 veranderen (geen rekenwijziging)
+Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de items zelf geven de details en de normverwijzingen. Dit item verandert zelf niets.
+
+- **Referentiegevallen die bewegen.** Van de 290 gevallen in de referentiepoort veranderen er drie:
+  - **openbaar geval N** (supermarkt, 2020+A1): BENG 1/2/3 van 54,57 / −24,31 / 122,6 naar 54,52 / −24,34 / 122,7 door de kelderwanden per wanddeel (review 44);
+  - **ISSO 54 EP-W406q**: BENG 2 van 101,80 naar 104,13 door f_prac 0,95 op een verklaard tapwaterrendement van een gastoestel of indirect gestookt vat (review 41);
+  - **ISSO 54 EP-W006g**: BENG 1 69,33 → 69,25, BENG 2 100,96 → 100,69, TOjuli 5,67 → 5,73 door de kelderwanden per wanddeel (review 44).
+
+  Beide ISSO 54-deeltests hebben nog geen verwachte waarden. De overige openbare gevallen A–O, de RVO-voorbeeldwoningen en de andere deeltests zijn byte-gelijk.
+- **Uitkomsten die alleen bij bepaalde invoer veranderen** (geen referentiegeval heeft die invoer):
+  - **TOjuli:** methode 3 met beweegbare zonwering van tabel 7.5/7.6 in 2024; methode 3 en bijlage AA geweigerd in 2023 en ouder; de serregevel buiten de verdeling per oriëntatie (review 40).
+  - **Tapwater:** de circulatieleiding bij een onbekend aantal woningen volgens tabel 13.29 (review 41).
+  - **Ruimteverwarming:** het leidingverlies in de zone bij een collectieve afleverset en tabel 9.16; een ketel voor meer dan 500 m² buiten de thermische schil (review 42).
+  - **Ventilatie:** een opening op een sectorgrens bij dwarsventilatie telt in één sector (review 43).
+  - **Transmissie:** forfaitaire koudebruggen zonder grondvloer (nieuwe keuze, bestaande projecten ongewijzigd); een zonekoudebrug naar de grond is nu een blokkerend gat in plaats van stil weggelaten (review 44).
+  - **Serre:** de begrenzing van de serrewinst bij een gedeelde serre (review 46).
+  - **Koeling:** de condensorwarmte bij een verklaarde EER of ζ met waterzijdige warmteafvoer (review 48).
+  - **Eerdere items van 9 oktober:** PV boven 300/400 W/m², WKK met voorraadvat, opgegeven F_D;dayl, kelderwanden in A_ls, wanden en daken aan de grond, gemeenschappelijke ruimten (6.6.4).
+- **Open interpretaties.** De keuzes achter vragen 1–12 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
+
 ### 11 oktober 2026 — Review 48: formules van bijlage M en bijlage Q, koudeopwekkers van hoofdstuk 10, condensorwarmte bij een verklaarde EER (10.80)
 Review 48 legde de formules van bijlage M (M.1–M.29, p. 870–879), de formules van bijlage Q buiten de tabellen die review 47 al deed (Q.1–Q.16, Q.20–Q.31, Q.35–Q.53, Q.60–Q.97, p. 1027–1072) en de koudeopwekkers van hoofdstuk 10 (10.46–10.87 met tabellen 10.15–10.34, p. 397–425) naast de tekst van 2025+C1. Zonder verschil nagerekend:
 - **Bijlage M:** het rendement bij vollast M.7/M.8 met tabel M.2, bij deellast M.10 met tabel M.4, de correctie uit een aanvullende test M.13/M.14, de verliezen M.9, M.11 en M.12 met f_prac 0,95 en tabel M.3, de interpolatie M.4/M.5 en M.21/M.22, M.6 en M.23 over de bedrijfstijd van tabel 9.15, de mantel- en hulpenergieverliezen M.16–M.19 met tabellen M.5/M.6, de regelingsfactor M.24 met tabel M.7 en P_int = 0,3·P_n (M.29). M.25 staat zo in alle uitgaven vanaf 2022.
