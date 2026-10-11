@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useI18n } from '../../i18n/i18n';
 import { useEnergy } from '../../context/EnergyContext';
+import { useSurveyResult } from '../../context/SurveyResultProvider';
 import {
   CheckField, FieldPathPrefixProvider, NumberField, read, Section, SelectField, TextField, TriStateField, write, type Draft, type Path,
 } from '../NtaPerformancePanel/NtaFormFields';
@@ -781,7 +782,8 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
   const { state, dispatch } = useEnergy();
   const stored = state.project.basisopname as StoredSurvey | undefined;
   const edition = state.project.ntaCalculation?.normVersion ?? null;
-  const [result, setResult] = useState<OpnameAssessment | null>(null);
+  // Kept per document with the survey and edition it was calculated from (survives leaving the step).
+  const { result, record, clear } = useSurveyResult();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [json, setJson] = useState<string | null>(null);
@@ -794,7 +796,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
     dispatch({ type: 'SET_BASISOPNAME', payload: next });
     if (!keepResult) {
       requestId.current += 1;
-      setResult(null);
+      clear();
       setError(null);
       setBusy(false);
     }
@@ -884,7 +886,8 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
 
   const run = async () => {
     const current = ++requestId.current;
-    setResult(null);
+    clear();
+    const from = stored;
     // An empty required number would make the kernel refuse the whole survey with a bare
     // deserialization message; name the fields instead.
     const empty = emptyRequiredSurveyFields(stored.survey);
@@ -904,7 +907,7 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       // `{ error, message }` without issues; show it as an error, not as a result.
       const refused = assessment as Partial<OpnameAssessment> & { error?: string; message?: string };
       if (!Array.isArray(refused.issues)) throw new Error(refused.message ?? refused.error ?? 'invalid response');
-      if (requestId.current === current) setResult(assessment);
+      if (requestId.current === current) record(from, edition, assessment);
     } catch (failure) {
       if (requestId.current === current) setError(failure instanceof Error ? failure.message : String(failure));
     } finally {
