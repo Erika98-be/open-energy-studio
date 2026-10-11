@@ -1383,6 +1383,37 @@ fn plausibility_warnings(project_value: &Value) -> Vec<InputGap> {
 /// Smallest mean floor width the perimeter check accepts, m: a floor of
 /// area A and width w ≥ 1 m has a perimeter of at most 2·A/w + 2·w.
 const MIN_FLOOR_WIDTH_M: f64 = 1.0;
+/// 7.38 (2025+C1 p. 187): a sunroom id that appears in several zones is one
+/// shared sunroom; each zone's copy gets every bordering zone's H_zi;ztu and
+/// heating setpoint, so the cap sums H_zi,j;ztu·(θ_int;set;H;stc;zi − θ_e)
+/// with each zone's own setpoint. A sunroom of one zone keeps 7.37.
+fn share_sunroom_bordering_zones(zones: &mut [ChainZone]) {
+    use crate::monthly_demand::SunroomBorderingZone;
+    let mut shared: HashMap<String, Vec<SunroomBorderingZone>> = HashMap::new();
+    for zone in zones.iter() {
+        for room in &zone.demand.sunrooms {
+            shared
+                .entry(room.id.clone())
+                .or_default()
+                .push(SunroomBorderingZone {
+                    zone_id: zone.demand.zone_id.clone(),
+                    conductance_w_per_k: room.zone_conductance_w_per_k,
+                    heating_setpoint_c: zone.demand.setpoints.heating_c,
+                });
+        }
+    }
+    shared.retain(|_, list| list.iter().any(|item| item.zone_id != list[0].zone_id));
+    for zone in zones.iter_mut() {
+        for room in &mut zone.demand.sunrooms {
+            if let Some(list) = shared.get(&room.id) {
+                if room.bordering_zones.is_empty() {
+                    room.bordering_zones = list.clone();
+                }
+            }
+        }
+    }
+}
+
 /// Relative deviation of a declared sunroom b_U or H_zi;ztu from the value
 /// derived from the matching unheated space before a warning.
 const SUNROOM_DEVIATION: f64 = 0.10;
@@ -4765,6 +4796,7 @@ fn derive_input(
                 .unwrap_or_else(|| nta.distribution.clone()),
         });
     }
+    share_sunroom_bordering_zones(&mut zones);
     for (index, item) in nta.window_obstructions.iter().enumerate() {
         if used_obstruction.contains(&item.window_id) {
             continue;
@@ -7529,6 +7561,95 @@ mod tests {
                 "{path}"
             );
         }
+    }
+
+    /// 7.38: one sunroom id in two zones is a shared sunroom; both copies
+    /// carry both zones' H_zi;ztu and heating setpoints, and the colder
+    /// neighbour lowers the capped gain of zone z1.
+    #[test]
+    fn a_shared_sunroom_lists_every_bordering_zone() {
+        let mut value = project();
+        let mut second = value["zones"][0].clone();
+        second["id"] = Value::from("z2");
+        second["floorArea"] = Value::from(50.0);
+        for surface in second["surfaces"].as_array_mut().unwrap() {
+            let id = surface["id"].as_str().unwrap().to_owned();
+            surface["id"] = Value::from(format!("{id}-2"));
+            surface["zoneId"] = Value::from("z2");
+            for window in surface["windows"].as_array_mut().unwrap() {
+                let window_id = window["id"].as_str().unwrap().to_owned();
+                window["id"] = Value::from(format!("{window_id}-2"));
+            }
+        }
+        for bridge in second["thermalBridges"].as_array_mut().unwrap() {
+            bridge["id"] = Value::from("tb1-2");
+            bridge["zoneId"] = Value::from("z2");
+        }
+        value["zones"].as_array_mut().unwrap().push(second);
+        let sunroom = |h: f64, f: f64| {
+            serde_json::json!([{
+                "id": "atrium", "glazingGHeating": 0.55, "glazingGCooling": 0.35,
+                "exteriorFrameFraction": 0.25, "reductionFactor": 0.7,
+                "zoneConductanceWPerK": h, "distributionFactor": f,
+                "surfaces": [
+                    {"areaM2": 60.0, "absorptance": 0.7, "azimuthDeg": 180.0, "tiltDeg": 0.0}
+                ],
+                "sourceReference": "drawing"
+            }])
+        };
+        let block = &mut value["ntaCalculation"];
+        let heating_setpoint = block["setpoints"]["heatingC"].as_f64().unwrap();
+        let zone_entry = |id: &str, h: f64, f: f64| {
+            serde_json::json!({
+                "zoneId": id,
+                "verticalPipes": [],
+                "ventilationFlows": block["ventilationFlows"].clone(),
+                "internalGains": block["internalGains"].clone(),
+                "sunrooms": sunroom(h, f)
+            })
+        };
+        let entries = vec![zone_entry("z1", 6.0, 0.3), zone_entry("z2", 14.0, 0.7)];
+        block["zoneData"] = Value::from(entries);
+        block["surfaceTilts"].as_array_mut().unwrap().push(
+            serde_json::json!({"surfaceId": "roof-2", "tiltDeg": 45.0, "sourceReference": "copy"}),
+        );
+        let mut floor = block["groundFloors"][0].clone();
+        floor["surfaceId"] = Value::from("floor-2");
+        block["groundFloors"].as_array_mut().unwrap().push(floor);
+        let gains = |value: &Value| -> f64 {
+            let result = assess_project_performance(value);
+            assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+            let derived = result.derived_input.as_ref().unwrap();
+            let first = &derived.space_heating.demand.sunrooms[0];
+            let second = &derived.space_heating.additional_zones[0].demand.sunrooms[0];
+            assert_eq!(first.bordering_zones, second.bordering_zones);
+            assert_eq!(first.bordering_zones.len(), 2);
+            assert_eq!(first.bordering_zones[1].zone_id, "z2");
+            assert_eq!(first.bordering_zones[1].conductance_w_per_k, 14.0);
+            result
+                .performance
+                .as_ref()
+                .unwrap()
+                .space_heating
+                .demand
+                .monthly
+                .iter()
+                .map(|row| row.sunroom_gains_kwh)
+                .sum()
+        };
+        let same = gains(&value);
+        // Table 7.13: a sport zone is heated to 16 °C instead of 20 °C.
+        assert_eq!(heating_setpoint, 20.0);
+        let mut setpoints = value["ntaCalculation"]["setpoints"].clone();
+        setpoints["heatingC"] = Value::from(16.0);
+        let zone_two = &mut value["ntaCalculation"]["zoneData"][1];
+        zone_two["usageFunction"] = Value::from("sport");
+        zone_two["setpoints"] = setpoints;
+        zone_two["internalGains"] = serde_json::json!({
+            "method": "declared", "heatFluxWPerM2": 3.0, "sourceReference": "x"
+        });
+        let colder = gains(&value);
+        assert!(colder < same, "{colder} vs {same}");
     }
 
     #[test]

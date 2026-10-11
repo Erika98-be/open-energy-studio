@@ -1205,6 +1205,7 @@ mod tests {
             reduction_factor: 0.8,
             zone_conductance_w_per_k: 10.0,
             distribution_factor: 1.0,
+            bordering_zones: Vec::new(),
             surfaces: Vec::new(),
             source_reference: "survey".into(),
         });

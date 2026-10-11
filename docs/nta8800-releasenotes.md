@@ -28,12 +28,18 @@ Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de
   - **Ruimteverwarming:** het leidingverlies in de zone bij een collectieve afleverset en tabel 9.16; een ketel voor meer dan 500 m² buiten de thermische schil (review 42).
   - **Ventilatie:** een opening op een sectorgrens bij dwarsventilatie telt in één sector (review 43).
   - **Transmissie:** forfaitaire koudebruggen zonder grondvloer (nieuwe keuze, bestaande projecten ongewijzigd); een zonekoudebrug naar de grond is nu een blokkerend gat in plaats van stil weggelaten (review 44).
-  - **Serre:** de begrenzing van de serrewinst bij een gedeelde serre (review 46).
+  - **Serre:** de begrenzing van de serrewinst bij een gedeelde serre (review 46), met het setpoint van elke aangrenzende zone (vervolg op review 52).
   - **Koeling:** de condensorwarmte bij een verklaarde EER of ζ met waterzijdige warmteafvoer (review 48).
   - **Forfaitaire R_c:** thermokussens onder een vloer met een spouw krijgen geen spouwwaarde meer (review 50).
   - **Constructies:** nieuwe keuze voor een zwak geventileerde smalle luchtlaag, met de halve waarde van tabel F.1 (review 51; bestaande projecten ongewijzigd).
   - **Eerdere items van 9 oktober:** PV boven 300/400 W/m², WKK met voorraadvat, opgegeven F_D;dayl, kelderwanden in A_ls, wanden en daken aan de grond, gemeenschappelijke ruimten (6.6.4).
 - **Open interpretaties.** De keuzes achter vragen 1–12 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
+
+### 11 oktober 2026 — Gedeelde serre: begrenzing 7.38 met het setpoint van elke zone
+Formule 7.38 (p. 187) begrenst de winst van een serre waaraan meerdere rekenzones grenzen met de som van H_zi,j;ztu·(θ_int;set;H;stc;zi − θ_e) over al die zones, elk met het eigen setpoint. De kern nam tot nu toe H_zi;ztu / F (7.36) met het setpoint van de eigen zone; dat is alleen exact bij gelijke setpoints (kanttekening van review 52).
+- **Wat de kern nu doet:** komt dezelfde serre-id voor bij meer dan één zone in `zoneData`, dan krijgt elke kopie de lijst van alle aangrenzende zones met hun H_zi;ztu en verwarmingssetpoint (`borderingZones`), en de begrenzing rekent met die lijst. Een serre van één zone rekent zoals voorheen met 7.37.
+- **Gevolg:** uitkomsten veranderen alleen bij een gedeelde serre tussen zones met verschillende setpoints volgens tabel 7.13, bijvoorbeeld een woonfunctie (20 °C) naast een sportfunctie (16 °C). Bij gelijke setpoints is de uitkomst gelijk. Geen referentiegeval heeft een serre; de referentierapporten zijn voor en na byte-gelijk.
+- **Tests:** `a_shared_sunroom_caps_with_each_zone_setpoint_7_38` (handberekening met 6 W/K bij 20 °C en 14 W/K bij 16 °C, februari) en `a_shared_sunroom_lists_every_bordering_zone` (projectroute, twee zones).
 
 ### 11 oktober 2026 — Review 52: onafhankelijke herberekening van de wijzigingen uit reviews 40–51 (geen rekenwijziging)
 Elke regel die in reviews 40–51 veranderde, is opnieuw uitgerekend met een eigen implementatie, geschreven vanaf de normpagina's zonder eerst de kerncode van die regel te lezen, en op synthetische invoer met grenswaarden met de kern vergeleken. Alle elf regels komen overeen (tot 1e-9). De gevallen staan nu als vaste tests in de kern (`review52_*`).
