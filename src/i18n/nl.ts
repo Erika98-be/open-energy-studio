@@ -3622,7 +3622,7 @@ export const nl: Record<string, string> = {
   'nta.form.sunroom.addSurface': "Vlak toevoegen",
   'nta.form.sunroom.removeSurface': "Vlak verwijderen",
   'nta.form.sunroom.space': "Onverwarmde ruimte van de serre",
-  'nta.form.sunroom.sharedWith': "Gedeelde serre, ook bij {{zones}}: de begrenzing van 7.38 telt alle aangrenzende zones, elk met zijn eigen H_zi;ztu en setpoint",
+  'nta.form.sunroom.sharedWith': "Gedeelde serre, ook bij {{zones}}: de begrenzing van 7.38 telt alle aangrenzende zones, elk met zijn eigen H_zi;ztu en instelwaarde",
   'nta.form.sunroom.shareNote': "Grenst een serre aan meer rekenzones, kies dan in elke zone dezelfde serre (hetzelfde id) en geef per zone H_zi;ztu en het aandeel F_zi;ztu op (7.36–7.38).",
   'nta.form.generator.gasHeatPump': "Gaswarmtepomp (tabel 9.27/9.29)",
   'nta.form.gasHp.table': "Tabel",
