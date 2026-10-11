@@ -49,3 +49,5 @@ Alle afbeeldingen waar de hoofdstukken naar verwijzen staan in `img/`. De meeste
 - het venster *Handleiding* (`handleiding-venster.png`, hoofdstuk 0).
 
 Nog later op 10 oktober 2026 kwamen op dezelfde manier de gedeclareerde f_ctrl bij het ventilatiesysteem (`fctrl-gedeclareerd.png`, hoofdstuk 3) en de keuzelijst *Uitgave NTA 8800* in het blok *Algemeen* (`uitgave-keuze.png`, hoofdstuk 10) erbij, beide met het voorbeeldkantoor. Daarmee heeft elk onderdeel een schermafdruk.
+
+Op 11 oktober 2026 is `overnemen-vloeren.png` (hoofdstuk 2) opnieuw gemaakt, omdat het venster nu ook het deel *Koudebrugmethode van het gebouw* toont. Op dezelfde manier kwamen erbij, alle in hoofdstuk 3: de keuze *Lineaire koudebruggen van het gebouw* (`koudebrugmethode.png`), twee rekenzones die één serre delen (`gedeelde-serre.png`), een verwarmde kelder met de diepte per wanddeel (`kelder-wanddelen.png`) en een smalle luchtlaag die zwak geventileerd is in *Constructie bewerken* (`smalle-luchtlaag.png`). Ze gebruiken de voorbeeldtussenwoning; de serre, de wanddelen en de lagen zijn voor de afbeelding ingevuld.

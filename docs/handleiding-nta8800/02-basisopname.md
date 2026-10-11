@@ -123,7 +123,7 @@ Na **Opname doorrekenen** staat de knop **Overnemen in projectmodel** onder Uitk
 
 **Vloeren op de grond.** Omdat de geometrie die van het projectmodel blijft, gaan de vloergegevens van de opname alleen mee in de grondvloergegevens van een vloer uit het projectmodel (Gebouw › Schil & ramen, *Vloeren op grond (§8.3)*). Het venster toont daarvoor per opnamevloer het deel *Vloeren op de grond*:
 
-![Venster Opname overnemen in het projectmodel met het deel Vloeren op de grond: de opnamevloer gekoppeld aan de projectvloer, omtrek P en R_c niet aangevinkt omdat het project een andere waarde heeft, de verwarmde kelder aangevinkt](img/overnemen-vloeren.png)
+![Venster Opname overnemen in het projectmodel met het deel Vloeren op de grond: de opnamevloer gekoppeld aan de projectvloer, omtrek P en R_c niet aangevinkt omdat het project een andere waarde heeft, de verwarmde kelder aangevinkt; daaronder het deel Koudebrugmethode van het gebouw met het voorstel Forfaitair aangevinkt](img/overnemen-vloeren.png)
 
 
 - **Koppelen.** Kies bij elke opnamevloer de vloer van het projectmodel waar hij bij hoort. Het programma stelt een vloer voor: dezelfde id, anders de enige vloer op de grond aan beide kanten, anders de enige vloer met dezelfde oppervlakte (±2 %). Kies *niet overnemen* om een opnamevloer over te slaan.
