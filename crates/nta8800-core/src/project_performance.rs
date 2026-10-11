@@ -1525,6 +1525,56 @@ fn chapter8_warnings(
             }
         }
     }
+
+    // vragen-nen 11: the partition to a sunroom gets no solar gain of its
+    // own. In the forfait route 7.6.1 (2025+C1 p. 182) determines one; in the
+    // calculated route 7.6.6.1.1 (p. 189) would pass sun through its windows
+    // with the g of the sunroom glazing, which 7.34 note 2 (p. 185) leaves out.
+    let sunroom_sets = std::iter::once((None, "ntaCalculation.sunrooms".to_owned(), &nta.sunrooms))
+        .chain(nta.zone_data.iter().enumerate().map(|(index, item)| {
+            (
+                Some(item.zone_id.as_str()),
+                format!("ntaCalculation.zoneData[{index}].sunrooms"),
+                &item.sunrooms,
+            )
+        }));
+    for (zone_id, base, sunrooms) in sunroom_sets {
+        for (index, room) in sunrooms.iter().enumerate() {
+            let partitions: Vec<&Value> = project
+                .zones
+                .iter()
+                .filter(|zone| zone_id.map_or(true, |id| zone.id == id))
+                .flat_map(|zone| &zone.surfaces)
+                .filter(|surface| {
+                    surface.get("unheatedSpaceId").and_then(Value::as_str) == Some(room.id.as_str())
+                        && surface.get("thermalBoundary").and_then(|value| {
+                            serde_json::from_value::<ThermalBoundary>(value.clone()).ok()
+                        }) == Some(ThermalBoundary::UnheatedSpace)
+                })
+                .collect();
+            let windows = partitions
+                .iter()
+                .filter_map(|surface| surface.get("windows").and_then(Value::as_array))
+                .map(Vec::len)
+                .sum::<usize>();
+            let detail = if partitions.is_empty() {
+                continue;
+            } else if forfait {
+                "forfait route (8.4.1): the partition to the sunroom gets no solar gain of its own (7.6.1) and the 7.30b gains apply; question 11 to NEN".to_owned()
+            } else if windows > 0 {
+                format!("{windows} window(s) in the partition to the sunroom get no direct solar gain (7.6.6.1.1); only the 7.30b gains count; question 11 to NEN")
+            } else {
+                continue;
+            };
+            warnings.push(InputGap {
+                detail: Some(detail),
+                ..gap(
+                    "sunroom_partition_gain_interpreted",
+                    format!("{base}[{index}]"),
+                )
+            });
+        }
+    }
 }
 
 /// Lowest residential f_ctrl·f_sys of table 11.5 (p. 460) for system B and
@@ -7183,6 +7233,55 @@ mod tests {
             .find(|item| item.code == "sunroom_values_differ_from_unheated_space")
             .unwrap();
         assert_eq!(warning.path, "ntaCalculation.sunrooms[0]");
+    }
+
+    #[test]
+    fn a_sunroom_partition_reports_the_gain_interpretation() {
+        // vragen-nen 11: forfait route (7.6.1) or windows in the partition
+        // (7.6.6.1.1) get no solar gain of their own.
+        let mut value: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-terraced-dwelling.json"
+        ))
+        .unwrap();
+        value["zones"][0]["surfaces"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({
+                "id": "wall-serre", "name": "Wand serre", "type": "wall",
+                "thermalBoundary": "unheated_space", "unheatedSpaceId": "serre",
+                "area": 10.0, "orientation": "S", "constructionId": "c-wall",
+                "zoneId": "z1", "windows": []
+            }));
+        value["ntaCalculation"]["sunrooms"] = serde_json::json!([{
+            "id": "serre", "glazingGHeating": 0.6, "glazingGCooling": 0.6,
+            "exteriorFrameFraction": 0.2, "reductionFactor": 0.8,
+            "zoneConductanceWPerK": 10.0, "surfaces": [], "sourceReference": "x"
+        }]);
+        let found = |value: &Value| {
+            plausibility_warnings(value)
+                .into_iter()
+                .find(|item| item.code == "sunroom_partition_gain_interpreted")
+        };
+        // The example takes the forfait route through its floor edge.
+        let forfait = found(&value).unwrap();
+        assert_eq!(forfait.path, "ntaCalculation.sunrooms[0]");
+        assert!(forfait.detail.unwrap().starts_with("forfait route"));
+        // Calculated route: only a partition with windows is reported.
+        value["ntaCalculation"]["thermalBridgeRoute"] = Value::from("detailed");
+        value["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"] =
+            serde_json::json!({"method": "detailed", "bridges": []});
+        assert!(found(&value).is_none());
+        value["zones"][0]["surfaces"]
+            .as_array_mut()
+            .unwrap()
+            .last_mut()
+            .unwrap()["windows"] =
+            serde_json::json!([{"id": "w-serre", "area": 2.0, "uValue": 1.4, "gValue": 0.6}]);
+        assert!(found(&value)
+            .unwrap()
+            .detail
+            .unwrap()
+            .starts_with("1 window(s)"));
     }
 
     #[test]

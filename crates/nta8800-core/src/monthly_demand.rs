@@ -57,6 +57,8 @@ pub const OMITTED_CORRECTIONS: &[&str] = &[
     "8.5: H_A = 0 for adjacent heated spaces is prescribed by the norm",
     "§17.3.8 extended obstruction method (hourly NEN 5060) enters as declared factors",
     "table 7.10 footnote c is the caller's column choice",
+    "7.38 (p. 187): with several zones bordering one sunroom Σ H_zi,j;ztu is H_zi;ztu / F_zi;ztu of 7.36 and every zone takes its own θ_int;set;H;stc (exact when the zones share the setpoint)",
+    "7.6.1 (p. 182) and 7.6.6.1.1 (p. 189) against 7.34 note 2 (p. 185): the partition to an adjacent unheated sunroom gets no solar gain of its own, also not through its windows, in the forfait and the calculated route; the sunroom counts through 7.30b only, with warning sunroom_partition_gain_interpreted (vragen-nen 11)",
 ];
 
 const SCOPE: &str = "nta8800_chapter_7_monthly_need_single_zone_unverified";
@@ -2248,10 +2250,16 @@ pub fn sunroom_gains_kwh(input: &MonthlyDemandInput, month_index: usize, balance
                 })
                 .sum();
             let gains = f_sol * absorbed * 0.001 * hours;
-            // 7.37: heating only, capped at 1.
+            if room.distribution_factor <= 0.0 {
+                return 0.0;
+            }
+            // 7.37/7.38: heating only, capped at 1. With several bordering
+            // zones 7.38 sums H_zi,j;ztu over all of them, which is
+            // H_zi;ztu / F_zi;ztu by 7.36 (2025+C1 p. 186–187); the
+            // setpoint is this zone's (equal setpoints assumed).
             let cap = match balance {
                 Balance::Heating if gains > 0.0 => (room.reduction_factor
-                    * room.zone_conductance_w_per_k
+                    * (room.zone_conductance_w_per_k / room.distribution_factor)
                     * (input.setpoints.heating_c - OUTDOOR_TEMPERATURE_C[month_index])
                     * 0.001
                     * hours
@@ -3268,6 +3276,39 @@ mod tests {
         let base = valid(&sample());
         let with = valid(&input);
         assert!(with.monthly[0].heating.need_kwh < base.monthly[0].heating.need_kwh);
+    }
+
+    #[test]
+    fn a_shared_sunroom_caps_on_all_bordering_zones_7_38() {
+        // Two equal zones border the sunroom: H_zi;ztu 5 W/K each, F 0,5
+        // (7.36). 7.38 caps on b_U·ΣH·Δθ·t = 0,8·10·17,39·0,744 kWh, not on
+        // this zone's 5 W/K alone (2025+C1 p. 187).
+        let mut input = sample();
+        input.sunrooms.push(Sunroom {
+            id: "atrium".into(),
+            glazing_g_heating: 0.6,
+            glazing_g_cooling: 0.6,
+            exterior_frame_fraction: 0.2,
+            reduction_factor: 0.8,
+            zone_conductance_w_per_k: 5.0,
+            distribution_factor: 0.5,
+            surfaces: vec![SunroomSurface {
+                area_m2: 40.0,
+                absorptance: 0.6,
+                azimuth_deg: 180.0,
+                tilt_deg: 0.0,
+            }],
+            source_reference: "drawing".into(),
+        });
+        let march_irradiance = climate::irradiance_at(180.0, 0.0, 3).unwrap();
+        let gains = 0.6 * 0.8 * 0.6 * 40.0 * march_irradiance * 0.001 * 744.0;
+        let cap = 0.8 * 10.0 * (20.0 - 5.91) * 0.001 * 744.0 / gains;
+        assert!(cap < 1.0, "the cap binds in this example");
+        let expected = (1.0 - 0.8) * 0.5 * cap * gains;
+        assert!((sunroom_gains_kwh(&input, 2, Balance::Heating) - expected).abs() < 1e-9);
+        // A zone with no share gets nothing.
+        input.sunrooms[0].distribution_factor = 0.0;
+        assert_eq!(sunroom_gains_kwh(&input, 2, Balance::Heating), 0.0);
     }
 
     #[test]

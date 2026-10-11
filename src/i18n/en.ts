@@ -1407,6 +1407,7 @@ export const en: Record<string, string> = {
   'nta.warning.construction_year_mismatch': 'Construction year in the registration differs from the NTA input; the label uses the registration year (Omgevingsregeling art. 5.13 onder a)',
   'nta.warning.ventilation_year_before_construction_year': 'Ventilation construction or renovation year (table 11.13) is before the construction year of the building',
   'nta.warning.sunroom_values_differ_from_unheated_space': 'Sunroom b_U or H_zi;ztu differs from its unheated space (8.4.1)',
+  'nta.warning.sunroom_partition_gain_interpreted': 'Partition to the sunroom: no solar gain of its own or through its windows, only the sunroom gains of 7.30b (7.6.1, 7.6.6.1.1; question 11 to NEN)',
   'nta.performance.bblNotApplicable': 'not applicable (dwellings only)',
   'nta.performance.labelEp2': 'Label EP2 with forfait area measures (Omgevingsregeling art. 5.11 lid 4): {{value}} kWh/m²·yr',
   'nta.gap.bbl_functions_residential_utility_mixed': 'Residential and utility functions mixed in the Bbl function list; determine them separately (§5.3.1)',

@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij tien punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij elf punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -114,6 +114,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Lezing B.** Alleen f_P;del;dh blijft die van de verklaring; f_Pren;dh wordt de forfaitaire waarde (0,95 volgens 9.6.8.1.1.2.3 a), of 0 volgens tabel 5.4).
 - **Gevolg.** Alleen de EMGforf-waarden van RERPrenTot en EwePrenTot, die bij een woning met gebiedsmaatregelen informatief op het label staan; BENG 3 rekent met EMGverklaring. Geen openbaar geval of ISSO 54-deeltest heeft zo'n bron met kwaliteitsverklaring.
 - **Vraag.** Welke f_Pren;dh (en welke f_P;del;dh) hoort in RERPrenTot;EMGforf bij een collectieve warmtepompbron onder 20 °C met kwaliteitsverklaring?
+
+### Vraag 11. Zonnewinst door de scheidingsconstructie naar een aangrenzende onverwarmde serre (7.6.1, p. 182; 7.6.4, p. 185; 7.6.6.1.1, p. 189)
+
+- **Plaats.** 7.6.1 (p. 182) bepaalt bij de forfaitaire verrekening van 8.4.1 via een aangrenzende onverwarmde serre (AOS) de zonnewinst door de scheidingsconstructie, met de serre vervangen door buitenlucht; of 7.30b dan nog geldt, staat er niet bij. In de berekende route telt 7.34 alleen de niet-transparante vlakken in de serre (opmerking 2, p. 185), terwijl 7.6.6.1.1 (p. 189) straling die een raam pas na een serre bereikt, vermenigvuldigt met de zontoetredingsfactor van de serre.
+- **Lezing A (onze keuze).** De scheidingsconstructie naar een serre krijgt in beide routes geen eigen zonnewinst, ook niet door haar ramen; de serre telt alleen via 7.30b.
+- **Lezing B.** In de berekende route krijgen ramen in de scheiding directe zonnewinst volgens 7.32 met g_gl van het raam maal g_gl van de serrebeglazing, naast 7.30b; in de forfaitaire route krijgt de scheiding zonnewinst als uitwendige scheidingsconstructie (7.32/7.33) en vervalt 7.30b voor die serre.
+- **Gevolg.** Geen openbaar geval of ISSO 54-deeltest heeft een serre. Lezing B verlaagt de warmtebehoefte en verhoogt de koudebehoefte van een zone met ramen naar een serre.
+- **Vraag.** Krijgen ramen in de scheiding naar een AOS directe zonnewinst met de zontoetredingsfactor van de serre, en hoe wordt in de forfaitaire route de zonnewinst door die scheiding bepaald (7.32/7.33 of 7.30b, en met welke F_sky)?
 
 ---
 

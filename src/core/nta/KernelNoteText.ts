@@ -13,6 +13,10 @@ const DUTCH: Record<string, string> = {
     '§17.3.8 uitgebreide belemmeringsmethode (uurwaarden NEN 5060) wordt als opgegeven factoren ingevoerd.',
   "table 7.10 footnote c is the caller's column choice":
     'Tabel 7.10 voetnoot c: de kolomkeuze ligt bij de invoer.',
+  '7.38 (p. 187): with several zones bordering one sunroom Σ H_zi,j;ztu is H_zi;ztu / F_zi;ztu of 7.36 and every zone takes its own θ_int;set;H;stc (exact when the zones share the setpoint)':
+    '7.38 (p. 187): grenzen meerdere rekenzones aan één serre, dan is Σ H_zi,j;ztu gelijk aan H_zi;ztu / F_zi;ztu van 7.36 en neemt elke zone haar eigen θ_int;set;H;stc (exact bij gelijke setpoints).',
+  '7.6.1 (p. 182) and 7.6.6.1.1 (p. 189) against 7.34 note 2 (p. 185): the partition to an adjacent unheated sunroom gets no solar gain of its own, also not through its windows, in the forfait and the calculated route; the sunroom counts through 7.30b only, with warning sunroom_partition_gain_interpreted (vragen-nen 11)':
+    '7.6.1 (p. 182) en 7.6.6.1.1 (p. 189) tegenover 7.34 opmerking 2 (p. 185): de scheiding naar een aangrenzende onverwarmde serre krijgt geen eigen zonnewinst, ook niet door de ramen, in de forfaitaire en de berekende route; de serre telt alleen via 7.30b, met melding sunroom_partition_gain_interpreted (vraag 11 aan NEN).',
   '9.6.1: generators with the same preference share their energy by nominal power; product-specific hybrid switching and domestic hot water priority are not modelled':
     '9.6.1: opwekkers met dezelfde voorkeur delen de energie naar nominaal vermogen; productspecifiek hybride schakelen en tapwatervoorrang zijn niet gemodelleerd.',
   '7.82: ϑ_ztu of the unheated space follows from distributionSystem.unheatedReductionFactor (b_U); without it and without entered values 13 °C is used':
