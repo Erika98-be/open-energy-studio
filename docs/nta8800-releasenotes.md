@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 54: kritische codereview van reviews 44–53 (geen rekenwijziging)
+Codereview van alles wat na review 43 is samengevoegd (reviews 44–53, de gedeelde serre van 7.38 en het vervolg op review 53). Gevonden en hersteld, elk met een test die op de oude code faalt:
+
+- **Lijst van aangrenzende zones niet gecontroleerd.** `borderingZones` van een serre (7.38) komt ook via de directe invoer van de maandbehoefte (API en MCP) binnen. Een negatieve H_zi,j;ztu, een zone die twee keer voorkomt, een onzinnige instelwaarde of waarden die samen overlopen (1e308 en −1e308 geven ∞ − ∞) gaven een ongeldige of NaN-begrenzing. De kern weigert zo'n lijst nu met `sunroom_invalid` op `sunrooms[i].borderingZones`.
+- **Ingevulde lijst in de projectroute bleef staan.** De projectroute vulde `borderingZones` alleen aan als de lijst leeg was, zodat een in het project ingevulde lijst (met niet-bestaande zones of andere instelwaarden) de begrenzing bepaalde. De projectroute leidt de lijst nu altijd zelf af uit de zones met dezelfde serre-id, en maakt hem leeg voor een serre van één zone.
+- **Lege serre-id gedeeld.** Twee zones met een serre zonder id telden als één gedeelde serre. Een lege id deelt nu nooit.
+- **Dezelfde serre twee keer in één lijst.** Een zone kon dezelfde serre (dezelfde onverwarmde ruimte) twee keer kiezen; die telde dan dubbel in 7.30b en in 7.38. Dat is nu het ontbrekende gegeven `sunroom_id_duplicate` op de tweede vermelding, met "Ga naar".
+- **"Ga naar" bij gemengde koudebrugmethoden.** Met de koudebrugmethode van het gebouw op forfaitair en ψ-waarden in een zone wees `thermal_bridge_methods_mixed` naar `ntaCalculation.groundFloors`, ook als het project geen vloer op de grond heeft (bovenwoning). De melding wijst nu naar `zones[i].thermalBridges` van de eerste zone met ψ-waarden; een gedetailleerde vloerrand houdt de melding op de vloeren.
+- **Diepte per wanddeel: ingevulde diepte ging verloren.** Bij **Diepte per wanddeel opgeven** verdween de al ingevulde diepte z, en bij het verwijderen van het laatste wanddeel kwam z leeg terug. Het eerste wanddeel begint nu met de ingevulde diepte, en het laatste verwijderde wanddeel geeft zijn diepte terug aan z.
+
+Gecontroleerd zonder bevinding: de gas/olie-keuze van de stoomopwekker met de oude waarde `gas_or_oil` bij opslaan en openen, de deling door het aantal identieke toestellen bij de grens van 500 m², nulwaarden bij de wanddelen (z = 0 wordt geweigerd), het verplaatsen van meldingen naar hun invoer na het herordenen van zones (op zone-id, niet op volgorde), en de overname van de koudebrugmethode met ongedaan maken. Projecten met geldige invoer rekenen gelijk; de referentierapporten zijn ongewijzigd.
+
 ### 11 oktober 2026 — Overname van de koudebrugmethode en de verwarmde kelder in de optiedekking (geen rekenwijziging)
 Vervolg op review 53.
 

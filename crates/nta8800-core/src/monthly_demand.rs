@@ -1540,6 +1540,24 @@ fn validate(input: &MonthlyDemandInput, issues: &mut Vec<DemandIssue>) {
         if !fractions_ok || !finite_nonneg(room.zone_conductance_w_per_k) {
             issues.push(issue("sunroom_invalid", path.clone()));
         }
+        // 7.38: each bordering zone once, with a finite H_zi,j;ztu ≥ 0 and a
+        // plausible setpoint, and a cap sum that stays finite in every month.
+        let mut seen = std::collections::HashSet::new();
+        let zones_ok = room.bordering_zones.iter().all(|zone| {
+            !zone.zone_id.trim().is_empty()
+                && seen.insert(zone.zone_id.as_str())
+                && finite_nonneg(zone.conductance_w_per_k)
+                && zone.heating_setpoint_c.is_finite()
+                && (-50.0..=100.0).contains(&zone.heating_setpoint_c)
+        }) && room
+            .bordering_zones
+            .iter()
+            .map(|zone| zone.conductance_w_per_k * (zone.heating_setpoint_c.abs() + 100.0))
+            .sum::<f64>()
+            .is_finite();
+        if !zones_ok {
+            issues.push(issue("sunroom_invalid", format!("{path}.borderingZones")));
+        }
         if room.surfaces.iter().any(|surface| {
             !(surface.area_m2.is_finite()
                 && surface.area_m2 > 0.0
@@ -4222,5 +4240,66 @@ mod tests {
         let cooling = sunroom_gains_kwh(&input, 6, Balance::Cooling);
         input.sunrooms[0].bordering_zones.clear();
         assert_eq!(cooling, sunroom_gains_kwh(&input, 6, Balance::Cooling));
+    }
+
+    /// Review 54: the 7.38 list of bordering zones comes in through the API
+    /// as well. A negative H_zi,j;ztu, a setpoint outside any table 7.13
+    /// value or overflowing values (1e308 and −1e308 give ∞ − ∞ = NaN in
+    /// the cap) are refused instead of producing a NaN gain.
+    #[test]
+    fn invalid_bordering_zones_are_refused() {
+        let zone = |id: &str, h: f64, setpoint: f64| SunroomBorderingZone {
+            zone_id: id.into(),
+            conductance_w_per_k: h,
+            heating_setpoint_c: setpoint,
+        };
+        let with = |zones: Vec<SunroomBorderingZone>| {
+            let mut input = sample();
+            input.sunrooms.push(Sunroom {
+                id: "atrium".into(),
+                glazing_g_heating: 0.55,
+                glazing_g_cooling: 0.35,
+                exterior_frame_fraction: 0.25,
+                reduction_factor: 0.7,
+                zone_conductance_w_per_k: 6.0,
+                distribution_factor: 0.3,
+                bordering_zones: zones,
+                surfaces: vec![SunroomSurface {
+                    area_m2: 30.0,
+                    absorptance: 0.7,
+                    azimuth_deg: 180.0,
+                    tilt_deg: 0.0,
+                }],
+                source_reference: "drawing".into(),
+            });
+            assess_monthly_demand(&input)
+        };
+        let valid = with(vec![zone("z1", 6.0, 20.0), zone("z2", 14.0, 16.0)]);
+        assert!(
+            !valid
+                .issues
+                .iter()
+                .any(|item| item.code == "sunroom_invalid"),
+            "{:?}",
+            valid.issues
+        );
+        for zones in [
+            vec![zone("z1", -6.0, 20.0)],
+            vec![zone("z1", 1e308, 20.0), zone("z2", -1e308, 20.0)],
+            vec![zone("z1", 6.0, 1e308)],
+            vec![zone("z1", 6.0, 20.0), zone("z1", 14.0, 16.0)],
+        ] {
+            let result = with(zones.clone());
+            assert!(
+                result
+                    .issues
+                    .iter()
+                    .any(|item| item.code == "sunroom_invalid"
+                        && item.path == "sunrooms[0].borderingZones"),
+                "{zones:?}: {:?}",
+                result.issues
+            );
+            assert!(crate::finite::first_non_finite(&result).is_none());
+        }
     }
 }

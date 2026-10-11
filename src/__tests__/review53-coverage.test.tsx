@@ -110,14 +110,16 @@ describe('review 53: basement depth per wall part (8.42/D.12)', () => {
       ? { ...floor, heatedBasement: { depthM: 1.5, wallResistanceM2kPerW: 2.5 } } : floor);
     renderWithProviders(<Section id="groundFloors" project={dwelling} initial={{ ...block, groundFloors: floors } as Draft} />);
     fireEvent.click(screen.getByRole('button', { name: 'Enter the depth per wall part' }));
-    expect(draft().groundFloors[0].heatedBasement).toEqual({ wallResistanceM2kPerW: 2.5, wallDepths: [{ lengthM: null, depthM: null }] });
+    // Review 54: the first part starts from the depth already entered.
+    expect(draft().groundFloors[0].heatedBasement).toEqual({ wallResistanceM2kPerW: 2.5, wallDepths: [{ lengthM: null, depthM: 1.5 }] });
     expect(screen.queryByLabelText(/Depth of the floor below ground level z/)).toBeNull();
     const part = screen.getByRole('group', { name: 'Basement wall part 1' });
     fireEvent.change(within(part).getByLabelText(/Length ℓ_j/), { target: { value: '12' } });
     fireEvent.change(within(part).getByLabelText(/Depth z_j/), { target: { value: '1.2' } });
     expect(draft().groundFloors[0].heatedBasement.wallDepths).toEqual([{ lengthM: 12, depthM: 1.2 }]);
     fireEvent.click(within(part).getByRole('button', { name: /Remove/ }));
-    expect(draft().groundFloors[0].heatedBasement).toEqual({ wallResistanceM2kPerW: 2.5, depthM: null });
+    // Review 54: the last part's depth becomes the single depth z again.
+    expect(draft().groundFloors[0].heatedBasement).toEqual({ wallResistanceM2kPerW: 2.5, depthM: 1.2 });
     expect(screen.getByLabelText(/Depth of the floor below ground level z/)).toBeTruthy();
   });
 });

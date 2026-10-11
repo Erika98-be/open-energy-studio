@@ -1393,6 +1393,7 @@ export const en: Record<string, string> = {
   'nta.gap.vertical_pipes_unknown': 'Vertical pipes unknown: list them, or none (7.3.3)',
   'nta.gap.vertical_pipes_conflicting': 'Zone "no vertical pipes" conflicts with the project pipes (7.3.3)',
   'nta.gap.basement_forfait_delta_u_conflict': 'Basement ΔU_for differs from the derived ΔU_for (8.38, 8.3)',
+  'nta.gap.sunroom_id_duplicate': 'The same sunroom is listed twice in this list (7.30b, 7.38)',
   'nta.gap.thermal_bridge_methods_mixed': 'Forfait and detailed thermal bridges mixed (8.2.1)',
   'nta.gap.ground_floor_edge_insulation_slab_only': 'Edge insulation applies to a slab on ground only (D.7/D.8, table D.1)',
   'nta.performance.warnings': 'Plausibility (the calculation continues):',

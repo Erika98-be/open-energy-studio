@@ -1393,6 +1393,7 @@ export const nl: Record<string, string> = {
   'nta.gap.vertical_pipes_unknown': 'Verticale leidingen onbekend: geef ze op, of geen (7.3.3)',
   'nta.gap.vertical_pipes_conflicting': 'Zone "geen verticale leidingen" botst met de projectleidingen (7.3.3)',
   'nta.gap.basement_forfait_delta_u_conflict': 'ΔU_for van de kelder wijkt af van de afgeleide ΔU_for (8.38, 8.3)',
+  'nta.gap.sunroom_id_duplicate': 'Dezelfde serre staat twee keer in deze lijst (7.30b, 7.38)',
   'nta.gap.thermal_bridge_methods_mixed': 'Forfaitaire en gedetailleerde koudebruggen gemengd (8.2.1)',
   'nta.gap.ground_floor_edge_insulation_slab_only': 'Randisolatie geldt alleen voor een vloer op de grond (D.7/D.8, tabel D.1)',
   'nta.performance.warnings': 'Plausibiliteit (de berekening loopt door):',
