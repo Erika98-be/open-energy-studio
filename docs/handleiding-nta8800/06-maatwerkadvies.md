@@ -19,6 +19,8 @@ Het resultaat toont per variant (huidig, elke maatregel, elk pakket):
 - netto contante waarde;
 - het indicatieve label met BENG 1–3.
 
+Het resultaat hoort bij de invoer waarmee het is berekend. Wijzigt daarna het project, de normuitgave of het advies (ook tijdens het doorrekenen, of via ongedaan maken), of opent u een ander document, dan verdwijnt het resultaat en kiest u opnieuw **Doorrekenen**. Terug in het eerste document, met ongewijzigde invoer, staat het resultaat er weer.
+
 De resultaten zijn te sorteren op terugverdientijd of op netto contante waarde. ISSO 82.2 §6.2.4 (p. 82) schrijft geen rangorde voor.
 
 ## Maatregelen met een sjabloon
@@ -88,4 +90,6 @@ Kies op de stap **Maatwerkadvies** de knop **Adviesrapport (HTML)**. Het rapport
 - categorieën;
 - bedragen gegroepeerd per duizendtal;
 - de reden bij een ongeldige variant;
+- een hoofdstuk **Meldingen** met de meldingen van de rekenkern, als het advies maar gedeeltelijk is berekend (zoals op het scherm);
+- bij **Best passend pakket** de tekst "geen pakket geadviseerd" als er geen pakket is gekozen of voorgesteld;
 - de onderbouwing van een gunstige PV-belemmering.

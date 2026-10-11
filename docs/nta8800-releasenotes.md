@@ -13,6 +13,14 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 38: maatwerkadvies (geen rekenwijziging)
+- **Resultaat hoort bij zijn invoer.** Het paneel hield het laatste resultaat vast tot het advies zelf werd gewijzigd. Na een wissel van normuitgave, ongedaan maken, een ander document of een wijziging tijdens het doorrekenen bleef zo een resultaat staan dat niet bij de getoonde invoer hoorde; document B kon het resultaat van document A tonen. Het resultaat wordt nu bewaard met de kernelinvoer waaruit het is berekend en alleen getoond zolang het document die invoer nog heeft. Terug in het eerste document staat het weer.
+- **Adviesrapport.**
+  - Zonder geadviseerd pakket stond er "— (automatisch: hoogste netto contante waarde, door adviseur te bevestigen)". Er staat nu "geen pakket geadviseerd", zoals op het scherm.
+  - Een gedeeltelijk berekend advies noemde de meldingen van de rekenkern alleen op het scherm. Het rapport heeft nu een hoofdstuk **Meldingen** met code, pad en toelichting.
+- **MCP.** Een tool zonder invoer (GET-operatie) negeerde argumenten, terwijl het schema geen leden toestaat. Elk argument wordt nu geweigerd met `invalid_request_shape`, zoals een onbekend lid bij de andere tools. De HTTP-routes geven deze operaties nooit een body en veranderen niet.
+- Tests: `src/__tests__/mwa-review38.test.tsx` (vier tests, alle vier falen op de oude code) en `a_tool_without_input_refuses_arguments` in de MCP-server. Handleiding hoofdstuk 6 en `docs/nta8800-mcp.md` bijgewerkt.
+
 ### 11 oktober 2026 — Review 37: contract van HTTP-API en MCP-server (geen rekenwijziging)
 - **OpenAPI-document.**
   - Elke route kan 405 `method_not_allowed` geven (de verkeerde methode), maar het document noemde 405 nergens. Het staat nu bij elke route, met de `Allow`-header; 403 `host_not_allowed` staat nu ook bij `/health` en `/v1/openapi.json`.

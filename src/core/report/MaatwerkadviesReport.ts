@@ -145,7 +145,12 @@ export function generateMaatwerkadviesReportHTML(
   const chosen = assessment.packages.find((item) => item.id === advice?.packageId);
   const passport = assessment.renovationPassport;
   const list = (items: string[]) => items.length ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<p>Geen.</p>';
-  return `${head}
+  // A partly calculated advice keeps its kernel issues, as the screen shows them.
+  const issuesSection = assessment.issues.length > 0
+    ? `<h2>Meldingen</h2><table><thead><tr><th>Code</th><th>Pad</th><th>Detail</th></tr></thead><tbody>${assessment.issues
+      .map((item) => `<tr>${dutchCodeCell(item.code)}${cell(item.path)}<td>${dutchDetailHtml(item.detail)}</td></tr>`).join('')}</tbody></table>`
+    : '';
+  return `${head}${issuesSection}
     <h2>Huidige situatie</h2>
     <table><tbody>
       <tr><th>Energielabel (indicatief, NTA 8800)</th>${cell(current.label.labelClass ?? '—')}<th>EP2 [kWh/m²·jr]</th>${n(current.label.primaryFossilIndicatorKwhPerM2, 1)}</tr>
@@ -198,7 +203,9 @@ export function generateMaatwerkadviesReportHTML(
       <li>Het gebouw kan in de praktijk gevoeliger zijn voor oververhitting; aanvullende (dynamische) studies kunnen zinvol zijn.</li>
     </ul>` : ''}
     <h2>Advies</h2>
-    <p><strong>Best passend pakket:</strong> ${escapeHtml(chosen?.name ?? '—')} (${advice?.chosenBy === 'adviser' ? 'keuze adviseur' : 'automatisch: hoogste netto contante waarde, door adviseur te bevestigen'})</p>
+    <p><strong>Best passend pakket:</strong> ${chosen
+      ? `${escapeHtml(chosen.name)} (${advice?.chosenBy === 'adviser' ? 'keuze adviseur' : 'automatisch: hoogste netto contante waarde, door adviseur te bevestigen'})`
+      : 'geen pakket geadviseerd'}</p>
     ${advice?.motivation ? `<p>${escapeHtml(advice.motivation)}</p>` : ''}
     <h3>Waarschuwingen</h3>${list(advice?.warnings ?? [])}
     <h3>Uitwerking door een specialist</h3>${list(advice?.specialistNotes ?? [])}

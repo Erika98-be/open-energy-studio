@@ -633,6 +633,28 @@ mod tests {
     }
 
     #[test]
+    fn a_tool_without_input_refuses_arguments() {
+        // Review 38: the schema of a GET tool allows no members
+        // (additionalProperties: false); an argument is refused, as an
+        // unknown member is on the POST tools.
+        for op in operations() {
+            if op.method != Method::Get {
+                continue;
+            }
+            let mut arguments = Map::new();
+            arguments.insert("normVersion".to_string(), json!("2024"));
+            let result = call(op.name, Some(arguments));
+            assert_eq!(result.is_error, Some(true), "{}", op.name);
+            let body = result.structured_content.unwrap();
+            assert_eq!(body["error"], "invalid_request_shape", "{}", op.name);
+            assert!(body["message"]
+                .as_str()
+                .is_some_and(|message| message.contains("takes no members")));
+            assert_eq!(call(op.name, Some(Map::new())).is_error, Some(false));
+        }
+    }
+
+    #[test]
     fn guard_answers_lines_the_library_would_leave_unanswered() {
         // Invalid and truncated JSON: parse error, with the id when readable.
         let bad = reply(classify(b"{bad json"));

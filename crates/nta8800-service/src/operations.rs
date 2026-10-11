@@ -612,14 +612,18 @@ fn unknown_member(op: &Operation, body: &Value) -> Option<Outcome> {
         status: 400,
         body: error_body(
             "invalid_request_shape",
-            format!(
-                "Unknown request member `{unknown}`; this operation takes {}",
-                allowed
-                    .iter()
-                    .map(|key| format!("`{key}`"))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
+            if allowed.is_empty() {
+                format!("Unknown request member `{unknown}`; this operation takes no members")
+            } else {
+                format!(
+                    "Unknown request member `{unknown}`; this operation takes {}",
+                    allowed
+                        .iter()
+                        .map(|key| format!("`{key}`"))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+            },
             Some(unknown.clone()),
             Value::Null,
         ),
@@ -631,11 +635,13 @@ fn unknown_member(op: &Operation, body: &Value) -> Option<Outcome> {
 /// active while the kernel runs) and the edition stamped on the result. The
 /// body is moved through, never copied.
 pub fn execute(op: &Operation, mut body: Value) -> Outcome {
-    if op.method == Method::Get {
-        return (op.run)(body);
-    }
+    // A GET operation takes no members; its schema says so
+    // (`additionalProperties: false`), so MCP arguments are refused too.
     if let Some(outcome) = unknown_member(op, &body) {
         return outcome;
+    }
+    if op.method == Method::Get {
+        return (op.run)(body);
     }
     let requested = match requested_norm_version(&body) {
         Ok(requested) => requested,
