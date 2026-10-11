@@ -2575,6 +2575,8 @@ export const nl: Record<string, string> = {
   "mwa.report": "Adviesrapport (HTML)",
   "mwa.col.variant": "Variant",
   "mwa.col.label": "Label",
+  "mwa.col.tojuli": "TOjuli [K]",
+  "mwa.col.heat": "Warmte [kWh]",
   "mwa.col.gas": "Gas [m³]",
   "mwa.col.electricity": "Elektr. netto [kWh]",
   "mwa.col.cost": "Kosten [€/jr]",

@@ -2575,6 +2575,8 @@ export const en: Record<string, string> = {
   "mwa.report": "Advice report (HTML)",
   "mwa.col.variant": "Variant",
   "mwa.col.label": "Label",
+  "mwa.col.tojuli": "TOjuli [K]",
+  "mwa.col.heat": "Heat [kWh]",
   "mwa.col.gas": "Gas [m³]",
   "mwa.col.electricity": "Net electricity [kWh]",
   "mwa.col.cost": "Costs [€/yr]",

@@ -6,6 +6,7 @@ import { summarizeForPreview } from './core/nta/PreviewSummary';
 import { NtaDraftProvider, useNtaDraft } from './context/NtaDraftProvider';
 import { RegistrationDraftProvider, useRegistrationDraft } from './context/RegistrationDraftProvider';
 import { SurveyResultProvider } from './context/SurveyResultProvider';
+import { MaatwerkadviesResultProvider } from './context/MaatwerkadviesResultProvider';
 import { I18nProvider } from './i18n/I18nProvider';
 import { WelcomeScreen, type NewProjectKind } from './components/WelcomeScreen/WelcomeScreen';
 import { StatusBar } from './components/StatusBar/StatusBar';
@@ -392,8 +393,10 @@ function ActiveDocumentContent({ onReport, ...props }: {
       <NtaDraftProvider>
         <RegistrationDraftProvider>
           <SurveyResultProvider>
-            <DocumentReporter onReport={onReport} />
-            <ActiveDocumentShell {...props} />
+            <MaatwerkadviesResultProvider>
+              <DocumentReporter onReport={onReport} />
+              <ActiveDocumentShell {...props} />
+            </MaatwerkadviesResultProvider>
           </SurveyResultProvider>
         </RegistrationDraftProvider>
       </NtaDraftProvider>
