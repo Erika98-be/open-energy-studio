@@ -31,7 +31,7 @@ Het venster heeft vijf delen:
 4. **Contextpaneel** rechts, met drie tabbladen:
    - *Eigenschappen*: de gegevens van het geselecteerde element (zone, constructie, vlak, raam, systeem). Je kunt ze hier direct wijzigen. Selecteer je een element, dan opent dit tabblad, ook als *Voorbeeld* open stond. Bij een vlak, raam, koudebrug of zone staat hier ook het blok **Bron & bewijs** met de bestanden die bij dat element horen;
    - *Voorbeeld*: label, BENG 1–3, TO<sub>juli</sub>, maandbehoefte en kerngetallen van de laatste doorrekening;
-   - *Controle*: de open punten van de rekenkern voor deze stap, elk met **Ga naar**.
+   - *Controle*: de open punten van de rekenkern voor deze stap, elk met **Ga naar**. Zonder meldingen staat er "Geen fouten of aandachtspunten.", zolang de rekenkern nog niet heeft geantwoord "Nog geen antwoord van de rekenkern.".
 5. **Statusbalk** onderaan: de status van de rekenkern (actueel, verouderd, bezig), kern- en normversie, BENG 1–3, TO<sub>juli</sub> en het label. Klik op een waarde om Resultaten te openen.
 
 Onder de werkstappen staan **Gereedschap** en **Instellingen** (Ctrl+,).
@@ -80,6 +80,8 @@ De invoer van het NTA 8800-formulier staat verdeeld over de stappen waar hij inh
 Stap 4 **Controle** verzamelt alle meldingen van de rekenkern: fouten, waarschuwingen en ontbrekende invoer, gegroepeerd per stap. Elke melding heeft **Ga naar**. Die opent de juiste stap, subpagina en (bij verwarming) het juiste deel van de keten, en zet de focus op het veld. Een veld met een melding krijgt een rode (fout) of gele (waarschuwing) rand.
 
 ![Controle](img/controle.png)
+
+Is de lijst *Open punten* hier of op de stap Project leeg, dan zegt ze waarom. Alleen als de rekenkern heeft geantwoord staat er "Geen open punten van de rekenkern.". Rekent hij nog, dan staat er "Berekenen…". Is hij niet bereikbaar, dan staat er "Rekenkern niet bereikbaar". Is er nog geen antwoord, dan staat er "Nog geen antwoord van de rekenkern". Een lege lijst betekent dus niet vanzelf dat alles in orde is.
 
 Dezelfde meldingen voor de huidige stap staan in het contextpaneel onder *Controle*. Ga naar werkt ook vanuit Resultaten, Registratie, de basisopname en herlabelen.
 

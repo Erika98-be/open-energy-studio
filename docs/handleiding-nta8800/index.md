@@ -11,7 +11,7 @@ Deze handleiding beschrijft het NTA 8800-deel van Open Energy Studio:
 - herlabelen;
 - het projectdossier.
 
-Ze is geschreven als programmadocumentatie voor een softwareattest (BRL 9501). Ze volgt de code van de branch `nta8800-kernel` per 10 oktober 2026, na het UI-herontwerp (werkstappen in plaats van het lint) en met de oudere uitgaven van NTA 8800 in de kern.
+Ze is geschreven als programmadocumentatie voor een softwareattest (BRL 9501). Ze volgt de code van de branch `nta8800-kernel` per 11 oktober 2026, na het UI-herontwerp (werkstappen in plaats van het lint) en met de oudere uitgaven van NTA 8800 in de kern.
 
 De handleiding citeert geen tekst uit NTA 8800, ISSO-publicaties of BRL-documenten. Verwijzingen noemen alleen paragraaf-, formule-, tabel- en paginanummers. Houd de bronnen zelf bij de hand.
 

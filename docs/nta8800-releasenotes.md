@@ -13,6 +13,15 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 33: handleiding bijgewerkt voor het testsetdossier en de lege lijst Open punten (geen rekenwijziging)
+
+- **Testsetdossier.** Hoofdstuk 5 beschrijft nu het testsetdossier in het releasearchief: de deeltesten als projectbestanden die je in het programma opent, het overzicht met de kolommen *verwacht* en *oordeel*, en de markering "(met lokale wijzigingen)" bij een proefrun.
+- **Lege lijst.** Hoofdstuk 0 noemt nu wat een lege lijst *Open punten* op Controle en Project betekent. "Geen open punten van de rekenkern." staat er alleen als de kern heeft geantwoord; anders staat er dat de kern nog rekent, niet bereikbaar is of nog geen antwoord heeft gegeven. Het contextpaneel heeft eigen teksten, en die staan nu bij *Controle*.
+- **Nagelopen zonder bevinding:**
+  - verwijzingen, ankers en afbeeldingen;
+  - vetgedrukte veld- en knopnamen tegen de Nederlandse teksten van de app;
+  - de onderdelen van de afgelopen dagen: wissel van uitgave, gemeenschappelijke ruimten per zone en gebouw, *Overnemen* van vloeren op de grond, opgegeven F_D;dayl, WKK met voorraadvat, wandoppervlakte van de verwarmde kelder, Technische details en de programmaversie in de uitvoer.
+
 ### 11 oktober 2026 — Review 32: oordeel in het testsetdossier gelijk aan de vergelijking, dossiermap beveiligd (geen rekenwijziging)
 
 - **Oordeel.** Het testsetdossier telde alleen de getallen na. Een afwijkende labelklasse (`compared_fail` bij getallen binnen de band) stond er daardoor als *binnen de band*. Een deeltest met verwachting die niet rekende, stond er met een leeg oordeel, alsof de verwachting nog ontbrak. Het oordeel komt nu uit de status van de vergelijking: *binnen de band*, *buiten de band* of *niet vergeleken (status)*. De verwachte labelklasse staat in de kolom *verwacht*.

@@ -84,6 +84,16 @@ Het rapport (`reference-report.md` en `.json`) noemt per geval de uitkomst, het 
 
 Een rapport met alleen "geen verwachting" is dus geen bewijs van overeenstemming. Dat ontstaat pas met de verwachte uitkomsten van ISSO 54 versie 5.0:2026, waar BRL 9501 naar verwijst.
 
+### Testsetdossier in het releasearchief
+
+Bij elke vrijgave schrijft `scripts/release-nta.sh` de gecodeerde ISSO 54-deeltesten als testsetdossier in het archief, in de map `testset/` (BRL 9501 §3.3, p. 5–6):
+- `projecten/<deeltest>.oes.json`: elke deeltest als gewoon projectbestand. Je opent het met **Openen** (zie [hoofdstuk 9](09-bestanden-en-uitwisseling.md)) en ziet dan precies de invoer waarmee de deeltest is gerekend. Zo kan de certificerende instelling een deeltest in het programma bekijken of zelf opnieuw invoeren.
+- `testset.md`, `testset.csv` en `testset.json`: per deeltest het onderwerp, de uitgave, de status, BENG 1, 2 en 3, TO<sub>juli</sub>, de geleverde energie per dienst en de SHA-256 van projectbestand en antwoord.
+
+De kolommen *verwacht* en *oordeel* vullen zich zodra een deeltest een verwachting heeft. Het oordeel komt uit de vergelijking van de suite: *binnen de band*, *buiten de band* (ook als alleen de labelklasse afwijkt) of *niet vergeleken*, met de status, als een deeltest met verwachting niet rekent. Zolang de verwachte uitkomsten van ISSO 54 versie 5.0 ontbreken, blijven beide kolommen leeg.
+
+Het dossier noemt de commit waarmee het is gemaakt. Is het gemaakt vanuit een werkkopie met niet-vastgelegde wijzigingen (alleen bij een proefrun), dan staat daar "(met lokale wijzigingen)" achter. Een echte vrijgave kan alleen vanuit een schone werkkopie. Het manifest telt de projectbestanden en `SHA256SUMS` dekt alle bestanden. De technische beschrijving staat in het [testprotocol](../nta8800-testprotocol.md), §3.
+
 ## Plausibiliteit bij registratie
 
 Bij registratie meldt het programma, zonder te blokkeren, onwaarschijnlijke uitkomsten (BRL 9500-W §7.2.2, p. 42):
