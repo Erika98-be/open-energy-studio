@@ -1380,6 +1380,7 @@ export const nl: Record<string, string> = {
   'nta.gap.ground_floor_data_missing': 'Perimeter en warmteweerstand van grondvloer ontbreken',
   'nta.gap.ground_floor_data_without_ground_surface': 'Grondvloergegevens zonder bijbehorend grondvlak',
   'nta.gap.ground_surface_not_floor': 'Alleen een vloer kan aan de grond grenzen; leg kelderwanden vast bij de verwarmde kelder van de vloer (8.3.3.2)',
+  'nta.gap.thermal_bridge_ground_on_floor_edge': 'Koudebrug naar de grond: geef ψ_gr op bij de randkoudebruggen van de grondvloer (8.36/8.39), niet in de koudebruggenlijst van de zone',
   'nta.gap.common_space_invalid': 'Gemeenschappelijke ruimte: de oppervlakte moet groter dan 0 zijn en elke functie mag één keer voorkomen',
   'nta.gap.common_space_function_outside_zone': 'Gemeenschappelijke ruimte: geen van de functies die erop aangewezen zijn ligt in deze rekenzone (6.6.4)',
   'nta.gap.common_space_exceeds_zone': 'De gemeenschappelijke ruimten zijn samen groter dan de rekenzone of laten geen eigen functie-oppervlakte over',

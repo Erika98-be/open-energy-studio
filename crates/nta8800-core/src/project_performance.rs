@@ -3955,6 +3955,28 @@ fn derive_input(
         .map(|item| (item.surface_id.as_str(), item))
         .collect();
     let delta_u_forfait = forfait_bridge_route(&project, &nta, &constructions, gaps);
+    // 8.36/8.39: the floor-edge bridges to the ground are ψ_gr of the
+    // ground floor (2025+C1 p. 253 and 255–256; 8.3.6 p. 263); H_D, H_U and
+    // H_g take no zone bridge with boundary "ground", so it would be lost.
+    for (zone_index, zone) in project.zones.iter().enumerate() {
+        for (list, items) in [
+            ("thermalBridges", zone.thermal_bridges.as_deref()),
+            ("pointThermalBridges", zone.point_thermal_bridges.as_deref()),
+        ] {
+            for (index, bridge) in items.unwrap_or_default().iter().enumerate() {
+                let ground = bridge
+                    .get("thermalBoundary")
+                    .and_then(|value| serde_json::from_value::<ThermalBoundary>(value.clone()).ok())
+                    == Some(ThermalBoundary::Ground);
+                if ground {
+                    gaps.push(gap(
+                        "thermal_bridge_ground_on_floor_edge",
+                        format!("zones[{zone_index}].{list}[{index}].thermalBoundary"),
+                    ));
+                }
+            }
+        }
+    }
     // b_U per unheated space for the forfait route (8.4.1 note 5, C.10).
     let partition_factors = match delta_u_forfait {
         Some(_) if !project.unheated_spaces.is_empty() => {
@@ -7461,6 +7483,43 @@ mod tests {
                     .iter()
                     .any(|(code, _)| *code == "ground_floor_data_without_ground_surface"),
                 "{kind}: {codes:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_zone_bridge_to_the_ground_is_refused_not_dropped() {
+        // 8.36/8.39 (2025+C1 p. 253 and 255–256): ψ_gr belongs to the ground
+        // floor's edge bridges. H_D, H_U and H_g take no zone bridge with
+        // boundary "ground", so one entered there was silently lost.
+        let base = assess_project_performance(&project());
+        assert_eq!(base.status, "calculated_unverified", "{:?}", base.gaps);
+        let mut value = project();
+        value["zones"][0]["thermalBridges"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({
+                "id": "tb-ground", "name": "Vloerrand", "psiValue": 0.6,
+                "length": 20.0, "zoneId": "z1", "thermalBoundary": "ground"
+            }));
+        value["zones"][0]["pointThermalBridges"] = serde_json::json!([{
+            "id": "pb-ground", "name": "Paal", "chiValue": 0.2,
+            "zoneId": "z1", "thermalBoundary": "ground", "sourceReference": "test"
+        }]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "incomplete");
+        let codes: Vec<_> = result
+            .gaps
+            .iter()
+            .map(|item| (item.code, item.path.as_str()))
+            .collect();
+        for path in [
+            "zones[0].thermalBridges[1].thermalBoundary",
+            "zones[0].pointThermalBridges[0].thermalBoundary",
+        ] {
+            assert!(
+                codes.contains(&("thermal_bridge_ground_on_floor_edge", path)),
+                "{codes:?}"
             );
         }
     }

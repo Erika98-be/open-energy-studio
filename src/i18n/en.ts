@@ -1380,6 +1380,7 @@ export const en: Record<string, string> = {
   'nta.gap.ground_floor_data_missing': 'Ground floor perimeter and thermal resistance missing',
   'nta.gap.ground_floor_data_without_ground_surface': 'Ground floor data without a matching ground surface',
   'nta.gap.ground_surface_not_floor': 'Only a floor can border the ground; enter basement walls on the floor\'s heated basement (8.3.3.2)',
+  'nta.gap.thermal_bridge_ground_on_floor_edge': 'Thermal bridge to the ground: enter ψ_gr on the ground floor\'s edge bridges (8.36/8.39), not in the zone\'s bridge list',
   'nta.gap.common_space_invalid': 'Common space: the area must be above 0 and each function may appear once',
   'nta.gap.common_space_function_outside_zone': 'Common space: none of the functions that rely on it lies in this calculation zone (6.6.4)',
   'nta.gap.common_space_exceeds_zone': 'The common spaces together exceed the calculation zone or leave no own function area',
