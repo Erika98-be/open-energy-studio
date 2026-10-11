@@ -738,15 +738,23 @@ fn forfait_bridge_route(
     let detailed_edges = nta.ground_floors.iter().any(|floor| {
         matches!(&floor.edge_thermal_bridges, EdgeThermalBridges::Detailed { bridges } if !bridges.is_empty())
     });
-    let psi = project.zones.iter().any(|zone| {
+    // ψ-values in a zone point at that zone's thermal bridges: with the
+    // building route a project may have no ground floor at all.
+    let psi = project.zones.iter().position(|zone| {
         zone.thermal_bridges
             .as_deref()
             .is_some_and(|items| !items.is_empty())
     });
-    if detailed_edges || psi {
+    if detailed_edges {
         gaps.push(gap(
             "thermal_bridge_methods_mixed",
             "ntaCalculation.groundFloors",
+        ));
+    }
+    if let Some(index) = psi {
+        gaps.push(gap(
+            "thermal_bridge_methods_mixed",
+            format!("zones[{index}].thermalBridges"),
         ));
     }
     let boundary = |surface: &Value| {
@@ -1403,13 +1411,13 @@ fn share_sunroom_bordering_zones(zones: &mut [ChainZone]) {
         }
     }
     shared.retain(|_, list| list.iter().any(|item| item.zone_id != list[0].zone_id));
+    // The list is derived here only: one entered in the project input (the
+    // field belongs to the derived chain input) would bypass the zones and
+    // their setpoints, so it is replaced, and cleared for a sunroom of one
+    // zone.
     for zone in zones.iter_mut() {
         for room in &mut zone.demand.sunrooms {
-            if let Some(list) = shared.get(&room.id) {
-                if room.bordering_zones.is_empty() {
-                    room.bordering_zones = list.clone();
-                }
-            }
+            room.bordering_zones = shared.get(&room.id).cloned().unwrap_or_default();
         }
     }
 }
@@ -6986,6 +6994,26 @@ mod tests {
             .iter()
             .any(|gap| gap.code == "thermal_bridge_methods_mixed"
                 && gap.path == "ntaCalculation.thermalBridgeRoute"));
+        // Review 54: ψ-values next to the forfait route point at the zone's
+        // thermal bridges, also without a floor on the ground.
+        let mut upper = project();
+        upper["ntaCalculation"]["thermalBridgeRoute"] = Value::from("forfait");
+        upper["ntaCalculation"]["groundFloors"] = serde_json::json!([]);
+        let result = assess_project_performance(&upper);
+        assert!(
+            result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == "thermal_bridge_methods_mixed"
+                    && gap.path == "zones[0].thermalBridges"),
+            "{:?}",
+            result.gaps
+        );
+        assert!(!result
+            .gaps
+            .iter()
+            .any(|gap| gap.code == "thermal_bridge_methods_mixed"
+                && gap.path == "ntaCalculation.groundFloors"));
         mixed["ntaCalculation"]["thermalBridgeRoute"] = Value::from("detailed");
         mixed["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"] =
             serde_json::json!({"method": "forfait"});
@@ -7820,6 +7848,52 @@ mod tests {
         });
         let colder = gains(&value);
         assert!(colder < same, "{colder} vs {same}");
+    }
+
+    /// Review 54: `borderingZones` in the project input is not taken over;
+    /// the project route derives it from the zones that share a sunroom
+    /// id, so an entered list naming zones that do not exist or another
+    /// setpoint has no effect, and a sunroom of one zone keeps 7.37.
+    #[test]
+    fn an_entered_list_of_bordering_zones_is_replaced() {
+        let mut value = project();
+        let sunroom = serde_json::json!({
+            "id": "atrium", "glazingGHeating": 0.55, "glazingGCooling": 0.35,
+            "exteriorFrameFraction": 0.25, "reductionFactor": 0.7,
+            "zoneConductanceWPerK": 6.0, "distributionFactor": 1.0,
+            "surfaces": [
+                {"areaM2": 60.0, "absorptance": 0.7, "azimuthDeg": 180.0, "tiltDeg": 0.0}
+            ],
+            "sourceReference": "drawing"
+        });
+        let gains = |value: &Value| -> (f64, usize) {
+            let result = assess_project_performance(value);
+            assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+            let derived = result.derived_input.as_ref().unwrap();
+            let listed = derived.space_heating.demand.sunrooms[0].bordering_zones.len();
+            let sum = result
+                .performance
+                .as_ref()
+                .unwrap()
+                .space_heating
+                .demand
+                .monthly
+                .iter()
+                .map(|row| row.sunroom_gains_kwh)
+                .sum();
+            (sum, listed)
+        };
+        value["ntaCalculation"]["sunrooms"] = serde_json::json!([sunroom.clone()]);
+        let plain = gains(&value);
+        let mut entered = sunroom;
+        entered["borderingZones"] = serde_json::json!([
+            {"zoneId": "z1", "conductanceWPerK": 6.0, "heatingSetpointC": 20.0},
+            {"zoneId": "elsewhere", "conductanceWPerK": 500.0, "heatingSetpointC": 20.0}
+        ]);
+        value["ntaCalculation"]["sunrooms"] = serde_json::json!([entered]);
+        let with_list = gains(&value);
+        assert_eq!(with_list.1, 0);
+        assert_eq!(with_list.0, plain.0);
     }
 
     #[test]
