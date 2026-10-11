@@ -30,8 +30,19 @@ Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de
   - **Transmissie:** forfaitaire koudebruggen zonder grondvloer (nieuwe keuze, bestaande projecten ongewijzigd); een zonekoudebrug naar de grond is nu een blokkerend gat in plaats van stil weggelaten (review 44).
   - **Serre:** de begrenzing van de serrewinst bij een gedeelde serre (review 46).
   - **Koeling:** de condensorwarmte bij een verklaarde EER of ζ met waterzijdige warmteafvoer (review 48).
+  - **Forfaitaire R_c:** thermokussens onder een vloer met een spouw krijgen geen spouwwaarde meer (review 50).
   - **Eerdere items van 9 oktober:** PV boven 300/400 W/m², WKK met voorraadvat, opgegeven F_D;dayl, kelderwanden in A_ls, wanden en daken aan de grond, gemeenschappelijke ruimten (6.6.4).
 - **Open interpretaties.** De keuzes achter vragen 1–12 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
+
+### 11 oktober 2026 — Review 50: hoofdstuk 17, bijlage AB, de WKK-methoden, bijlage P en de constructiebijlagen; thermokussens zonder spouwwaarde (I.2.1.4)
+Review 50 rondde de controle per hoofdstuk af met wat in de stand van 11 oktober nog niet opnieuw naast de tekst van 2025+C1 lag. Zonder verschil nagerekend:
+- **Hoofdstuk 17:** tabel 17.1 (maandlengte, buitentemperatuur, ϑ_e;argII, windsnelheid, ϑ_ODA;preh;WTWC) en tabel 17.2 (alle hellingen en oriëntaties) met de keuzeregels voor oriëntatie en helling (p. 689–694); de beschaduwingstabellen 17.4 en 17.7–17.15 cel voor cel tegen de tekstlaag (7 584 cellen, p. 708–763); tabellen 17.5 en 17.6 zijn overal 1,00. De uurroute van 17.3.8 blijft onbeschikbaar zonder de uurgegevens van NEN 5060.
+- **Bijlage AB (ZEB):** AB.1, AB.9–AB.15, AB.61–AB.73 met η_BAT 0,85 en f_BAT;el;corr vanaf 5 kWh, tabel AB.1 met de oppervlaktegewogen fractie, de factoren van tabel AB.2 en de emissiefactoren van tabel AB.3 (p. 1148–1159).
+- **WKK:** methode 2 (9.65 met tabel 9.31, p. 342–343) en methode 1 (9.66–9.83 met tabellen 9.36–9.38, p. 347–354), en voor tapwater 13.182/13.183 met de afronding op 0,025 (p. 649–650).
+- **Bijlage P:** tabellen P.0–P.12 en P.16, P.19–P.30 (energiefactor, energiefractie, β, WKK met en zonder derving) en de restwarmte van P.6.5.4.7 (p. 961–1003).
+- **Constructies:** tabellen C.1–C.5 en C.15–C.22 (afschotisolatie), bijlage E (tabellen E.1–E.6 en E.10–E.17, de afrondingsregels), F.1–F.3, G.1, H.1, bijlage I (tabellen I.1/I.2 en I.4–I.16, I.1–I.7) en L.1/L.2 met criterium L.1 (p. 773–869).
+
+- **Thermokussens onder een vloer (I.2.1.4, p. 833).** De kussenregel staat "in afwijking van het voorgaande": de vloer krijgt R_ad 0,15 plus 1,8, samen 1,95. Was de vloer ook als constructie met spouw ingevoerd, dan telde de kern daar de spouwwaarde 0,18 van de regel voor dunne isolatie bij op, dus 2,13. Die spouwwaarde valt nu weg; zo staat het ook in de opname (R_c 1,95, ISSO 82.1 p. 93). 2023 en 2024 hebben dezelfde tekst. **Gevolg:** alleen een forfaitaire vloer met thermokussens en een spouw. Geen referentiegeval heeft thermokussens; de referentierapporten zijn byte-gelijk.
 
 ### 11 oktober 2026 — Review 48: formules van bijlage M en bijlage Q, koudeopwekkers van hoofdstuk 10, condensorwarmte bij een verklaarde EER (10.80)
 Review 48 legde de formules van bijlage M (M.1–M.29, p. 870–879), de formules van bijlage Q buiten de tabellen die review 47 al deed (Q.1–Q.16, Q.20–Q.31, Q.35–Q.53, Q.60–Q.97, p. 1027–1072) en de koudeopwekkers van hoofdstuk 10 (10.46–10.87 met tabellen 10.15–10.34, p. 397–425) naast de tekst van 2025+C1. Zonder verschil nagerekend:

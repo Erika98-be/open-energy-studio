@@ -632,7 +632,9 @@ impl ForfaitOpaque {
                 let base = crate::norm_versions::profile().lambda_equi_ntr;
                 let lambda = known_lambda_equivalent.unwrap_or(base).max(base);
                 let mut r = d_mm / 1000.0 / lambda + self.element.additional_resistance();
-                if self.cavity && d_mm <= 30.0 {
+                // Thermal cushions replace the rest of I.2.1.4 ("in afwijking
+                // van het voorgaande", 2025+C1 p. 833): R_ad + 1,8, no cavity.
+                if self.cavity && d_mm <= 30.0 && !*thermal_cushions {
                     r += self.element.cavity_resistance();
                 }
                 if let Some(reed) = reed_thickness_m {
@@ -1078,6 +1080,11 @@ mod tests {
             thermal_cushions: true,
         };
         assert!(floor.validate("f").is_empty());
+        assert!((floor.calculate().r_c - (0.15 + 1.8)).abs() < 1e-12);
+        // A crawlspace floor marked with a cavity still gets R_ad + 1,8 only:
+        // the 0,18 cavity value belongs to the thin-insulation rule that the
+        // cushions rule replaces (I.2.1.4, p. 833).
+        floor.cavity = true;
         assert!((floor.calculate().r_c - (0.15 + 1.8)).abs() < 1e-12);
     }
 
