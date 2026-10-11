@@ -13,6 +13,20 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 39: getrouwheid van de UNIEC3- en VABI-uitwisseling (geen rekenwijziging)
+- **Exportmelding was onvolledig.** De melding "niet alles overgenomen" keek alleen naar zones, vlakken, ramen, koudebruggen en constructies. Ze noemt nu ook:
+  - velden van installaties die geen van beide formaten bevat, zoals de NTA-warmtepompgegevens (`heatingSystems[*].ntaHeatPump`) en een opmerking bij een PV-veld (`solarPV[*].comment`), die stil wegvielen;
+  - bij UNIEC3 een constructie die geen vlak gebruikt (`constructions[unused]`): UNIEC3 schrijft een constructie alleen bij de vlakken die haar gebruiken;
+  - bij VABI een raam met een andere oriëntatie dan zijn vlak: een VABI-deelvlak heeft geen eigen oriëntatie, dus het raam kwam terug met de oriëntatie van het vlak.
+- **VABI-export van een vlak vol ramen.** Bedekten de ramen het hele vlak, dan schreef de export geen dicht deelvlak en ging de constructie van het vlak bij het weer inlezen verloren (openbaar geval F, de dakkapelgevels). Het dichte deelvlak staat er nu altijd, met oppervlakte 0 als de ramen het vlak vullen.
+- **Niet-ingelezen gegevens worden genoemd.** De import sloeg alles over waar hij geen veld voor heeft, zonder punt in het importverslag. Nu staat het er als *Niet overgenomen*, één punt per soort:
+  - UNIEC3: entiteiten die niet gelezen zijn (een andere soort, een entiteit die niet gekoppeld is waar de import zoekt, een tweede constructie of luchtdichtheid onder één element) en per entiteitsoort de eigenschappen zonder veld;
+  - VABI: per soort element de onderliggende elementen zonder veld;
+  - niet mee tellen bibliotheekkopieën en een lege instellingen-entiteit; een export van dit programma geeft bij het weer inlezen geen zulke punten.
+- **Bronversie en editie.** De import las `meta.json` van UNIEC3 en het blok `Algemeen` van VABI niet. Het importverslag noemt nu de **bronversie** (programma en NTA 8800-versie volgens het bestand), en elke import heeft een punt bij `normVersion`: de editie en de rekeninstellingen van het andere programma worden niet overgenomen, het project rekent met de editie van de NTA-invoer. Zo valt een bestand uit een oudere Uniec 3 op voordat je registreert.
+- **Rondgang.** Een nieuwe test exporteert elk trainingsproject naar UNIEC3 en VABI, leest het weer in en eist dat elke gewijzigde waarde in de exportmelding of het importverslag staat.
+- Tests: `src/__tests__/import-fidelity-review39.test.ts` (veertien tests; elf falen op de oude code). Handleiding hoofdstuk 9 bijgewerkt.
+
 ### 11 oktober 2026 — Maatwerkadvies: resultaat per document en kolommen als het rapport (geen rekenwijziging)
 - **Resultaat blijft staan.** Het paneel hield het resultaat van **Doorrekenen** zelf vast, dus na het verlaten van de stap Maatwerkadvies stond er weer "niet berekend". Het resultaat wordt nu per document bewaard (`MaatwerkadviesResultProvider`), met de regel van review 38: alleen getoond zolang het document nog de kernelinvoer heeft waaruit het is berekend, nooit bij een ander document, en niet als het binnenkomt na een wijziging. Het wordt niet in het projectbestand opgeslagen.
 - **Kolommen.** De resultatentabel op het scherm miste de kolommen TO<sub>juli</sub> [K] en Warmte [kWh] die het rapport wel heeft. Ze staan er nu, met dezelfde afronding (2 en 0 decimalen); de tabel scrolt horizontaal op een smal scherm.
