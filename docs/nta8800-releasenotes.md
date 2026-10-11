@@ -13,6 +13,10 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Schermafdrukken van het hele venster opnieuw, met een vaste opnameopstelling (geen rekenwijziging)
+- **Opnieuw gemaakt:** de acht afbeeldingen van het hele venster (`welkom.png`, `projectoverzicht.png`, `verwarming.png`, `palet.png`, `controle.png`, `resultaten.png`, `rapport.png`, `registratie.png`, hoofdstuk 0). Ze tonen nu programmaversie 0.2.0 in de titelbalk in plaats van 0.1.6-alpha, en de huidige pagina's (onder meer de knop **Handleiding** en het blok *Algemeen* met de uitgave). Het punt "Bekend, niet aangepast" bij review 56 is daarmee opgelost.
+- **Opnameopstelling in de repository:** `scripts/manual-screenshots/` maakt deze afbeeldingen opnieuw met `node scripts/manual-screenshots/capture.mjs`. Het start een tijdelijke lokale vite-server op een vrije poort, laat Firefox headless het echte programma fotograferen en stopt de server weer. De aanroepen van het programma naar de rekenkern beantwoordt het in hetzelfde proces met het nieuwe voorbeeld `kernel_once` van `crates/nta8800-service`; er wordt geen API-server gestart. De README noemt per afbeelding hoe ze gemaakt is.
+
 ### 11 oktober 2026 — Review 56: schermafdrukken van de handleiding bij de wijzigingen van reviews 35–55 (geen rekenwijziging)
 - **Opnieuw gemaakt:** `overnemen-vloeren.png` (hoofdstuk 2). Het venster *Opname overnemen in het projectmodel* toont sinds de vervolgstappen van review 53 ook het deel *Koudebrugmethode van het gebouw*; de oude afbeelding liet dat niet zien.
 - **Nieuw, in hoofdstuk 3:** de keuze *Lineaire koudebruggen van het gebouw* (`koudebrugmethode.png`), twee rekenzones die één serre delen met de melding *Gedeelde serre, ook bij …* (`gedeelde-serre.png`), een verwarmde kelder met de diepte per wanddeel (`kelder-wanddelen.png`) en een zwak geventileerde smalle luchtlaag in *Constructie bewerken* (`smalle-luchtlaag.png`).
