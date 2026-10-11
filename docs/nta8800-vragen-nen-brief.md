@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij negen punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vraag 9) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij tien punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -106,6 +106,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Lezing B.** Stap A gaat voor: de scheidingsconstructie blijft ook in de forfaitaire route buiten A_T;or en buiten de verdeling per oriëntatie.
 - **Gevolg.** Alleen geval O (gezondheidszorgfunctie, NTA 8800:2022) gebruikt de forfaitaire route met een AOR op een gevel; het rapport geeft geen TOjuli. Met lezing B wordt een oriëntatie met alleen zo'n gevel niet beoordeeld (A_T;or ≤ 3 m²) en krijgt een oriëntatie met ook buitengevels een kleiner aandeel in de verdeelde posten van stap B.
 - **Vraag.** Geldt de scheidingsconstructie naar een AOR in de forfaitaire route voor stap A als uitwendige scheidingsconstructie, en hoort haar transmissie dan bij H_C;D;juli van haar oriëntatie?
+
+### Vraag 10. RER_PrenTot;EMGforf bij een collectieve warmtepompbron onder 20 °C met kwaliteitsverklaring (5.3.1.2–5.3.1.3, p. 72–74; 9.6.8.1.1.2.3, p. 362)
+
+- **Plaats.** Voor EwePTot;EMGforf geldt bij een collectieve warmtepompbron met ϑ < 20 °C dezelfde f_P;del;dh als bij EMGverklaring (p. 72 en p. 362). Voor RERPrenTot;EMGforf en EwePrenTot;EMGforf (p. 74) noemt 5.3.1.3 die uitzondering niet en verwijst naar de forfaitaire f_P;del en f_Pren van tabel 5.2 en 5.4. Voor de bron zelf geeft 9.6.8.1.1.2.3 a) forfaitaire waarden f_P;del;el/23 en f_Pren;dh = 0,95; tabel 5.4 geeft voor externe warmte zonder verklaring f_Pren = 0.
+- **Lezing A (onze keuze).** De hele EMGforf-berekening houdt voor zo'n bron de waarden van de verklaring aan (f_P;del;dh, f_Pren;dh en K_CO2), zodat EPTot in EwePTot;EMGforf en in RERPrenTot;EMGforf gelijk is.
+- **Lezing B.** Alleen f_P;del;dh blijft die van de verklaring; f_Pren;dh wordt de forfaitaire waarde (0,95 volgens 9.6.8.1.1.2.3 a), of 0 volgens tabel 5.4).
+- **Gevolg.** Alleen de EMGforf-waarden van RERPrenTot en EwePrenTot, die bij een woning met gebiedsmaatregelen informatief op het label staan; BENG 3 rekent met EMGverklaring. Geen openbaar geval of ISSO 54-deeltest heeft zo'n bron met kwaliteitsverklaring.
+- **Vraag.** Welke f_Pren;dh (en welke f_P;del;dh) hoort in RERPrenTot;EMGforf bij een collectieve warmtepompbron onder 20 °C met kwaliteitsverklaring?
 
 ---
 
