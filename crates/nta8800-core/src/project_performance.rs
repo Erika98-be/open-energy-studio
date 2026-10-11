@@ -4020,10 +4020,9 @@ fn derive_input(
             ("pointThermalBridges", zone.point_thermal_bridges.as_deref()),
         ] {
             for (index, bridge) in items.unwrap_or_default().iter().enumerate() {
-                let ground = bridge
-                    .get("thermalBoundary")
-                    .and_then(|value| serde_json::from_value::<ThermalBoundary>(value.clone()).ok())
-                    == Some(ThermalBoundary::Ground);
+                let ground = bridge.get("thermalBoundary").and_then(|value| {
+                    serde_json::from_value::<ThermalBoundary>(value.clone()).ok()
+                }) == Some(ThermalBoundary::Ground);
                 if ground {
                     gaps.push(gap(
                         "thermal_bridge_ground_on_floor_edge",
@@ -6767,8 +6766,7 @@ mod tests {
     #[test]
     fn forfait_bridges_without_a_ground_floor() {
         let mut value = project();
-        value["zones"][0]["surfaces"][5]["thermalBoundary"] =
-            Value::from("adjacent_conditioned");
+        value["zones"][0]["surfaces"][5]["thermalBoundary"] = Value::from("adjacent_conditioned");
         value["ntaCalculation"]["groundFloors"] = serde_json::json!([]);
         value["zones"][0]["thermalBridges"] = serde_json::json!([]);
         value["ntaCalculation"]["thermalBridgeRoute"] = Value::from("forfait");
@@ -6806,14 +6804,20 @@ mod tests {
         mixed["ntaCalculation"]["thermalBridgeRoute"] = Value::from("forfait");
         mixed["zones"][0]["thermalBridges"] = serde_json::json!([]);
         let result = assess_project_performance(&mixed);
-        assert!(result.gaps.iter().any(|gap| gap.code == "thermal_bridge_methods_mixed"
-            && gap.path == "ntaCalculation.thermalBridgeRoute"));
+        assert!(result
+            .gaps
+            .iter()
+            .any(|gap| gap.code == "thermal_bridge_methods_mixed"
+                && gap.path == "ntaCalculation.thermalBridgeRoute"));
         mixed["ntaCalculation"]["thermalBridgeRoute"] = Value::from("detailed");
         mixed["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"] =
             serde_json::json!({"method": "forfait"});
         let result = assess_project_performance(&mixed);
-        assert!(result.gaps.iter().any(|gap| gap.code == "thermal_bridge_methods_mixed"
-            && gap.path == "ntaCalculation.thermalBridgeRoute"));
+        assert!(result
+            .gaps
+            .iter()
+            .any(|gap| gap.code == "thermal_bridge_methods_mixed"
+                && gap.path == "ntaCalculation.thermalBridgeRoute"));
     }
 
     /// 8.2.1/8.3.3.1: the forfait floor edge selects ΔU_for for the whole
@@ -7607,9 +7611,11 @@ mod tests {
             serde_json::json!([]);
         let result = assess_project_performance(&value);
         assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
-        assert!(result.warnings.iter().any(|gap| gap.code
-            == "ground_floor_edge_bridges_none_entered"
-            && gap.path == "ntaCalculation.groundFloors[0].edgeThermalBridges"));
+        assert!(result
+            .warnings
+            .iter()
+            .any(|gap| gap.code == "ground_floor_edge_bridges_none_entered"
+                && gap.path == "ntaCalculation.groundFloors[0].edgeThermalBridges"));
         let base = assess_project_performance(&project());
         assert!(!base
             .warnings

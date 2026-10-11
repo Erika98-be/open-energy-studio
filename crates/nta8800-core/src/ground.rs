@@ -1304,9 +1304,7 @@ mod tests {
         assert!((basement.depth(30.0) - 2.0).abs() < 1e-12);
         // The floor keeps z = 2,0 (8.40/8.42); 8.38/8.39 take U_bw;j of
         // 8.45 at each part's own depth (2025+C1 p. 253–255 and 260).
-        let u_bw_at = |z: f64| {
-            4.0 / (PI * z) * (1.0 + 0.5 * d1 / (d1 + z)) * (z / d_bw + 1.0).ln()
-        };
+        let u_bw_at = |z: f64| 4.0 / (PI * z) * (1.0 + 0.5 * d1 / (d1 + z)) * (z / d_bw + 1.0).ln();
         let walls = 20.0 * 2.5 * u_bw_at(2.5) + 10.0 * 1.0 * u_bw_at(1.0);
         let parts = 50.0 * u_fl + walls + 0.5 * 30.0 + 2.0 * 30.0 * 0.05;
         assert!((slab_on_ground_conductance(&floor).unwrap() - parts).abs() < 1e-9);
