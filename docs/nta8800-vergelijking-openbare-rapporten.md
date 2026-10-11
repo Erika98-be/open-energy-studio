@@ -794,7 +794,9 @@ Geval N is een supermarkt van 2 064,26 m² winkelfunctie, berekend op 02-02-2021
 |---|---|---|---|
 | rapport (Uniec 3.0.7.1) | 55,98 | −27,18 | 126,9 |
 | eis (Bbl, ook in de kern) | 95,31 | 60,00 | 30,0 |
-| kern, uitgave 2020+A1 | 54,57 | −24,31 | 122,6 |
+| kern, uitgave 2020+A1 | 54,52 | −24,34 | 122,7 |
+
+Review 44 (11 oktober 2026) rekent de kelderwanden met U_bw;j van 8.45 per wanddeel op zijn eigen diepte z_j, zoals 8.39 en 8.38 vragen (2020+A1 p. 225–227; 2025+C1 p. 253–255 en 260), en niet meer op de gemiddelde z van 8.42. Bij N ligt 31,80 m van de omtrek op 3,65 m en de rest op 0 m; de wand van 116,07 m² rekent nu met U_bw bij 3,65 m in plaats van bij 1,66 m. N ging daardoor van 54,57 / −24,31 / 122,6 naar 54,52 / −24,34 / 122,7: warmtebehoefte 80 201 → 80 023 kWh, vaste C1 93 686 → 93 511 kWh, verwarming 33 080 → 33 007 kWh. De analyses hieronder noemen nog de cijfers van vóór review 44; de verschillen veranderen daardoor niet wezenlijk.
 
 ### Kernfout: wanden van een verwarmde kelder niet in A_ls
 

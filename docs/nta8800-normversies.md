@@ -261,7 +261,7 @@ BENG 1 / 2 / 3 per uitgave, alleen waar een uitgave verschilt van de vorige:
 | K | 29,57 / −1,29 / 101,6 | 29,57 / −0,90 / 101,1 | 29,57 / −0,51 / 100,6 | 29,57 / −0,64 / 100,8 | 2022: punt 74; 2023: f_sto;dis;ls 1,5 vervalt (punt 64); 2024: punten 41, 47, 48 |
 | L | 111,44 / 17,72 / 81,0 | 111,44 / 18,63 / 80,2 | n.b. (h) | n.b. (h) | 2022: punt 74 |
 | M | 170,87 / 48,26 / 80,3 | 170,87 / 47,85 / 80,6 | gelijk aan 2022 | 166,86 / 45,97 / 80,9 | 2022: punt 74 en de PV-afronding (punt 68); 2024: f_τ = min(0,38 + 0,006·A_g; 0,8) = 0,64 bij 43 m² (punt 23) |
-| N | 54,57 / −24,31 / 122,6 | 54,57 / −24,23 / 122,3 | gelijk aan 2022 | 54,57 / −25,57 / 124,2 | 2022: punt 74 en punt 68; 2024: punten 47, 48 |
+| N | 54,52 / −24,34 / 122,7 | 54,52 / −24,25 / 122,3 | gelijk aan 2022 | 54,52 / −25,59 / 124,2 | 2022: punt 74 en punt 68; 2024: punten 47, 48 |
 | O | 88,25 / 47,78 / 44,2 | 88,25 / 47,75 / 44,2 | 88,29 / 47,77 / 44,3 | 88,29 / 47,41 / 44,1 | 2022: PV-afronding (punt 68); 2023: vaste h 0,125 m (punt 59); 2024: distributie met afleverset (punt 41) en afgifte verwarming (punt 47) |
 | woning | n.b. (paneelroute, punt 68) | 51,37 / 80,56 / 22,3 | gelijk | gelijk | geen invoer op een route die verschilt |
 | kantoor | n.b. (paneelroute) | 74,55 / 61,43 / 43,7 | gelijk aan 2022 | 74,55 / 48,33 / 49,6 | ledkolom van tabel 14.3 (punt 33): verlichting 17 000 → 13 000 kWh |
