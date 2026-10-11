@@ -136,6 +136,9 @@ pub fn scaled_dwellings(copies: usize) -> Value {
     // its share by area.
     let dwellings = Value::from(copies as u64);
     project["ntaCalculation"]["internalGains"]["dwellingCount"] = dwellings.clone();
+    // One boiler per dwelling (§9.1 identical systems): each serves the
+    // area of one dwelling, so none is a system for more than 500 m² (§9.6).
+    project["ntaCalculation"]["identicalSystems"] = dwellings.clone();
     for entry in project["ntaCalculation"]["zoneData"]
         .as_array_mut()
         .into_iter()
