@@ -262,3 +262,65 @@ describe('source version and edition (review 39)', () => {
     expect(en['import.log.source']).toBe('Source version');
   });
 });
+
+// Follow-ups of review 39: a ratio of 0 and the tilt of a UNIEC3 pitched roof.
+describe('a COP, EER or efficiency of 0 (review 39 follow-up)', () => {
+  const read = (format: 'UNIEC3' | 'VABI', project: IProject) =>
+    (format === 'UNIEC3' ? readUNIEC3(exportToUNIEC3(project)) : readVABI(exportToVABI(project)));
+
+  it('keeps an EER of 0 on cooling of type "none" without an issue', () => {
+    const project = load('2786-reddingspost-kijkduin.oes.json');
+    expect(project.coolingSystems[0]).toMatchObject({ type: 'none', eer: 0 });
+    for (const format of ['UNIEC3', 'VABI'] as const) {
+      expect(droppedOnExport(project, format)).not.toContain('coolingSystems[*].eer');
+      const { project: back, issues } = read(format, project);
+      expect(back.coolingSystems[0]).toMatchObject({ type: 'none', eer: 0 });
+      expect(issues.list.filter((issue) => issue.path === 'coolingSystems[0].eer')).toEqual([]);
+    }
+  });
+
+  it('names a hot-water efficiency of 0 in the export warning and leaves it out of the file', () => {
+    const project = load('edr-2022-epw001-project.json');
+    expect(project.hotWaterSystems[0].efficiency).toBe(0);
+    for (const format of ['UNIEC3', 'VABI'] as const) {
+      expect(droppedOnExport(project, format)).toContain('hotWaterSystems[*].efficiency');
+      const issue = read(format, project).issues.list.find((item) => item.path === 'hotWaterSystems[0].efficiency');
+      expect(issue?.kind).toBe('defaulted');
+    }
+  });
+
+  it('names an EER of 0 on real cooling and a COP of 0, not a usable value', () => {
+    const project = load('2522-woning-aalten.oes.json');
+    const zero: IProject = {
+      ...project,
+      heatingSystems: project.heatingSystems.map((system, index) => (index === 0 ? { ...system, cop: 0 } : system)),
+      coolingSystems: [{ id: 'c', name: 'Split', type: 'split_unit', eer: 0 }],
+    };
+    for (const format of ['UNIEC3', 'VABI'] as const) {
+      expect(droppedOnExport(project, format)).not.toContain('coolingSystems[*].eer');
+      expect(droppedOnExport(project, format)).not.toContain('heatingSystems[*].cop');
+      expect(droppedOnExport(zero, format)).toEqual(expect.arrayContaining(['coolingSystems[*].eer', 'heatingSystems[*].cop']));
+      const issues = read(format, zero).issues.list;
+      expect(issues.find((item) => item.path === 'coolingSystems[0].eer')?.kind).toBe('defaulted');
+      expect(issues.find((item) => item.path === 'heatingSystems[0].cop')?.kind).toBe('defaulted');
+    }
+  });
+});
+
+describe('tilt of a pitched roof from UNIEC3 (review 39 follow-up)', () => {
+  it('asks for the tilt of a pitched roof, as a VABI import does, and not for a flat roof', () => {
+    const project = load('2522-woning-aalten.oes.json');
+    const zone = project.zones[0];
+    const pitched: IProject = { ...project, zones: [{ ...zone, surfaces: [
+      ...zone.surfaces, { ...zone.surfaces[0], id: 'roof-s', name: 'Dakvlak zuid', type: 'roof', orientation: 'S', windows: [] },
+      { ...zone.surfaces[0], id: 'roof-flat', name: 'Platdak', type: 'roof', orientation: 'horizontal', windows: [] },
+    ] }, ...project.zones.slice(1)] };
+    const sloped = pitched.zones[0].surfaces.length - 2;
+    for (const issues of [readUNIEC3(exportToUNIEC3(pitched)).issues.list, readVABI(exportToVABI(pitched)).issues.list]) {
+      const tilt = issues.find((item) => item.path === `zones[0].surfaces[${sloped}].tilt`);
+      expect(tilt?.kind).toBe('dropped');
+      expect(tilt?.message).toContain('Dakvlak zuid');
+      expect(issues.find((item) => item.path === `zones[0].surfaces[${sloped + 1}].tilt`)).toBeUndefined();
+    }
+  });
+});

@@ -149,6 +149,16 @@ const EXPORTED = {
 
 const SYSTEM_LISTS = ['heatingSystems', 'ventilationSystems', 'coolingSystems', 'hotWaterSystems', 'solarPV', 'solarThermal'] as const;
 
+/**
+ * Whether a COP, EER or efficiency is not a usable value: 0 or below (or not
+ * a number). Both formats' importers refuse it, so the writers leave it out
+ * and the export warning names it. An EER on cooling of type "none" is not
+ * used and may be 0; it is written as it is.
+ */
+export function unusableRatio(value: number, notApplicable = false): boolean {
+  return !notApplicable && !(Number.isFinite(value) && value > 0);
+}
+
 /** Fields the program keeps for itself and never writes to a foreign format. */
 const NOT_INPUT = new Set(['importLog']);
 
@@ -194,6 +204,14 @@ export function droppedOnExport(project: IProject, format: 'UNIEC3' | 'VABI'): s
   }
   for (const key of SYSTEM_LISTS) {
     for (const system of project[key] ?? []) check(system, EXPORTED[key], `${key}[*].`);
+  }
+  // A COP, EER or efficiency of 0 is not a value either importer takes; it is left out of the file.
+  if ((project.heatingSystems ?? []).some((system) => unusableRatio(system.cop))) dropped.add('heatingSystems[*].cop');
+  if ((project.coolingSystems ?? []).some((system) => unusableRatio(system.eer, system.type === 'none'))) {
+    dropped.add('coolingSystems[*].eer');
+  }
+  if ((project.hotWaterSystems ?? []).some((system) => unusableRatio(system.efficiency))) {
+    dropped.add('hotWaterSystems[*].efficiency');
   }
   // VABI carries a construction's layers; UNIEC3 only its Rc and U.
   const constructionKeep = format === 'VABI'

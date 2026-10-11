@@ -41,6 +41,8 @@ Wat het **niet** bevat of garandeert:
 
 **UNIEC3 import** leest een `.uniec3`-bestand en opent het als een nieuw project. Alleen het projectmodel komt mee: zones, vlakken, ramen, koudebruggen, constructies en installaties. De NTA-invoer, opname en registratie moet je daarna zelf invullen; tot dan geeft de rekenkern invoergaten.
 
+Een UNIEC3-begrenzing heeft hier geen hellingshoek. Bij een hellend dak (een dak met een oriëntatie) zet de import daarom, net als de VABI-import zonder `Hellingshoek`, een punt in het importverslag: vul de hellingshoek in bij de NTA-invoer.
+
 Getallen worden met volle precisie geschreven (geen afronding op twee decimalen).
 
 ## VABI-uitwisseling
@@ -79,7 +81,7 @@ Een bestand dat helemaal niet te lezen is (geen geldige JSON, een verkeerde opbo
 
 ## Wat bij export verloren gaat
 
-UNIEC3 en VABI kunnen niet alles bevatten wat het project bevat: de NTA-invoer (`ntaCalculation`), de basisopname, het maatwerkadvies, de registratie, bij installaties de NTA-warmtepompgegevens (`heatingSystems[*].ntaHeatPump`) en een opmerking bij een PV-veld, bij UNIEC3 de lagen van de constructies en een constructie die geen vlak gebruikt (`constructions[unused]`), en bij VABI de oriëntatie van een raam dat anders staat dan zijn vlak (een VABI-deelvlak heeft geen eigen oriëntatie). Bij het exporteren toont de app welke onderdelen niet in het bestand komen. Lees je zo'n bestand later weer in, dan staat de ontbrekende NTA-invoer als punt in het importverslag.
+UNIEC3 en VABI kunnen niet alles bevatten wat het project bevat: de NTA-invoer (`ntaCalculation`), de basisopname, het maatwerkadvies, de registratie, bij installaties de NTA-warmtepompgegevens (`heatingSystems[*].ntaHeatPump`) en een opmerking bij een PV-veld, bij UNIEC3 de lagen van de constructies en een constructie die geen vlak gebruikt (`constructions[unused]`), bij VABI de oriëntatie van een raam dat anders staat dan zijn vlak (een VABI-deelvlak heeft geen eigen oriëntatie), en in beide formaten een COP, EER of rendement van 0: dat is geen waarde die een import overneemt, dus die blijft uit het bestand (bij het weer inlezen staat een aangenomen waarde met een punt in het importverslag). Een EER van 0 bij koeling van de soort *geen* gaat wel mee, want die wordt niet gebruikt. Bij het exporteren toont de app welke onderdelen niet in het bestand komen. Lees je zo'n bestand later weer in, dan staat de ontbrekende NTA-invoer als punt in het importverslag.
 
 **Vloeren op grond.** Geen van beide formaten bevat, voor zover hun bestanden hier bekend zijn, de grondroute van NTA 8800 8.3: de grens van een vlak (grond, kruipruimte, onverwarmde kelder), de perimeter P, de ruimte onder de vloer en een verwarmde kelder met diepte z en wandoppervlak ΣA_T;bw. Een vloer komt als gewoon vlak met zijn R_c in het bestand. De exportmelding noemt daarom `ntaCalculation.groundFloors` apart, en na een import vul je de vloeren op grond opnieuw in bij de NTA-invoer (Gebouw › Schil & ramen › Vloeren op grond). Zonder echte voorbeeldbestanden van Uniec 3 en VABI met deze gegevens kan het programma geen veldnamen kiezen die die pakketten zouden lezen.
 
