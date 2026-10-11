@@ -6,13 +6,14 @@ import { render, type RenderOptions } from '@testing-library/react';
 import { EnergyProvider } from '../context/EnergyContext';
 import { NtaDraftProvider } from '../context/NtaDraftProvider';
 import { RegistrationDraftProvider } from '../context/RegistrationDraftProvider';
+import { SurveyResultProvider } from '../context/SurveyResultProvider';
 import { I18nProvider } from '../i18n/I18nProvider';
 
 function AllProviders({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
       <EnergyProvider>
-        <NtaDraftProvider><RegistrationDraftProvider>{children}</RegistrationDraftProvider></NtaDraftProvider>
+        <NtaDraftProvider><RegistrationDraftProvider><SurveyResultProvider>{children}</SurveyResultProvider></RegistrationDraftProvider></NtaDraftProvider>
       </EnergyProvider>
     </I18nProvider>
   );

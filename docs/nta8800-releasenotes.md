@@ -13,6 +13,9 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Uitkomst van de basisopname blijft staan na het verlaten van de stap (geen rekenwijziging)
+- **Opname doorrekenen** gaf een uitkomst die verdween zodra je naar een andere stap ging: bij terugkomst stond er "Nog niet doorgerekend". De uitkomst wordt nu per document bewaard, met de opname en de NTA 8800-uitgave waarmee ze is berekend, en alleen getoond zolang de opname en de uitgave daarmee overeenkomen. Een wijziging in de opname (een reden bij een standaardwaarde uitgezonderd), een andere uitgave, het verwijderen van de opname of een ander document geeft geen uitkomst; een ander document toont nooit de uitkomst van het eerste. Handleiding hoofdstuk 2 bijgewerkt.
+
 ### 11 oktober 2026 — Review 36: basisopname op locatie: vlakken, namen, verwijderen en foto's (geen rekenwijziging)
 - **Vlakken van de schil.** De opname had geen knop om een vlak toe te voegen, te hernoemen of te verwijderen: elke opname bleef de zes vlakken van de voorbeeldwoning houden (ook de woningscheidende wand), en een ander vlak kon alleen via de JSON-weergave. Er is nu **Vlak toevoegen**, **Naam van het vlak** en **Vlak verwijderen**. Bij een nieuwe naam gaan ramen, deuren, panelen, lichtkoepels, de vloer bij een geveldeel tegen de grond en de gekoppelde foto's mee; een vlak met ramen, deuren, panelen of lichtkoepels kan niet weg.
 - **Namen die halverwege leeg of dubbel zijn.** Wie de naam van een rekenzone wiste en opnieuw typte, of onderweg de naam van een andere zone passeerde (`zone1` op weg naar `zone12`), liet de verwijzingen van vlakken en verlichtingszones achter bij een naam die niet meer bestond. De verwijzingen blijven nu bij de laatste goede naam en volgen zodra de naam weer uniek is; het formulier meldt een lege of dubbele naam.
