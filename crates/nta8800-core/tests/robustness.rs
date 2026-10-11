@@ -415,9 +415,15 @@ fn an_extreme_connected_area_is_a_range_gap() {
     huge["ntaCalculation"]["collectiveConnection"]["connectedUsableAreaM2"] = json!(1e300);
     let result = assess_project_performance(&huge);
     assert_eq!(result.status, "invalid");
-    assert!(result.gaps.iter().any(|gap| gap.code == "connected_area_out_of_range"
-        && gap.path == "ntaCalculation.collectiveConnection.connectedUsableAreaM2"));
-    assert!(!result.gaps.iter().any(|gap| gap.code == "non_finite_result"));
+    assert!(result
+        .gaps
+        .iter()
+        .any(|gap| gap.code == "connected_area_out_of_range"
+            && gap.path == "ntaCalculation.collectiveConnection.connectedUsableAreaM2"));
+    assert!(!result
+        .gaps
+        .iter()
+        .any(|gap| gap.code == "non_finite_result"));
     let mut large = support::new_inputs::collective_delivery_set();
     large["ntaCalculation"]["collectiveConnection"]["connectedUsableAreaM2"] = json!(2.0e6);
     let result = assess_project_performance(&large);

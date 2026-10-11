@@ -61,10 +61,7 @@ pub fn shared_sunroom() -> Value {
             "sunrooms": sunroom(h, f)
         })
     };
-    let entries = vec![
-        entry("z1", 6.0, 0.3, block),
-        entry("z2", 14.0, 0.7, block),
-    ];
+    let entries = vec![entry("z1", 6.0, 0.3, block), entry("z2", 14.0, 0.7, block)];
     block["zoneData"] = Value::from(entries);
     let tilts = block["surfaceTilts"].as_array_mut().unwrap();
     let copies: Vec<Value> = tilts
