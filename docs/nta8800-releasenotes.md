@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Overname van de koudebrugmethode en de verwarmde kelder in de optiedekking (geen rekenwijziging)
+Vervolg op review 53.
+
+- **Overnemen in projectmodel stelt de koudebrugmethode voor.** De opname (ISSO 82.1/75.1) rekent met forfaitaire lineaire koudebruggen (ΔU_for, 8.3), maar de overname nam de methode van het gebouw (`ntaCalculation.thermalBridgeRoute`) niet mee. Een bovenwoning zonder vloer op de grond hield in het project zo de gedetailleerde route tot de adviseur forfaitair koos. Het venster heeft nu het deel *Koudebrugmethode van het gebouw*: forfaitair, aangevinkt als het project nog geen methode heeft, niet aangevinkt als het project een andere methode, een gedetailleerde vloerrand of ψ-waarden in de zones heeft. Ongedaan maken werkt zoals bij de andere overgenomen waarden. Een opname die niets over de methode zegt, verandert niets.
+- **Verwarmde kelder in de optiedekking.** Openbaar geval N (verwarmde kelder met een diepte per wanddeel, 8.42) is een projectvoorbeeld van de optiedekking, zodat de catalogus `training-data/nta8800-input-options.json` de velden van `groundFloors[].heatedBasement` en de wanddelen (`wallDepths[]`) noemt; ook enkele andere blokken van N staan er nu in, alle met een formulier. De formulierbewaking (`nta-project-form-guard`) loopt het formulier van de vloeren op de grond ook door met een verwarmde kelder met twee wanddelen, en de kern rekent elke stand door.
+
 ### 11 oktober 2026 — Review 53: nieuwe invoer en meldingen van reviews 40–52 bereikbaar in de workflow (geen rekenwijziging)
 Review van de invoer en meldingen die reviews 40–52 en de gedeelde serre toevoegden: formulieren, Ga naar, lijsten en handleiding.
 

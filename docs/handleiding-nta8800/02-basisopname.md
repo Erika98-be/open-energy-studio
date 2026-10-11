@@ -134,6 +134,8 @@ Na **Opname doorrekenen** staat de knop **Overnemen in projectmodel** onder Uitk
 
 Rekent het project daarna met een vloer van dezelfde oppervlakte als de opnamevloer, dan is de warmteoverdracht naar de grond gelijk aan die in de opname (getoetst in `crates/nta8800-core/tests/survey_takeover.rs`).
 
+**Koudebrugmethode van het gebouw.** De opname rekent met forfaitaire lineaire koudebruggen: ΔU_for (8.3) op de buitenconstructies, en bij een vloer op de grond 0,5·P. Het venster stelt daarom ook *Lineaire koudebruggen van het gebouw (8.2.1)* op *Forfaitair* voor, zodat een woning zonder vloer op de grond (bijvoorbeeld een bovenwoning) in het project dezelfde methode krijgt. Heeft het project nog geen methode, dan staat het voorstel aangevinkt. Kiest het project al ψ-waarden per koudebrug, heeft een vloer een gedetailleerde vloerrand, of staan er koudebruggen met ψ in de zones, dan staat het voorstel niet aangevinkt: forfaitair mag niet samen met ψ-waarden (8.2.1). Je neemt het dan alleen bewust over, en past daarna de vloerrand of de koudebruggen aan.
+
 **Overnemen in concept** past nog niets toe. De toepasbalk onderaan toont de wijzigingen, met **Ongedaan maken** en **Toepassen**. De normversie van het concept blijft staan.
 
 ## Invoergrenzen

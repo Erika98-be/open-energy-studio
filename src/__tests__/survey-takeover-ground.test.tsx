@@ -215,7 +215,10 @@ describe('survey takeover dialog for floors to the ground', () => {
     const ground = within(dialog).getByRole('region', { name: /grond|ground/i });
     fireEvent.change(within(ground).getByRole('combobox'), { target: { value: '' } });
     expect(within(ground).queryAllByRole('checkbox')).toHaveLength(0);
-    // Nothing else differs in this survey, so there is nothing to take over.
+    // The survey's forfait floor edge also proposes the building's forfait thermal-bridge method; unticked,
+    // nothing else differs in this survey, so there is nothing to take over.
+    const route = within(dialog).getByRole('region', { name: /koudebrugmethode|thermal-bridge method/i });
+    fireEvent.click(within(route).getByRole('checkbox'));
     expect((within(dialog).getByRole('button', { name: /in concept|into draft/i }) as HTMLButtonElement).disabled).toBe(true);
     expect(draftFloor()).not.toHaveProperty('heatedBasement');
   });
