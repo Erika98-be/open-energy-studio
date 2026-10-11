@@ -87,6 +87,12 @@ Het formulier vraagt alleen wat het projectmodel nog niet heeft. De secties staa
 
 ![Tabel Glas per raam: alle ramen rekenen met hun eigen g-waarde behalve het dakraam, waarvoor een glastype van tabel 7.4 of vaste lamellen (7.41a) wordt gekozen](img/glas-per-raam.png)
 
+![Eigen gegevens voor twee rekenzones, Woning en Praktijk, die dezelfde serre kiezen uit de onverwarmde ruimten: elke zone toont Gedeelde serre, ook bij de andere zone, met per zone g_gl;ue, kozijnfractie, b_U, H_zi;ztu en het aandeel F_zi;ztu](img/gedeelde-serre.png)
+
+![Vloer op grond met een verwarmde kelder waarvan de diepte per wanddeel is opgegeven: twee wanddelen van 12 m op 1,2 m en 8 m op 2,4 m diepte, met de knop Diepte per wanddeel opgeven, R_c van de kelderwanden en ΣA_T;bw leeg](img/kelder-wanddelen.png)
+
+![Het onderdeel NTA 8800 U/R_c in Constructie bewerken met drie lagen; de tweede laag is een smalle luchtlaag (tabel F.1) van 10 mm met breedte 50 mm en zwak geventileerd aangevinkt](img/smalle-luchtlaag.png)
+
 ### Opwekkers voor ruimteverwarming
 
 Het formulier kent deze opwekkers:
@@ -143,6 +149,8 @@ Lineaire koudebruggen reken je voor het hele gebouw op één manier (8.2.1): met
 - *ψ-waarden per koudebrug (8.1)*: een vloer op grond moet dan ψ-waarden per randdeel hebben.
 
 Kiezen de vloerrand en het gebouw verschillend, dan meldt de kern `thermal_bridge_methods_mixed`.
+
+![De keuze Lineaire koudebruggen van het gebouw (8.2.1) op Forfaitair: ΔU_for (8.3), met de uitleg dat één methode voor het hele gebouw geldt](img/koudebrugmethode.png)
 
 De koudebrug van de vloerrand naar de grond (ψ_gr, 8.36/8.39) hoort bij de vloer op grond, niet in de koudebruggenlijst van de zone; een koudebrug met begrenzing *grond* in die lijst wordt geweigerd (`thermal_bridge_ground_on_floor_edge`). Heeft een vloerrand *ψ-waarden per randdeel* zonder randdelen, dan waarschuwt de kern dat H_g geen randverlies heeft.
 

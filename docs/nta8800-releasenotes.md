@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 56: schermafdrukken van de handleiding bij de wijzigingen van reviews 35–55 (geen rekenwijziging)
+- **Opnieuw gemaakt:** `overnemen-vloeren.png` (hoofdstuk 2). Het venster *Opname overnemen in het projectmodel* toont sinds de vervolgstappen van review 53 ook het deel *Koudebrugmethode van het gebouw*; de oude afbeelding liet dat niet zien.
+- **Nieuw, in hoofdstuk 3:** de keuze *Lineaire koudebruggen van het gebouw* (`koudebrugmethode.png`), twee rekenzones die één serre delen met de melding *Gedeelde serre, ook bij …* (`gedeelde-serre.png`), een verwarmde kelder met de diepte per wanddeel (`kelder-wanddelen.png`) en een zwak geventileerde smalle luchtlaag in *Constructie bewerken* (`smalle-luchtlaag.png`).
+- **Nagelopen, ongewijzigd:** de andere 24 afbeeldingen tonen geen onderdeel dat in reviews 35–55 is veranderd. De vetgedrukte knop- en veldnamen in de hoofdstukken komen overeen met de huidige Nederlandse teksten van het programma.
+- **Bekend, niet aangepast:** de afbeeldingen van het hele venster (`welkom.png`, `projectoverzicht.png`, `controle.png`, `resultaten.png`, `rapport.png`, `registratie.png` en andere) tonen in de titelbalk nog programmaversie 0.1.6-alpha. Die opnieuw maken vraagt het hele programma met een draaiende rekenkern; dat kon hier niet.
+- Zoals de eerdere afbeeldingen zijn ze gemaakt met een tijdelijke lokale ontwikkelserver die het onderdeel los toont, en `firefox --headless --screenshot`; de rekenkern is daarvoor niet gestart.
+
 ### 11 oktober 2026 — Review 55: robuustheidsbewaking op de routes van reviews 40–54 (geen rekenwijziging)
 De robuustheidsfuzz (`tests/robustness.rs`), de numerieke fuzz (`tests/numeric_fuzz.rs`), de optiedekking (`tests/option_coverage.rs`) en de fuzz van de zoektocht naar lege velden (`blank_fuzz`) rekenden alleen met voorbeelden zonder de invoer die reviews 40–54 toevoegden. Ze krijgen nu invoer op die routes (`tests/support/new_inputs.rs`): twee zones met een gedeelde serre (7.38), een collectieve installatie met afleverset en twee identieke toestellen, een bovenwoning met de forfaitaire koudebrugmethode van het gebouw, een stoombevochtiger op olie bij een ketel voor 800 m², TOjuli-methode 3 met screens in 2024, de verwarmde kelder met wanddelen van geval N en een zwak geventileerde smalle luchtlaag (F.2). De optiedekking vindt daardoor 14 posities meer (504), alle bereikt; de catalogus `training-data/nta8800-input-options.json` noemt nu ook de stoomdrager, de koudebrugmethode, de collectieve aansluiting en de serres per zone.
 
