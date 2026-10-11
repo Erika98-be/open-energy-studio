@@ -2,7 +2,7 @@
 
 Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)).
 
-Alle negen vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle tien vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -109,3 +109,15 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Vraag.**
 - Geldt in de forfaitaire route van 8.4.1 de scheidingsconstructie naar een AOR voor 5.7.2 stap A als uitwendige scheidingsconstructie (zoals opmerking 5 zegt), of blijft ze buiten A_T;or zoals stap A voor een AOR voorschrijft?
 - Zo ja: hoort haar transmissie (U_iu;equi·A) bij H_C;D;juli van haar oriëntatie?
+
+## 10. RER_PrenTot;EMGforf bij een collectieve warmtepompbron onder 20 °C met kwaliteitsverklaring (5.3.1.2–5.3.1.3, p. 72–74; 9.6.8.1.1.2.3, p. 362)
+
+**Situatie.** Met een kwaliteitsverklaring wordt de berekening twee keer gemaakt. Voor EwePTot;EMGforf geldt bij een collectieve warmtepompbron met ϑ < 20 °C een uitzondering: dezelfde f_P;del;dh als bij EMGverklaring (p. 72, en nog eens p. 362). Voor RERPrenTot;EMGforf en EwePrenTot;EMGforf (p. 74) noemt 5.3.1.3 geen uitzondering: daar gelden "de forfaitaire waarden" voor f_P;del en f_Pren van tabel 5.2 en tabel 5.4. Voor de bron zelf geeft 9.6.8.1.1.2.3 a) aparte forfaitaire waarden (f_P;del;dh = f_P;del;el/23, f_Pren;dh = 0,95); tabel 5.4 geeft voor externe warmtelevering zonder kwaliteitsverklaring f_Pren = 0.
+
+**Gekozen lezing.** De kern rekent de EMGforf-berekening voor zo'n bron met de waarden uit de kwaliteitsverklaring (f_P;del;dh, f_Pren;dh en K_CO2), dus met één EPTot in EwePTot;EMGforf en in de noemer van RERPrenTot;EMGforf.
+
+**Gevolg.** Alleen de EMGforf-waarden van RERPrenTot en EwePrenTot veranderen; die staan bij een woning met gebiedsmaatregelen informatief op het label. BENG 3 gebruikt EMGverklaring en verandert niet. Geen openbaar geval of ISSO 54-deeltest heeft een collectieve bron onder 20 °C met kwaliteitsverklaring.
+
+**Vraag.**
+- Welke f_Pren;dh hoort in RERPrenTot;EMGforf bij een collectieve warmtepompbron onder 20 °C met kwaliteitsverklaring: die van de verklaring, 0,95 van 9.6.8.1.1.2.3 a), of 0 van tabel 5.4?
+- Geldt in die berekening de f_P;del;dh van de verklaring (zoals voor EwePTot;EMGforf) of de forfaitaire waarde?

@@ -44,7 +44,7 @@ Elke ingang van de kern rekent in een gekozen uitgave en zet die op de uitkomst 
 | `targetNormVersion` | `NTA 8800:2025+C1:2026` | `NTA 8800:2024 met INT-V1:2024`, `NTA 8800:2023` of `NTA 8800:2022` |
 | `normVersion`, `registrationEligible` | `2025+C1`, `true` | `2024`, `2023` of `2022`, `false` |
 | Registratiecontrole | volgens BRL 9500 | altijd de fout `legacy_edition_not_registrable` |
-| Indicatoren die pas in 2025+C1 bestaan (§5.3.3–5.3.5, 5.5.6.1–2, 5.5.7, 5.6.4, 5.9, bijlage AB) | berekend | `null` |
+| Blok `chapter5` met de indicatoren die pas in 2025+C1 bestaan (§5.3.3–5.3.5, 5.5.6.1–2, 5.5.7, 5.6.4, 5.9, bijlage AB) | berekend | `null`; het hele blok vervalt, dus ook de posten die de oudere uitgave wel kent: E_H;nd (5.3a, alle uitgaven), de standaard voor woningisolatie (2023 p. 74, 2024 p. 76), de renovatiestandaard (2024 p. 73–74), EwePrenTot (2023 p. 73, 2024 p. 75) en 5.17–5.19. Zonder blok geeft de kern in een oudere uitgave ook geen melding `standard_insulation_construction_year_missing` (review 45) |
 
 Invoer voor een route die de gekozen uitgave niet kent, wordt geweigerd met `route_not_in_edition` op het pad van die invoer. Voorbeelden voor 2024: `bacsFactor` ≠ 1, een dakrand als belemmering van PV of collectoren, zonwerend glas (`glazingType: solar_control`), vaste lamellen, en `effectiveMassKgPerM2`/`roofAreaM2` van bijlage AA in 2025+C1. Voor 2023 daarnaast: bijlage AA als bewijs van koelcapaciteit, een spuiopening volgens (11.71a) (`area.method: discharge`), en omgekeerd `kitchenPipeDiameter` (tabel 13.2) in 2024 en 2025+C1.
 
