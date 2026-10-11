@@ -57,6 +57,8 @@ pub const OMITTED_CORRECTIONS: &[&str] = &[
     "8.5: H_A = 0 for adjacent heated spaces is prescribed by the norm",
     "§17.3.8 extended obstruction method (hourly NEN 5060) enters as declared factors",
     "table 7.10 footnote c is the caller's column choice",
+    "7.38 (p. 187): with several zones bordering one sunroom Σ H_zi,j;ztu is H_zi;ztu / F_zi;ztu of 7.36 and every zone takes its own θ_int;set;H;stc (exact when the zones share the setpoint)",
+    "7.6.1 (p. 182) and 7.6.6.1.1 (p. 189) against 7.34 note 2 (p. 185): the partition to an adjacent unheated sunroom gets no solar gain of its own, also not through its windows, in the forfait and the calculated route; the sunroom counts through 7.30b only, with warning sunroom_partition_gain_interpreted (vragen-nen 11)",
 ];
 
 const SCOPE: &str = "nta8800_chapter_7_monthly_need_single_zone_unverified";

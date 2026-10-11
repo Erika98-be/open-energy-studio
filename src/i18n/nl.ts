@@ -1407,6 +1407,7 @@ export const nl: Record<string, string> = {
   'nta.warning.construction_year_mismatch': 'Bouwjaar in de registratie wijkt af van het bouwjaar in de NTA-invoer; het label gebruikt het registratiejaar (Omgevingsregeling art. 5.13 onder a)',
   'nta.warning.ventilation_year_before_construction_year': 'Bouw- of renovatiejaar bij ventilatie (tabel 11.13) ligt vóór het bouwjaar van het gebouw',
   'nta.warning.sunroom_values_differ_from_unheated_space': 'b_U of H_zi;ztu van de serre wijkt af van de onverwarmde ruimte (8.4.1)',
+  'nta.warning.sunroom_partition_gain_interpreted': 'Scheiding naar de serre: geen eigen zonnewinst of winst door de ramen, alleen de serrewinst van 7.30b (7.6.1, 7.6.6.1.1; vraag 11 aan NEN)',
   'nta.performance.bblNotApplicable': 'niet van toepassing (alleen woonfunctie)',
   'nta.performance.labelEp2': 'EP2 voor het label met forfaitaire gebiedsmaatregelen (Omgevingsregeling art. 5.11 lid 4): {{value}} kWh/m²·jr',
   'nta.gap.bbl_functions_residential_utility_mixed': 'Woon- en utiliteitsfuncties gemengd in de Bbl-functielijst; bepaal ze apart (§5.3.1)',
