@@ -226,7 +226,8 @@ pub struct DistributionSystem {
     #[serde(default)]
     pub pipes_also_for_hot_water: bool,
     /// Collective installation making hot water through a delivery set:
-    /// `ϑ_H,mean ≥ 65 °C` and the whole month in operation.
+    /// `ϑ_H,mean ≥ 65 °C` and the whole month in operation. The heating
+    /// pipes then serve hot water too ([`DistributionSystem::serves_hot_water`]).
     #[serde(default)]
     pub collective_hot_water_delivery_set: bool,
     /// `n_si` of 9.37, at least 1.
@@ -1938,8 +1939,7 @@ fn calculate_distribution(
     // delivery sets, ϑ_H;mean ≥ 65 °C (9.30) and L_zi = 0 for heating-only
     // pipes. NTA 8800:2023 (p. 290–294) has none of these rules.
     let rules_2024 = crate::norm_versions::profile().distribution_2024_rules;
-    let full_month =
-        rules_2024 && (system.pipes_also_for_hot_water || system.collective_hot_water_delivery_set);
+    let full_month = rules_2024 && system.serves_hot_water();
     // Table 9.X: pump fraction 0,10 for dwellings with an individual installation.
     let pump_fraction = if system.usage_function == ReductionFunction::Residential
         && system.installation == Installation::Individual
@@ -2013,7 +2013,7 @@ fn calculate_distribution(
     }
     // Table 9.16 rows for combined collective pipes: 2024 p. 292; absent
     // in NTA 8800:2023 (p. 296).
-    let shared = system.pipes_also_for_hot_water
+    let shared = system.serves_hot_water()
         && system.installation == Installation::Collective
         && crate::norm_versions::profile().table_9_16_combined_rows;
     let psi_zone = system.pipe_transmittance.value(connected_area_m2, shared);
@@ -2056,8 +2056,9 @@ fn calculate_distribution(
         }
         let share = zone.area_m2 / zone_area;
         // 9.4.1: L_zi = 0 when the pipes serve space heating only (2024
-        // p. 284–285; not in NTA 8800:2023 p. 290–291).
-        let zone_length = if system.pipes_also_for_hot_water || !rules_2024 {
+        // p. 284–286; not in NTA 8800:2023 p. 290–291); pipes feeding a
+        // delivery set serve hot water too.
+        let zone_length = if system.serves_hot_water() || !rules_2024 {
             in_zone_with_fittings * share
         } else {
             0.0
@@ -3575,6 +3576,17 @@ fn generate_annex_q_share(
 }
 
 impl DistributionSystem {
+    /// The pipes inside the connected parts carry heat for hot water too.
+    /// A collective delivery set is fed by the heating pipes, so it counts
+    /// as such: 13.4 c) puts the loss of those pipes in 9.4.2 (2025+C1
+    /// p. 545, 2024 p. 529), and it is the combined row of table 9.16
+    /// (2025+C1 p. 310, 2024 p. 292). The pipes then do not serve space
+    /// heating only, so L_zi counts (9.4.1 and 9.27: 2025+C1 p. 302 and 304,
+    /// 2024 p. 284 and 286).
+    pub fn serves_hot_water(&self) -> bool {
+        self.pipes_also_for_hot_water || self.collective_hot_water_delivery_set
+    }
+
     /// ϑ_ztu of the unheated space with pipes and vessels: the entered
     /// values, else 7.82 with `b_U`, else 13 °C.
     pub fn unheated_ambient(&self, month: usize, setpoint_c: f64) -> f64 {
@@ -8250,6 +8262,52 @@ mod tests {
             .iter()
             .any(|item| item.code == "route_not_in_edition"
                 && item.path == "distributionSystem.uninsulatedPipesInUninsulatedShell"));
+    }
+
+    /// A collective delivery set is fed by the heating pipes, so those pipes
+    /// serve hot water too: 13.4 c) (2025+C1 p. 545) puts their loss in
+    /// 9.4.2, L_zi counts (p. 302, 304) and table 9.16 takes the combined
+    /// row (p. 310), also when "pipes also for hot water" is not ticked.
+    #[test]
+    fn a_delivery_set_keeps_the_zone_pipes_and_the_combined_row() {
+        let mut input = collective_boiler_chain();
+        input.distribution = Distribution::Calculated {
+            heating_limit_extra_kwh: Some(vec![0.0; 12]),
+            source_reference: "9.26".into(),
+        };
+        let distribution = input.distribution_system.as_mut().unwrap();
+        distribution.collective_hot_water_delivery_set = true;
+        distribution.actual_pipe_length_m = Some(100.0);
+        distribution.unheated_pipe_length_m = Some(0.0);
+        distribution.valves_insulated = true;
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(
+            result.status, "calculated_unverified",
+            "{:?}",
+            result.issues
+        );
+        let summary = result.distribution.as_ref().unwrap();
+        // Table 9.16 combined row, insulated: 0,4 (heating row from 1995: 0,3).
+        assert_eq!(summary.psi_zone_w_per_mk, 0.4);
+        // July: whole month, ϑ_H;mean = 65 °C, all 100 m in the zone with
+        // L_equi = 0,03/Ψ · L (9.27b):
+        // Q = 0,4 · (65 − θ_op) · (100 + 7,5) · 744 / 1000.
+        let demand = crate::monthly_demand::assess_monthly_demand(&input.demand);
+        let operative = demand.monthly[6].heating.calculation_temperature_c;
+        let expected = 0.4 * (65.0 - operative) * 107.5 * 744.0 / 1000.0;
+        let july = result.monthly[6].distribution_loss_kwh;
+        assert!(expected > 1000.0, "{expected}");
+        assert!((july - expected).abs() < 1e-6, "{july} vs {expected}");
+        // Ticking "pipes also for hot water" as well changes nothing.
+        let mut both = input.clone();
+        both.distribution_system
+            .as_mut()
+            .unwrap()
+            .pipes_also_for_hot_water = true;
+        let both = assess_space_heating_chain(&both);
+        for (one, two) in result.monthly.iter().zip(&both.monthly) {
+            assert_eq!(one.distribution_loss_kwh, two.distribution_loss_kwh);
+        }
     }
 
     #[test]
