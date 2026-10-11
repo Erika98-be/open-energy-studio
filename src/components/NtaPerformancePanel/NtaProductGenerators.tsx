@@ -368,13 +368,19 @@ export function GroundFloorDetailFields({ draft, change, base }: SectionProps & 
         <RemoveButton label={t('nta.form.remove')} onClick={() => {
           const rest = wallParts.filter((__, item) => item !== index);
           // The last part removed: the single depth z comes back (8.42).
+          // The last part removed: the single depth z comes back (8.42),
+          // with that part's depth so nothing entered is lost.
           const { wallDepths: _parts, ...single } = basementBlock;
-          change(at('heatedBasement'), rest.length > 0 ? { ...basementBlock, wallDepths: rest } : { ...single, depthM: null });
+          const lastDepth = (wallParts[index] as Draft | undefined)?.depthM;
+          change(at('heatedBasement'), rest.length > 0 ? { ...basementBlock, wallDepths: rest }
+            : { ...single, depthM: typeof lastDepth === 'number' ? lastDepth : null });
         }} />
       </div>)}
       <button type="button" className="btn" onClick={() => {
-        const { depthM: _depth, ...parts } = basementBlock;
-        change(at('heatedBasement'), { ...parts, wallDepths: [...wallParts, { lengthM: null, depthM: null }] });
+        // The first part starts from the single depth z already entered.
+        const { depthM: depth, ...parts } = basementBlock;
+        const start = wallParts.length === 0 && typeof depth === 'number' ? depth : null;
+        change(at('heatedBasement'), { ...parts, wallDepths: [...wallParts, { lengthM: null, depthM: start }] });
       }}>{t('nta.form.ground.addWallPart')}</button>
       <NumberField {...field} path={at('heatedBasement', 'wallResistanceM2kPerW')} label={t('nta.form.ground.basementWallResistance')} />
       <NumberField {...field} path={at('heatedBasement', 'wallAreaM2')} label={t('nta.form.ground.basementWallArea')} optional />

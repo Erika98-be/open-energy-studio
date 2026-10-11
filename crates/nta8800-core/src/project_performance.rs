@@ -1399,7 +1399,13 @@ fn share_sunroom_bordering_zones(zones: &mut [ChainZone]) {
     use crate::monthly_demand::SunroomBorderingZone;
     let mut shared: HashMap<String, Vec<SunroomBorderingZone>> = HashMap::new();
     for zone in zones.iter() {
-        for room in &zone.demand.sunrooms {
+        // A blank id names no sunroom: two zones without one do not share.
+        for room in zone
+            .demand
+            .sunrooms
+            .iter()
+            .filter(|room| !room.id.trim().is_empty())
+        {
             shared
                 .entry(room.id.clone())
                 .or_default()
@@ -4899,6 +4905,23 @@ fn derive_input(
                 .unwrap_or_else(|| nta.distribution.clone()),
         });
     }
+    // One sunroom id once per list: a second entry would count the same
+    // sunroom twice for the zone (7.30b) and twice in the 7.38 cap.
+    let sunroom_lists = std::iter::once(("ntaCalculation.sunrooms".to_owned(), &nta.sunrooms))
+        .chain(nta.zone_data.iter().enumerate().map(|(index, item)| {
+            (
+                format!("ntaCalculation.zoneData[{index}].sunrooms"),
+                &item.sunrooms,
+            )
+        }));
+    for (base, rooms) in sunroom_lists {
+        let mut seen = HashSet::new();
+        for (index, room) in rooms.iter().enumerate() {
+            if !room.id.trim().is_empty() && !seen.insert(room.id.as_str()) {
+                gaps.push(gap("sunroom_id_duplicate", format!("{base}[{index}].id")));
+            }
+        }
+    }
     share_sunroom_bordering_zones(&mut zones);
     for (index, item) in nta.window_obstructions.iter().enumerate() {
         if used_obstruction.contains(&item.window_id) {
@@ -7848,6 +7871,38 @@ mod tests {
         });
         let colder = gains(&value);
         assert!(colder < same, "{colder} vs {same}");
+        // Review 54: one zone listing the same sunroom twice is a gap.
+        let twice = value["ntaCalculation"]["zoneData"][0]["sunrooms"][0].clone();
+        value["ntaCalculation"]["zoneData"][0]["sunrooms"]
+            .as_array_mut()
+            .unwrap()
+            .push(twice);
+        let result = assess_project_performance(&value);
+        assert!(
+            result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == "sunroom_id_duplicate"
+                    && gap.path == "ntaCalculation.zoneData[0].sunrooms[1].id"),
+            "{:?}",
+            result.gaps
+        );
+        value["ntaCalculation"]["zoneData"][0]["sunrooms"]
+            .as_array_mut()
+            .unwrap()
+            .pop();
+        // Review 54: a blank sunroom id in both zones is no shared sunroom.
+        for index in 0..2 {
+            value["ntaCalculation"]["zoneData"][index]["sunrooms"][0]["id"] = Value::from("");
+        }
+        let result = assess_project_performance(&value);
+        let derived = result.derived_input.as_ref().unwrap();
+        assert!(derived.space_heating.demand.sunrooms[0]
+            .bordering_zones
+            .is_empty());
+        assert!(derived.space_heating.additional_zones[0].demand.sunrooms[0]
+            .bordering_zones
+            .is_empty());
     }
 
     /// Review 54: `borderingZones` in the project input is not taken over;
@@ -7870,7 +7925,9 @@ mod tests {
             let result = assess_project_performance(value);
             assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
             let derived = result.derived_input.as_ref().unwrap();
-            let listed = derived.space_heating.demand.sunrooms[0].bordering_zones.len();
+            let listed = derived.space_heating.demand.sunrooms[0]
+                .bordering_zones
+                .len();
             let sum = result
                 .performance
                 .as_ref()

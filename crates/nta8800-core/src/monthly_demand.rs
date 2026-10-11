@@ -4276,7 +4276,10 @@ mod tests {
         };
         let valid = with(vec![zone("z1", 6.0, 20.0), zone("z2", 14.0, 16.0)]);
         assert!(
-            !valid.issues.iter().any(|item| item.code == "sunroom_invalid"),
+            !valid
+                .issues
+                .iter()
+                .any(|item| item.code == "sunroom_invalid"),
             "{:?}",
             valid.issues
         );
