@@ -1293,8 +1293,9 @@ pub enum PipeCorrection {
     OldSlidingSystem,
     /// Surface-mounted or recessed: 0,90.
     SurfaceOrRecessed,
-    /// One pipe in a trench without rigid connections: 1,00. Deviating:
-    /// table P.1 has no single-pipe case; it takes the neutral factor.
+    /// One pipe in a trench without rigid connections: 1,00 (table P.1 of
+    /// 2025+C1, p. 963). The 2024 and 2023 tables have no such row; the
+    /// kernel uses the same neutral factor there.
     SinglePipeInTrench,
 }
 
