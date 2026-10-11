@@ -187,6 +187,10 @@ pub enum Layer {
         thickness_mm: f64,
         #[serde(rename = "widthMm")]
         width_mm: f64,
+        /// Weakly ventilated layer (definition in C.3.4): F.2 takes half of
+        /// the table F.1 value. Absent means unventilated.
+        #[serde(default, rename = "weaklyVentilated")]
+        weakly_ventilated: bool,
     },
     /// Tables F.2/F.3: tubular cavity in a component with U > 1,0.
     TubularCavity {
@@ -446,7 +450,11 @@ impl Layer {
             Self::NarrowCavity {
                 thickness_mm,
                 width_mm,
-            } => Some(narrow_cavity_resistance(*thickness_mm, *width_mm)),
+                weakly_ventilated,
+            } => {
+                let r = narrow_cavity_resistance(*thickness_mm, *width_mm);
+                Some(if *weakly_ventilated { r / 2.0 } else { r })
+            }
             Self::TubularCavity {
                 thickness_mm,
                 width_mm,
@@ -646,6 +654,7 @@ impl Layer {
             Self::NarrowCavity {
                 thickness_mm,
                 width_mm,
+                ..
             } => {
                 if !(positive(*thickness_mm) && positive(*width_mm)) || *thickness_mm < 2.0 {
                     issues.push(issue("cavity_dimensions_invalid", path.to_string()));
@@ -1706,6 +1715,18 @@ mod tests {
                 < 1e-12
         );
         assert!((narrow_cavity_resistance(10.0, 5.0) - 0.20).abs() < 1e-12);
+        // F.2: a weakly ventilated narrow layer takes half of table F.1,
+        // d = 10 mm, d/b = 2 → 0,20 / 2 = 0,10; absent flag stays unventilated.
+        let weak: Layer = serde_json::from_value(serde_json::json!({
+            "kind": "narrow_cavity", "thicknessMm": 10.0, "widthMm": 5.0, "weaklyVentilated": true
+        }))
+        .unwrap();
+        assert!((weak.resistance(HeatFlow::Horizontal).unwrap() - 0.10).abs() < 1e-12);
+        let plain: Layer = serde_json::from_value(serde_json::json!({
+            "kind": "narrow_cavity", "thicknessMm": 10.0, "widthMm": 5.0
+        }))
+        .unwrap();
+        assert!((plain.resistance(HeatFlow::Horizontal).unwrap() - 0.20).abs() < 1e-12);
         // Between d/b = 1 and 2 at d = 5: 0,13.
         assert!((narrow_cavity_resistance(5.0, 3.333_333) - 0.13).abs() < 1e-9);
         assert!(
@@ -2011,6 +2032,7 @@ mod tests {
         let narrow = Layer::NarrowCavity {
             thickness_mm: 10.0,
             width_mm: 5.0,
+            weakly_ventilated: false,
         };
         let tube = Layer::TubularCavity {
             thickness_mm: 20.0,

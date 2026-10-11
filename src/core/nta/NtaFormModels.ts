@@ -260,7 +260,9 @@ export function lightingTemplate(project: IProject, labelFunction: unknown): Blo
 
 export type NtaLayerDraft =
   | { kind: 'material'; name: string; thicknessM: number; lambda: number; sourceReference: string }
-  | { kind: 'air_cavity'; name: string; thicknessMm: number; ventilation: 'unventilated' | 'weakly' | 'strongly' };
+  | { kind: 'air_cavity'; name: string; thicknessMm: number; ventilation: 'unventilated' | 'weakly' | 'strongly' }
+  /** Table F.1 narrow air layer (U ≤ 1,0); weakly ventilated takes half the table value (F.2). */
+  | { kind: 'narrow_cavity'; name: string; thicknessMm: number; widthMm: number; weaklyVentilated: boolean };
 
 export interface NtaConstructionDraft {
   heatFlow: 'upward' | 'horizontal' | 'downward';
@@ -304,7 +306,9 @@ export function envelopeFromLayers(id: string, draft: NtaConstructionDraft): Env
                 thicknessM: layer.thicknessM,
                 conductivity: { method: 'calculated', lambdaCalc: layer.lambda, sourceReference: layer.sourceReference || layer.name },
               }
-              : { kind: 'air_cavity', thicknessMm: layer.thicknessMm, ventilation: { kind: layer.ventilation } }),
+              : layer.kind === 'narrow_cavity'
+                ? { kind: 'narrow_cavity', thicknessMm: layer.thicknessMm, widthMm: layer.widthMm, weaklyVentilated: layer.weaklyVentilated }
+                : { kind: 'air_cavity', thicknessMm: layer.thicknessMm, ventilation: { kind: layer.ventilation } }),
           },
         },
       },
