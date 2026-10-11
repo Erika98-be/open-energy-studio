@@ -23,7 +23,16 @@ export interface ImportResult {
   fileName?: string;
   /** SHA-256 (hex) of the file as read. */
   sha256?: string;
+  /** Program and NTA 8800 version the file names (Uniec 3 meta.json, VABI Algemeen), when it names one. */
+  sourceVersion?: string;
   issues: ImportIssue[];
+}
+
+/** What a reader returns: the project, its import issues and the version the file names. */
+export interface ReadResult {
+  project: IProject;
+  issues: ImportIssues;
+  sourceVersion?: string;
 }
 
 /**
@@ -128,7 +137,17 @@ const EXPORTED = {
   surface: ['id', 'name', 'type', 'area', 'orientation', 'constructionId', 'zoneId', 'windows'],
   window: ['id', 'name', 'area', 'uValue', 'gValue', 'orientation', 'surfaceId'],
   thermalBridge: ['id', 'name', 'psiValue', 'length', 'zoneId'],
+  // Installations: the fields both writers put in the file; anything else (the NTA heat-pump
+  // classification, a comment) is not in either format.
+  heatingSystems: ['id', 'name', 'type', 'cop', 'coverageFraction'],
+  ventilationSystems: ['id', 'name', 'type', 'heatRecoveryEfficiency', 'sfp'],
+  coolingSystems: ['id', 'name', 'type', 'eer'],
+  hotWaterSystems: ['id', 'name', 'type', 'efficiency', 'hasSolarBoiler', 'solarBoilerFraction'],
+  solarPV: ['id', 'name', 'peakPower', 'orientation', 'tilt', 'area'],
+  solarThermal: ['id', 'name', 'collectorArea', 'type', 'orientation', 'tilt'],
 } as const;
+
+const SYSTEM_LISTS = ['heatingSystems', 'ventilationSystems', 'coolingSystems', 'hotWaterSystems', 'solarPV', 'solarThermal'] as const;
 
 /** Fields the program keeps for itself and never writes to a foreign format. */
 const NOT_INPUT = new Set(['importLog']);
@@ -162,15 +181,31 @@ export function droppedOnExport(project: IProject, format: 'UNIEC3' | 'VABI'): s
     if (zone.airTightness?.assumed) dropped.add('zones[*].airTightness.assumed');
     for (const surface of zone.surfaces ?? []) {
       check(surface, EXPORTED.surface, 'zones[*].surfaces[*].');
-      for (const window of surface.windows ?? []) check(window, EXPORTED.window, 'zones[*].surfaces[*].windows[*].');
+      for (const window of surface.windows ?? []) {
+        check(window, EXPORTED.window, 'zones[*].surfaces[*].windows[*].');
+        // A VABI Deelvlak has no orientation of its own: a window facing another way than its
+        // surface comes back facing the surface's way.
+        if (format === 'VABI' && window.orientation !== surface.orientation) {
+          dropped.add('zones[*].surfaces[*].windows[*].orientation');
+        }
+      }
     }
     for (const bridge of zone.thermalBridges ?? []) check(bridge, EXPORTED.thermalBridge, 'zones[*].thermalBridges[*].');
+  }
+  for (const key of SYSTEM_LISTS) {
+    for (const system of project[key] ?? []) check(system, EXPORTED[key], `${key}[*].`);
   }
   // VABI carries a construction's layers; UNIEC3 only its Rc and U.
   const constructionKeep = format === 'VABI'
     ? ['id', 'name', 'layers', 'rcValue', 'uValue']
     : ['id', 'name', 'rcValue', 'uValue'];
   for (const construction of project.constructions ?? []) check(construction, constructionKeep, 'constructions[*].');
+  // UNIEC3 holds a construction only on the surfaces that use it (VABI also has its library):
+  // a construction no surface uses is not in the file.
+  if (format === 'UNIEC3') {
+    const used = new Set((project.zones ?? []).flatMap((zone) => (zone.surfaces ?? []).map((surface) => surface.constructionId)));
+    if ((project.constructions ?? []).some((construction) => !used.has(construction.id))) dropped.add('constructions[unused]');
+  }
   return [...dropped].sort();
 }
 
@@ -181,6 +216,36 @@ export function droppedOnExport(project: IProject, format: 'UNIEC3' | 'VABI'): s
 export function ntaInputNotInFormat(issues: ImportIssues, tool: string): void {
   issues.add('dropped', 'ntaCalculation',
     `${tool} bevat geen NTA 8800-rekeninvoer (rekenblok, grens per vlak, vloeren op grond met perimeter, kruipruimte of verwarmde kelder, onverwarmde ruimten, puntkoudebruggen); vul die aan bij de NTA-invoer.`);
+}
+
+/**
+ * The program and NTA 8800 version the foreign file names, recorded once per
+ * import: the importer carries geometry and installations over, never the
+ * edition or the calculation settings of the other program, so the adviser
+ * checks the edition of the NTA input (an older Uniec 3 file was made under
+ * an older edition).
+ */
+export function sourceVersionNotCarried(issues: ImportIssues, tool: string, source: string | undefined): void {
+  issues.add('dropped', 'normVersion', source
+    ? `${tool}-bestand gemaakt met ${source}; de NTA 8800-editie en de rekeninstellingen van dat programma worden niet overgenomen. Dit project rekent met de editie van de NTA-invoer; controleer die.`
+    : `${tool}-bestand zonder programma- of NTA 8800-versie; de editie en de rekeninstellingen worden niet overgenomen. Dit project rekent met de editie van de NTA-invoer; controleer die.`,
+  source ? source.slice(0, 80) : undefined);
+}
+
+/** Longest list of names in one "not read" issue; the rest is counted. */
+const UNREAD_NAMES_SHOWN = 20;
+
+/**
+ * Records data the importer saw but did not read: `names` maps each element
+ * or property name to how often it occurred, under `path` (an entity type or
+ * a parent element). One issue per path, so a rich file gives a readable list.
+ */
+export function unreadData(issues: ImportIssues, path: string, what: string, names: Map<string, number>): void {
+  if (names.size === 0) return;
+  const sorted = [...names.entries()].sort(([a], [b]) => a.localeCompare(b));
+  const shown = sorted.slice(0, UNREAD_NAMES_SHOWN).map(([name, count]) => (count > 1 ? `${name} (${count}×)` : name));
+  const more = sorted.length > UNREAD_NAMES_SHOWN ? ` en nog ${sorted.length - UNREAD_NAMES_SHOWN}` : '';
+  issues.add('dropped', path, `${what} niet ingelezen: ${shown.join(', ')}${more}.`, sorted.reduce((sum, [, count]) => sum + count, 0));
 }
 
 /** Strips a UTF-8 byte-order mark. */

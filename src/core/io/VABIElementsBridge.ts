@@ -27,7 +27,7 @@ import { ASSUMED_QV10 } from '../energy/normalizeProject';
 import { buildNtaCalculationTemplate } from '../nta/NtaCalculationTemplate';
 import {
   ImportFormatError, ImportIssues, droppedOnExport, lookup, ntaInputNotInFormat, parseDecimalText,
-  type ImportResult,
+  sourceVersionNotCarried, unreadData, type ImportResult, type ReadResult,
 } from './importIssues';
 import { downloadBytes, importFile, pickFile } from './importFile';
 
@@ -270,11 +270,12 @@ export function exportToVABI(project: IProject): Uint8Array {
       // Opaque sub-surfaces (DeelvlakList)
       lines.push(`${L(7)}${xmlOpen('DeelvlakList')}`);
 
-      // Main opaque part (subtract windows)
+      // Main opaque part (subtract windows). Written whenever the surface has a construction,
+      // also when windows fill it: without the Deelvlak the import loses the construction.
       const windowArea = surface.windows.reduce((sum, w) => sum + w.area, 0);
       const opaqueArea = Math.max(0, surface.area - windowArea);
 
-      if (opaqueArea > 0 && construction) {
+      if (construction) {
         lines.push(`${L(8)}${xmlOpen('Deelvlak')}`);
         lines.push(`${L(9)}${xmlTag('Type', 'Dicht')}`);
         lines.push(`${L(9)}${xmlTag('Naam', construction.name)}`);
@@ -490,7 +491,7 @@ function projectXml(files: Record<string, Uint8Array>): Uint8Array {
 }
 
 /** Imports a VABI EPA archive, with the list of what the program filled in or left out. */
-export function readVABI(zipData: Uint8Array): { project: IProject; issues: ImportIssues } {
+export function readVABI(zipData: Uint8Array): ReadResult {
   // Only XML entries are read, with a size cap, so a crafted archive cannot
   // unpack gigabytes into memory.
   const files = safeUnzip(zipData, (name) => name.toLowerCase().endsWith('.xml'));
@@ -503,7 +504,7 @@ export function importFromVABI(zipData: Uint8Array): IProject {
 }
 
 /** Imports a VABI EPA archive or a bare project.xml. */
-export function readVABIFile(bytes: Uint8Array): { project: IProject; issues: ImportIssues } {
+export function readVABIFile(bytes: Uint8Array): ReadResult {
   return bytes[0] === 0x50 && bytes[1] === 0x4b ? readVABI(bytes) : readVABIXml(decodeXml(bytes));
 }
 
@@ -515,7 +516,87 @@ function bridgeListSignature(listEl: Element | null): string {
     .join(';');
 }
 
-export function readVABIXml(xmlText: string): { project: IProject; issues: ImportIssues } {
+/**
+ * The child elements the importer reads, per element (an Opwekker by its
+ * parent, since a heating, cooling and hot-water generator differ). Any other
+ * child element is reported as not read.
+ */
+const READ_ELEMENTS: Record<string, readonly string[]> = {
+  Project: ['Algemeen', 'Objecten', 'ConstructieBibliotheek'],
+  Algemeen: ['Versie', 'Applicatie', 'Datum'],
+  Objecten: ['Object'],
+  Object: ['Naam', 'Omschrijving', 'Adres', 'Plaats', 'Gebruiksfunctie', 'Rekenzones', 'Installaties', 'Hernieuwbaar'],
+  Rekenzones: ['Rekenzone'],
+  Rekenzone: ['Naam', 'Gebruiksoppervlakte', 'Volume', 'Hoogte', 'Luchtdoorlatendheid', 'Geometrie', 'KoudebrugList'],
+  Geometrie: ['Hoofdvlak'],
+  Hoofdvlak: ['Naam', 'Locatie', 'Orientatie', 'Hellingshoek', 'Oppervlakte', 'DeelvlakList', 'KoudebrugList'],
+  DeelvlakList: ['Deelvlak'],
+  Deelvlak: ['Type', 'Naam', 'Oppervlakte', 'RcWaarde', 'UWaarde', 'GWaarde'],
+  KoudebrugList: ['Koudebrug'],
+  Koudebrug: ['Naam', 'PsiWaarde', 'Lengte'],
+  Installaties: ['Verwarming', 'Ventilatie', 'Koeling', 'Tapwater'],
+  Verwarming: ['Opwekker'],
+  'Verwarming/Opwekker': ['Naam', 'Type', 'COP', 'Dekking'],
+  Ventilatie: ['Systeem'],
+  Systeem: ['Naam', 'Type', 'WTWRendement', 'SFP'],
+  Koeling: ['Opwekker'],
+  'Koeling/Opwekker': ['Naam', 'Type', 'EER'],
+  Tapwater: ['Opwekker'],
+  'Tapwater/Opwekker': ['Naam', 'Type', 'Rendement', 'Zonneboiler', 'ZonneboilerFractie'],
+  Hernieuwbaar: ['PVSysteem', 'ZonthermischSysteem'],
+  PVSysteem: ['Naam', 'Piekvermogen', 'Orientatie', 'Hellingshoek', 'Oppervlakte'],
+  ZonthermischSysteem: ['Naam', 'CollectorOppervlakte', 'Type', 'Orientatie', 'Hellingshoek'],
+  ConstructieBibliotheek: ['Constructie'],
+  Constructie: ['Naam', 'RcWaarde', 'UWaarde', 'Lagen'],
+  Lagen: ['Laag'],
+  Laag: ['Materiaal', 'Dikte', 'Lambda'],
+};
+
+const elementKey = (element: Element) => (element.tagName === 'Opwekker' && element.parentElement
+  ? `${element.parentElement.tagName}/Opwekker` : element.tagName);
+
+/**
+ * Reports the elements of the file the importer has no field for, one issue
+ * per kind of parent element. Only `objectEl` of the Objecten is walked (the
+ * others are reported as 'multiple'); a Rekenzone without Geometrie keeps
+ * the containers its Hoofdvlakken are read from.
+ */
+function reportUnreadElements(root: Element, objectEl: Element, issues: ImportIssues): void {
+  const unread = new Map<string, Map<string, number>>();
+  const walk = (element: Element) => {
+    const key = elementKey(element);
+    const known = READ_ELEMENTS[key];
+    if (!known) return;
+    const noGeometry = key === 'Rekenzone' && !getEl(element, 'Geometrie');
+    for (const child of Array.from(element.children)) {
+      if (child.tagName === 'Object' && child !== objectEl) continue;
+      if (known.includes(child.tagName)) {
+        walk(child);
+        continue;
+      }
+      if (noGeometry && child.getElementsByTagName('Hoofdvlak').length > 0) continue;
+      const names = unread.get(key) ?? new Map<string, number>();
+      names.set(child.tagName, (names.get(child.tagName) ?? 0) + 1);
+      unread.set(key, names);
+    }
+  };
+  walk(root.tagName === 'Project' ? root : objectEl);
+  for (const [key, names] of [...unread.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    unreadData(issues, key, `Elementen onder ${key}`, names);
+  }
+}
+
+/** The program and file version the Algemeen block names ("Vabi Elements, versie 4.0"). */
+function algemeenVersion(doc: Document): string | undefined {
+  const algemeen = Array.from(doc.getElementsByTagName('Algemeen')).find((el) => el.parentElement === doc.documentElement);
+  if (!algemeen) return undefined;
+  const parts = [textOf(algemeen, 'Applicatie'), textOf(algemeen, 'Versie') ? `versie ${textOf(algemeen, 'Versie')}` : undefined]
+    .filter((part): part is string => !!part && part.trim() !== '')
+    .map((part) => part.trim().slice(0, 80));
+  return parts.length > 0 ? parts.join(', ') : undefined;
+}
+
+export function readVABIXml(xmlText: string): ReadResult {
   const xmlString = xmlText.charCodeAt(0) === 0xfeff ? xmlText.slice(1) : xmlText;
   // EPA files have no document type; refusing one up front rules out entity
   // expansion and external entities whatever the parser does with them.
@@ -897,12 +978,15 @@ export function readVABIXml(xmlText: string): { project: IProject; issues: Impor
     project.ntaCalculation = block as unknown as IProject['ntaCalculation'];
   }
 
+  reportUnreadElements(doc.documentElement, objectEl, issues);
+  const sourceVersion = algemeenVersion(doc);
+  sourceVersionNotCarried(issues, 'VABI', sourceVersion);
   ntaInputNotInFormat(issues, 'VABI');
-  return { project, issues };
+  return { project, issues, ...(sourceVersion ? { sourceVersion } : {}) };
 }
 
 // Legacy import for the old custom XML format (backwards compatibility)
-function importFromVABILegacy(doc: Document, issues: ImportIssues): { project: IProject; issues: ImportIssues } {
+function importFromVABILegacy(doc: Document, issues: ImportIssues): ReadResult {
   const gebouw = doc.getElementsByTagName('gebouw')[0];
   if (!gebouw) throw new ImportFormatError('vabi_no_object', 'Geen gebouw-element gevonden.');
 
@@ -998,6 +1082,7 @@ function importFromVABILegacy(doc: Document, issues: ImportIssues): { project: I
   }
 
   issues.add('defaulted', 'buildingFunction', 'Oud VABI-formaat zonder gebruiksfunctie; residential aangenomen.', 'residential');
+  sourceVersionNotCarried(issues, 'VABI', undefined);
   ntaInputNotInFormat(issues, 'VABI');
   return {
     project: {

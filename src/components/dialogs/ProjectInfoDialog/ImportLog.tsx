@@ -8,8 +8,9 @@ interface ImportLogProps {
 
 /**
  * What was read in with another program (BRL 9501 §4.3.1, p. 8): tool,
- * file, SHA-256 and every value the importer assumed or left out, so the
- * adviser can check them after the import toast is gone.
+ * file, SHA-256, the version the file names and every value the importer
+ * assumed or left out, so the adviser can check them after the import toast
+ * is gone.
  */
 export function ImportLog({ records }: ImportLogProps) {
   const { t } = useI18n();
@@ -25,6 +26,7 @@ export function ImportLog({ records }: ImportLogProps) {
             <dd>{t('import.log.date')}: {record.importedAt}</dd>
             {record.fileName && <><dt>{t('import.log.file')}</dt><dd>{record.fileName}</dd></>}
             {record.sha256 && <><dt>{t('import.log.sha256')}</dt><dd><code>{record.sha256}</code></dd></>}
+            {record.sourceVersion && <><dt>{t('import.log.source')}</dt><dd>{record.sourceVersion}</dd></>}
           </dl>
           {record.issues && record.issues.length > 0 ? (
             <ul className="import-log-issues">

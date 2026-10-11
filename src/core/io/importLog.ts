@@ -7,7 +7,8 @@ import type { IProject, ProjectImportIssue, ProjectImportRecord } from '../energ
  * import in this program is started by the adviser.
  *
  * The record names the file, its SHA-256 (so the source file can be
- * identified later) and what the importer filled in or left out. It is
+ * identified later), the program and NTA 8800 version the file names, and
+ * what the importer filled in or left out. It is
  * provenance, not label input: like the registration it stays outside the
  * label input hash (`labelInputSha256`, kernel `label_input_hash`), so a
  * relabel comparison never trips on it.
@@ -17,13 +18,14 @@ export function withImportRecord(
   tool: string,
   fileName?: string,
   importedAt: string = new Date().toISOString(),
-  details: { sha256?: string; issues?: ProjectImportIssue[] } = {},
+  details: { sha256?: string; sourceVersion?: string; issues?: ProjectImportIssue[] } = {},
 ): IProject {
   const record: ProjectImportRecord = {
     tool,
     importedAt,
     ...(fileName ? { fileName } : {}),
     ...(details.sha256 ? { sha256: details.sha256 } : {}),
+    ...(details.sourceVersion ? { sourceVersion: details.sourceVersion } : {}),
     ...(details.issues ? { issues: details.issues } : {}),
   };
   return { ...project, importLog: [...(project.importLog ?? []), record] };

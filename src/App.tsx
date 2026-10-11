@@ -657,7 +657,7 @@ function AppContent() {
     try {
       const result = await (format === 'UNIEC3' ? openUNIEC3FileDialog() : openVABIFileDialog());
       const loaded = normalizeProject(withImportRecord(result.project, format, result.fileName, undefined,
-        { sha256: result.sha256, issues: result.issues }));
+        { sha256: result.sha256, sourceVersion: result.sourceVersion, issues: result.issues }));
       docDispatch({ type: 'DOC_NEW', payload: { id: crypto.randomUUID(), project: loaded } });
       if (result.issues.length > 0) {
         toast.show({

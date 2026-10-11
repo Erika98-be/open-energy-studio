@@ -18,8 +18,8 @@
 import { zipSync, strToU8, strFromU8 } from 'fflate';
 import { safeUnzip } from './safeUnzip';
 import {
-  ImportFormatError, ImportIssues, droppedOnExport, lookup, ntaInputNotInFormat, withoutBom,
-  type ImportResult,
+  ImportFormatError, ImportIssues, droppedOnExport, lookup, ntaInputNotInFormat, sourceVersionNotCarried, unreadData,
+  withoutBom, type ImportResult, type ReadResult,
 } from './importIssues';
 import { downloadBytes, importFile, pickFile } from './importFile';
 import { ASSUMED_QV10 } from '../energy/normalizeProject';
@@ -702,12 +702,44 @@ function codeOf<T>(
   return value;
 }
 
+/** Property ids this importer reads; any other property of an entity it reads is reported. */
+const READ_PROPERTIES = new Set<string>(Object.values(PROP));
+
+/**
+ * Entities the importer passes over on purpose: our own export writes a
+ * library copy of every construction (the values are read from the
+ * construction itself) and an empty settings entity.
+ */
+const LIBRARY_ENTITIES = new Set<string>([ENT.LIBCONSTRD, ENT.LIBCONSTRT]);
+
+/**
+ * The program and NTA 8800 version meta.json names ("NTA8800 v3.4.0.3,
+ * VersionId 311, …"); undefined when the file has no readable meta.json.
+ */
+function metaVersion(bytes: Uint8Array | undefined): string | undefined {
+  if (!bytes) return undefined;
+  let meta: unknown;
+  try {
+    meta = JSON.parse(withoutBom(strFromU8(bytes)));
+  } catch {
+    return undefined;
+  }
+  if (!isRecord(meta)) return undefined;
+  const parts = [
+    typeof meta.NTAVersion === 'string' ? meta.NTAVersion.trim() : '',
+    typeof meta.VersionId === 'number' || typeof meta.VersionId === 'string' ? `VersionId ${String(meta.VersionId).trim()}` : '',
+    typeof meta.Generator === 'string' ? meta.Generator.trim() : '',
+  ].filter((part) => part !== '').map((part) => part.slice(0, 80));
+  return parts.length > 0 ? parts.join(', ') : undefined;
+}
+
 /** Imports a Uniec 3 archive, with the list of what the program filled in or left out. */
-export function readUNIEC3(zipData: Uint8Array): { project: IProject; issues: ImportIssues } {
-  // Only the building entities and relations are read, with a size cap,
-  // so a crafted archive cannot unpack gigabytes into memory.
-  const files = safeUnzip(zipData, (name) => /^buildings\/\d+\/(entities|relations)\.json$/.test(name));
+export function readUNIEC3(zipData: Uint8Array): ReadResult {
+  // Only the building entities and relations and meta.json are read, with a
+  // size cap, so a crafted archive cannot unpack gigabytes into memory.
+  const files = safeUnzip(zipData, (name) => name === 'meta.json' || /^buildings\/\d+\/(entities|relations)\.json$/.test(name));
   const issues = new ImportIssues();
+  const sourceVersion = metaVersion(files['meta.json']);
 
   const buildingIds = [...new Set(Object.keys(files)
     .map((path) => path.match(/^buildings\/(\d+)\/entities\.json$/)?.[1])
@@ -767,15 +799,22 @@ export function readUNIEC3(zipData: Uint8Array): { project: IProject; issues: Im
   }
 
   const unique = [...entityById.values()];
-  const findByType = (type: string) => unique.filter(e => e.NTAEntityId === type);
-  const getChildren = (parentId: string, relId?: string) => {
-    const children = childrenOf.get(parentId) || [];
-    return (relId ? children.filter(c => c.relationId === relId) : children)
-      .map(c => entityById.get(c.childId))
-      .filter((e): e is UNIEC3Entity => !!e);
+  // Every entity the importer reads is marked, so what it passes over can be reported.
+  const read = new Set<UNIEC3Entity>();
+  const mark = (entities: UNIEC3Entity[]) => {
+    for (const entity of entities) read.add(entity);
+    return entities;
   };
+  const findByType = (type: string) => mark(unique.filter(e => e.NTAEntityId === type));
+  const childrenBy = (parentId: string, relId: string) => (childrenOf.get(parentId) || [])
+    .filter(c => c.relationId === relId)
+    .map(c => entityById.get(c.childId))
+    .filter((e): e is UNIEC3Entity => !!e);
+  const getChildren = (parentId: string, relId: string) => mark(childrenBy(parentId, relId));
+  /** The one child the importer reads; any further ones stay unread and are reported. */
+  const firstChild = (parentId: string, relId: string): UNIEC3Entity | undefined => mark(childrenBy(parentId, relId).slice(0, 1))[0];
 
-  // Building (GEB)
+  // Building (GEB); further buildings and units are reported as 'multiple', not as unread.
   const gebEntities = findByType(ENT.GEB);
   const geb = gebEntities[0];
   if (!geb) {
@@ -828,7 +867,7 @@ export function readUNIEC3(zipData: Uint8Array): { project: IProject; issues: Im
       // Opaque construction: the U from the file, else from Rc with the R_si of the element type
       // (NTA 8800 table C.2); never a U of 0.
       let constructionId = '';
-      const constrd = getChildren(begr.NTAEntityDataId, 'BEGR_CONSTRD')[0];
+      const constrd = firstChild(begr.NTAEntityDataId, 'BEGR_CONSTRD');
       if (constrd) {
         const cName = getEntityProp(constrd, PROP.CONSTRD_NAAM) || surfaceName;
         const rc = issues.number(`${sp}.construction.rcValue`, getEntityProp(constrd, PROP.CONSTRD_RC),
@@ -893,7 +932,7 @@ export function readUNIEC3(zipData: Uint8Array): { project: IProject; issues: Im
 
     // Air tightness: a missing, zero or unreadable qv10 gets the importer default, marked assumed
     // (as normalizeProject does), so the envelope view asks the adviser to check it.
-    const lucht = getChildren(rz.NTAEntityDataId, 'RZ_LUCHTDH')[0];
+    const lucht = firstChild(rz.NTAEntityDataId, 'RZ_LUCHTDH');
     const before = issues.list.length;
     const qv10 = issues.number(`${zp}.airTightness.qv10`, lucht ? getEntityProp(lucht, PROP.LUCHTDH_QV10) : undefined, {
       fallback: ASSUMED_QV10, min: 0, minExclusive: true, fallbackReason: 'aangenomen waarde, te controleren',
@@ -916,7 +955,7 @@ export function readUNIEC3(zipData: Uint8Array): { project: IProject; issues: Im
   const solarPV: ISolarPV[] = [];
   const solarThermal: ISolarThermal[] = [];
 
-  const installParent = getChildren(unit.NTAEntityDataId, 'UNIT_INSTALLATIE')[0] || unit;
+  const installParent = firstChild(unit.NTAEntityDataId, 'UNIT_INSTALLATIE') || unit;
 
   const heating = (opwek: UNIEC3Entity) => {
     const hp = `heatingSystems[${heatingSystems.length}]`;
@@ -1011,6 +1050,31 @@ export function readUNIEC3(zipData: Uint8Array): { project: IProject; issues: Im
     });
   }
 
+  // What the file holds beyond this: entities nobody reads (another entity type, or one that is
+  // not linked where the importer looks) and properties of read entities the importer has no
+  // field for. Library copies and an empty settings entity hold nothing of their own.
+  const unreadEntities = new Map<string, number>();
+  const unreadProperties = new Map<string, Map<string, number>>();
+  for (const entity of unique) {
+    if (!read.has(entity)) {
+      const empty = entity.NTAPropertyDatas.every((property) => property.Value.trim() === '');
+      if (LIBRARY_ENTITIES.has(entity.NTAEntityId) || (entity.NTAEntityId === ENT.SETTINGS && empty)) continue;
+      unreadEntities.set(entity.NTAEntityId, (unreadEntities.get(entity.NTAEntityId) ?? 0) + 1);
+      continue;
+    }
+    for (const property of entity.NTAPropertyDatas) {
+      if (READ_PROPERTIES.has(property.NTAPropertyId) || property.Value.trim() === '') continue;
+      const names = unreadProperties.get(entity.NTAEntityId) ?? new Map<string, number>();
+      names.set(property.NTAPropertyId, (names.get(property.NTAPropertyId) ?? 0) + 1);
+      unreadProperties.set(entity.NTAEntityId, names);
+    }
+  }
+  unreadData(issues, 'entities', 'Entiteiten', unreadEntities);
+  for (const [type, names] of [...unreadProperties.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    unreadData(issues, type, `Eigenschappen van ${type}`, names);
+  }
+
+  sourceVersionNotCarried(issues, 'UNIEC3', sourceVersion);
   ntaInputNotInFormat(issues, 'UNIEC3');
 
   return {
@@ -1031,6 +1095,7 @@ export function readUNIEC3(zipData: Uint8Array): { project: IProject; issues: Im
       constructions,
     },
     issues,
+    ...(sourceVersion ? { sourceVersion } : {}),
   };
 }
 
