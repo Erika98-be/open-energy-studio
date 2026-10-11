@@ -1432,6 +1432,24 @@ fn chapter8_warnings(
                 });
             }
         }
+        // 8.36/8.39: the detailed edge sums ℓ_j·ψ_gr;j along the exposed
+        // perimeter (2025+C1 p. 253 and 255); with none entered H_g has no
+        // edge loss at all, where the forfait would add 0,5·P.
+        if matches!(&floor.edge_thermal_bridges, EdgeThermalBridges::Detailed { bridges } if bridges.is_empty())
+            && floor.exposed_perimeter_m > 0.0
+        {
+            warnings.push(InputGap {
+                detail: Some(format!(
+                    "Detailed floor edge (8.36/8.39) without ψ_gr over P = {:.1} m; the forfait 8.37/8.38 would add {:.1} W/K",
+                    floor.exposed_perimeter_m,
+                    0.5 * floor.exposed_perimeter_m
+                )),
+                ..gap(
+                    "ground_floor_edge_bridges_none_entered",
+                    format!("{path}.edgeThermalBridges"),
+                )
+            });
+        }
     }
 
     // 8.2.1: the detailed route sums ψ·ℓ over the linear thermal bridges of
@@ -7579,6 +7597,24 @@ mod tests {
                 "{kind}: {codes:?}"
             );
         }
+    }
+
+    #[test]
+    fn a_detailed_floor_edge_without_psi_is_flagged() {
+        // 8.36/8.39: a detailed edge without ψ_gr gives H_g no edge loss.
+        let mut value = project();
+        value["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"]["bridges"] =
+            serde_json::json!([]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        assert!(result.warnings.iter().any(|gap| gap.code
+            == "ground_floor_edge_bridges_none_entered"
+            && gap.path == "ntaCalculation.groundFloors[0].edgeThermalBridges"));
+        let base = assess_project_performance(&project());
+        assert!(!base
+            .warnings
+            .iter()
+            .any(|gap| gap.code == "ground_floor_edge_bridges_none_entered"));
     }
 
     #[test]
