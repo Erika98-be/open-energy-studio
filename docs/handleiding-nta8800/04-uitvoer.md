@@ -44,6 +44,7 @@ Alle getoonde BENG-waarden komen uit de kern. De oude, vereenvoudigde berekening
 - **Woningen:** de toets vergelijkt BENG 1, 2 en 3 met de grenswaarden. BENG 1 hangt af van A_ls/A_g.
 - **Utiliteit:** de grenswaarden zijn per functie naar oppervlakte gewogen (art. 4.149 lid 2). Woonfuncties en utiliteitsfuncties mogen niet samen worden gewogen.
 - **TOjuli:** de grens van 1,20 geldt alleen voor woningbouw.
+- **TOjuli bij een serre:** het geveldeel naar een aangrenzende onverwarmde serre, zijn transmissie en de zonwinst via de serre blijven buiten de verdeling per oriëntatie. De rekenzone krijgt dan een melding; hoe dit geveldeel moet meetellen, is als vraag aan NEN voorgelegd.
 - **Rapport:** het rapport toont elke grens met hetzelfde aantal decimalen als de waarde.
 
 De grenswaarden komen uit de Bbl-tekst, niet uit de NTA. Zie het bronnenregister in [hoofdstuk 8](08-versies-en-verwijzingen.md).
