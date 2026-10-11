@@ -3360,9 +3360,8 @@ fn biomass_class_warnings(input: &SpaceHeatingChainInput) -> Vec<ChainIssue> {
 /// `generator_large_system_outside`: a boiler entered inside the thermal
 /// boundary of a system for more than 500 m², taken outside ([`placed_boiler`]).
 fn large_system_warnings(generator: &Generator) -> Vec<ChainIssue> {
-    let inside = |boiler: &BoilerForfaitDraftInput| {
-        boiler.location == BoilerLocation::InsideThermalBoundary
-    };
+    let inside =
+        |boiler: &BoilerForfaitDraftInput| boiler.location == BoilerLocation::InsideThermalBoundary;
     let paths = |generator: &Generator, prefix: &str| -> Vec<String> {
         match generator {
             Generator::GasBoiler(item) if inside(&item.boiler) => {
@@ -3392,7 +3391,10 @@ fn large_system_warnings(generator: &Generator) -> Vec<ChainIssue> {
             .iter()
             .enumerate()
             .flat_map(|(index, part)| {
-                paths(&part.generator, &format!("generator.generators[{index}].generator"))
+                paths(
+                    &part.generator,
+                    &format!("generator.generators[{index}].generator"),
+                )
             })
             .collect(),
         generator => paths(generator, "generator"),
@@ -8436,7 +8438,10 @@ mod tests {
                 .iter()
                 .map(|item| (item.code, item.path.as_str()))
                 .collect::<Vec<_>>(),
-            [("generator_large_system_outside", "generator.boiler.location")]
+            [(
+                "generator_large_system_outside",
+                "generator.boiler.location"
+            )]
         );
 
         // Two identical appliances of 300 m² each are small systems.
