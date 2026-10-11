@@ -2,7 +2,7 @@
 
 ## Stand 11 oktober 2026
 
-**Controle per hoofdstuk tegen de normtekst (reviews 40–48).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
+**Controle per hoofdstuk tegen de normtekst (reviews 40–50).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
 - **Gecontroleerd:**
   - hoofdstuk 5 (indicatoren, primaire-energiefactoren, hernieuwbaar aandeel, f_BACS, labelklasse), review 45;
   - hoofdstukken 6 en 7 (zonering, oppervlakten, maandbalans, interne en zonnewinst, serres), review 46;
@@ -12,10 +12,11 @@
   - hoofdstuk 11 (ventilatie en infiltratie), review 43;
   - hoofdstuk 12 en de bijlagen B, M, N, Q, V, W, X en AA (tabellen), review 47;
   - hoofdstuk 13 (tapwater) en hoofdstuk 16 (PV), review 41;
-  - hoofdstuk 14 (verlichting), review 45.
-- **Gevonden en opgelost:** fouten op routes die geen referentiegeval gebruikt, plus de kelderwanden per wanddeel (8.39/8.45) en f_prac op een verklaard tapwaterrendement (13.152). Van de 290 gevallen van de referentiepoort bewegen er drie: openbaar geval N en de ISSO 54-deeltests EP-W406q en EP-W006g; zie het overzichtsitem bovenaan "Onuitgebracht" in de releasenotes.
+  - hoofdstuk 14 (verlichting), review 45;
+  - hoofdstuk 17 (tabellen 17.1, 17.2, 17.4 en 17.7–17.15, cel voor cel tegen de tekstlaag, 7 584 cellen in de beschaduwingstabellen), bijlage AB (ZEB, AB.1–AB.73 en tabellen AB.1–AB.3), de WKK-methoden 1 en 2 (9.65–9.83, tabellen 9.31 en 9.36–9.38, 13.182/13.183), bijlage P (tabellen P.0–P.12 en P.16, P.19–P.30) en de bijlagen C, E, F, G, H, I en L van de constructies, review 50.
+- **Gevonden en opgelost:** fouten op routes die geen referentiegeval gebruikt, plus de kelderwanden per wanddeel (8.39/8.45) en f_prac op een verklaard tapwaterrendement (13.152). Review 50 vond in de bijlagen alleen dat thermokussens onder een vloer met een spouw de spouwwaarde 0,18 van I.2.1.4 erbij kregen; de kussenregel geldt "in afwijking van het voorgaande", dus R_c = 0,15 + 1,8 (p. 833). Van de 290 gevallen van de referentiepoort bewegen er drie: openbaar geval N en de ISSO 54-deeltests EP-W406q en EP-W006g; zie het overzichtsitem bovenaan "Onuitgebracht" in de releasenotes.
 - **Interpretaties:** vragen 8–12 aan NEN kwamen uit deze controle; samen met vragen 1–7 staan ze in [vragen aan NEN](nta8800-vragen-nen.md) en de [brief](nta8800-vragen-nen-brief.md). De kern houdt haar gekozen lezing tot er een antwoord is.
-- **Niet opnieuw tegen de tekst gelegd** in deze ronde: hoofdstuk 17 (klimaat, alleen tabel 17.1 als invoer van hoofdstuk 7), de bijlagen P, AB en de WKK-methoden (wel in de herberekeningen van 5 oktober), en de bijlagen C, E–I en L van de constructies (gecontroleerd op 2 oktober; review 44 nam C.10 en bijlage D mee).
+- **Steekproefsgewijs** in deze ronde: van bijlage P de tabellen en de formules van de opwekkers; de rekenroute per maand (P.72–P.83) en de distributieverliezen per leidingdeel (P.13–P.18) rusten op de herberekening van 5 oktober. De uurroute van 17.3.8 blijft buiten de kern zolang de uurgegevens van NEN 5060 ontbreken.
 
 **Openbare gevallen.** Geval O (gezondheidszorgfunctie op externe warmtelevering met kwaliteitsverklaring, 2022) is toegevoegd; de referentiepoort heeft nu 30 vergeleken gevallen en 290 in totaal. Het resterende verschil in BENG 2 van geval O (en van L) wordt verklaard door vraag 7 (de warmtecapaciteit van lucht in 11.115/11.119).
 
