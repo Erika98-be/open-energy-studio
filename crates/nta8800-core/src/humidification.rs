@@ -18,6 +18,8 @@ use serde::{Deserialize, Serialize};
 pub const INTERPRETATIONS: &[&str] = &[
     "§12.1 (p. 520) assumes one humidification system per calculation zone; a second humidifier on the same zone is refused (humidifier_zone_duplicate)",
     "12.2.1 (p. 521) sets the recoverable loss to 0 for \"grote opwekkers (A_g > 500 m²)\"; the served area of the humidification generator is used when given (servedAreaM2), otherwise the area connected to the space-heating system, as for 9.2.5.1",
+    "table 12.1 (p. 522) gives (Δx·t)_a;SUP per use function; a zone with several functions takes the mean weighted by their areas",
+    "12.3 (p. 521) gives η 0,6 for gas and oil alike; the fuel is booked on its own carrier (table 5.2: natural gas or fuel oil); the earlier choice gas_or_oil and the survey answer non_electric_steam (ISSO 75.1, which does not ask the fuel) book natural gas",
 ];
 
 /// h_we at 20 °C, kJ/kg.
