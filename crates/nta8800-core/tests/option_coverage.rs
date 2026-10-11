@@ -153,7 +153,47 @@ fn fixtures() -> Vec<Fixture> {
             );
             Fixture { name, route, value }
         })
+        .chain(new_input_fixtures())
         .collect()
+}
+
+/// Review 55: inputs on the routes of reviews 40–54, so the sweep finds the
+/// positions inside them (the sunroom members, the steam carrier, the
+/// collective connection, the thermal-bridge route, the narrow cavity of
+/// F.2) and not only the block member that holds them.
+fn new_input_fixtures() -> Vec<Fixture> {
+    let mut fixtures: Vec<Fixture> = support::new_inputs::new_input_projects()
+        .into_iter()
+        // Case N is already a fixture of its own.
+        .filter(|(name, _)| !name.starts_with("public-comparison-n"))
+        .map(|(name, value)| Fixture {
+            name,
+            route: Route::Project,
+            value,
+        })
+        .collect();
+    let mut envelope: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-constructions-synthetic.json"
+    ))
+    .unwrap();
+    envelope["elements"][0]["element"]["construction"]["build"]["layers"]
+        .as_array_mut()
+        .unwrap()
+        .insert(2, support::new_inputs::narrow_cavity_layer());
+    fixtures.push(Fixture {
+        name: "constructions-synthetic (weakly ventilated narrow cavity)",
+        route: Route::Envelope,
+        value: envelope,
+    });
+    for fixture in &fixtures {
+        assert!(
+            shape_error(fixture.route, &fixture.value).is_none(),
+            "{}: {:?}",
+            fixture.name,
+            shape_error(fixture.route, &fixture.value)
+        );
+    }
+    fixtures
 }
 
 /// Further JSON that only serves as a donor of blocks (generators,

@@ -63,6 +63,10 @@ fn fixtures() -> Vec<(&'static str, Value)> {
     .chain(std::iter::once(sunken_crawlspace_floor()))
     .chain(std::iter::once(common_space_input()))
     .chain(isso54_routes())
+    // Review 55: the routes of reviews 40–54 (shared sunroom, collective
+    // delivery set, forfait bridges without a ground floor, oil steam, a
+    // boiler over 500 m², TOjuli method 3 in 2024, basement wall parts).
+    .chain(support::new_inputs::new_input_projects())
     .collect()
 }
 

@@ -13,6 +13,16 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 55: robuustheidsbewaking op de routes van reviews 40–54 (geen rekenwijziging)
+De robuustheidsfuzz (`tests/robustness.rs`), de numerieke fuzz (`tests/numeric_fuzz.rs`), de optiedekking (`tests/option_coverage.rs`) en de fuzz van de zoektocht naar lege velden (`blank_fuzz`) rekenden alleen met voorbeelden zonder de invoer die reviews 40–54 toevoegden. Ze krijgen nu invoer op die routes (`tests/support/new_inputs.rs`): twee zones met een gedeelde serre (7.38), een collectieve installatie met afleverset en twee identieke toestellen, een bovenwoning met de forfaitaire koudebrugmethode van het gebouw, een stoombevochtiger op olie bij een ketel voor 800 m², TOjuli-methode 3 met screens in 2024, de verwarmde kelder met wanddelen van geval N en een zwak geventileerde smalle luchtlaag (F.2). De optiedekking vindt daardoor 14 posities meer (504), alle bereikt; de catalogus `training-data/nta8800-input-options.json` noemt nu ook de stoomdrager, de koudebrugmethode, de collectieve aansluiting en de serres per zone.
+
+Gevonden en hersteld, elk met een test die op de oude code faalt:
+
+- **Aangesloten oppervlakte zonder bereikgrens.** Een collectieve installatie met `collectiveConnection.connectedUsableAreaM2` van 10³⁰⁰ m² gaf een niet-eindig hulpenergiegebruik (9.4), dat het vangnet als `non_finite_result` weigerde in plaats van de invoer te noemen. De aangesloten oppervlakte krijgt nu de grenzen van de zone-oppervlakte: waarschuwing boven 1.000.000 m², blokkade boven 10.000.000 m², met de nieuwe melding `connected_area_out_of_range` op het veld (NL/EN, Ga naar).
+- **Leeg tagveld met eenheidsvarianten.** Bij een lege soort van een bevochtiger naast een lege drager, of een lege soort zonwering naast een lege kleur, noemde de zoektocht naar lege velden ook de drager of de kleur. Of die gevraagd wordt hangt van de soort af (een verneveling of metaalhoudend doek vraagt er geen), en volgens de regel voor lege tags wordt dan alleen de soort genoemd. De zoektocht herkende de soort niet als tag, omdat een variant zonder velden (verneveling, doek, uitvalscherm) de andere velden negeert in plaats van te weigeren. Nu wordt alleen de soort genoemd; een lege drager bij een gekozen stoombevochtiger blijft een ontbrekend gegeven.
+
+Fuzzresultaten: robuustheidsfuzz met 4000 pogingen per voorbeeld (16 voorbeelden) zonder panic of niet-eindig getal; numerieke fuzz over 23 voorbeelden (3619 getallen, 12174 runs) zonder bevinding; de fuzz van lege velden met 3000 pogingen op twee seeds over vijf blokken zonder valse of gemiste melding. De referentierapporten van alle suites zijn byte-identiek voor en na.
+
 ### 11 oktober 2026 — Review 54: kritische codereview van reviews 44–53 (geen rekenwijziging)
 Codereview van alles wat na review 43 is samengevoegd (reviews 44–53, de gedeelde serre van 7.38 en het vervolg op review 53). Gevonden en hersteld, elk met een test die op de oude code faalt:
 

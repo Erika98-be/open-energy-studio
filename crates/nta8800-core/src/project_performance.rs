@@ -1063,20 +1063,30 @@ fn input_range_findings(project_value: &Value) -> (Vec<InputGap>, Vec<InputGap>)
             );
         }
     }
-    // q_v10 and the dwelling counts may sit at several places in the NTA
-    // block (block level, per zone, per ventilation system).
+    // q_v10, the dwelling counts and the connected area of a collective
+    // installation may sit at several places in the NTA block (block level,
+    // per zone, per ventilation or heating system).
     let mut keyed = Vec::new();
     if let Some(nta) = project_value.get("ntaCalculation") {
         collect_keys(
             nta,
             "ntaCalculation",
-            &["qv10DmPerSM2", "dwellingCount"],
+            &["qv10DmPerSM2", "dwellingCount", "connectedUsableAreaM2"],
             &mut keyed,
         );
     }
     for (key, path, value) in &keyed {
         match key.as_str() {
             "qv10DmPerSM2" => found.check(*value, &QV10_BOUND, "qv10_out_of_range", path.clone()),
+            // Review 55: the connected area of a collective installation
+            // takes the zone-area bounds; 10³⁰⁰ m² made the 9.4 auxiliary
+            // energy non-finite instead of naming the input.
+            "connectedUsableAreaM2" => found.check(
+                *value,
+                &AREA_BOUND,
+                "connected_area_out_of_range",
+                path.clone(),
+            ),
             _ if total_area > 0.0
                 && *value > 0.0
                 && total_area / *value < MIN_AREA_PER_DWELLING_M2 =>
@@ -3266,13 +3276,48 @@ where
                     && error.is_some_and(|(_, message)| {
                         message.starts_with("unknown field") || message.starts_with("missing field")
                     })
-            });
+            })
+            || unit_variant_tag(work, slot, first_error);
         if shapes_object {
             let parent = render_path(&slot.steps[..slot.steps.len() - 1]);
             tags.push((leaf.path.clone(), parent));
         }
     }
     tags
+}
+
+/// Review 55: a tag whose other variants are unit variants of an internally
+/// tagged enum (`atomising` next to `steam { carrier }`, a metallised fabric
+/// next to a screen with a colour). A unit variant ignores the members of
+/// the object, so switching to it gives no unknown or missing field and
+/// [`blank_tags`] took the tag for a plain enum: a blank carrier or colour
+/// next to the blank tag was reported, although the variant decides whether
+/// it is asked. With the object reduced to the tag, the variants ask for
+/// different members: then it is a tag.
+fn unit_variant_tag<F>(work: &Value, slot: &Slot, first_error: &F) -> bool
+where
+    F: Fn(&Value) -> FirstError,
+{
+    let Some((PathStep::Key(key), parent_steps)) = slot.steps.split_last() else {
+        return false;
+    };
+    let parent = render_path(parent_steps);
+    let mut outcomes = std::collections::BTreeSet::new();
+    let mut asks_members = false;
+    for name in slot.variants.iter().take(9) {
+        let mut trial = work.clone();
+        set_at(
+            &mut trial,
+            parent_steps,
+            serde_json::json!({ key.as_str(): name.as_str() }),
+        );
+        let error = first_error(&trial);
+        asks_members |= error
+            .as_ref()
+            .is_some_and(|(at, message)| *at == parent && message.starts_with("missing field"));
+        outcomes.insert(error);
+    }
+    asks_members && outcomes.len() > 1
 }
 
 /// Resolves ``missing field `field` `` at `at`: the removed null member of
@@ -6472,6 +6517,55 @@ mod tests {
         ));
     }
 
+    /// Review 55: next to a blank tag whose other variants are unit variants
+    /// (`atomising` beside `steam { carrier }`, a metallised fabric beside a
+    /// screen with a colour) only the tag is reported; the variant decides
+    /// whether the member is asked at all.
+    #[test]
+    fn a_blank_tag_with_unit_variants_hides_the_members_it_decides() {
+        let missing = |value: &Value| -> Vec<String> {
+            assess_project_performance(value)
+                .gaps
+                .iter()
+                .filter(|gap| gap.code == "nta_value_missing")
+                .map(|gap| gap.path.clone())
+                .collect()
+        };
+        let mut office: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-office.json"
+        ))
+        .unwrap();
+        office["ntaCalculation"]["humidifiers"] = serde_json::json!([{
+            "zoneId": "z1",
+            "humidification": {
+                "humidifier": {"kind": null, "carrier": null},
+                "rotaryWheel": false,
+                "equipmentReference": "steam unit"
+            }
+        }]);
+        assert_eq!(
+            missing(&office),
+            ["ntaCalculation.humidifiers[0].humidification.humidifier.kind"]
+        );
+        // The carrier alone stays a missing input of the steam variant.
+        office["ntaCalculation"]["humidifiers"][0]["humidification"]["humidifier"]["kind"] =
+            Value::from("steam");
+        assert_eq!(
+            missing(&office),
+            ["ntaCalculation.humidifiers[0].humidification.humidifier.carrier"]
+        );
+        let mut case_n: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-public-comparison-n.json"
+        ))
+        .unwrap();
+        case_n["ntaCalculation"]["windowShadings"][0]["movableShading"]["device"] =
+            serde_json::json!({"kind": null, "colour": null});
+        assert_eq!(
+            missing(&case_n),
+            ["ntaCalculation.windowShadings[0].movableShading.device.kind"]
+        );
+    }
+
     /// A probe with nested arrays of internally tagged enums.
     #[derive(serde::Deserialize)]
     #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -8408,6 +8502,66 @@ mod blank_fuzz {
         block
     }
 
+    /// Review 55: the synthetic block with the members of reviews 40–54 —
+    /// a zone sunroom (7.38), an oil-fired steam humidifier, a collective
+    /// installation with a delivery set and identical appliances, the
+    /// building's thermal-bridge route, TOjuli method 3 and a heated basement
+    /// with wall parts — so the blank search sees their required members.
+    fn new_routes_block() -> Value {
+        let mut block = block("nta8800-project-performance-synthetic.json");
+        block["zoneData"] = serde_json::json!([{
+            "zoneId": "z1",
+            "verticalPipes": [],
+            "ventilationFlows": block["ventilationFlows"].clone(),
+            "internalGains": block["internalGains"].clone(),
+            "sunrooms": [{
+                "id": "atrium", "glazingGHeating": 0.55, "glazingGCooling": 0.35,
+                "exteriorFrameFraction": 0.25, "reductionFactor": 0.7,
+                "zoneConductanceWPerK": 6.0, "distributionFactor": 0.3,
+                "surfaces": [
+                    {"areaM2": 60.0, "absorptance": 0.7, "azimuthDeg": 180.0, "tiltDeg": 0.0}
+                ],
+                "sourceReference": "review 55"
+            }]
+        }]);
+        block["humidifiers"] = serde_json::json!([{
+            "zoneId": "z1",
+            "humidification": {
+                "humidifier": {"kind": "steam", "carrier": "oil"},
+                "rotaryWheel": false,
+                "equipmentReference": "review 55"
+            }
+        }]);
+        block["distribution"] =
+            serde_json::json!({"method": "calculated", "sourceReference": "review 55"});
+        block["distributionSystem"] = serde_json::json!({
+            "designTemperatureClass": "70_60", "installation": "collective",
+            "usageFunction": "residential", "collectiveHotWaterDeliverySet": true,
+            "connectedStoreys": 5,
+            "pipeTransmittance": {"method": "forfait",
+                "insulation": {"state": "insulated", "period": "from1995"}},
+            "valvesInsulated": true, "actualPipeLengthM": 100.0, "unheatedPipeLengthM": 0.0,
+            "pump": {"method": "calculated", "heatMeterPresent": true, "sourceReference": "review 55"},
+            "sourceReference": "review 55"
+        });
+        block["collectiveConnection"] =
+            serde_json::json!({"connectedUsableAreaM2": 1200.0, "sourceReference": "review 55"});
+        block["identicalSystems"] = Value::from(2);
+        block["thermalBridgeRoute"] = Value::from("forfait");
+        block["activeCooling"] = serde_json::json!({
+            "system": "split_units_in_every_habitable_room",
+            "capacity": {"method": "solar_limitation", "criterion": "shaded_glazing",
+                "sourceReference": "review 55"},
+            "sourceReference": "review 55"
+        });
+        block["groundFloors"][0]["heatedBasement"] = serde_json::json!({
+            "wallDepths": [{"lengthM": 10.0, "depthM": 1.5}, {"lengthM": 10.0, "depthM": 0.0}],
+            "wallResistanceM2kPerW": 2.5
+        });
+        assert!(deserializes(&block), "review 55 block must deserialize");
+        block
+    }
+
     /// Serialized defaults (`None`) as absent members, as the app sends them.
     fn without_nulls(value: Value) -> Value {
         match value {
@@ -8454,17 +8608,39 @@ mod blank_fuzz {
             let Some(message) = error(&probe).filter(|m| m.starts_with("unknown variant")) else {
                 continue;
             };
-            let is_tag = super::variants(&message)
-                .into_iter()
-                .filter(|name| name != current)
+            let names = super::variants(&message);
+            let is_tag = names
+                .iter()
+                .filter(|name| *name != current)
                 .take(8)
                 .any(|name| {
                     let mut trial = block.clone();
-                    *trial.pointer_mut(pointer).unwrap() = Value::from(name);
+                    *trial.pointer_mut(pointer).unwrap() = Value::from(name.as_str());
                     error(&trial).is_some_and(|m| {
                         m.starts_with("unknown field") || m.starts_with("missing field")
                     })
-                });
+                })
+                // Review 55: a unit variant of an internally tagged enum
+                // ignores the members of the other variant, so switching to
+                // it from the full object gives no error (`detailed` →
+                // `forfait` floor-edge bridges). With the object reduced to
+                // its tag, the variants then ask for different members.
+                || {
+                    let parent_pointer = &pointer[..pointer.rfind('/').unwrap()];
+                    let key = &pointer[pointer.rfind('/').unwrap() + 1..];
+                    let outcomes: BTreeSet<Option<String>> = names
+                        .iter()
+                        .take(9)
+                        .map(|name| {
+                            let mut trial = block.clone();
+                            *trial.pointer_mut(parent_pointer).unwrap() =
+                                serde_json::json!({ key: name });
+                            error(&trial)
+                        })
+                        .collect();
+                    outcomes.len() > 1
+                        && outcomes.iter().flatten().any(|m| m.starts_with("missing field"))
+                };
             if is_tag {
                 found.insert(path.clone(), path[..dot].to_string());
             }
@@ -8644,6 +8820,26 @@ mod blank_fuzz {
             "multiple + annex P",
             multiple_and_annex_p_block(),
             0x2545_F491_4F6C_DD1D,
+            300,
+        );
+    }
+
+    #[test]
+    fn random_blanks_on_the_routes_of_reviews_40_to_54() {
+        check(
+            "review 55 routes",
+            new_routes_block(),
+            0x5DEE_CE66_D1CE_4E5B,
+            300,
+        );
+    }
+
+    #[test]
+    fn random_blanks_in_case_n() {
+        check(
+            "case N (heated basement, wall parts)",
+            block("nta8800-public-comparison-n.json"),
+            0x27BB_2EE6_87B0_B0FD,
             300,
         );
     }

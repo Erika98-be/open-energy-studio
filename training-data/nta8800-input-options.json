@@ -16,6 +16,15 @@
   {
     "kind": "variant",
     "options": [
+      "small_window_area",
+      "shaded_glazing"
+    ],
+    "path": "/ntaCalculation/activeCooling/capacity/criterion",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
       "dynamic_cooling_load",
       "annex_aa",
       "solar_limitation"
@@ -88,6 +97,21 @@
       "utility"
     ],
     "path": "/ntaCalculation/additionalHotWaterSystems/[]/need/method",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "a_plus",
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g"
+    ],
+    "path": "/ntaCalculation/additionalHotWaterSystems/[]/storage/[]/loss/label",
     "route": "project"
   },
   {
@@ -256,6 +280,19 @@
       "free_cooling"
     ],
     "path": "/ntaCalculation/cooling/generators/[]/generator/kind",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "aquifer_from2013",
+      "aquifer_utility_before2013",
+      "aquifer_dwellings_before2013",
+      "surface_water",
+      "closed_ground_loop",
+      "dew_point_cooling"
+    ],
+    "path": "/ntaCalculation/cooling/generators/[]/generator/source",
     "route": "project"
   },
   {
@@ -804,6 +841,26 @@
   {
     "kind": "variant",
     "options": [
+      "electricity",
+      "gas",
+      "gas_or_oil",
+      "oil"
+    ],
+    "path": "/ntaCalculation/humidifiers/[]/humidification/humidifier/carrier",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "atomising",
+      "steam"
+    ],
+    "path": "/ntaCalculation/humidifiers/[]/humidification/humidifier/kind",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
       "chapter14",
       "declared",
       "resolved"
@@ -926,6 +983,15 @@
       "panels"
     ],
     "path": "/ntaCalculation/pvSystems/[]/peakPower/method",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "detailed",
+      "forfait"
+    ],
+    "path": "/ntaCalculation/thermalBridgeRoute",
     "route": "project"
   },
   {
@@ -1658,6 +1724,15 @@
   {
     "kind": "field",
     "options": [
+      "connectedUsableAreaM2",
+      "sourceReference"
+    ],
+    "path": "/ntaCalculation/collectiveConnection",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
       "emission",
       "distribution",
       "generators",
@@ -2153,6 +2228,34 @@
   {
     "kind": "field",
     "options": [
+      "zoneId",
+      "humidification",
+      "servedAreaM2"
+    ],
+    "path": "/ntaCalculation/humidifiers/[]",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "humidifier",
+      "rotaryWheel",
+      "equipmentReference"
+    ],
+    "path": "/ntaCalculation/humidifiers/[]/humidification",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "carrier"
+    ],
+    "path": "/ntaCalculation/humidifiers/[]/humidification/humidifier",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
       "lighting",
       "hotWaterRecoverableKwh",
       "sourceReference"
@@ -2599,6 +2702,34 @@
   {
     "kind": "field",
     "options": [
+      "id",
+      "glazingGHeating",
+      "glazingGCooling",
+      "exteriorFrameFraction",
+      "reductionFactor",
+      "zoneConductanceWPerK",
+      "distributionFactor",
+      "borderingZones",
+      "surfaces",
+      "sourceReference"
+    ],
+    "path": "/ntaCalculation/zoneData/[]/sunrooms/[]",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "areaM2",
+      "absorptance",
+      "azimuthDeg",
+      "tiltDeg"
+    ],
+    "path": "/ntaCalculation/zoneData/[]/sunrooms/[]/surfaces/[]",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
       "floor",
       "wall",
       "ceiling",
@@ -2698,6 +2829,28 @@
       "declaredControlFactor"
     ],
     "path": "/ntaCalculation/zoneData/[]/ventilation/system/unit",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "id",
+      "sourceReference",
+      "months"
+    ],
+    "path": "/ntaCalculation/zoneData/[]/ventilationFlows/[]",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "month",
+      "conductanceWPerK",
+      "supplyTemperatureC",
+      "coolingConductanceWPerK",
+      "coolingSupplyTemperatureC"
+    ],
+    "path": "/ntaCalculation/zoneData/[]/ventilationFlows/[]/months/[]",
     "route": "project"
   },
   {

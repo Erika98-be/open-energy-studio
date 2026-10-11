@@ -120,6 +120,14 @@ export const FORM_COVERAGE_EXEMPTIONS: CoverageExemption[] = [
     reason: 'Afwijkende koelwaarden per maand van een opgegeven luchtstroom; leeg is de verwarmingswaarde (expert).',
   },
   {
+    route: 'project', path: '/ntaCalculation/zoneData/[]/ventilationFlows/[]/months/[]', options: ['coolingConductanceWPerK', 'coolingSupplyTemperatureC'], kind: 'json',
+    reason: 'Afwijkende koelwaarden per maand van een opgegeven luchtstroom van de zone; leeg is de verwarmingswaarde (expert).',
+  },
+  {
+    route: 'project', path: '/ntaCalculation/zoneData/[]/sunrooms/[]', options: ['borderingZones'], kind: 'json',
+    reason: 'De kern leidt de aangrenzende zones van een gedeelde serre af uit de zones met hetzelfde serre-id (7.38, review 54); een opgegeven lijst wordt vervangen.',
+  },
+  {
     route: 'project', path: '/ntaCalculation/thermalMass', options: ['annexBElements'], kind: 'json',
     reason: 'Bijlage B per bouwdeel vervangt tabel 7.10; vraagt een lagenopbouw per element (expert).',
   },

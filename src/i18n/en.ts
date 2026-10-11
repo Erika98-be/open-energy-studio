@@ -1287,6 +1287,7 @@ export const en: Record<string, string> = {
   'nta.gap.non_finite_result': "The calculation produced a non-finite number (NaN or infinity); the result is withheld. Check the input at the reported path.",
   'nta.gap.zone_area_out_of_range': "Zone usable area outside the range the program accepts (warning above 1,000,000 m², blocked above 10,000,000 m²)",
   'nta.gap.surface_area_out_of_range': "Surface or window area outside the range the program accepts (warning above 500,000 m², blocked above 10,000,000 m²)",
+  'nta.gap.connected_area_out_of_range': "Connected usable area of the collective installation outside the range the program accepts (warning above 1,000,000 m², blocked above 10,000,000 m²)",
   'nta.gap.u_value_out_of_range': "U-value outside the range the program accepts (warning above 10 W/m²K, blocked above 100 W/m²K)",
   'nta.gap.qv10_out_of_range': "q_v10 outside the range the program accepts (warning above 10 dm³/s·m², blocked above 1000)",
   'nta.gap.declared_use_out_of_range': "Declared monthly use per m² outside the range the program accepts (warning above 5000 kWh per m² per month, blocked above 1,000,000 kWh per m² per month)",

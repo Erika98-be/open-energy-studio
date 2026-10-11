@@ -71,6 +71,10 @@ In deze ronde kregen een formulier: de douche-WTW (§13.5.3, per douche met verb
 - het soort en de kleur van het toestel in `windowShadings[].movableShading` (`form`): dezelfde samengestelde keuze "soort:kleur" als de projectbrede zonwering;
 - `groundFloors[].heatedBasement.forfaitDeltaUWPerM2k` (`json`): de kern leidt ΔU_for van de verwarmde kelder af uit het projectmodel (8.38); alleen opgeven om daarvan af te wijken. De overname uit de opname laat een opgegeven waarde staan.
 
+**11 oktober 2026, review 55:** de optiedekking kreeg invoer op de routes van reviews 40–54 (gedeelde serre per zone, stoombevochtiger op olie, collectieve aansluiting, koudebrugmethode van het gebouw, TOjuli-methode 3). De catalogus noemt nu ook die velden; alle hebben een formulier, behalve twee vrijstellingen (`json`):
+- `zoneData[].sunrooms[].borderingZones`: de kern leidt de aangrenzende zones van een gedeelde serre af uit de zones met dezelfde serre-id (7.38, review 54); een opgegeven lijst wordt vervangen;
+- `zoneData[].ventilationFlows[].months[].coolingConductanceWPerK`, `coolingSupplyTemperatureC`: dezelfde vrijstelling als voor de luchtstromen van het blok.
+
 ## Nieuwe formulieren in deze ronde
 
 - **Tapwater:** boosterwarmtepomp met meetwaarden (bijlage W: beproevingen bij 24 en 40 °C, klasse, stilstandsverlies W.17, brontemperatuur als één waarde of per maand, bron van de warmte), warmtepompen in serie (bron van de laatste warmtepomp), warmtepomp met indirect verwarmd vat, biomassa-combitoestel (isolatie volgens bijlage R), overig direct gestookt voorraadtoestel; afleversets en b_U per tapwatersysteem.
