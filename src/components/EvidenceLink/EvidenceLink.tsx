@@ -87,8 +87,11 @@ function Thumbnail({ item }: { item: NtaEvidenceItem }) {
       if (created) URL.revokeObjectURL(created);
     };
   }, [item]);
-  if (!url) return <Paperclip className="evidence-link__icon" aria-hidden="true" />;
-  return <img className="evidence-link__thumb" src={url} alt="" />;
+  // HEIC and TIFF photos (phones, scanners) are kept as they are, but most browsers cannot draw
+  // them: the icon replaces a broken image.
+  const [broken, setBroken] = useState(false);
+  if (!url || broken) return <Paperclip className="evidence-link__icon" aria-hidden="true" />;
+  return <img className="evidence-link__thumb" src={url} alt="" onError={() => setBroken(true)} />;
 }
 
 function ItemRow({ item, onUnlink }: { item: NtaEvidenceItem; onUnlink: () => void }) {

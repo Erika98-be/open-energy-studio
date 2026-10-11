@@ -4,7 +4,7 @@ De basisopname is werkstap 6 **Basisopname** (groep *Bestaande bouw*). Er zijn t
 - **Woning-opname starten:** voor bestaande woningen, volgens ISSO 82.1, 7e druk met erratum van 6 januari 2026.
 - **Utiliteit-opname starten:** voor bestaande utiliteitsgebouwen, volgens ISSO 75.1, 7e druk.
 
-Na het starten loop je de opname door met de voortgangslijst links: Algemeen, (alleen utiliteit) Rekenzones, Thermische schil, Verwarming, Warm tapwater, Ventilatie, Koeling, Zonnestroom (PV) en **Uitkomst & forfaitair**. **Vorige** en **Volgende** gaan een onderdeel terug of verder. **Opname verwijderen** haalt de opname uit het project.
+Na het starten loop je de opname door met de voortgangslijst links: Algemeen, (alleen utiliteit) Rekenzones, Thermische schil, Verwarming, Warm tapwater, Ventilatie, Koeling, Zonnestroom (PV) en **Uitkomst & forfaitair**. **Vorige** en **Volgende** gaan een onderdeel terug of verder. **Opname verwijderen** haalt de hele opname uit het project, na een bevestiging. Foto's en andere bestanden die aan de opname gekoppeld waren, blijven in het bewijsregister, als "niet gekoppeld"; het venster noemt hoeveel het er zijn.
 
 ![Basisopname van een woning na Opname doorrekenen: links de voortgangslijst met alle onderdelen zonder fouten, in het midden Uitkomst & forfaitair met de knop Overnemen in projectmodel en de toegepaste standaardwaarden, rechts de kaart Uitkomst opname met labelklasse F](img/opname-voortgang.png)
 
@@ -40,6 +40,10 @@ De opname heeft deze onderdelen:
 - **PV:** de ventilatie achter de modules (tabel 16.2), de amorfe moduletypen, en opgegeven belemmeringsfactoren F_sh;obst (één waarde of twaalf) in plaats van een situatie.
 
 Factoren per maand vul je in als lijst gescheiden door puntkomma's, met een komma als decimaalteken.
+
+**Vlakken van de schil.** Een nieuwe opname begint met de vlakken van een voorbeeldwoning. Met **Vlak toevoegen** voeg je een vlak toe (eerst een ongeïsoleerde gevel aan buitenlucht, `vlak-<n>`); vul daarna element, grens, oppervlakte en isolatie in. **Naam van het vlak** wijzigt de id: ramen, deuren, panelen en lichtkoepels in dat vlak, de vloer bij een geveldeel tegen de grond en de gekoppelde foto's gaan mee. Een lege of dubbele naam meldt het formulier; de verwijzingen blijven dan bij de laatste goede naam tot de naam weer uniek is. Hetzelfde geldt voor **Naam van de zone** in de utiliteitsopname. **Vlak verwijderen** kan pas als er geen raam, deur, paneel of lichtkoepel meer in het vlak ligt; verplaats of verwijder die eerst.
+
+**JSON-weergave.** Onder Uitkomst & forfaitair staat de hele opname als JSON. **JSON toepassen** neemt alleen één JSON-object over. Is de opname intussen in een ander onderdeel gewijzigd, dan meldt de weergave dat toepassen die wijzigingen overschrijft; **JSON opnieuw laden** haalt de actuele opname op.
 
 **Standaardwaarden.** Een vraag zonder antwoord krijgt de standaardwaarde uit de ISSO-tabel. Elke toegepaste standaardwaarde verschijnt onder Uitkomst & forfaitair in de lijst "Toegepaste standaardwaarden". Leg per regel de reden vast in het veld **Reden inklappen**. Het projectdossier toetst die redenen; zie [hoofdstuk 7](07-herlabelen-registratie-dossier.md).
 
@@ -101,7 +105,7 @@ Elk opname-onderdeel heeft een blok **Foto's**:
 - de opwekker van verwarming en tapwater, en extra opwekkers;
 - zonneboilers, ventilatie en koeling.
 
-**Foto toevoegen** opent de bestandskiezer; op een tablet of telefoon ook de camera. Elke foto gaat met zijn SHA-256 in het bewijsregister (soort *Detailfoto*). Hij wordt gekoppeld aan het onderdeel, bijvoorbeeld `/basisopname/survey/pv/@pv-1` (het PV-veld met id `pv-1`). Met **Bestaand bewijsstuk koppelen** koppel je een foto die al in het register staat; met het kruisje ontkoppel je hem weer.
+**Foto toevoegen** opent de bestandskiezer; op een tablet of telefoon ook de camera. Elke foto gaat met zijn SHA-256 in het bewijsregister (soort *Detailfoto*), ook HEIC/HEIF van een telefoon en TIFF of BMP. Kan het programma zo'n foto niet tonen, dan staat er een paperclip in plaats van een voorbeeld; het bestand zelf blijft ongewijzigd. Hij wordt gekoppeld aan het onderdeel, bijvoorbeeld `/basisopname/survey/pv/@pv-1` (het PV-veld met id `pv-1`). Met **Bestaand bewijsstuk koppelen** koppel je een foto die al in het register staat; met het kruisje ontkoppel je hem weer.
 
 De foto's gaan mee in de dossier-ZIP (BRL 9500 bijlage 3: leesbare foto's van typeaanduiding en maatvoering). In de browser blijven de bestanden alleen in deze sessie bewaard. Exporteer daarom het dossier voordat je het venster sluit. De desktopapp bewaart ze in de app-map.
 

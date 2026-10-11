@@ -4,7 +4,7 @@ import { useEnergy } from '../../context/EnergyContext';
 import {
   CheckField, FieldPathPrefixProvider, NumberField, read, Section, SelectField, TextField, TriStateField, write, type Draft, type Path,
 } from '../NtaPerformancePanel/NtaFormFields';
-import { Pill } from '../ui';
+import { ConfirmDialog, Pill } from '../ui';
 import { labelColor } from '../shell/pages/results/resultsData';
 import {
   assessResidentialSurveyWithRust, assessUtilitySurveyWithRust, DEFAULT_NORM_VERSION, type OpnameAssessment,
@@ -26,7 +26,7 @@ import {
   SurveyPanelsFields, SurveyShowerHeatRecoveryField, UtilityCoolingCoverageFields, UtilityHotWaterStorageFields,
   VentilationBypassField, WindowDeclaredObstructionFields,
 } from './SurveyCoverageFields';
-import { freshItemId, jsonPointer, linksAfterRemoval } from '../../core/nta/EvidenceLinks';
+import { freshItemId, jsonPointer, linksAfterEdit, linksAfterRemoval, linksOutside } from '../../core/nta/EvidenceLinks';
 import { formatNumber } from '../../i18n/format';
 import { dutchDefaultValue, dutchSource, snakeCase } from '../../core/nta/OpnameValueText';
 import '../NtaPerformancePanel/NtaPerformancePanel.css';
@@ -282,6 +282,66 @@ function GasEngineFields({ draft, base, change, t }: { draft: Draft; base: Path;
   </>;
 }
 
+/**
+ * The name (`id`) of a survey item whose references follow it. The references move with every
+ * keystroke while the name is unique and not empty; an empty or taken name in between leaves them on
+ * the last good name, so clearing the field and typing a new name (or passing another item's name on
+ * the way) does not strand them (review 36).
+ */
+function IdField({ label, id, others, rename, t }: {
+  label: string; id: string; others: string[]; t: T;
+  /** Writes `next` as the item's id and moves the references from `from` (null: leave them). */
+  rename: (next: string, from: string | null) => void;
+}) {
+  // The name the references point at while this field is being edited.
+  const tracked = useRef<string | null | undefined>(undefined);
+  const invalid = id === '' || others.includes(id);
+  return <><label>{label}
+    <input value={id} aria-invalid={invalid || undefined}
+      onFocus={() => { tracked.current = undefined; }}
+      onChange={(event) => {
+        const next = event.target.value;
+        if (tracked.current === undefined) tracked.current = id !== '' && !others.includes(id) ? id : null;
+        const from = tracked.current;
+        const moves = from != null && next !== '' && !others.includes(next);
+        if (moves) tracked.current = next;
+        rename(next, moves ? from : null);
+      }} />
+  </label>
+  {invalid && <small className="nta-form-note">{t('opname.idInvalid')}</small>}</>;
+}
+
+/** Survey lists whose items name a surface in `surfaceId`. */
+const SURFACE_REFERENCE_LISTS = ['windows', 'doors', 'panels', 'rooflights'] as const;
+
+/** Rewrites the references to survey surface `from` (windows, doors, panels, rooflights, the floor of a ground wall) to `to`. */
+export function moveSurfaceReferences(draft: Draft, from: string, to: string | undefined): Draft {
+  const next = structuredClone(draft);
+  for (const key of SURFACE_REFERENCE_LISTS) {
+    for (const item of list(next, ['envelope', key])) if (item && item.surfaceId === from) item.surfaceId = to;
+  }
+  for (const surface of list(next, ['envelope', 'surfaces'])) {
+    if (surface && surface.groundFloorId === from) {
+      if (to === undefined) delete surface.groundFloorId; else surface.groundFloorId = to;
+    }
+  }
+  return next;
+}
+
+/** Windows, doors, panels and rooflights in surface `id`; a surface with any of them cannot be removed. */
+export function surfaceDependents(draft: Draft, id: string): number {
+  return SURFACE_REFERENCE_LISTS.reduce((count, key) =>
+    count + list(draft, ['envelope', key]).filter((item) => item?.surfaceId === id).length, 0);
+}
+
+/** A new survey surface: an uninsulated façade to outside air until the adviser answers otherwise. */
+export function surfaceTemplate(surfaces: unknown[]): Record<string, unknown> {
+  return {
+    id: freshItemId(surfaces, 'vlak'), element: 'facade', boundary: { kind: 'outdoor' }, grossAreaM2: 10,
+    orientation: 'south', cavity: false, insulation: { kind: 'none_or_unknown' }, sourceReference: '',
+  };
+}
+
 /** Zone of a surface or lighting zone; empty: split by A_g (surfaces) or not set. A reference to a zone that
  * no longer exists is shown as such, so the kernel's `surface_zone_unknown` is visible in the form. */
 function ZoneSelect({ draft, change, path, label, ids, empty, unknown }: {
@@ -312,13 +372,16 @@ export function moveZoneReferences(draft: Draft, from: string, to: string | null
   return next;
 }
 
-/** Renames zone `index`; its references follow when the old name was unique and the new one is free. */
-export function renameZone(draft: Draft, index: number, id: string): Draft {
+/**
+ * Renames zone `index`; its references follow when the old name was unique and the new one is free.
+ * With `from`, the references move from that name instead (the name field tracks them, see `IdField`).
+ */
+export function renameZone(draft: Draft, index: number, id: string, from?: string | null): Draft {
   const zones = list(draft, ['zones']);
   const old = String(zones[index]?.id ?? '');
   const others = zones.filter((_, item) => item !== index).map((zone) => String(zone.id ?? ''));
-  const moved = old !== '' && id !== '' && !others.includes(old) && !others.includes(id)
-    ? moveZoneReferences(draft, old, id) : draft;
+  const source = from === undefined ? (old !== '' && !others.includes(old) ? old : null) : from;
+  const moved = source != null && id !== '' && !others.includes(id) ? moveZoneReferences(draft, source, id) : draft;
   return write(moved, ['zones', index, 'id'], id);
 }
 
@@ -414,8 +477,9 @@ export function CalculationZoneFields({ draft, change, replace, t }: {
         <strong className="opname-zone-heading">
           {t('opname.zones.heading', { n: index + 1, id: String(read(draft, [...base, 'id']) ?? '') })}
         </strong>
-        <TextField draft={draft} path={[...base, 'id']} label={t('opname.zones.id')}
-          onChange={(_, value) => replace(renameZone(draft, index, String(value ?? '')))} />
+        <IdField label={t('opname.zones.id')} id={String(read(draft, [...base, 'id']) ?? '')} t={t}
+          others={zones.filter((_, item) => item !== index).map((zone) => String(zone.id ?? ''))}
+          rename={(next, from) => replace(renameZone(draft, index, next, from))} />
         {functions.map((_, functionIndex) => <div key={functionIndex} className="opname-served">
           <SelectField {...field} path={[...base, 'functions', functionIndex, 'function']} label={t('opname.zones.function')}
             options={opts(t, 'opname.functionKind', UTILITY_FUNCTIONS)} />
@@ -643,8 +707,8 @@ function ListControls({ label, onAdd }: { label: string; onAdd: () => void }) {
   </div>;
 }
 
-function RemoveButton({ label, onRemove }: { label: string; onRemove: () => void }) {
-  return <button type="button" className="btn opname-remove" onClick={onRemove}>{label}</button>;
+function RemoveButton({ label, onRemove, disabled = false }: { label: string; onRemove: () => void; disabled?: boolean }) {
+  return <button type="button" className="btn opname-remove" disabled={disabled} onClick={onRemove}>{label}</button>;
 }
 
 function list(draft: Draft, path: Path): Array<Record<string, unknown>> {
@@ -721,6 +785,9 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [json, setJson] = useState<string | null>(null);
+  // The survey the JSON text was taken from; a field changed since then is shown before Apply overwrites it.
+  const [jsonBase, setJsonBase] = useState<unknown>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const requestId = useRef(0);
 
   const save = (next: StoredSurvey | undefined, keepResult = false) => {
@@ -730,6 +797,21 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       setResult(null);
       setError(null);
       setBusy(false);
+    }
+  };
+
+  /**
+   * "Opname verwijderen" after a confirmation: the survey and its photo links go (the photos stay
+   * in the register, unlinked), the same as removing one survey item.
+   */
+  const discard = () => {
+    const registration = state.project.registration;
+    const evidence = registration?.evidence ?? [];
+    save(undefined);
+    setJson(null);
+    const kept = linksOutside(evidence, '/basisopname');
+    if (kept.some((item, position) => item !== evidence[position])) {
+      dispatch({ type: 'UPDATE_PROJECT_INFO', payload: { registration: { ...registration, evidence: kept } } });
     }
   };
 
@@ -749,8 +831,8 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
   const change: Change = (path, value) => save({ kind, survey: write(draft, path, value) });
   // Removes a survey item and keeps the photo links of the other items on their item
   // (items without an id are linked by position, so the ones after it move up).
-  const removeAt = (path: Path, index: number) => {
-    let survey = write(draft, path, list(draft, path).filter((_, item) => item !== index));
+  const removeAt = (path: Path, index: number, after: (survey: Draft) => Draft = (survey) => survey) => {
+    let survey = after(write(draft, path, list(draft, path).filter((_, item) => item !== index)));
     // A removed window leaves no id in the solar-control list (`solar_control_window_unknown`).
     const removedId = list(draft, path)[index]?.id;
     const solarControl = read(survey, ['solarControlWindowIds']);
@@ -764,6 +846,18 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
     if (evidence.length === 0) return;
     const moved = linksAfterRemoval(evidence, state.project, { ...state.project, basisopname: next },
       surveyPointer(path), index);
+    if (moved.some((item, position) => item !== evidence[position])) {
+      dispatch({ type: 'UPDATE_PROJECT_INFO', payload: { registration: { ...registration, evidence: moved } } });
+    }
+  };
+  /** Saves an edit that keeps every item in place (a renamed surface); photo links follow the item. */
+  const replaceKeepingLinks = (survey: Draft) => {
+    const next: StoredSurvey = { kind, survey };
+    const registration = state.project.registration;
+    const evidence = registration?.evidence ?? [];
+    save(next);
+    if (evidence.length === 0) return;
+    const moved = linksAfterEdit(evidence, state.project, { ...state.project, basisopname: next });
     if (moved.some((item, position) => item !== evidence[position])) {
       dispatch({ type: 'UPDATE_PROJECT_INFO', payload: { registration: { ...registration, evidence: moved } } });
     }
@@ -783,6 +877,10 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
   const reasons = (read(draft, ['inklapRedenen']) ?? {}) as Record<string, string>;
   const verticalPipes = read(draft, ['verticalPipes']);
   const zoneIds = list(draft, ['zones']).map((zone) => String(zone.id ?? '')).filter((id) => id !== '');
+
+  // Files linked into the survey, named in the removal question.
+  const linkedPhotos = (state.project.registration?.evidence ?? []).filter((item) =>
+    (item.linkedPaths ?? []).some((pointer) => pointer === '/basisopname' || pointer.startsWith('/basisopname/'))).length;
 
   const run = async () => {
     const current = ++requestId.current;
@@ -918,8 +1016,14 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       {surfaces.map((surface, index) => {
         const base: Path = ['envelope', 'surfaces', index];
         const insulation = read(draft, [...base, 'insulation', 'kind']);
+        const id = String(surface.id ?? '');
+        const others = surfaces.filter((_, item) => item !== index).map((item) => String(item.id ?? ''));
+        const dependents = surfaceDependents(draft, id);
         return <div key={index} className="opname-item" role="group" aria-label={String(surface.id ?? index)}>
           <strong>{String(surface.id ?? index)}</strong>
+          <IdField label={t('opname.surface.id')} id={id} others={others} t={t}
+            rename={(next, from) => replaceKeepingLinks(write(from != null ? moveSurfaceReferences(draft, from, next) : draft,
+              [...base, 'id'], next))} />
           <SelectField {...field} path={[...base, 'element']} label={t('opname.surface.element')}
             options={opts(t, 'opname.surface.elementKind', ['facade', 'roof', 'floor'])}
             onChange={(_, value) => change(base, withoutStaleGroundWall({ ...surface, element: value }))} />
@@ -959,8 +1063,15 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
             <CheckField {...field} path={[...base, 'renovation', 'meetsRequirementsOfYear']} label={t('opname.surface.renovationEvidence')} />
           </>}
           <SurveyPhotos path={base} />
+          {/* A surface with windows, doors, panels or rooflights keeps them; they are moved or removed first. */}
+          <RemoveButton label={t('opname.surface.remove')} disabled={dependents > 0}
+            onRemove={() => removeAt(['envelope', 'surfaces'], index,
+              (survey) => (others.includes(id) ? survey : moveSurfaceReferences(survey, id, undefined)))} />
+          {dependents > 0 && <small className="nta-form-note">{t('opname.surface.removeBlocked', { count: dependents })}</small>}
         </div>;
       })}
+      <ListControls label={t('opname.addSurface')}
+        onAdd={() => change(['envelope', 'surfaces'], [...surfaces, surfaceTemplate(surfaces)])} />
       {windows.map((window, index) => {
         const base: Path = ['envelope', 'windows', index];
         const situation = read(draft, [...base, 'shading', 'situation']);
@@ -1257,22 +1368,37 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
     {show('result') && <details className="opname-json">
       <summary>{t('opname.json')}</summary>
       <textarea aria-label={t('opname.json')} rows={14} value={json ?? JSON.stringify(draft, null, 2)}
-        onChange={(event) => setJson(event.target.value)} />
+        onChange={(event) => {
+          if (json == null) setJsonBase(stored.survey);
+          setJson(event.target.value);
+        }} />
+      {json != null && jsonBase !== stored.survey && <p className="nta-form-note" role="status">
+        {t('opname.jsonStale')}{' '}
+        <button type="button" className="btn btn-sm" onClick={() => setJson(null)}>{t('opname.jsonReload')}</button>
+      </p>}
       <div className="opname-actions">
         <button type="button" className="btn" disabled={json == null} onClick={() => {
+          let parsed: unknown;
           try {
-            save({ kind, survey: JSON.parse(json ?? '{}') as Record<string, unknown> });
-            setJson(null);
+            parsed = JSON.parse(json ?? '{}');
           } catch {
             setError(t('opname.jsonInvalid'));
+            return;
           }
+          // The survey is one JSON object; `null`, a list or a number would break the form.
+          if (parsed == null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            setError(t('opname.jsonNotObject'));
+            return;
+          }
+          save({ kind, survey: parsed as Record<string, unknown> });
+          setJson(null);
         }}>{t('opname.jsonApply')}</button>
       </div>
     </details>}
 
     {!wizard && <div className="opname-actions">
       <button type="button" className="btn btn-primary" disabled={busy} onClick={() => { void run(); }}>{t('opname.calculate')}</button>
-      <button type="button" className="btn" onClick={() => save(undefined)}>{t('opname.discard')}</button>
+      <button type="button" className="btn" onClick={() => setConfirmDiscard(true)}>{t('opname.discard')}</button>
     </div>}
     {error && <p className="opname-error" role="alert">{error}</p>}
     {wizard && section === 'result' && !result && <p className="nta-form-note">{t('opname.progress.notCalculated')}</p>}
@@ -1350,8 +1476,16 @@ export function BasisopnamePanel({ section: requested, onSection }: BasisopnameP
       </> : <p className="nta-form-note">{t('opname.progress.notCalculated')}</p>}
       <div className="opname-actions">
         <button type="button" className="btn btn-primary" disabled={busy} onClick={() => { void run(); }}>{t('opname.calculate')}</button>
-        <button type="button" className="btn" onClick={() => save(undefined)}>{t('opname.discard')}</button>
+        <button type="button" className="btn" onClick={() => setConfirmDiscard(true)}>{t('opname.discard')}</button>
       </div>
     </aside>}
+    {confirmDiscard && <ConfirmDialog title={t('opname.discardConfirm.title')} danger
+      message={linkedPhotos === 0 ? t('opname.discardConfirm.messageNone')
+        : t('opname.discardConfirm.message', { count: linkedPhotos })}
+      confirmLabel={t('opname.discard')}
+      onChoose={(choice) => {
+        setConfirmDiscard(false);
+        if (choice === 'confirm') discard();
+      }} />}
   </section>;
 }
