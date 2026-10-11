@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij acht punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen nu steeds de letterlijke tekst, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij negen punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vraag 9) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -48,7 +48,7 @@ Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is 
 ### Vraag 3. Praktijkfactor f_prac bij een kwaliteitsverklaring van een warmtepomp (p. 337, 340, 615–617)
 
 - **Plaats.** Formule 9.62 (tabelroute, f_prac 1) en 9.63 (gegevens volgens bijlage Q, f_prac 0,95); §9.1 (p. 285) over de kwaliteitsverklaring die de tabelwaarde vervangt; p. 615 over de kwaliteitsverklaring voor verwarming volgens bijlage Q; formule 13.152 voor tapwater.
-- **Lezing A (onze keuze).** Een gedeclareerde COP voor verwarming valt onder 9.63 met f_prac 0,95. Een gedeclareerd tapwaterrendement is geen forfaitaire waarde en krijgt eveneens 0,95.
+- **Lezing A (onze keuze).** Een gedeclareerde COP voor verwarming valt onder 9.63 met f_prac 0,95. Een gedeclareerd tapwaterrendement is geen forfaitaire waarde en krijgt eveneens 0,95; dat geldt voor een warmtepomp, een gastoestel (tabel 13.25 of bijlage T) en een ketel met indirect verwarmd voorraadvat (tabel 13.28).
 - **Lezing B.** Een gedeclareerde waarde die de tabelwaarde vervangt, blijft binnen 9.62 en 13.8.4.7, met f_prac 1.
 - **Gevolg in openbare gevallen.** Lezing A komt tot op de kWh overeen met de gepubliceerde rapporten. Lezing B zou BENG 2 verlagen ten opzichte van die rapporten, in geval A met 2,82 en in geval B met 1,73 kWh/(m²·jr).
 - **Vraag.** Klopt lezing A?
@@ -98,6 +98,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Lezing B.** Het geveldeel telt mee in A_T;or met b_U·H_zi;ztu (8.4) of U·A als transmissie en de indirecte zonnewinst van 7.30b als zonnewinst op zijn oriëntatie.
 - **Gevolg.** Geen van de openbare gevallen heeft een serre. Ligt de serre op de enige gevel van een oriëntatie, dan wordt die oriëntatie met lezing A mogelijk niet beoordeeld (A_T;or ≤ 3 m²).
 - **Vraag.** Welke warmteoverdrachtscoëfficiënt en welke zonnewinst horen in 5.40 en de julibalans bij het geveldeel naar een serre?
+
+### Vraag 9. Scheidingsconstructie naar een aangrenzende onverwarmde ruimte bij TOjuli in de forfaitaire route (5.7.2, p. 115; 8.4.1, p. 266)
+
+- **Plaats.** Stap A van 5.7.2 (p. 115) laat elementen naar een aangrenzende onverwarmde ruimte (AOR) buiten A_T;or. Bij de forfaitaire verrekening van 8.4.1 is H_U;for = 0 en zit de scheidingsconstructie in H_D;for (U_iu;equi volgens C.1.3); opmerking 5 (p. 266) beschouwt haar dan als uitwendige scheidingsconstructie, met de AOR vervangen door buitenlucht. Stap 1 van 5.7.2 neemt H_C;D;juli uit 8.2.
+- **Lezing A (onze keuze).** In de forfaitaire route telt de scheidingsconstructie mee in A_T;or en H_C;D;juli van haar oriëntatie, zonder zonnewinst, zodat de verdeling aansluit op H_D;for.
+- **Lezing B.** Stap A gaat voor: de scheidingsconstructie blijft ook in de forfaitaire route buiten A_T;or en buiten de verdeling per oriëntatie.
+- **Gevolg.** Alleen geval O (gezondheidszorgfunctie, NTA 8800:2022) gebruikt de forfaitaire route met een AOR op een gevel; het rapport geeft geen TOjuli. Met lezing B wordt een oriëntatie met alleen zo'n gevel niet beoordeeld (A_T;or ≤ 3 m²) en krijgt een oriëntatie met ook buitengevels een kleiner aandeel in de verdeelde posten van stap B.
+- **Vraag.** Geldt de scheidingsconstructie naar een AOR in de forfaitaire route voor stap A als uitwendige scheidingsconstructie, en hoort haar transmissie dan bij H_C;D;juli van haar oriëntatie?
 
 ---
 

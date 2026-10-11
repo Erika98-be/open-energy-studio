@@ -82,6 +82,12 @@ pub const STANDBY_ELECTRONICS_W: f64 = 10.0;
 /// 13.49/13.50: recoverable share of circulation pump energy.
 pub const PUMP_RECOVERABLE_FACTOR: f64 = 0.20;
 
+/// Readings of chapter 13 where the norm leaves a choice.
+pub const INTERPRETATIONS: &[&str] = &[
+    "13.152 (p. 616–617): f_prac;gi = 1,0 only for the forfait values of 13.8.4.5–13.8.4.7; a declared value (heat pump, gas appliance of table 13.25, indirectly heated vessel of table 13.28) or an annex T value is no forfait value and takes 0,95 (vragen-nen 3)",
+    "Table 13.29 (p. 553): an unknown N_woon;si,W is A_g;gebouw;W / A_g;tot; the kernel rounds the quotient to whole dwellings before choosing the band (≤ 10, 11–20, > 20)",
+];
+
 /// Table 13.1 `Q_W;nd;spec`, kWh/m² per year.
 pub fn utility_specific_need(function: LabelFunction) -> Option<f64> {
     Some(match function {
