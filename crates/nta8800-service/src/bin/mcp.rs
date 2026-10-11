@@ -93,15 +93,36 @@ pub fn call(name: &str, arguments: Option<Map<String, Value>>) -> CallToolResult
     };
     let body = Value::Object(arguments.unwrap_or_default());
     let outcome = execute(op, body);
-    if outcome.is_error() {
-        CallToolResult::structured_error(outcome.body)
+    let is_error = outcome.is_error();
+    // MCP structured content must be an object; the one list result
+    // (list_interpretations) comes wrapped as `{"result": [...]}`.
+    let body = if outcome.body.is_object() {
+        outcome.body
     } else {
-        CallToolResult::structured(outcome.body)
+        json!({ "result": outcome.body })
+    };
+    if is_error {
+        CallToolResult::structured_error(body)
+    } else {
+        CallToolResult::structured(body)
     }
 }
 
+/// Default number of tool calls that calculate at the same time: the same
+/// default as the HTTP API's calculation slots.
+fn max_calculations() -> usize {
+    std::env::var("OES_MCP_MAX_CALCULATIONS")
+        .ok()
+        .and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|slots| (1..=nta8800_service::http::MAX_CALCULATION_SLOTS).contains(slots))
+        .unwrap_or_else(nta8800_service::http::default_max_concurrent_calculations)
+}
+
 #[derive(Clone)]
-struct EnergyMcp;
+struct EnergyMcp {
+    /// Tool calls that may calculate at once; further calls wait for a slot.
+    slots: Arc<tokio::sync::Semaphore>,
+}
 
 impl ServerHandler for EnergyMcp {
     fn get_info(&self) -> ServerConfig {
@@ -149,16 +170,21 @@ impl ServerHandler for EnergyMcp {
     ) -> Result<CallToolResponse, McpError> {
         let name = request.name.to_string();
         let arguments = request.arguments;
-        let result = tokio::task::spawn_blocking(move || call(&name, arguments))
-            .await
-            .unwrap_or_else(|_| {
-                CallToolResult::structured_error(error_body(
-                    "kernel_panic",
-                    "The kernel stopped unexpectedly; the result is withheld",
-                    None,
-                    Value::Null,
-                ))
-            });
+        // The semaphore is never closed, so acquiring only waits.
+        let slot = self.slots.clone().acquire_owned().await.ok();
+        let result = tokio::task::spawn_blocking(move || {
+            let _slot = slot;
+            call(&name, arguments)
+        })
+        .await
+        .unwrap_or_else(|_| {
+            CallToolResult::structured_error(error_body(
+                "kernel_panic",
+                "The kernel stopped unexpectedly; the result is withheld",
+                None,
+                Value::Null,
+            ))
+        });
         Ok(result.into())
     }
 
@@ -290,10 +316,24 @@ fn top_level_id(bytes: &[u8]) -> Value {
 }
 
 /// Decides what to do with one complete input line (without its newline).
-fn classify_line(line: &[u8]) -> LineAction {
+/// A line with more than `max_json_values` JSON values is refused before it
+/// is parsed, as the HTTP API refuses such a body (the parsed value takes
+/// memory per value, not per byte).
+fn classify_line(line: &[u8], max_json_values: usize) -> LineAction {
     let text = line.trim_ascii();
     if text.is_empty() {
         return LineAction::Skip;
+    }
+    if nta8800_service::http::json_value_count(text, max_json_values).is_none() {
+        let mut reply: Value = serde_json::from_str(&error_line(
+            top_level_id(text),
+            INVALID_REQUEST,
+            &format!("Invalid Request: the message has more than {max_json_values} JSON values"),
+        ))
+        .unwrap_or(Value::Null);
+        reply["error"]["data"] =
+            json!({ "code": "payload_too_large", "maxJsonValues": max_json_values });
+        return LineAction::Reply(reply.to_string());
     }
     let message: Value = match serde_json::from_slice(text) {
         Ok(message) => message,
@@ -354,6 +394,13 @@ fn oversized_line(max_line_bytes: usize) -> String {
     )
 }
 
+/// The guard's caps on one input line.
+#[derive(Debug, Clone, Copy)]
+struct LineLimits {
+    max_line_bytes: usize,
+    max_json_values: usize,
+}
+
 /// Reads stdin line by line, at most `max_line_bytes` per line, answers the
 /// lines [`classify_line`] refuses through `replies` and forwards the others
 /// to the MCP library.
@@ -361,9 +408,13 @@ async fn guard_input(
     input: impl tokio::io::AsyncRead + Unpin,
     mut to_server: impl tokio::io::AsyncWrite + Unpin,
     replies: tokio::sync::mpsc::UnboundedSender<String>,
-    max_line_bytes: usize,
+    limits: LineLimits,
 ) -> std::io::Result<()> {
     use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+    let LineLimits {
+        max_line_bytes,
+        max_json_values,
+    } = limits;
     let mut reader = BufReader::new(input);
     let mut line: Vec<u8> = Vec::new();
     let mut oversized = false;
@@ -390,7 +441,7 @@ async fn guard_input(
             let action = if oversized {
                 LineAction::Reply(oversized_line(max_line_bytes))
             } else {
-                classify_line(&line)
+                classify_line(&line, max_json_values)
             };
             match action {
                 LineAction::Forward => {
@@ -411,7 +462,7 @@ async fn guard_input(
     if oversized {
         let _ = replies.send(oversized_line(max_line_bytes));
     } else if !line.is_empty() {
-        match classify_line(&line) {
+        match classify_line(&line, max_json_values) {
             LineAction::Forward => {
                 to_server.write_all(&line).await?;
                 to_server.write_all(b"\n").await?;
@@ -467,6 +518,16 @@ fn max_line_bytes() -> usize {
         .unwrap_or(DEFAULT_MAX_LINE_BYTES)
 }
 
+/// Cap on the JSON values of one message: the HTTP API's default
+/// (`--max-json-values`), or `OES_MCP_MAX_JSON_VALUES` (at least 1000).
+fn max_json_values() -> usize {
+    std::env::var("OES_MCP_MAX_JSON_VALUES")
+        .ok()
+        .and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|values| *values >= 1000)
+        .unwrap_or(nta8800_service::http::DEFAULT_MAX_JSON_VALUES)
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if std::env::args().any(|arg| arg == "--version") {
@@ -479,9 +540,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (guard_end, server_in) = tokio::io::duplex(1 << 16);
     let (server_out, merge_end) = tokio::io::duplex(1 << 16);
     let (replies, replies_rx) = tokio::sync::mpsc::unbounded_channel();
-    let guard = tokio::spawn(guard_input(stdin, guard_end, replies, max_line_bytes()));
+    let limits = LineLimits {
+        max_line_bytes: max_line_bytes(),
+        max_json_values: max_json_values(),
+    };
+    let guard = tokio::spawn(guard_input(stdin, guard_end, replies, limits));
     let merge = tokio::spawn(merge_output(merge_end, replies_rx, stdout));
-    let service = EnergyMcp.serve((server_in, server_out)).await?;
+    let server = EnergyMcp {
+        slots: Arc::new(tokio::sync::Semaphore::new(max_calculations())),
+    };
+    let service = server.serve((server_in, server_out)).await?;
     service.waiting().await?;
     guard.abort();
     let _ = merge.await;
@@ -524,13 +592,53 @@ mod tests {
         }
     }
 
+    fn classify(line: &[u8]) -> LineAction {
+        classify_line(line, nta8800_service::http::DEFAULT_MAX_JSON_VALUES)
+    }
+
+    #[test]
+    fn guard_refuses_more_json_values_than_the_http_cap() {
+        let arguments = format!("[{}]", vec!["0"; 2000].join(","));
+        let line = format!(
+            r#"{{"jsonrpc":"2.0","id":21,"method":"tools/call","params":{{"name":"validate_project","arguments":{{"project":{{"x":{arguments}}}}}}}}}"#
+        );
+        let refused = reply(classify_line(line.as_bytes(), 1000));
+        assert_eq!(refused["id"], 21);
+        assert_eq!(refused["error"]["code"], INVALID_REQUEST);
+        assert_eq!(refused["error"]["data"]["code"], "payload_too_large");
+        assert_eq!(refused["error"]["data"]["maxJsonValues"], 1000);
+        assert_eq!(classify_line(line.as_bytes(), 5000), LineAction::Forward);
+    }
+
+    #[test]
+    fn a_list_result_is_wrapped_as_an_object() {
+        // MCP structured content is an object; list_interpretations answers
+        // a list over HTTP.
+        let result = call("list_interpretations", None);
+        assert_eq!(result.is_error, Some(false));
+        let body = result.structured_content.unwrap();
+        assert!(body["result"]
+            .as_array()
+            .is_some_and(|groups| !groups.is_empty()));
+        for op in operations() {
+            if op.method == Method::Get {
+                let result = call(op.name, None);
+                assert!(
+                    result.structured_content.unwrap().is_object(),
+                    "{}",
+                    op.name
+                );
+            }
+        }
+    }
+
     #[test]
     fn guard_answers_lines_the_library_would_leave_unanswered() {
         // Invalid and truncated JSON: parse error, with the id when readable.
-        let bad = reply(classify_line(b"{bad json"));
+        let bad = reply(classify(b"{bad json"));
         assert_eq!(bad["error"]["code"], PARSE_ERROR);
         assert_eq!(bad["id"], Value::Null);
-        let truncated = reply(classify_line(
+        let truncated = reply(classify(
             br#"{"jsonrpc":"2.0","id":11,"method":"tools/list""#,
         ));
         assert_eq!(truncated["error"]["code"], PARSE_ERROR);
@@ -541,29 +649,29 @@ mod tests {
             "[".repeat(200),
             "]".repeat(200)
         );
-        let deep = reply(classify_line(deep.as_bytes()));
+        let deep = reply(classify(deep.as_bytes()));
         assert_eq!(deep["error"]["code"], INVALID_REQUEST);
         assert_eq!(deep["id"], "x7");
         // tools/call with non-object arguments or params: invalid params.
-        let arguments = reply(classify_line(
+        let arguments = reply(classify(
             br#"{"jsonrpc":"2.0","id":12,"method":"tools/call","params":{"name":"get_version","arguments":[1]}}"#,
         ));
         assert_eq!(arguments["error"]["code"], INVALID_PARAMS);
         assert_eq!(arguments["id"], 12);
-        let params = reply(classify_line(
+        let params = reply(classify(
             br#"{"jsonrpc":"2.0","id":13,"method":"tools/call","params":[1]}"#,
         ));
         assert_eq!(params["error"]["code"], INVALID_PARAMS);
         // Valid messages, notifications and blank lines pass or are dropped.
         assert_eq!(
-            classify_line(br#"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"#),
+            classify(br#"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"#),
             LineAction::Forward
         );
         assert_eq!(
-            classify_line(br#"{"jsonrpc":"2.0","method":"tools/call","params":[1]}"#),
+            classify(br#"{"jsonrpc":"2.0","method":"tools/call","params":[1]}"#),
             LineAction::Forward
         );
-        assert_eq!(classify_line(b"   "), LineAction::Skip);
+        assert_eq!(classify(b"   "), LineAction::Skip);
     }
 
     #[test]
@@ -583,7 +691,11 @@ mod tests {
         input.push(b'\n');
         let (to_server, mut server_side) = tokio::io::duplex(1 << 16);
         let (replies, mut replies_rx) = tokio::sync::mpsc::unbounded_channel();
-        guard_input(&input[..], to_server, replies, 4096)
+        let limits = LineLimits {
+            max_line_bytes: 4096,
+            max_json_values: nta8800_service::http::DEFAULT_MAX_JSON_VALUES,
+        };
+        guard_input(&input[..], to_server, replies, limits)
             .await
             .unwrap();
         let reply: Value = serde_json::from_str(&replies_rx.recv().await.unwrap()).unwrap();

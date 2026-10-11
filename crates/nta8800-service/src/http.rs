@@ -613,6 +613,18 @@ fn input_schema(op: &Operation) -> Value {
 /// JSON Schema of an operation's 200 result. Most results are described in
 /// docs/nta8800-api.md; the edition comparison has its shape here.
 fn result_schema(op: &Operation) -> Value {
+    if op.name == "list_interpretations" {
+        // The one result that is not an object (an MCP tool result wraps it
+        // as `{"result": [...]}`, see bin/mcp.rs).
+        return json!({
+            "type": "array",
+            "items": { "type": "object", "required": ["module", "part", "items"], "properties": {
+                "module": { "type": "string" },
+                "part": { "type": "string" },
+                "items": { "type": "array", "items": { "type": "string" } }
+            } }
+        });
+    }
     if op.name != "compare_project_editions" {
         return json!({ "type": "object" });
     }
@@ -663,9 +675,24 @@ pub fn request_schema(op: &Operation) -> Value {
     input_schema(op)
 }
 
+/// The 405 answer of a route called with another method; `Allow` names the
+/// route's own method.
+fn method_not_allowed_response(method: Method, error: &Value) -> Value {
+    let allow = match method {
+        Method::Get => "GET, HEAD",
+        Method::Post => "POST",
+    };
+    json!({
+        "description": format!("Called with another method than the route's own (method_not_allowed); the Allow header gives {allow}"),
+        "headers": { "Allow": { "description": "The method(s) the route takes", "schema": { "type": "string" } } },
+        "content": { "application/json": { "schema": error } }
+    })
+}
+
 /// OpenAPI 3.1 document built from the operation registry.
 pub fn openapi_document() -> Value {
     let error = json!({ "$ref": "#/components/schemas/Error" });
+    let host_refused = json!({ "description": "The Host header names a host the service does not answer (host_not_allowed; protection against DNS rebinding)", "content": { "application/json": { "schema": error } } });
     let mut paths = serde_json::Map::new();
     paths.insert(
         "/health".to_string(),
@@ -673,8 +700,12 @@ pub fn openapi_document() -> Value {
             "operationId": "health",
             "tags": ["service"],
             "summary": "Liveness check",
-            "responses": { "200": { "description": "Service is up",
-                "content": { "application/json": { "schema": { "type": "object" } } } } }
+            "responses": {
+                "200": { "description": "Service is up",
+                    "content": { "application/json": { "schema": { "type": "object" } } } },
+                "403": host_refused,
+                "405": method_not_allowed_response(Method::Get, &error),
+            }
         }}),
     );
     paths.insert(
@@ -683,8 +714,12 @@ pub fn openapi_document() -> Value {
             "operationId": "openapi",
             "tags": ["service"],
             "summary": "This OpenAPI 3.1 document",
-            "responses": { "200": { "description": "OpenAPI document",
-                "content": { "application/json": { "schema": { "type": "object" } } } } }
+            "responses": {
+                "200": { "description": "OpenAPI document",
+                    "content": { "application/json": { "schema": { "type": "object" } } } },
+                "403": host_refused,
+                "405": method_not_allowed_response(Method::Get, &error),
+            }
         }}),
     );
     for op in operations() {
@@ -698,7 +733,8 @@ pub fn openapi_document() -> Value {
             "200".into(),
             json!({ "description": "Result", "content": { "application/json": { "schema": result_schema(op) } } }),
         );
-        responses.insert("403".into(), json!({ "description": "The Host header names a host the service does not answer (host_not_allowed; protection against DNS rebinding)", "content": { "application/json": { "schema": error } } }));
+        responses.insert("403".into(), host_refused.clone());
+        responses.insert("405".into(), method_not_allowed_response(op.method, &error));
         if op.method == Method::Post {
             responses.insert("400".into(), json!({ "description": "Malformed request: invalid JSON, an unknown or missing member, a wrong input shape or an edition that does not fit", "content": { "application/json": { "schema": error } } }));
             responses.insert("413".into(), json!({ "description": "Request body larger than the configured byte limit or with more JSON values than the configured value limit", "content": { "application/json": { "schema": error } } }));
@@ -753,7 +789,10 @@ pub fn openapi_document() -> Value {
             "required": ["error", "code", "message"],
             "properties": {
                 "error": { "type": "string", "description": "Machine code (same as code; kept for older clients)" },
-                "code": { "type": "string", "description": "Machine code: invalid_json, invalid_request_shape, missing_request_member, invalid_project_shape, invalid_maatwerkadvies_shape, invalid_norm_version, norm_version_conflict, norm_version_not_applicable, payload_too_large, unsupported_media_type, host_not_allowed, not_found, method_not_allowed, non_finite_result, serialization_failed, kernel_panic, calculation_unavailable, server_busy, calculation_timeout" },
+                "code": { "type": "string", "description": format!(
+                    "Machine code: {} (unknown_tool from the MCP server only)",
+                    crate::operations::ERROR_CODES.join(", ")
+                ) },
                 "message": { "type": "string" },
                 "path": { "type": ["string", "null"], "description": "JSON path of the offending input or result value" },
                 "details": { "description": "Optional extra data" }

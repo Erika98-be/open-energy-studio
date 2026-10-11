@@ -8,7 +8,7 @@ use axum::{
 };
 use nta8800_service::{
     app, app_with, openapi_document,
-    operations::{operations, Method},
+    operations::{operations, Method, ERROR_CODES},
     HttpConfig,
 };
 use serde_json::{json, Value};
@@ -888,4 +888,184 @@ async fn queue_timeout_is_separate_from_the_calculation_timeout() {
     assert_eq!(second.0, StatusCode::SERVICE_UNAVAILABLE, "{}", second.2);
     assert_envelope(&second.2, "server_busy");
     assert!(second.1.contains_key(header::RETRY_AFTER));
+}
+
+// ------------------------------------------------------------ contract probe
+
+/// The machine codes the OpenAPI document lists for the error envelope.
+fn documented_codes(document: &Value) -> Vec<String> {
+    let description = document["components"]["schemas"]["Error"]["properties"]["code"]
+        ["description"]
+        .as_str()
+        .unwrap();
+    description
+        .split(|c: char| !(c.is_ascii_lowercase() || c == '_'))
+        .filter(|word| word.contains('_'))
+        .map(str::to_string)
+        .collect()
+}
+
+/// Checks one answer against the operation's documented responses: the
+/// status is listed, an error envelope carries a listed code, a 200 has the
+/// result schema's required members, and no message leaks a panic or a
+/// source path.
+fn assert_within_contract(
+    document: &Value,
+    path: &str,
+    method: &str,
+    probe: &str,
+    status: StatusCode,
+    body: &Value,
+) {
+    let responses = &document["paths"][path][method]["responses"];
+    assert!(
+        responses.get(status.as_str()).is_some(),
+        "{method} {path} ({probe}) answered {status}, not documented: {body}"
+    );
+    let text = body.to_string();
+    for leak in ["panicked", "/home/", "src/", ".rs:", "RUST_BACKTRACE"] {
+        assert!(
+            !text.contains(leak),
+            "{path} ({probe}) leaks {leak}: {body}"
+        );
+    }
+    if status == StatusCode::OK {
+        let schema = &responses["200"]["content"]["application/json"]["schema"];
+        let kind = if body.is_array() { "array" } else { "object" };
+        assert!(
+            body.is_object() || body.is_array(),
+            "{path} ({probe}): {body}"
+        );
+        assert_eq!(schema["type"], kind, "{path} ({probe}) result type");
+        for key in schema["required"].as_array().into_iter().flatten() {
+            let key = key.as_str().unwrap();
+            assert!(body.get(key).is_some(), "{path} ({probe}) lacks {key}");
+        }
+        return;
+    }
+    if status == StatusCode::UNPROCESSABLE_ENTITY && body.get("code").is_none() {
+        // A kernel assessment, not an envelope.
+        assert!(body["status"].is_string(), "{path} ({probe}): {body}");
+        return;
+    }
+    let code = body["code"].as_str().unwrap_or("?").to_string();
+    assert_envelope(body, &code);
+    assert!(
+        documented_codes(document).contains(&code),
+        "{path} ({probe}) answered code {code}, not listed in the OpenAPI Error schema"
+    );
+}
+
+/// Every code the service sources put in an error envelope (an
+/// `error_body("…"` call or an edition refusal's `code: "…"`) is one of
+/// [`ERROR_CODES`], so the OpenAPI list cannot fall behind the code.
+#[test]
+fn every_emitted_error_code_is_listed() {
+    let root = env!("CARGO_MANIFEST_DIR");
+    let sources = [
+        "src/operations.rs",
+        "src/http.rs",
+        "src/bin/mcp.rs",
+        "../nta8800-core/src/norm_versions/request.rs",
+    ];
+    let mut found = Vec::new();
+    for source in sources {
+        let text = std::fs::read_to_string(format!("{root}/{source}")).unwrap();
+        for marker in ["error_body(", "code: "] {
+            for (at, _) in text.match_indices(marker) {
+                let rest = text[at + marker.len()..].trim_start();
+                if let Some(literal) = rest.strip_prefix('"') {
+                    let code = literal.split('"').next().unwrap();
+                    found.push((source, code.to_string()));
+                }
+            }
+        }
+    }
+    assert!(found.len() > 15, "{found:?}");
+    for (source, code) in found {
+        assert!(
+            ERROR_CODES.contains(&code.as_str()),
+            "{source} emits {code}, not in ERROR_CODES"
+        );
+    }
+    let listed = documented_codes(&openapi_document());
+    for code in ERROR_CODES {
+        assert!(listed.iter().any(|item| item == code), "{code}");
+    }
+}
+
+/// Every documented operation, probed in process with malformed and
+/// edge-case requests, answers only the statuses and error codes its OpenAPI
+/// entry lists.
+#[tokio::test]
+async fn every_operation_answers_within_its_documented_contract() {
+    let document = openapi_document();
+    let office = without_nulls(fixture("nta8800-example-office.json"));
+    let survey = fixture("nta8800-opname-1930-terraced.json");
+    for op in operations() {
+        let path = op.path;
+        if op.method == Method::Get {
+            let (status, body) = get(path).await;
+            assert_within_contract(&document, path, "get", "get", status, &body);
+            let (status, body) = post(path, json!({})).await;
+            assert_within_contract(&document, path, "get", "post on get", status, &body);
+            continue;
+        }
+        let key = op.input.unwrap().key;
+        let mut probes: Vec<(&str, Value)> = vec![
+            ("empty", json!({})),
+            ("unknown member", json!({ key: {}, "normversion": "2022" })),
+            ("bad edition", json!({ key: {}, "normVersion": "1999" })),
+            ("edition number", json!({ key: {}, "normVersion": 2022 })),
+            ("older edition", json!({ key: {}, "normVersion": "2022" })),
+        ];
+        for (name, value) in [
+            ("null", Value::Null),
+            ("number", json!(1)),
+            ("string", json!("x")),
+            ("array", json!([])),
+            ("object", json!({})),
+            (
+                "null members",
+                json!({ "ntaCalculation": null, "normVersion": null }),
+            ),
+        ] {
+            let mut body = json!({ key: value });
+            if op.name == "assess_relabel" {
+                body["current"] = body[key].clone();
+            }
+            probes.push((name, body));
+        }
+        if key == "project" {
+            probes.push(("example office", json!({ "project": office.clone() })));
+            probes.push((
+                "example office 2022",
+                json!({ "project": office.clone(), "normVersion": "2022" }),
+            ));
+        }
+        if op.name == "assess_relabel" {
+            probes.push((
+                "example office pair",
+                json!({ "original": office.clone(), "current": office.clone() }),
+            ));
+        }
+        if key == "survey" {
+            probes.push(("survey fixture", json!({ "survey": survey.clone() })));
+        }
+        for (probe, body) in probes {
+            let (status, answer) = post(path, body).await;
+            assert_within_contract(&document, path, "post", probe, status, &answer);
+        }
+        let (status, _, answer) = send(
+            app(),
+            Request::post(path)
+                .header("content-type", "text/plain")
+                .body(Body::from("{}"))
+                .unwrap(),
+        )
+        .await;
+        assert_within_contract(&document, path, "post", "text/plain", status, &answer);
+        let (status, answer) = get(path).await;
+        assert_within_contract(&document, path, "post", "get on post", status, &answer);
+    }
 }

@@ -51,7 +51,7 @@ Herstart daarna Claude Desktop.
   - een beschrijving in het Engels met Nederlandse vaktermen, waaronder de HTTP-route;
   - een JSON Schema van de invoer: een object met het vereiste invoerlid (`project`, `survey`, `input`, `case`, of `original` en `current`).
 - **`tools/call`:**
-  - **Inhoud:** het resultaat is precies de JSON-body die de HTTP-route teruggeeft, als `structuredContent` en als tekst in `content`.
+  - **Inhoud:** het resultaat is precies de JSON-body die de HTTP-route teruggeeft, als `structuredContent` en als tekst in `content`. Eén uitzondering: MCP vraagt een object als `structuredContent`, dus de lijst van `list_interpretations` komt verpakt als `{"result": [...]}`.
   - **`isError`:** dit staat op `true` als de route met 4xx of 5xx zou antwoorden.
     - Bij een ontbrekend of verkeerd invoerlid krijg je de foutenvelop met `code` en `path`, bijvoorbeeld `missing_request_member` met pad `project`.
     - Bij een weigering van de kern krijg je de beoordeling, met `status`, `gaps` en `issues`.
@@ -60,7 +60,7 @@ Herstart daarna Claude Desktop.
 - **`compare_project_editions`:** hier is `normVersion` de doeluitgave; het project behoudt zijn eigen uitgave. De tool toont wat die uitgave weigert, extra vraagt, niet gebruikt of anders leest, met omschakelpunt, pad en aanpassing, plus het aangepaste project (zie [API, Uitgave wijzigen](nta8800-api.md#uitgave-wijzigen-compare_project_editions)).
 - **`resources/list` en `resources/read`:** zie hieronder. Een onbekende URI geeft de JSON-RPC-fout *resource not found*.
 
-Een tool die lang rekent, draait buiten de protocol-lus, zodat de server bereikbaar blijft.
+Een tool die lang rekent, draait buiten de protocol-lus, zodat de server bereikbaar blijft. Er rekenen hoogstens zoveel tools tegelijk als de HTTP-API standaard rekenplaatsen heeft (het aantal processorkernen); verdere aanroepen wachten op een vrije plaats. `OES_MCP_MAX_CALCULATIONS` (1–1024) stelt een ander aantal in.
 
 ### Grenzen en foutregels
 
@@ -71,9 +71,11 @@ Elke regel op stdin gaat eerst door een poortwachter. Die beantwoordt de regels 
 | Geen geldige JSON, of afgebroken | JSON-RPC-fout `-32700` (*parse error*), met het `id` als dat nog te lezen is, anders `null` |
 | Dieper genest dan 128 niveaus | `-32600` (*invalid request*), met het `id` |
 | Langer dan de regelgrens | `-32600`, met `id` `null`; de rest van de regel wordt gelezen en weggegooid, niet bewaard |
+| Meer JSON-waarden dan de waardengrens | `-32600`, met het `id` als dat te lezen is en `data` `{"code": "payload_too_large", "maxJsonValues": …}`; de regel wordt niet ingelezen |
 | `tools/call` met `params` of `arguments` die geen object zijn | `-32602` (*invalid params*), met het `id` |
 
 - **Regelgrens:** 64 MiB per bericht. `OES_MCP_MAX_LINE_BYTES` (in bytes, minimaal 1024) stelt een andere grens in.
+- **Waardengrens:** 500 000 JSON-waarden per bericht, dezelfde standaard als `--max-json-values` van de HTTP-API. Een ingelezen bericht neemt geheugen per waarde, niet per byte; zonder deze grens kon een regel binnen 64 MiB een veelvoud daarvan aan geheugen vragen. `OES_MCP_MAX_JSON_VALUES` (minimaal 1000) stelt een andere grens in.
 - Een melding (een bericht zonder `id`) krijgt nooit een antwoord, ook niet als hij ongeldig is.
 - Na zo'n fout blijft de server gewoon antwoorden.
 

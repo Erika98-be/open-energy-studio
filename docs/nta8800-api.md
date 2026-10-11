@@ -110,13 +110,16 @@ De foutenvelop:
 
 Een 422 is geen fout van de client of de server, maar een rekenuitkomst: lees `gaps` (ontbrekende invoer met pad) en `issues` (strijdige invoer). De betekenis van elke code staat in de app en in [hoofdstuk 5 van de handleiding](handleiding-nta8800/05-validatie.md).
 
-Vier bewerkingen antwoorden nooit 422; hun bevindingen staan in de body bij 200:
+Vijf bewerkingen antwoorden nooit 422; hun bevindingen staan in de body bij 200:
 - `validate_project` (status `invalid` of `structurally_valid`; de app leest de beoordeling ook bij `invalid`);
 - `assess_relabel`;
 - `get_label_input_hash`;
-- `audit_reference_case`.
+- `audit_reference_case`;
+- `compare_project_editions` (wat de doeluitgave weigert of vraagt, staat in `items` en `remainingAfterAutomaticChanges`).
 
-Het OpenAPI-document noemt 422 alleen bij de bewerkingen die het kunnen geven.
+Het OpenAPI-document noemt 422 alleen bij de bewerkingen die het kunnen geven, en 403 en 405 bij elke route. Elke code die de service kan geven, staat in de beschrijving van `Error.code`; een test leest de bronnen en houdt die lijst volledig. Een tweede test stuurt elke bewerking lege, verkeerde en onbekende leden, een onbekende of oudere `normVersion`, een verkeerd `Content-Type` en de verkeerde methode, en controleert dat elk antwoord een gedocumenteerde status en code heeft en geen paniek- of bronpad noemt.
+
+`GET /v1/nta8800/interpretations` geeft als enige een lijst (per module een groep), geen object; het OpenAPI-document beschrijft die vorm.
 
 ## Bewerkingen
 
