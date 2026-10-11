@@ -118,5 +118,5 @@ Een nieuwere programmaversie moet projecten van een oudere versie kunnen lezen, 
 - **Testresultaten per wijziging:**
   - de lokale gate `scripts/verify-nta.sh`, met Rust-tests, Clippy, de minimale Rust-versie, frontendtests en de productiebouw;
   - de vaste fuzz- en robuustheidstests;
-  - de referentiesuites in `training-data/reference-suites/` (openbare gevallen A–N, RVO-voorbeeldwoningen, ISSO 54 versie 2.0). Elke gate schrijft hun rapport, met commit, `KERNEL_VERSION` en SHA-256 per invoer en uitvoer, naar `nta-evidence/gate/reference/`; een vrijgave bewaart het in haar archief.
+  - de referentiesuites in `training-data/reference-suites/` (openbare gevallen A–O, RVO-voorbeeldwoningen, ISSO 54 versie 2.0). Elke gate schrijft hun rapport, met commit, `KERNEL_VERSION` en SHA-256 per invoer en uitvoer, naar `nta-evidence/gate/reference/`; een vrijgave bewaart het in haar archief.
 - **Nog niet aanwezig:** de EDR-testen van ISSO-publicatie 54 versie 5.0:2026 (BRL 9501 §4.2, p. 7), waarvan de uitkomsten bij elke vrijgave moeten worden bewaard. Zie het [attestdossier](nta8800-attestdossier.md).

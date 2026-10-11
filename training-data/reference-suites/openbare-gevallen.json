@@ -1,6 +1,6 @@
 {
   "suiteId": "openbare-gevallen",
-  "description": "Herbouwde openbare BENG-rapporten A–N. Verwacht is de vastgelegde uitkomst van deze rekenkern (regressie, banden als in crates/nta8800-core/tests/public_comparison.rs); de gepubliceerde waarden staan er ter vergelijking bij en beslissen niets. Geen officiële referentietoets.",
+  "description": "Herbouwde openbare BENG-rapporten A–O. Verwacht is de vastgelegde uitkomst van deze rekenkern (regressie, banden als in crates/nta8800-core/tests/public_comparison.rs); de gepubliceerde waarden staan er ter vergelijking bij en beslissen niets. Geen officiële referentietoets.",
   "cases": [
     {
       "caseId": "openbaar-a-2025c1",
@@ -867,6 +867,58 @@
           "path": "beng3",
           "value": 126.9,
           "source": "rapport N (Uniec 3.0.7.1, 02-02-2021, NTA 8800:2020+A1)"
+        }
+      ]
+    },
+    {
+      "caseId": "openbaar-o-2022",
+      "normVersion": "2022",
+      "projectFile": "../nta8800-public-comparison-o.json",
+      "source": {
+        "publisher": "openbaar BENG-rapport O (gezondheidszorgfunctie op een warmtenet), bijlage bij een ter-inzage-legging",
+        "documentId": "https://repository.officiele-overheidspublicaties.nl/Bijlagen/TerInzageLegging/2024/til-2024-13830/1/bijlage/62.4617.151.ur.nbu_OVB-K4_BENG_MPG.pdf",
+        "edition": "Uniec 3.1.5.0, 24-02-2023",
+        "usePermission": "openbaar gepubliceerd; alleen getallen overgenomen, geen rapporttekst",
+        "independentReviewer": "geen: regressie op de eigen uitkomst van de rekenkern (docs/nta8800-vergelijking-openbare-rapporten.md)"
+      },
+      "expected": [
+        {
+          "path": "beng1",
+          "value": 88.25,
+          "unit": "kWh/m2.year",
+          "normReference": "BENG 1, energiebehoefte (5.3)",
+          "absoluteTolerance": 0.05
+        },
+        {
+          "path": "beng2",
+          "value": 47.75,
+          "unit": "kWh/m2.year",
+          "normReference": "BENG 2, primair fossiel energiegebruik (5.2)",
+          "absoluteTolerance": 0.05
+        },
+        {
+          "path": "beng3",
+          "value": 44.2,
+          "unit": "%",
+          "normReference": "BENG 3, aandeel hernieuwbare energie (5.4)",
+          "absoluteTolerance": 0.15
+        }
+      ],
+      "published": [
+        {
+          "path": "beng1",
+          "value": 87.26,
+          "source": "rapport O (Uniec 3.1.5.0, 24-02-2023, NTA 8800:2022)"
+        },
+        {
+          "path": "beng2",
+          "value": 49.49,
+          "source": "rapport O (Uniec 3.1.5.0, 24-02-2023, NTA 8800:2022)"
+        },
+        {
+          "path": "beng3",
+          "value": 45.1,
+          "source": "rapport O (Uniec 3.1.5.0, 24-02-2023, NTA 8800:2022)"
         }
       ]
     }

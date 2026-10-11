@@ -2,7 +2,7 @@
 
 Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)).
 
-Alle zes vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle zeven vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -73,3 +73,15 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Vraag.**
 - Geldt voor 13.19 en de weging in hoofdstuk 14 de gebruiksoppervlakte binnen de rekenzone (6.6.4, laatste alinea) of die in het gebouw (6.6.4, eerste alinea)?
 - Ligt het deel van een gemeenschappelijke ruimte dat aan een functie buiten de rekenzone wordt toebedeeld, voor deze weging "in de rekenzone"?
+
+## 7. Warmtecapaciteit van lucht in 11.115 en 11.119 (p. 505 en 506; 2022: p. 486 en 487)
+
+**Situatie.** Formule 11.119 geeft de warmte van de verwarmingsbatterij van een luchtbehandelingskast als q_V;SUP;dis;in · (ρ·c)_a · t · (ϑ_SUP;dis;in − ϑ_SUP;hu), gedeeld door het rendement van 11.120; 11.115 geeft de koude van de koelbatterij op dezelfde manier. Bij beide staat c_a = 0,000 027 9 kWh/(kg·K). Elders rekent de norm met ρ_a·c_a = 1,205 kg/m³ · 1 005 J/(kg·K) = 1 211 J/(m³·K) (bij 8.49 en 8.57), dus c_a = 0,000 279 kWh/(kg·K): tien keer zo groot. Dezelfde waarde 0,000 027 9 staat in de uitgaven 2022 en 2025+C1.
+
+**Gekozen lezing.** De kern rekent met de gedrukte waarde.
+
+**Gevolg.** De zone krijgt toevoerlucht op de temperatuur van tabel 11.15, en haar warmtebehoefte daalt met de volle warmte die de batterij toevoegt; de batterij zelf telt maar een tiende daarvan. In openbaar geval O (gezondheidszorgfunctie, D.3 met de LBK in de zone, Uniec 3.1.5.0, NTA 8800:2022) telt de batterij 279 kWh in plaats van 2 794 kWh. Met de gedrukte waarde rekent de kern BENG 2 47,75, met 0,000 279 49,80; het rapport geeft 49,49. Bij geval L (school, LBK buiten de zone) is het 18,63 tegen 23,82, rapport 25,36.
+
+**Vraag.**
+- Is c_a = 0,000 027 9 kWh/(kg·K) in 11.115 en 11.119 een drukfout voor 0,000 279 kWh/(kg·K)?
+- Zo niet: waarom telt de batterij een tiende van de warmte die de toevoerlucht volgens 11.3.2 en tabel 11.15 krijgt?

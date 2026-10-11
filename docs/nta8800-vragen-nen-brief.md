@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij zes punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vier daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen nu steeds de letterlijke tekst, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij zeven punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen nu steeds de letterlijke tekst, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -83,6 +83,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Gevolg in een openbaar geval.** Geval H (NTA 8800:2023) heeft een gemeenschappelijke ruimte van 49,20 m² in de rekenzone zonder sport, terwijl ook de sportfunctie erop is aangewezen. Het rapport volgt lezing B: 44,35 m² gaat naar sport, ook in de verlichting van de rekenzone zonder sport. Met lezing A rekenen wij 317 kWh minder tapwater en 248 kWh minder verlichting; BENG 2 wordt 80,74 in plaats van 81,86 kWh/(m²·jr) (rapport 80,01).
 - **Vraag.** Geldt voor 13.19 en de weging in hoofdstuk 14 de gebruiksoppervlakte binnen de rekenzone of die in het gebouw? Ligt het deel van een gemeenschappelijke ruimte dat aan een functie buiten de rekenzone wordt toebedeeld, voor deze weging "in de rekenzone"?
 
+### Vraag 7. Warmtecapaciteit van lucht in 11.115 en 11.119 (p. 505 en 506; 2022: p. 486 en 487)
+
+- **Plaats.** Formule 11.119 (p. 506) geeft de warmte van de verwarmingsbatterij van een luchtbehandelingskast, 11.115 (p. 505) de koude van de koelbatterij. Bij beide staat c_a = 0,000 027 9 kWh/(kg·K). Elders rekent de norm met ρ_a·c_a = 1 211 J/(m³·K) (bij 8.49 en 8.57), dus c_a = 1 005 J/(kg·K) = 0,000 279 kWh/(kg·K). NTA 8800:2022 (p. 486 en 487) heeft dezelfde waarde.
+- **Lezing A (onze keuze).** De gedrukte waarde 0,000 027 9 kWh/(kg·K).
+- **Lezing B.** Een drukfout voor 0,000 279 kWh/(kg·K), zodat de batterij de warmte telt die de toevoerlucht volgens 11.3.2 en tabel 11.15 krijgt.
+- **Gevolg in een openbaar geval.** Geval O (gezondheidszorgfunctie, NTA 8800:2022, D.3 met de luchtbehandelingskast in de zone): de warmtebehoefte van de zone daalt met ongeveer 1 600 kWh doordat de toevoerlucht op 18 °C komt, maar met lezing A telt de batterij 279 kWh, met lezing B 2 794 kWh. BENG 2 is 47,75 met lezing A en 49,80 met lezing B; het rapport geeft 49,49 kWh/(m²·jr). Bij geval L (school, NTA 8800:2022) is het 18,63 tegen 23,82, rapport 25,36.
+- **Vraag.** Is c_a in 11.115 en 11.119 een drukfout voor 0,000 279 kWh/(kg·K)? Zo niet: waarom telt de batterij een tiende van de warmte die de toevoerlucht krijgt?
+
 ---
 
 Wij danken u voor uw aandacht en zijn graag bereid de berekeningen per geval toe te lichten.
@@ -93,4 +101,4 @@ Met vriendelijke groet,
 [functie]
 [organisatie]
 
-*Bijlage op verzoek: vergelijking met openbare rapporten (gevallen A–N), met de verschilanalyse per post.*
+*Bijlage op verzoek: vergelijking met openbare rapporten (gevallen A–O), met de verschilanalyse per post.*
