@@ -8340,3 +8340,61 @@ mod refusal_gaps {
         }
     }
 }
+
+#[cfg(test)]
+mod steam_humidifier_carrier {
+    use super::*;
+
+    fn office_with_steam(carrier: &str) -> ProjectPerformanceAssessment {
+        let mut office: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-office.json"
+        ))
+        .unwrap();
+        office["ntaCalculation"]["humidifiers"] = serde_json::json!([{
+            "zoneId": "z1",
+            "humidification": {
+                "humidifier": {"kind": "steam", "carrier": carrier},
+                "rotaryWheel": false,
+                "equipmentReference": "steam unit"
+            }
+        }]);
+        assess_project_performance(&office)
+    }
+
+    fn used(result: &ProjectPerformanceAssessment, carrier: &str) -> f64 {
+        result
+            .performance
+            .as_ref()
+            .unwrap()
+            .carriers
+            .iter()
+            .filter(|row| row.carrier == carrier)
+            .map(|row| row.used_kwh)
+            .sum()
+    }
+
+    /// 12.3 with table 5.2: the fuel of an oil-fired steam humidifier is
+    /// oil, not natural gas; the energy is the same (η 0,6 for both).
+    #[test]
+    fn an_oil_fired_steam_humidifier_uses_oil() {
+        let gas = office_with_steam("gas");
+        let oil = office_with_steam("oil");
+        for result in [&gas, &oil] {
+            assert!(
+                result.performance.is_some(),
+                "{} {:?}",
+                result.status,
+                result.gaps
+            );
+        }
+        let steam = used(&oil, "oil");
+        assert!(steam > 0.0);
+        assert_eq!(used(&gas, "oil"), 0.0);
+        assert!((used(&gas, "gas") - used(&oil, "gas") - steam).abs() < 1e-6);
+        assert!((used(&gas, "el") - used(&oil, "el")).abs() < 1e-9);
+        // The earlier "gas_or_oil" choice still books natural gas.
+        let legacy = office_with_steam("gas_or_oil");
+        assert!((used(&legacy, "gas") - used(&gas, "gas")).abs() < 1e-9);
+        assert_eq!(used(&legacy, "oil"), 0.0);
+    }
+}

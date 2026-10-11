@@ -580,7 +580,7 @@ export interface NtaHeatedBasement {
 export interface NtaZoneHumidifier {
   zoneId: string;
   humidification: {
-    humidifier: { kind: 'atomising' } | { kind: 'steam'; carrier: 'electricity' | 'gas_or_oil' };
+    humidifier: { kind: 'atomising' } | { kind: 'steam'; carrier: 'electricity' | 'gas' | 'oil' | 'gas_or_oil' };
     rotaryWheel: boolean;
     equipmentReference: string;
   };

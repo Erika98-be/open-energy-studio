@@ -485,7 +485,7 @@ Via **NTA-invoer starten** opent een gestructureerd formulier met secties die de
 - **Ontvochtiging:** zit in de koelketen. Q_C;dhum = f_DHU;C · Q_C;nd (12.5, tabel 12.2) komt bij de opwekkerlast. De factor volgt uit de ontwerptemperatuur van de koudedistributie; zonder distributie (directe expansie) of bij een onbekend ontwerp telt 6/12 °C. Bij stralingsafgifte (vloer, wand, plafond) is Q_C;dhum 0.
 - **Bevochtiging:** `humidifiers` per zone, in de verwarmingsketen (of `ntaCalculation.humidifiers`). Vereist hoofdstuk 11-invoer, want 12.1 gebruikt de mechanische toevoer van de warmtebalans.
   - Een vernevelaar levert zijn latente warmte als last aan het knooppunt van de verwarmingsketen (9.4).
-  - Een stoombevochtiger gebruikt elektriciteit (η 0,8) of gas (η 0,6).
+  - Een stoombevochtiger gebruikt elektriciteit (η 0,8), gas of olie (beide η 0,6); de brandstof telt als die energiedrager (tabel 5.2). De oude keuze `gas_or_oil` en het antwoord "niet-elektrische stoom" uit de basisopname tellen als gas.
   - Het terugwinbare verlies van stoombevochtiging (12.4, (1 − η)·Q_hum;nd, nul boven 500 m²) telt per zone mee bij de terugwinbare verliezen van 7.3–7.8, naast die van de distributie, en verlaagt zo de warmtebehoefte.
 
 ## Ventilatoren in de afgifte (9.21/9.22, tabel 9.11)

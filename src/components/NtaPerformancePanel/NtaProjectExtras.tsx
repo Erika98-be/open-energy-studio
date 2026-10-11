@@ -81,6 +81,9 @@ export function HumidifiersFields({ draft, change, project }: SectionProps & { p
     {rows.map((_, index) => {
       const at = (...rest: Path): Path => ['humidifiers', index, ...rest];
       const kind = read(draft, at('humidification', 'humidifier', 'kind'));
+      // Projects saved before the gas/oil split keep their "gas or oil"
+      // choice visible; the kernel books it as natural gas.
+      const legacyCarrier = read(draft, at('humidification', 'humidifier', 'carrier')) === 'gas_or_oil';
       return <fieldset key={index} className="nta-form-row">
         <legend>{t('nta.form.humidifier')} {index + 1}</legend>
         <SelectField {...field} path={at('zoneId')} label={t('nta.form.humidifier.zone')} options={zones} />
@@ -90,7 +93,9 @@ export function HumidifiersFields({ draft, change, project }: SectionProps & { p
             ? { kind: 'steam', carrier: 'electricity' } : { kind: 'atomising' })} />
         {kind === 'steam' && <SelectField {...field} path={at('humidification', 'humidifier', 'carrier')}
           label={t('nta.form.humidifier.carrier')} options={[
-            ['electricity', t('nta.form.humidifier.electricity')], ['gas_or_oil', t('nta.form.humidifier.gasOrOil')]]} />}
+            ['electricity', t('nta.form.humidifier.electricity')], ['gas', t('nta.form.humidifier.gas')],
+            ['oil', t('nta.form.humidifier.oil')],
+            ...(legacyCarrier ? [['gas_or_oil', t('nta.form.humidifier.gasOrOil')] as [string, string]] : [])]} />}
         {kind === 'steam' && <NumberField {...field} path={at('servedAreaM2')} label={t('nta.form.humidifier.servedArea')} />}
         <CheckField {...field} path={at('humidification', 'rotaryWheel')} label={t('nta.form.humidifier.rotaryWheel')} />
         <TextField {...field} path={at('humidification', 'equipmentReference')} label={t('nta.form.boilerEquipmentSource')} />
