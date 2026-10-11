@@ -74,6 +74,52 @@ export function surveyTakeover(derived: BuildingPerformanceInput, current: Loose
   return { next, keys, skipped };
 }
 
+/** The survey rule that adds ΔU_for of 8.3 to the outdoor elements (ISSO 82.1/75.1). */
+export const FORFAIT_BRIDGE_RULE = 'thermal_bridges_forfait_delta_u';
+
+/**
+ * The thermal-bridge method of 8.2.1 the survey worked with: `forfait` when it
+ * added ΔU_for to the outdoor elements or gave a floor a forfait edge; null
+ * when the survey says nothing about it.
+ */
+export function surveyBridgeRoute(assessment: OpnameAssessment & { derivedInput: BuildingPerformanceInput }): 'forfait' | null {
+  if ((assessment.appliedDefaults ?? []).some((item) => item.rule === FORFAIT_BRIDGE_RULE)) return 'forfait';
+  const forfaitEdge = surveyGroundFloors(assessment.derivedInput)
+    .some(({ floor }) => (floor.edgeThermalBridges as Loose | undefined)?.method === 'forfait');
+  return forfaitEdge ? 'forfait' : null;
+}
+
+/** The building's thermal-bridge method the takeover proposes. */
+export interface BridgeRouteItem {
+  key: 'thermalBridgeRoute';
+  from: unknown;
+  to: 'forfait';
+  /** `conflict`: the project has another method, a detailed floor edge or ψ-values, so forfait would mix methods. */
+  status: 'new' | 'conflict';
+}
+
+/**
+ * The proposal for `ntaCalculation.thermalBridgeRoute`, or null when the survey
+ * implies no method or the draft already has it. `projectHasPsi`: the project
+ * zones carry linear thermal bridges (ψ), which the forfait route does not allow.
+ */
+export function bridgeRouteItem(route: 'forfait' | null, current: Loose | null, projectHasPsi: boolean): BridgeRouteItem | null {
+  if (route == null) return null;
+  const from = current?.thermalBridgeRoute ?? undefined;
+  if (from === route) return null;
+  const detailedEdge = (Array.isArray(current?.groundFloors) ? current.groundFloors as Loose[] : [])
+    .some((floor) => (floor.edgeThermalBridges as Loose | null | undefined)?.method === 'detailed');
+  const status = from === undefined && !detailedEdge && !projectHasPsi ? 'new' : 'conflict';
+  return { key: 'thermalBridgeRoute', from, to: route, status };
+}
+
+/** Writes the accepted thermal-bridge method into a copy of the draft. */
+export function applyBridgeRoute(draft: Loose | null, item: BridgeRouteItem | null, accepted: ReadonlySet<string>): Loose {
+  const next: Loose = structuredClone(draft ?? {});
+  if (item != null && accepted.has(item.key)) next.thermalBridgeRoute = item.to;
+  return next;
+}
+
 /** A short display of a value in the diff preview. */
 export function previewValue(value: unknown, locale?: string): string {
   if (value === undefined) return '—';

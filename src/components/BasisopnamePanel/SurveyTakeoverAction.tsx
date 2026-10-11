@@ -5,9 +5,9 @@ import { changedPaths, useNtaDraft } from '../../context/NtaDraftProvider';
 import type { OpnameAssessment } from '../../core/nta/KernelClient';
 import { parseKernelPath } from '../../core/nta/pathUtil';
 import {
-  applyGroundFloors, canTakeOver, defaultGroundSelection, formatTakeoverNumber, groundFloorItems, groundValueLines, previewValue,
+  applyBridgeRoute, applyGroundFloors, bridgeRouteItem, canTakeOver, defaultGroundSelection, formatTakeoverNumber, groundFloorItems, groundValueLines, previewValue,
   projectGroundSurfaces,
-  proposeGroundPairs, surveyGroundFloors, surveyTakeover,
+  proposeGroundPairs, surveyBridgeRoute, surveyGroundFloors, surveyTakeover,
 } from '../../core/nta/SurveyTakeover';
 import { read, type Draft } from '../NtaPerformancePanel/NtaFormFields';
 import { Button, Dialog } from '../ui';
@@ -30,10 +30,14 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
   const [done, setDone] = useState(false);
   const [pairs, setPairs] = useState<Record<string, string | null>>({});
   const [accepted, setAccepted] = useState<Set<string>>(new Set());
+  const [routeAccepted, setRouteAccepted] = useState(false);
   const available = shared != null && canTakeOver(result);
   const current = (shared?.draft ?? shared?.base ?? null) as Draft | null;
   const surfaces = useMemo(() => projectGroundSurfaces(state.project as never), [state.project]);
   const floors = useMemo(() => canTakeOver(result) ? surveyGroundFloors(result.derivedInput) : [], [result]);
+  const projectHasPsi = useMemo(() => (state.project?.zones ?? []).some((zone) => (zone.thermalBridges ?? []).length > 0), [state.project]);
+  const routeItem = useMemo(() => canTakeOver(result) ? bridgeRouteItem(surveyBridgeRoute(result), current, projectHasPsi) : null,
+    [result, current, projectHasPsi]);
   const preview = useMemo(() => {
     if (!open || !canTakeOver(result)) return null;
     const takeover = surveyTakeover(result.derivedInput, current);
@@ -49,6 +53,7 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
     const proposed = proposeGroundPairs(floors, surfaces);
     setPairs(proposed);
     setAccepted(defaultGroundSelection(groundFloorItems(result.derivedInput, current, proposed)));
+    setRouteAccepted(routeItem?.status === 'new');
     setDone(false);
     setOpen(true);
   };
@@ -63,6 +68,8 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
     if (next.has(key)) next.delete(key); else next.add(key);
     return next;
   });
+  const routeLabel = (value: unknown) => value === 'forfait' ? t('nta.form.thermalBridgeRoute.forfait')
+    : value === 'detailed' ? t('nta.form.thermalBridgeRoute.detailed') : t('nta.form.thermalBridgeRoute.fromFloors');
   const surfaceName = (id: string) => surfaces.find((surface) => surface.id === id)?.name ?? id;
   const groundLabel = (key: string) => i18next.exists(`opname.takeover.ground.${key}`) ? t(`opname.takeover.ground.${key}`) : undefined;
   const groundValue = (value: unknown, field: string) => {
@@ -84,10 +91,12 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
       {open && preview && <Dialog title={t('opname.takeover.title')} onClose={() => setOpen(false)} width={720}
         footer={<>
           <Button variant="ghost" onClick={() => setOpen(false)}>{t('opname.takeover.cancel')}</Button>
-          <Button variant="primary" disabled={preview.changes.length === 0 && accepted.size === 0} onClick={() => {
+          <Button variant="primary" disabled={preview.changes.length === 0 && accepted.size === 0 && !routeAccepted} onClick={() => {
             if (!canTakeOver(result)) return;
             const derived = result.derivedInput;
-            shared.update((draft) => applyGroundFloors(surveyTakeover(derived, draft).next, derived, pairs, accepted) as Draft);
+            const route = routeAccepted ? routeItem : null;
+            shared.update((draft) => applyBridgeRoute(applyGroundFloors(surveyTakeover(derived, draft).next, derived, pairs, accepted),
+              route, new Set(route ? [route.key] : [])) as Draft);
             setOpen(false);
             setDone(true);
           }}>{t('opname.takeover.confirm')}</Button>
@@ -152,6 +161,15 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
                 })}
               </tbody>
             </table>}
+        </section>}
+        {routeItem && <section className="opname-takeover__route" aria-label={t('opname.takeover.route.title')}>
+          <h4>{t('opname.takeover.route.title')}</h4>
+          <p className="nta-form-note">{t('opname.takeover.route.intro')}</p>
+          <label className={routeItem.status === 'conflict' ? 'opname-takeover__conflict' : undefined}>
+            <input type="checkbox" checked={routeAccepted} onChange={() => setRouteAccepted((value) => !value)} />
+            {' '}{t('opname.takeover.route.item', { from: routeLabel(routeItem.from), to: routeLabel(routeItem.to) })}
+            {routeItem.status === 'conflict' && <> <small>{t('opname.takeover.route.conflict')}</small></>}
+          </label>
         </section>}
         <h4>{t('opname.takeover.skipped')}</h4>
         <ul className="opname-takeover__skipped">
