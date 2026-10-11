@@ -13,6 +13,10 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Bewijsregister: koppeling vanuit het contextpaneel blijft bewaard bij opslaan van het registratieformulier (geen rekenwijziging)
+- Had het registratieformulier niet-opgeslagen wijzigingen in het bewijsregister en koppelde de adviseur intussen een bewijsstuk vanuit het contextpaneel, dan won bij *Opslaan* de lijst uit het formulier en ging de nieuwe koppeling stil verloren (vervolg op review 35). Het formulier voegt het bewijsregister nu per bewijsstuk samen: koppelingen en bestanden die elders zijn toegevoegd blijven, de wijzigingen en verwijderingen van de adviseur ook. Is hetzelfde bewijsstuk aan beide kanten gewijzigd, dan blijft de versie van de adviseur staan en toont het formulier een melding met de bestandsnaam.
+- Handleiding hoofdstuk 7 bijgewerkt.
+
 ### 11 oktober 2026 — Review 35: registratiegegevens blijven bewaard buiten de stap, bewijsregister en checklist (geen rekenwijziging)
 - **Registratieformulier:** de niet-opgeslagen gegevens in werkstap 10 horen nu bij het document, zoals het NTA-concept. Ze gingen verloren zodra de adviseur een andere stap opende; nu blijven ze staan. Sluiten van het tabblad of het programma vraagt eerst of je zonder opslaan wilt sluiten. Registratiegegevens die een andere stap opslaat (de herlabelvergelijking, een koppeling vanuit het contextpaneel) laten de wijzigingen in het formulier staan.
 - **Geen schijnwijzigingen:** een veld dat je invult en weer leegmaakt, een vinkje aan en weer uit, of een verklaring k/l die je terugzet naar *niet beantwoord*, telt niet meer als wijziging; *Opslaan* en *Verwerpen* blijven dan uit.

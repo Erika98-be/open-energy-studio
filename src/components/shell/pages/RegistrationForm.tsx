@@ -289,6 +289,11 @@ export function RegistrationForm() {
       </Card>
 
       <Card title={t('evidence.title')} level={2}>
+        {(shared?.evidenceConflicts.length ?? 0) > 0 && (
+          <Banner tone="warn" role="status">
+            {t('registration.form.evidenceConflict', { names: shared!.evidenceConflicts.join(', ') })}
+          </Banner>
+        )}
         <div data-path="registration.evidence">
           <EvidenceRegister evidence={registration.evidence ?? []} onChange={(evidence) => update({ evidence })} />
         </div>
