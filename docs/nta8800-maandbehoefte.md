@@ -191,7 +191,7 @@ Een forfaitaire vloerrand kiest de forfaitaire route voor het hele gebouw. De ke
 
 ## Plausibiliteitswaarschuwingen in de projectroute
 
-`warnings` in de projectbeoordeling houdt de berekening niet tegen, maar meldt opgegeven waarden die met de norm of andere invoer botsen:
+`warnings` in de projectbeoordeling houdt de berekening niet tegen, maar meldt opgegeven waarden die met de norm of andere invoer botsen. Daarnaast staan er de waarschuwingen van de gebouwberekening (`performance.warnings`), elk op het pad van de projectinvoer waar ze vandaan komen en met het pad in de berekening als `detail` (`derivedInput.<pad>`); zo komen ze in de lijst *Open punten* met **Ga naar**. De eigen plausibiliteitstoetsen zijn:
 
 - `declared_hot_water_efficiency_above_one`: een opgegeven brandstofgebruik voor warm tapwater is lager dan Q_W;nd (13.15 voor woningen, tabel 13.1 voor utiliteit). Dat impliceert een opwekkingsrendement boven 1 op bovenwaarde.
 - `declared_ventilation_below_required_flow`: alleen bij woningen. Het gaat om een mechanisch systeem zonder warmteterugwinning waarvan de opgegeven H_ve onder ρc·q_V;ODA;req ligt.

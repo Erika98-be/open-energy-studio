@@ -324,6 +324,9 @@ export function GroundFloorDetailFields({ draft, change, base }: SectionProps & 
   const at = (...rest: Path): Path => [...base, ...rest];
   const below = read(draft, at('below', 'kind'));
   const basement = read(draft, at('heatedBasement')) != null;
+  const basementBlock = (read(draft, at('heatedBasement')) ?? {}) as Draft;
+  // 8.42/D.12: the depth z_j per wall part instead of one depth z.
+  const wallParts = list(draft, at('heatedBasement', 'wallDepths'));
   const edges = list(draft, at('edgeInsulation'));
   return <>
     <label>{t('nta.form.ground.below')}
@@ -355,7 +358,24 @@ export function GroundFloorDetailFields({ draft, change, base }: SectionProps & 
       {t('nta.form.ground.heatedBasement')}
     </label>
     {basement && <>
-      <NumberField {...field} path={at('heatedBasement', 'depthM')} label={t('nta.form.ground.basementDepth')} />
+      {wallParts.length === 0
+        ? <NumberField {...field} path={at('heatedBasement', 'depthM')} label={t('nta.form.ground.basementDepth')} />
+        : <p className="nta-form-note">{t('nta.form.ground.wallPartsNote')}</p>}
+      {wallParts.map((_, index) => <div key={index} className="nta-form-row" role="group"
+        aria-label={`${t('nta.form.ground.wallPart')} ${index + 1}`}>
+        <NumberField {...field} path={at('heatedBasement', 'wallDepths', index, 'lengthM')} label={t('nta.form.ground.wallPartLength')} />
+        <NumberField {...field} path={at('heatedBasement', 'wallDepths', index, 'depthM')} label={t('nta.form.ground.wallPartDepth')} />
+        <RemoveButton label={t('nta.form.remove')} onClick={() => {
+          const rest = wallParts.filter((__, item) => item !== index);
+          // The last part removed: the single depth z comes back (8.42).
+          const { wallDepths: _parts, ...single } = basementBlock;
+          change(at('heatedBasement'), rest.length > 0 ? { ...basementBlock, wallDepths: rest } : { ...single, depthM: null });
+        }} />
+      </div>)}
+      <button type="button" className="btn" onClick={() => {
+        const { depthM: _depth, ...parts } = basementBlock;
+        change(at('heatedBasement'), { ...parts, wallDepths: [...wallParts, { lengthM: null, depthM: null }] });
+      }}>{t('nta.form.ground.addWallPart')}</button>
       <NumberField {...field} path={at('heatedBasement', 'wallResistanceM2kPerW')} label={t('nta.form.ground.basementWallResistance')} />
       <NumberField {...field} path={at('heatedBasement', 'wallAreaM2')} label={t('nta.form.ground.basementWallArea')} optional />
     </>}

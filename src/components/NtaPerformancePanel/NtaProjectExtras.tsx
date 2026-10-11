@@ -32,18 +32,53 @@ function RemoveButton({ label, onClick }: { label: string; onClick: () => void }
   return <button type="button" className="nta-form-remove" onClick={onClick}>{label}</button>;
 }
 
-/** 7.30b adjacent unheated sunrooms with their glazing and surfaces. */
-export function SunroomsFields({ draft, change, base = ['sunrooms'] }: SectionProps & { base?: Path }) {
+/** Every sunroom list of the draft (the block's and each zone's) with the zone it belongs to. */
+function sunroomLists(draft: Draft): Array<{ base: Path; zoneId: string | null }> {
+  return [
+    { base: ['sunrooms'], zoneId: null },
+    ...list(draft, ['zoneData']).map((item, index) => ({ base: ['zoneData', index, 'sunrooms'] as Path, zoneId: String(item.zoneId ?? '') })),
+  ];
+}
+
+/** A sunroom id no sunroom list of the draft uses yet, so a new sunroom is not shared by accident. */
+function freeSunroomId(draft: Draft): string {
+  const used = new Set(sunroomLists(draft).flatMap(({ base }) => list(draft, base).map((room) => String(room.id ?? ''))));
+  let number = 1;
+  while (used.has(`serre-${number}`)) number += 1;
+  return `serre-${number}`;
+}
+
+/**
+ * 7.30b adjacent unheated sunrooms with their glazing and surfaces. The same sunroom id in the sunroom lists
+ * of several zones is one sunroom shared by those zones: the kernel caps its gain with 7.38 over all of them,
+ * each with its own H_zi;ztu and setpoint. The id names the project's unheated space of the sunroom.
+ */
+export function SunroomsFields({ draft, change, base = ['sunrooms'], project }: SectionProps & { base?: Path; project?: IProject }) {
   const { t } = useI18n();
   const field = { draft, onChange: change };
   const rooms = list(draft, base);
+  const spaces = project?.unheatedSpaces ?? [];
+  const zoneName = (zoneId: string) => project?.zones.find((item) => item.id === zoneId)?.name || zoneId;
+  const own = JSON.stringify(base);
+  const sharedWith = (id: string) => sunroomLists(draft)
+    .filter((entry): entry is { base: Path; zoneId: string } => JSON.stringify(entry.base) !== own && entry.zoneId != null)
+    .filter((entry) => list(draft, entry.base).some((room) => String(room.id ?? '') === id))
+    .map((entry) => zoneName(entry.zoneId));
   return <div className="nta-form-subsection">
-    {rooms.map((_, index) => {
+    {rooms.map((room, index) => {
       const at = (...rest: Path): Path => [...base, index, ...rest];
       const surfaces = list(draft, at('surfaces'));
+      const id = typeof room.id === 'string' ? room.id : '';
+      const shared = id ? sharedWith(id) : [];
+      const spaceOptions: Array<[string, string]> = spaces.map((space) => [space.id, space.name ? `${space.name} (${space.id})` : space.id]);
+      if (id && !spaces.some((space) => space.id === id)) spaceOptions.push([id, id]);
       return <fieldset key={index} className="nta-form-row">
         <legend>{t('nta.form.sunroom')} {index + 1}</legend>
-        <TextField {...field} path={at('id')} label={t('nta.form.sunroom.id')} />
+        {spaces.length > 0
+          ? <SelectField {...field} path={at('id')} label={t('nta.form.sunroom.space')} options={spaceOptions} />
+          : <TextField {...field} path={at('id')} label={t('nta.form.sunroom.id')} />}
+        {shared.length > 0 && <p className="nta-form-note" data-testid="sunroom-shared">
+          {t('nta.form.sunroom.sharedWith', { zones: shared.join(', ') })}</p>}
         <NumberField {...field} path={at('glazingGHeating')} label={t('nta.form.sunroom.gHeating')} />
         <NumberField {...field} path={at('glazingGCooling')} label={t('nta.form.sunroom.gCooling')} />
         <NumberField {...field} path={at('exteriorFrameFraction')} label={t('nta.form.sunroom.frame')} />
@@ -65,9 +100,10 @@ export function SunroomsFields({ draft, change, base = ['sunrooms'] }: SectionPr
         <RemoveButton label={t('nta.form.remove')} onClick={() => change(base, rooms.filter((__, other) => other !== index))} />
       </fieldset>;
     })}
-    <button type="button" className="btn" onClick={() => change(base, [...rooms, sunroomTemplate(rooms.length)])}>
+    <button type="button" className="btn" onClick={() => change(base, [...rooms, { ...sunroomTemplate(rooms.length), id: freeSunroomId(draft) }])}>
       {t('nta.form.sunroom.add')}
     </button>
+    <p className="nta-form-note">{t('nta.form.sunroom.shareNote')}</p>
   </div>;
 }
 
