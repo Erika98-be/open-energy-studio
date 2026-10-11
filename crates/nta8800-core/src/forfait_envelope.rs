@@ -1336,4 +1336,33 @@ mod tests {
         assert_eq!(forfait_psi(30, 0, PsiColumn::A), None);
         assert_eq!(basic_survey_unheated_transfer(12.0), 60.0);
     }
+
+    /// Review 52, independent recalculation of I.2.1.4 (2025+C1 p. 832–833):
+    /// thermal cushions give R_ad 0,15 + 1,8 whether or not a cavity is
+    /// marked; without cushions a floor with ≤ 30 mm insulation adds the
+    /// 0,18 cavity value, a façade with 40 mm adds none.
+    #[test]
+    fn review52_known_thickness_rules_of_i_2_1_4() {
+        let known = |thickness: f64, cushions: bool| InsulationState::KnownThickness {
+            thickness_mm: thickness,
+            thickness_proven: false,
+            known_lambda_equivalent: None,
+            reed_thickness_m: None,
+            thermal_cushions: cushions,
+        };
+        let mut floor = element(2000, known(0.0, true));
+        floor.element = ElementType::Floor;
+        for cavity in [true, false] {
+            floor.cavity = cavity;
+            assert!(
+                (floor.calculate().r_c - 1.95).abs() < 1e-9,
+                "cavity {cavity}"
+            );
+        }
+        let mut thin = element(2000, known(30.0, false));
+        thin.element = ElementType::Floor;
+        assert!((thin.calculate().r_c - (0.03 / 0.045 + 0.15 + 0.18)).abs() < 1e-9);
+        let facade = element(2000, known(40.0, false));
+        assert!((facade.calculate().r_c - (0.04 / 0.045 + 0.36)).abs() < 1e-9);
+    }
 }

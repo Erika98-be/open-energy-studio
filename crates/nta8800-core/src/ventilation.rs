@@ -4356,4 +4356,35 @@ mod tests {
             0.65
         );
     }
+
+    /// Review 52, independent recalculation of 11.77–11.79 (2025+C1
+    /// p. 480–481) with α_min ≤ α < α_max, written from the norm with the
+    /// south-based α: east 2 m², west 1 m², north-west 0,5 m² (on a
+    /// boundary) and 1,5 m² at 200° (north-based), all vertical, give
+    /// 1,105 384; all openings in one sector give no cross-ventilation area
+    /// (A_w;tot − A_w;or,j = 0 in 11.78).
+    #[test]
+    fn review52_cross_area_against_an_independent_implementation() {
+        let opening = |azimuth: f64| CoolingOpening {
+            id: "w".into(),
+            area: OpeningArea::Declared { net_area_m2: 1.0 },
+            centre_height_m: 1.5,
+            opening_height_m: 1.0,
+            azimuth_deg: azimuth,
+            tilt_deg: 90.0,
+        };
+        let openings = vec![
+            opening(90.0),
+            opening(270.0),
+            opening(315.0),
+            opening(200.0),
+        ];
+        close(
+            cross_area(&openings, &[2.0, 1.0, 0.5, 1.5], 5.0),
+            1.105_383_919_682_465_3,
+            1e-12,
+        );
+        let one_sector = vec![opening(170.0), opening(190.0)];
+        close(cross_area(&one_sector, &[1.0, 2.0], 3.0), 0.0, 1e-12);
+    }
 }

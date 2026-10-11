@@ -7022,4 +7022,105 @@ mod tests {
         assert!((loss(Some(15)) - expected(0.299)).abs() < 1e-9);
         assert!((loss(Some(1)) - expected(0.256)).abs() < 1e-9);
     }
+
+    /// Review 52, independent recalculation of table 13.29 (2025+C1 p. 553):
+    /// with N_woon;si,W unknown, A_g;gebouw;W / A_g;tot (100 m²) gives the
+    /// band ≤ 10 → 28 mm, 11–20 → 35 mm, > 20 → 42 mm. Each case must
+    /// calculate exactly as the same system with that diameter entered.
+    #[test]
+    fn review52_table_13_29_bands_from_the_area_ratio() {
+        let build = |building: f64, diameter: Option<f64>| {
+            let mut input = system(HotWaterGenerator::ExternalHeat);
+            input.collective = Some(CollectiveHotWater {
+                building_usable_floor_area_m2: building,
+                source_reference: "drawing".into(),
+            });
+            input.circulation = Some(Circulation {
+                outer_diameter_mm: diameter,
+                insulation: PipeInsulation::Mm15,
+                declared_psi_w_per_mk: None,
+                calculated_psi: None,
+                fittings_insulated: true,
+                length_m: Some(100.0),
+                unheated_length_m: Some(0.0),
+                unheated_ambient_c: None,
+                floor_count: 5,
+                sport_hall_area_m2: 0.0,
+                connected_dwellings: None,
+                pump: CirculationPump {
+                    control: PumpControl::UncontrolledOrUnknown,
+                    label_power_kw: None,
+                    energy_efficiency_index: None,
+                },
+                source_reference: "design".into(),
+            });
+            assess_hot_water(&input, context()).unwrap().months[0].circulation_loss_kwh
+        };
+        for (building, diameter) in [
+            (1000.0, 28.0),
+            (1040.0, 28.0),
+            (1960.0, 35.0),
+            (2000.0, 35.0),
+            (2040.0, 35.0),
+            (2100.0, 42.0),
+        ] {
+            let derived = build(building, None);
+            let entered = build(building, Some(diameter));
+            assert!(
+                (derived - entered).abs() < 1e-9,
+                "{building}: {derived} vs {entered}"
+            );
+        }
+    }
+
+    /// Review 52, independent recalculation of 13.152 (2025+C1 p. 616–617)
+    /// with the rounding of p. 627/645: a declared 0,737 of a gas appliance
+    /// becomes 0,725 and a declared 0,949 of an indirectly heated vessel
+    /// 0,925, both with f_prac 0,95, so E_W = Q_W;gen;out / (0,95 · η). The
+    /// gas appliance measured in class 4 keeps c_W;gen of table 13.26
+    /// (p. 641–643, OPMERKING 1 of p. 640): linear in Q_W;dis;nren;an between
+    /// 1 805 kWh (0,80) and 2 500 kWh (0,867).
+    #[test]
+    fn review52_declared_values_take_f_prac_0_95() {
+        let gas = HotWaterGenerator::GasAppliance {
+            appliance: GasAppliance::CombiGaskeurHrCw,
+            measured_class: Some(ApplicationClass::Class4),
+            kitchen_only: false,
+            declared: Some(DeclaredEfficiency {
+                value: 0.737,
+                source_reference: "Gaskeur CW 0000".into(),
+            }),
+            annex_t: None,
+            annex_t_conditions: None,
+        };
+        let indirect = HotWaterGenerator::IndirectBoiler {
+            boiler: IndirectBoiler::Hr107,
+            oil: false,
+            inside_boundary: true,
+            also_space_heating: true,
+            declared: Some(DeclaredEfficiency {
+                value: 0.949,
+                source_reference: "BCRG 0000/02".into(),
+            }),
+            pilot_flame: false,
+        };
+        for (generator, declared, class_4) in [(gas, 0.725, true), (indirect, 0.925, false)] {
+            let result = assess_hot_water(&system(generator), context()).unwrap();
+            let annual: f64 = result.months.iter().map(|m| m.generator_output_kwh).sum();
+            let eta = if class_4 {
+                assert!((1805.0..=2500.0).contains(&annual), "{annual}");
+                declared * (0.80 + (annual - 1805.0) / (2500.0 - 1805.0) * (0.867 - 0.80))
+            } else {
+                declared
+            };
+            for month in &result.months {
+                let expected = month.generator_output_kwh / (0.95 * eta);
+                assert!(
+                    (month.carrier_input_kwh - expected).abs() < 1e-9 * expected.max(1.0),
+                    "{} vs {expected}",
+                    month.carrier_input_kwh
+                );
+            }
+        }
+    }
 }

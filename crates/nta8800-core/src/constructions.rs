@@ -2061,4 +2061,23 @@ mod tests {
         });
         assert!(codes(anchored).contains(&"fastener_penetration_exceeds_insulation"));
     }
+
+    /// Review 52, independent recalculation of F.2 (2025+C1 p. 814–815): a
+    /// weakly ventilated narrow layer is half of the table F.1 value, taken
+    /// at table nodes only (d 10 mm / d/b 2; d 25 mm / d/b 0,1; the
+    /// 25–500 mm row at d/b 5).
+    #[test]
+    fn review52_weakly_ventilated_narrow_layer_is_half_of_table_f1() {
+        let layer = |d: f64, b: f64, weak: bool| -> f64 {
+            let value = serde_json::json!({
+                "kind": "narrow_cavity", "thicknessMm": d, "widthMm": b, "weaklyVentilated": weak
+            });
+            let layer: Layer = serde_json::from_value(value).unwrap();
+            layer.resistance(HeatFlow::Horizontal).unwrap()
+        };
+        for (d, b, table) in [(10.0, 5.0, 0.20), (25.0, 250.0, 0.18), (100.0, 20.0, 0.28)] {
+            assert!((layer(d, b, false) - table).abs() < 1e-9, "{d}/{b}");
+            assert!((layer(d, b, true) - table / 2.0).abs() < 1e-9, "{d}/{b}");
+        }
+    }
 }

@@ -35,6 +35,19 @@ Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de
   - **Eerdere items van 9 oktober:** PV boven 300/400 W/m², WKK met voorraadvat, opgegeven F_D;dayl, kelderwanden in A_ls, wanden en daken aan de grond, gemeenschappelijke ruimten (6.6.4).
 - **Open interpretaties.** De keuzes achter vragen 1–12 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
 
+### 11 oktober 2026 — Review 52: onafhankelijke herberekening van de wijzigingen uit reviews 40–51 (geen rekenwijziging)
+Elke regel die in reviews 40–51 veranderde, is opnieuw uitgerekend met een eigen implementatie, geschreven vanaf de normpagina's zonder eerst de kerncode van die regel te lezen, en op synthetische invoer met grenswaarden met de kern vergeleken. Alle elf regels komen overeen (tot 1e-9). De gevallen staan nu als vaste tests in de kern (`review52_*`).
+- **TOjuli methode 3 in 2024** (p. 106): schermen en zonneschermen van tabel 7.5/7.6 tellen, alleen "> 95 %" volstaat, noordramen (tussen NW en NO) tellen niet mee, horizontale ramen en een noordoostraam wel.
+- **Tabel 13.29** (p. 553): de banden ≤ 10, 11–20 en > 20 woningen uit A_g;gebouw;W / A_g;tot rekenen gelijk aan dezelfde invoer met de diameter ingevuld. Bij een quotiënt op ,5 rondt de kern naar boven (10,5 → 11 woningen → 35 mm), zoals de interpretatielijst zegt; de norm noemt geen afronding.
+- **13.152** (p. 616–617, afronding p. 627/645): f_prac 0,95 op een verklaard rendement van een gastoestel (0,737 → 0,725) en een indirect gestookt vat (0,949 → 0,925). Bij het gastoestel blijft c_W;gen van tabel 13.26 staan (p. 640–643); de eerste eigen berekening vergat die factor, de kern niet.
+- **Tabel 9.16 en 9.26/9.27a** (p. 302–304, 310): ongeïsoleerde leidingen bij een afleverset Ψ 1,0 tot 500 m² en 2,0 daarboven, alleen verwarming boven 500 m² 3,0, en het juliverlies met L_equi = 0,15/Ψ·L.
+- **Tabel 9.25 met §9.6** (p. 322, 327–328): 500 m² is nog een klein systeem, 500,5 m² niet; twee gelijke systemen op 1 000 m² zijn klein.
+- **11.77–11.79** (p. 480–481): de halfopen sectoren, ook met vier ramen in verschillende sectoren en met alle ramen in één sector (A_w;cros 0).
+- **8.38/8.39 met 8.32–8.35, 8.40–8.42 en 8.45** (p. 251–260): kelderwanden per wanddeel op eigen diepte, een ongeïsoleerde kelder op één diepte en de forfaitaire route met ΣA_T;bw verdeeld naar z_j·ℓ_j.
+- **7.30b en 7.34–7.38** (p. 182, 185–187): een gedeelde serre met F = 0,3, twee niet-transparante vlakken, de begrenzing in februari en geen begrenzing bij koeling. **Kanttekening:** de kern neemt in 7.38 het setpoint van de eigen zone voor alle grenzende zones (zo staat het in de interpretatielijst). Bij gelijke setpoints is dat exact; grenzen zones met een ander setpoint aan dezelfde serre, dan wijkt de begrenzing af. Bijvoorbeeld 16 °C in plaats van 20 °C in de andere zone geeft in een synthetisch voorbeeld 17,9 kWh volgens 7.38 tegen 20,2 kWh in de kern. De invoer per zone kent de andere zones niet, dus dit blijft een beperking; geen referentiegeval heeft een serre.
+- **10.76, 10.80 en 10.83 met §10.1** (p. 365, 417–423): verklaarde EER 5,04 → 5,00 (droge koeler) en 3,18 → 3,15 (open koeltoren) met Q_hr = Q_C·(1 + 1/EER) zonder f_prpr, 10.82 nul in methode 3, en de tabelwaarde 3,00 met f_prpr 1.
+- **I.2.1.4** (p. 832–833) en **F.2** (p. 814–815): thermokussens 1,95 met en zonder spouw, de spouwwaarde bij ≤ 30 mm, en de halve tabel F.1-waarde op drie tabelknopen.
+
 ### 11 oktober 2026 — Review 51: rest van bijlage P (P.13–P.18, P.72–P.83) en de zwak geventileerde smalle luchtlaag (F.2)
 Review 51 sloot de twee open punten van review 50.
 - **Bijlage P zonder verschil nagerekend** tegen 2025+C1 en vergeleken met 2024 en 2023:

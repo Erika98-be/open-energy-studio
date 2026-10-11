@@ -8490,4 +8490,89 @@ mod tests {
             .all(|row| row.auxiliary_electricity_kwh.is_some()));
         assert!(result.annual_auxiliary_electricity_kwh.unwrap() > 0.0);
     }
+
+    /// Review 52, independent recalculation of table 9.25 with §9.6 and
+    /// note b (2025+C1 p. 322, 327–328): a system for more than 500 m²
+    /// takes the outside row; exactly 500 m² is still small, and two
+    /// identical systems on 1 000 m² serve 500 m² each.
+    #[test]
+    fn review52_large_system_boundary_of_table_9_25() {
+        let chain = |kind: &str, temperature: f64, area: Option<f64>, systems: Option<u32>| {
+            let mut input = boiler_chain();
+            input.generator = serde_json::from_value(json!({
+                "kind": "gas_boiler",
+                "boiler": {
+                    "generatorId":"boiler", "role":"individual_main",
+                    "location":"inside_thermal_boundary", "kind": kind, "fuel":"natural_gas",
+                    "averageDesignEmissionTemperatureC": temperature, "emissionCircuit":"direct",
+                    "equipmentReference":"type plate", "locationReference":"building plan",
+                    "temperatureAndCircuitReference":"system design", "pilotFlamePresent":false,
+                    "installationYear": 2020, "installationYearReference": "invoice"
+                }
+            }))
+            .unwrap();
+            input.collective_connection = area.map(|area| CollectiveConnection {
+                connected_usable_area_m2: area,
+                source_reference: "building plan".into(),
+            });
+            input.identical_systems = systems;
+            assess_space_heating_chain(&input).generation_efficiency
+        };
+        assert_eq!(chain("hr107", 45.0, Some(500.0), None), Some(0.975));
+        assert_eq!(chain("hr107", 45.0, Some(500.5), None), Some(0.925));
+        assert_eq!(chain("hr104", 70.0, Some(1000.0), None), Some(0.875));
+        assert_eq!(chain("hr104", 70.0, Some(1000.0), Some(2)), Some(0.925));
+    }
+
+    /// Review 52, independent recalculation of table 9.16 and 9.26/9.27a
+    /// (2025+C1 p. 302–304, 310) for uninsulated pipes: with a delivery set
+    /// the combined rows give Ψ 1,0 up to 500 m² and 2,0 above; heating-only
+    /// pipes on more than 500 m² give 3,0. July with the delivery set, the
+    /// whole month, ϑ_H;mean 65 °C, 100 m in the zone, uninsulated valves
+    /// L_equi = 0,15/Ψ·L: Q = Ψ·(65 − ϑ_op)·(100 + 15/Ψ)·744/1 000·f_gebouw.
+    #[test]
+    fn review52_uninsulated_pipes_follow_table_9_16() {
+        let run = |delivery_set: bool, area: f64| {
+            let mut input = collective_boiler_chain();
+            input.distribution = Distribution::Calculated {
+                heating_limit_extra_kwh: Some(vec![0.0; 12]),
+                source_reference: "9.26".into(),
+            };
+            input.collective_connection = Some(CollectiveConnection {
+                connected_usable_area_m2: area,
+                source_reference: "building plan".into(),
+            });
+            let distribution = input.distribution_system.as_mut().unwrap();
+            distribution.collective_hot_water_delivery_set = delivery_set;
+            distribution.pipe_transmittance = PipeTransmittance::Forfait {
+                insulation: crate::heating_distribution::PipeInsulation::Uninsulated,
+            };
+            distribution.actual_pipe_length_m = Some(100.0);
+            distribution.unheated_pipe_length_m = Some(0.0);
+            distribution.valves_insulated = false;
+            let result = assess_space_heating_chain(&input);
+            assert_eq!(
+                result.status, "calculated_unverified",
+                "{:?}",
+                result.issues
+            );
+            (input, result)
+        };
+        for (delivery_set, area, psi) in
+            [(true, 400.0, 1.0), (true, 600.0, 2.0), (false, 600.0, 3.0)]
+        {
+            let (input, result) = run(delivery_set, area);
+            let summary = result.distribution.as_ref().unwrap();
+            assert_eq!(summary.psi_zone_w_per_mk, psi, "{delivery_set} {area}");
+            if delivery_set {
+                let demand = crate::monthly_demand::assess_monthly_demand(&input.demand);
+                let operative = demand.monthly[6].heating.calculation_temperature_c;
+                let expected = psi * (65.0 - operative) * (100.0 + 0.15 / psi * 100.0) * 744.0
+                    / 1000.0
+                    * summary.building_fraction;
+                let july = result.monthly[6].distribution_loss_kwh;
+                assert!((july - expected).abs() < 1e-6, "{july} vs {expected}");
+            }
+        }
+    }
 }
