@@ -1,4 +1,5 @@
 import { IProject } from '../energy/types';
+import { withoutBom } from './importIssues';
 
 /** File format version written by this build. */
 export const FILE_VERSION = '1.0';
@@ -80,7 +81,14 @@ export function serializeProject(project: IProject, kernel?: KernelStamp | null)
  * Throws if the file format is invalid.
  */
 export function deserializeProjectFile(json: string): LoadedProjectFile {
-  const data: IProjectFile = JSON.parse(json);
+  // A UTF-8 byte-order mark (a file re-saved by a Windows editor) is not
+  // part of the JSON. The browser's File.text() drops it already; the
+  // desktop read (Rust read_to_string) keeps it.
+  const parsed: unknown = JSON.parse(withoutBom(json));
+  if (parsed == null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Invalid file format: expected a JSON object');
+  }
+  const data = parsed as IProjectFile;
 
   if (data.type !== FILE_TYPE) {
     throw new Error(`Invalid file format: expected type "${FILE_TYPE}", got "${data.type}"`);
