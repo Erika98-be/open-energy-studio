@@ -2,7 +2,7 @@
 
 Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)).
 
-Alle tien vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle elf vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -121,3 +121,15 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Vraag.**
 - Welke f_Pren;dh hoort in RERPrenTot;EMGforf bij een collectieve warmtepompbron onder 20 °C met kwaliteitsverklaring: die van de verklaring, 0,95 van 9.6.8.1.1.2.3 a), of 0 van tabel 5.4?
 - Geldt in die berekening de f_P;del;dh van de verklaring (zoals voor EwePTot;EMGforf) of de forfaitaire waarde?
+
+## 11. Zonnewinst door de scheidingsconstructie naar een aangrenzende onverwarmde serre (7.6.1, p. 182; 7.6.4, p. 185; 7.6.6.1.1, p. 189)
+
+**Situatie.** 7.6.1 zegt dat bij de forfaitaire verrekening van 8.4.1 via een aangrenzende onverwarmde serre (AOS) de zonnewinst door de scheidingsconstructie tussen de rekenzone en de serre wordt bepaald; opmerking 2 rekent de serre dan weg (buitenlucht) en de scheidingsconstructie als uitwendige scheidingsconstructie. Of 7.30b in die route nog geldt, staat er niet bij. In de berekende route (8.4) telt 7.34 alleen de niet-transparante vlakken in de serre; opmerking 2 bij 7.34 laat deuren, panelen en het kozijndeel van ramen weg, en noemt het glas van de ramen in de scheiding niet. 7.6.6.1.1 zegt dat zonnestraling die een raam pas bereikt na een andere lichtdoorlatende constructie (zoals een serre) met de zontoetredingsfactor van die constructie wordt vermenigvuldigd. 7.6.6.4 geeft F_sky = 0 voor de scheiding naar een AOS.
+
+**Gekozen lezing.** De kern geeft de scheidingsconstructie naar een serre in beide routes geen eigen zonnewinst, ook niet door haar ramen. De serre telt alleen via 7.30b (met 7.34–7.38), ook in de forfaitaire route. Een project met zo'n scheiding krijgt de melding `sunroom_partition_gain_interpreted`: in de forfaitaire route altijd, in de berekende route als de scheiding ramen heeft.
+
+**Gevolg.** Geen openbaar geval en geen ISSO 54-deeltest heeft een serre. Bij de andere lezing krijgt de zone in de berekende route extra zonnewinst door de ramen in de scheiding (g_gl van het raam maal g_gl van de serrebeglazing), en in de forfaitaire route zonnewinst op de scheiding zelf volgens 7.32/7.33 in plaats van, of naast, 7.30b. Beide verlagen de warmtebehoefte en verhogen de koudebehoefte.
+
+**Vraag.**
+- Krijgen ramen in de scheiding naar een AOS in de berekende route directe zonnewinst volgens 7.32 met de zontoetredingsfactor van de serrebeglazing (7.6.6.1.1), naast de winst van 7.30b?
+- Wordt in de forfaitaire route de zonnewinst door de scheiding naar een AOS bepaald als bij een uitwendige scheidingsconstructie (7.32/7.33, met welke F_sky en zontoetreding), en vervalt 7.30b dan voor die serre?

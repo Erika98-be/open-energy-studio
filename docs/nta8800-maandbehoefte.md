@@ -164,7 +164,7 @@ De toetsen op setpointverschil, ventilatiecapaciteit en warmtecapaciteit staan i
 - g en kozijnfractie van de serrebeglazing, apart voor verwarming en koeling;
 - b_U en H_zi;ztu uit §8.4, en de verdeelfactor (7.36).
 
-De winst is (1 − b_U)·F·f_gn;max·Q_sol;ztu. Q_sol;ztu volgt uit 7.34/7.35 met F_sh;obst = 1. De begrenzing f_gn;max (7.37) geldt alleen in de verwarmingsstand. Het warmteverlies via de serre loopt via de onverwarmde ruimte van §8.4. De vereenvoudigde route uit de norm (de serre negeren) blijft mogelijk door geen `sunrooms` op te geven.
+De winst is (1 − b_U)·F·f_gn;max·Q_sol;ztu. Q_sol;ztu volgt uit 7.34/7.35 met F_sh;obst = 1. De begrenzing f_gn;max (7.37/7.38) geldt alleen in de verwarmingsstand. Grenzen meerdere rekenzones aan dezelfde serre, dan neemt 7.38 de som van H_zi,j;ztu over al die zones; de kern rekent die als H_zi;ztu / F (7.36) met het setpoint van de eigen zone. Het warmteverlies via de serre loopt via de onverwarmde ruimte van §8.4. De vereenvoudigde route uit de norm (de serre negeren) blijft mogelijk door geen `sunrooms` op te geven. De scheidingsconstructie naar de serre krijgt geen eigen zonnewinst, ook niet door haar ramen en ook niet in de forfaitaire route; dat is vraag 11 aan NEN (melding `sunroom_partition_gain_interpreted`).
 
 ## H_D naar een onverwarmde ruimte (8.4.2.1)
 
@@ -205,6 +205,7 @@ Een forfaitaire vloerrand kiest de forfaitaire route voor het hele gebouw. De ke
 - `ground_floor_perimeter_implausible`: de blootgestelde omtrek P is groter dan 2·A/w + 2·w met w = 1 m. Een vloer met een gemiddelde breedte van minstens 1 m kan zo'n omtrek niet hebben.
 - `detailed_thermal_bridges_none_entered`: de gedetailleerde route (geen forfaitaire vloerrand, 8.2.1) zonder één lineaire thermische brug naar buitenlucht. H_D krijgt dan geen ψ·ℓ. Voer de bruggen in of kies de forfaitaire ΔU_for (8.3).
 - `sunroom_values_differ_from_unheated_space`: een serre (`sunrooms`) met dezelfde id als een onverwarmde ruimte van het project, waarvan de opgegeven b_U of H_zi;ztu meer dan 10 % afwijkt van de afgeleide waarde (8.4.1, 8.53–8.59).
+- `sunroom_partition_gain_interpreted`: een serre met een scheidingsconstructie naar de rekenzone. In de forfaitaire route (8.4.1) krijgt die scheiding geen eigen zonnewinst en telt 7.30b; in de berekende route krijgen ramen in de scheiding geen directe zonnewinst (7.6.6.1.1). Zie vraag 11 aan NEN.
 
 BENG 1 (`needIndicatorKwhPerM2Year`, ook in `indicators`) staat alleen ingevuld als de behoefte uit de vaste C1-ventilatierun van §5.4 komt. E_H+C;nd met de opgegeven ventilatie staat in het hoofdstuk 5-blok (`chapter5.heatingAndCoolingNeedKwhPerM2`). `tojuliMeetsBblLimit` geldt alleen voor woonfuncties (Bbl art. 4.149b) en is bij utiliteit leeg.
 
