@@ -24,7 +24,7 @@ Het gatelog staat in `gate.log`, het referentierapport in `evidence/reference/`.
 |---|---|---|---|
 | a | Unittests kern | | |
 | b | Differentiële tests per uitgave | | |
-| c | Openbare gevallen A–N | | |
+| c | Openbare gevallen A–O | | |
 | d | Referentiesuites (openbare gevallen, RVO, ISSO 54) | | oordeel: |
 | e | Optiedekking | | |
 | f | Numerieke fuzz | | |

@@ -1,6 +1,6 @@
 # Brief aan NEN en RVO: interpretatievragen NTA 8800
 
-*Verzendklaar concept, opgesteld 10 oktober 2026 uit [nta8800-vragen-nen.md](nta8800-vragen-nen.md). Vul de velden tussen rechte haken in voor verzending. De brief citeert geen normtekst; hij verwijst alleen naar formule-, paragraaf- en paginanummers van NTA 8800:2025+C1:2026, tenzij een andere uitgave is genoemd.*
+*Verzendklaar concept, opgesteld 10 oktober 2026 en bijgewerkt 11 oktober 2026 uit [nta8800-vragen-nen.md](nta8800-vragen-nen.md). Vul de velden tussen rechte haken in voor verzending. De brief citeert geen normtekst; hij verwijst alleen naar formule-, paragraaf- en paginanummers van NTA 8800:2025+C1:2026, tenzij een andere uitgave is genoemd.*
 
 ---
 
@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij twaalf punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software (vragen 1–7) en bij een systematische controle van de rekenkern tegen de normtekst (vragen 8–12) zijn wij twaalf punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport; vragen 8–12 veranderen geen vergeleken uitkomst van de openbare gevallen. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
