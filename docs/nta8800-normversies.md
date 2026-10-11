@@ -72,6 +72,7 @@ Dat wijkt bewust af van "alle parameters doorgeven". De kern rekent synchroon op
 | 8 | Bronwarmte warmtepomp (5.20) | elke tabelbron ≥ 15 °C, f_P 0,9 of bijlage P, plus Q/EER (p. 93, 323, 346; INT-V1 p. 5) | alleen collectieve bron, < 20 °C f_P;el/23 (p. 72, 90, 362–363) | `SystemHeatPump::source_heat_booked`, `source_factors`, `realisedFrom2013` |
 | 9 | 17.3.2 f) dakrand als belemmering | bestaat niet (p. 678–687) | p. 695–708 | `collector_obstruction_factor` → geen waarde; PV-invoer `route_not_in_edition` |
 | 10 | 7.6.6.1.2–7.6.6.1.3.4 zonwerend glas, vaste en draaibare lamellen (ook TOjuli-uitzondering 5.7.1) | bestaan niet (p. 179–180, 106) | p. 190–196, 114–115 | invoer `route_not_in_edition` |
+| 10a | TOjuli-uitzondering 5.7.1 methode 3: zonwering die de zoninstraling beperkt | zonwering van tabel 7.5 of 7.6 (screens, jaloezieën, rolluiken, gemetalliseerde weefsels, uitval- en knikarmschermen) telt mee (p. 106) | alleen de vaste lamellen van tabel 7.4a/7.4b (punt 10); zonwering van tabel 7.5/7.6 telt niet (p. 114) | `solar_limitation_movable_shading`: in 2024 telt een raam met `movableShading.device`; een gedeclareerde F_c noemt geen tabeltype en telt niet (review 40) |
 | 11 | (13.157)/(13.160) f_gebouw;si;W | /365, hulpenergie zonder f_gebouw (p. 611–612) | /(365·f_gebouw), × f_gebouw (p. 627–628) | `book_generator` |
 | 12 | Tabel 13.18 c_W,EU;gen | kolom (p. 614) | lineair geïnterpoleerd (p. 630–631) | `european_profile_correction` |
 | 13 | (11.136) gemeten motorrendement | alleen als hoger dan tabel 11.20 (p. 499) | vrije keuze (p. 515) | `nominal_fan_power` |
@@ -100,7 +101,7 @@ Bovenop de achttien punten hierboven. Pagina's links uit NTA 8800:2023, rechts u
 | 28 | (P.25) referentievermogen | Q/8 800 × 3,6 (p. 950) | Q/5 400 × 3,6 (p. 948) | `annex_p` |
 | 29 | P.6.5.4.8 rendement geothermie | forfait 20 (p. 960) | met temperatuurcorrectie (p. 958) | `geothermal_efficiency` |
 | 30 | Biomassagrens bmA | 100 kW (p. 90–93) | 500 kW (p. 92–95) | `biomass_class_limit_kw`; het invoerveld `biomassAbove500Kw` betekent "boven de grens van de uitgave" |
-| 31 | Bijlage AA als bewijs koelcapaciteit (5.7.1) | bestaat niet; actieve koeling met voldoende capaciteit geldt als voldaan (p. 103–104) | p. 106, 1115–1127 | `capacity.method: annex_aa` → `route_not_in_edition` |
+| 31 | Bijlage AA en toets op beperking van de zoninstraling als bewijs koelcapaciteit (5.7.1 methode 2 en 3) | bestaan niet; actieve koeling met voldoende capaciteit geldt als voldaan (p. 103–104) | p. 105–106, 1115–1127 | `cooling_capacity_methods_route`: `capacity.method: annex_aa` en `solar_limitation` → `route_not_in_edition` (methode 3 sinds review 40) |
 | 32 | Renovatiestandaard (tabel 5.7) | bestaat niet (p. 70–72) | p. 73–74 | `null` (hoofdstuk-5-indicatoren zijn in beide oudere uitgaven al `null`) |
 | 33 | Tabel 14.3 kolom "led vanaf 2017" | één kolom (p. 648) | 16 / 12 W/m² (p. 646) | `ledFrom2017: true` → `route_not_in_edition` |
 | 34 | Roeden in U_w (8.17)/(8.18) | geen term (p. 214–218) | p. 219–222 | `glazingBars` → `route_not_in_edition` |

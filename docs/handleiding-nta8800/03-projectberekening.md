@@ -189,6 +189,16 @@ Kies bij **Actieve koeling** als capaciteitsbewijs *bijlage AA (berekening per r
 - Onder de editie 2024 vraagt het formulier ook de specifiek werkzame massa SWM (50–100 kg/m²) en het dakoppervlak per ruimte.
 - De edities 2023, 2022 en 2020+A1 kennen bijlage AA niet als capaciteitsbewijs. Het formulier meldt dat.
 
+**Toets op beperking van de zoninstraling.** Als capaciteitsbewijs kun je ook *beperking van de zoninstraling* kiezen (§5.7.1 methode 3), met een van twee toetsen. De rekenkern controleert de toets tegen de ramen van de rekenzone:
+- **Klein raamoppervlak:** het raamoppervlak is kleiner dan 0,2 × A_g van de rekenzone.
+- **Zonwering:** meer dan 95 % van het raamoppervlak beperkt de zoninstraling. Ramen op het noorden tellen niet mee. Een raam telt als het voldoet aan een van deze punten:
+  - zonwerend glas met g_gl ≤ 0,4;
+  - een belemmering met F_sh;obst;juli < 0,67;
+  - onder 2025+C1 vaste of draaibare lamellen (tabel 7.4a/7.4b);
+  - onder 2024 een zonwering uit tabel 7.5 of 7.6 (screen, jaloezie, rolluik, gemetalliseerd weefsel, uitval- of knikarmscherm). Een zonwering met alleen een ingevulde F_c telt niet, omdat die geen tabeltype noemt.
+
+  De edities 2023, 2022 en 2020+A1 kennen deze toets niet; de rekenkern meldt dan dat de route niet in de editie bestaat.
+
 **JSON bekijken** toont de berekening als bewerkbare JSON. **JSON overnemen** neemt de JSON alleen over als die geldig is.
 
 ### Geavanceerd (JSON)

@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij zeven punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen nu steeds de letterlijke tekst, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software zijn wij acht punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport. Wij volgen nu steeds de letterlijke tekst, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -90,6 +90,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Lezing B.** Een drukfout voor 0,000 279 kWh/(kg·K), zodat de batterij de warmte telt die de toevoerlucht volgens 11.3.2 en tabel 11.15 krijgt.
 - **Gevolg in een openbaar geval.** Geval O (gezondheidszorgfunctie, NTA 8800:2022, D.3 met de luchtbehandelingskast in de zone): de warmtebehoefte van de zone daalt met ongeveer 1 600 kWh doordat de toevoerlucht op 18 °C komt, maar met lezing A telt de batterij 279 kWh, met lezing B 2 794 kWh. BENG 2 is 47,75 met lezing A en 49,80 met lezing B; het rapport geeft 49,49 kWh/(m²·jr). Bij geval L (school, NTA 8800:2022) is het 18,63 tegen 23,82, rapport 25,36.
 - **Vraag.** Is c_a in 11.115 en 11.119 een drukfout voor 0,000 279 kWh/(kg·K)? Zo niet: waarom telt de batterij een tiende van de warmte die de toevoerlucht krijgt?
+
+### Vraag 8. Gevel aan een aangrenzende onverwarmde serre bij TOjuli (5.7.2, p. 115–118)
+
+- **Plaats.** Stap A van 5.7.2 (p. 115) neemt het geveldeel dat aan een aangrenzende onverwarmde serre grenst mee in A_T;or. Stap 2 (p. 116–117) telt H_C;D;juli;k en Q_C;sol;juli;k van constructies tussen de rekenzone en "de buitenlucht of serre". Stap 1 bepaalt H_C;D;juli;k volgens 8.2, terwijl een constructie naar een serre onder 8.4 valt (H_U met b_U); stap B noemt geen component voor H_U.
+- **Lezing A (onze keuze tot uw antwoord).** Het serregeveldeel blijft buiten de verdeling per oriëntatie, zoals een gewone aangrenzende onverwarmde ruimte; de kern meldt dit bij elke rekenzone met een serre.
+- **Lezing B.** Het geveldeel telt mee in A_T;or met b_U·H_zi;ztu (8.4) of U·A als transmissie en de indirecte zonnewinst van 7.30b als zonnewinst op zijn oriëntatie.
+- **Gevolg.** Geen van de openbare gevallen heeft een serre. Ligt de serre op de enige gevel van een oriëntatie, dan wordt die oriëntatie met lezing A mogelijk niet beoordeeld (A_T;or ≤ 3 m²).
+- **Vraag.** Welke warmteoverdrachtscoëfficiënt en welke zonnewinst horen in 5.40 en de julibalans bij het geveldeel naar een serre?
 
 ---
 

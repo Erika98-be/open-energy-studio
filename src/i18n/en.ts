@@ -1349,6 +1349,7 @@ export const en: Record<string, string> = {
   'nta.gap.product_boiler_output_without_operating_hours': 'Boiler output in a month without operating hours (table 9.15)',
   'nta.gap.cooling_part_load_above_full_load': 'Cooling part load above 100 % (10.58): the EN 14825 curve is extrapolated; check the unit capacity',
   'nta.gap.annex_aa_capacity_insufficient': 'Annex AA: cooling capacity insufficient (AA.10/AA.12); TOjuli is calculated (§5.7.1)',
+  'nta.gap.tojuli_sunroom_facade_left_out': 'TOjuli: the facade to the adjacent sunroom, its transmission and the sunroom gains stay out of the split by orientation (§5.7.2 step A; question 8 to NEN)',
   'nta.gap.annex_aa_window_unknown': 'Annex AA: window id not found in the zone (use the project window id)',
   'nta.gap.annex_aa_window_assigned_twice': 'Annex AA: window assigned to more than one room',
   'nta.gap.solar_limitation_not_met': 'Solar limitation (§5.7.1 method 3) not met by the window data',
