@@ -26,7 +26,7 @@ import { SURFACE_RESISTANCE } from '../energy/Constants';
 import { ASSUMED_QV10 } from '../energy/normalizeProject';
 import { buildNtaCalculationTemplate } from '../nta/NtaCalculationTemplate';
 import {
-  ImportFormatError, ImportIssues, droppedOnExport, lookup, ntaInputNotInFormat, parseDecimalText,
+  ImportFormatError, ImportIssues, droppedOnExport, lookup, ntaInputNotInFormat, parseDecimalText, unusableRatio,
   sourceVersionNotCarried, unreadData, type ImportResult, type ReadResult,
 } from './importIssues';
 import { downloadBytes, importFile, pickFile } from './importFile';
@@ -328,7 +328,7 @@ export function exportToVABI(project: IProject): Uint8Array {
       lines.push(`${L(5)}${xmlOpen('Opwekker')}`);
       lines.push(`${L(6)}${xmlTag('Naam', hs.name)}`);
       lines.push(`${L(6)}${xmlTag('Type', lookup(HEATING_TO_VABI, hs.type) ?? 1)}`);
-      lines.push(`${L(6)}${xmlTag('COP', hs.cop)}`);
+      if (!unusableRatio(hs.cop)) lines.push(`${L(6)}${xmlTag('COP', hs.cop)}`);
       lines.push(`${L(6)}${xmlTag('Dekking', hs.coverageFraction)}`);
       lines.push(`${L(5)}${xmlClose('Opwekker')}`);
     }
@@ -356,7 +356,7 @@ export function exportToVABI(project: IProject): Uint8Array {
       lines.push(`${L(5)}${xmlOpen('Opwekker')}`);
       lines.push(`${L(6)}${xmlTag('Naam', cs.name)}`);
       lines.push(`${L(6)}${xmlTag('Type', lookup(COOL_TO_VABI, cs.type) ?? 0)}`);
-      lines.push(`${L(6)}${xmlTag('EER', cs.eer)}`);
+      if (!unusableRatio(cs.eer, cs.type === 'none')) lines.push(`${L(6)}${xmlTag('EER', cs.eer)}`);
       lines.push(`${L(5)}${xmlClose('Opwekker')}`);
     }
     lines.push(`${L(4)}${xmlClose('Koeling')}`);
@@ -369,7 +369,7 @@ export function exportToVABI(project: IProject): Uint8Array {
       lines.push(`${L(5)}${xmlOpen('Opwekker')}`);
       lines.push(`${L(6)}${xmlTag('Naam', hw.name)}`);
       lines.push(`${L(6)}${xmlTag('Type', lookup(HW_TO_VABI, hw.type) ?? 0)}`);
-      lines.push(`${L(6)}${xmlTag('Rendement', hw.efficiency)}`);
+      if (!unusableRatio(hw.efficiency)) lines.push(`${L(6)}${xmlTag('Rendement', hw.efficiency)}`);
       lines.push(`${L(6)}${xmlTag('Zonneboiler', hw.hasSolarBoiler)}`);
       lines.push(`${L(6)}${xmlTag('ZonneboilerFractie', hw.solarBoilerFraction)}`);
       lines.push(`${L(5)}${xmlClose('Opwekker')}`);
@@ -896,11 +896,13 @@ export function readVABIXml(xmlText: string): ReadResult {
     const koelEl = getEl(installEl, 'Koeling');
     for (const opwEl of koelEl ? getChildren(koelEl, 'Opwekker') : []) {
       const cp = `coolingSystems[${coolingSystems.length}]`;
+      const type = vabiCode(issues, `${cp}.type`, opwEl, 'Type', COOL_FROM_VABI, 'none' as CoolingSystemType, 'Koelsoort');
       coolingSystems.push({
         id: crypto.randomUUID(),
         name: getText(opwEl, 'Naam') || 'Koeling',
-        type: vabiCode(issues, `${cp}.type`, opwEl, 'Type', COOL_FROM_VABI, 'none' as CoolingSystemType, 'Koelsoort'),
-        eer: issues.number(`${cp}.eer`, textOf(opwEl, 'EER'), { fallback: 3, min: 0, minExclusive: true }),
+        type,
+        // Without cooling the EER is not used, so 0 is kept as it is.
+        eer: issues.number(`${cp}.eer`, textOf(opwEl, 'EER'), { fallback: 3, min: 0, minExclusive: type !== 'none' }),
       });
     }
 

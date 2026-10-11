@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Uitwisseling: een waarde van 0 en de helling van een UNIEC3-dak (geen rekenwijziging)
+- **Een COP, EER of rendement van 0 veranderde stil.** De export schreef 0, de UNIEC3- en VABI-import namen dat niet over en gaven de standaardwaarde (EER 3, COP en rendement 1). Nu:
+  - een EER van 0 bij koeling van de soort *geen* (bijvoorbeeld de Reddingspost Kijkduin) is niet in gebruik en komt ongewijzigd terug, zonder punt;
+  - een COP, EER of rendement van 0 bij een werkend systeem (bijvoorbeeld het tapwaterrendement in het EDR-project) blijft uit het bestand en staat in de exportmelding (`heatingSystems[*].cop`, `coolingSystems[*].eer`, `hotWaterSystems[*].efficiency`); bij het weer inlezen staat de aangenomen waarde als punt in het importverslag.
+- **Helling van een hellend UNIEC3-dak.** De VABI-import vroeg bij een hellend dak zonder `Hellingshoek` om de hoek in de NTA-invoer, de UNIEC3-import niet. Een UNIEC3-begrenzing heeft hier geen hellingshoek; een dak met een oriëntatie krijgt nu hetzelfde punt (`zones[*].surfaces[*].tilt`, *dropped*). Een plat dak niet.
+- Tests: vier nieuwe tests in `src/__tests__/import-fidelity-review39.test.ts`; alle vier falen op de oude code. Handleiding hoofdstuk 9 bijgewerkt.
+
 ### 11 oktober 2026 — Review 39: getrouwheid van de UNIEC3- en VABI-uitwisseling (geen rekenwijziging)
 - **Exportmelding was onvolledig.** De melding "niet alles overgenomen" keek alleen naar zones, vlakken, ramen, koudebruggen en constructies. Ze noemt nu ook:
   - velden van installaties die geen van beide formaten bevat, zoals de NTA-warmtepompgegevens (`heatingSystems[*].ntaHeatPump`) en een opmerking bij een PV-veld (`solarPV[*].comment`), die stil wegvielen;

@@ -18,7 +18,7 @@
 import { zipSync, strToU8, strFromU8 } from 'fflate';
 import { safeUnzip } from './safeUnzip';
 import {
-  ImportFormatError, ImportIssues, droppedOnExport, lookup, ntaInputNotInFormat, sourceVersionNotCarried, unreadData,
+  ImportFormatError, ImportIssues, droppedOnExport, lookup, ntaInputNotInFormat, sourceVersionNotCarried, unreadData, unusableRatio,
   withoutBom, type ImportResult, type ReadResult,
 } from './importIssues';
 import { downloadBytes, importFile, pickFile } from './importFile';
@@ -481,7 +481,7 @@ export function exportToUNIEC3(project: IProject): Uint8Array {
       const verwOpwek = makeEntity(ENT['VERW-OPWEK'], {
         [PROP.VERW_NAAM]: hs.name,
         [PROP.VERW_TYPE]: lookup(HEATING_TO_UNIEC3, hs.type) ?? 'GVL_VERW_HR107',
-        [PROP.VERW_COP]: nlNum(hs.cop),
+        ...(unusableRatio(hs.cop) ? {} : { [PROP.VERW_COP]: nlNum(hs.cop) }),
         [PROP.VERW_DEKKING]: nlNum(hs.coverageFraction),
       });
       entities.push(verwOpwek);
@@ -511,7 +511,7 @@ export function exportToUNIEC3(project: IProject): Uint8Array {
       const koelOpwek = makeEntity(ENT['KOEL-OPWEK'], {
         [PROP.KOEL_NAAM]: cs.name,
         [PROP.KOEL_TYPE]: lookup(COOL_TO_UNIEC3, cs.type) ?? 'GVL_KOEL_GEEN',
-        [PROP.KOEL_EER]: nlNum(cs.eer),
+        ...(unusableRatio(cs.eer, cs.type === 'none') ? {} : { [PROP.KOEL_EER]: nlNum(cs.eer) }),
       });
       entities.push(koelOpwek);
       relations.push(makeRelation(koelGroup.NTAEntityDataId, koelOpwek.NTAEntityDataId, 'KOEL_OPWEK'));
@@ -528,7 +528,7 @@ export function exportToUNIEC3(project: IProject): Uint8Array {
       const tapwOpwek = makeEntity(ENT['TAPW-OPWEK'], {
         [PROP.TAPW_NAAM]: hw.name,
         [PROP.TAPW_TYPE]: lookup(HW_TO_UNIEC3, hw.type) ?? 'GVL_TAPW_HRCOMBI',
-        [PROP.TAPW_REND]: nlNum(hw.efficiency),
+        ...(unusableRatio(hw.efficiency) ? {} : { [PROP.TAPW_REND]: nlNum(hw.efficiency) }),
         [PROP.TAPW_ZONTHERM]: hw.hasSolarBoiler ? 'True' : 'False',
         [PROP.TAPW_ZONTHERM_FRAC]: nlNum(hw.solarBoilerFraction),
       });
@@ -916,6 +916,10 @@ export function readUNIEC3(zipData: Uint8Array): ReadResult {
       const surfaceId = crypto.randomUUID();
       for (const w of windows) w.surfaceId = surfaceId;
       surfaces.push({ id: surfaceId, name: surfaceName, type: surfaceType, area, orientation, constructionId, zoneId: '', windows });
+      // A UNIEC3 begrenzing has no tilt here: a pitched roof needs it in the NTA input, as on a VABI import.
+      if (surfaceType === 'roof' && orientation !== 'horizontal') {
+        issues.add('dropped', `${sp}.tilt`, `Hellingshoek van dak "${surfaceName}" ontbreekt; vul die in bij de NTA-invoer.`);
+      }
     });
 
     getChildren(rz.NTAEntityDataId, 'RZ_KOUDEBRUG').forEach((kb, bridgeIndex) => {
@@ -992,12 +996,15 @@ export function readUNIEC3(zipData: Uint8Array): ReadResult {
   for (const koel of getChildren(installParent.NTAEntityDataId, 'INST_KOEL')) {
     for (const opwek of getChildren(koel.NTAEntityDataId, 'KOEL_OPWEK')) {
       const cp = `coolingSystems[${coolingSystems.length}]`;
+      const type = codeOf<CoolingSystemType>(issues, `${cp}.type`, getEntityProp(opwek, PROP.KOEL_TYPE),
+        COOL_FROM_UNIEC3, 'none', 'Koelsoort');
       coolingSystems.push({
         id: crypto.randomUUID(),
         name: getEntityProp(opwek, PROP.KOEL_NAAM) || 'Koeling',
-        type: codeOf<CoolingSystemType>(issues, `${cp}.type`, getEntityProp(opwek, PROP.KOEL_TYPE),
-          COOL_FROM_UNIEC3, 'none', 'Koelsoort'),
-        eer: issues.number(`${cp}.eer`, getEntityProp(opwek, PROP.KOEL_EER), { fallback: 3, min: 0, minExclusive: true }),
+        type,
+        // Without cooling the EER is not used, so 0 is kept as it is.
+        eer: issues.number(`${cp}.eer`, getEntityProp(opwek, PROP.KOEL_EER),
+          { fallback: 3, min: 0, minExclusive: type !== 'none' }),
       });
     }
   }
