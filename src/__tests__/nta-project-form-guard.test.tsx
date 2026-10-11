@@ -46,10 +46,22 @@ function twoZoneOffice(): IProject {
   return project;
 }
 
-const FIXTURES: Array<{ name: string; project: IProject }> = [
+/** The terraced dwelling on a heated basement with the depth per wall part (8.42/D.12). */
+function terracedHeatedBasement(): IProject {
+  const project = structuredClone(terraced) as unknown as IProject & { ntaCalculation: Record<string, unknown> };
+  const floors = project.ntaCalculation.groundFloors as Array<Record<string, unknown>>;
+  floors[0] = { ...floors[0], heatedBasement: {
+    wallDepths: [{ lengthM: 10, depthM: 1.5 }, { lengthM: 5, depthM: 0.5 }], wallResistanceM2kPerW: 2.5,
+  } };
+  return project;
+}
+
+/** `sections`: only these sections run on the fixture (a variant for one form). */
+const FIXTURES: Array<{ name: string; project: IProject; sections?: string[] }> = [
   { name: 'office', project: office as unknown as IProject },
   { name: 'terraced-dwelling', project: terraced as unknown as IProject },
   { name: 'office-two-zones', project: twoZoneOffice() },
+  { name: 'terraced-heated-basement', project: terracedHeatedBasement(), sections: ['groundFloors'] },
 ];
 
 const collected = new Map<string, GuardDoc>();
@@ -142,6 +154,7 @@ describe('project form guard', () => {
   for (const fixture of FIXTURES) {
     // The sections the step pages show for this project (`when`), as the adviser sees them.
     const shown = NTA_SECTIONS.filter((section) => !SKIPPED_SECTIONS.has(section.id)
+      && (!fixture.sections || fixture.sections.includes(section.id))
       && (!section.when || section.when(fixture.project, fixture.project.ntaCalculation as unknown as Draft)));
     for (const def of shown) {
       it(`${fixture.name}: ${def.id}`, () => {

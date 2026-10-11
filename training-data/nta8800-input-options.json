@@ -199,6 +199,39 @@
   {
     "kind": "variant",
     "options": [
+      "none_or_unknown",
+      "static_per_emitter",
+      "static_with_group_balancing",
+      "static_with_dynamic_groups",
+      "dynamic_or_direct_expansion"
+    ],
+    "path": "/ntaCalculation/cooling/emission/edition2023/balancing",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "central",
+      "p_before1988",
+      "room"
+    ],
+    "path": "/ntaCalculation/cooling/emission/edition2023/control",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "unknown",
+      "standalone",
+      "standalone_with_manual_override",
+      "network_with_override_and_adaptive"
+    ],
+    "path": "/ntaCalculation/cooling/emission/edition2023/roomAutomation",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
       "floor_cooling",
       "wall_cooling",
       "fan_coil_or_rac_on_outer_wall",
@@ -353,6 +386,15 @@
       "other"
     ],
     "path": "/ntaCalculation/dwellingType",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "direct",
+      "indirect"
+    ],
+    "path": "/ntaCalculation/emission/airHeaters/kind/kind",
     "route": "project"
   },
   {
@@ -850,6 +892,15 @@
   {
     "kind": "variant",
     "options": [
+      "system",
+      "lamps"
+    ],
+    "path": "/ntaCalculation/lighting/[]/lightingZones/[]/power/luminaires/[]/power/method",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
       "forfait",
       "installed"
     ],
@@ -1031,6 +1082,17 @@
   {
     "kind": "variant",
     "options": [
+      "none",
+      "situation1",
+      "situation2",
+      "situation3"
+    ],
+    "path": "/ntaCalculation/ventilation/system/unit/airHandlingUnit/supplyDuctsOutside",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
       "unknown",
       "luka_a_b_c",
       "luka_d",
@@ -1163,6 +1225,42 @@
       "both"
     ],
     "path": "/ntaCalculation/windowObstructions/[]/obstruction/side",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "manual_residential",
+      "automatic_residential_iso52016",
+      "automatic",
+      "manual_utility_with_glare_protection",
+      "manual_utility_without_glare_protection"
+    ],
+    "path": "/ntaCalculation/windowShadings/[]/movableShading/control",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "dark",
+      "other",
+      "white",
+      "unknown"
+    ],
+    "path": "/ntaCalculation/windowShadings/[]/movableShading/device/colour",
+    "route": "project"
+  },
+  {
+    "kind": "variant",
+    "options": [
+      "external_screen",
+      "external_venetian_blind",
+      "external_roller_shutter",
+      "internal_metallised_fabric",
+      "drop_arm_awning",
+      "folding_arm_awning"
+    ],
+    "path": "/ntaCalculation/windowShadings/[]/movableShading/device/kind",
     "route": "project"
   },
   {
@@ -1615,6 +1713,17 @@
   {
     "kind": "field",
     "options": [
+      "control",
+      "certifiedControl",
+      "balancing",
+      "roomAutomation"
+    ],
+    "path": "/ntaCalculation/cooling/emission/edition2023",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
       "id",
       "generator",
       "capacityKw",
@@ -1719,6 +1828,28 @@
       "edition2023"
     ],
     "path": "/ntaCalculation/emission",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "kind",
+      "count",
+      "further",
+      "designHeatLoadW",
+      "sourceReference"
+    ],
+    "path": "/ntaCalculation/emission/airHeaters",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "roomHeightAbove8M",
+      "warmAirReturn",
+      "ecMotor"
+    ],
+    "path": "/ntaCalculation/emission/airHeaters/kind",
     "route": "project"
   },
   {
@@ -1876,6 +2007,27 @@
       "sourceReference"
     ],
     "path": "/ntaCalculation/groundFloors/[]/edgeThermalBridges/bridges/[]",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "depthM",
+      "wallDepths",
+      "wallResistanceM2kPerW",
+      "forfaitDeltaUWPerM2k",
+      "wallAreaM2"
+    ],
+    "path": "/ntaCalculation/groundFloors/[]/heatedBasement",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "lengthM",
+      "depthM"
+    ],
+    "path": "/ntaCalculation/groundFloors/[]/heatedBasement/wallDepths/[]",
     "route": "project"
   },
   {
@@ -2060,6 +2212,23 @@
       "ledFrom2017"
     ],
     "path": "/ntaCalculation/lighting/[]/lightingZones/[]/power",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "count",
+      "power"
+    ],
+    "path": "/ntaCalculation/lighting/[]/lightingZones/[]/power/luminaires/[]",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "powerW"
+    ],
+    "path": "/ntaCalculation/lighting/[]/lightingZones/[]/power/luminaires/[]/power",
     "route": "project"
   },
   {
@@ -2251,6 +2420,17 @@
   {
     "kind": "field",
     "options": [
+      "insideThermalZone",
+      "supplyDuctsOutside",
+      "heatingCoil",
+      "coolingCoil"
+    ],
+    "path": "/ntaCalculation/ventilation/system/unit/airHandlingUnit",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
       "value",
       "declarationReference"
     ],
@@ -2340,6 +2520,27 @@
       "relativeHeight"
     ],
     "path": "/ntaCalculation/windowObstructions/[]/obstruction",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "windowId",
+      "movableShading",
+      "sourceReference"
+    ],
+    "path": "/ntaCalculation/windowShadings/[]",
+    "route": "project"
+  },
+  {
+    "kind": "field",
+    "options": [
+      "reductionFactor",
+      "device",
+      "control",
+      "sourceReference"
+    ],
+    "path": "/ntaCalculation/windowShadings/[]/movableShading",
     "route": "project"
   },
   {

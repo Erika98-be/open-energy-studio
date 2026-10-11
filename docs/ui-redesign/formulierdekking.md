@@ -67,6 +67,10 @@ In deze ronde kregen een formulier: de douche-WTW (§13.5.3, per douche met verb
 
 **Bewust JSON, nieuw in de lijst:** de maandwaarden van de warmte die een boosterwarmtepomp aan de koeling onttrekt, en de maandfracties van de ventilatorregeling; beide uit een meetrapport.
 
+**11 oktober 2026:** de optiedekking kreeg openbaar geval N (verwarmde kelder met een diepte per wanddeel, 8.42) als projectvoorbeeld. Daardoor staan de velden van `groundFloors[].heatedBasement` en zijn wanddelen (`wallDepths[]`: lengte en diepte) nu in de catalogus, en ook enkele blokken die alleen N heeft (de per-raamzonwering `windowShadings`, luchtverwarmers, armaturen per lamp, het koelafgifteblok van de editie 2023 en de LBK-kanalen buiten de zone). Die hebben alle een formulier. Twee kregen een vrijstelling:
+- het soort en de kleur van het toestel in `windowShadings[].movableShading` (`form`): dezelfde samengestelde keuze "soort:kleur" als de projectbrede zonwering;
+- `groundFloors[].heatedBasement.forfaitDeltaUWPerM2k` (`json`): de kern leidt ΔU_for van de verwarmde kelder af uit het projectmodel (8.38); alleen opgeven om daarvan af te wijken. De overname uit de opname laat een opgegeven waarde staan.
+
 ## Nieuwe formulieren in deze ronde
 
 - **Tapwater:** boosterwarmtepomp met meetwaarden (bijlage W: beproevingen bij 24 en 40 °C, klasse, stilstandsverlies W.17, brontemperatuur als één waarde of per maand, bron van de warmte), warmtepompen in serie (bron van de laatste warmtepomp), warmtepomp met indirect verwarmd vat, biomassa-combitoestel (isolatie volgens bijlage R), overig direct gestookt voorraadtoestel; afleversets en b_U per tapwatersysteem.

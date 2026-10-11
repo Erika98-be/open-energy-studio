@@ -75,6 +75,19 @@ export const FORM_COVERAGE_EXEMPTIONS: CoverageExemption[] = [
     reason: 'Zonwering per raam en de projectbrede zonwering kiezen het toestel als samengestelde waarde "soort:kleur" (NtaWindowShadings).',
   },
   {
+    route: 'project', path: '/ntaCalculation/windowShadings/[]/movableShading/device/colour', options: ['dark', 'white', 'other', 'unknown'], kind: 'form',
+    reason: 'Zonwering per raam kiest het toestel als samengestelde waarde "soort:kleur" (NtaWindowShadings).',
+  },
+  {
+    route: 'project', path: '/ntaCalculation/windowShadings/[]/movableShading/device/kind',
+    options: ['external_screen', 'external_venetian_blind', 'external_roller_shutter'], kind: 'form',
+    reason: 'Zonwering per raam kiest het toestel als samengestelde waarde "soort:kleur" (NtaWindowShadings).',
+  },
+  {
+    route: 'project', path: '/ntaCalculation/groundFloors/[]/heatedBasement', options: ['forfaitDeltaUWPerM2k'], kind: 'json',
+    reason: 'De kern leidt ΔU_for van de verwarmde kelder af uit het projectmodel (8.38); alleen opgeven om daarvan af te wijken (expert). De overname uit de opname laat een opgegeven waarde staan.',
+  },
+  {
     route: 'project', path: '/ntaCalculation/distributionSystem', options: ['usageFunction'], kind: 'form',
     reason: 'Het sjabloon van het distributiesysteem neemt de gebruiksfunctie van het blok over (distributionSystemTemplate).',
   },

@@ -76,7 +76,7 @@ macro_rules! fixture {
 
 /// The fixtures a user's input can look like, per route.
 fn fixtures() -> Vec<Fixture> {
-    let sources: [(&str, Route, &str); 26] = [
+    let sources: [(&str, Route, &str); 27] = [
         fixture!("example-office", Route::Project),
         fixture!("example-terraced-dwelling", Route::Project),
         fixture!("project-performance-synthetic", Route::Project),
@@ -86,6 +86,9 @@ fn fixtures() -> Vec<Fixture> {
         fixture!("public-comparison-d", Route::Project),
         fixture!("public-comparison-e", Route::Project),
         fixture!("public-comparison-f", Route::Project),
+        // A heated basement with the depth per wall part (8.42), so the
+        // catalogue lists the basement's fields and its wall parts.
+        fixture!("public-comparison-n", Route::Project),
         fixture!("building-performance-synthetic", Route::Building),
         fixture!(
             "rvo-voorbeeldwoningen-galerijwoning-1975-1991",
