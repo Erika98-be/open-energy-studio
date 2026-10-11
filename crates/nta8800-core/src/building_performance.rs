@@ -5155,11 +5155,7 @@ mod tests {
             .any(|item| item.code == "standard_insulation_construction_year_missing"));
         // An older edition reports no chapter 5 block, so no standard to
         // miss the year for (2022 has no standard at all, p. 72–73).
-        for version in [
-            NormVersion::V2024,
-            NormVersion::V2023,
-            NormVersion::V2022,
-        ] {
+        for version in [NormVersion::V2024, NormVersion::V2023, NormVersion::V2022] {
             sample.norm_version = version;
             let result = assess_building_performance(&sample);
             assert!(result.chapter5.is_none());
