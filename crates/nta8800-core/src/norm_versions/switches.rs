@@ -143,6 +143,11 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
         |p| p.permanent_shading_routes,
     ),
     values(
+        &["10a"],
+        "TOjuli-uitzondering 5.7.1 methode 3: zonwering tabel 7.5/7.6",
+        &["solar_limitation_movable_shading"],
+    ),
+    values(
         &["11"],
         "f_gebouw;si;W (13.157)/(13.160)",
         &["hot_water_building_share"],
@@ -225,8 +230,8 @@ pub const SWITCH_POINTS: &[SwitchPoint] = &[
     },
     inputs(
         &["31"],
-        "bijlage AA als bewijs koelcapaciteit",
-        &["annex_aa_route"],
+        "bijlage AA en zoninstralingstoets als bewijs koelcapaciteit",
+        &["cooling_capacity_methods_route"],
         &["capacity.method"],
     ),
     values(

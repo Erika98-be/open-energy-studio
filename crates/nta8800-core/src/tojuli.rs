@@ -253,8 +253,12 @@ pub fn use_function_required(zone_id: &str) -> TojuliAssessment {
 /// §5.7.1 method 3, second situation (p. 114–115): the share of the
 /// assessed glazing area (orientation 45°–315° or horizontal) that has fixed
 /// louvres of table 7.4a/7.4b, `g_gl ≤ 0,4` (July, cooling) or
-/// `F_sh;obst;juli < 0,67`. Without assessed glazing the share is 1.
+/// `F_sh;obst;juli < 0,67`. NTA 8800:2024 (p. 106) names the shading of
+/// tables 7.5/7.6 instead of the louvres, so there a window with a table
+/// device (`movableShading.device`) counts; a declared `F_c` names no table
+/// type and does not. Without assessed glazing the share is 1.
 pub fn shaded_glazing_share(input: &MonthlyDemandInput) -> f64 {
+    let movable_tables = crate::norm_versions::profile().solar_limitation_movable_shading;
     let mut total = 0.0;
     let mut limited = 0.0;
     for window in &input.windows {
@@ -267,9 +271,15 @@ pub fn shaded_glazing_share(input: &MonthlyDemandInput) -> f64 {
             .glazing
             .as_ref()
             .is_some_and(|glazing| glazing.fixed_louvres.is_some());
+        let table_shading = movable_tables
+            && window
+                .movable_shading
+                .as_ref()
+                .is_some_and(|shading| shading.device.is_some());
         let g = window_g_gl(window, JULY, Balance::Cooling);
         let obstruction = window_obstruction(window, JULY, Balance::Cooling).unwrap_or(1.0);
         if louvres
+            || table_shading
             || g <= SHADED_GLAZING_G_MAX + 1e-9
             || obstruction < SHADED_GLAZING_OBSTRUCTION_MAX
         {
@@ -310,6 +320,13 @@ pub fn validate_active_cooling(
         ));
     }
     if let CoolingCapacityEvidence::SolarLimitation { criterion, .. } = &evidence.capacity {
+        // 5.7.1 of NTA 8800:2023 (p. 103–104) and older has no method 3.
+        if !crate::norm_versions::profile().cooling_capacity_methods_route {
+            issues.push(issue(
+                "route_not_in_edition",
+                &format!("{path}.capacity.method"),
+            ));
+        }
         if evidence.system == ActiveCoolingSystem::DewPointCoolingHumidifiedExhaust {
             // Note 2 of §5.7.1: only methods 1 or 2.
             issues.push(issue(
@@ -454,7 +471,7 @@ pub fn assess_tojuli(input: &MonthlyDemandInput, options: TojuliOptions<'_>) -> 
         } = &evidence.capacity
         {
             // 5.7.1 of NTA 8800:2023 (p. 103–104) has no annex AA.
-            if !crate::norm_versions::profile().annex_aa_route {
+            if !crate::norm_versions::profile().cooling_capacity_methods_route {
                 issues.push(issue(
                     "route_not_in_edition",
                     "activeCooling.capacity.method",
@@ -505,7 +522,7 @@ pub fn assess_tojuli(input: &MonthlyDemandInput, options: TojuliOptions<'_>) -> 
                 active_cooling: true,
                 orientations: Vec::new(),
                 max_tojuli_k: Some(0.0),
-                meets_bbl_limit: Some(true),
+                meets_bbl_limit: options.residential.then_some(true),
                 annex_aa,
                 issues: Vec::new(),
                 warnings: Vec::new(),
@@ -705,7 +722,10 @@ pub fn assess_tojuli(input: &MonthlyDemandInput, options: TojuliOptions<'_>) -> 
         active_cooling: false,
         orientations: results,
         max_tojuli_k: max,
-        meets_bbl_limit: max.map(|value| value <= TOJULI_LIMIT_K),
+        // Bbl art. 4.149b sets the limit for woonfuncties only.
+        meets_bbl_limit: max
+            .filter(|_| options.residential)
+            .map(|value| value <= TOJULI_LIMIT_K),
         warnings: insufficient_annex_aa
             .is_some()
             .then(|| {
@@ -1064,6 +1084,90 @@ mod tests {
         // An incomplete inventory cannot carry the declaration.
         input.window_inventory_complete = false;
         assert!(codes(&input).contains(&"window_inventory_incomplete"));
+    }
+
+    /// Review 40: §5.7.1 method 3, second situation. NTA 8800:2024 (p. 106)
+    /// counts an opening with shading of table 7.5 or 7.6; 2025+C1 (p. 114)
+    /// names the fixed louvres of tables 7.4a/7.4b instead, so a screen
+    /// limits solar gain in 2024 only. A declared F_c names no table type.
+    #[test]
+    fn movable_shading_of_tables_7_5_and_7_6_counts_in_2024_only() {
+        use crate::norm_versions::{with_version, NormVersion};
+        use crate::solar_shading::{MovableShading, ShadeColour, ShadingControl, ShadingDevice};
+        let mut input = demand();
+        input.window_inventory_complete = true;
+        for window in &mut input.windows {
+            window.g_perpendicular = 0.70;
+            window.glazing = None;
+            window.dynamic = None;
+            window.movable_shading = Some(MovableShading {
+                reduction_factor: f64::NAN,
+                device: Some(ShadingDevice::ExternalScreen {
+                    colour: ShadeColour::Unknown,
+                }),
+                control: ShadingControl::ManualResidential,
+                source_reference: "survey".into(),
+            });
+        }
+        let share = |version, input: &MonthlyDemandInput| {
+            with_version(version, || shaded_glazing_share(input))
+        };
+        assert!((share(NormVersion::V2024, &input) - 1.0).abs() < 1e-12);
+        assert!(share(NormVersion::V2025C1, &input) < SHADED_GLAZING_AREA_SHARE);
+        // A declared reduction factor instead of a table device.
+        for window in &mut input.windows {
+            let shading = window.movable_shading.as_mut().unwrap();
+            shading.device = None;
+            shading.reduction_factor = 0.20;
+        }
+        assert!(share(NormVersion::V2024, &input) < SHADED_GLAZING_AREA_SHARE);
+    }
+
+    /// Review 40: 5.7.1 of NTA 8800:2023 (p. 103–104) has no capacity
+    /// methods, so method 3 (toets op beperking van de zoninstraling) is no
+    /// route there; 2024 p. 105–106 has it.
+    #[test]
+    fn solar_limitation_is_not_in_2023() {
+        use crate::norm_versions::{with_version, NormVersion};
+        let mut input = demand();
+        input.window_inventory_complete = true;
+        input.windows.clear();
+        let solar = evidence(CoolingCapacityEvidence::SolarLimitation {
+            criterion: SolarLimitationCriterion::SmallWindowArea,
+            source_reference: "window inventory".into(),
+        });
+        let refused = |version| {
+            with_version(version, || {
+                validate_active_cooling(&solar, &input, true, "activeCooling")
+                    .iter()
+                    .any(|item| {
+                        item.code == "route_not_in_edition"
+                            && item.path == "activeCooling.capacity.method"
+                    })
+            })
+        };
+        assert!(refused(NormVersion::V2023));
+        assert!(refused(NormVersion::V2022));
+        assert!(!refused(NormVersion::V2024));
+        assert!(!refused(NormVersion::V2025C1));
+    }
+
+    /// Review 40: Bbl art. 4.149b sets the TOjuli limit for woonfuncties
+    /// only, so a utility zone carries no verdict, also not per zone.
+    #[test]
+    fn the_bbl_limit_is_for_dwellings_only() {
+        let input = demand();
+        let utility = assess_tojuli(
+            &input,
+            TojuliOptions {
+                residential: false,
+                ..TojuliOptions::default()
+            },
+        );
+        assert!(utility.max_tojuli_k.is_some());
+        assert_eq!(utility.meets_bbl_limit, None);
+        let dwelling = assess_tojuli(&input, TojuliOptions::default());
+        assert!(dwelling.meets_bbl_limit.is_some());
     }
 
     #[test]

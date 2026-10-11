@@ -280,8 +280,14 @@ pub struct NormProfile {
     /// P.6.5.4.8: geothermal efficiency is the forfait 20, without the
     /// temperature-difference correction.
     pub geothermal_efficiency_fixed: bool,
-    /// Annex AA as proof of the capacity of an active cooling system (5.7.1).
-    pub annex_aa_route: bool,
+    /// 5.7.1 methods 2 (annex AA) and 3 (toets op beperking van de
+    /// zoninstraling) as proof of the capacity of an active cooling system.
+    pub cooling_capacity_methods_route: bool,
+    /// 5.7.1 method 3, second situation: an opening with shading of table
+    /// 7.5 or 7.6 (screens, venetian blinds, roller shutters, metallised
+    /// fabric, awnings) limits solar gain (2024 p. 106). 2025+C1 names the
+    /// fixed louvres of tables 7.4a/7.4b instead (p. 114).
+    pub solar_limitation_movable_shading: bool,
     /// Table 5.7 renovatiestandaard (§5.3.1.2).
     pub renovation_standard: bool,
     /// Table 14.3 column "ledverlichting geïnstalleerd vanaf 2017".
