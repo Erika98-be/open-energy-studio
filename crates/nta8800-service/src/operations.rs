@@ -93,6 +93,32 @@ pub struct Operation {
     pub run: fn(Value) -> Outcome,
 }
 
+/// Every machine code the error envelope can carry, as the OpenAPI document
+/// lists them. `unknown_tool` is answered by the MCP server only.
+pub const ERROR_CODES: &[&str] = &[
+    "invalid_json",
+    "invalid_request_shape",
+    "missing_request_member",
+    "invalid_project_shape",
+    "invalid_maatwerkadvies_shape",
+    "invalid_norm_version",
+    "norm_version_conflict",
+    "norm_version_not_applicable",
+    "edition_not_implemented",
+    "payload_too_large",
+    "unsupported_media_type",
+    "host_not_allowed",
+    "not_found",
+    "method_not_allowed",
+    "non_finite_result",
+    "serialization_failed",
+    "kernel_panic",
+    "calculation_unavailable",
+    "server_busy",
+    "calculation_timeout",
+    "unknown_tool",
+];
+
 /// The common error envelope. `error` and `code` carry the same machine code
 /// (`error` is kept for older clients), `message` is human readable, `path`
 /// is the JSON path of the offending input when known, `details` is optional.

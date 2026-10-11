@@ -13,6 +13,18 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 11 oktober 2026 — Review 37: contract van HTTP-API en MCP-server (geen rekenwijziging)
+- **OpenAPI-document.**
+  - Elke route kan 405 `method_not_allowed` geven (de verkeerde methode), maar het document noemde 405 nergens. Het staat nu bij elke route, met de `Allow`-header; 403 `host_not_allowed` staat nu ook bij `/health` en `/v1/openapi.json`.
+  - `GET /v1/nta8800/interpretations` geeft een lijst, maar het document beschreef elke uitkomst als object. Het beschrijft nu de lijst met per groep `module`, `part` en `items`.
+  - De lijst van foutcodes bij `Error.code` miste `edition_not_implemented` (en `unknown_tool` van de MCP-server). De lijst komt nu uit één constante (`ERROR_CODES`); een test leest de bronnen van de service en de editieweigeringen van de kern en faalt bij een code die er niet in staat.
+- **MCP-server.**
+  - `list_interpretations` gaf een lijst als `structuredContent`, terwijl MCP daar een object vraagt; een strikte client kon de uitkomst weigeren. De lijst komt nu verpakt als `{"result": [...]}`.
+  - De HTTP-API weigert een body met meer dan 500 000 JSON-waarden voordat hij wordt ingelezen; de MCP-server las elke regel tot 64 MiB in, wat een veelvoud daarvan aan geheugen kon vragen. De poortwachter weigert nu ook een regel met meer waarden dan de grens (`-32600`, `data.code` `payload_too_large`); `OES_MCP_MAX_JSON_VALUES` stelt een andere grens in.
+  - Tools rekenden onbeperkt tegelijk. Er rekenen er nu hoogstens zoveel als de HTTP-API standaard rekenplaatsen heeft; verdere aanroepen wachten. `OES_MCP_MAX_CALCULATIONS` stelt een ander aantal in.
+- **Documentatie.** `docs/nta8800-api.md` noemde vier bewerkingen die nooit 422 geven; `compare_project_editions` is de vijfde. `docs/nta8800-mcp.md` beschrijft de verpakking, de waardengrens en de rekenplaatsen.
+- **Test.** `every_operation_answers_within_its_documented_contract` (`crates/nta8800-service/tests/api.rs`) stuurt elke bewerking in het proces lege, verkeerde en onbekende leden, een onbekende, numerieke en oudere `normVersion`, de voorbeeldprojecten en -opnamen, een verkeerd `Content-Type` en de verkeerde methode, en controleert dat elk antwoord een gedocumenteerde status en foutcode heeft, dat een 200 de vereiste leden van het resultaatschema heeft en dat geen bericht een paniek of bronpad noemt.
+
 ### 11 oktober 2026 — Uitkomst van de basisopname blijft staan na het verlaten van de stap (geen rekenwijziging)
 - **Opname doorrekenen** gaf een uitkomst die verdween zodra je naar een andere stap ging: bij terugkomst stond er "Nog niet doorgerekend". De uitkomst wordt nu per document bewaard, met de opname en de NTA 8800-uitgave waarmee ze is berekend, en alleen getoond zolang de opname en de uitgave daarmee overeenkomen. Een wijziging in de opname (een reden bij een standaardwaarde uitgezonderd), een andere uitgave, het verwijderen van de opname of een ander document geeft geen uitkomst; een ander document toont nooit de uitkomst van het eerste. Handleiding hoofdstuk 2 bijgewerkt.
 
