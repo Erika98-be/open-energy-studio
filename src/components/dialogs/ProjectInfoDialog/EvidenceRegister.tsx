@@ -22,18 +22,33 @@ export function parseGps(text: string): NtaEvidenceItem['gps'] {
   return parts.length === 2 && parts.every(Number.isFinite) ? { latitude: parts[0], longitude: parts[1] } : undefined;
 }
 
-function GpsField({ id, label, value, onChange }: {
-  id: string; label: string; value: NtaEvidenceItem['gps']; onChange: (gps: NtaEvidenceItem['gps']) => void;
+/** Parses "a, b": the trimmed, non-empty paths. */
+export function parsePaths(text: string): string[] {
+  return text.split(',').map((path) => path.trim()).filter(Boolean);
+}
+
+/**
+ * A text field for a parsed value: keeps what the adviser types (a trailing
+ * comma, a half-typed coordinate) and shows the value again when it changes
+ * from outside (Verwerpen, undo), review 35.
+ */
+function ParsedTextField<T>({ id, label, placeholder, value, format, parse, onChange }: {
+  id: string; label: string; placeholder: string; value: T;
+  format: (value: T) => string; parse: (text: string) => T; onChange: (value: T) => void;
 }) {
-  const [text, setText] = useState(value ? `${value.latitude}, ${value.longitude}` : '');
+  const [text, setText] = useState(() => format(value));
+  const shown = JSON.stringify(parse(text)) === JSON.stringify(value) ? text : format(value);
   return (
     <div className="dialog-field">
       <label htmlFor={id}>{label}</label>
-      <input id={id} type="text" placeholder="52.37, 4.89" value={text}
-        onChange={(event) => { setText(event.target.value); onChange(parseGps(event.target.value)); }} />
+      <input id={id} type="text" placeholder={placeholder} value={shown}
+        onChange={(event) => { setText(event.target.value); onChange(parse(event.target.value)); }} />
     </div>
   );
 }
+
+const formatGps = (gps: NtaEvidenceItem['gps']) => (gps ? `${gps.latitude}, ${gps.longitude}` : '');
+const formatPaths = (paths: string[]) => paths.join(', ');
 
 /** BRL 9500 Bijlage 3 evidence register: files with hash, origin and check. */
 export function EvidenceRegister({ evidence, onChange }: EvidenceRegisterProps) {
@@ -123,16 +138,11 @@ export function EvidenceRegister({ evidence, onChange }: EvidenceRegisterProps) 
             <input id={`evidence-${item.id}-description`} type="text" value={item.description ?? ''}
               onChange={(event) => update(index, { description: event.target.value || undefined })} />
           </div>
-          <div className="dialog-field">
-            <label htmlFor={`evidence-${item.id}-links`}>{t('evidence.linkedPaths')}</label>
-            <input id={`evidence-${item.id}-links`} type="text" placeholder="/zones/0/surfaces/1"
-              value={(item.linkedPaths ?? []).join(', ')}
-              onChange={(event) => update(index, {
-                linkedPaths: event.target.value.split(',').map((path) => path.trim()).filter(Boolean),
-              })} />
-          </div>
-          <GpsField id={`evidence-${item.id}-gps`} label={t('evidence.gps')} value={item.gps}
-            onChange={(gps) => update(index, { gps })} />
+          <ParsedTextField id={`evidence-${item.id}-links`} label={t('evidence.linkedPaths')} placeholder="/zones/0/surfaces/1"
+            value={item.linkedPaths ?? []} format={formatPaths} parse={parsePaths}
+            onChange={(linkedPaths) => update(index, { linkedPaths })} />
+          <ParsedTextField id={`evidence-${item.id}-gps`} label={t('evidence.gps')} placeholder="52.37, 4.89"
+            value={item.gps} format={formatGps} parse={parseGps} onChange={(gps) => update(index, { gps })} />
           <button type="button" onClick={() => {
             const next = evidence.filter((_, i) => i !== index);
             onChange(next);

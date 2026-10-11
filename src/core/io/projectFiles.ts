@@ -75,12 +75,14 @@ export interface ClosingDocument {
   isDirty: boolean;
   /** NTA input edited but not applied (only known for the active document). */
   draftDirty: boolean;
+  /** Registration data edited but not saved into the project (only known for the active document). */
+  registrationDirty?: boolean;
 }
 
 export type CloseChoice = 'save' | 'discard' | 'cancel';
 
 export interface CloseDeps {
-  /** Unapplied NTA input: true to discard it and go on, false to stop. */
+  /** Unapplied NTA input or unsaved registration data: true to discard it and go on, false to stop. */
   confirmDiscardDraft(doc: ClosingDocument): Promise<boolean>;
   /** Unsaved changes: Opslaan · Niet opslaan · Annuleren. */
   askUnsaved(doc: ClosingDocument): Promise<CloseChoice>;
@@ -90,7 +92,7 @@ export interface CloseDeps {
 
 /** Documents that need a question before the window closes. */
 export function documentsNeedingConfirmation(documents: ClosingDocument[]): ClosingDocument[] {
-  return documents.filter((doc) => doc.isDirty || doc.draftDirty);
+  return documents.filter((doc) => doc.isDirty || doc.draftDirty || doc.registrationDirty);
 }
 
 /**
@@ -100,7 +102,7 @@ export function documentsNeedingConfirmation(documents: ClosingDocument[]): Clos
  */
 export async function confirmCloseAll(documents: ClosingDocument[], deps: CloseDeps): Promise<boolean> {
   for (const doc of documentsNeedingConfirmation(documents)) {
-    if (doc.draftDirty && !(await deps.confirmDiscardDraft(doc))) return false;
+    if ((doc.draftDirty || doc.registrationDirty) && !(await deps.confirmDiscardDraft(doc))) return false;
     if (!doc.isDirty) continue;
     const choice = await deps.askUnsaved(doc);
     if (choice === 'cancel') return false;
