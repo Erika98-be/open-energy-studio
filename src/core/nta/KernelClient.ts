@@ -4379,6 +4379,8 @@ export interface NtaCalculationInput {
     heatedBasement?: NtaHeatedBasement | null;
     sourceReference: string;
   }>;
+  /** 8.2.1 thermal-bridge route of the whole building; absent, the floor edges decide. `forfait` gives ΔU_for also without a ground floor. */
+  thermalBridgeRoute?: 'detailed' | 'forfait' | null;
   ventilationFlows: MonthlyDemandInput['ventilationFlows'];
   ventilation?: VentilationInput | null;
   /** 7.3.3 vertical pipes (single-zone projects; per zone in `zoneData`); `[]` is none, absent is unknown (a gap). */

@@ -61,6 +61,7 @@ export const NTA_INPUT_ROUTES: Record<string, NtaTarget> = {
   windowGlazings: ['building', 'envelope'],
   surfaceTilts: ['building', 'envelope'],
   groundFloors: ['building', 'envelope'],
+  thermalBridgeRoute: ['building', 'envelope'],
   unheatedSpaces: ['building', 'unheated'],
   sunrooms: ['building', 'unheated'],
   generator: ['installations', 'heating'],

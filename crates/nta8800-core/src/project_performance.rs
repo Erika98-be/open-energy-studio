@@ -38,6 +38,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 
+/// Linear thermal bridges of the building (8.2.1): ψ·ℓ per bridge, or the
+/// forfait ΔU_for of 8.3 on every part of H_D.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ThermalBridgeRoute {
+    Detailed,
+    Forfait,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NtaCalculationInput {
@@ -93,6 +102,13 @@ pub struct NtaCalculationInput {
     pub vertical_pipes: Option<Vec<crate::monthly_demand::VerticalPipe>>,
     #[serde(default)]
     pub ground_floors: Vec<GroundFloorData>,
+    /// 8.2.1/8.3: the linear thermal-bridge route of the whole building.
+    /// Absent, the ground floors' edge route decides (8.37/8.38 forfait
+    /// selects ΔU_for); `forfait` selects ΔU_for (8.2, 8.3) also for a
+    /// building without a floor on the ground. One route for the building:
+    /// a ground floor on the other route is `thermal_bridge_methods_mixed`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thermal_bridge_route: Option<ThermalBridgeRoute>,
     #[serde(default)]
     pub ventilation_flows: Vec<VentilationFlow>,
     /// Chapter 11 input (single-zone projects; per zone in `zoneData`).
@@ -677,21 +693,46 @@ fn collect_airtightness_types(value: &Value, out: &mut Vec<String>) {
     }
 }
 
-/// 8.2.1 and 8.3.3.1: a forfait floor edge (0,5·P of 8.37/8.38) selects
-/// the forfait treatment of linear thermal bridges for the whole building,
-/// so H_D takes ΔU_for of 8.3 and no ψ-values may be entered; mixing the
-/// two methods is not allowed. Returns ΔU_for for the forfait route.
+/// The forfait thermal-bridge route of 8.2.1 is chosen: by
+/// `thermalBridgeRoute`, or else by a forfait floor edge.
+fn forfait_bridges_chosen(nta: &NtaCalculationInput) -> bool {
+    match nta.thermal_bridge_route {
+        Some(route) => route == ThermalBridgeRoute::Forfait,
+        None => nta
+            .ground_floors
+            .iter()
+            .any(|floor| matches!(floor.edge_thermal_bridges, EdgeThermalBridges::Forfait)),
+    }
+}
+
+/// 8.2.1 and 8.3.3.1: a forfait floor edge (0,5·P of 8.37/8.38) or
+/// `thermalBridgeRoute` `forfait` selects the forfait treatment of linear
+/// thermal bridges for the whole building, so H_D takes ΔU_for of 8.3 and
+/// no ψ-values may be entered; mixing the two methods is not allowed (2025+C1
+/// p. 225 and 254). The route needs no floor on the ground: 8.2.1 applies
+/// to every building. Returns ΔU_for for the forfait route.
 fn forfait_bridge_route(
     project: &ProjectInput,
     nta: &NtaCalculationInput,
     constructions: &HashMap<&str, &Value>,
     gaps: &mut Vec<InputGap>,
 ) -> Option<f64> {
-    let forfait = nta
-        .ground_floors
-        .iter()
-        .any(|floor| matches!(floor.edge_thermal_bridges, EdgeThermalBridges::Forfait));
-    if !forfait {
+    if let Some(route) = nta.thermal_bridge_route {
+        // The building route and the floor edges must agree: a forfait
+        // building needs 0,5·P on its floors (8.37/8.38), a detailed one
+        // Σℓ·ψ_gr (8.36/8.39).
+        let disagrees = nta.ground_floors.iter().any(|floor| {
+            matches!(floor.edge_thermal_bridges, EdgeThermalBridges::Forfait)
+                != (route == ThermalBridgeRoute::Forfait)
+        });
+        if disagrees {
+            gaps.push(gap(
+                "thermal_bridge_methods_mixed",
+                "ntaCalculation.thermalBridgeRoute",
+            ));
+        }
+    }
+    if !forfait_bridges_chosen(nta) {
         return None;
     }
     let detailed_edges = nta.ground_floors.iter().any(|floor| {
@@ -1391,14 +1432,29 @@ fn chapter8_warnings(
                 });
             }
         }
+        // 8.36/8.39: the detailed edge sums ℓ_j·ψ_gr;j along the exposed
+        // perimeter (2025+C1 p. 253 and 255); with none entered H_g has no
+        // edge loss at all, where the forfait would add 0,5·P.
+        if matches!(&floor.edge_thermal_bridges, EdgeThermalBridges::Detailed { bridges } if bridges.is_empty())
+            && floor.exposed_perimeter_m > 0.0
+        {
+            warnings.push(InputGap {
+                detail: Some(format!(
+                    "Detailed floor edge (8.36/8.39) without ψ_gr over P = {:.1} m; the forfait 8.37/8.38 would add {:.1} W/K",
+                    floor.exposed_perimeter_m,
+                    0.5 * floor.exposed_perimeter_m
+                )),
+                ..gap(
+                    "ground_floor_edge_bridges_none_entered",
+                    format!("{path}.edgeThermalBridges"),
+                )
+            });
+        }
     }
 
     // 8.2.1: the detailed route sums ψ·ℓ over the linear thermal bridges of
     // H_D; with none entered H_D carries no bridges at all.
-    let forfait = nta
-        .ground_floors
-        .iter()
-        .any(|floor| matches!(floor.edge_thermal_bridges, EdgeThermalBridges::Forfait));
+    let forfait = forfait_bridges_chosen(nta);
     let outdoor = |item: &Value| {
         item.get("thermalBoundary")
             .and_then(|value| serde_json::from_value::<ThermalBoundary>(value.clone()).ok())
@@ -3955,6 +4011,27 @@ fn derive_input(
         .map(|item| (item.surface_id.as_str(), item))
         .collect();
     let delta_u_forfait = forfait_bridge_route(&project, &nta, &constructions, gaps);
+    // 8.36/8.39: the floor-edge bridges to the ground are ψ_gr of the
+    // ground floor (2025+C1 p. 253 and 255–256; 8.3.6 p. 263); H_D, H_U and
+    // H_g take no zone bridge with boundary "ground", so it would be lost.
+    for (zone_index, zone) in project.zones.iter().enumerate() {
+        for (list, items) in [
+            ("thermalBridges", zone.thermal_bridges.as_deref()),
+            ("pointThermalBridges", zone.point_thermal_bridges.as_deref()),
+        ] {
+            for (index, bridge) in items.unwrap_or_default().iter().enumerate() {
+                let ground = bridge.get("thermalBoundary").and_then(|value| {
+                    serde_json::from_value::<ThermalBoundary>(value.clone()).ok()
+                }) == Some(ThermalBoundary::Ground);
+                if ground {
+                    gaps.push(gap(
+                        "thermal_bridge_ground_on_floor_edge",
+                        format!("zones[{zone_index}].{list}[{index}].thermalBoundary"),
+                    ));
+                }
+            }
+        }
+    }
     // b_U per unheated space for the forfait route (8.4.1 note 5, C.10).
     let partition_factors = match delta_u_forfait {
         Some(_) if !project.unheated_spaces.is_empty() => {
@@ -6682,6 +6759,67 @@ mod tests {
                 && gap.detail.is_some()));
     }
 
+    /// 8.2.1 (2025+C1 p. 224–225): the forfait ΔU_for applies to any
+    /// building, also one without a floor on the ground (an upper-floor
+    /// dwelling). Before, only a forfait floor edge could select it, so such
+    /// a building had to enter every ψ.
+    #[test]
+    fn forfait_bridges_without_a_ground_floor() {
+        let mut value = project();
+        value["zones"][0]["surfaces"][5]["thermalBoundary"] = Value::from("adjacent_conditioned");
+        value["ntaCalculation"]["groundFloors"] = serde_json::json!([]);
+        value["zones"][0]["thermalBridges"] = serde_json::json!([]);
+        value["ntaCalculation"]["thermalBridgeRoute"] = Value::from("forfait");
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        let mean = (98.0 * 0.21 + 52.0 * 0.16) / 150.0;
+        let delta = 0.1 - 0.25 * (mean - 0.4);
+        let expected = 98.0 * 0.21 + 52.0 * 0.16 + 12.0 * 1.1 + 162.0 * delta;
+        let summary = result
+            .performance
+            .as_ref()
+            .unwrap()
+            .space_heating
+            .demand
+            .transmission
+            .clone()
+            .unwrap();
+        assert!((summary.direct_conductance_w_per_k.unwrap() - expected).abs() < 1e-9);
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|gap| gap.code == "detailed_thermal_bridges_none_entered"));
+        // Without the route the same building has no bridges at all.
+        value["ntaCalculation"]
+            .as_object_mut()
+            .unwrap()
+            .remove("thermalBridgeRoute");
+        let detailed = assess_project_performance(&value);
+        assert!(detailed
+            .warnings
+            .iter()
+            .any(|gap| gap.code == "detailed_thermal_bridges_none_entered"));
+        // The building route and a floor edge on the other route mix them.
+        let mut mixed = project();
+        mixed["ntaCalculation"]["thermalBridgeRoute"] = Value::from("forfait");
+        mixed["zones"][0]["thermalBridges"] = serde_json::json!([]);
+        let result = assess_project_performance(&mixed);
+        assert!(result
+            .gaps
+            .iter()
+            .any(|gap| gap.code == "thermal_bridge_methods_mixed"
+                && gap.path == "ntaCalculation.thermalBridgeRoute"));
+        mixed["ntaCalculation"]["thermalBridgeRoute"] = Value::from("detailed");
+        mixed["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"] =
+            serde_json::json!({"method": "forfait"});
+        let result = assess_project_performance(&mixed);
+        assert!(result
+            .gaps
+            .iter()
+            .any(|gap| gap.code == "thermal_bridge_methods_mixed"
+                && gap.path == "ntaCalculation.thermalBridgeRoute"));
+    }
+
     /// 8.2.1/8.3.3.1: the forfait floor edge selects ΔU_for for the whole
     /// building; ψ-values next to it mix the methods.
     #[test]
@@ -7461,6 +7599,63 @@ mod tests {
                     .iter()
                     .any(|(code, _)| *code == "ground_floor_data_without_ground_surface"),
                 "{kind}: {codes:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_detailed_floor_edge_without_psi_is_flagged() {
+        // 8.36/8.39: a detailed edge without ψ_gr gives H_g no edge loss.
+        let mut value = project();
+        value["ntaCalculation"]["groundFloors"][0]["edgeThermalBridges"]["bridges"] =
+            serde_json::json!([]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        assert!(result
+            .warnings
+            .iter()
+            .any(|gap| gap.code == "ground_floor_edge_bridges_none_entered"
+                && gap.path == "ntaCalculation.groundFloors[0].edgeThermalBridges"));
+        let base = assess_project_performance(&project());
+        assert!(!base
+            .warnings
+            .iter()
+            .any(|gap| gap.code == "ground_floor_edge_bridges_none_entered"));
+    }
+
+    #[test]
+    fn a_zone_bridge_to_the_ground_is_refused_not_dropped() {
+        // 8.36/8.39 (2025+C1 p. 253 and 255–256): ψ_gr belongs to the ground
+        // floor's edge bridges. H_D, H_U and H_g take no zone bridge with
+        // boundary "ground", so one entered there was silently lost.
+        let base = assess_project_performance(&project());
+        assert_eq!(base.status, "calculated_unverified", "{:?}", base.gaps);
+        let mut value = project();
+        value["zones"][0]["thermalBridges"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({
+                "id": "tb-ground", "name": "Vloerrand", "psiValue": 0.6,
+                "length": 20.0, "zoneId": "z1", "thermalBoundary": "ground"
+            }));
+        value["zones"][0]["pointThermalBridges"] = serde_json::json!([{
+            "id": "pb-ground", "name": "Paal", "chiValue": 0.2,
+            "zoneId": "z1", "thermalBoundary": "ground", "sourceReference": "test"
+        }]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "incomplete");
+        let codes: Vec<_> = result
+            .gaps
+            .iter()
+            .map(|item| (item.code, item.path.as_str()))
+            .collect();
+        for path in [
+            "zones[0].thermalBridges[1].thermalBoundary",
+            "zones[0].pointThermalBridges[0].thermalBoundary",
+        ] {
+            assert!(
+                codes.contains(&("thermal_bridge_ground_on_floor_edge", path)),
+                "{codes:?}"
             );
         }
     }

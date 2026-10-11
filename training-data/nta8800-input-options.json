@@ -1383,6 +1383,7 @@
       "sunrooms",
       "verticalPipes",
       "groundFloors",
+      "thermalBridgeRoute",
       "ventilationFlows",
       "ventilation",
       "zoneData",

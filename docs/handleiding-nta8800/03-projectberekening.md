@@ -135,6 +135,17 @@ Bij distributie (verwarming en koeling) en bij de circulatieleiding van warm tap
 
 ![Het blok ψ uit de leidinggegevens voor een geïsoleerde leiding in de constructie, met de diameters zonder en met isolatie, de λ van de isolatie en van de constructie en de diepte, alle maten in meters](img/psi-leidinggegevens.png)
 
+### Koudebrugmethode van het gebouw
+
+Lineaire koudebruggen reken je voor het hele gebouw op één manier (8.2.1): met een ψ-waarde per koudebrug, of forfaitair met de toeslag ΔU_for (8.3) op alle delen van H_D. Kies onder **Lineaire koudebruggen van het gebouw (8.2.1)** in de stap *Gebouw → Schil & ramen*:
+- *Volgt de vloerrand van de grondvloeren*: de keuze bij **Vloerrand** van de vloeren op grond beslist, zoals voorheen.
+- *Forfaitair: ΔU_for (8.3)*: ook voor een gebouw zonder vloer op de grond, zoals een bovenwoning. Een vloer op grond moet dan ook forfaitair (0,5·P) zijn en de koudebruggenlijst blijft leeg.
+- *ψ-waarden per koudebrug (8.1)*: een vloer op grond moet dan ψ-waarden per randdeel hebben.
+
+Kiezen de vloerrand en het gebouw verschillend, dan meldt de kern `thermal_bridge_methods_mixed`.
+
+De koudebrug van de vloerrand naar de grond (ψ_gr, 8.36/8.39) hoort bij de vloer op grond, niet in de koudebruggenlijst van de zone; een koudebrug met begrenzing *grond* in die lijst wordt geweigerd (`thermal_bridge_ground_on_floor_edge`). Heeft een vloerrand *ψ-waarden per randdeel* zonder randdelen, dan waarschuwt de kern dat H_g geen randverlies heeft.
+
 ### Forfaitaire koudebruggen met een onverwarmde ruimte
 
 Rekent het gebouw met forfaitaire koudebruggen (ΔU_for) en grenst een rekenzone aan een onverwarmde ruimte, dan volgt de kern 8.4.1 opmerking 5 met bijlage C.10:
@@ -233,6 +244,7 @@ Het paneel toont het volledige NTA-invoerblok als JSON. Gebruik dit alleen als e
 | `pv_peak_power_invalid` | PV: een opgegeven K_pk boven 400 W/m², of een paneelvermogen onder de vermogensstap | waarde en datablad controleren |
 | `lighting_daylight_sector_invalid` | een daglichtsector met een onmogelijke geometrie, of een opgegeven F_D;dayl buiten 0–1 of met een oppervlakte van 0 | maten of opgegeven waarden controleren |
 | `ground_surface_not_floor` | een gevel of dak grenst aan de grond; NTA 8800 8.3 kent alleen vloeren aan de grond (kelderwanden horen bij de verwarmde kelder, 8.3.3.2) | het vlak op een andere begrenzing zetten, of de kelderwand opgeven bij de verwarmde kelder van de vloer (diepte z en eventueel ΣA_T;bw) |
+| `thermal_bridge_ground_on_floor_edge` | een lineaire of puntvormige koudebrug in de lijst van de zone grenst aan de grond; ψ_gr van de vloerrand hoort bij de grondvloer (8.36/8.39) en zou anders wegvallen | de koudebrug opgeven bij de randkoudebruggen van de grondvloer, of de begrenzing van de koudebrug corrigeren |
 | `air_cavity_below_20_mm_unsupported` | dunne luchtspouw die zwak geventileerd is of een reflecterende laag heeft | opgeven als R-waarde met bron |
 | `common_space_invalid`, `common_space_function_outside_zone`, `common_space_exceeds_zone`, `common_space_area_mismatch` | gemeenschappelijke ruimte: geen oppervlakte of een functie dubbel aangevinkt, geen aangewezen functie in de rekenzone, samen groter dan de rekenzone, of eigen functie-oppervlakten plus gemeenschappelijke ruimten niet gelijk aan de rekenzone | zie [Gemeenschappelijke ruimten](#gemeenschappelijke-ruimten-664) |
 

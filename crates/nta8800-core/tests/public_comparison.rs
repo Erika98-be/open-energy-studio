@@ -1101,7 +1101,9 @@ fn case_n_supermarket_under_nta_8800_2020_a1() {
     .unwrap();
     assert_eq!(value["ntaCalculation"]["normVersion"], "2020+A1");
     let (performance, indicators) = run_edition(&value, "2020+A1");
-    assert_indicators("N 2020+A1", indicators, [54.57, -24.31, 122.6]);
+    // Review 44: the basement walls (31,80 m at z_j 3,65 m, the rest at 0)
+    // take U_bw;j of 8.45 at 3,65 m, not at the mean z 1,66 m (8.39).
+    assert_indicators("N 2020+A1", indicators, [54.52, -24.34, 122.7]);
     assert_eq!(
         performance["spaceHeating"]["emissionTemperatureIncrementK"].as_f64(),
         Some(4.0)
@@ -1112,15 +1114,15 @@ fn case_n_supermarket_under_nta_8800_2020_a1() {
         let loss = month["emissionLossKwh"].as_f64().unwrap();
         assert!((loss - 0.15 * need).abs() < 1e-6, "{loss} {need}");
     }
-    assert!((used_kwh(&performance, "heating") - 33080.0).abs() < 1.0);
+    assert!((used_kwh(&performance, "heating") - 33007.0).abs() < 1.0);
     // Heat need of the actual system against fixed C1 (5.4.2). The report
     // implies about 71 000-74 000 kWh; see the doc section "Warmtebehoefte
     // van het werkelijke systeem".
     let demand = &performance["spaceHeating"]["demand"];
     let need = demand["annualHeatingNeedKwh"].as_f64().unwrap();
-    assert!((need - 80201.0).abs() < 1.0, "{need}");
+    assert!((need - 80023.0).abs() < 1.0, "{need}");
     let c1 = demand["fixedC1"]["annualHeatingNeedKwh"].as_f64().unwrap();
-    assert!((c1 - 93686.0).abs() < 1.0, "{c1}");
+    assert!((c1 - 93511.0).abs() < 1.0, "{c1}");
     // Infiltration without a measurement: 11.86 gives 0,5 · 1,2 · 0,7 =
     // 0,42 dm³/(s·m²), 11.85 q_v1 = 0,42/10^0,67 · A_g · 3,6. In January
     // the mass balance of 11.5 (table 11.1, H 9,40 m) lets in 629,5 m³/h
