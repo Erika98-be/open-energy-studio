@@ -4,6 +4,7 @@ import { KernelProvider, useKernel } from './context/KernelProvider';
 import { projectCalculated } from './core/nta/KernelClient';
 import { summarizeForPreview } from './core/nta/PreviewSummary';
 import { NtaDraftProvider, useNtaDraft } from './context/NtaDraftProvider';
+import { RegistrationDraftProvider, useRegistrationDraft } from './context/RegistrationDraftProvider';
 import { I18nProvider } from './i18n/I18nProvider';
 import { WelcomeScreen, type NewProjectKind } from './components/WelcomeScreen/WelcomeScreen';
 import { StatusBar } from './components/StatusBar/StatusBar';
@@ -42,7 +43,7 @@ import { downloadVABI, openVABIFileDialog } from './core/io/VABIElementsBridge';
 import { withImportRecord } from './core/io/importLog';
 import { exportLossesSummary, importErrorText, importIssuesSummary } from './core/io/importText';
 import { serializeProject, deserializeProjectFile, compareKernelStamp, describeStamp, ProjectFileTooNewError } from './core/io/ProjectSerializer';
-import { confirmCloseAll, isMissingFileError, saveProjectText, type ClosingDocument } from './core/io/projectFiles';
+import { confirmCloseAll, documentsNeedingConfirmation, isMissingFileError, saveProjectText, type ClosingDocument } from './core/io/projectFiles';
 import { migrateLegacyRelabel, relabelNoticeKey } from './core/nta/Registration';
 import { normalizeProject } from './core/energy/normalizeProject';
 import { stepStatuses } from './core/nta/stepStatus';
@@ -360,6 +361,8 @@ export interface DocumentReport {
   projectId: string;
   /** The NTA draft has changes that are not applied. */
   draftDirty: boolean;
+  /** The registration draft has changes that are not saved into the project. */
+  registrationDirty: boolean;
   /** Label class of a calculated kernel answer, for the recent-projects list. */
   labelClass: string | null;
 }
@@ -367,11 +370,13 @@ export interface DocumentReport {
 function DocumentReporter({ onReport }: { onReport: (report: DocumentReport | null) => void }) {
   const { state } = useEnergy();
   const draftDirty = useNtaDraft()?.dirty ?? false;
+  const registrationDirty = useRegistrationDraft()?.dirty ?? false;
   const settled = useKernel()?.settled ?? null;
   const summary = settled ? summarizeForPreview(settled) : null;
   const labelClass = summary && projectCalculated(summary.status) ? summary.labelClass ?? null : null;
   const projectId = state.project.id;
-  useEffect(() => { onReport({ projectId, draftDirty, labelClass }); }, [projectId, draftDirty, labelClass, onReport]);
+  useEffect(() => { onReport({ projectId, draftDirty, registrationDirty, labelClass }); },
+    [projectId, draftDirty, registrationDirty, labelClass, onReport]);
   useEffect(() => () => onReport(null), [onReport]);
   return null;
 }
@@ -384,8 +389,10 @@ function ActiveDocumentContent({ onReport, ...props }: {
   return (
     <KernelProvider project={state.project}>
       <NtaDraftProvider>
-        <DocumentReporter onReport={onReport} />
-        <ActiveDocumentShell {...props} />
+        <RegistrationDraftProvider>
+          <DocumentReporter onReport={onReport} />
+          <ActiveDocumentShell {...props} />
+        </RegistrationDraftProvider>
       </NtaDraftProvider>
     </KernelProvider>
   );
@@ -691,19 +698,24 @@ function AppContent() {
     docDispatch({ type: 'DOC_DISPATCH', payload: { id: activeDoc.id, action: { type: 'SET_DIRTY', payload: false } } });
   }, [docState, docDispatch, writeProjectToDisk, rememberRecent]);
 
+  // The question before discarding unapplied NTA input and/or unsaved registration data.
+  const unappliedQuestion = useCallback((name: string, ntaDraft: boolean, registration: boolean) => {
+    const prefix = ntaDraft && registration ? 'app.unappliedDraftAndRegistration'
+      : ntaDraft ? 'app.unappliedDraft' : 'app.unsavedRegistration';
+    return { title: t(`${prefix}.title`), message: t(`${prefix}.message`, { name }), confirmLabel: t(`${prefix}.discard`), danger: true };
+  }, [t]);
+
   // ── Close tab (with unsaved-changes check) ──
   const handleCloseTab = useCallback(async (id: string) => {
     const doc = docState.documents.find(d => d.id === id);
     if (!doc) return;
 
-    // NTA input that was edited but not applied is lost on closing (it is not part of the project yet).
-    if (id === docState.activeDocumentId && activeReport.current?.projectId === doc.state.project.id && activeReport.current.draftDirty) {
-      const choice = await confirmChoice({
-        title: t('app.unappliedDraft.title'),
-        message: t('app.unappliedDraft.message', { name: doc.state.project.name || t('app.untitled') }),
-        confirmLabel: t('app.unappliedDraft.discard'),
-        danger: true,
-      });
+    // NTA input that was edited but not applied, and registration data not
+    // saved, are lost on closing (they are not part of the project yet).
+    const report = id === docState.activeDocumentId && activeReport.current?.projectId === doc.state.project.id
+      ? activeReport.current : null;
+    if (report && (report.draftDirty || report.registrationDirty)) {
+      const choice = await confirmChoice(unappliedQuestion(doc.state.project.name || t('app.untitled'), report.draftDirty, report.registrationDirty));
       if (choice !== 'confirm') return;
     }
 
@@ -723,7 +735,7 @@ function AppContent() {
     }
 
     docDispatch({ type: 'DOC_CLOSE', payload: id });
-  }, [docState.documents, docState.activeDocumentId, docDispatch, writeProjectToDisk, confirmChoice, t]);
+  }, [docState.documents, docState.activeDocumentId, docDispatch, writeProjectToDisk, confirmChoice, t, unappliedQuestion]);
 
   const handleCloseActiveTab = useCallback(() => {
     if (docState.activeDocumentId) void handleCloseTab(docState.activeDocumentId);
@@ -739,15 +751,13 @@ function AppContent() {
     draftDirty: doc.id === docState.activeDocumentId
       && activeReport.current?.projectId === doc.state.project.id
       && Boolean(activeReport.current?.draftDirty),
+    registrationDirty: doc.id === docState.activeDocumentId
+      && activeReport.current?.projectId === doc.state.project.id
+      && Boolean(activeReport.current?.registrationDirty),
   })), [docState.documents, docState.activeDocumentId, t]);
 
   const confirmWindowClose = useCallback(() => confirmCloseAll(closingDocuments(), {
-    confirmDiscardDraft: async (doc) => (await confirmChoice({
-      title: t('app.unappliedDraft.title'),
-      message: t('app.unappliedDraft.message', { name: doc.name }),
-      confirmLabel: t('app.unappliedDraft.discard'),
-      danger: true,
-    })) === 'confirm',
+    confirmDiscardDraft: async (doc) => (await confirmChoice(unappliedQuestion(doc.name, doc.draftDirty, Boolean(doc.registrationDirty)))) === 'confirm',
     askUnsaved: async (doc) => {
       const choice = await confirmChoice({
         title: t('app.unsaved.title'),
@@ -766,7 +776,7 @@ function AppContent() {
       docDispatch({ type: 'DOC_DISPATCH', payload: { id: open.id, action: { type: 'SET_DIRTY', payload: false } } });
       return true;
     },
-  }), [closingDocuments, confirmChoice, docState.documents, docDispatch, rememberRecent, t, writeProjectToDisk]);
+  }), [closingDocuments, confirmChoice, docState.documents, docDispatch, rememberRecent, t, writeProjectToDisk, unappliedQuestion]);
 
   const windowClose = useRef({ confirm: confirmWindowClose, documents: closingDocuments });
   windowClose.current = { confirm: confirmWindowClose, documents: closingDocuments };
@@ -775,7 +785,7 @@ function AppContent() {
     if (!isTauri()) {
       // Browser build: the browser's own "leave site?" question.
       const beforeUnload = (event: BeforeUnloadEvent) => {
-        if (windowClose.current.documents().some((doc) => doc.isDirty || doc.draftDirty)) {
+        if (documentsNeedingConfirmation(windowClose.current.documents()).length > 0) {
           event.preventDefault();
           event.returnValue = '';
         }
@@ -789,7 +799,7 @@ function AppContent() {
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
       const win = getCurrentWindow();
       const unlisten = await win.onCloseRequested(async (event) => {
-        if (!windowClose.current.documents().some((doc) => doc.isDirty || doc.draftDirty)) return;
+        if (documentsNeedingConfirmation(windowClose.current.documents()).length === 0) return;
         event.preventDefault();
         if (await windowClose.current.confirm()) await win.destroy();
       });

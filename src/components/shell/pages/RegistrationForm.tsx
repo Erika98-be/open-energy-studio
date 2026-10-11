@@ -1,15 +1,17 @@
 /**
  * Registration data of the Registratie step (UI redesign F9): message type,
  * object and BAG, survey and advisers, WLC-GWP, detail-survey triggers and the
- * evidence register. Formerly part of the project-info dialog; the behaviour is
- * unchanged — one local draft, saved with `cleanRegistration` (software
- * identity kept on a relabel) and the BAG ledger update.
+ * evidence register. Formerly part of the project-info dialog. It edits the
+ * document's registration draft (`RegistrationDraftProvider`, review 35), saved
+ * with `cleanRegistration` (software identity kept on a relabel) and the BAG
+ * ledger update.
  */
 import { NumberInput } from '../../ui/Field';
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Save, Undo2 } from 'lucide-react';
 import { useI18n } from '../../../i18n/i18n';
 import { useEnergy } from '../../../context/EnergyContext';
+import { registrationChanged, useRegistrationDraft } from '../../../context/RegistrationDraftProvider';
 import type { NtaDetailSurveyTriggers, NtaRegistration } from '../../../core/nta/KernelClient';
 import {
   bagConflicts, cleanRegistration, readBagLedger, recordBagRegistration, registrationSoftware,
@@ -59,9 +61,13 @@ export function RegistrationForm() {
   const { state, dispatch } = useEnergy();
   const { project } = state;
   const stored = project.registration;
-  const [registration, setRegistration] = useState<NtaRegistration>(stored ?? {});
-  // A new stored registration (save, undo, another document) restarts the draft.
-  useEffect(() => { setRegistration(stored ?? {}); }, [stored]);
+  // The document's draft, so leaving the step loses nothing (review 35); a
+  // local one outside a document.
+  const shared = useRegistrationDraft();
+  const [local, setLocal] = useState<NtaRegistration>(stored ?? {});
+  // A new stored registration (save, undo, another document) restarts the local draft.
+  useEffect(() => { if (!shared) setLocal(stored ?? {}); }, [stored, shared]);
+  const registration = shared?.draft ?? local;
   // Calculation core of the kernel that calculates this project, stored with
   // the program identity (BRL 9500-W §4.2.4, p. 24).
   const [kernelVersion, setKernelVersion] = useState<string | undefined>();
@@ -70,7 +76,14 @@ export function RegistrationForm() {
     void stampProject(project).then((stamp) => { if (active) setKernelVersion(stamp?.kernelVersion); });
     return () => { active = false; };
   }, [project]);
-  const update = (patch: Partial<NtaRegistration>) => setRegistration((current) => ({ ...current, ...patch }));
+  const update = (patch: Partial<NtaRegistration>) => {
+    if (shared) shared.update(patch);
+    else setLocal((current) => ({ ...current, ...patch }));
+  };
+  const discard = () => {
+    if (shared) shared.discard();
+    else setLocal(stored ?? {});
+  };
   const advisor = (key: 'surveyingAdvisor' | 'registeringAdvisor') =>
     registration[key] ?? { name: '', competenceNumber: '' };
 
@@ -91,7 +104,8 @@ export function RegistrationForm() {
   // stored stamp from another kernel version is a change to save even with the fields unchanged.
   const stampOutdated = stored?.software != null && kernelVersion != null
     && JSON.stringify(stored.software) !== JSON.stringify(software);
-  const dirty = useMemo(() => JSON.stringify(registration) !== JSON.stringify(stored ?? {}), [registration, stored]);
+  // A field set and cleared again is no change: compared as it would be stored.
+  const dirty = registrationChanged(registration, stored);
   const canSave = dirty || stampOutdated;
   const formId = useId();
 
@@ -287,7 +301,7 @@ export function RegistrationForm() {
             ? <span className="registration-form-dirty">{t('registration.form.stampOutdated')}</span>
             : <span id={`${formId}-clean`} className="registration-form-clean">{t('registration.form.nothingToSave')}</span>}
         <Button type="button" variant="ghost" icon={<Undo2 aria-hidden="true" />} disabled={!dirty}
-          onClick={() => setRegistration(stored ?? {})}>{t('registration.form.discard')}</Button>
+          onClick={discard}>{t('registration.form.discard')}</Button>
         {/* Nothing changed, nothing to save (UX finding 8). */}
         <Button type="submit" variant="primary" icon={<Save aria-hidden="true" />} disabled={!canSave}
           aria-describedby={canSave ? undefined : `${formId}-clean`}>{t('registration.form.save')}</Button>
