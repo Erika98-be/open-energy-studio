@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { KernelCode, KernelDetail } from '../KernelCode/KernelCode';
 import { adviceText } from '../../core/nta/MwaAdviceText';
 import { formatNumber } from '../../i18n/format';
@@ -7,6 +7,7 @@ import { useEnergy } from '../../context/EnergyContext';
 import i18next, { useI18n } from '../../i18n/i18n';
 import {
   assessMaatwerkadviesWithRust,
+  buildMaatwerkadviesInput,
   DEFAULT_NORM_VERSION,
   type MaatwerkadviesAssessment,
   type MwaMeasure,
@@ -354,12 +355,34 @@ function MeasureChecks({ label, measures, selected, onChange }: {
 /** Tabs of the Maatwerkadvies step (ontwerp §8): maatregelen & pakketten, gemeten verbruik, woningpas, advies & rapport. */
 export type MwaTab = 'measures' | 'use' | 'passport' | 'advice';
 
+/** A calculation with the kernel input it was made from (review 38). */
+interface StoredAssessment {
+  projectId: string;
+  project: IProject;
+  input: string;
+  assessment: MaatwerkadviesAssessment;
+}
+
+/**
+ * The stored assessment when it was calculated from the project as it is now:
+ * same document and the same kernel input (base project, edition, measures,
+ * packages, use and tariffs). An edit elsewhere (undo, an edition switch,
+ * another document, an edit made while the calculation ran) gives null, so a
+ * result is never shown for input it was not calculated from.
+ */
+export function matchingAssessment(stored: StoredAssessment | null, project: IProject): MaatwerkadviesAssessment | null {
+  if (!stored || !project.maatwerkadvies || stored.projectId !== project.id) return null;
+  if (stored.project === project) return stored.assessment;
+  return JSON.stringify(buildMaatwerkadviesInput(project, project.maatwerkadvies)) === stored.input ? stored.assessment : null;
+}
+
 export function MaatwerkadviesPanel({ tab }: { tab?: MwaTab } = {}) {
   const { state, dispatch } = useEnergy();
   const { t } = useI18n();
   const project = state.project;
   const definition = project.maatwerkadvies;
-  const [assessment, setAssessment] = useState<MaatwerkadviesAssessment | null>(null);
+  const [stored, setStored] = useState<StoredAssessment | null>(null);
+  const assessment = useMemo(() => matchingAssessment(stored, project), [stored, project]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [order, setOrder] = useState<ResultOrder>('input');
@@ -368,7 +391,7 @@ export function MaatwerkadviesPanel({ tab }: { tab?: MwaTab } = {}) {
 
   const update = (next: NtaMaatwerkadvies) => {
     dispatch({ type: 'SET_MAATWERKADVIES', payload: next });
-    setAssessment(null);
+    setStored(null);
   };
 
   if (!definition) {
@@ -436,7 +459,9 @@ export function MaatwerkadviesPanel({ tab }: { tab?: MwaTab } = {}) {
       // project as it is now.
       const current = regenerateTemplatePatches(project, definition);
       if (JSON.stringify(current) !== JSON.stringify(definition)) dispatch({ type: 'SET_MAATWERKADVIES', payload: current });
-      setAssessment(await assessMaatwerkadviesWithRust(project, current));
+      const input = JSON.stringify(buildMaatwerkadviesInput(project, current));
+      const result = await assessMaatwerkadviesWithRust(project, current);
+      setStored({ projectId: project.id, project, input, assessment: result });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
