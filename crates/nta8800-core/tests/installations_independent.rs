@@ -903,3 +903,644 @@ fn annex_q_undersized_with_switch_off_and_backup() {
         415.76511761098016,
     );
 }
+const ANNEX_Q_BRINE_WATER: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "brine_water", "maximumPower": {"condition1": {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 30, "condenserOutC": 35, "cop": 4.5, "heatingPowerKw": 8.0}, "condition2": {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 47, "condenserOutC": 55, "cop": 2.9, "heatingPowerKw": 7.4}, "condition3": {"evaporatorInC": 10, "evaporatorOutC": 7, "condenserInC": 30, "condenserOutC": 35, "cop": 5.8, "heatingPowerKw": 10.2}}, "modulation": {"method": "on_off"}, "switchOff": {}, "sourcePump": {"nominalPowerW": 120.0, "overrunS": 60.0}, "testReportReference": "r69 synthetic"}, "designSupplyTemperatureC": 35.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r69 synthetic"}}]"#;
+
+const ANNEX_Q_EXHAUST_AIR: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "exhaust_air_water", "maximumPower": {"condition1": {"evaporatorInC": 20, "evaporatorOutC": 12, "condenserInC": 30, "condenserOutC": 35, "cop": 4.2, "heatingPowerKw": 1.6}, "condition2": {"evaporatorInC": 20, "evaporatorOutC": 12, "condenserInC": 47, "condenserOutC": 55, "cop": 2.6, "heatingPowerKw": 1.35}}, "modulation": {"method": "on_off"}, "switchOff": {}, "testReportReference": "r69 synthetic"}, "designSupplyTemperatureC": 35.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": true, "sourceReference": "r69 synthetic"}}]"#;
+
+const ANNEX_Q_COMBINED_AIR: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "combined_air_water", "outdoorAirFraction": 0.6, "maximumPower": {"condition1": {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 30, "condenserOutC": 35, "cop": 4.6, "heatingPowerKw": 6.0}, "condition2": {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 47, "condenserOutC": 55, "cop": 2.9, "heatingPowerKw": 5.6}, "condition3": {"evaporatorInC": -7, "evaporatorOutC": -8, "condenserInC": 30, "condenserOutC": 35, "cop": 2.7, "heatingPowerKw": 4.4}, "condition4": {"evaporatorInC": 2, "evaporatorOutC": 1, "condenserInC": 30, "condenserOutC": 35, "cop": 3.3, "heatingPowerKw": 4.9}}, "modulation": {"method": "on_off"}, "switchOff": {"minEvaporatorInC": -20.0}, "testReportReference": "r69 synthetic"}, "designSupplyTemperatureC": 35.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r69 synthetic", "combinedOutdoorAndExhaustAir": true, "outdoorAirHeatFraction": 0.6, "outdoorAirFractionReference": "r69"}}]"#;
+
+const ANNEX_Q_AIR_AIR: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "air_air", "maximumPower": {"condition1": {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 20, "condenserOutC": 35, "cop": 4.0, "heatingPowerKw": 5.0}, "condition3": {"evaporatorInC": -7, "evaporatorOutC": -8, "condenserInC": 20, "condenserOutC": 32, "cop": 2.6, "heatingPowerKw": 3.6}}, "modulation": {"method": "on_off"}, "switchOff": {"minEvaporatorInC": -15.0}, "testReportReference": "r69 synthetic"}, "designSupplyTemperatureC": 35.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/emission", "value": {"system": "air_heating", "balancing": "not_applicable", "control": "individual_room_thermostats", "sourceReference": "r69"}}, {"op": "remove", "pointer": "/ntaCalculation/distributionSystem"}, {"pointer": "/ntaCalculation/distribution", "value": {"method": "heated_zone_only_space_heating", "sourceReference": "r69"}}]"#;
+
+const ANNEX_Q_GAS_BACKUP: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "outdoor_air_water", "maximumPower": {"condition1": {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 30, "condenserOutC": 35, "cop": 4.6, "heatingPowerKw": 2.4}, "condition2": {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 47, "condenserOutC": 55, "cop": 2.9, "heatingPowerKw": 2.2}, "condition3": {"evaporatorInC": -7, "evaporatorOutC": -8, "condenserInC": 30, "condenserOutC": 35, "cop": 2.7, "heatingPowerKw": 1.7}}, "modulation": {"method": "on_off"}, "switchOff": {"minEvaporatorInC": -5.0, "minCop": 2.0}, "testReportReference": "r69 synthetic"}, "designSupplyTemperatureC": 45.0, "backup": {"kind": "gas_boiler", "boiler": {"generatorId": "hr107", "role": "individual_main", "location": "inside_thermal_boundary", "kind": "hr107", "fuel": "natural_gas", "averageDesignEmissionTemperatureC": 42.5, "emissionCircuit": "direct", "equipmentReference": "r69", "locationReference": "r69", "temperatureAndCircuitReference": "r69", "pilotFlamePresent": false, "installationYear": 2021, "installationYearReference": "r69"}}, "equipmentReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r69 synthetic"}}]"#;
+
+const ANNEX_Q_MODULATING: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "outdoor_air_water", "maximumPower": {"condition1": {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 30, "condenserOutC": 35, "cop": 4.6, "heatingPowerKw": 6.0}, "condition2": {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 47, "condenserOutC": 55, "cop": 2.9, "heatingPowerKw": 5.6}, "condition3": {"evaporatorInC": -7, "evaporatorOutC": -8, "condenserInC": 30, "condenserOutC": 35, "cop": 2.7, "heatingPowerKw": 4.4}, "condition4": {"evaporatorInC": 2, "evaporatorOutC": 1, "condenserInC": 30, "condenserOutC": 35, "cop": 3.3, "heatingPowerKw": 4.9}}, "modulation": {"method": "modulating", "minimumPowerKw": 1.2, "lowRange": [{"evaporatorInC": -10, "evaporatorOutC": -11, "condenserInC": 30, "condenserOutC": 35, "cop": 2.4, "heatingPowerKw": 4.0}, {"evaporatorInC": -7, "evaporatorOutC": -8, "condenserInC": 29.5, "condenserOutC": 34, "cop": 2.9, "heatingPowerKw": 3.9}, {"evaporatorInC": 2, "evaporatorOutC": 1, "condenserInC": 26.5, "condenserOutC": 30, "cop": 4.3, "heatingPowerKw": 2.6}, {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 24.5, "condenserOutC": 27, "cop": 5.4, "heatingPowerKw": 1.75}, {"evaporatorInC": 12, "evaporatorOutC": 11, "condenserInC": 22.5, "condenserOutC": 24, "cop": 6.6, "heatingPowerKw": 0.8}], "highRange": [{"evaporatorInC": -10, "evaporatorOutC": -11, "condenserInC": 48, "condenserOutC": 55, "cop": 1.6, "heatingPowerKw": 3.6}, {"evaporatorInC": -7, "evaporatorOutC": -8, "condenserInC": 46, "condenserOutC": 52, "cop": 1.9, "heatingPowerKw": 3.5}, {"evaporatorInC": 2, "evaporatorOutC": 1, "condenserInC": 38, "condenserOutC": 42, "cop": 2.9, "heatingPowerKw": 2.3}, {"evaporatorInC": 7, "evaporatorOutC": 6, "condenserInC": 33, "condenserOutC": 36, "cop": 3.8, "heatingPowerKw": 1.5}, {"evaporatorInC": 12, "evaporatorOutC": 11, "condenserInC": 28, "condenserOutC": 30, "cop": 4.7, "heatingPowerKw": 0.7}], "condenserPumpModulating": true, "sourcePumpModulating": true}, "switchOff": {"minEvaporatorInC": -20.0}, "testReportReference": "r69 synthetic"}, "designSupplyTemperatureC": 35.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r69 synthetic"}}]"#;
+
+const ANNEX_Q_MODULATING_BRINE: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "brine_water", "maximumPower": {"condition1": {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 30, "condenserOutC": 35, "cop": 4.5, "heatingPowerKw": 8.0}, "condition2": {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 47, "condenserOutC": 55, "cop": 2.9, "heatingPowerKw": 7.4}, "condition3": {"evaporatorInC": 10, "evaporatorOutC": 7, "condenserInC": 30, "condenserOutC": 35, "cop": 5.8, "heatingPowerKw": 10.2}}, "modulation": {"method": "modulating", "minimumPowerKw": 1.5, "lowRange": [{"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 30, "condenserOutC": 35, "cop": 4.5, "heatingPowerKw": 8.0}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 29.5, "condenserOutC": 34, "cop": 4.8, "heatingPowerKw": 7.0}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 27, "condenserOutC": 30, "cop": 5.6, "heatingPowerKw": 4.3}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 25, "condenserOutC": 27, "cop": 6.1, "heatingPowerKw": 2.8}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 23, "condenserOutC": 24, "cop": 6.5, "heatingPowerKw": 1.2}], "highRange": [{"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 48, "condenserOutC": 55, "cop": 2.8, "heatingPowerKw": 7.4}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 46.5, "condenserOutC": 52, "cop": 3.0, "heatingPowerKw": 6.5}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 39, "condenserOutC": 42, "cop": 3.7, "heatingPowerKw": 4.0}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 34, "condenserOutC": 36, "cop": 4.3, "heatingPowerKw": 2.6}, {"evaporatorInC": 0, "evaporatorOutC": -3, "condenserInC": 29, "condenserOutC": 30, "cop": 5.0, "heatingPowerKw": 1.1}], "condenserPumpModulating": true, "sourcePumpModulating": true}, "switchOff": {}, "sourcePump": {"nominalPowerW": 120.0, "overrunS": 60.0}, "testReportReference": "r69 synthetic"}, "designSupplyTemperatureC": 35.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r69 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r69 synthetic"}}]"#;
+
+/// Review 69. Annex Q, on/off brine/water heat pump with a source pump (p. 1028-1056): evaporator inlet of table Q.4,
+/// f_cor;bu 1 (Q.3.8), θ_evap;nom −1,5 °C (Q.48), source pump Q.5/Q.7/Q.8 with t_on of Q.9 inside the efficiency of
+/// Q.2/Q.4; 9.6.3 (p. 340) adds W_H;aux;hp;an / (12 × 3,6) as auxiliary energy every month (literal text).
+#[test]
+fn annex_q_brine_water_with_source_pump() {
+    let p = performance("EPW001", ANNEX_Q_BRINE_WATER);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close("bw F", at(&p, &format!("{q}/energyFraction")), 0.99973692);
+    close(
+        "bw eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        5.023885721386021,
+    );
+    close(
+        "bw Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4670.470501957207,
+    );
+    close(
+        "bw Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        929.6530138167011,
+    );
+    close(
+        "bw W_aux",
+        at(&p, &format!("{q}/sourcePumpKwh")),
+        65.77810328085602,
+    );
+    close(
+        "bw P_max bin 9",
+        at(&p, &format!("{q}/bins/9/maximumPowerKw")),
+        8.883555555555555,
+    );
+    close(
+        "bw COP bin 9",
+        at(&p, &format!("{q}/bins/9/cop")),
+        5.545059452701766,
+    );
+    close(
+        "bw on hours bin 9",
+        at(&p, &format!("{q}/bins/9/onHours")),
+        41.52412596784017,
+    );
+    close(
+        "bw P_max bin 16",
+        at(&p, &format!("{q}/bins/16/maximumPowerKw")),
+        8.49088888888889,
+    );
+    close(
+        "bw COP bin 16",
+        at(&p, &format!("{q}/bins/16/cop")),
+        5.098887623281012,
+    );
+    close(
+        "bw on hours bin 16",
+        at(&p, &format!("{q}/bins/16/onHours")),
+        31.027665450491885,
+    );
+    close(
+        "bw P_max bin 21",
+        at(&p, &format!("{q}/bins/21/maximumPowerKw")),
+        8.307555555555556,
+    );
+    close(
+        "bw COP bin 21",
+        at(&p, &format!("{q}/bins/21/cop")),
+        4.8417276010557035,
+    );
+    close(
+        "bw on hours bin 21",
+        at(&p, &format!("{q}/bins/21/onHours")),
+        6.592982202609814,
+    );
+    close(
+        "bw f_on m1",
+        at(&p, &format!("{q}/monthlyOnFraction/0")),
+        0.13749975950733773,
+    );
+    close(
+        "bw E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        292.20690875906007,
+    );
+    close(
+        "bw aux m1",
+        at(&p, "/spaceHeating/monthly/0/auxiliaryElectricityKwh"),
+        5.481508606738001,
+    );
+}
+
+/// Review 69. Annex Q, exhaust-air-only air/water heat pump: θ_evap;in 20 °C (Q.41), constants from conditions 1 and 2
+/// (Q.54-Q.56, Q.63-Q.65), f_cor;bu 1; undersized, so the electric backup (COP 1,0) takes the rest of every month.
+#[test]
+fn annex_q_exhaust_air_only() {
+    let p = performance("EPW001", ANNEX_Q_EXHAUST_AIR);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close(
+        "exh F",
+        at(&p, &format!("{q}/energyFraction")),
+        0.9923593016639592,
+    );
+    close(
+        "exh eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        4.768926489097366,
+    );
+    close(
+        "exh Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4636.0044858245055,
+    );
+    close(
+        "exh Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        972.1274790926753,
+    );
+    close("exh W_aux", at(&p, &format!("{q}/sourcePumpKwh")), 0.0);
+    close(
+        "exh P_max bin 9",
+        at(&p, &format!("{q}/bins/9/maximumPowerKw")),
+        1.7000000000000002,
+    );
+    close(
+        "exh COP bin 9",
+        at(&p, &format!("{q}/bins/9/cop")),
+        4.8751396258776865,
+    );
+    close(
+        "exh on hours bin 9",
+        at(&p, &format!("{q}/bins/9/onHours")),
+        216.98934113599717,
+    );
+    close(
+        "exh P_max bin 16",
+        at(&p, &format!("{q}/bins/16/maximumPowerKw")),
+        1.6555555555555557,
+    );
+    close(
+        "exh COP bin 16",
+        at(&p, &format!("{q}/bins/16/cop")),
+        4.594811598863697,
+    );
+    close(
+        "exh on hours bin 16",
+        at(&p, &format!("{q}/bins/16/onHours")),
+        159.13235828158986,
+    );
+    close(
+        "exh P_max bin 21",
+        at(&p, &format!("{q}/bins/21/maximumPowerKw")),
+        1.625,
+    );
+    close(
+        "exh COP bin 21",
+        at(&p, &format!("{q}/bins/21/cop")),
+        4.402086080291579,
+    );
+    close(
+        "exh on hours bin 21",
+        at(&p, &format!("{q}/bins/21/onHours")),
+        29.0,
+    );
+    close(
+        "exh f_on m1",
+        at(&p, &format!("{q}/monthlyOnFraction/0")),
+        0.6777152841178543,
+    );
+    close(
+        "exh E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        316.1328426943665,
+    );
+}
+
+/// Review 69. Annex Q, combined outdoor and exhaust air (f_buitenlucht 0,6): θ_evap;in of Q.43, planes through
+/// conditions 1-3, f_cor;bu;max from condition 4 (Q.81-Q.83).
+#[test]
+fn annex_q_combined_outdoor_and_exhaust_air() {
+    let p = performance("EPW001", ANNEX_Q_COMBINED_AIR);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close("comb F", at(&p, &format!("{q}/energyFraction")), 0.99973692);
+    close(
+        "comb eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        5.167431824322921,
+    );
+    close(
+        "comb Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4670.470501957207,
+    );
+    close(
+        "comb Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        903.8281801752014,
+    );
+    close("comb W_aux", at(&p, &format!("{q}/sourcePumpKwh")), 0.0);
+    close(
+        "comb P_max bin 9",
+        at(&p, &format!("{q}/bins/9/maximumPowerKw")),
+        6.759841269841269,
+    );
+    close(
+        "comb COP bin 9",
+        at(&p, &format!("{q}/bins/9/cop")),
+        5.931674301758937,
+    );
+    close(
+        "comb on hours bin 9",
+        at(&p, &format!("{q}/bins/9/onHours")),
+        54.569606771233715,
+    );
+    close(
+        "comb P_max bin 14",
+        at(&p, &format!("{q}/bins/14/maximumPowerKw")),
+        6.368095238095237,
+    );
+    close(
+        "comb COP bin 14",
+        at(&p, &format!("{q}/bins/14/cop")),
+        4.486822884643272,
+    );
+    close(
+        "comb on hours bin 14",
+        at(&p, &format!("{q}/bins/14/onHours")),
+        46.683313536368225,
+    );
+    close(
+        "comb P_max bin 23",
+        at(&p, &format!("{q}/bins/23/maximumPowerKw")),
+        5.6598412698412695,
+    );
+    close(
+        "comb COP bin 23",
+        at(&p, &format!("{q}/bins/23/cop")),
+        4.238766499428271,
+    );
+    close(
+        "comb on hours bin 23",
+        at(&p, &format!("{q}/bins/23/onHours")),
+        5.11689257033558,
+    );
+    close(
+        "comb f_on m1",
+        at(&p, &format!("{q}/monthlyOnFraction/0")),
+        0.18907111847193941,
+    );
+    close(
+        "comb E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        284.08969223262875,
+    );
+}
+
+/// Review 69. Annex Q, air/air heat pump with air heating: constants from conditions 1 and 3 on the evaporator
+/// temperature only (Q.57-Q.59, Q.66-Q.68), no condition 4 so f_cor;bu;max 0,75.
+#[test]
+fn annex_q_air_air() {
+    let p = performance("EPW001", ANNEX_Q_AIR_AIR);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close(
+        "aa F",
+        at(&p, &format!("{q}/energyFraction")),
+        0.9997369200000001,
+    );
+    close(
+        "aa eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        3.252730016153208,
+    );
+    close(
+        "aa Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4479.338322845153,
+    );
+    close(
+        "aa Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        1377.101173660449,
+    );
+    close("aa W_aux", at(&p, &format!("{q}/sourcePumpKwh")), 0.0);
+    close(
+        "aa P_max bin 9",
+        at(&p, &format!("{q}/bins/9/maximumPowerKw")),
+        5.0,
+    );
+    close("aa COP bin 9", at(&p, &format!("{q}/bins/9/cop")), 4.0);
+    close(
+        "aa on hours bin 9",
+        at(&p, &format!("{q}/bins/9/onHours")),
+        70.75718562772356,
+    );
+    close(
+        "aa P_max bin 14",
+        at(&p, &format!("{q}/bins/14/maximumPowerKw")),
+        4.500000000000001,
+    );
+    close(
+        "aa COP bin 14",
+        at(&p, &format!("{q}/bins/14/cop")),
+        2.6250000000000004,
+    );
+    close(
+        "aa on hours bin 14",
+        at(&p, &format!("{q}/bins/14/onHours")),
+        63.3595293689384,
+    );
+    close(
+        "aa P_max bin 23",
+        at(&p, &format!("{q}/bins/23/maximumPowerKw")),
+        3.6000000000000005,
+    );
+    close(
+        "aa COP bin 23",
+        at(&p, &format!("{q}/bins/23/cop")),
+        2.6000000000000005,
+    );
+    close(
+        "aa on hours bin 23",
+        at(&p, &format!("{q}/bins/23/onHours")),
+        7.715450372623382,
+    );
+    close(
+        "aa f_on m1",
+        at(&p, &format!("{q}/monthlyOnFraction/0")),
+        0.262158050208687,
+    );
+    close(
+        "aa E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        432.76105599965587,
+    );
+}
+
+/// Review 69. Annex Q with a gas boiler as backup (hybrid): the undersized heat pump of review 68 at 45 °C with
+/// switch-off below −5 °C and COP 2; the rest of every month goes to the HR107 boiler (table 9.25, 0,975).
+#[test]
+fn annex_q_with_a_gas_boiler_backup() {
+    let p = performance("EPW001", ANNEX_Q_GAS_BACKUP);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close(
+        "hyb F",
+        at(&p, &format!("{q}/energyFraction")),
+        0.9728849680329282,
+    );
+    close(
+        "hyb eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        3.7788288772602825,
+    );
+    close(
+        "hyb Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4545.026250501353,
+    );
+    close(
+        "hyb Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        1202.7605372267021,
+    );
+    close("hyb W_aux", at(&p, &format!("{q}/sourcePumpKwh")), 0.0);
+    close(
+        "hyb P_max bin 9",
+        at(&p, &format!("{q}/bins/9/maximumPowerKw")),
+        2.4574074074074073,
+    );
+    close(
+        "hyb COP bin 9",
+        at(&p, &format!("{q}/bins/9/cop")),
+        5.012547626077299,
+    );
+    close(
+        "hyb on hours bin 9",
+        at(&p, &format!("{q}/bins/9/onHours")),
+        150.11018474969512,
+    );
+    close(
+        "hyb P_max bin 19",
+        at(&p, &format!("{q}/bins/19/maximumPowerKw")),
+        1.8562962962962963,
+    );
+    close(
+        "hyb COP bin 19",
+        at(&p, &format!("{q}/bins/19/cop")),
+        2.5427664756156054,
+    );
+    close(
+        "hyb on hours bin 19",
+        at(&p, &format!("{q}/bins/19/onHours")),
+        45.10450212040932,
+    );
+    close(
+        "hyb P_max bin 23",
+        at(&p, &format!("{q}/bins/23/maximumPowerKw")),
+        1.6151851851851853,
+    );
+    close(
+        "hyb COP bin 23",
+        at(&p, &format!("{q}/bins/23/cop")),
+        1.9942431847259137,
+    );
+    close(
+        "hyb on hours bin 23",
+        at(&p, &format!("{q}/bins/23/onHours")),
+        0.0,
+    );
+    close(
+        "hyb f_on m1",
+        at(&p, &format!("{q}/monthlyOnFraction/0")),
+        0.4317507389128007,
+    );
+    close(
+        "hyb E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        377.95013039611615,
+    );
+    close(
+        "hyb gas m1",
+        at(&p, "/spaceHeating/monthly/0/naturalGasKwh"),
+        38.78460227165539,
+    );
+}
+
+/// Review 69. Annex Q, modulating outdoor-air/water heat pump with modulating condenser and source fan (Q.2.6): part-load
+/// constants Q.71-Q.73 from the LT and MT rows of table Q.13 (f_cor;bu;max at plj = 2, Q.77), utilisation Q.28 and
+/// interval table Q.2, COP Q.13-Q.16 with interpolation Q.14, P_pl Q.27, θ_evap;out Q.21, F_water Q.25, t_on Q.10;
+/// monthly on-fraction Q.90 with Q.93 and table Q.17.
+#[test]
+fn annex_q_modulating_outdoor_air() {
+    let p = performance("EPW001", ANNEX_Q_MODULATING);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close("mod F", at(&p, &format!("{q}/energyFraction")), 0.99973692);
+    close(
+        "mod eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        4.2713332886620385,
+    );
+    close(
+        "mod Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4670.470501957207,
+    );
+    close(
+        "mod Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        1093.4455792421188,
+    );
+    close("mod W_aux", at(&p, &format!("{q}/sourcePumpKwh")), 0.0);
+    close(
+        "mod P_max bin 4",
+        at(&p, &format!("{q}/bins/4/maximumPowerKw")),
+        6.788095238095237,
+    );
+    close(
+        "mod COP bin 4",
+        at(&p, &format!("{q}/bins/4/cop")),
+        6.666544973973457,
+    );
+    close(
+        "mod on hours bin 4",
+        at(&p, &format!("{q}/bins/4/onHours")),
+        111.57139691904426,
+    );
+    close(
+        "mod P_max bin 9",
+        at(&p, &format!("{q}/bins/9/maximumPowerKw")),
+        6.165555555555555,
+    );
+    close(
+        "mod COP bin 9",
+        at(&p, &format!("{q}/bins/9/cop")),
+        5.358773380986137,
+    );
+    close(
+        "mod on hours bin 9",
+        at(&p, &format!("{q}/bins/9/onHours")),
+        307.40156660932934,
+    );
+    close(
+        "mod P_max bin 14",
+        at(&p, &format!("{q}/bins/14/maximumPowerKw")),
+        5.545238095238095,
+    );
+    close(
+        "mod COP bin 14",
+        at(&p, &format!("{q}/bins/14/cop")),
+        3.508704764912016,
+    );
+    close(
+        "mod on hours bin 14",
+        at(&p, &format!("{q}/bins/14/onHours")),
+        236.0,
+    );
+    close(
+        "mod P_max bin 19",
+        at(&p, &format!("{q}/bins/19/maximumPowerKw")),
+        4.922698412698413,
+    );
+    close(
+        "mod COP bin 19",
+        at(&p, &format!("{q}/bins/19/cop")),
+        3.1536248758843524,
+    );
+    close(
+        "mod on hours bin 19",
+        at(&p, &format!("{q}/bins/19/onHours")),
+        49.0,
+    );
+    close(
+        "mod f_on m1",
+        at(&p, &format!("{q}/monthlyOnFraction/0")),
+        0.8312059213840048,
+    );
+    close(
+        "mod E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        343.68990134807154,
+    );
+}
+
+/// Review 69. Annex Q, modulating brine/water heat pump with a modulating source pump: P_aux (P_pl/P_max)³ (Q.6) over
+/// t_ev;on of Q.8 with t_on of Q.10, table Q.12 part-load rows.
+#[test]
+fn annex_q_modulating_brine_water() {
+    let p = performance("EPW001", ANNEX_Q_MODULATING_BRINE);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close(
+        "modbw F",
+        at(&p, &format!("{q}/energyFraction")),
+        0.99973692,
+    );
+    close(
+        "modbw eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        6.316718691709764,
+    );
+    close(
+        "modbw Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4670.470501957207,
+    );
+    close(
+        "modbw Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        739.3823802992622,
+    );
+    close(
+        "modbw W_aux",
+        at(&p, &format!("{q}/sourcePumpKwh")),
+        2.007883476509976,
+    );
+    close(
+        "modbw P_max bin 4",
+        at(&p, &format!("{q}/bins/4/maximumPowerKw")),
+        9.620222222222221,
+    );
+    close(
+        "modbw COP bin 4",
+        at(&p, &format!("{q}/bins/4/cop")),
+        7.599217141162558,
+    );
+    close(
+        "modbw on hours bin 4",
+        at(&p, &format!("{q}/bins/4/onHours")),
+        89.25711753523541,
+    );
+    close(
+        "modbw P_max bin 9",
+        at(&p, &format!("{q}/bins/9/maximumPowerKw")),
+        8.883555555555555,
+    );
+    close(
+        "modbw COP bin 9",
+        at(&p, &format!("{q}/bins/9/cop")),
+        6.682721159509616,
+    );
+    close(
+        "modbw on hours bin 9",
+        at(&p, &format!("{q}/bins/9/onHours")),
+        245.9212532874635,
+    );
+    close(
+        "modbw P_max bin 14",
+        at(&p, &format!("{q}/bins/14/maximumPowerKw")),
+        8.612222222222222,
+    );
+    close(
+        "modbw COP bin 14",
+        at(&p, &format!("{q}/bins/14/cop")),
+        6.045668226498378,
+    );
+    close(
+        "modbw on hours bin 14",
+        at(&p, &format!("{q}/bins/14/onHours")),
+        198.18919108630226,
+    );
+    close(
+        "modbw P_max bin 19",
+        at(&p, &format!("{q}/bins/19/maximumPowerKw")),
+        8.535555555555556,
+    );
+    close(
+        "modbw COP bin 19",
+        at(&p, &format!("{q}/bins/19/cop")),
+        5.531252649247946,
+    );
+    close(
+        "modbw on hours bin 19",
+        at(&p, &format!("{q}/bins/19/onHours")),
+        49.0,
+    );
+    close(
+        "modbw f_on m1",
+        at(&p, &format!("{q}/monthlyOnFraction/0")),
+        0.7333394725254121,
+    );
+    close(
+        "modbw E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        232.40137613404443,
+    );
+    close(
+        "modbw aux m1",
+        at(&p, "/spaceHeating/monthly/0/auxiliaryElectricityKwh"),
+        0.167323623042498,
+    );
+}
