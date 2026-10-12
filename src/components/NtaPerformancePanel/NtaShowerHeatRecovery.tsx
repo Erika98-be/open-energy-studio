@@ -44,7 +44,7 @@ export function ShowerHeatRecoveryFields({ draft, change, base, residential }: P
         const at: Path = [...recovery, 'showers', index];
         return <fieldset key={index} className="nta-form-row">
           <legend>{t('nta.form.shower.unit')} {index + 1}</legend>
-          <SelectField {...field} path={[...at, 'unit']} label={t('nta.form.shower.unitKind')}
+          <SelectField required {...field} path={[...at, 'unit']} label={t('nta.form.shower.unitKind')}
             options={UNITS.map((key) => [key, t(`nta.form.shower.unit.${key}`)])}
             onChange={(_, value) => change(at, showerUnitTemplate(String(value ?? 'none')))} />
           {shower.unit === 'declared' && <>

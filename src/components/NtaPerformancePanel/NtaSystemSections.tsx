@@ -388,7 +388,7 @@ function BoosterAnnexWFields({ draft, change, base }: SectionProps & { base: Pat
     {monthly
       ? <MonthlyValues draft={draft} change={change} path={at('sourceTemperaturesC')} label={t('nta.form.boosterW.sourceTemperature')} />
       : <NumberField {...field} path={at('sourceTemperaturesC', 0)} label={t('nta.form.boosterW.sourceTemperature')} unit="°C" />}
-    <SelectField {...field} path={at('heatSource', 'kind')} label={t('nta.form.booster.heatSource')} options={[
+    <SelectField required {...field} path={at('heatSource', 'kind')} label={t('nta.form.booster.heatSource')} options={[
       ['external_heat', t('nta.form.booster.source.external')], ['heating_system', t('nta.form.booster.source.heatingSystem')],
       ['collective_generator', t('nta.form.booster.source.collective')]]}
       onChange={(_, value) => change(at('heatSource'), boosterHeatSourceTemplate(String(value ?? '')))} />
@@ -416,7 +416,7 @@ function BoosterForfaitFields({ draft, change, base }: SectionProps & { base: Pa
   return <div className="nta-form-subsection">
     <NumberField {...field} path={at('designSupplyTemperatureC')} label={t('nta.form.booster.supplyTemperature')} optional unit="°C" />
     <p className="nta-form-note">{t('nta.form.booster.supplyTemperatureNote')}</p>
-    <SelectField {...field} path={at('heatSource', 'kind')} label={t('nta.form.booster.heatSource')} options={[
+    <SelectField required {...field} path={at('heatSource', 'kind')} label={t('nta.form.booster.heatSource')} options={[
       ['external_heat', t('nta.form.booster.source.external')], ['heating_system', t('nta.form.booster.source.heatingSystem')],
       ['collective_generator', t('nta.form.booster.source.collective')]]}
       onChange={(_, value) => change(at('heatSource'), boosterHeatSourceTemplate(String(value ?? '')))} />
@@ -522,7 +522,7 @@ function StorageLossFields({ draft, change, base }: SectionProps & { base: Path 
   const field = { draft, onChange: change };
   const method = read(draft, [...base, 'method']);
   return <>
-    <SelectField {...field} path={[...base, 'method']} label={t('nta.form.solar.storageLoss')} options={[
+    <SelectField required {...field} path={[...base, 'method']} label={t('nta.form.solar.storageLoss')} options={[
       ['label', t('nta.form.solar.storageLoss.label')], ['unknown_label', t('nta.form.solar.storageLoss.unknown')],
       ['measured', t('nta.form.solar.storageLoss.measured')], ['measured_standby', t('nta.form.storageLoss.standby')]]}
       onChange={(_, value) => change(base, storageLossTemplate(String(value ?? '')))} />
@@ -869,7 +869,7 @@ function CollectorObstructionFields({ draft, change, base }: SectionProps & { ba
   const field = { draft, onChange: change };
   const method = read(draft, [...base, 'method']);
   return <>
-    <SelectField {...field} path={[...base, 'method']} label={t('nta.form.obstruction')} options={[
+    <SelectField required {...field} path={[...base, 'method']} label={t('nta.form.obstruction')} options={[
       ['minimal', t('nta.form.obstruction.minimal')], ['side_obstruction', t('nta.form.obstruction.side')],
       ['full', t('nta.form.obstruction.full')], ['roof_edge', t('nta.form.obstruction.roofEdge')],
       ['other', t('nta.form.obstruction.other')], ['declared', t('nta.form.obstruction.declared')]]}
@@ -905,7 +905,7 @@ export function SolarCalculatedFields({ draft, change, base }: SectionProps & { 
     <SelectField {...field} path={at('collectors', 'orientation')} label={t('nta.form.solar.orientation')} options={orientations} />
     <NumberField {...field} path={at('collectors', 'tiltDeg')} label={t('nta.form.tilt')} />
     <CollectorObstructionFields draft={draft} change={change} base={at('collectors', 'obstruction')} />
-    <SelectField {...field} path={at('collectors', 'efficiency', 'method')} label={t('nta.form.solar.efficiency')} options={[
+    <SelectField required {...field} path={at('collectors', 'efficiency', 'method')} label={t('nta.form.solar.efficiency')} options={[
       ['forfait', t('nta.form.solar.efficiency.forfait')], ['declared', t('nta.form.solar.efficiency.declared')]]}
       onChange={(_, value) => change(at('collectors', 'efficiency'), value === 'declared'
         ? { method: 'declared', eta0: null, a1WPerM2K: null, a2WPerM2K2: null, incidenceAngleModifier: null, sourceReference: '' }
@@ -920,7 +920,7 @@ export function SolarCalculatedFields({ draft, change, base }: SectionProps & { 
       ['unglazed_or_unknown', t('nta.form.solar.collector.unglazed')], ['glazed', t('nta.form.solar.collector.glazed')],
       ['evacuated_tube', t('nta.form.solar.collector.tube')]]} />}
     <NumberField {...field} path={at('collectors', 'heatExchangerWPerK')} label={t('nta.form.solar.heatExchanger')} />
-    <SelectField {...field} path={at('collectors', 'loopPipes', 'method')} label={t('nta.form.solar.loop')} options={[
+    <SelectField required {...field} path={at('collectors', 'loopPipes', 'method')} label={t('nta.form.solar.loop')} options={[
       ['forfait', t('nta.form.solar.loop.forfait')], ['declared', t('nta.form.solar.loop.declared')]]}
       onChange={(_, value) => change(at('collectors', 'loopPipes'), value === 'declared'
         ? { method: 'declared', heatLossWPerK: null, sourceReference: '' } : { method: 'forfait' })} />
@@ -959,7 +959,7 @@ export function SolarWaterHeaterFields({ draft, change, base = ['hotWater', 'sol
           ['water_heating', t('nta.form.solar.use.water')], ['combi', t('nta.form.solar.use.combi')],
           ['space_heating', t('nta.form.solar.use.space')]]} />
         <NumberField {...field} path={at('count')} label={t('nta.form.solar.count')} step="1" optional />
-        <SelectField {...field} path={at('method', 'method')} label={t('nta.form.solar.method')} options={[
+        <SelectField required {...field} path={at('method', 'method')} label={t('nta.form.solar.method')} options={[
           ['calculated', t('nta.form.solar.method.calculated')], ['tested', t('nta.form.solar.method.tested')]]}
           onChange={(_, value) => change(at('method'), value === 'tested' ? testedSolarMethod() : calculatedSolarMethod())} />
         <SelectField {...field} path={at('method', 'solarType')} label={t('nta.form.solar.type')} options={[
@@ -1057,7 +1057,7 @@ export function WindowObstructionFields({ draft, change, base = ['windowSolar', 
   const field = { draft, onChange: change };
   const method = read(draft, [...base, 'method']);
   return <>
-    <SelectField {...field} path={[...base, 'method']} label={t('nta.form.obstruction')} options={[
+    <SelectField required {...field} path={[...base, 'method']} label={t('nta.form.obstruction')} options={[
       ['minimal', t('nta.form.obstruction.minimal')], ['parallel_obstruction', t('nta.form.obstruction.parallel')],
       ['overhang', t('nta.form.obstruction.overhang')], ['side_obstruction', t('nta.form.obstruction.side')],
       ['full', t('nta.form.obstruction.full')], ['other', t('nta.form.obstruction.other')],

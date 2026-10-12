@@ -1965,6 +1965,43 @@ fn building_issue_gaps(
     gaps
 }
 
+/// Refusals of the building calculation that only follow from a refused NTA
+/// block: without its chapter 11 ventilation the zone has no airflows, and
+/// without its chapter 14 lighting the utility gains have no lighting. When
+/// that block has a gap of its own, the follow-up is not a second open point
+/// for the one input the user left open (review 58). (code, path, block)
+const CONSEQUENCES: [(&str, &str, &str); 2] = [
+    (
+        "ventilation_flow_required",
+        "ntaCalculation.ventilationFlows",
+        "ntaCalculation.ventilation",
+    ),
+    (
+        "lighting_gain_requires_chapter_14",
+        "ntaCalculation.internalGains.lighting",
+        "ntaCalculation.lighting",
+    ),
+];
+
+fn without_consequences(gaps: Vec<InputGap>) -> Vec<InputGap> {
+    let within = |path: &str, block: &str| {
+        path.strip_prefix(block)
+            .is_some_and(|rest| rest.is_empty() || rest.starts_with(['.', '[']))
+    };
+    let caused = |gap: &InputGap| {
+        CONSEQUENCES.iter().any(|(code, path, block)| {
+            gap.code == *code
+                && gap.path == *path
+                && gaps.iter().any(|other| within(&other.path, block))
+        })
+    };
+    let keep: Vec<bool> = gaps.iter().map(|gap| !caused(gap)).collect();
+    gaps.into_iter()
+        .zip(keep)
+        .filter_map(|(gap, keep)| keep.then_some(gap))
+        .collect()
+}
+
 /// Warnings of the building calculation (`performance.warnings`, e.g. a
 /// boiler of a system over 500 m² or the TOjuli sunroom facade) carry a path
 /// in the derived input. Each becomes a project warning at the project input
@@ -2208,6 +2245,8 @@ fn zone_path(
                 "thermalMass" | "setpoints" | "usageFunction" => {
                     per_zone(field, &indexed, zone_has(field))
                 }
+                // Copied from the NTA input for every zone (review 58).
+                "areaSourceReference" => format!("ntaCalculation.{field}{indexed}"),
                 // A zone that overrides the usage function brings its own
                 // dwelling type.
                 "dwellingType" => per_zone(
@@ -2382,6 +2421,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         if !result.status.starts_with("calculated") {
             let found = building_issue_gaps(&result.issues, input, project_value, &gaps);
             gaps.extend(found);
+            gaps = without_consequences(gaps);
         }
     }
     let version = project_norm_version(project_value);
@@ -5150,16 +5190,30 @@ fn derive_input(
             ));
             return None;
         }
-        Some(bacs) => match crate::bacs_draft::assess_bacs_draft(bacs).factor {
-            Some(factor) => (
-                factor,
-                "NTA 8800 §5.5.8 (derived from ntaCalculation.bacs)".into(),
-            ),
-            None => {
-                gaps.push(gap("bacs_factor_undetermined", "ntaCalculation.bacs"));
-                return None;
+        Some(bacs) => {
+            let assessed = crate::bacs_draft::assess_bacs_draft(bacs);
+            match assessed.factor {
+                Some(factor) => (
+                    factor,
+                    "NTA 8800 §5.5.8 (derived from ntaCalculation.bacs)".into(),
+                ),
+                // The inventory's own issues name the input to fill in; the
+                // undetermined factor only when none does (review 58).
+                None if !assessed.issues.is_empty() => {
+                    for issue in assessed.issues {
+                        gaps.push(gap(
+                            issue.code,
+                            format!("ntaCalculation.bacs.{}", issue.path),
+                        ));
+                    }
+                    return None;
+                }
+                None => {
+                    gaps.push(gap("bacs_factor_undetermined", "ntaCalculation.bacs"));
+                    return None;
+                }
             }
-        },
+        }
     };
     // 5.5.8 is new in 2025+C1: older editions have no f_BACS.
     let (bacs_factor, bacs_source_reference) = if nta.norm_version.profile().bacs_factor_route {
@@ -6575,6 +6629,74 @@ mod tests {
             .iter()
             .any(|gap| gap.code == "nta_value_missing"
                 && gap.path == "ntaCalculation.ventilation.heatingSetpointC"));
+    }
+
+    /// Review 58: one cleared field, one gap at that field (the clear-field
+    /// sweep in tests/project_form_guard.rs found each of these).
+    #[test]
+    fn a_cleared_field_is_named_where_it_was_cleared() {
+        let gaps_of = |value: &Value| -> Vec<(String, String)> {
+            assess_project_performance(value)
+                .gaps
+                .iter()
+                .map(|gap| (gap.code.to_string(), gap.path.clone()))
+                .collect()
+        };
+        let office: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-office.json"
+        ))
+        .unwrap();
+        let only = |gaps: Vec<(String, String)>, code: &str, path: &str| {
+            assert_eq!(gaps, [(code.to_string(), path.to_string())], "{path}");
+        };
+        // A refused chapter 11 block: no second gap at the airflows it
+        // would have given.
+        let mut value = office.clone();
+        value["ntaCalculation"]["ventilation"]["sourceReference"] = Value::from("");
+        only(
+            gaps_of(&value),
+            "source_reference_required",
+            "ntaCalculation.ventilation.sourceReference",
+        );
+        // A refused chapter 14 block: no second gap at the lighting gains.
+        let mut value = office.clone();
+        value["ntaCalculation"]["lighting"][0]["sourceReference"] = Value::from("");
+        only(
+            gaps_of(&value),
+            "source_reference_required",
+            "ntaCalculation.lighting[0].sourceReference",
+        );
+        // The area source is the NTA input's, not the zone's.
+        let mut value = office.clone();
+        value["ntaCalculation"]["areaSourceReference"] = Value::from("");
+        only(
+            gaps_of(&value),
+            "source_reference_required",
+            "ntaCalculation.areaSourceReference",
+        );
+        // The BACS inventory names its own blank, not the whole block.
+        let mut value = office.clone();
+        value["ntaCalculation"]["bacs"]["systems"][0]["sourceReference"] = Value::from("");
+        only(
+            gaps_of(&value),
+            "source_required",
+            "ntaCalculation.bacs.systems[0].sourceReference",
+        );
+        // A heat-pump year cleared next to its source (2020+A1, public case
+        // N): one gap at the year, no summary on the forfait lookup.
+        let mut case_n: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-public-comparison-n.json"
+        ))
+        .unwrap();
+        let forfait = &mut case_n["ntaCalculation"]["generator"]["forfait"];
+        if forfait.get("installationYearReference").is_some() {
+            forfait["installationYear"] = Value::Null;
+            only(
+                gaps_of(&case_n),
+                "installation_year_reference_without_year",
+                "ntaCalculation.generator.forfait.installationYear",
+            );
+        }
     }
 
     #[test]
@@ -8939,10 +9061,6 @@ mod refusal_gaps {
                 "route_not_in_edition",
                 "ntaCalculation.pvSystems[0].peakPower.panelPeakPowerW",
             ),
-            (
-                "lighting_gain_requires_chapter_14",
-                "ntaCalculation.internalGains.lighting",
-            ),
         ] {
             assert!(
                 found
@@ -8951,9 +9069,22 @@ mod refusal_gaps {
                 "{expected:?} in {found:?}"
             );
         }
+        // The lighting gains only lack chapter 14 because its block is
+        // refused above: not a second gap for that one cause (review 58).
+        assert!(
+            !found
+                .iter()
+                .any(|(code, _, _)| *code == "lighting_gain_requires_chapter_14"),
+            "{found:?}"
+        );
         // The derived path stays in the detail.
-        assert!(found.iter().any(|(_, _, detail)| *detail
-            == Some("derivedInput.spaceHeating.demand.internalGains.lighting")));
+        assert!(
+            found
+                .iter()
+                .any(|(_, _, detail)| detail
+                    .is_some_and(|detail| detail.starts_with("derivedInput."))),
+            "{found:?}"
+        );
         // A calculated result gets no gaps from the building issues.
         assert!(office_in("2025+C1").status.starts_with("calculated"));
     }

@@ -123,7 +123,7 @@ export function HumidifiersFields({ draft, change, project }: SectionProps & { p
       return <fieldset key={index} className="nta-form-row">
         <legend>{t('nta.form.humidifier')} {index + 1}</legend>
         <SelectField {...field} path={at('zoneId')} label={t('nta.form.humidifier.zone')} options={zones} />
-        <SelectField {...field} path={at('humidification', 'humidifier', 'kind')} label={t('nta.form.humidifier.kind')} options={[
+        <SelectField required {...field} path={at('humidification', 'humidifier', 'kind')} label={t('nta.form.humidifier.kind')} options={[
           ['atomising', t('nta.form.humidifier.atomising')], ['steam', t('nta.form.humidifier.steam')]]}
           onChange={(_, value) => change(at('humidification', 'humidifier'), value === 'steam'
             ? { kind: 'steam', carrier: 'electricity' } : { kind: 'atomising' })} />

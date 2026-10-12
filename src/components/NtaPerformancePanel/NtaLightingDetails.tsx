@@ -56,7 +56,7 @@ export function LuminaireGroupsFields({ draft, change, base }: SectionProps & { 
       const method = read(draft, at('power', 'method'));
       return <div key={index} className="nta-form-row" role="group" aria-label={`${t('nta.light.group')} ${index + 1}`}>
         <NumberField {...field} path={at('count')} label={`${t('nta.light.group')} ${index + 1} — ${t('nta.light.count')}`} step="1" />
-        <SelectField {...field} path={at('power', 'method')} label={t('nta.light.groupPower')} options={[
+        <SelectField required {...field} path={at('power', 'method')} label={t('nta.light.groupPower')} options={[
           ['system', t('nta.light.groupPower.system')], ['lamps', t('nta.light.groupPower.lamps')]]}
           onChange={(_, value) => change(at('power'), value === 'lamps'
             ? { method: 'lamps', lampPowerW: null, lampCount: null, technology: null }
@@ -84,7 +84,7 @@ export function ParasiticPowerFields({ draft, change, base }: SectionProps & { b
   const field = { draft, onChange: change };
   const method = read(draft, [...base, 'method']);
   return <>
-    <SelectField {...field} path={[...base, 'method']} label={t('nta.light.parasitic')} options={[
+    <SelectField required {...field} path={[...base, 'method']} label={t('nta.light.parasitic')} options={[
       ['forfait', t('nta.light.parasitic.forfait')], ['installed', t('nta.light.parasitic.installed')]]}
       onChange={(_, value) => change(base, value === 'installed'
         ? { method: 'installed', emergencyChargingW: null, controlStandbyW: null, sourceReference: '' } : { method: 'forfait' })} />
@@ -120,7 +120,7 @@ function DaylightSectorFields({ draft, change, base }: SectionProps & { base: Pa
   const vertical = read(draft, at('vertical')) != null;
   const rooflight = read(draft, at('rooflight')) != null;
   return <>
-    <SelectField {...field} path={at('kind')} label={t('nta.light.sector.kind')} options={[
+    <SelectField required {...field} path={at('kind')} label={t('nta.light.sector.kind')} options={[
       ['vertical_windows', t('nta.light.sector.vertical')], ['rooflights', t('nta.light.sector.rooflights')],
       ['tilted_window', t('nta.light.sector.tilted')], ['declared', t('nta.light.sector.declared')]]}
       onChange={(_, value) => change(base, daylightSectorTemplate(String(value ?? 'vertical_windows')))} />

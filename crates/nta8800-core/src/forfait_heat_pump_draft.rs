@@ -495,7 +495,7 @@ pub fn assess_forfait_heat_pump_draft(
         if input.installation_year.is_none() && input.installation_year_reference.is_some() {
             issues.push(issue(
                 "installation_year_reference_without_year",
-                "installationYearReference",
+                "installationYear",
             ));
         }
     }

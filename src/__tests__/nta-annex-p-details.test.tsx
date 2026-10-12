@@ -144,14 +144,15 @@ describe('annex P details without JSON editors', () => {
     await user.type(screen.getByLabelText('azimuth ° (0 = north)'), '180');
     expect(withoutNulls(current().externalSupply.areaElectricity[0])).toEqual({
       kind: 'pv', id: 'gebied-pv-1', peakPower: { method: 'panels', panelPeakPowerW: 400, panelCount: 10 }, azimuthDeg: 180,
-      mounting: 'unknown', obstructionFactors: [], sourceReference: '',
+      mounting: 'unknown', obstructionFactors: [null], sourceReference: '',
     });
-    // The obstruction factor is optional: clearing it leaves no blank.
+    // §17.3: without an obstruction situation the kernel needs the factor (one value or twelve),
+    // so clearing it leaves a blank at this field, not an empty list it refuses (review 58).
     const obstruction = screen.getByLabelText(/obstruction/i);
     await user.type(obstruction, '0.9');
     expect(current().externalSupply.areaElectricity[0].obstructionFactors).toEqual([0.9]);
     await user.clear(obstruction);
-    expect(current().externalSupply.areaElectricity[0].obstructionFactors).toEqual([]);
+    expect(current().externalSupply.areaElectricity[0].obstructionFactors).toEqual([null]);
     await user.selectOptions(screen.getByLabelText('gebied-pv-1 — peak power P_pk'), 'table16_1');
     expect(current().externalSupply.areaElectricity[0].peakPower).toEqual({ method: 'table16_1', moduleType: null, panelAreaM2: null });
   }, SLOW_UI_TEST_MS);

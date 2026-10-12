@@ -82,9 +82,12 @@ npx tsc --noEmit
 step "UI tests"
 # The project-form guard (src/__tests__/nta-project-form-guard.test.tsx) writes every form state
 # it produced; the next step runs them through the kernel.
+# The clear-field sweep (src/__tests__/nta-clear-field-sweep.test.tsx, review 58) writes every
+# field cleared on its own; the same step checks each gives one gap, at that field.
 nta_form_guard_docs="$nta_evidence_dir/form-guard/project-forms.jsonl"
-rm -f "$nta_form_guard_docs"
-NTA_FORM_GUARD_OUT="$nta_form_guard_docs" \
+nta_clear_sweep_docs="$nta_evidence_dir/form-guard/clear-fields.jsonl"
+rm -f "$nta_form_guard_docs" "$nta_clear_sweep_docs"
+NTA_FORM_GUARD_OUT="$nta_form_guard_docs" NTA_CLEAR_SWEEP_OUT="$nta_clear_sweep_docs" \
   npx vitest run --maxWorkers="${NTA_VITEST_MAX_WORKERS:-4}"
 
 if [ "${NTA_SKIP_KERNEL_E2E:-0}" != "1" ]; then
@@ -98,6 +101,7 @@ fi
 
 step "project-form states through the kernel"
 NTA_FORM_GUARD_DOCS="$(realpath "$nta_form_guard_docs")" \
+  NTA_CLEAR_SWEEP_DOCS="$(realpath "$nta_clear_sweep_docs")" \
   cargo test --locked --manifest-path crates/nta8800-core/Cargo.toml --quiet --test project_form_guard
 
 printf '\nAll configured technical NTA gates passed; reference verification and attestation require separate evidence.\n'

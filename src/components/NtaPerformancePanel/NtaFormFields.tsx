@@ -77,10 +77,12 @@ export function TextField({ draft, path, label, onChange }: FieldProps) {
 /**
  * A choice from `options`. With `fallback`, an absent value shows the option the kernel applies
  * when the field is left out (for example the designated edition) instead of "—", and there is
- * no empty option.
+ * no empty option. With `required` (the tag of a choice whose handler writes the members of the
+ * chosen variant) there is no "—" once a value is chosen: the handler would turn it into one of
+ * the options anyway (review 58).
  */
-export function SelectField({ draft, path, label, onChange, options, disabled = false, fallback }:
-  FieldProps & { options: Array<[string, string]>; disabled?: boolean; fallback?: string }) {
+export function SelectField({ draft, path, label, onChange, options, disabled = false, fallback, required = false }:
+  FieldProps & { options: Array<[string, string]>; disabled?: boolean; fallback?: string; required?: boolean }) {
   const stored = read(draft, path);
   const value = stored ?? fallback;
   const kernelPath = useFieldPath(path);
@@ -90,7 +92,7 @@ export function SelectField({ draft, path, label, onChange, options, disabled = 
   return <label className={wide ? 'nta-form-wide' : undefined} data-path={kernelPath ?? undefined}>{label}
     <select value={value == null ? '' : String(value)} title={selected} disabled={disabled}
       onChange={(event) => onChange(path, event.target.value || null)}>
-      {fallback == null && <option value="">—</option>}
+      {fallback == null && (!required || value == null) && <option value="">—</option>}
       {options.map(([key, text]) => <option key={key} value={key}>{text}</option>)}
     </select>
   </label>;

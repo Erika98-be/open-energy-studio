@@ -21,4 +21,11 @@ describe('scripts/verify-nta.sh', () => {
     expect(gate).toContain('OES_KERNEL_ONCE=');
     expect(gate).toContain('src/__tests__/real-kernel-e2e.test.tsx');
   });
+
+  it('runs the clear-field sweep through the kernel after the UI tests (review 58)', () => {
+    const ui = gate.indexOf('NTA_CLEAR_SWEEP_OUT=');
+    const kernel = gate.indexOf('NTA_CLEAR_SWEEP_DOCS=');
+    expect(ui).toBeGreaterThan(gate.indexOf('step "UI tests"'));
+    expect(kernel).toBeGreaterThan(gate.indexOf('step "project-form states through the kernel"'));
+  });
 });

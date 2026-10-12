@@ -452,7 +452,7 @@ function InternalGainsSection(props: NtaSectionProps) {
         <NumberField {...f} path={['internalGains', 'dwellingShare']} label={t('nta.form.dwellingShare')} optional />
       </>
       : <>
-        <SelectField {...f} path={['internalGains', 'method']} label={t('nta.gains.method')}
+        <SelectField required {...f} path={['internalGains', 'method']} label={t('nta.gains.method')}
           options={[['utility', t('nta.gains.method.utility')], ['declared', t('nta.gains.method.declared')]]}
           onChange={(_, value) => change(['internalGains'], value === 'utility'
             ? { ...utilityInternalGains(), sourceReference: read(draft, ['internalGains', 'sourceReference']) ?? '' }
