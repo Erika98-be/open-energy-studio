@@ -18,8 +18,12 @@ const SAME_SHAPE = [
   'demandUsesFixedC1Ventilation', 'batteryStoragePresent', 'storage', 'externalSupply',
 ] as const;
 
-/** Blocks of the main heating chain (`spaceHeating.<key>` → `<key>`). */
-const HEATING_CHAIN = ['emission', 'distribution', 'generator', 'collectiveConnection'] as const;
+/**
+ * Blocks of the main heating chain (`spaceHeating.<key>` → `<key>`). The
+ * calculated distribution (9.4) needs its `distributionSystem`: without it the
+ * kernel refuses the taken-over project with `distribution_system_required`.
+ */
+const HEATING_CHAIN = ['emission', 'distribution', 'distributionSystem', 'generator', 'collectiveConnection', 'identicalSystems'] as const;
 
 /** Demand blocks of a single-zone survey (`spaceHeating.demand.<key>` → `<key>`). */
 const DEMAND = ['usageFunction', 'dwellingType', 'setpoints', 'thermalMass', 'internalGains', 'ventilationFlows', 'ventilation'] as const;
