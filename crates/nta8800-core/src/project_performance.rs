@@ -2746,6 +2746,29 @@ fn put_back(trial: &mut Value, leaf: &NullLeaf) {
 /// whole block is searched instead. `custom_deserialization_in_the_kernel_is_known`
 /// in `tests/blank_search_equivalence.rs` lists the serde constructs that
 /// could break the assumption (review 27).
+/// Members of the NTA block that must equal another member
+/// (`ventilation_setpoint_mismatch`): the ventilation copies the zone's
+/// setpoints, so a form clears both when the user clears the setpoint.
+/// (copy, source)
+const BLANK_MIRRORS: [(&str, &str); 2] = [
+    ("ventilation.heatingSetpointC", "setpoints.heatingC"),
+    ("ventilation.coolingSetpointC", "setpoints.coolingC"),
+];
+
+/// A blank copy is not a second missing input next to its blank source:
+/// one cleared field gives one gap, at the field the user cleared.
+fn without_blank_mirrors(paths: Vec<String>) -> Vec<String> {
+    paths
+        .iter()
+        .filter(|path| {
+            !BLANK_MIRRORS
+                .iter()
+                .any(|(copy, source)| path.as_str() == *copy && paths.iter().any(|p| p == source))
+        })
+        .cloned()
+        .collect()
+}
+
 fn blank_paths<T: serde::de::DeserializeOwned>(block: &Value) -> BlankSearch {
     let reduced = reduce_lists(block);
     if !reduced.dropped {
@@ -4186,7 +4209,7 @@ fn derive_input(
                             ..gap("nta_calculation_block_invalid", "ntaCalculation")
                         });
                     }
-                    for path in search.paths {
+                    for path in without_blank_mirrors(search.paths) {
                         gaps.push(InputGap {
                             detail: Some(error.to_string()),
                             ..gap("nta_value_missing", format!("ntaCalculation.{path}"))
@@ -6521,6 +6544,39 @@ mod tests {
     /// (`atomising` beside `steam { carrier }`, a metallised fabric beside a
     /// screen with a colour) only the tag is reported; the variant decides
     /// whether the member is asked at all.
+    /// The form copies the zone's setpoints into the chapter 11 ventilation,
+    /// so clearing a setpoint blanks both: one gap, at the setpoint.
+    #[test]
+    fn a_cleared_setpoint_is_one_gap_not_two() {
+        let dwelling: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-example-terraced-dwelling.json"
+        ))
+        .unwrap();
+        for (source, copy) in [
+            ("heatingC", "heatingSetpointC"),
+            ("coolingC", "coolingSetpointC"),
+        ] {
+            let mut value = dwelling.clone();
+            value["ntaCalculation"]["setpoints"][source] = Value::Null;
+            value["ntaCalculation"]["ventilation"][copy] = Value::Null;
+            let missing: Vec<String> = assess_project_performance(&value)
+                .gaps
+                .iter()
+                .filter(|gap| gap.code == "nta_value_missing")
+                .map(|gap| gap.path.clone())
+                .collect();
+            assert_eq!(missing, [format!("ntaCalculation.setpoints.{source}")]);
+        }
+        // A blank copy next to a filled setpoint is still named.
+        let mut value = dwelling.clone();
+        value["ntaCalculation"]["ventilation"]["heatingSetpointC"] = Value::Null;
+        assert!(assess_project_performance(&value)
+            .gaps
+            .iter()
+            .any(|gap| gap.code == "nta_value_missing"
+                && gap.path == "ntaCalculation.ventilation.heatingSetpointC"));
+    }
+
     #[test]
     fn a_blank_tag_with_unit_variants_hides_the_members_it_decides() {
         let missing = |value: &Value| -> Vec<String> {

@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Eén open punt voor een gewiste instelwaarde (geen rekenwijziging)
+- **Wat er mis was:** het formulier neemt de instelwaarden van de zone over in de ventilatie van hoofdstuk 11 (`ventilation.heatingSetpointC`, `ventilation.coolingSetpointC`), en de kern eist dat die gelijk zijn (`ventilation_setpoint_mismatch`). Wie **Instelwaarde verwarming** of **Instelwaarde koeling** wiste, kreeg daardoor twee open punten voor één handeling, waarvan één naar een veld dat het formulier niet toont.
+- **Nu:** staat de instelwaarde zelf ook leeg, dan noemt de kern alleen `setpoints.heatingC` of `setpoints.coolingC`, met **Ga naar** naar het gewiste veld. Een lege kopie naast een ingevulde instelwaarde blijft een open punt. Een volledige invoer rekent precies als voorheen.
+- **Tests:** `a_cleared_setpoint_is_one_gap_not_two` in de kern; de app-run met de echte kern eist nu één open punt na het wissen van de instelwaarde.
+
 ### 12 oktober 2026 — Review 57: Overnemen in projectmodel volledig voor alle voorbeeldopnamen (geen rekenwijziging)
 - **Nieuwe controle over alle zes voorbeeldopnamen** (drie woningen, drie utiliteitsgebouwen). `crates/nta8800-core/tests/survey_takeover_completeness.rs` legt de NTA-invoer vast die de kern uit elke opname afleidt (`training-data/nta8800-survey-takeover-derived.json`). `src/__tests__/review57-takeover-completeness.test.ts` eist dat elk onderdeel daarvan wordt overgenomen of met reden in `NOT_TAKEN_OVER` staat, en legt vast wat het overnemen schrijft, in een leeg concept en in het concept van het voorbeeldproject, zoals **Toepassen** het aan de kern geeft (`training-data/nta8800-survey-takeover-written.json`). De Rust-test rekent dat door via de projectroute en controleert:
   - dat er geen open punt overblijft op een overgenomen onderdeel;

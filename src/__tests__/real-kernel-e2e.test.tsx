@@ -300,6 +300,9 @@ describe.skipIf(!binary)('full app against the real kernel (kernel_once)', () =>
     expect(answer.status).toBe('incomplete');
     const gap = answer.gaps.find((item) => item.path === 'ntaCalculation.setpoints.heatingC');
     expect(gap?.code).toBe('nta_value_missing');
+    // The form copies the setpoint into the ventilation; one cleared field gives one gap.
+    expect(answer.gaps.filter((item) => item.code === 'nta_value_missing').map((item) => item.path))
+      .toEqual(['ntaCalculation.setpoints.heatingC']);
 
     await openStep(user, /^Check/, 'Check overview');
     const buttons = await main().findAllByRole('button', { name: /Go to/ }, { timeout: 30_000 });
