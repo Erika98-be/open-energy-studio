@@ -26,7 +26,7 @@ export function NtaUtilityGainsFields({ draft, change }: SectionProps) {
   const field = { draft, onChange: change };
   const lighting = read(draft, ['internalGains', 'lighting', 'method']);
   return <>
-    <SelectField {...field} path={['internalGains', 'lighting', 'method']} label={t('nta.gains.lighting')}
+    <SelectField required {...field} path={['internalGains', 'lighting', 'method']} label={t('nta.gains.lighting')}
       options={[['chapter14', t('nta.gains.lighting.chapter14')], ['declared', t('nta.gains.lighting.declared')]]}
       onChange={(_, value) => change(['internalGains', 'lighting'], value === 'declared'
         ? { method: 'declared', annualKwh: null, recovery: 'forfait_power' } : { method: 'chapter14' })} />
@@ -87,7 +87,7 @@ export function NtaLightingSection({ draft, change, project, measureOnly = false
       {zones.map((zone, index) => <div key={String(zone.id)} className="nta-form-row" role="group" aria-label={String(zone.id)}>
         <NumberField {...field} path={['lighting', 0, 'lightingZones', index, 'areaM2']} label={`${String(zone.id)} — ${t('nta.form.area')}`}
           disabled={measureOnly} />
-        <SelectField {...field} path={['lighting', 0, 'lightingZones', index, 'power', 'method']} label={t('nta.light.power')}
+        <SelectField required {...field} path={['lighting', 0, 'lightingZones', index, 'power', 'method']} label={t('nta.light.power')}
           options={[['forfait', t('nta.light.power.forfait')], ['installed', t('nta.light.power.installed')]]}
           onChange={(_, value) => change(['lighting', 0, 'lightingZones', index, 'power'], value === 'installed'
             ? { method: 'installed', sourceReference: '', luminaires: [luminaireGroupTemplate()] }
@@ -106,7 +106,7 @@ export function NtaLightingSection({ draft, change, project, measureOnly = false
           <p className="nta-form-note">{t('nta.light.centralNote')}</p>}
         {read(draft, ['lighting', 0, 'lightingZones', index, 'power', 'method']) === 'forfait' &&
           <p className="nta-form-note">{t('nta.light.forfaitDaylightNote')}</p>}
-        <SelectField {...field} path={['lighting', 0, 'lightingZones', index, 'daylight', 'method']} label={t('nta.light.daylight')}
+        <SelectField required {...field} path={['lighting', 0, 'lightingZones', index, 'daylight', 'method']} label={t('nta.light.daylight')}
           disabled={read(draft, ['lighting', 0, 'lightingZones', index, 'power', 'method']) === 'forfait'}
           options={[['none', t('nta.light.daylight.none')], ['forfait', t('nta.light.daylight.forfait')],
             ['sectors', t('nta.light.daylight.sectors')]]}
@@ -174,7 +174,7 @@ export function NtaDistributionFields({ draft, change }: SectionProps) {
   const psiCalculated = psiMethod != null && psiMethod !== 'forfait';
   const collective = read(draft, ['distributionSystem', 'installation']) === 'collective';
   return <>
-    <SelectField {...field} path={['distribution', 'method']} label={t('nta.dist.route')} options={[
+    <SelectField required {...field} path={['distribution', 'method']} label={t('nta.dist.route')} options={[
       ['heated_zone_only_space_heating', t('nta.dist.route.heatedZone')], ['calculated', t('nta.dist.route.calculated')]]}
       onChange={(_, value) => {
         const source = read(draft, ['distribution', 'sourceReference']) ?? '';
@@ -209,7 +209,7 @@ export function NtaDistributionFields({ draft, change }: SectionProps) {
         {psiCalculated
           ? <PipeGeometryFields draft={draft} change={change} base={['distributionSystem', 'pipeTransmittance']} />
           : <>
-        <SelectField {...field} path={['distributionSystem', 'pipeTransmittance', 'insulation', 'state']} label={t('nta.dist.pipes')}
+        <SelectField required {...field} path={['distributionSystem', 'pipeTransmittance', 'insulation', 'state']} label={t('nta.dist.pipes')}
           options={[['insulated', t('nta.vent.insulated')], ['uninsulated', t('nta.vent.uninsulated')], ['unknown', t('nta.form.unknown')]]}
           onChange={(_, value) => change(['distributionSystem', 'pipeTransmittance'], { method: 'forfait', insulation: value === 'insulated'
             ? { state: 'insulated', period: 'before1980_or_unknown' } : { state: value ?? 'unknown' } })} />
@@ -227,7 +227,7 @@ export function NtaDistributionFields({ draft, change }: SectionProps) {
             buffer vessel is only entered for a collective installation. */}
         {collective && psiCalculated && <BufferVesselFields draft={draft} change={change} />}
       </>}
-      <SelectField {...field} path={['distributionSystem', 'pump', 'method']} label={t('nta.dist.pump')} options={[
+      <SelectField required {...field} path={['distributionSystem', 'pump', 'method']} label={t('nta.dist.pump')} options={[
         ['included_in_generator_auxiliary', t('nta.dist.pump.included')], ['calculated', t('nta.dist.pump.calculated')],
         ['none_on_site', t('nta.dist.pump.none')]]}
         onChange={(_, value) => change(['distributionSystem', 'pump'], value === 'calculated'

@@ -88,7 +88,7 @@ function DynamicWindowFields({ draft, change, base, windowName }: SectionProps &
     change(dynamic, { ...value, states: next, solarWeights: map(value.solarWeights), temperatureWeights: map(value.temperatureWeights) });
   };
   return <fieldset className="nta-form-group"><legend>{windowName}</legend>
-    <SelectField {...field} path={[...dynamic, 'method']} label={t('nta.form.dynamic.method')} options={[
+    <SelectField required {...field} path={[...dynamic, 'method']} label={t('nta.form.dynamic.method')} options={[
       ['single_state', t('nta.form.dynamic.methodB')], ['weighted_states', t('nta.form.dynamic.methodA')]]}
       onChange={(_, value) => setMethod(value)} />
     {method === 'single_state' && <StateFields draft={draft} change={change} base={[...dynamic, 'state']} />}

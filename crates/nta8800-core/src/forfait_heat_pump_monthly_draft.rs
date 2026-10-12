@@ -123,7 +123,9 @@ pub fn assess_forfait_heat_pump_monthly_draft(
 ) -> ForfaitHeatPumpMonthlyDraftAssessment {
     let mut issues = Vec::new();
     let lookup = assess_forfait_heat_pump_draft(&input.forfait);
-    if lookup.status == "invalid" || lookup.corrected_cop.is_none() {
+    // The lookup's own issues below name the field; the summary only when
+    // none does, so one blank is one open point (review 58).
+    if (lookup.status == "invalid" || lookup.corrected_cop.is_none()) && lookup.issues.is_empty() {
         issues.push(issue("forfait_lookup_invalid", "forfait"));
     }
     // Each lookup issue keeps its own code and field, so the adviser sees
@@ -364,7 +366,13 @@ mod tests {
         assert_eq!(invalid.status, "invalid");
         assert!(invalid.monthly.is_empty());
         assert!(invalid.corrected_cop.is_none());
+        // The lookup names the correction itself; no summary next to it
+        // (review 58).
         assert!(invalid
+            .issues
+            .iter()
+            .any(|item| item.path.starts_with("forfait.")));
+        assert!(!invalid
             .issues
             .iter()
             .any(|item| item.code == "forfait_lookup_invalid"));

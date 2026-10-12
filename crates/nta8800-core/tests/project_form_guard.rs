@@ -252,3 +252,148 @@ fn pointer_of(path: &str) -> String {
     }
     pointer
 }
+
+/// Review 58: one user action, one gap at the field the user changed.
+/// `src/__tests__/nta-clear-field-sweep.test.tsx` clears every clearable
+/// field of every NTA section on its own (the example office and terraced
+/// dwelling, public case N) and writes each resulting project, plus the
+/// untouched project of each fixture (`baseline`). Every gap the cleared
+/// project has beyond its baseline must sit at the cleared field or below it;
+/// a gap anywhere else is a second open point for one action (the form wrote
+/// a blank into another member, or the blank search reported a member derived
+/// from the field). The gate passes the file with `NTA_CLEAR_SWEEP_DOCS`.
+#[test]
+fn every_cleared_field_is_one_gap_at_that_field() {
+    let Ok(file) = std::env::var("NTA_CLEAR_SWEEP_DOCS") else {
+        eprintln!("NTA_CLEAR_SWEEP_DOCS not set: the gate sets it after the UI tests");
+        return;
+    };
+    let text = std::fs::read_to_string(&file)
+        .unwrap_or_else(|error| panic!("{file}: {error} (run the UI tests first)"));
+    let docs: Vec<Value> = text
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert!(
+        docs.len() > 200,
+        "only {} cleared fields collected",
+        docs.len()
+    );
+
+    let baselines: BTreeMap<String, BTreeSet<(String, String)>> = docs
+        .iter()
+        .filter(|doc| doc["kind"] == "baseline")
+        .map(|doc| {
+            let value = serde_json::to_value(assess_project_performance(&doc["project"])).unwrap();
+            (
+                doc["fixture"].as_str().unwrap_or("").to_string(),
+                gap_set(&value),
+            )
+        })
+        .collect();
+    let cleared: Vec<&Value> = docs
+        .iter()
+        .filter(|doc| doc["kind"] != "baseline")
+        .collect();
+    let threads = std::thread::available_parallelism().map_or(4, |n| n.get());
+    let chunk = cleared.len().div_ceil(threads).max(1);
+    let mut failures: Vec<String> = std::thread::scope(|scope| {
+        let handles: Vec<_> = cleared
+            .chunks(chunk)
+            .map(|part| {
+                let baselines = &baselines;
+                scope.spawn(move || {
+                    part.iter()
+                        .flat_map(|doc| check_cleared(doc, baselines))
+                        .collect::<Vec<_>>()
+                })
+            })
+            .collect();
+        handles
+            .into_iter()
+            .flat_map(|handle| handle.join().unwrap())
+            .collect()
+    });
+    failures.sort();
+    assert!(
+        failures.is_empty(),
+        "{} gaps away from the cleared field ({} fields cleared):\n{}",
+        failures.len(),
+        cleared.len(),
+        failures.join("\n")
+    );
+}
+
+/// A cleared field that is itself a valid answer, whose follow-up the kernel
+/// rightly asks elsewhere: (end of the cleared field, code of the follow-up).
+const DELIBERATE: [(&str, &str); 1] = [
+    // §5.5.8: an unknown generator capacity counts as above 290 kW, so the
+    // system needs its BACS classes.
+    (".nominalThermalCapacityKw", "bacs_evidence_incomplete"),
+];
+
+/// The (code, path) of every gap in a project-route answer.
+fn gap_set(value: &Value) -> BTreeSet<(String, String)> {
+    value["gaps"]
+        .as_array()
+        .map(|gaps| {
+            gaps.iter()
+                .map(|gap| {
+                    (
+                        gap["code"].as_str().unwrap_or("").to_string(),
+                        gap["path"].as_str().unwrap_or("").to_string(),
+                    )
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// The gaps of one cleared field that sit elsewhere than at (or below) it.
+fn check_cleared(
+    doc: &Value,
+    baselines: &BTreeMap<String, BTreeSet<(String, String)>>,
+) -> Vec<String> {
+    let fixture = doc["fixture"].as_str().unwrap_or("");
+    let field = doc["field"].as_str().unwrap_or("");
+    let label = format!(
+        "{fixture} / {} / {field} ({})",
+        doc["section"].as_str().unwrap_or(""),
+        doc["kind"].as_str().unwrap_or("")
+    );
+    let result = match std::panic::catch_unwind(|| assess_project_performance(&doc["project"])) {
+        Ok(result) => result,
+        Err(panic) => return vec![format!("{label}: panic {}", panic_message(&*panic))],
+    };
+    let value = match checked(&result) {
+        Ok(value) => value,
+        Err(error) => return vec![format!("{label}: {error}")],
+    };
+    let baseline = baselines.get(fixture).cloned().unwrap_or_default();
+    let gaps = gap_set(&value);
+    if std::env::var("NTA_CLEAR_SWEEP_REPORT").is_ok() {
+        let new: Vec<String> = gaps
+            .difference(&baseline)
+            .map(|(code, path)| format!("{code}@{path}"))
+            .collect();
+        eprintln!("{label} [{}]: {}", value["status"], new.join(", "));
+    }
+    gaps.difference(&baseline)
+        .filter(|(_, path)| !at_or_below(path, field))
+        .filter(|(code, _)| {
+            !DELIBERATE
+                .iter()
+                .any(|(cleared, follow_up)| field.ends_with(cleared) && code == follow_up)
+        })
+        .map(|(code, path)| format!("{label}: {code} at {path}"))
+        .collect()
+}
+
+/// `path` is `field` itself or a member or item below it.
+fn at_or_below(path: &str, field: &str) -> bool {
+    path == field
+        || path
+            .strip_prefix(field)
+            .is_some_and(|rest| rest.starts_with('.') || rest.starts_with('['))
+}

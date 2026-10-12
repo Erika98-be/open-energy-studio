@@ -226,7 +226,7 @@ pub fn assess_boiler_forfait_draft(
     if input.installation_year.is_none() && input.installation_year_reference.is_some() {
         issues.push(issue(
             "installation_year_reference_without_year",
-            "installationYearReference",
+            "installationYear",
         ));
     }
     let lt = input.average_design_emission_temperature_c <= 50.0
