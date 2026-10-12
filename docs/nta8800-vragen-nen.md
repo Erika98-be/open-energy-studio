@@ -1,8 +1,8 @@
 # Vragen aan NEN / NTA 8800-commissie
 
-Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding voor vragen 1–7 is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)); vragen 8–12 kwamen uit de controle van de rekenkern tegen de normtekst per hoofdstuk (reviews 40–48 in [nta8800-releasenotes.md](nta8800-releasenotes.md)), en vraag 13 uit de onafhankelijke herberekening van bijlage Q (review 69).
+Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding voor vragen 1–7 is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)); vragen 8–12 kwamen uit de controle van de rekenkern tegen de normtekst per hoofdstuk (reviews 40–48 in [nta8800-releasenotes.md](nta8800-releasenotes.md)), en vragen 13 en 14 uit de onafhankelijke herberekening van bijlage Q (reviews 69 en 70).
 
-Alle dertien vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle veertien vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -155,3 +155,13 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Gevolg.** Geen openbaar geval heeft een warmtepomp volgens bijlage Q. In een synthetische brine/watervariant van ISSO 54-deeltest EP-W001 (bronpomp 120 W, 66 kWh per jaar) telt de bronpomp 69 kWh via de COP (met f_prac 0,95) en 66 kWh als hulpenergie, op ongeveer 980 kWh warmtepompelektriciteit. Bij de andere lezing valt een van beide weg.
 
 **Vraag.** Telt het hulpenergiegebruik van de bronpomp volgens Q.5 bij een warmtepomp volgens bijlage Q alleen in η_H;gen;hp (Q.2/Q.4), alleen als hulpenergie volgens 9.6.3, of bedoelt de norm beide?
+
+## 14. Tijdfractie voor warm tapwater van een warmtepomp op ventilatielucht (13.8.2.4, p. 614–615; 11.2.2.1.2, p. 449–450; Q.5.2.2, p. 1066–1067)
+
+**Situatie.** Voor een warmtepomp die ventilatieretourlucht als bron gebruikt, telt de norm de tijdfractie in bedrijf voor warm tapwater, f_W;t;hp-on;mi, mee in het buitenluchtdebiet (11.23) en, via Q.84, in de herberekening van de warmtevraag bij overventilatie (Q.5.3). 13.8.2.4 schrijft voor dat die fractie "in alle gevallen" met 13.149 wordt bepaald: de geleverde tapwaterwarmte gedeeld door de maximaal leverbare (13.141, met P_nom). 11.23 verwijst daarvoor naar 13.8.2.4. Bijlage Q.5.2.2 geeft met Q.86–Q.88 een andere formule: de tapwaterwarmte maal F_W;gen, gedeeld door het bronvermogen P_W;hp;max van Q.87 (met q_ve;hp = 0,44·A_g;tot volgens Q.88, minimaal 44 dm³/s, en een afkoeling van 20 naar 3 °C), maal (η_W;gen − 1)/η_W;gen en maal 1,2.
+
+**Gekozen lezing.** De kern bepaalt f_W;t;hp-on met 13.149, ook in Q.84, omdat 13.8.2.4 en 11.23 dat voorschrijven. Q.86–Q.88 worden niet gebruikt.
+
+**Gevolg.** Geen openbaar geval en geen ISSO 54-deeltest heeft een warmtepomp op ventilatielucht voor tapwater. De twee formules geven een andere fractie: 13.149 rekent met het afgiftevermogen van het toestel, Q.86 met het bronvermogen bij het forfaitaire luchtdebiet, de verhouding (η_W;gen − 1)/η_W;gen en een toeslag van 20 %. Een andere f_W verandert het buitenluchtdebiet van 11.23 en de grens f_H ≤ 1 − f_W in Q.84.
+
+**Vraag.** Welke formule bepaalt f_W;t;hp-on;mi in Q.84 en 11.23: 13.149, zoals 13.8.2.4 zegt, of Q.86–Q.88 van bijlage Q? Is Q.86 bedoeld voor een ander geval, bijvoorbeeld alleen een combiwarmtepomp met een kwaliteitsverklaring volgens bijlage Q?

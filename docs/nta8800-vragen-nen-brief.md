@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software (vragen 1–7) en bij een systematische controle en onafhankelijke herberekening van de rekenkern tegen de normtekst (vragen 8–13) zijn wij dertien punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport; vragen 8–13 veranderen geen vergeleken uitkomst van de openbare gevallen. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software (vragen 1–7) en bij een systematische controle en onafhankelijke herberekening van de rekenkern tegen de normtekst (vragen 8–14) zijn wij veertien punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport; vragen 8–14 veranderen geen vergeleken uitkomst van de openbare gevallen. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -139,6 +139,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Lezing B.** De bronpomp telt maar één keer: alleen in η_H;gen;hp, of alleen als hulpenergie.
 - **Gevolg.** Geen openbaar geval heeft een warmtepomp volgens bijlage Q. In een synthetische brine/watervariant (bronpomp 120 W, 66 kWh per jaar) telt de bronpomp bij lezing A 69 kWh via de COP en 66 kWh als hulpenergie, op ongeveer 980 kWh warmtepompelektriciteit.
 - **Vraag.** Telt het hulpenergiegebruik van de bronpomp bij een warmtepomp volgens bijlage Q alleen in η_H;gen;hp, alleen als hulpenergie volgens 9.6.3, of in beide?
+
+### Vraag 14. Tijdfractie voor warm tapwater van een warmtepomp op ventilatielucht (13.8.2.4, p. 614–615; 11.2.2.1.2, p. 449–450; Q.5.2.2, p. 1066–1067)
+
+- **Plaats.** 13.8.2.4 schrijft voor dat de tijdfractie voor warm tapwater, f_W;t;hp-on;mi, "in alle gevallen" met 13.149 wordt bepaald (geleverde tapwaterwarmte gedeeld door de maximaal leverbare volgens 13.141), en 11.23 verwijst daarnaar. Bijlage Q.5.2.2 geeft met Q.86–Q.88 een andere formule voor dezelfde grootheid, die Q.84 gebruikt in de herberekening bij overventilatie: tapwaterwarmte maal F_W;gen, gedeeld door het bronvermogen van Q.87 (q_ve;hp = 0,44·A_g;tot, minimaal 44 dm³/s, afkoeling 20 naar 3 °C), maal (η_W;gen − 1)/η_W;gen en 1,2.
+- **Lezing A (onze keuze).** 13.149 geldt overal, ook in Q.84.
+- **Lezing B.** In de herberekening van bijlage Q (Q.84) geldt Q.86–Q.88.
+- **Gevolg.** Geen openbaar geval of ISSO 54-deeltest heeft een warmtepomp op ventilatielucht voor tapwater. De twee formules geven een andere f_W en daarmee een ander buitenluchtdebiet (11.23) en een andere grens f_H ≤ 1 − f_W in Q.84.
+- **Vraag.** Welke formule bepaalt f_W;t;hp-on;mi in Q.84 en 11.23, en voor welk geval is Q.86 bedoeld?
 
 ---
 
