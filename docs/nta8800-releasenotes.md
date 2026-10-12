@@ -13,6 +13,10 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Review 65: overige routes van hoofdstuk 11 onafhankelijk nagerekend (geen rekenwijziging)
+- **Herberekening:** de routes die de voorbeeldprojecten niet bereiken, zijn met 29 synthetische ventilatie-invoeren nagerekend vanaf de normpagina's: ventilatieve koeling, enkelzijdig en dwars met halfopen sectoren (11.70–11.79), open verbrandingstoestellen (11.80–11.83, tabellen 11.11 en 11.12), luchtstroomzones vanaf 15 m (tabel 11.1, 11.6–11.10, tabel 11.3), de kruipruimterijen van tabel 11.1, roosterverwarming (11.123–11.128), vorstbeveiliging bij een woning met balansventilatie (tabel 11.16, 11.105/11.106) en de luchtbehandelingskast met batterijen (tabellen 11.15 en 11.19, f_lea;ahu, f_ins;ahu, 11.114–11.121 met c_a als gedrukt).
+- **Uitkomst:** 12 008 grootheden vergeleken tegen 10⁻⁶ relatief; alle gelijk. Geen kernfout, geen gewijzigde uitkomst. Twaalf varianten blijven als test in `crates/nta8800-core/tests/ventilation_independent.rs`. Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
+
 ### 12 oktober 2026 — Review 64: hoofdstuk 11 onafhankelijk nagerekend (geen rekenwijziging)
 - **Herberekening:** hoofdstuk 11 is voor de tussenwoning (C1) en het kantoor (D2 met wtw) in 2025+C1 opnieuw afgeleid vanaf de normpagina's, vanaf de afgeleide invoer van de kern. Vergeleken zijn de benodigde buitenluchtvolumestroom (11.22, 11.56, tabellen 11.5, 11.8, 11.9), infiltratie en spuien (11.68, 11.84, 11.85), het luchtstroommodel met de routine voor de interne referentiedruk (11.1–11.21), de toevoertemperatuur met wtw en bypass (11.99–11.108), H_ve met b_v (7.19, 7.20) en het ventilatorgebruik (11.132, 11.142), plus de run met vast systeem C1 (§5.4.2, §5.4.3) door hoofdstuk 7.
 - **Uitkomst:** 1 041 grootheden vergeleken tegen 10⁻⁶ relatief; alle gelijk, ook BENG 1 van het kantoor (74,55) uit de eigen C1-run. Geen kernfout, geen gewijzigde uitkomst. Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
