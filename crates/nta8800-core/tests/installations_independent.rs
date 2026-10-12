@@ -719,3 +719,187 @@ fn micro_chp_method_1() {
         82.58400000000002,
     );
 }
+
+// Review 68: cooling method 1 and annex Q product values, recalculated independently in the same way.
+
+/// Cooling method 1 (10.5.4, p. 401-409): the five equations of 10.63 for C1-C4 and Δϑ_corr with a measured
+/// fifth point, f_EER per bin 10.56/10.57 with T_0;abs 273,16 K (p. 413), ϑ_C;evap;out = ϑ_C;int;inc − 20 K
+/// (10.61, direct evaporation in the room), Φ_net per bin 10.60 with table 10.17 at the cooling limit, the
+/// month weighting 10.55 with the printed f_t;tot row of table 10.18, and 10.54 with f_prpr 0,9.
+#[test]
+fn cooling_method_1_with_a_fifth_point() {
+    let p = performance(
+        "EPW301a",
+        r#"[{"pointer": "/ntaCalculation/cooling/generators/0/generator", "value": {"kind": "room_air_conditioner", "performance": {"method": "en14825", "nominalEer": 3.4, "nominalCapacityKw": 3.5, "minimumCapacityKw": 1.0, "testPoints": [{"partLoadPercent": 100, "eer": 3.4, "evaporatorOutletC": 12.0, "condenserInletC": 35.0}, {"partLoadPercent": 74, "eer": 4.9, "evaporatorOutletC": 13.0, "condenserInletC": 30.0}, {"partLoadPercent": 47, "eer": 7.1, "evaporatorOutletC": 14.0, "condenserInletC": 25.0}, {"partLoadPercent": 21, "eer": 8.6, "evaporatorOutletC": 15.0, "condenserInletC": 20.0}], "fifthPoint": {"partLoadPercent": 47, "eer": 5.3, "evaporatorOutletC": 14.0, "condenserInletC": 35.0}, "sourceReference": "r68 synthetic"}}}, {"pointer": "/ntaCalculation/cooling/emission/emitter", "value": "fan_coil_or_rac_on_outer_wall"}, {"pointer": "/ntaCalculation/cooling/emission/fanCoilCount", "value": 1}]"#,
+    );
+    let expected = [
+        0.4603403015901443,
+        -1.240043896515591,
+        1.0523145526545443,
+        -0.05433525700681298,
+        39.2434988179669,
+    ];
+    for (index, value) in expected.iter().enumerate() {
+        close(
+            &format!("m1 C/dT_corr {index}"),
+            at(
+                &p,
+                &format!("/cooling/generatorShares/0/en14825Coefficients/{index}"),
+            ),
+            *value,
+        );
+    }
+    close(
+        "m1 EER m7",
+        at(&p, "/cooling/generatorShares/0/monthlyEer/6"),
+        4.533652810681888,
+    );
+    close(
+        "m1 EER m8",
+        at(&p, "/cooling/generatorShares/0/monthlyEer/7"),
+        4.479986062497868,
+    );
+    close(
+        "m1 E_C;el m8",
+        at(&p, "/cooling/months/7/electricityKwh"),
+        157.49963783028423,
+    );
+}
+
+/// Cooling method 1 without a fifth point: 10.64 with Δϑ_corr = 0, a condenser inlet limit of 25 °C (10.62) and a
+/// minimum part load of 71 % so most bins take 10.57.
+#[test]
+fn cooling_method_1_without_a_fifth_point() {
+    let p = performance(
+        "EPW301a",
+        r#"[{"pointer": "/ntaCalculation/cooling/generators/0/generator", "value": {"kind": "room_air_conditioner", "performance": {"method": "en14825", "nominalEer": 3.1, "nominalCapacityKw": 3.5, "minimumCapacityKw": 2.5, "testPoints": [{"partLoadPercent": 100, "eer": 3.1, "evaporatorOutletC": 12.0, "condenserInletC": 35.0}, {"partLoadPercent": 74, "eer": 4.4, "evaporatorOutletC": 12.0, "condenserInletC": 30.0}, {"partLoadPercent": 47, "eer": 6.3, "evaporatorOutletC": 12.0, "condenserInletC": 25.0}, {"partLoadPercent": 21, "eer": 7.9, "evaporatorOutletC": 12.0, "condenserInletC": 20.0}], "condenserInletLimitC": 25.0, "sourceReference": "r68 synthetic"}}}, {"pointer": "/ntaCalculation/cooling/emission/emitter", "value": "fan_coil_or_rac_on_outer_wall"}, {"pointer": "/ntaCalculation/cooling/emission/fanCoilCount", "value": 1}]"#,
+    );
+    let expected = [
+        0.16626214298917724,
+        -0.4109480605495624,
+        0.30033645466484676,
+        0.025005936454241994,
+        0.0,
+    ];
+    for (index, value) in expected.iter().enumerate() {
+        close(
+            &format!("m1b C/dT_corr {index}"),
+            at(
+                &p,
+                &format!("/cooling/generatorShares/0/en14825Coefficients/{index}"),
+            ),
+            *value,
+        );
+    }
+    close(
+        "m1b EER m7",
+        at(&p, "/cooling/generatorShares/0/monthlyEer/6"),
+        2.681753397252766,
+    );
+    close(
+        "m1b EER m8",
+        at(&p, "/cooling/generatorShares/0/monthlyEer/7"),
+        2.679769590862541,
+    );
+    close(
+        "m1b E_C;el m8",
+        at(&p, "/cooling/months/7/electricityKwh"),
+        263.3047948353739,
+    );
+}
+
+const ANNEX_Q_ON_OFF: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "outdoor_air_water", "maximumPower": {"condition1": {"evaporatorInC": 7.0, "evaporatorOutC": 6.0, "condenserInC": 30.0, "condenserOutC": 35.0, "cop": 4.6, "heatingPowerKw": 6.0}, "condition2": {"evaporatorInC": 7.0, "evaporatorOutC": 6.0, "condenserInC": 47.0, "condenserOutC": 55.0, "cop": 2.9, "heatingPowerKw": 5.6}, "condition3": {"evaporatorInC": -7.0, "evaporatorOutC": -8.0, "condenserInC": 30.0, "condenserOutC": 35.0, "cop": 2.7, "heatingPowerKw": 4.4}, "condition4": {"evaporatorInC": 2.0, "evaporatorOutC": 1.0, "condenserInC": 30.0, "condenserOutC": 35.0, "cop": 3.3, "heatingPowerKw": 4.9}}, "modulation": {"method": "on_off"}, "switchOff": {"minEvaporatorInC": -20.0}, "testReportReference": "r68 synthetic"}, "designSupplyTemperatureC": 35.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r68 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r68 synthetic"}}]"#;
+
+const ANNEX_Q_UNDERSIZED: &str = r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "heat_pump_annex_q", "heatPump": {"source": "outdoor_air_water", "maximumPower": {"condition1": {"evaporatorInC": 7.0, "evaporatorOutC": 6.0, "condenserInC": 30.0, "condenserOutC": 35.0, "cop": 4.6, "heatingPowerKw": 2.4}, "condition2": {"evaporatorInC": 7.0, "evaporatorOutC": 6.0, "condenserInC": 47.0, "condenserOutC": 55.0, "cop": 2.9, "heatingPowerKw": 2.2}, "condition3": {"evaporatorInC": -7.0, "evaporatorOutC": -8.0, "condenserInC": 30.0, "condenserOutC": 35.0, "cop": 2.7, "heatingPowerKw": 1.7}}, "modulation": {"method": "on_off"}, "switchOff": {"minEvaporatorInC": -5.0, "minCop": 2.0}, "testReportReference": "r68 synthetic"}, "designSupplyTemperatureC": 45.0, "backup": {"kind": "electric_resistance"}, "equipmentReference": "r68 synthetic"}}, {"pointer": "/ntaCalculation/heatPumpRenewable", "value": {"sourceBelow20C": true, "exhaustAirSource": false, "sourceReference": "r68 synthetic"}}]"#;
+
+/// Annex Q, on/off outdoor-air/water heat pump (p. 1027-1069): planes Q.51-Q.53 and Q.60-Q.62 through conditions
+/// 1-3 at the operative temperatures Q.69/Q.70, dT over all four measured conditions (Q.49/Q.50), f_cor;bu;max from
+/// condition 4 (Q.81-Q.83) with Q.32-Q.34, θ_cond;in of table Q.5, P_max Q.37/Q.45, θ_cond;out;max Q.36 with the
+/// design flow Q.47/Q.48 (table Q.7; θ_evap;nom −10 °C, kernel reading), COP Q.31/Q.35, demand Q.46 with table Q.6
+/// (WHE), Q.29/Q.9, totals Q.1-Q.4; 9.63 with f_prac 0,95 and the same value every month (p. 340). Every bin is
+/// covered, so the kernel applies F_H;gen = 1 (its documented reading of Q.1).
+#[test]
+fn annex_q_on_off_outdoor_air() {
+    let p = performance("EPW001", ANNEX_Q_ON_OFF);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close(
+        "q-onoff F",
+        at(&p, &format!("{q}/energyFraction")),
+        0.99973692,
+    );
+    close(
+        "q-onoff eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        4.319731312142112,
+    );
+    close(
+        "q-onoff Q_pr",
+        at(&p, &format!("{q}/deliveredKwh")),
+        4670.470501957207,
+    );
+    close(
+        "q-onoff Q_el",
+        at(&p, &format!("{q}/electricityKwh")),
+        1081.1946772775473,
+    );
+    for (index, power, cop) in [
+        (9, 6.165555555555555, 5.248700735824447),
+        (14, 5.545238095238095, 3.691025186126918),
+        (19, 4.922698412698413, 3.2666135444775524),
+        (23, 4.4255555555555555, 2.8202829394104834),
+    ] {
+        close(
+            &format!("q-onoff P_max bin {index}"),
+            at(&p, &format!("{q}/bins/{index}/maximumPowerKw")),
+            power,
+        );
+        close(
+            &format!("q-onoff COP bin {index}"),
+            at(&p, &format!("{q}/bins/{index}/cop")),
+            cop,
+        );
+    }
+    close(
+        "q-onoff E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        339.83921927704716,
+    );
+}
+
+/// Annex Q, undersized on/off heat pump without condition 4 (f_cor;bu;max 0,75), switch-off below −5 °C inlet and a
+/// minimum COP of 2 (table Q.3), design supply 45 °C: F_H;gen < 1 and the electric backup (COP 1,0) takes the rest.
+#[test]
+fn annex_q_undersized_with_switch_off_and_backup() {
+    let p = performance("EPW001", ANNEX_Q_UNDERSIZED);
+    let q = "/spaceHeating/annexQ/annexQ";
+    close(
+        "q-small F",
+        at(&p, &format!("{q}/energyFraction")),
+        0.9728849680329282,
+    );
+    close(
+        "q-small eta",
+        at(&p, &format!("{q}/generationEfficiency")),
+        3.7788288772602825,
+    );
+    close(
+        "q-small COP bin -3",
+        at(&p, &format!("{q}/bins/19/cop")),
+        2.5427664756156054,
+    );
+    close(
+        "q-small off bin -7",
+        at(&p, &format!("{q}/bins/23/switchOffFactor")),
+        0.0,
+    );
+    close(
+        "q-small Q_hp m1",
+        at(&p, "/spaceHeating/monthly/0/heatPumpOutputKwh"),
+        1356.7984235598763,
+    );
+    close(
+        "q-small E_H;el m1",
+        at(&p, "/spaceHeating/monthly/0/generatorElectricityKwh"),
+        415.76511761098016,
+    );
+}

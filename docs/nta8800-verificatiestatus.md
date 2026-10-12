@@ -106,7 +106,22 @@ Samen 2 417 vergeleken grootheden (per maand opwekkerinvoer per energiedrager, h
 - **Booster, correctie voor de taphoeveelheid:** W.3.3 staat drie methoden toe; de kern gebruikt methode 3 (W.14/W.15, interpolatie met het stilstandsverlies). Met tabel 13.27 (methode 2) komen 24 van de 24 maandwaarden anders uit; de herberekening volgt de keuze van de kern.
 - **WKK methode 1, lezingen van de kern aangehouden** (lijst `micro_chp::INTERPRETATIONS`): P_th;sb = 0, de NEN-EN 50465-rendementen op onderwaarde met omrekening f_Hs/Hi 1,11 voor aardgas, en warmte boven P_th;chp_100+sup_100 × t als bijstook tegen f_prac × η_th;100 (9.66 wijst die warmte aan geen opwekker toe).
 - **Opgemerkt bij WKK methode 1:** tabel 9.35 geeft t = t_H;op volgens 9.32a. Voor een woning met een individuele installatie bevat 9.32a de pompfactor f_H;red;pmp;op = 0,10 (tabel 9.X). De WKK krijgt daardoor een tiende van de stookuren (januari 42,9 h) en draait in de koudste maanden op vollast met bijstook. De kern volgt de letterlijke tekst; of dit zo bedoeld is, is een mogelijke vraag aan NEN.
-- **Niet nagerekend:** koelmethode 1 (NEN-EN 14825, 10.5.4) en warmtepompen met productwaarden volgens bijlage Q. Die routes zijn niet opnieuw afgeleid. Zes gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`.
+- **Niet nagerekend:** koelmethode 1 (NEN-EN 14825, 10.5.4) en warmtepompen met productwaarden volgens bijlage Q. Die routes zijn niet opnieuw afgeleid. Zes gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`. Review 68 (hieronder) rekent beide alsnog na.
+
+**Koelmethode 1 en bijlage Q onafhankelijk nagerekend (review 68).** Op dezelfde manier als reviews 66 en 67: synthetische varianten van ISSO 54 v2.0-deeltesten in 2025+C1 met één route aangezet, nagerekend met een eigen implementatie vanaf de normpagina's zonder eerst de kerncode van die route te lezen. Tolerantie 10⁻⁶ relatief.
+
+| Route | Gevallen | Vergeleken | Uitkomst |
+|---|---|---|---|
+| Koelmethode 1 (10.5.4: 10.53–10.64, tabellen 10.17 en 10.18; p. 401–409) | EP-W301a met een modulerende airco: met gemeten vijfde punt, en zonder vijfde punt (10.64, Δϑ_corr = 0) met een grens voor de condensorintrede van 25 °C en een minimale deellast van 71 % | 58 | gelijk |
+| Bijlage Q, aan/uit-lucht/waterwarmtepomp (Q.1–Q.9, Q.29–Q.53, Q.60–Q.62, Q.69/Q.70, Q.81–Q.83, tabellen Q.3 en Q.5–Q.7; p. 1027–1055) met 9.63 (p. 340) | EP-W001 met een warmtepomp die elke bin dekt (35 °C, conditie 4 gemeten) en met een te kleine warmtepomp met afschakeling onder −5 °C en bij COP < 2 en elektrische bijverwarming (45 °C, zonder conditie 4) | 434 | gelijk |
+| **Totaal** | | **492** | **gelijk** |
+
+- **Vergeleken:** bij koelmethode 1 de coëfficiënten C1–C4 en Δϑ_corr van 10.63, de EER per maand (10.54/10.55) en het elektriciteitsgebruik per maand. Bij bijlage Q per bin van tabel Q.6 de uren, het gevraagde en geleverde vermogen, P_max, de COP, de afschakelfactor en de aantijd, daarnaast F_H;gen, η_H;gen;hp, Q_H;hp;pr;an en Q_H;hp;us;an;el, en per maand de warmtepompwarmte en het elektriciteitsgebruik.
+- **Als invoer van de kern overgenomen:** de koelgrens en Q_C;gen;in per maand (hoofdstuk 10, eerder nagerekend), ϑ_C;int;inc (10.10) en de thermische node-input Q_H;node,in per maand (9.2.3.5).
+- **Tabel 10.18:** f_t;tot is de afgedrukte totaalrij van de tabel ("volgens tabel 10.18"). De som van de afgedrukte waarden wijkt per maand tot 2·10⁻⁴ af van die rij; met de som in plaats van de rij komen zes maanden op 10⁻⁴ tot 2·10⁻³ relatief uit. Kern en herberekening gebruiken de afgedrukte rij.
+- **Q.49/Q.50 (N meetcondities):** de gemiddelde temperatuurverhoging over de condensor en -verlaging over de verdamper gaan over alle volgens Q.4.2 gemeten condities, dus ook conditie 4 als die is gemeten. Met alleen de condities 1–3 wijkt P_max per bin 4·10⁻⁴ relatief af. De kern neemt alle gemeten condities; de herberekening volgt die lezing.
+- **Lezingen van de kern aangehouden** (lijst `annex_q::INTERPRETATIONS`): ϑ_evap;nom = −10 °C voor lucht/water in Q.48 (de tekst noemt alleen W/W, B/W en L/L), en F_H;gen = 1 als elke bin van tabel Q.6 wordt gedekt. In de eerste variant rapporteert de kern daardoor F_H;gen = 0,999 737 (de letterlijke Q.1, die de herberekening ook geeft), maar rekent per maand met 1.
+- **Niet nagerekend:** modulerende warmtepompen (Q.2.6, Q.3.6/Q.3.7, tabellen Q.15/Q.16), brine/water- en water/waterwarmtepompen (tabel Q.4, bronpomp Q.5–Q.8), afvoer- en gecombineerde lucht (Q.41/Q.43), lucht/luchtwarmtepompen, de maandverdeling Q.90–Q.97 en de hybride route met bijlage Q. Vier gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`.
 
 ## Stand 11 oktober 2026
 
