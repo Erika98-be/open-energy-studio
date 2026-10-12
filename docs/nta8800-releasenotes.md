@@ -13,6 +13,10 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Poort: tijd per stap en optioneel parallel (geen rekenwijziging)
+- **Tijd per stap:** `scripts/verify-nta.sh` toont na elke stap de duur en aan het eind een overzicht, ook als een stap faalt. Meting op 12 oktober (koude build, 8 kernen): 1798 s in totaal, met als grootste stappen de kern op Rust 1.77.2 (426 s), de UI-tests (385 s), de kerntests (357 s) en de twee Tauri-stappen (247 s); zie het testprotocol §5.
+- **Optioneel parallel (`NTA_GATE_PARALLEL=1`):** de Rust 1.77.2-run en de frontendbundel met de Tauri-stappen kunnen naast de kernstappen lopen en worden vóór de UI-tests opgehaald; een mislukte pijplijn laat de poort falen. Standaard staat dit uit: drie gelijktijdige cargo-builds liepen op deze machine (13 GB) tegen een geheugentekort aan. Zonder de variabele doet de poort dezelfde controles, alleen staat TypeScript nu vóór de Rust 1.77.2-run en de Tauri-stappen.
+
 ### 12 oktober 2026 — Review 59: codereview van reviews 55–58 en de overname, de statusbalk en de app-run tegen de echte kern (geen rekenwijziging)
 - **Overnemen in projectmodel bij meer zones:** het warm tapwater van een opname dient het hele gebouw (13.20: de functieoppervlakken samen ten hoogste A_g van het gebouw). Bij een project met meer rekenzones schaalde de overname de tapwateroppervlakken naar de eerste zone, zodat de tapwatervraag te laag uitviel. Ze volgen nu de A_g van alle zones samen; de verlichting (14.4) en bevochtigers blijven bij de zone. Bij één zone verandert niets. Test: `src/__tests__/review59-takeover-building-area.test.ts`.
 - **Poort en schermafdrukken met `CARGO_TARGET_DIR`:** de stap "app against the real kernel" en `scripts/manual-screenshots/` zochten `kernel_once` altijd in `crates/nta8800-service/target`; met een gezette `CARGO_TARGET_DIR` faalde de poort. Ze zoeken het programma nu waar cargo het neerzet; een mislukte start noemt de oorzaak. `gate-order.test.ts` bewaakt dit.
