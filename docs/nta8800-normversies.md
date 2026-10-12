@@ -78,7 +78,7 @@ Dat wijkt bewust af van "alle parameters doorgeven". De kern rekent synchroon op
 | 13 | (11.136) gemeten motorrendement | alleen als hoger dan tabel 11.20 (p. 499) | vrije keuze (p. 515) | `nominal_fan_power` |
 | 14 | Bijlage AA | SWM, tabel AA.2, juli-maandinstraling 17.2, geen ondergrens (p. 1115–1127) | uurinstraling tabel AA.3, ondergrens 0 kW (p. 1136–1147) | `assess_annex_aa`, `effectiveMassKgPerM2`, `roofAreaM2` |
 | 15 | Tabel E.5 F_A;iso cellulose, gespoten vlas | overig 1,30 (p. 783) | 1,00 (p. 803) | `ForfaitMaterial::in_situ_product` |
-| 16 | Tabel E.11/E.12 biobased λ, riet | vlas/schapenwol/katoen 0,050, kokos 0,055, stro 0,060, hennep 0,100; riet 0,200 geen isolatie (p. 791) | p. 810 | `ForfaitMaterial::lambda` |
+| 16 | Tabel E.11/E.12 biobased λ, riet, miscanthus, graswol | vlas/schapenwol/katoen 0,050, kokos 0,055, stro 0,060, hennep 0,100; riet 0,200 geen isolatie; geen rij voor miscanthus en graswol (p. 791) | p. 810 | `ForfaitMaterial::lambda`; miscanthus en graswol → `route_not_in_edition` vóór 2025+C1 |
 | 17 | (I.3) rieten dak | d/0,2 (p. 814) | d/0,105 (p. 833) | `ForfaitOpaque::calculate` |
 | 18 | (W.9) ondergrens noemer boosterwarmtepomp | geen (p. 1103) | ≥ E_ls (p. 1123) | `calculate_booster` |
 | 18a | P.3 item 6 oppervlaktewater en andere LT-bronnen als collectieve bron | alleen bodem en grondwater (p. 916) | ruimere lijst (p. 936) | `wide_collective_low_temperature_sources`; geen eigen invoer (zie "Niet omgeschakeld") |
@@ -142,7 +142,7 @@ Bovenop de punten 1–48. Pagina's links uit NTA 8800:2022, rechts uit NTA 8800:
 | 60 | Tabel E.5 minerale-wolvlokken F_A;iso | 1,05 (p. 775) | 1,00 (p. 785) | `mineral_wool_flakes_ageing` |
 | 61 | (I.2) λ_equi;ntr | 0,06 (p. 805) | 0,045 of een bekende hogere λ (p. 814) | `knownLambdaEquivalent` → `route_not_in_edition` |
 | 62 | Zwembad in (11.57) | bestaat niet (p. 451) | q_usi;spec sport × 2 (p. 459) | `swimmingPool` → `route_not_in_edition` |
-| 63 | η_hr volgens NEN-EN 13053 | geen rij (p. 482) | p. 490–491 | `standard: en13053` → `route_not_in_edition` |
+| 63 | Tabel 11.17 rij "toestelrendement volgens NEN-EN 13053" | geen rij: η_hr volgens NEN-EN 13053 mag (p. 479, 482) en valt onder "onbekend/overig", f_rend;cond 0,10 (p. 481) | f_rend;cond 0,00 (p. 489–491) | `en_13053_route` in de condensatieaftrek |
 | 64 | f_sto;dis;ls = 1,5 elektroboiler met geïsoleerde leiding | p. 550 | vervallen (p. 557–558) | `electricBoilerInsulatedPipe` (alleen 2022) |
 | 65 | ϑ_sto;amb met ventilatieretourluchtwarmtepomp (13.69a/13.137a) | bestaat niet (p. 557, 584) | p. 565, 592 | `storage_ambient_exhaust_air` |
 | 66 | C_W;mixed air (13.153b) | bestaat niet (p. 600–602) | p. 609–611 | `mixedAir` → `route_not_in_edition` |

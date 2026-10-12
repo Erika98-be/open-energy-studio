@@ -146,16 +146,28 @@ fn miscanthus_and_grass_wool_are_2025_rows() {
 #[test]
 fn switch_19_table_13_2_kitchen_rows() {
     let rows = [
-        (Some(KitchenPipeDiameter::UpTo8Mm), [1.00, 0.86, 0.75, 0.67, 0.60, 0.55, 0.50, 0.46]),
-        (Some(KitchenPipeDiameter::UpTo10Mm), [1.00, 0.79, 0.65, 0.55, 0.48, 0.43, 0.38, 0.35]),
+        (
+            Some(KitchenPipeDiameter::UpTo8Mm),
+            [1.00, 0.86, 0.75, 0.67, 0.60, 0.55, 0.50, 0.46],
+        ),
+        (
+            Some(KitchenPipeDiameter::UpTo10Mm),
+            [1.00, 0.79, 0.65, 0.55, 0.48, 0.43, 0.38, 0.35],
+        ),
         (None, [1.00, 0.69, 0.53, 0.43, 0.36, 0.31, 0.27, 0.24]),
     ];
     let other = [1.00, 0.69, 0.53, 0.43, 0.36, 0.31, 0.27, 0.24];
     for (diameter, values) in rows {
         for (band, expected) in values.iter().enumerate() {
             let length = band as f64 * 2.0 + 1.0;
-            close(with_version(V2023, || kitchen_emission_for(length, diameter)), *expected);
-            close(with_version(V2024, || kitchen_emission_for(length, diameter)), other[band]);
+            close(
+                with_version(V2023, || kitchen_emission_for(length, diameter)),
+                *expected,
+            );
+            close(
+                with_version(V2024, || kitchen_emission_for(length, diameter)),
+                other[band],
+            );
         }
     }
 }
@@ -166,9 +178,8 @@ fn switch_19_table_13_2_kitchen_rows() {
 /// details equal column A of 2022, and there is no column B.
 #[test]
 fn switches_26_and_76_tables_i_1_and_i_2() {
-    let psi = |version, position, column| {
-        with_version(version, || forfait_psi(position, 0, column))
-    };
+    let psi =
+        |version, position, column| with_version(version, || forfait_psi(position, 0, column));
     assert_eq!(psi(V2023, 17, PsiColumn::A), Some(0.60));
     assert_eq!(psi(V2023, 17, PsiColumn::B), Some(0.90));
     assert_eq!(psi(V2024, 17, PsiColumn::A), Some(0.06));
@@ -190,7 +201,11 @@ fn switches_26_and_76_tables_i_1_and_i_2() {
         (67, 0.78),
         (72, 0.44),
     ] {
-        assert_eq!(psi(V2020, position, PsiColumn::A), Some(value), "detail {position}");
+        assert_eq!(
+            psi(V2020, position, PsiColumn::A),
+            Some(value),
+            "detail {position}"
+        );
     }
 }
 
@@ -248,7 +263,43 @@ fn switch_74_device_forfait_9_85_in_2020() {
     // 2022 (p. 338): the electric heat-pump set A 43,8 kWh, B 0,132, C 0,7,
     // B_nom 3 kW: 3,65 + 0,132 × 1 200/(0,7 × 3).
     close(
-        with_version(V2022, || heat_pump_forfait_auxiliary_kwh(1200.0, Some(2016))),
+        with_version(V2022, || {
+            heat_pump_forfait_auxiliary_kwh(1200.0, Some(2016))
+        }),
         3.65 + 158.4 / 2.1,
     );
+}
+
+/// Switch point 12: table 13.18 c_W,EU;gen. 2025+C1 (p. 630–631) says to
+/// interpolate linearly between the columns; 2024 (p. 614–615) has columns
+/// "≤ 765", 2 130, 4 250 and "≥ 6 960" without an interpolation rule, and the
+/// kernel takes the column of the largest quantity not above the demand.
+/// Profile L at 3 000 kWh: 2024 0,74; 2025+C1
+/// 0,74 + (3 000 − 2 130)/(4 250 − 2 130) × (1 − 0,74).
+#[test]
+fn switch_12_table_13_18_interpolation() {
+    use nta8800_core::domestic_hot_water::{european_profile_correction, TappingProfile};
+    let c = |version, profile, kwh| {
+        with_version(version, || {
+            european_profile_correction(profile, kwh).unwrap()
+        })
+    };
+    close(c(V2024, TappingProfile::L, 3000.0), 0.74);
+    close(
+        c(V2025, TappingProfile::L, 3000.0),
+        0.74 + 870.0 / 2120.0 * 0.26,
+    );
+    close(c(V2024, TappingProfile::Xl, 5000.0), 0.79);
+    close(
+        c(V2025, TappingProfile::Xl, 5000.0),
+        0.79 + 750.0 / 2710.0 * 0.21,
+    );
+    close(c(V2024, TappingProfile::M, 500.0), 0.56);
+    close(c(V2025, TappingProfile::M, 500.0), 0.56);
+    // A use in a higher class than measured is not allowed (both editions).
+    assert!(with_version(V2024, || european_profile_correction(
+        TappingProfile::M,
+        3000.0
+    ))
+    .is_none());
 }
