@@ -1756,18 +1756,11 @@ fn validate_unit(
             HeatRecoveryEfficiency::Declared {
                 value,
                 source_reference,
-                standard,
+                ..
             } => {
-                // The NEN-EN 13053 row is new in NTA 8800:2023 (p. 490–491;
-                // 2022 p. 482).
-                if *standard == EfficiencyStandard::En13053
-                    && !crate::norm_versions::profile().en_13053_route
-                {
-                    issues.push(issue(
-                        "route_not_in_edition",
-                        format!("{rpath}.efficiency.standard"),
-                    ));
-                }
+                // η_hr according to NEN-EN 13053 is allowed in every
+                // edition (2022 p. 479, 482; 2023 p. 487, 490); only the
+                // table 11.17 row differs (see the condensation deduction).
                 if !(0.0..=1.0).contains(value) {
                     issues.push(issue(
                         "heat_recovery_efficiency_invalid",
@@ -2379,10 +2372,19 @@ fn heat_recovery_practice_factor(
     };
     let condensation = match &recovery.efficiency {
         HeatRecoveryEfficiency::Table { .. } => 0.0,
+        // Table 11.17: the NEN-EN 13053 row (0,00) is new in NTA 8800:2023
+        // (p. 489); in 2022 (p. 481) and 2020+A1 such an efficiency falls
+        // under "onbekend/overig" (0,10).
         HeatRecoveryEfficiency::Declared {
             standard: EfficiencyStandard::En13053,
             ..
-        } => 0.0,
+        } => {
+            if crate::norm_versions::profile().en_13053_route {
+                0.0
+            } else {
+                0.10
+            }
+        }
         HeatRecoveryEfficiency::Declared { value, .. } => {
             if *value >= 0.95 {
                 0.10

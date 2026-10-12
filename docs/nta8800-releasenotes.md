@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Review 72: schakelpunten van oudere uitgaven nagelopen; miscanthus/graswol en NEN-EN 13053 in 2022
+- **Nagelopen:** de schakelpunten die review 71 niet raakte, tegen de tekst van elke uitgave. Elf schakelpunten (6, 12, 15, 16, 19, 26, 27, 38, 60, 74 en 76) nu ook als kerntest met met de hand berekende waarden (`edition_switches_independent.rs`); een groot deel van de rest tekstueel. Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
+- **Miscanthus en graswol vóór 2025+C1:** tabel E.11 van 2020+A1 t/m 2024 heeft voor deze materialen geen waarde. De kern gaf ze de 2025+C1-waarde; nu `route_not_in_edition` op het materiaal. Invoer die al rekende verandert niet.
+- **η_hr volgens NEN-EN 13053 in 2022 en 2020+A1:** werd geweigerd, maar mag volgens 2022 p. 479/482. Zonder de rij van tabel 11.17 (die pas in 2023 komt) geldt "onbekend/overig": f_rend;cond 0,10. Nieuwe route in een oudere uitgave; geen invoer die al rekende verandert.
+
 ### 12 oktober 2026 — Review 71: oudere uitgaven onafhankelijk nagerekend (geen rekenwijziging)
 - **Herberekening:** de voorbeeldwoning, het voorbeeldkantoor en de 31 ventilatievarianten van review 65 in 2024, 2023, 2022 en 2020+A1 nagerekend met een eigen implementatie per uitgave (hoofdstukken 5, 7, 9, 11, 13, 14, 16, TOjuli en de vaste C1-run van 5.4.3). Per uitgave 14 639 grootheden vergeleken tegen 10⁻⁶ relatief (2025+C1: 14 640); alle gelijk.
 - **Wat de uitgaven hier veranderen en dat is nagerekend:** K_CO2 van tabel 5.3 (2024), θ_e;argII van tabel 17.1, τ_argII van tabel 11.7, f_argII, de NEN 1087-factor 0,5, (11.77) zonder dakregel, ΔT_C;fan 0,7/1,5 K en de afgiftetabellen 9.2/9.3 (2023), en in 2020+A1 de afronding van K_pk op 5 W/m² (16.4) en A = 13,0 kWh in (9.85). Geen kernfout en geen nieuwe vraag aan NEN. Welke schakelpunten deze invoer niet raakt, staat in de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
