@@ -23,10 +23,44 @@ const SAME_SHAPE = [
  * calculated distribution (9.4) needs its `distributionSystem`: without it the
  * kernel refuses the taken-over project with `distribution_system_required`.
  */
-const HEATING_CHAIN = ['emission', 'distribution', 'distributionSystem', 'generator', 'collectiveConnection', 'identicalSystems'] as const;
+const HEATING_CHAIN = ['emission', 'distribution', 'distributionSystem', 'generator', 'collectiveConnection', 'identicalSystems', 'humidifiers'] as const;
 
 /** Demand blocks of a single-zone survey (`spaceHeating.demand.<key>` → `<key>`). */
 const DEMAND = ['usageFunction', 'dwellingType', 'setpoints', 'thermalMass', 'internalGains', 'ventilationFlows', 'ventilation'] as const;
+
+/**
+ * Building facts with the same meaning in both models, taken over only when the
+ * survey gives them: a survey without a label or Bbl function (a dwelling) does
+ * not clear the project's. The construction year feeds §5.3.2 and the label.
+ */
+const BUILDING_FACTS = [
+  'constructionYear', 'labelFunction', 'labelFunctions', 'bblFunction', 'bblFunctions', 'activeCooling',
+  'fossilAppliancesOutsideCalculation', 'zebHeatDeliveryTemperature',
+] as const;
+
+/**
+ * Members of the derived input the takeover leaves to the project, with why.
+ * `review57-takeover-completeness.test.ts` checks that every member a survey
+ * derives is either taken over or listed here.
+ */
+export const NOT_TAKEN_OVER: Readonly<Record<string, string>> = {
+  normVersion: 'the edition is the project\'s own choice (edition switch)',
+  totalUsableFloorAreaM2: 'geometry',
+  lossAreaM2: 'geometry',
+  lossAreaSourceReference: 'geometry',
+  permitApplicationAfter20260529: 'a fact of the permit application, not of the survey',
+  hotWaterNeedFit: 'no project field',
+  additionalHeatingSystems: 'additional heating systems have another shape in the project',
+  'spaceHeating.additionalZones': 'multi-zone survey',
+  'spaceHeating.demand.transmission': 'geometry',
+  'spaceHeating.demand.opaqueElements': 'geometry',
+  'spaceHeating.demand.opaqueInventoryComplete': 'geometry',
+  'spaceHeating.demand.windows': 'geometry',
+  'spaceHeating.demand.windowInventoryComplete': 'geometry',
+  'spaceHeating.demand.usableFloorAreaM2': 'geometry',
+  'spaceHeating.demand.areaSourceReference': 'geometry',
+  'spaceHeating.demand.zoneId': 'geometry',
+};
 
 /** Parts of the derived input that are not taken over, with the reason key. */
 export type SkippedPart = { path: string; reason: 'geometry' | 'multi_zone' | 'additional_heating' };
@@ -49,8 +83,67 @@ function present(value: unknown): boolean {
   return value !== undefined;
 }
 
-/** Writes the derived survey input into a copy of the NTA draft. */
-export function surveyTakeover(derived: BuildingPerformanceInput, current: Loose | null): SurveyTakeover {
+/** The project zone a single-zone survey is taken over into: its id and usable floor area. */
+export interface TakeoverZone { id: string; floorArea?: number | null }
+
+/** Every `areaM2` member in a copy of `value`, times `factor`. */
+function scaleAreas(value: unknown, factor: number): unknown {
+  if (Array.isArray(value)) return value.map((item) => scaleAreas(item, factor));
+  if (value == null || typeof value !== 'object') return value;
+  return Object.fromEntries(Object.entries(value as Loose).map(([key, inner]) =>
+    [key, key === 'areaM2' && typeof inner === 'number' ? inner * factor : scaleAreas(inner, factor)]));
+}
+
+/**
+ * Lighting (chapter 14) and humidifiers name the survey's zone and carry its
+ * areas; the kernel wants the project zone's id and its areas to add up to the
+ * zone's area (14.4, `lighting_zone_areas_invalid`). The survey's split is kept
+ * and scaled to the project zone.
+ */
+/** Project zone area over survey area, or null when either is unknown. */
+function areaFactor(surveyArea: unknown, zone: TakeoverZone): number | null {
+  return typeof zone.floorArea === 'number' && zone.floorArea > 0 && typeof surveyArea === 'number' && surveyArea > 0
+    ? zone.floorArea / surveyArea : null;
+}
+
+/**
+ * A utility hot-water system serves function areas that together are at most
+ * the building's A_g (13.20, `hot_water_served_area_exceeds_building`); the
+ * survey's areas are scaled to the project zone like the lighting.
+ */
+function hotWaterToProject(system: unknown, factor: number | null): unknown {
+  if (factor == null || system == null || typeof system !== 'object') return system;
+  const next = { ...(system as Loose) };
+  const need = next.need as Loose | null | undefined;
+  if (need != null && typeof need === 'object' && Array.isArray(need.areas)) next.need = { ...need, areas: scaleAreas(need.areas, factor) };
+  const circulation = next.circulation as Loose | null | undefined;
+  if (circulation != null && typeof circulation === 'object' && typeof circulation.sportHallAreaM2 === 'number') {
+    next.circulation = { ...circulation, sportHallAreaM2: circulation.sportHallAreaM2 * factor };
+  }
+  return next;
+}
+
+function toProjectZone(items: unknown, surveyZone: unknown, surveyArea: unknown, zone: TakeoverZone, areaKey: 'areaM2' | 'servedAreaM2'): unknown {
+  if (!Array.isArray(items)) return items;
+  const factor = areaFactor(surveyArea, zone);
+  return items.map((item) => {
+    if (item == null || typeof item !== 'object') return item;
+    const entry = item as Loose;
+    if (entry.zoneId !== surveyZone) return item;
+    let next: Loose = { ...entry, zoneId: zone.id };
+    if (factor != null) {
+      if (areaKey === 'areaM2') next = scaleAreas(next, factor) as Loose;
+      else if (typeof next.servedAreaM2 === 'number') next.servedAreaM2 = next.servedAreaM2 * factor;
+    }
+    return next;
+  });
+}
+
+/**
+ * Writes the derived survey input into a copy of the NTA draft. `zone`: the
+ * project zone a single-zone survey goes into (lighting and humidifiers follow it).
+ */
+export function surveyTakeover(derived: BuildingPerformanceInput, current: Loose | null, zone?: TakeoverZone): SurveyTakeover {
   const source = derived as unknown as Loose;
   const next: Loose = structuredClone(current ?? {});
   const keys: string[] = [];
@@ -61,12 +154,31 @@ export function surveyTakeover(derived: BuildingPerformanceInput, current: Loose
     keys.push(key);
   };
   for (const key of SAME_SHAPE) put(key, source[key]);
+  // A BACS inventory in the draft (§5.5.8) overrides bacsFactor; it describes the
+  // installations the takeover replaces, so the survey's f_BACS takes its place.
+  if (keys.includes('bacsFactor') && next.bacs != null) {
+    next.bacs = null;
+    keys.push('bacs');
+  }
+  for (const key of BUILDING_FACTS) {
+    const value = source[key];
+    if (value != null && !(Array.isArray(value) && value.length === 0)) put(key, value);
+  }
   const heating = (source.spaceHeating ?? {}) as Loose;
   for (const key of HEATING_CHAIN) put(key, heating[key]);
   const demand = (heating.demand ?? {}) as Loose;
   const zones = Array.isArray(heating.additionalZones) ? heating.additionalZones : [];
   if (zones.length === 0) {
     for (const key of DEMAND) put(key, demand[key]);
+    if (zone != null) {
+      if (keys.includes('lighting')) next.lighting = toProjectZone(next.lighting, demand.zoneId, demand.usableFloorAreaM2, zone, 'areaM2');
+      if (keys.includes('humidifiers')) next.humidifiers = toProjectZone(next.humidifiers, demand.zoneId, demand.usableFloorAreaM2, zone, 'servedAreaM2');
+      const factor = areaFactor(demand.usableFloorAreaM2, zone);
+      if (keys.includes('hotWater')) next.hotWater = hotWaterToProject(next.hotWater, factor);
+      if (keys.includes('additionalHotWaterSystems') && Array.isArray(next.additionalHotWaterSystems)) {
+        next.additionalHotWaterSystems = next.additionalHotWaterSystems.map((system) => hotWaterToProject(system, factor));
+      }
+    }
   } else {
     skipped.push({ path: 'spaceHeating.additionalZones', reason: 'multi_zone' });
   }
@@ -75,6 +187,7 @@ export function surveyTakeover(derived: BuildingPerformanceInput, current: Loose
   }
   skipped.push({ path: 'spaceHeating.demand.transmission', reason: 'geometry' });
   skipped.push({ path: 'totalUsableFloorAreaM2', reason: 'geometry' });
+  skipped.push({ path: 'lossAreaM2', reason: 'geometry' });
   return { next, keys, skipped };
 }
 

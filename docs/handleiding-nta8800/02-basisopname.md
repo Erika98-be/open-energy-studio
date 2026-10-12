@@ -117,9 +117,12 @@ Na **Opname doorrekenen** staat de knop **Overnemen in projectmodel** onder Uitk
 
 | Overgenomen | Niet overgenomen |
 |---|---|
-| verwarming (opwekker, distributie, afgifte, collectieve aansluiting), tapwater, koeling, ventilatie, PV, verlichting, BACS, gebruiksfunctie, instelwaarden, thermische massa en interne warmte | geometrie en oppervlakten: zones, vlakken en ramen blijven die van het projectmodel |
+| verwarming (opwekker, distributie met het distributiesysteem, afgifte, collectieve aansluiting), bevochtiging, tapwater, koeling, ventilatie, PV, verlichting, BACS, gebruiksfunctie, instelwaarden, thermische massa en interne warmte | geometrie en oppervlakten: zones, vlakken en ramen blijven die van het projectmodel |
+| het bouwjaar, en de label- en Bbl-functie als de opname die geeft | de NTA 8800-uitgave: die blijft die van het project |
 | per aangevinkte waarde: de gegevens van een vloer op de grond (zie hieronder) | bij een opname met meer rekenzones: de zonegegevens (setpoints, massa, interne warmte, ventilatie) |
-| | aanvullende verwarmingssystemen |
+| | aanvullende verwarmingssystemen; de vraag of de vergunning na 29 mei 2026 is aangevraagd |
+
+De verlichting, de bevochtiging, het tapwater en de ventilatie volgens hoofdstuk 11 horen bij de eerste rekenzone van het projectmodel. Ze krijgen bij het overnemen die zone en haar gebruiksoppervlakte: de oppervlakten uit de opname (verlichtingszones, functieoppervlakten van de verlichting en het tapwater, bediende oppervlakte van een bevochtiger) worden naar verhouding omgerekend naar de oppervlakte van die zone. Neemt de opname BACS-gegevens over (f_BACS), dan vervalt een eigen BACS-inventaris van het project; die hoort bij de installaties die het overnemen vervangt.
 
 **Vloeren op de grond.** Omdat de geometrie die van het projectmodel blijft, gaan de vloergegevens van de opname alleen mee in de grondvloergegevens van een vloer uit het projectmodel (Gebouw › Schil & ramen, *Vloeren op grond (§8.3)*). Het venster toont daarvoor per opnamevloer het deel *Vloeren op de grond*:
 
