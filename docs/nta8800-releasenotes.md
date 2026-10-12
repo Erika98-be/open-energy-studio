@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Review 69: overige bijlage Q-warmtepompen onafhankelijk nagerekend (geen rekenwijziging)
+- **Herberekening:** in 2025+C1 nagerekend vanaf de normpagina's (p. 1027–1069): brine/water en water/water met bronpomp (tabel Q.4, Q.44, Q.5–Q.8), alleen afvoerlucht (Q.41, Q.54–Q.56, Q.63–Q.65), gecombineerde buiten- en afvoerlucht (Q.43), lucht/lucht (Q.57–Q.59, Q.66–Q.68), een gasketel als bijverwarming, modulerende lucht/water- en brine/waterwarmtepompen (Q.2.6, Q.6, Q.71–Q.78, tabellen Q.1, Q.2, Q.12, Q.13 en Q.16) en de tijdfractie in bedrijf per maand (Q.90, Q.91, Q.93, tabel Q.17).
+- **Uitkomst:** 2 214 grootheden in negen varianten vergeleken tegen 10⁻⁶ relatief; alle gelijk. Geen kernfout, geen gewijzigde uitkomst. Zeven varianten blijven als test in `crates/nta8800-core/tests/installations_independent.rs`.
+- **Vraag 13 aan NEN:** de bronpomp van een brine/water- of water/waterwarmtepomp telt letterlijk twee keer: in η_H;gen;hp via Q.4 en nog eens als hulpenergie via 9.6.3 (p. 340). De kern volgt de tekst tot er een antwoord is. Niet nagerekend: interval 5, modulerende lucht/lucht met carnotbegrenzing, de herberekening bij overventilatie (Q.94–Q.97) en de tapwaterfractie (Q.86–Q.88). Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
+
 ### 12 oktober 2026 — Review 68: koelmethode 1 en bijlage Q-warmtepompen onafhankelijk nagerekend (geen rekenwijziging)
 - **Herberekening:** in 2025+C1 nagerekend vanaf de normpagina's: koelmethode 1 met NEN-EN 14825-deellastgegevens (10.53–10.64; met en zonder vijfde meetpunt, met een grens voor de condensorintrede) en aan/uit-lucht/waterwarmtepompen met productwaarden volgens bijlage Q (Q.1–Q.9, Q.29–Q.53, Q.60–Q.62, Q.69/Q.70, Q.81–Q.83, tabellen Q.3 en Q.5–Q.7, met 9.63), ook een te kleine warmtepomp met afschakeling en elektrische bijverwarming.
 - **Uitkomst:** 492 grootheden vergeleken tegen 10⁻⁶ relatief; alle gelijk. Geen kernfout, geen gewijzigde uitkomst. Vier gevallen blijven als test in `crates/nta8800-core/tests/installations_independent.rs`. De lezingen van de kern zijn gevolgd: de afgedrukte f_t;tot-rij van tabel 10.18, alle gemeten condities in Q.49/Q.50, ϑ_evap;nom −10 °C voor lucht/water (Q.48) en F_H;gen = 1 als elke bin wordt gedekt. Niet nagerekend: modulerende warmtepompen, brine/water en water/water, afvoerlucht, lucht/lucht, de maandverdeling Q.90–Q.97 en hybride met bijlage Q. Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
@@ -176,7 +181,7 @@ Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de
   - **Forfaitaire R_c:** thermokussens onder een vloer met een spouw krijgen geen spouwwaarde meer (review 50).
   - **Constructies:** nieuwe keuze voor een zwak geventileerde smalle luchtlaag, met de halve waarde van tabel F.1 (review 51; bestaande projecten ongewijzigd).
   - **Eerdere items van 9 oktober:** PV boven 300/400 W/m², WKK met voorraadvat, opgegeven F_D;dayl, kelderwanden in A_ls, wanden en daken aan de grond, gemeenschappelijke ruimten (6.6.4).
-- **Open interpretaties.** De keuzes achter vragen 1–12 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
+- **Open interpretaties.** De keuzes achter vragen 1–13 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
 
 ### 11 oktober 2026 — Gedeelde serre: begrenzing 7.38 met het setpoint van elke zone
 Formule 7.38 (p. 187) begrenst de winst van een serre waaraan meerdere rekenzones grenzen met de som van H_zi,j;ztu·(θ_int;set;H;stc;zi − θ_e) over al die zones, elk met het eigen setpoint. De kern nam tot nu toe H_zi;ztu / F (7.36) met het setpoint van de eigen zone; dat is alleen exact bij gelijke setpoints (kanttekening van review 52).

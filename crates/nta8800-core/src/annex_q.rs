@@ -212,6 +212,7 @@ pub const INTERPRETATIONS: &[&str] = &[
     "switch-off criteria that are not given are not applied (note 1 of tables Q.1/Q.3)",
     "Q.4.4 (p. 1065): the forfait water/water source pump uses the evaporator power at condition 1, P·(1 − 1/COP); the norm does not name the condition",
     "Q.1: when every bin of table Q.6 is covered, F_H;gen = 1 with or without a backup; the rounded hours would otherwise leave F just below 1",
+    "Q.4 counts the source pump W_H;aux;hp;an in η_H;gen;hp and 9.6.3 (p. 340) adds W_H;aux;hp;an / (12 × 3,6) as auxiliary energy every month; both are applied as written (NEN question 13)",
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]

@@ -121,7 +121,27 @@ Samen 2 417 vergeleken grootheden (per maand opwekkerinvoer per energiedrager, h
 - **Tabel 10.18:** f_t;tot is de afgedrukte totaalrij van de tabel ("volgens tabel 10.18"). De som van de afgedrukte waarden wijkt per maand tot 2·10⁻⁴ af van die rij; met de som in plaats van de rij komen zes maanden op 10⁻⁴ tot 2·10⁻³ relatief uit. Kern en herberekening gebruiken de afgedrukte rij.
 - **Q.49/Q.50 (N meetcondities):** de gemiddelde temperatuurverhoging over de condensor en -verlaging over de verdamper gaan over alle volgens Q.4.2 gemeten condities, dus ook conditie 4 als die is gemeten. Met alleen de condities 1–3 wijkt P_max per bin 4·10⁻⁴ relatief af. De kern neemt alle gemeten condities; de herberekening volgt die lezing.
 - **Lezingen van de kern aangehouden** (lijst `annex_q::INTERPRETATIONS`): ϑ_evap;nom = −10 °C voor lucht/water in Q.48 (de tekst noemt alleen W/W, B/W en L/L), en F_H;gen = 1 als elke bin van tabel Q.6 wordt gedekt. In de eerste variant rapporteert de kern daardoor F_H;gen = 0,999 737 (de letterlijke Q.1, die de herberekening ook geeft), maar rekent per maand met 1.
-- **Niet nagerekend:** modulerende warmtepompen (Q.2.6, Q.3.6/Q.3.7, tabellen Q.15/Q.16), brine/water- en water/waterwarmtepompen (tabel Q.4, bronpomp Q.5–Q.8), afvoer- en gecombineerde lucht (Q.41/Q.43), lucht/luchtwarmtepompen, de maandverdeling Q.90–Q.97 en de hybride route met bijlage Q. Vier gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`.
+- **Niet nagerekend:** modulerende warmtepompen (Q.2.6, Q.3.6/Q.3.7, tabellen Q.15/Q.16), brine/water- en water/waterwarmtepompen (tabel Q.4, bronpomp Q.5–Q.8), afvoer- en gecombineerde lucht (Q.41/Q.43), lucht/luchtwarmtepompen, de maandverdeling Q.90–Q.97 en de hybride route met bijlage Q. Vier gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`. Review 69 (hieronder) rekent die varianten alsnog na.
+
+**Overige bijlage Q-varianten onafhankelijk nagerekend (review 69).** Op dezelfde manier als review 68: synthetische varianten van ISSO 54-deeltest EP-W001 in 2025+C1 met één warmtepomp volgens bijlage Q, nagerekend met een eigen implementatie vanaf de normpagina's (p. 1027–1069) zonder eerst de kerncode van die route te lezen. Tolerantie 10⁻⁶ relatief.
+
+| Route | Variant | Vergeleken | Uitkomst |
+|---|---|---|---|
+| Brine/water, aan/uit, met bronpomp (tabel Q.4, Q.5/Q.7/Q.8, ϑ_evap;nom −1,5 °C) | 35 °C, bronpomp 120 W, nadraaitijd 60 s | 254 | gelijk |
+| Water/water, aan/uit, met bronpomp (Q.44, ϑ_evap;nom 8,5 °C) | 45 °C, bronpomp 90 W, afschakeling boven 60 °C uittrede | 254 | gelijk |
+| Alleen afvoerlucht (Q.41, Q.54–Q.56, Q.63–Q.65) | te klein, elektrische bijverwarming | 242 | gelijk |
+| Gecombineerde buiten- en afvoerlucht (Q.43, f_buitenlucht 0,6) | conditie 4 gemeten | 242 | gelijk |
+| Lucht/lucht met luchtverwarming (Q.57–Q.59, Q.66–Q.68) | zonder conditie 4 | 242 | gelijk |
+| Lucht/water met gasketel als bijverwarming | te klein, afschakeling onder −5 °C en bij COP < 2, HR107 | 242 | gelijk |
+| Modulerend lucht/water (Q.2.6: Q.10–Q.28, Q.71–Q.78, tabellen Q.1, Q.2, Q.13, Q.16) | modulerende condensorpomp en bronventilator, 35 °C; en aan/uit-pompen, 45 °C | 484 | gelijk |
+| Modulerend brine/water met modulerende bronpomp (Q.6) | tabel Q.12-deellastrijen | 254 | gelijk |
+| **Totaal** | 9 varianten | **2 214** | **gelijk** |
+
+- **Vergeleken:** per bin van tabel Q.6 de uren, het gevraagde en geleverde vermogen, P_max, de COP, de afschakelfactor en de aantijd (Q.9 of Q.10); daarnaast F_H;gen, η_H;gen;hp, Q_H;hp;pr;an, Q_H;hp;us;an;el en W_H;aux;hp;an; per maand de warmtepompwarmte, het elektriciteitsgebruik, het gasgebruik van de bijverwarming en de hulpenergie (9.6.3, p. 340); en de tijdfractie in bedrijf per maand (Q.90 met Q.91 of Q.93 en tabel Q.17).
+- **Bronpomp twee keer geteld (letterlijke tekst, vraag 13 aan NEN):** Q.4 telt W_H;aux;hp;an mee in het elektriciteitsgebruik waaruit η_H;gen;hp (Q.2) volgt, en 9.6.3 (p. 340) telt dezelfde W_H;aux;hp;an / (12 × 3,6) per maand nog eens als hulpenergie. De kern volgt beide bepalingen letterlijk. Bij de brine/watervariant (bronpomp 66 kWh per jaar) telt de bronpomp zo twee keer: 69 kWh via de COP (met f_prac) en 66 kWh als hulpenergie, op ongeveer 980 kWh warmtepompelektriciteit.
+- **Lezingen van de kern aangehouden** (lijst `annex_q::INTERPRETATIONS`): ϑ_evap;nom −10 °C voor lucht/water en gecombineerde lucht (Q.48), een condensorintrede van 20 °C bij lucht/lucht, F_H;gen = 1 als elke bin wordt gedekt, en het gemeten 15 %-punt (plj = 4) bij interval 5, waar Q.16 naar het niet gemeten plj = 5 verwijst.
+- **Afgeleide invoer van de kern overgenomen:** de thermische node-input per maand (9.2.3.5) en de vraagklasse van tabel Q.6.
+- **Niet nagerekend:** interval 5 (B < 0,15; de varianten blijven met P_H;hp;min erboven), het forfaitaire bronpompvermogen als de fabrikant het niet opgeeft (Q.4.4), modulerende lucht/luchtwarmtepompen met de carnotbegrenzing (Q.12A/Q.12B, Q.73A/Q.73B), de herberekening van de warmtevraag bij overventilatie door een afvoerluchtwarmtepomp (Q.5.3, Q.94–Q.97) en de tijdfractie voor tapwater (Q.86–Q.88). Zeven varianten staan als test in `crates/nta8800-core/tests/installations_independent.rs`.
 
 ## Stand 11 oktober 2026
 
@@ -151,7 +171,7 @@ Samen 2 417 vergeleken grootheden (per maand opwekkerinvoer per energiedrager, h
 - het contract van API en MCP is per operatie getoetst;
 - de UNIEC3/VABI-uitwisseling is als heen-en-terug over alle trainingsprojecten getoetst.
 
-**Openstaand** blijft wat hieronder onder "Stand 5 oktober" staat: de verwachte uitkomsten van ISSO 54 versie 5.0, het EP-Online-aanleverschema, het uurklimaat van 17.3.8 en het attestnummer. Daarbij komen de antwoorden van NEN op vragen 1–12 en echte Uniec 3- en VABI-bestanden om de veldnamen van de uitwisseling tegen te toetsen.
+**Openstaand** blijft wat hieronder onder "Stand 5 oktober" staat: de verwachte uitkomsten van ISSO 54 versie 5.0, het EP-Online-aanleverschema, het uurklimaat van 17.3.8 en het attestnummer. Daarbij komen de antwoorden van NEN op vragen 1–13 en echte Uniec 3- en VABI-bestanden om de veldnamen van de uitwisseling tegen te toetsen.
 
 ## Stand 5 oktober 2026
 
