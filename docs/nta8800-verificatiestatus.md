@@ -40,8 +40,27 @@ Samen 782 vergeleken grootheden. Alle komen overeen, op BENG 1 van het kantoor n
 
 Samen 1 041 vergeleken grootheden (per maand verwarming en koeling), alle gelijk tegen 1·10⁻⁶ relatief. BENG 1 van het kantoor (74,55) volgt nu ook uit de eigen herberekening van de C1-run: let daarbij op §5.4.2, dat voor utiliteit de interne warmte vastzet (Φ_int;W = 0, q_L;kantoor = 1,25 W/m², geen terugwinbare systeemverliezen). Een eerste versie van de herberekening liet dat weg en kwam op 74,35; de kern rekent het goed. c_a van 11.115/11.119 is als gedrukt gelaten (vraag 7 aan NEN); de luchtbehandelingskast-batterijen zelf spelen in deze projecten niet. Geen kernfout, geen gewijzigde uitkomst.
 
-- **Niet in deze projecten aanwezig en dus niet met deze herberekening gedekt:** ventilatieve koeling (11.2.3.3), open verbrandingstoestellen (11.2.4), luchtbehandelingskast met batterijen (11.110–11.121), gebouwen vanaf 15 m (meerdere luchtstroomzones), de kruipruimterijen van tabel 11.1, roosterverwarming en vorstbeveiliging bij woningen met balansventilatie. De sectorgrens van 11.77 is door review 52 al apart nagerekend.
+- **Niet in deze projecten aanwezig en dus niet met deze herberekening gedekt:** ventilatieve koeling (11.2.3.3), open verbrandingstoestellen (11.2.4), luchtbehandelingskast met batterijen (11.110–11.121), gebouwen vanaf 15 m (meerdere luchtstroomzones), de kruipruimterijen van tabel 11.1, roosterverwarming en vorstbeveiliging bij woningen met balansventilatie. De sectorgrens van 11.77 is door review 52 al apart nagerekend; de overige routes door review 65 (hieronder).
 - **Grenswaarden voor de lucht (`heatingLimitAirKwh`, `coolingLimitAirKwh`)** horen bij 9.29 en 10.15 en niet bij hoofdstuk 11; ze zijn hier niet opnieuw afgeleid.
+
+**De overige routes van hoofdstuk 11 onafhankelijk nagerekend (review 65).** De routes die de voorbeeldprojecten niet bereiken, zijn met 29 synthetische ventilatie-invoeren door `/v1/nta8800/ventilation/calculate` gehaald en vergeleken met een eigen implementatie vanaf de normpagina's (zonder eerst de kerncode van die routes te lezen). Elke variant gaat uit van de invoer van de voorbeeldwoning (C1) of het voorbeeldkantoor (D2) en zet één route aan.
+
+| Route | Normplaats | Varianten | Uitkomst |
+|---|---|---|---|
+| Ventilatieve koeling: nettodoorlaat (opgegeven, 11.71a, 11.71b met factor 0,3), h_w;st, enkelzijdig en dwarsventilatie, A_w;cros met halfopen sectoren | 11.70–11.79, tabel 11.7 (p. 475–481) | enkelzijdig handmatig en automatisch; dwars N–Z, gevel + dak 45°, ZO/O/N op de sectorgrenzen; met kruipruimte | gelijk |
+| Open verbrandingstoestellen: afvoerloos (in), met rookgasafvoer (uit), gesloten (f_as = 0), P_h;fi;min | 11.80–11.83, tabellen 11.11 en 11.12 (p. 481–484) | afvoerloos, met afvoer, gemengd; ook bij 20 m, 60 m en kruipruimte | gelijk |
+| Luchtstroomzones vanaf 15 m: H_path, C-verdeling, mechanische stromen naar 11.6–11.10, C_p per padhoogte, massabalans per zone | tabel 11.1 (p. 430–437), 11.6–11.10, tabel 11.3 (p. 440–443) | 20, 49, 50 en 60 m; kantoor 20 m; kantoor 60 m met toestellen | gelijk |
+| Kruipruimterijen (H < 15 m, vóór 1992): 0,35/0,35/0,15/0,15 × C_lea, vloer op 0 m met C_p −0,20; vanaf 1992 de gewone rijen | tabel 11.1 (p. 430), tabel 11.3 | bouwjaar 1980 en 2000, ook met D2 en met toestellen | gelijk |
+| Roosterverwarming: 11.123 (begrensd), 11.124 (terugval), f_pre;nat;elvv | 11.123–11.128 (p. 509–511) | opgegeven, opgegeven met maximale sprong en voorverwarmd ontwerpdebiet, terugval | gelijk |
+| Vorstbeveiliging bij een woning met balansventilatie | tabel 11.16, 11.105/11.106, 11.108 (p. 497–502) | woning D2, ook met kruipruimte | gelijk |
+| Luchtbehandelingskast met batterijen: tabel 11.15, kanaalverlies tabel 11.19, f_lea;ahu 1,02, f_ins;ahu 0,02, Q_H/C;ahu;in;req (c_a als gedrukt, vraag 7) | 11.87, 11.102–11.104, 11.107, 11.114–11.121, 11.129/11.130 (p. 474, 489–508) | in de zone met beide batterijen en alleen koeling; buiten de zone situatie 2 (beide) en situatie 3 (alleen verwarming) | gelijk |
+
+Samen 12 008 vergeleken grootheden (referentiedruk per luchtstroomzone, alle effectieve stromen, toevoertemperaturen, H_ve met b, ventilator-, vorst- en roostergebruik, en Q_ahu;in;req per maand), alle gelijk tegen 1·10⁻⁶ relatief. Geen kernfout, geen gewijzigde uitkomst. Twaalf varianten staan als vaste test in `crates/nta8800-core/tests/ventilation_independent.rs`, met de onafhankelijk berekende waarden. Daarbij vastgesteld:
+
+- **H = 50 m:** tabel 11.1 geeft vanaf 50 m drie luchtstroomzones, 11.6–11.10 pas boven 50 m. Bij precies 50 m is de derde zone leeg ((H − 50)/H = 0) en vallen beide lezingen samen; de kern rekent met twee zones.
+- **u10;site:** tabel 17.1 geeft alleen u_site; de kern en de herberekening gebruiken die voor u10;site in 11.73–11.76.
+- **11.76:** de uitgaande stroom bij dwarsventilatie gebruikt in de thermiekterm T_e;mi, de ingaande (11.75) T_e;argII;mi. De kern volgt de druk; bij de variant met dakraam overheerst in juli de thermiekterm, zodat dit verschil meetelt en overeenkomt.
+- **Q_ahu:** de kern geeft Q_H;ahu;in;req en Q_C;ahu;in;req (lucht gedeeld door 0,98, 11.116/11.120), de grootheden die hoofdstuk 9 en 10 gebruiken.
 
 ## Stand 11 oktober 2026
 
