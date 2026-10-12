@@ -143,6 +143,23 @@ Samen 2 417 vergeleken grootheden (per maand opwekkerinvoer per energiedrager, h
 - **Afgeleide invoer van de kern overgenomen:** de thermische node-input per maand (9.2.3.5) en de vraagklasse van tabel Q.6.
 - **Niet nagerekend:** interval 5 (B < 0,15; de varianten blijven met P_H;hp;min erboven), het forfaitaire bronpompvermogen als de fabrikant het niet opgeeft (Q.4.4), modulerende lucht/luchtwarmtepompen met de carnotbegrenzing (Q.12A/Q.12B, Q.73A/Q.73B), de herberekening van de warmtevraag bij overventilatie door een afvoerluchtwarmtepomp (Q.5.3, Q.94–Q.97) en de tijdfractie voor tapwater (Q.86–Q.88). Zeven varianten staan als test in `crates/nta8800-core/tests/installations_independent.rs`.
 
+
+**Laatste bijlage Q-onderdelen onafhankelijk nagerekend (review 70).** Dezelfde werkwijze als reviews 68 en 69: synthetische varianten van ISSO 54-deeltest EP-W001 in 2025+C1, nagerekend met een eigen implementatie vanaf de normpagina's (p. 1027–1072, 449–450, 614–615) zonder eerst de kerncode van die route te lezen. Tolerantie 10⁻⁶ relatief.
+
+| Route | Variant | Vergeleken | Uitkomst |
+|---|---|---|---|
+| Interval 5, B < 0,15 (tabel Q.2, Q.16, Q.10, Q.27/Q.28) | modulerend lucht/water met P_H;hp;min 0,5 kW (35 °C, modulerende pompen) en 0,4 kW (45 °C, aan/uit-pompen); 11 en 12 klassen in interval 5 | 388 | gelijk |
+| Forfaitair bronpompvermogen W/W (Q.4.4, 50 W/kW verdampervermogen) | aan/uit water/water zonder opgegeven bronpompvermogen | 194 | gelijk |
+| Modulerend lucht/lucht met carnotbegrenzing (Q.12A/Q.12B, Q.20–Q.24A, Q.73A/Q.73B, Q.74–Q.78) | aan/uit-ventilator, deellastrijen bij conditie 1; begrenzing actief in 16 van de 27 klassen | 194 | gelijk |
+| Herberekening bij overventilatie (Q.5.3: Q.84, Q.90/Q.91 met tabel Q.17, Q.96/Q.97) en buitenluchtdebiet (11.23/11.23a, 13.148a) | afvoerluchtwarmtepomp met q_V;hp;H 200 en 230 m³/h; zonder tapwaterfractie, met f_W 0,4 bij 150 m³/h en met een fractie per maand bij 250 m³/h | 258 | gelijk na herstel |
+| **Totaal** | 7 varianten | **1 034** | **gelijk** |
+
+- **Werkwijze bij Q.5.3:** stap 1 is een kernrun met f_H = 0; f(2) volgt uit de eigen Q.90/Q.91 op Q_H;node,in(1); een kernrun met f(2) geeft Q_H;node,in(2); f(3) volgt uit Q.96/Q.97 met de grens van Q.84. Een kernrun met dat f(3) geeft dezelfde uitkomst als de automatische herberekening van de kern (f(3) per maand, Q_H;node,in(3), warmtepompelektriciteit, tijdfractie in bedrijf, BENG 1 en 2). Het buitenluchtdebiet volgt per maand 11.23 met 11.23a en 13.148a, op het debiet uit de run zonder overventilatie (hoofdstuk 11 zelf is in reviews 64 en 65 nagerekend).
+- **Kernfout hersteld:** een opgegeven tapwaterdebiet `overventilation.hotWaterFlowM3PerH` onder q_V;ODA;req verlaagde het buitenluchtdebiet van 11.23. Volgens 13.148/13.148a is q_V;hp;W;zi,mi nooit lager dan q_V;ODA;req van de warmtebehoefte (11.22). De kern verhoogt een lager opgegeven waarde nu tot dat debiet, in de verwarmings- en de koelbalans; bij de door de kern afgeleide waarden verandert niets. Voorbeeld: 100 m³/h bij f_W 0,3 gaf 137,0 in plaats van 152,8 m³/h. De referentierapporten van alle suites zijn voor en na byte-identiek.
+- **Lezingen van de kern aangehouden** (lijst `annex_q::INTERPRETATIONS`): interval 5 rekent met het 15 %-punt (plj = 4); het forfaitaire W/W-bronpompvermogen neemt het verdampervermogen bij conditie 1, P·(1 − 1/COP); bij Q_H;node,in(2) = 0 blijft f(3) = f(2) (Q.96 onbepaald); f_W;t;hp-on komt uit 13.149, niet uit Q.86–Q.88 (vraag 14 aan NEN).
+- **Vraag 14 aan NEN:** 13.8.2.4 en 11.23 schrijven 13.149 voor de tapwatertijdfractie voor, bijlage Q.5.2.2 geeft met Q.86–Q.88 een andere formule voor dezelfde grootheid in Q.84.
+- **Niet nagerekend:** Q.86–Q.88 zelf (de kern gebruikt ze niet), Q.92 (forfaitair maximaal vermogen zonder productgegevens; de kern vraagt productgegevens) en de luchtdebietinterpolatie van tabel Q.9 (niet uitgevoerd). Vijf gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`, waaronder de regressietest van het herstel.
+
 ## Stand 11 oktober 2026
 
 **Controle per hoofdstuk tegen de normtekst (reviews 40–51).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
