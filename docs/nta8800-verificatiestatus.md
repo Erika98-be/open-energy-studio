@@ -160,6 +160,30 @@ Samen 2 417 vergeleken grootheden (per maand opwekkerinvoer per energiedrager, h
 - **Vraag 14 aan NEN:** 13.8.2.4 en 11.23 schrijven 13.149 voor de tapwatertijdfractie voor, bijlage Q.5.2.2 geeft met Q.86–Q.88 een andere formule voor dezelfde grootheid in Q.84.
 - **Niet nagerekend:** Q.86–Q.88 zelf (de kern gebruikt ze niet), Q.92 (forfaitair maximaal vermogen zonder productgegevens; de kern vraagt productgegevens) en de luchtdebietinterpolatie van tabel Q.9 (niet uitgevoerd). Vijf gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`, waaronder de regressietest van het herstel.
 
+**Oudere uitgaven onafhankelijk nagerekend (review 71).** Reviews 63–70 rekenden alleen in 2025+C1. Review 71 rekent dezelfde invoer in 2024, 2023, 2022 en 2020+A1 na, met de herberekeningen van reviews 63–65 aangevuld met de regels van die uitgave (gelicentieerde PDF's: 2024, 2023, 2022 en de geconsolideerde 2020+A1). Werkwijze:
+- **Invoer.** De twee voorbeeldprojecten, in alle vijf uitgaven met dezelfde invoer: `ledFrom2017` uit (2023 en ouder kennen die kolom niet) en het PV-piekvermogen als opgegeven K_pk 182,5 W/m² (16.4a) in plaats van per paneel (16.4b bestaat niet in 2020+A1). Daarnaast de 31 ventilatievarianten van review 65 via `ventilation/calculate`; in 2023 en ouder wordt een spuiopening volgens (11.71a) een opgegeven netto-oppervlakte van dezelfde grootte, omdat (11.71a) daar niet bestaat.
+- **Wat de uitgaven hier veranderen.** Eerst is per stap (2025+C1 → 2024 → 2023 → 2022 → 2020+A1) bepaald welke kernuitkomsten verschuiven; die zijn daarna met de eigen implementatie in die uitgave nagerekend:
+  - 2024: de CO2-coëfficiënten van tabel 5.3 (p. 94–95: el 0,34, gas 0,183, olie 0,260, externe warmte 0,17, externe koude K_el/3);
+  - 2023: θ_e;argII van tabel 17.1 (p. 676), ΔT_C;fan 1,5 K in de utiliteitsbouw (11.3.2.7, p. 496; via de toevoertemperatuur verschuiven de koudebehoefte en TOjuli van het kantoor: 5,37 → 5,73 K) en Δθ_int;inc van de afgiftetabellen 9.2/9.3 (p. 276–278);
+  - 2022: niets in deze invoer (de schakelpunten 49–67 worden niet geraakt);
+  - 2020+A1: K_pk naar beneden afgerond op 5 W/m² (16.4, p. 651: 182,5 → 180) en A = 13,0 kWh in (9.85) voor een toestel vanaf 2015 (p. 336).
+- **Gelijk in alle uitgaven, tekstueel nagelopen:** tabellen 17.1, 17.2 en 17.4, de kantoorrijen van 7.2, 7.3, 7.13, 11.8 en 14.3, de woningformules (7.21)–(7.24), de vaste C1-run van 5.4.2/5.4.3, de constanten van (9.85), tabel 5.2, de tabellen 11.1, 11.3, 11.7, 11.11/11.12, 11.15/11.16, 11.18, 11.19 en de zomernachtventilatie 11.2.3.3 (in 2022 en 2020+A1 gelijk aan 2023, met f_argII 0,5/0,9/1,0, de NEN 1087-factor 0,5 en (11.77) zonder dakregel, α_min ≤ α < α_max).
+
+| Onderdeel | 2025+C1 | 2024 | 2023 | 2022 | 2020+A1 |
+|---|---|---|---|---|---|
+| Hoofdstuk 11, beide voorbeelden | 988 | 988 | 988 | 988 | 988 |
+| Hoofdstuk 7, beide voorbeelden | 546 | 546 | 546 | 546 | 546 |
+| Vaste C1-run en BENG 1 (5.4.3) | 53 | 53 | 53 | 53 | 53 |
+| Installaties, PV, hoofdstuk 5 (BENG 2/3) | 211 | 210 | 210 | 210 | 210 |
+| TOjuli | 26 | 26 | 26 | 26 | 26 |
+| CO2 en forfaitaire CO2-factoren externe levering | 8 | 8 | 8 | 8 | 8 |
+| 31 ventilatievarianten van review 65 | 12 808 | 12 808 | 12 808 | 12 808 | 12 808 |
+| **Totaal, alle gelijk (10⁻⁶ relatief)** | **14 640** | **14 639** | **14 639** | **14 639** | **14 639** |
+
+- **Lezingen van de kern aangehouden.** Afgifte in 2023 en ouder zonder `emission.edition2023`: onbekend leidingsysteem telt als eenpijps (Δθ_hydr 0,7), onbekende eigenschappen nemen de hoogste waarde van de hoofdcategorie (Δθ_str = (1,6 + 1,7)/2), Δθ_ctr,1 2,5 en Δθ_im;emt −0,3, samen 4,55 K (2025+C1: 3,55 K). In beide voorbeelden ligt het afgifteverlies van (9.16) in elke stookmaand op de grens 0,15, dus de verwarmingsenergie verandert niet. Tabel 7.10 naar massa per m² in 2022 en 2020+A1 (punt 58) leest de kern zonder massa-invoer uit de vloer- en wandklassen.
+- **Geen kernfout gevonden, geen gewijzigde uitkomst, geen nieuwe vraag aan NEN.**
+- **Niet nagerekend (niet geraakt door deze invoer):** de meeste schakelpunten van [nta8800-normversies.md](nta8800-normversies.md): 1–2, 6–18a, 19, 26–38, 41–48 behalve 47, 49–67, 69–73 en 75–79. Hoofdstuk 13, hoofdstuk 10 en de bijlagen zijn in de oudere uitgaven alleen nagerekend voor zover de voorbeelden ze gebruiken.
+
 ## Stand 11 oktober 2026
 
 **Controle per hoofdstuk tegen de normtekst (reviews 40–51).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
