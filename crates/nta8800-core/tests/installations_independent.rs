@@ -528,3 +528,194 @@ fn pv_with_a_battery() {
         6666.068113927736,
     );
 }
+
+// Review 67: the routes review 66 left unchecked, recalculated independently in the same way.
+
+fn at(p: &Value, pointer: &str) -> f64 {
+    p.pointer(pointer)
+        .and_then(Value::as_f64)
+        .unwrap_or_else(|| panic!("{pointer}"))
+}
+
+/// Solar water heater, water heating only, preheater (13.7.2.2, p. 574-594): forfait glazed collector of table
+/// 13.14, η_loop 13.72 with H_s;sto;hx of 13.73, H_loop;p of 13.75, storage H of 13.82 from label A, X/Y 13.97/13.99,
+/// 13.100 with table 13.15, storage loss 13.102 at the levelled setpoint of 7.76 (13.69), Q_W;ren rounded down
+/// (annex X), f_prac;sol 0,95 (13.66); pump 13.76 rounded up to 16 W (annex X: the next higher value) over 1 500 h
+/// spread by irradiation (13.108/13.109).
+#[test]
+fn solar_water_heater_preheater() {
+    let p = performance("EPW405a", r#"[]"#);
+    close(
+        "EPW405a Q_W;ren;prac m6",
+        at(&p, "/hotWater/months/5/solarRenewableKwh"),
+        190.0,
+    );
+    close(
+        "EPW405a Q_W;ren;prac m7",
+        at(&p, "/hotWater/months/6/solarRenewableKwh"),
+        209.0,
+    );
+    close(
+        "EPW405a W_W;aux;sol m1",
+        at(&p, "/hotWater/months/0/solarAuxiliaryKwh"),
+        0.8690975045343672,
+    );
+    close(
+        "EPW405a Q_W;sol;ls;rbl m7",
+        at(&p, "/hotWater/months/6/solarRecoverableKwh"),
+        20.232297986032997,
+    );
+    close(
+        "EPW405a Q_W;sol;ls;rbl m11",
+        at(&p, "/hotWater/months/10/solarRecoverableKwh"),
+        0.2566844762080898,
+    );
+}
+
+/// Solar water heater with an integrated back-up part (SOL_TYPE PAR): 13.93/13.94 with V_bu 100 l of 220 l,
+/// back-up storage loss 13.95 at 60 °C and the back-up output 13.105.
+#[test]
+fn solar_water_heater_integrated_backup() {
+    let p = performance("EPW405e", r#"[]"#);
+    close(
+        "EPW405e Q_W;bu;sto;ls m1",
+        at(&p, "/hotWater/months/0/solarBackupStorageLossKwh"),
+        17.5214703405296,
+    );
+    close(
+        "EPW405e Q_W;ren;prac m7",
+        at(&p, "/hotWater/months/6/solarRenewableKwh"),
+        209.0,
+    );
+    close(
+        "EPW405e Q_W;bu;out m1",
+        at(&p, "/hotWater/months/0/generatorOutputKwh"),
+        232.17035766386078,
+    );
+    close(
+        "EPW405e Q_W;sol;ls;rbl m7",
+        at(&p, "/hotWater/months/6/solarRecoverableKwh"),
+        36.186095059869444,
+    );
+}
+
+/// Cooling method 2 (10.5.5, p. 409-416) for a split inverter room unit: PLV of table 10.19 row C (10.68/10.69),
+/// f_EER;corr 10.73 with Δϑ_evap 20 K and Δϑ_cond 10 K (table 10.22), ϑ_e;kg of table 10.24, the required outlet
+/// ϑ_C;int;inc (10.10) and f_prpr 0,60 (direct condensation).
+#[test]
+fn cooling_method_2_room_air_conditioner() {
+    let p = performance(
+        "EPW301a",
+        r#"[{"pointer": "/ntaCalculation/cooling/generators/0/generator", "value": {"kind": "room_air_conditioner", "performance": {"method": "en14511", "nominalEer": 3.21, "nominalCapacityKw": 3.5, "nominalEvaporatorOutletC": 27.0, "nominalCondenserInletC": 35.0, "roomUnitType": "split_inverter", "sourceReference": "r67 synthetic"}}}, {"pointer": "/ntaCalculation/cooling/emission/emitter", "value": "fan_coil_or_rac_on_outer_wall"}, {"pointer": "/ntaCalculation/cooling/emission/fanCoilCount", "value": 1}]"#,
+    );
+    close(
+        "rac E_C;el m7",
+        at(&p, "/cooling/months/6/electricityKwh"),
+        122.86484213685722,
+    );
+    close(
+        "rac E_C;el m8",
+        at(&p, "/cooling/months/7/electricityKwh"),
+        191.81164614750148,
+    );
+    close(
+        "rac EER m7",
+        at(&p, "/cooling/generatorShares/0/monthlyEer/6"),
+        3.6442604372252374,
+    );
+}
+
+/// Cooling method 2 for a water-cooled chiller on a dry cooler: table 10.21 (heat rejection to water), Δϑ_evap 6 K,
+/// Δϑ_cond 4 K, ϑ_ref = ϑ_e;kg + 15 (table 10.26), the table 10.8 outlet 17 − Δϑ_int;inc read literally, f_prpr 0,9.
+#[test]
+fn cooling_method_2_water_cooled_chiller() {
+    let p = performance(
+        "EPW301a",
+        r#"[{"pointer": "/ntaCalculation/cooling/generators/0/generator", "value": {"kind": "compression", "heatRejection": "dry_cooler", "performance": {"method": "en14511", "nominalEer": 4.5, "nominalCapacityKw": 2.0, "nominalEvaporatorOutletC": 7.0, "nominalCondenserInletC": 30.0, "sourceReference": "r67 synthetic"}}}]"#,
+    );
+    close(
+        "wtr E_C;el m8",
+        at(&p, "/cooling/months/7/electricityKwh"),
+        129.70624911986462,
+    );
+    close(
+        "wtr E_C;el m10",
+        at(&p, "/cooling/months/9/electricityKwh"),
+        2.9941390824029273,
+    );
+    close(
+        "wtr EER m8",
+        at(&p, "/cooling/generatorShares/0/monthlyEer/7"),
+        5.488240443536629,
+    );
+}
+
+/// Measured booster heat pump, annex W (p. 1119-1126): COP line W.11-W.13 through the 24 °C and 40 °C tests after
+/// the tap-quantity correction W.14/W.15 (class 3), W.1 with f_prac 0,95 and W.2 (f_C 0) with W.8-W.10, both
+/// rounded up (annex X).
+#[test]
+fn measured_booster_heat_pump() {
+    let p = performance(
+        "EPW406i",
+        r#"[{"pointer": "/ntaCalculation/hotWater/generator", "value": {"kind": "booster_heat_pump", "lowTest": {"sourceTemperatureC": 24.0, "cop": 3.2}, "highTest": {"sourceTemperatureC": 40.0, "cop": 4.1}, "measuredClass": "class3", "standingLossKw": 0.012, "sourceTemperaturesC": [38.0, 38.0, 36.0, 34.0, 30.0, 28.0, 26.0, 26.0, 30.0, 34.0, 36.0, 38.0], "heatSource": {"kind": "heating_system"}, "testReportReference": "r67 synthetic"}}]"#,
+    );
+    let aux = [
+        65.0, 60.0, 65.0, 65.0, 75.0, 75.0, 80.0, 80.0, 70.0, 70.0, 65.0, 65.0,
+    ];
+    let hj = [
+        220.0, 190.0, 220.0, 200.0, 200.0, 190.0, 190.0, 190.0, 190.0, 200.0, 200.0, 220.0,
+    ];
+    for (m, (aux, hj)) in aux.iter().zip(hj.iter()).enumerate() {
+        close(
+            &format!("bwp W_W;aux;gen;bwp m{}", m + 1),
+            at(&p, &format!("/hotWater/months/{m}/auxiliaryElectricityKwh")),
+            *aux,
+        );
+        close(
+            &format!("bwp E_W;gen,in;hj m{}", m + 1),
+            at(&p, &format!("/hotWater/months/{m}/heatingSystemLoadKwh")),
+            *hj,
+        );
+    }
+}
+
+/// Micro-CHP method 1 (9.6.6.2, p. 346-352): 9.66-9.83 between the stand-by point (P_th;sb 0), CHP_100+Sup_0 and
+/// CHP_100+Sup_100 with f_prac 0,95, t = t_H;op of 9.32a, recoverable stand-by loss 9.80; the kernel's documented
+/// readings kept (micro_chp INTERPRETATIONS): heat above full load as supplementary heat and f_Hs/Hi 1,11.
+#[test]
+fn micro_chp_method_1() {
+    let p = performance(
+        "EPW204g",
+        r#"[{"pointer": "/ntaCalculation/generator", "value": {"kind": "chp", "method1": {"kind": "stirling_engine", "fuel": "natural_gas", "location": "heated_space", "fullLoad": {"thermalPowerKw": 24.0, "thermalEfficiency": 0.92, "electricEfficiency": 0.04, "auxiliaryPowerKw": 0.06}, "chpOnly": {"thermalPowerKw": 5.5, "thermalEfficiency": 0.78, "electricEfficiency": 0.14, "auxiliaryPowerKw": 0.04}, "standbyLossKw": 0.1, "pilotKw": 0.0, "standbyElectricKw": 0.0, "standbyAuxiliaryKw": 0.005, "testReportReference": "r67 synthetic"}, "auxiliary": {"electricallyConnectedDevices": 1, "nominalPowerKw": 24.0, "sourceReference": "r67 synthetic"}, "equipmentReference": "r67 synthetic"}}]"#,
+    );
+    close(
+        "chp1 E_el m2",
+        at(&p, "/spaceHeating/monthly/1/chpElectricityKwh"),
+        33.83909139807581,
+    );
+    close(
+        "chp1 E_gen;in m2",
+        at(&p, "/spaceHeating/monthly/1/chpInputKwh"),
+        1035.5687296499302,
+    );
+    close(
+        "chp1 W_gen;aux m2",
+        at(&p, "/spaceHeating/monthly/1/chpGeneratorAuxiliaryKwh"),
+        1.926317815474853,
+    );
+    close(
+        "chp1 Q_gen;ls;rbl m2",
+        at(&p, "/spaceHeating/monthly/1/generatorRecoverableLossKwh"),
+        3.249166666666667,
+    );
+    close(
+        "chp1 E_gen;in m1 (excess)",
+        at(&p, "/spaceHeating/monthly/0/chpInputKwh"),
+        1822.097877640744,
+    );
+    close(
+        "chp1 E_gen;in m5 (stand-by)",
+        at(&p, "/spaceHeating/monthly/4/chpInputKwh"),
+        82.58400000000002,
+    );
+}
