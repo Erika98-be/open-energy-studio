@@ -2829,7 +2829,15 @@ fn balance_month(
         let q_h = over
             .heating_flow_m3_per_h
             .map_or(required, |q| (q * over.heating_area_share).max(required));
-        let q_w = over.hot_water_flow_m3_per_h[m];
+        // q_V;hp;W;zi,mi is the 13.148/13.148a value, at least the q_V;ODA;req of
+        // the heating balance (11.22); an entered flow below it is raised to it.
+        let heating_required = if balance == Balance::Heating {
+            required
+        } else {
+            f_ctrl_table / PRACTICE_FACTOR_REQUIRED
+                * design_flow(input, constants, Balance::Heating, policy)
+        };
+        let q_w = over.hot_water_flow_m3_per_h[m].max(heating_required);
         let base = required;
         required = (1.0 - f_h - f_w) * base + f_h * q_h + f_w * q_w;
         if over.heating_flow_m3_per_h.is_some() && q_h > 0.0 {
