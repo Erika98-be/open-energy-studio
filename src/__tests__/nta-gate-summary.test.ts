@@ -74,6 +74,15 @@ describe('gate summary (scripts/nta-gate-summary.mjs)', () => {
     expect(ui.vitest?.files).toEqual({ passed: 172, failed: 0, skipped: 1, total: 173 });
   });
 
+  it('names the reference step without the machine-local archive path', () => {
+    const local = '/home/someone/repo/release/dry-run-x/evidence/reference';
+    const gate = summariseGateLog(
+      `==> reference suites (report in ${local})\nGate step times:\n   11s  reference suites (report in ${local})\n`,
+    );
+    expect(gate.steps[0].name).toBe('reference suites (report in evidence/reference)');
+    expect(gate.steps[0].seconds).toBe(11);
+  });
+
   it('is not passed without the closing gate line', () => {
     expect(summariseGateLog(LOG.replace(/All configured.*\n/, '')).passed).toBe(false);
   });

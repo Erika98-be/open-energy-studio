@@ -41,12 +41,17 @@ export function summariseGateLog(logText) {
     }
     if (inTimes) {
       const time = STEP_TIME.exec(line);
-      if (time) times.push({ name: time[2].trim(), seconds: Number(time[1]) });
+      if (time) {
+        const name = time[2].trim().replace(/\(report in \S*?\/?evidence\/reference\)/, '(report in evidence/reference)');
+        times.push({ name, seconds: Number(time[1]) });
+      }
       continue;
     }
     const header = /^==> (.+?)(?: \(started in the background, log .*\))?$/.exec(line);
     if (header) {
-      const name = header[1].trim();
+      // The evidence path of a release is local to the machine: name it by
+      // its place in the archive.
+      const name = header[1].trim().replace(/\(report in \S*?\/?evidence\/reference\)/, '(report in evidence/reference)');
       current = byName.get(name);
       if (!current) {
         current = { name, rust: null, vitest: null };
