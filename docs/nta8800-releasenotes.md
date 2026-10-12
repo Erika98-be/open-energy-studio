@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Review 62: de zes open ISSO 54-deeltesten opnieuw nagegaan (geen rekenwijziging)
+- **EP-W204d en EP-W406l** (biomassa die niet aan bijlage R voldoet): ook in 2025+C1 geeft tabel 9.30 (p. 341) alleen rendementen voor toestellen die aan bijlage R voldoen, en methode 1 vraagt meetgegevens die de deeltest niet geeft. Geen route; de kern weigert terecht.
+- **EP-W406j** (booster met één COP): 13.8.4.4 en bijlage W (2025+C1 p. 631–632, 1118–1120) vragen nog steeds meetgegevens bij twee brontemperaturen of het forfait zonder opgegeven COP. Geen route.
+- **EP-W203q, EP-W406w en EP-W406x:** de bijlagedocumenten met de kwaliteitsverklaringen zijn nog steeds niet in bezit.
+- De telling blijft 260 van de 266; zie [voorbereiding ISSO 54](nta8800-isso54-voorbereiding.md).
+
 ### 12 oktober 2026 — Review 61: vrijgavegereedschap weigert een gate-log die geen bewijs is (geen rekenwijziging)
 - **Mislukte of afgebroken gate:** `scripts/nta-gate-summary.mjs` geeft elke samenvatting een status (geslaagd, niet geslaagd, onvolledig) en markeert de stap waar de gate stopte. Een stap zonder tellingen heette eerder altijd "geslaagd", ook in een mislukte gate; een log met mislukte tests en toch de slotregel telt niet meer als geslaagd.
 - **Vrijgave weigert:** `release-nta.sh` laat de samenvatting met `--require-pass` controleren en stopt bij een mislukte of onvolledige gate. Buiten een proefvrijgave stopt hij ook als een verplichte gatestap ontbreekt, en vooraf als `NTA_SKIP_MSRV` of `NTA_SKIP_KERNEL_E2E` aanstaat. Na de gate, het testsetdossier en de build moet de werkmap nog schoon zijn.
