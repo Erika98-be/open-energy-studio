@@ -37,8 +37,13 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
   const floors = useMemo(() => canTakeOver(result) ? surveyGroundFloors(result.derivedInput) : [], [result]);
   // The zone the chapter 11 ventilation follows on Toepassen (syncVentilation); lighting and humidifiers follow it too.
   const firstZone = state.project?.zones?.[0];
-  const takeoverZone = useMemo(() => firstZone ? { id: firstZone.id, floorArea: firstZone.floorArea ?? null } : undefined,
-    [firstZone]);
+  const projectZones = state.project?.zones;
+  const takeoverZone = useMemo(() => {
+    if (!firstZone) return undefined;
+    // The hot water follows the building's A_g when the project has more zones (review 59).
+    const total = (projectZones ?? []).reduce((sum, zone) => sum + (typeof zone.floorArea === 'number' && zone.floorArea > 0 ? zone.floorArea : 0), 0);
+    return { id: firstZone.id, floorArea: firstZone.floorArea ?? null, buildingFloorArea: total > 0 ? total : null };
+  }, [firstZone, projectZones]);
   const projectHasPsi = useMemo(() => (state.project?.zones ?? []).some((zone) => (zone.thermalBridges ?? []).length > 0), [state.project]);
   const routeItem = useMemo(() => canTakeOver(result) ? bridgeRouteItem(surveyBridgeRoute(result), current, projectHasPsi) : null,
     [result, current, projectHasPsi]);

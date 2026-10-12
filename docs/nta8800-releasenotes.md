@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Review 59: codereview van reviews 55–58 en de overname, de statusbalk en de app-run tegen de echte kern (geen rekenwijziging)
+- **Overnemen in projectmodel bij meer zones:** het warm tapwater van een opname dient het hele gebouw (13.20: de functieoppervlakken samen ten hoogste A_g van het gebouw). Bij een project met meer rekenzones schaalde de overname de tapwateroppervlakken naar de eerste zone, zodat de tapwatervraag te laag uitviel. Ze volgen nu de A_g van alle zones samen; de verlichting (14.4) en bevochtigers blijven bij de zone. Bij één zone verandert niets. Test: `src/__tests__/review59-takeover-building-area.test.ts`.
+- **Poort en schermafdrukken met `CARGO_TARGET_DIR`:** de stap "app against the real kernel" en `scripts/manual-screenshots/` zochten `kernel_once` altijd in `crates/nta8800-service/target`; met een gezette `CARGO_TARGET_DIR` faalde de poort. Ze zoeken het programma nu waar cargo het neerzet; een mislukte start noemt de oorzaak. `gate-order.test.ts` bewaakt dit.
+- **Nagelopen zonder gebrek:** de keuzes die in review 58 geen "—" meer tonen (de bijbehorende kernvelden zijn verplicht; waar "geen" een keuze is, is het een eigen optie), het weglaten van vervolgpunten van een geweigerd ventilatie- of verlichtingsblok (alleen zolang dat blok zelf een open punt heeft), de BACS- en forfaitpaden, het wissen van de BACS-inventaris bij overname (zichtbaar in de voorbeschouwing, ongedaan te maken), `kernel_once` (leest alleen stdin, schrijft geen bestanden) en de versiechip in de statusbalk.
+
 ### 12 oktober 2026 — Review 58: één handeling, één open punt bij het veld dat de adviseur wijzigde (geen rekenwijziging)
 - **Bewaking:** een nieuwe veegtest (`src/__tests__/nta-clear-field-sweep.test.tsx`) wist elk veld dat een adviseur kan leegmaken (getal, keuze met "—", tekst) apart, in elke NTA-sectie van de voorbeeldkantoor, de voorbeeldrijwoning en openbaar geval N, via de eigen wijzigfunctie van het formulier. De kern (`every_cleared_field_is_one_gap_at_that_field` in `tests/project_form_guard.rs`, in de poort) eist dat elk nieuw open punt op of onder dat veld ligt, en de UI-test dat **Ga naar** voor dat veld naar de pagina van de sectie leidt. 262 velden in ongeveer 15 s.
 - **Gevonden en verholpen:**

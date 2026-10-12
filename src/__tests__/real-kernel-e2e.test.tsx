@@ -33,7 +33,7 @@ const example = (file: string) => JSON.parse(readFileSync(resolve(root, 'trainin
 /** One kernel operation through `kernel_once`: the same answer the API server would give. */
 function kernel(method: string, path: string, body?: unknown): { status: number; body: unknown } {
   const run = spawnSync(binary!, [method, path], { input: body == null ? '' : JSON.stringify(body), encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
-  if (run.status !== 0) throw new Error(`kernel_once ${method} ${path} failed: ${run.stderr}`);
+  if (run.status !== 0) throw new Error(`kernel_once ${method} ${path} failed: ${run.error?.message ?? run.stderr}`);
   return JSON.parse(run.stdout) as { status: number; body: unknown };
 }
 

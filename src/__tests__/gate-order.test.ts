@@ -19,6 +19,8 @@ describe('scripts/verify-nta.sh', () => {
     expect(e2e).toBeGreaterThan(gate.indexOf('step "UI tests"'));
     expect(gate).toContain('--example kernel_once');
     expect(gate).toContain('OES_KERNEL_ONCE=');
+    // Review 59: the binary is found where cargo put it, also with CARGO_TARGET_DIR set.
+    expect(gate).toContain('${CARGO_TARGET_DIR:-crates/nta8800-service/target}/debug/examples/kernel_once');
     expect(gate).toContain('src/__tests__/real-kernel-e2e.test.tsx');
   });
 

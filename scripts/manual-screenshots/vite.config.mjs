@@ -11,7 +11,10 @@ import react from '@vitejs/plugin-react';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
-export const KERNEL_ONCE = path.join(root, 'crates/nta8800-service/target/debug/examples/kernel_once');
+// Where cargo puts the example: CARGO_TARGET_DIR when set (relative to the repository root), else the crate's target.
+const targetDir = process.env.CARGO_TARGET_DIR
+  ? path.resolve(root, process.env.CARGO_TARGET_DIR) : path.join(root, 'crates/nta8800-service/target');
+export const KERNEL_ONCE = path.join(targetDir, 'debug/examples/kernel_once');
 
 function readBody(request) {
   return new Promise((resolve, reject) => {
