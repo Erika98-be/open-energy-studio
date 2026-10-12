@@ -1,8 +1,8 @@
 # Vragen aan NEN / NTA 8800-commissie
 
-Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding voor vragen 1–7 is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)); vragen 8–12 kwamen uit de controle van de rekenkern tegen de normtekst per hoofdstuk (reviews 40–48 in [nta8800-releasenotes.md](nta8800-releasenotes.md)).
+Concepten voor vragen over de interpretatie van NTA 8800:2025+C1:2026. Ze zijn in eigen woorden opgesteld en verwijzen alleen naar paginanummers. Aanleiding voor vragen 1–7 is de vergelijking met openbare BENG-rapporten van geattesteerde software ([nta8800-vergelijking-openbare-rapporten.md](nta8800-vergelijking-openbare-rapporten.md)); vragen 8–12 kwamen uit de controle van de rekenkern tegen de normtekst per hoofdstuk (reviews 40–48 in [nta8800-releasenotes.md](nta8800-releasenotes.md)), en vraag 13 uit de onafhankelijke herberekening van bijlage Q (review 69).
 
-Alle twaalf vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
+Alle dertien vragen staan ook in een verzendklare brief aan NEN en RVO, met per vraag de twee lezingen en het gevolg in de openbare gevallen: [nta8800-vragen-nen-brief.md](nta8800-vragen-nen-brief.md). Werk die brief bij als een vraag hier verandert.
 
 ## 1. Afgifteverlies koeling, formule 10.15 (p. 376)
 
@@ -145,3 +145,13 @@ Deze punten gaan over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), nie
 **Gevolg.** Geen openbaar geval en geen ISSO 54-deeltest heeft een gedeclareerde koudeopwekker. Bij lezing f_prpr 1 daalt het aandrijfenergiegebruik van een gedeclareerde koudeopwekker met 10 % (een verklaarde EER van 4,37 telt dan als 4,35 in plaats van 3,915). Opvallend is dat een kamerairco met een verklaarde EER in methode 3 bij lezing f_prpr 1 gunstiger uitkomt dan dezelfde airco met volledige NEN-EN 14511-gegevens in methode 2, waar f_prpr 0,60 geldt.
 
 **Vraag.** Welke f_prpr hoort bij een gedeclareerde EER of ζ die volgens §10.1 een waarde van tabel 10.29 of 10.30 vervangt: 1, zoals bij de tabelwaarden, of die van methode 1/2 (0,9, of 0,60 bij directe condensatie tegen de buitenlucht)?
+
+## 13. Bronpomp van een warmtepomp volgens bijlage Q in de COP én als hulpenergie (9.6.3, p. 340; Q.2.4–Q.2.5, p. 1029–1031)
+
+**Situatie.** Bij een brine/water- of water/waterwarmtepomp met productgegevens volgens bijlage Q telt Q.4 het hulpenergiegebruik van de bronpomp, W_H;aux;hp;an (Q.5–Q.8), mee in het elektriciteitsgebruik waaruit het opwekkingsrendement η_H;gen;hp (Q.2) volgt. 9.6.3 (p. 340) gebruikt die η_H;gen;hp als COP van de maand en telt daarnaast W_H;aux;hp;an / (12 × 3,6) per maand als hulpenergie van de opwekker. Bij de hulpenergie van centrale opwekkers zegt de norm dat de bronpomp geen onderdeel is van die bepaling en deels in de COP zit (9.6.8.1.1.1.1, p. 357).
+
+**Gekozen lezing.** De kern volgt beide bepalingen letterlijk: de bronpomp zit in η_H;gen;hp en komt er per maand als hulpenergie nog eens bij.
+
+**Gevolg.** Geen openbaar geval heeft een warmtepomp volgens bijlage Q. In een synthetische brine/watervariant van ISSO 54-deeltest EP-W001 (bronpomp 120 W, 66 kWh per jaar) telt de bronpomp 69 kWh via de COP (met f_prac 0,95) en 66 kWh als hulpenergie, op ongeveer 980 kWh warmtepompelektriciteit. Bij de andere lezing valt een van beide weg.
+
+**Vraag.** Telt het hulpenergiegebruik van de bronpomp volgens Q.5 bij een warmtepomp volgens bijlage Q alleen in η_H;gen;hp (Q.2/Q.4), alleen als hulpenergie volgens 9.6.3, of bedoelt de norm beide?

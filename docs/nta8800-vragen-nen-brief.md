@@ -1,6 +1,6 @@
 # Brief aan NEN en RVO: interpretatievragen NTA 8800
 
-*Verzendklaar concept, opgesteld 10 oktober 2026 en bijgewerkt 11 oktober 2026 uit [nta8800-vragen-nen.md](nta8800-vragen-nen.md). Vul de velden tussen rechte haken in voor verzending. De brief citeert geen normtekst; hij verwijst alleen naar formule-, paragraaf- en paginanummers van NTA 8800:2025+C1:2026, tenzij een andere uitgave is genoemd.*
+*Verzendklaar concept, opgesteld 10 oktober 2026 en bijgewerkt 12 oktober 2026 uit [nta8800-vragen-nen.md](nta8800-vragen-nen.md). Vul de velden tussen rechte haken in voor verzending. De brief citeert geen normtekst; hij verwijst alleen naar formule-, paragraaf- en paginanummers van NTA 8800:2025+C1:2026, tenzij een andere uitgave is genoemd.*
 
 ---
 
@@ -19,7 +19,7 @@ Geachte leden van de normcommissie,
 
 [organisatie] ontwikkelt Open Energy Studio, rekensoftware voor de energieprestatie van woningen en utiliteitsgebouwen volgens NTA 8800. Wij bereiden de aanvraag van een attest volgens BRL 9501 voor. De versie waar deze vragen over gaan is programmaversie 0.2.0 met rekenkern 0.4.0 (nog niet uitgebracht); de standaarduitgave is NTA 8800:2025+C1:2026.
 
-Bij het narekenen van openbare BENG-berekeningen van geattesteerde software (vragen 1–7) en bij een systematische controle van de rekenkern tegen de normtekst (vragen 8–12) zijn wij twaalf punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport; vragen 8–12 veranderen geen vergeleken uitkomst van de openbare gevallen. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
+Bij het narekenen van openbare BENG-berekeningen van geattesteerde software (vragen 1–7) en bij een systematische controle en onafhankelijke herberekening van de rekenkern tegen de normtekst (vragen 8–13) zijn wij dertien punten tegengekomen waar de tekst van de norm (of, bij vraag 4, de Omgevingsregeling) meer dan één lezing toelaat. Bij vijf daarvan verklaart het verschil in lezing een meetbaar verschil in BENG 2 tussen onze uitkomst en het gepubliceerde rapport; vragen 8–13 veranderen geen vergeleken uitkomst van de openbare gevallen. Wij volgen steeds de letterlijke tekst, en waar twee bepalingen elkaar tegenspreken (vragen 9 en 10) de lezing die aansluit op de rest van de berekening, maar willen voor de attestering zeker weten welke lezing bedoeld is. Per vraag noemen wij de plaats in de norm, de twee lezingen, het gevolg in een openbaar geval en de concrete vraag. De openbare gevallen en de verschilanalyse per post staan in onze vergelijking van openbare rapporten; die sturen wij desgewenst mee.
 
 Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is naar een bestaande toelichting of een geplande correctie.
 
@@ -131,6 +131,14 @@ Deze vraag gaat over de Omgevingsregeling (BWBR0045528, versie 2026-10-01), niet
 - **Lezing B.** Een gedeclareerde waarde vervangt de tabelwaarde en houdt f_prpr 1.
 - **Gevolg.** Geen openbaar geval of ISSO 54-deeltest heeft een gedeclareerde koudeopwekker. Lezing B verlaagt het aandrijfenergiegebruik van zo'n opwekker met 10 %; een kamerairco met een verklaarde EER zou dan gunstiger uitkomen dan dezelfde airco met volledige NEN-EN 14511-gegevens in methode 2 (f_prpr 0,60).
 - **Vraag.** Welke f_prpr hoort bij een gedeclareerde EER of ζ die een waarde van tabel 10.29 of 10.30 vervangt?
+
+### Vraag 13. Bronpomp van een warmtepomp volgens bijlage Q in de COP én als hulpenergie (9.6.3, p. 340; Q.2.4–Q.2.5, p. 1029–1031)
+
+- **Plaats.** Q.4 (p. 1029) telt het hulpenergiegebruik van de bronpomp van een brine/water- of water/waterwarmtepomp (Q.5–Q.8, p. 1030–1031) mee in het elektriciteitsgebruik waaruit η_H;gen;hp (Q.2) volgt. 9.6.3 (p. 340) gebruikt η_H;gen;hp als COP per maand en telt daarnaast W_H;aux;hp;an / (12 × 3,6) per maand als hulpenergie. Bij de hulpenergie van centrale opwekkers staat dat de bronpomp deels in de COP zit (9.6.8.1.1.1.1, p. 357).
+- **Lezing A (letterlijk, onze keuze).** De bronpomp telt in η_H;gen;hp en daarnaast als hulpenergie.
+- **Lezing B.** De bronpomp telt maar één keer: alleen in η_H;gen;hp, of alleen als hulpenergie.
+- **Gevolg.** Geen openbaar geval heeft een warmtepomp volgens bijlage Q. In een synthetische brine/watervariant (bronpomp 120 W, 66 kWh per jaar) telt de bronpomp bij lezing A 69 kWh via de COP en 66 kWh als hulpenergie, op ongeveer 980 kWh warmtepompelektriciteit.
+- **Vraag.** Telt het hulpenergiegebruik van de bronpomp bij een warmtepomp volgens bijlage Q alleen in η_H;gen;hp, alleen als hulpenergie volgens 9.6.3, of in beide?
 
 ---
 
