@@ -13,6 +13,12 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Review 60: leverdocumenten halen hun aantallen uit de gate (geen rekenwijziging)
+- **Gate-samenvatting:** `scripts/release-nta.sh` schrijft na de gate `gate-samenvatting.json` met per gatestap de Rust- en Vitest-aantallen en de duur, en per referentiesuite het aantal gevallen, vergeleken en zonder verwachting, gelezen uit `gate.log` en `reference-report.json` (`scripts/nta-gate-summary.mjs`). Het bestand staat in het manifest en in `SHA256SUMS`.
+- **Testrapport:** krijgt een automatisch ingevulde sectie "Gate-uitvoer" met die tabel, en de niveaus n (app tegen de echte rekenkern) en o (formulierstanden en gewiste velden door de kern).
+- **GitHub-releasetekst:** noemt onder Verification de aantallen uit de samenvatting in plaats van alleen "passed".
+- **Testprotocol:** de verouderde aantallen (~950 kerntests, 1 300 tests in 139 bestanden) zijn bijgewerkt en verwijzen naar de samenvatting per vrijgave; de niveaus n en o en de duur van ongeveer 30 minuten staan erin.
+
 ### 12 oktober 2026 — Poort: tijd per stap en optioneel parallel (geen rekenwijziging)
 - **Tijd per stap:** `scripts/verify-nta.sh` toont na elke stap de duur en aan het eind een overzicht, ook als een stap faalt. Meting op 12 oktober (koude build, 8 kernen): 1798 s in totaal, met als grootste stappen de kern op Rust 1.77.2 (426 s), de UI-tests (385 s), de kerntests (357 s) en de twee Tauri-stappen (247 s); zie het testprotocol §5.
 - **Optioneel parallel (`NTA_GATE_PARALLEL=1`):** de Rust 1.77.2-run en de frontendbundel met de Tauri-stappen kunnen naast de kernstappen lopen en worden vóór de UI-tests opgehaald; een mislukte pijplijn laat de poort falen. Standaard staat dit uit: drie gelijktijdige cargo-builds liepen op deze machine (13 GB) tegen een geheugentekort aan. Zonder de variabele doet de poort dezelfde controles, alleen staat TypeScript nu vóór de Rust 1.77.2-run en de Tauri-stappen.
