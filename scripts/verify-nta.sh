@@ -13,8 +13,9 @@ nta_step_name=""
 nta_step_start=0
 nta_timings=()
 step_done() {
+  # $1: a note for the step the gate stopped at, e.g. " (failed, exit 101)".
   if [[ -n "$nta_step_name" ]]; then
-    nta_timings+=("$(printf '%5ds  %s' "$((SECONDS - nta_step_start))" "$nta_step_name")")
+    nta_timings+=("$(printf '%5ds  %s%s' "$((SECONDS - nta_step_start))" "$nta_step_name" "${1:-}")")
     printf '    (%ds)\n' "$((SECONDS - nta_step_start))"
   fi
   nta_step_name=""
@@ -26,7 +27,13 @@ step() {
   printf '\n==> %s\n' "$1"
 }
 timing_summary() {
-  step_done
+  local status="$1"
+  if [[ "$status" != 0 ]]; then
+    printf '\nGate FAILED (exit %s) at step: %s\n' "$status" "${nta_step_name:-before the first step}" >&2
+    step_done " (failed, exit $status)"
+  else
+    step_done
+  fi
   printf '\nGate step times:\n'
   printf '%s\n' "${nta_timings[@]}"
   printf '%5ds  total\n' "$SECONDS"
@@ -106,14 +113,20 @@ finish_bg() {
   nta_bg_pids=()
   nta_bg_names=()
 }
+# A background pipeline runs cargo or npm, which start their own children (rustc, vitest
+# workers): stop the whole tree, deepest first, so nothing keeps building after a failure.
+kill_tree() {
+  local child
+  for child in $(pgrep -P "$1" 2>/dev/null); do kill_tree "$child"; done
+  kill -TERM "$1" 2>/dev/null || true
+}
 stop_bg() {
   local pid
-  for pid in "${nta_bg_pids[@]}"; do
-    pkill -TERM -P "$pid" 2>/dev/null || true
-    kill "$pid" 2>/dev/null || true
-  done
+  for pid in "${nta_bg_pids[@]}"; do kill_tree "$pid"; done
+  if [[ ${#nta_bg_pids[@]} -gt 0 ]]; then wait "${nta_bg_pids[@]}" 2>/dev/null || true; fi
 }
-trap 'stop_bg; timing_summary' EXIT
+# The gate's own exit status is kept: the summary never turns a failure into a pass.
+trap 'nta_exit=$?; stop_bg; timing_summary "$nta_exit"; exit "$nta_exit"' EXIT
 
 msrv_core() {
   bg_step "core on Rust 1.77.2"

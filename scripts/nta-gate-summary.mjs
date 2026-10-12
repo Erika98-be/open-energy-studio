@@ -6,7 +6,7 @@
 // text from it, so no test count in a delivery document is typed by hand.
 //
 //   node scripts/nta-gate-summary.mjs --log <gate.log> [--reference <reference-report.json>]
-//        --out <gate-samenvatting.json>
+//        --out <gate-samenvatting.json> [--require-pass [--allow-missing-steps]]
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { normaliseNewlines } from './nta-kernel-version.mjs';
@@ -15,6 +15,32 @@ const RUST_RESULT = /^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; (\d
 const VITEST_FILES = /^\s*Test Files\s+(.*)\((\d+)\)\s*$/;
 const VITEST_TESTS = /^\s*Tests\s+(.*)\((\d+)\)\s*$/;
 const STEP_TIME = /^\s*(\d+)s {2}(.+)$/;
+// Colour codes, should a tool print them into the log (FORCE_COLOR, a terminal under tee).
+const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
+const PASSED_LINE = 'All configured technical NTA gates passed';
+
+/**
+ * Steps every release gate runs (verify-nta.sh). A log that passed without one
+ * of them was run with a skip switch (NTA_SKIP_MSRV, NTA_SKIP_KERNEL_E2E) or by
+ * another script, and is no evidence for a release. Matched by name prefix.
+ */
+export const REQUIRED_STEPS = [
+  'kernel version and release notes',
+  'manual stamped for this kernel version',
+  'tests crates/nta8800-core',
+  'clippy crates/nta8800-core',
+  'tests crates/nta8800-service',
+  'clippy crates/nta8800-service',
+  'reference suites',
+  'TypeScript',
+  'core on Rust 1.77.2',
+  'frontend bundle',
+  'Tauri check',
+  'Tauri command tests',
+  'UI tests',
+  'app against the real kernel',
+  'project-form states through the kernel',
+];
 
 function vitestCounts(text) {
   const count = (word) => Number((new RegExp(`(\\d+) ${word}`).exec(text) ?? [])[1] ?? 0);
@@ -28,7 +54,7 @@ function vitestCounts(text) {
  * count towards the one step.
  */
 export function summariseGateLog(logText) {
-  const lines = normaliseNewlines(logText).split('\n');
+  const lines = normaliseNewlines(logText).replace(ANSI, '').split('\n');
   const steps = [];
   const byName = new Map();
   let current = null;
@@ -42,8 +68,14 @@ export function summariseGateLog(logText) {
     if (inTimes) {
       const time = STEP_TIME.exec(line);
       if (time) {
+        // "(failed, exit N)" marks the step the gate stopped at; the name is the step's own.
+        const failedMark = / \(failed, exit \d+\)$/.exec(time[2]);
         const name = time[2].trim().replace(/\(report in \S*?\/?evidence\/reference\)/, '(report in evidence/reference)');
-        times.push({ name, seconds: Number(time[1]) });
+        times.push({
+          name: failedMark ? name.slice(0, name.length - failedMark[0].length).trim() : name,
+          seconds: Number(time[1]),
+          failed: Boolean(failedMark),
+        });
       }
       continue;
     }
@@ -89,9 +121,33 @@ export function summariseGateLog(logText) {
       times.find((entry) => entry.name === step.name) ??
       times.find((entry) => entry.name === `${step.name} (background)`);
     step.seconds = time ? time.seconds : null;
+    if (time?.failed) step.failed = true;
   }
-  const passedLine = lines.some((line) => line.startsWith('All configured technical NTA gates passed'));
-  return { steps, totalSeconds: totalTime ? totalTime.seconds : null, passed: passedLine };
+  const passedLine = lines.some((line) => line.startsWith(PASSED_LINE));
+  const failedTests = steps.some((step) => (step.rust?.failed ?? 0) > 0 || (step.vitest?.tests?.failed ?? 0) > 0
+    || (step.vitest?.files?.failed ?? 0) > 0);
+  // Without the closing line the gate stopped somewhere: the last step it started is where.
+  if (!passedLine && steps.length > 0 && !steps.some((step) => step.failed)) steps[steps.length - 1].failed = true;
+  const missingSteps = REQUIRED_STEPS.filter((required) => !steps.some((step) => step.name.startsWith(required)));
+  const status = passedLine && !failedTests ? 'passed' : totalTime ? 'failed' : 'incomplete';
+  return {
+    steps,
+    totalSeconds: totalTime ? totalTime.seconds : null,
+    passed: status === 'passed',
+    status,
+    missingSteps,
+  };
+}
+
+/** Why a summary is no release evidence, or [] when it is. */
+export function gateSummaryProblems(gate, { requireAllSteps = true } = {}) {
+  const problems = [];
+  if (gate.status === 'incomplete') problems.push('de gate-log is onvolledig (geen slotregel en geen tijdentabel)');
+  else if (!gate.passed) problems.push('de gate is niet geslaagd');
+  const failed = gate.steps.filter((step) => step.failed).map((step) => step.name);
+  if (failed.length) problems.push(`mislukte stap: ${failed.join(', ')}`);
+  if (requireAllSteps && gate.missingSteps.length) problems.push(`ontbrekende stappen: ${gate.missingSteps.join(', ')}`);
+  return problems;
 }
 
 /** Cases per suite and verdict from reference_gate's reference-report.json. */
@@ -148,17 +204,20 @@ export function renderGateSummaryMarkdown(summary) {
   const { gate, reference } = summary;
   const lines = [
     `Uit \`gate.log\` en \`evidence/reference/reference-report.json\` van deze vrijgave. ` +
-      `Gate ${gate.passed ? 'geslaagd' : 'niet geslaagd'}` +
+      `Gate ${gate.passed ? 'geslaagd' : gate.status === 'incomplete' ? 'onvolledig (log afgebroken)' : 'niet geslaagd'}` +
       (gate.totalSeconds !== null ? `, totale duur ${gate.totalSeconds} s.` : '.'),
     '',
     '| Stap | Resultaat | Duur (s) |',
     '|---|---|---|',
   ];
   for (const step of gate.steps) {
-    const result = [step.rust ? rustText(step.rust) : '', step.vitest ? vitestText(step.vitest) : '']
+    const counts = [step.rust ? rustText(step.rust) : '', step.vitest ? vitestText(step.vitest) : '']
       .filter(Boolean)
       .join('; ');
-    const fallback = /\bskipped\b/.test(step.name) ? 'overgeslagen' : 'geslaagd';
+    const result = step.failed && counts ? `niet geslaagd; ${counts}` : counts;
+    const fallback = step.failed
+      ? (gate.status === 'incomplete' ? 'onvolledig (gate afgebroken)' : 'niet geslaagd')
+      : /\bskipped\b/.test(step.name) ? 'overgeslagen' : 'geslaagd';
     lines.push(`| ${step.name} | ${result || fallback} | ${step.seconds ?? ''} |`);
   }
   if (reference) {
@@ -203,7 +262,11 @@ export function renderGateSummaryEnglish(summary) {
 
 function main(argv) {
   const options = {};
-  for (let i = 0; i < argv.length; i += 2) options[argv[i].replace(/^--/, '')] = argv[i + 1];
+  const flags = new Set(['--require-pass', '--allow-missing-steps']);
+  for (let i = 0; i < argv.length; i += 1) {
+    if (flags.has(argv[i])) options[argv[i].slice(2)] = true;
+    else options[argv[i].replace(/^--/, '')] = argv[++i];
+  }
   if (!options.log || !options.out) {
     console.error('--log en --out zijn verplicht');
     return 2;
@@ -214,6 +277,15 @@ function main(argv) {
       ? summariseReferenceReport(JSON.parse(readFileSync(options.reference, 'utf8')))
       : null;
   writeFileSync(options.out, `${JSON.stringify({ gate, reference }, null, 2)}\n`);
+  // --require-pass: the release stops on a summary that is no evidence (BRL 9501 §6.3).
+  // --allow-missing-steps: a dry run may use the skip switches.
+  if (options['require-pass'] !== undefined) {
+    const problems = gateSummaryProblems(gate, { requireAllSteps: options['allow-missing-steps'] === undefined });
+    if (problems.length) {
+      console.error(`Gate-samenvatting is geen bewijs voor een vrijgave: ${problems.join('; ')}.`);
+      return 1;
+    }
+  }
   return 0;
 }
 

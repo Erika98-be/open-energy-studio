@@ -13,6 +13,13 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 12 oktober 2026 — Review 61: vrijgavegereedschap weigert een gate-log die geen bewijs is (geen rekenwijziging)
+- **Mislukte of afgebroken gate:** `scripts/nta-gate-summary.mjs` geeft elke samenvatting een status (geslaagd, niet geslaagd, onvolledig) en markeert de stap waar de gate stopte. Een stap zonder tellingen heette eerder altijd "geslaagd", ook in een mislukte gate; een log met mislukte tests en toch de slotregel telt niet meer als geslaagd.
+- **Vrijgave weigert:** `release-nta.sh` laat de samenvatting met `--require-pass` controleren en stopt bij een mislukte of onvolledige gate. Buiten een proefvrijgave stopt hij ook als een verplichte gatestap ontbreekt, en vooraf als `NTA_SKIP_MSRV` of `NTA_SKIP_KERNEL_E2E` aanstaat. Na de gate, het testsetdossier en de build moet de werkmap nog schoon zijn.
+- **GitHub-releasetekst:** zegt bij een niet-geslaagde gate dat die niet slaagde, in plaats van "passed".
+- **Gate-log:** `verify-nta.sh` meldt bij een fout "Gate FAILED (exit N) at step: …", zet "(failed, exit N)" achter die stap in de tijdentabel en houdt de afsluitcode. In de parallelle modus stopt hij bij een fout de hele procesboom van elke achtergrondpijplijn (cargo, rustc, npm), niet alleen de directe kinderen.
+- **Kleurcodes:** ANSI-kleurcodes in de log (bijvoorbeeld met `FORCE_COLOR`) veranderen de tellingen niet meer.
+
 ### 12 oktober 2026 — Review 60: leverdocumenten halen hun aantallen uit de gate (geen rekenwijziging)
 - **Gate-samenvatting:** `scripts/release-nta.sh` schrijft na de gate `gate-samenvatting.json` met per gatestap de Rust- en Vitest-aantallen en de duur, en per referentiesuite het aantal gevallen, vergeleken en zonder verwachting, gelezen uit `gate.log` en `reference-report.json` (`scripts/nta-gate-summary.mjs`). Het bestand staat in het manifest en in `SHA256SUMS`.
 - **Testrapport:** krijgt een automatisch ingevulde sectie "Gate-uitvoer" met die tabel, en de niveaus n (app tegen de echte rekenkern) en o (formulierstanden en gewiste velden door de kern).
