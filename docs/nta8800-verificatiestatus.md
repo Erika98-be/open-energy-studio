@@ -62,6 +62,32 @@ Samen 12 008 vergeleken grootheden (referentiedruk per luchtstroomzone, alle eff
 - **11.76:** de uitgaande stroom bij dwarsventilatie gebruikt in de thermiekterm T_e;mi, de ingaande (11.75) T_e;argII;mi. De kern volgt de druk; bij de variant met dakraam overheerst in juli de thermiekterm, zodat dit verschil meetelt en overeenkomt.
 - **Q_ahu:** de kern geeft Q_H;ahu;in;req en Q_C;ahu;in;req (lucht gedeeld door 0,98, 11.116/11.120), de grootheden die hoofdstuk 9 en 10 gebruiken.
 
+**Installatieroutes buiten de voorbeeldprojecten onafhankelijk nagerekend (review 66).** De opwekkings-, tapwater-, koel- en PV-routes die de voorbeeldprojecten niet bereiken, zijn in 2025+C1 nagerekend met 37 ISSO 54 v2.0-deeltesten (`training-data/reference-suites/isso54-v2.json`, zonder `normVersion` en zonder het 2022/2023-blok van de emissie) en 15 synthetische varianten daarvan met één route aangezet. Uitgangspunt is de afgeleide invoer van de kern; de eigen implementatie is vanaf de normpagina's geschreven zonder eerst de kerncode van die route te lezen.
+
+| Route | Normplaats | Gevallen | Vergeleken | Uitkomst |
+|---|---|---|---|---|
+| Externe warmte zonder en met kwaliteitsverklaring (berekend, f_prac 0,95), EMGforf-run | 9.84, 9.91, §5.3.1.3, 5.39g, tabellen 5.2 en 5.3 | EPW204a/b/i | 174 | gelijk |
+| Biomassa (kachel, ketel binnen/buiten), hulpenergie met automatische toevoer en t_on ≤ t_mi | 9.64, tabel 9.30, 9.91/9.92 | EPW204c, 2 varianten | 173 | gelijk |
+| Warmtepomp forfaitair (buitenlucht, bodem met c_source, ventilatieretourlucht) en met gedeclareerde COP (afgerond op 0,05, f_prac 0,95, vraag 3) | 9.62, tabel 9.27, 9.85, 5.31, §9.1 | EPW203d, 4 varianten | 281 | gelijk |
+| WKK methode 2 met eigen gebruik en export | tabel 9.31, 16.12, 5.10–5.13, 5.22–5.26 | EPW204f/g | 176 | gelijk |
+| Meerdere opwekkers met prioriteit, collectieve ketels, waakvlammen | 9.56–9.60, tabellen 9.23 en 9.25, 9.91 met f_gebouw | EPW205a/c | 62 | gelijk |
+| Hybride warmtepomp (één en twee systemen) | 9.56, tabel 9.23, tabel 9.25 (bijverwarming), 9.85 per toestel | EPW203m, 1 variant | 134 | gelijk |
+| Elektrische weerstandsverwarming | tabel 9.27, 9.62, 9.91 | 1 variant | 48 | gelijk |
+| Tapwater: combitoestellen, collectief met afleverset, elektrische boiler en doorstromer, indirect gestookt voorraadvat, voorraadverlies met label (13.59) en gemeten (13.60, afronding bijlage X, kokendwaterkraan 90 °C) | 13.24, 13.46, 13.59, 13.60, 13.179, 13.181, tabellen 13.9, 13.25–13.28 | EPW404a/c, EPW405a, EPW406a/c/d/f/g/k/o/q/t/u/v, 1 variant | 553 | gelijk |
+| Douche-wtw (horizontaal, verticaal, twee units) | 13.9, 13.51/13.53, tabel 13.8 | EPW403a–d | 168 | gelijk |
+| Boosterwarmtepomp forfaitair | 13.162/13.163, tabel 13.27 | EPW406i | 54 | gelijk |
+| Koelopwekking methode 3: tabel-EER, gedeclareerde EER (0,05, f_prpr 0,9, vraag 12), gasabsorptie, absorptie op externe warmte, externe koude, onbekend collectief, gesloten koeltoren | 10.76–10.78, 10.83, 10.87, tabellen 10.29, 10.30 en 10.33 | EPW301a, EPW303a/b, 4 varianten | 224 | gelijk |
+| PV (twee systemen, volledige belemmering) en batterij | 16.2–16.4a, tabellen 16.1–16.3 en 17.15, 5.13, 5.14a/5.14b | EPW501a/b/c, 2 varianten | 370 | gelijk |
+
+Samen 2 417 vergeleken grootheden (per maand opwekkerinvoer per energiedrager, hulpenergie, terugwinbaar verlies, hernieuwbaar, voorraadverlies, teruggewonnen douchewarmte, PV-opbrengst en export, en per geval de rijen per dienst, primair fossiel, CO₂, hernieuwbaar en de totalen), alle gelijk tegen 1·10⁻⁶ relatief. Geen kernfout, geen gewijzigde uitkomst. Vijftien gevallen staan als vaste test in `crates/nta8800-core/tests/installations_independent.rs`, met de onafhankelijk berekende waarden. Daarbij vastgesteld:
+
+- **Regelenergie 10.87:** de kern telt die niet bij externe koude, vrije koeling en een onbekende collectieve opwekker. Dat is aangehouden en bij vraag 2 aan NEN genoteerd.
+- **Externe warmte met verklaring op berekende waarden:** `spaceHeating.monthly.districtHeatKwh` is de waarde met f_prac 1; de 0,95 werkt in hoofdstuk 5 op de geleverde energie en dus ook in E_P en 5.39g.
+- **Elektrische boiler:** rendement 1,0 zonder c_W;gen, geen hulpenergie en geen terugwinbaar verlies (13.8.4.5.3).
+- **Booster:** c_W;gen uit tabel 13.27, omdat een booster een individuele tapwaterwarmtepomp is (13.8.4.7.3).
+- **PV, c_sh:** onder F 0,80 houdt de kern c_sh op 0,75 (gedocumenteerde lezing van tabel 16.3); de herberekening volgt dat.
+- **Niet nagerekend in deze review:** zonneboilers (13.7), warmtepompen met productwaarden volgens bijlage Q, WKK methode 1, de gemeten booster van bijlage W en koelmethoden 1 en 2 (10.5.4/10.5.5). Die routes zijn niet opnieuw afgeleid.
+
 ## Stand 11 oktober 2026
 
 **Controle per hoofdstuk tegen de normtekst (reviews 40–51).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
