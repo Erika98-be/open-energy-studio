@@ -84,7 +84,12 @@ function present(value: unknown): boolean {
 }
 
 /** The project zone a single-zone survey is taken over into: its id and usable floor area. */
-export interface TakeoverZone { id: string; floorArea?: number | null }
+export interface TakeoverZone {
+  id: string;
+  floorArea?: number | null;
+  /** A_g of the whole project when it has more zones; the hot water serves the building (13.20). */
+  buildingFloorArea?: number | null;
+}
 
 /** Every `areaM2` member in a copy of `value`, times `factor`. */
 function scaleAreas(value: unknown, factor: number): unknown {
@@ -173,7 +178,10 @@ export function surveyTakeover(derived: BuildingPerformanceInput, current: Loose
     if (zone != null) {
       if (keys.includes('lighting')) next.lighting = toProjectZone(next.lighting, demand.zoneId, demand.usableFloorAreaM2, zone, 'areaM2');
       if (keys.includes('humidifiers')) next.humidifiers = toProjectZone(next.humidifiers, demand.zoneId, demand.usableFloorAreaM2, zone, 'servedAreaM2');
-      const factor = areaFactor(demand.usableFloorAreaM2, zone);
+      // The hot water serves the building, not only the zone the survey goes into (review 59).
+      const building = typeof zone.buildingFloorArea === 'number' && zone.buildingFloorArea > 0
+        ? { id: zone.id, floorArea: zone.buildingFloorArea } : zone;
+      const factor = areaFactor(demand.usableFloorAreaM2, building);
       if (keys.includes('hotWater')) next.hotWater = hotWaterToProject(next.hotWater, factor);
       if (keys.includes('additionalHotWaterSystems') && Array.isArray(next.additionalHotWaterSystems)) {
         next.additionalHotWaterSystems = next.additionalHotWaterSystems.map((system) => hotWaterToProject(system, factor));

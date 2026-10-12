@@ -95,7 +95,10 @@ if [ "${NTA_SKIP_KERNEL_E2E:-0}" != "1" ]; then
   # each /api call in-process. Reuses the service crate's target dir (built above).
   step "app against the real kernel (kernel_once)"
   cargo build --locked --quiet --manifest-path crates/nta8800-service/Cargo.toml --example kernel_once
-  OES_KERNEL_ONCE="$(pwd)/crates/nta8800-service/target/debug/examples/kernel_once" \
+  # Where cargo put it: CARGO_TARGET_DIR when set (relative to the repository root), else the crate's own target.
+  nta_kernel_once="${CARGO_TARGET_DIR:-crates/nta8800-service/target}/debug/examples/kernel_once"
+  case "$nta_kernel_once" in /*) ;; *) nta_kernel_once="$(pwd)/$nta_kernel_once" ;; esac
+  OES_KERNEL_ONCE="$nta_kernel_once" \
     npx vitest run src/__tests__/real-kernel-e2e.test.tsx
 fi
 
