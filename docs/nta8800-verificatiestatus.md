@@ -86,7 +86,27 @@ Samen 2 417 vergeleken grootheden (per maand opwekkerinvoer per energiedrager, h
 - **Elektrische boiler:** rendement 1,0 zonder c_W;gen, geen hulpenergie en geen terugwinbaar verlies (13.8.4.5.3).
 - **Booster:** c_W;gen uit tabel 13.27, omdat een booster een individuele tapwaterwarmtepomp is (13.8.4.7.3).
 - **PV, c_sh:** onder F 0,80 houdt de kern c_sh op 0,75 (gedocumenteerde lezing van tabel 16.3); de herberekening volgt dat.
-- **Niet nagerekend in deze review:** zonneboilers (13.7), warmtepompen met productwaarden volgens bijlage Q, WKK methode 1, de gemeten booster van bijlage W en koelmethoden 1 en 2 (10.5.4/10.5.5). Die routes zijn niet opnieuw afgeleid.
+- **Niet nagerekend in deze review:** zonneboilers (13.7), warmtepompen met productwaarden volgens bijlage Q, WKK methode 1, de gemeten booster van bijlage W en koelmethoden 1 en 2 (10.5.4/10.5.5). Review 67 (hieronder) rekent zonneboilers, WKK methode 1, de gemeten booster en koelmethode 2 alsnog na.
+
+**Restende installatieroutes onafhankelijk nagerekend (review 67).** Op dezelfde manier als review 66: ISSO 54 v2.0-deeltesten in 2025+C1 en synthetische varianten daarvan met één route aangezet, nagerekend met een eigen implementatie vanaf de normpagina's zonder eerst de kerncode van die route te lezen. Tolerantie 10⁻⁶ relatief.
+
+| Route | Gevallen | Vergeleken | Uitkomst |
+|---|---|---|---|
+| Zonneboiler, alleen tapwater (13.7.2.2: 13.66, 13.72–13.84, 13.92–13.109, tabellen 13.10–13.15; p. 574–594) | EP-W405a (voorverwarmer, beglaasd, label A), EP-W405b (onbeglaasd, west 30°, label C), EP-W405e (geïntegreerde naverwarming, 100 l back-up van 220 l) | 180 | gelijk |
+| Koelmethode 2 (10.5.5: 10.65, 10.67–10.69, 10.73–10.75, tabellen 10.19, 10.21, 10.22, 10.24, 10.26; p. 409–416) | EP-W301a met een split-inverter airco en met een watergekoelde koelmachine op een droge koeler | 28 | gelijk |
+| Gemeten boosterwarmtepomp (bijlage W: W.1, W.2, W.8–W.15; p. 1119–1126) | EP-W406i met metingen bij klasse 3 (24/40 °C) en bij klasse 1 (16/40 °C) | 48 | gelijk |
+| Micro-WKK methode 1 (9.6.6.2: 9.66–9.83; p. 346–352) | EP-W204g met een Stirling-WKK, CHP_100+Sup_0 5,5 kW en CHP_100+Sup_100 24 kW | 48 | gelijk |
+| **Totaal** | | **304** | **gelijk** |
+
+- **Als invoer van de kern overgenomen:** Q_W;dis per maand (13.1.2), de genivelleerde setpointtemperatuur van 7.76 voor ϑ_sto;amb (13.69; hoofdstuk 7 is in review 63 nagerekend), de koelgrens (10.3.5), t_C uit tabel 10.6, Δϑ_int;inc (10.11) en t_H;op van 9.32a.
+- **Afronding:** de pomp van de zonneboiler (13.76: 10 + 1·A = 15 W) wordt volgens bijlage X naar het *volgende hogere* getal uit tabel X.1 afgerond, dus 16 W. W.1 en W.2 van de booster worden ook naar boven afgerond; Q_W;ren van de zonneboiler naar beneden.
+- **H_sto;ls van de zonneboiler (13.82):** de waarde uit het energielabel wordt niet afgerond; de afrondingsregel van 13.81 geldt voor de opgave van de leverancier (UA). De herberekening volgt dat en komt dan overeen.
+- **Koelgrens onder 15 °C:** tabel 10.24 begint bij ≥ 15; bij een koelgrens van 14 °C gebruikt de kern de kolom ≥ 15. De herberekening volgt dat.
+- **Tabel 10.8 letterlijk:** bij een watergevoerd systeem is de gevraagde uittredetemperatuur ϑ_in − Δϑ_int;inc. Met een negatieve Δϑ_int;inc (−4,8 K bij vloerkoeling) wordt dat 17 + 4,8 = 21,8 °C. Kern en herberekening lezen de formule letterlijk.
+- **Booster, correctie voor de taphoeveelheid:** W.3.3 staat drie methoden toe; de kern gebruikt methode 3 (W.14/W.15, interpolatie met het stilstandsverlies). Met tabel 13.27 (methode 2) komen 24 van de 24 maandwaarden anders uit; de herberekening volgt de keuze van de kern.
+- **WKK methode 1, lezingen van de kern aangehouden** (lijst `micro_chp::INTERPRETATIONS`): P_th;sb = 0, de NEN-EN 50465-rendementen op onderwaarde met omrekening f_Hs/Hi 1,11 voor aardgas, en warmte boven P_th;chp_100+sup_100 × t als bijstook tegen f_prac × η_th;100 (9.66 wijst die warmte aan geen opwekker toe).
+- **Opgemerkt bij WKK methode 1:** tabel 9.35 geeft t = t_H;op volgens 9.32a. Voor een woning met een individuele installatie bevat 9.32a de pompfactor f_H;red;pmp;op = 0,10 (tabel 9.X). De WKK krijgt daardoor een tiende van de stookuren (januari 42,9 h) en draait in de koudste maanden op vollast met bijstook. De kern volgt de letterlijke tekst; of dit zo bedoeld is, is een mogelijke vraag aan NEN.
+- **Niet nagerekend:** koelmethode 1 (NEN-EN 14825, 10.5.4) en warmtepompen met productwaarden volgens bijlage Q. Die routes zijn niet opnieuw afgeleid. Zes gevallen staan als test in `crates/nta8800-core/tests/installations_independent.rs`.
 
 ## Stand 11 oktober 2026
 
