@@ -25,6 +25,24 @@ Samen 782 vergeleken grootheden. Alle komen overeen, op BENG 1 van het kantoor n
 - **Niet opnieuw afgeleid:** hoofdstuk 11. De luchtvolumestromen, H_ve per maand (verwarming en koeling, met de toevoertemperatuur van de wtw) en het ventilatorgebruik zijn van de kern overgenomen. Hoofdstuk 11 is op 3 oktober onafhankelijk nagerekend; sindsdien veranderde alleen de sectorgrens van 11.77 (review 43), die review 52 onafhankelijk narekende en die in deze projecten niet speelt. Daardoor is BENG 1 van het kantoor, dat volgens §5.4 uit de rekenrun met vast ventilatiesysteem C1 komt, alleen als som van die run gecontroleerd. Bij de woning is het eigen systeem al C1.
 - **Leesfout eerst bij de herberekening, niet bij de kern:** formule 7.33 bevat F_sh;obst;op,k;mi, maar p. 185 zet die voor niet-transparante elementen op 1. De kern volgt dat; een eerste versie van de herberekening niet. D.2/D.3 zijn een product van seizoensgemiddelden (afgelezen van de gerenderde p. 790), zoals de kern rekent.
 
+**Hoofdstuk 11 alsnog onafhankelijk nagerekend (review 64).** Het gat hierboven is gedicht: hoofdstuk 11 is voor beide voorbeeldprojecten opnieuw afgeleid vanaf de normpagina's, vanaf de afgeleide invoer van de kern en zonder eerst de hoofdstuk 11-code van de kern te lezen. De woning heeft C1 (natuurlijke toevoer, mechanische afvoer), het kantoor D2 (balansventilatie met tegenstroom-wtw en volledige bypass).
+
+| Onderdeel | Normplaats | Tussenwoning | Kantoor |
+|---|---|---|---|
+| q_V;ODA;req (f_ctrl, f_sys, f_prac;req, q_usi;spec, f_τ, f_lea;du, f_lea;ahu) | 11.22, 11.56/11.57, tabellen 11.5, 11.8, 11.9 (p. 444–475) | gelijk | gelijk |
+| Infiltratie q_V1;lea;ref, spuien q_V;argI (τ_argI, tabel 11.10) | 11.68, 11.84, 11.85, tabel 11.7 (p. 467–486) | gelijk | gelijk |
+| Mechanische toe- en afvoer en lekfactoren | 11.2.2.2.3/11.2.2.2.4, 11.87–11.92 (p. 449–451, 476–477) | gelijk | gelijk |
+| Luchtstroommodel: p_e per opening, interne referentiedruk via de routine van 11.2.1.6 (nauwkeurigheid x, stappen 1–12), effectieve in- en uitstromen | 11.1–11.21, tabellen 11.1–11.3 (p. 428–446) | gelijk | gelijk |
+| Toevoertemperatuur: wtw (f_prac;hr, η_hr tabel 11.18, bypass), vorstbeveiliging, ventilatorsprong | 11.99–11.108, 11.3.2.7, tabel 11.16 (p. 476–490) | gelijk | gelijk |
+| H_ve per maand met b_v en H_ve·(ϑ_set − ϑ_e), ook per luchtstroom | 7.19, 7.20 (p. 168–170) | gelijk | gelijk |
+| Ventilatorgebruik forfaitair, vorstbeveiliging, roosterverwarming | 11.105/11.106, 11.125, 11.132, 11.142, tabel 11.23 (p. 479–495) | gelijk | gelijk |
+| Run met vast systeem C1 (§5.4.3) door hoofdstuk 7, met de vaste interne warmte van §5.4.2 | §5.4.2, §5.4.3 (p. 80–83) | gelijk | gelijk |
+
+Samen 1 041 vergeleken grootheden (per maand verwarming en koeling), alle gelijk tegen 1·10⁻⁶ relatief. BENG 1 van het kantoor (74,55) volgt nu ook uit de eigen herberekening van de C1-run: let daarbij op §5.4.2, dat voor utiliteit de interne warmte vastzet (Φ_int;W = 0, q_L;kantoor = 1,25 W/m², geen terugwinbare systeemverliezen). Een eerste versie van de herberekening liet dat weg en kwam op 74,35; de kern rekent het goed. c_a van 11.115/11.119 is als gedrukt gelaten (vraag 7 aan NEN); de luchtbehandelingskast-batterijen zelf spelen in deze projecten niet. Geen kernfout, geen gewijzigde uitkomst.
+
+- **Niet in deze projecten aanwezig en dus niet met deze herberekening gedekt:** ventilatieve koeling (11.2.3.3), open verbrandingstoestellen (11.2.4), luchtbehandelingskast met batterijen (11.110–11.121), gebouwen vanaf 15 m (meerdere luchtstroomzones), de kruipruimterijen van tabel 11.1, roosterverwarming en vorstbeveiliging bij woningen met balansventilatie. De sectorgrens van 11.77 is door review 52 al apart nagerekend.
+- **Grenswaarden voor de lucht (`heatingLimitAirKwh`, `coolingLimitAirKwh`)** horen bij 9.29 en 10.15 en niet bij hoofdstuk 11; ze zijn hier niet opnieuw afgeleid.
+
 ## Stand 11 oktober 2026
 
 **Controle per hoofdstuk tegen de normtekst (reviews 40–51).** Na de onafhankelijke herberekeningen van 5 oktober is de kern nog eens per hoofdstuk naast de tekst van NTA 8800:2025+C1:2026 gelegd, met waar de kern uitgaven onderscheidt een vergelijking met 2024, 2023, 2022 en 2020+A1. Per review staan de nagerekende formules en tabellen in de [releasenotes](nta8800-releasenotes.md) onder "Onuitgebracht".
