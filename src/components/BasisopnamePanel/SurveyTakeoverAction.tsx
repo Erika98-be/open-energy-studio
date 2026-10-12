@@ -35,18 +35,22 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
   const current = (shared?.draft ?? shared?.base ?? null) as Draft | null;
   const surfaces = useMemo(() => projectGroundSurfaces(state.project as never), [state.project]);
   const floors = useMemo(() => canTakeOver(result) ? surveyGroundFloors(result.derivedInput) : [], [result]);
+  // The zone the chapter 11 ventilation follows on Toepassen (syncVentilation); lighting and humidifiers follow it too.
+  const firstZone = state.project?.zones?.[0];
+  const takeoverZone = useMemo(() => firstZone ? { id: firstZone.id, floorArea: firstZone.floorArea ?? null } : undefined,
+    [firstZone]);
   const projectHasPsi = useMemo(() => (state.project?.zones ?? []).some((zone) => (zone.thermalBridges ?? []).length > 0), [state.project]);
   const routeItem = useMemo(() => canTakeOver(result) ? bridgeRouteItem(surveyBridgeRoute(result), current, projectHasPsi) : null,
     [result, current, projectHasPsi]);
   const preview = useMemo(() => {
     if (!open || !canTakeOver(result)) return null;
-    const takeover = surveyTakeover(result.derivedInput, current);
+    const takeover = surveyTakeover(result.derivedInput, current, takeoverZone);
     const changes = changedPaths(current ?? {}, takeover.next).map((path) => {
       const segments = parseKernelPath(path);
       return { path, from: read(current ?? {}, segments), to: read(takeover.next, segments) };
     });
     return { ...takeover, changes, ground: groundFloorItems(result.derivedInput, current, pairs) };
-  }, [open, result, current, pairs]);
+  }, [open, result, current, pairs, takeoverZone]);
 
   const start = () => {
     if (!canTakeOver(result)) return;
@@ -95,7 +99,7 @@ export function SurveyTakeoverAction({ result }: { result: OpnameAssessment }) {
             if (!canTakeOver(result)) return;
             const derived = result.derivedInput;
             const route = routeAccepted ? routeItem : null;
-            shared.update((draft) => applyBridgeRoute(applyGroundFloors(surveyTakeover(derived, draft).next, derived, pairs, accepted),
+            shared.update((draft) => applyBridgeRoute(applyGroundFloors(surveyTakeover(derived, draft, takeoverZone).next, derived, pairs, accepted),
               route, new Set(route ? [route.key] : [])) as Draft);
             setOpen(false);
             setDone(true);
