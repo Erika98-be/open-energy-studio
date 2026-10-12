@@ -1,4 +1,29 @@
-# NTA 8800 verificatiestatus — 11 oktober 2026
+# NTA 8800 verificatiestatus — 12 oktober 2026
+
+## Stand 12 oktober 2026: onafhankelijke herberekening van de voorbeeldprojecten (review 63)
+
+Na reviews 40–62 zijn de twee voorbeeldprojecten (`training-data/nta8800-example-terraced-dwelling.json` en `nta8800-example-office.json`, NTA 8800:2025+C1:2026) opnieuw van begin tot eind nagerekend met een eigen implementatie vanaf de normpagina's, zoals op 3 en 5 oktober. Uitgangspunt is de afgeleide invoer van de kern (`derivedInput`), niet haar tussenresultaten. Elke grootheid die de kern uitgeeft en die op dezelfde manier is bepaald, is tegen 1·10⁻⁶ relatief vergeleken; de herberekening zelf blijft buiten de repository.
+
+| Onderdeel | Normplaats | Tussenwoning | Kantoor |
+|---|---|---|---|
+| ΔU_for, H_D, verticale leidingen | 8.2, 8.3; 7.17/7.17a, tabel 7.1 | gelijk | gelijk |
+| Vloer op grond: B', d_f;eq, U_f, H_g;for; H_pi, H_pe, H_g;an per maand, H_H/C;g;adj | 8.30–8.41; D.1–D.6, tabel D.1 | gelijk | gelijk |
+| Interne warmte (woning 7.21–7.24; kantoor 7.25–7.29 met verlichting en terugwinbaar tapwaterverlies) | 7.5 | gelijk | gelijk |
+| Zonnewinst per raam (verwarming en koeling) en niet-transparant, hemelstraling | 7.32, 7.33, 7.39, 7.40; tabellen 17.2, 17.4, 17.5 | gelijk | gelijk |
+| Temperatuurnivellering, onderbrekingsfactor, rekentemperatuur, a_C;red | 7.59–7.79 | gelijk | gelijk |
+| Tijdconstanten, benuttingsfactoren, Q_H;nd en Q_C;nd per maand | 7.1–7.13, 7.46–7.58 | gelijk | gelijk |
+| Afgifteverlies, opwekkingsrendement, gas en hulpenergie per maand | 9.9–9.12a, tabellen 9.2–9.4 en 9.25, 9.61, 9.85 | gelijk | gelijk |
+| Tapwater: behoefte, afgifte, opwekking (c_W;gen klasse 4) of voorraadvatverlies (13.59, label C) | 13.15–13.23, tabellen 13.1–13.3, 13.9, 13.25, 13.26 | gelijk | gelijk |
+| Verlichting forfaitair (P_n, W_L, W_P, W_t) | 14.7, 14.13, 14.14, tabellen 14.1 en 14.3 | n.v.t. | gelijk |
+| PV per maand | 16.2–16.4b, tabellen 16.2 en 16.3 | gelijk | gelijk |
+| Elektriciteitsgebruik, primair fossiel, hernieuwbaar, BENG 2 en 3 | tabel 5.2, §5.3 | gelijk | gelijk |
+| BENG 1 | §5.3, §5.4 | gelijk | zie onder |
+| TOjuli per oriëntatie (oppervlak, H, Q_C;nd;juli, TOjuli) | 5.40–5.41, p. 115–120 | gelijk | gelijk |
+
+Samen 782 vergeleken grootheden. Alle komen overeen, op BENG 1 van het kantoor na: de herberekening nam eerst de behoefte met het eigen ventilatiesysteem (46,83), de kern neemt terecht die van de C1-run van §5.4 (74,55, de som van die run klopt). Er is geen kernfout gevonden en er verandert geen uitkomst.
+
+- **Niet opnieuw afgeleid:** hoofdstuk 11. De luchtvolumestromen, H_ve per maand (verwarming en koeling, met de toevoertemperatuur van de wtw) en het ventilatorgebruik zijn van de kern overgenomen. Hoofdstuk 11 is op 3 oktober onafhankelijk nagerekend; sindsdien veranderde alleen de sectorgrens van 11.77 (review 43), die review 52 onafhankelijk narekende en die in deze projecten niet speelt. Daardoor is BENG 1 van het kantoor, dat volgens §5.4 uit de rekenrun met vast ventilatiesysteem C1 komt, alleen als som van die run gecontroleerd. Bij de woning is het eigen systeem al C1.
+- **Leesfout eerst bij de herberekening, niet bij de kern:** formule 7.33 bevat F_sh;obst;op,k;mi, maar p. 185 zet die voor niet-transparante elementen op 1. De kern volgt dat; een eerste versie van de herberekening niet. D.2/D.3 zijn een product van seizoensgemiddelden (afgelezen van de gerenderde p. 790), zoals de kern rekent.
 
 ## Stand 11 oktober 2026
 
