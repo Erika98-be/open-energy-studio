@@ -16,11 +16,14 @@ export interface GateStep {
   seconds: number | null;
   rust: RustCounts | null;
   vitest: { files?: VitestCounts; tests?: VitestCounts } | null;
+  failed?: boolean;
 }
 export interface GateLogSummary {
   steps: GateStep[];
   totalSeconds: number | null;
   passed: boolean;
+  status: 'passed' | 'failed' | 'incomplete';
+  missingSteps: string[];
 }
 export interface ReferenceSummary {
   verdict: string | null;
@@ -38,3 +41,5 @@ export function summariseGateLog(logText: string): GateLogSummary;
 export function summariseReferenceReport(report: unknown): ReferenceSummary;
 export function renderGateSummaryMarkdown(summary: GateSummary | null): string;
 export function renderGateSummaryEnglish(summary: GateSummary | null): string;
+export const REQUIRED_STEPS: string[];
+export function gateSummaryProblems(gate: GateLogSummary, options?: { requireAllSteps?: boolean }): string[];

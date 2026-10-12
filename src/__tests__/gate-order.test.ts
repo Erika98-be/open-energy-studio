@@ -23,7 +23,10 @@ describe('scripts/verify-nta.sh', () => {
     expect(collect).toBeGreaterThan(gate.indexOf('step "TypeScript"'));
     expect(collect).toBeLessThan(gate.indexOf('step "UI tests"'));
     expect(gate).toContain('exit "$status"');
-    expect(gate).toContain("trap 'stop_bg; timing_summary' EXIT");
+    // Review 61: the trap stops every background tree, marks the failed step and keeps the exit status.
+    expect(gate).toContain(`trap 'nta_exit=$?; stop_bg; timing_summary "$nta_exit"; exit "$nta_exit"' EXIT`);
+    expect(gate).toMatch(/kill_tree\(\) \{[\s\S]*pgrep -P "\$1"[\s\S]*kill_tree "\$child"/);
+    expect(gate).toContain('step_done " (failed, exit $status)"');
   });
 
   it('keeps the Rust 1.77.2 run of the whole kernel test suite', () => {

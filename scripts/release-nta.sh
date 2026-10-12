@@ -72,6 +72,14 @@ if [[ $dry_run -eq 0 ]]; then
     printf 'De werkmap heeft lokale wijzigingen; een vrijgave vraagt een schone werkmap.\n' >&2
     exit 1
   fi
+  # A skip switch of the gate in the environment would leave out the Rust 1.77.2 run or
+  # the app run against the real kernel; a release needs the full gate.
+  for skip in NTA_SKIP_MSRV NTA_SKIP_KERNEL_E2E; do
+    if [[ "${!skip:-0}" == "1" ]]; then
+      printf '%s=1 staat aan; een vrijgave vraagt de volledige gate.\n' "$skip" >&2
+      exit 1
+    fi
+  done
   if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
     printf 'Tag %s bestaat al: verhoog de programma- of rekenkernversie.\n' "$tag" >&2
     exit 1
@@ -145,8 +153,13 @@ else
   gate_status="geslaagd"
   # Test counts and step times as the gate itself reported them (BRL 9501
   # §6.2–6.3): the test report and the release text are filled from this file.
+  # It also stops the release when the log is no evidence: a failed or cut-off gate, or
+  # (outside a dry run) a gate that left out a required step.
+  summary_args=(--require-pass)
+  if [[ $dry_run -eq 1 ]]; then summary_args+=(--allow-missing-steps); fi
   node scripts/nta-gate-summary.mjs --log "$archive/gate.log" \
-    --reference "$archive/evidence/reference/reference-report.json" --out "$archive/gate-samenvatting.json"
+    --reference "$archive/evidence/reference/reference-report.json" --out "$archive/gate-samenvatting.json" \
+    "${summary_args[@]}"
 fi
 
 # Every ISSO 54 deeltest as a project file the app opens, with an outcome
@@ -209,6 +222,13 @@ if [[ ${#manual_files[@]} -eq 1 ]]; then
 fi
 manual_args=()
 for file in "${manual_files[@]}"; do manual_args+=(--manual "$file"); done
+
+# The gate, the testset and the build must not have changed tracked files: the release
+# commit and the leveringsdocument name exactly the commit that was checked.
+if [[ $dry_run -eq 0 && -n "$(git status --porcelain)" ]]; then
+  printf 'De gate of de build heeft de werkmap gewijzigd:\n%s\n' "$(git status --porcelain)" >&2
+  exit 1
+fi
 
 if [[ $notes_to_commit -eq 1 ]]; then
   step "releasenotes: onuitgebrachte items onder Rekenkern ${kernel_version} (commit)"
