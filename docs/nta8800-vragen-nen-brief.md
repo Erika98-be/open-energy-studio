@@ -43,6 +43,7 @@ Wij stellen een antwoord per vraag zeer op prijs, ook als het een verwijzing is 
   - geval A +1,66, geval B +0,94 en geval C +0,50;
   - geval I +0,29;
   - geval M +2,92.
+- **Toepassingsgebied in de kern.** Alleen bij een koelmachine (compressie of absorptie); niet bij externe koude, vrije koeling of een onbekende collectieve opwekker.
 - **Vraag.** Geldt de regelenergie van 10.87 in alle maanden? Geldt ze ook wanneer de koeling wordt geleverd door een omkeerbare warmtepomp waarvan de regeling al in de verwarmingsberekening is meegenomen?
 
 ### Vraag 3. Praktijkfactor f_prac bij een kwaliteitsverklaring van een warmtepomp (p. 337, 340, 615–617)

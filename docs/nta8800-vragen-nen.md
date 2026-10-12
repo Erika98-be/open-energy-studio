@@ -23,6 +23,8 @@ Alle twaalf vragen staan ook in een verzendklare brief aan NEN en RVO, met per v
 - Geldt de regelenergie van 10.87 in alle twaalf maanden, ook buiten het koelseizoen?
 - Geldt ze ook wanneer de koeling wordt geleverd door een omkeerbare warmtepomp waarvan de regeling al in de verwarmingsberekening (hulpenergie van de warmtepomp) is meegenomen?
 
+**Huidige lezing van de kern.** De kern telt 10.87 in alle maanden bij een koelmachine (compressie of absorptie), niet bij externe koude, vrije koeling en een onbekende collectieve opwekker (review 66).
+
 ## 3. f_prac bij een kwaliteitsverklaring van een warmtepomp (p. 337, 340, 615–617)
 
 **Situatie.** Formule 9.62 (tabelroute) heeft f_prac 1; formule 9.63 (gegevens volgens NEN-EN 14511/14825 via bijlage Q) heeft 0,95. §9.1 (p. 285) laat een kwaliteitsverklaring de tabelwaarde vervangen. Op p. 615 staat dat een kwaliteitsverklaring voor verwarming is opgesteld volgens bijlage Q. Voor tapwater geeft 13.152 f_prac 1,0 aan de forfaitaire waarden van 13.8.4.5–13.8.4.7 en 0,95 in alle overige gevallen.
