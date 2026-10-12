@@ -173,6 +173,27 @@ Elk veranderd getal wordt toegeschreven aan een item in de releasenotes: BENG 1/
 
 Deze werkwijze is toegepast in review 10 (basis) en review 17 (herhaling, zonder onverklaarde verschillen). De harnassen staan beschreven in die reviews: per project een regel met alle indicatoren, vóór en na naast elkaar.
 
+**Doorlooptijd van de gate.** `scripts/verify-nta.sh` drukt per stap de duur af en sluit af met een overzicht. Meting op 12 oktober 2026, koude build in een verse werkmap, 8 kernen, 13 GB:
+
+| Stap | Tijd (s) |
+|---|---|
+| kerntests (`crates/nta8800-core`) | 357 |
+| clippy kern | 49 |
+| servicetests | 123 |
+| clippy service | 41 |
+| referentiesuites | 11 |
+| kern op Rust 1.77.2 | 426 |
+| frontendbundel | 33 |
+| Tauri check | 109 |
+| Tauri-commandotests | 138 |
+| TypeScript | 25 |
+| UI-tests | 385 |
+| app tegen de echte kern (`kernel_once`) | 55 |
+| projectformulieren door de kern | 43 |
+| **totaal** | **1798** |
+
+Tests per run: de kern 985 unittests plus de integratietests, de UI 1614 tests in 172 bestanden (7 overgeslagen), de app-run 7 tests. Met `NTA_GATE_PARALLEL=1` lopen de Rust 1.77.2-run en de frontend/Tauri-pijplijn naast de kernstappen. Dat staat standaard uit: op deze machine gaf het een geheugentekort, en een parallelle meting is daarom nog niet gedaan. De kerntests besteden het grootste deel aan een paar binaries met twee of drie zware tests (82 s en 57 s); daar valt de meeste winst te halen.
+
 ## 6. Codereviews
 
 Naast de geautomatiseerde tests wordt elke wijziging gereviewd. Grote wijzigingen krijgen daarnaast een gerichte review.

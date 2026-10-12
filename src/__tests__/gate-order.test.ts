@@ -14,6 +14,22 @@ describe('scripts/verify-nta.sh', () => {
     expect(build).toBeLessThan(gate.indexOf('step "Tauri command tests"'));
   });
 
+  it('collects every background pipeline before the UI tests and fails on a failed one', () => {
+    // The Rust 1.77.2 run and the frontend/Tauri pipeline run next to the kernel steps;
+    // vitest must not run next to a cargo build (timing tests), and a failure must stop the gate.
+    expect(gate).toContain('start_bg "core on Rust 1.77.2" msrv_core');
+    expect(gate).toContain('start_bg "frontend bundle and Tauri" frontend_and_tauri');
+    const collect = gate.lastIndexOf('\nfinish_bg\n');
+    expect(collect).toBeGreaterThan(gate.indexOf('step "TypeScript"'));
+    expect(collect).toBeLessThan(gate.indexOf('step "UI tests"'));
+    expect(gate).toContain('exit "$status"');
+    expect(gate).toContain("trap 'stop_bg; timing_summary' EXIT");
+  });
+
+  it('keeps the Rust 1.77.2 run of the whole kernel test suite', () => {
+    expect(gate).toMatch(/CARGO_TARGET_DIR=target\/msrv-core cargo \+1\.77\.2 test --locked --quiet \\\n\s+--manifest-path crates\/nta8800-core\/Cargo\.toml\n/);
+  });
+
   it('runs the app against the real kernel through kernel_once, after the UI tests', () => {
     const e2e = gate.indexOf('step "app against the real kernel (kernel_once)"');
     expect(e2e).toBeGreaterThan(gate.indexOf('step "UI tests"'));
