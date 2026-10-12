@@ -5,12 +5,14 @@
 //
 //   node scripts/nta-github-release.mjs --out <file.md> --tag <tag> --commit <sha>
 //        --notes <released-notes.md> [--repo-url <https://github.com/owner/repo>]
+//        [--gate-summary <gate-samenvatting.json>]
 //        [asset ...]
 import { writeFileSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normaliseNewlines } from './nta-kernel-version.mjs';
 import { readIdentity, sha256File } from './nta-leveringsdocument.mjs';
+import { renderGateSummaryEnglish } from './nta-gate-summary.mjs';
 
 /**
  * The titles of the entries in the released section of `kernelVersion`
@@ -45,7 +47,7 @@ export function shortCommit(commit) {
 
 /** Fills the release body. Every asset is listed with its SHA-256. */
 export function renderGithubRelease(values) {
-  const { identity, tag, commit, notesText, assets, repoUrl } = values;
+  const { identity, tag, commit, notesText, assets, repoUrl, gateSummary } = values;
   const link = (path) => (repoUrl ? `${repoUrl}/blob/${tag}/${path}` : path);
   const attest = identity.attestNumber || 'nog niet toegekend';
   const { section, items } = releasedItems(notesText, identity.kernelVersion);
@@ -80,8 +82,11 @@ export function renderGithubRelease(values) {
     `Full change list: [docs/nta8800-releasenotes.md](${link('docs/nta8800-releasenotes.md')}).`,
     '',
     '### Verification',
-    'The release gate `scripts/verify-nta.sh` passed, including the kernel on Rust 1.77.2. ' +
-      'The archive holds the gate log, the reference-suite report and the test report. ' +
+    (gateSummary
+      ? 'The release gate `scripts/verify-nta.sh` passed, including the kernel on Rust 1.77.2: ' +
+        `${renderGateSummaryEnglish(gateSummary)} `
+      : 'The release gate `scripts/verify-nta.sh` passed, including the kernel on Rust 1.77.2. ') +
+      'The archive holds the gate log, the gate summary (`gate-samenvatting.json`), the reference-suite report and the test report. ' +
       `See the [test protocol](${link('docs/nta8800-testprotocol.md')}).`,
     '',
     '### Downloads',
@@ -113,7 +118,7 @@ function main(argv) {
   const options = { assets: [] };
   for (let i = 0; i < argv.length; i += 1) {
     const flag = argv[i];
-    if (['--out', '--tag', '--commit', '--notes', '--repo-url'].includes(flag)) {
+    if (['--out', '--tag', '--commit', '--notes', '--repo-url', '--gate-summary'].includes(flag)) {
       options[flag.slice(2)] = argv[i + 1];
       i += 1;
     } else {
@@ -132,6 +137,7 @@ function main(argv) {
     commit: options.commit,
     notesText: readFileSync(options.notes, 'utf8'),
     repoUrl: githubUrl(options['repo-url'] ?? ''),
+    gateSummary: options['gate-summary'] ? JSON.parse(readFileSync(options['gate-summary'], 'utf8')) : null,
     assets: options.assets.map((path) => ({ name: basename(path), sha256: sha256File(path) })),
   });
   writeFileSync(options.out, body);

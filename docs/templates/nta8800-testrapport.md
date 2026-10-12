@@ -18,7 +18,7 @@ Volgens het [testprotocol](../nta8800-testprotocol.md). `scripts/release-nta.sh`
 
 ## Automatische testniveaus (§2)
 
-Het gatelog staat in `gate.log`, het referentierapport in `evidence/reference/`.
+Het gatelog staat in `gate.log`, het referentierapport in `evidence/reference/`. De tabel onder "Gate-uitvoer" is door `scripts/release-nta.sh` uit die twee bestanden gehaald (ook als `gate-samenvatting.json`); neem de aantallen per niveau daaruit over.
 
 | | Niveau | Resultaat (aantal geslaagd / totaal) | Opmerking |
 |---|---|---|---|
@@ -35,6 +35,12 @@ Het gatelog staat in `gate.log`, het referentierapport in `evidence/reference/`.
 | k | Frontendtests | | |
 | l | MSRV 1.77.2 | | |
 | m | Versie- en handleidingstempel | | |
+| n | App tegen de echte rekenkern (`kernel_once`) | | |
+| o | Formulierstanden en gewiste velden door de kern | | |
+
+### Gate-uitvoer (automatisch ingevuld)
+
+{{GATE_SUMMARY}}
 
 ## ISSO 54 (§3)
 

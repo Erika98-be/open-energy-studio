@@ -143,6 +143,10 @@ else
   step "gate (log in ${archive}/gate.log)"
   NTA_EVIDENCE_DIR="$PWD/$archive/evidence" scripts/verify-nta.sh 2>&1 | tee "$archive/gate.log"
   gate_status="geslaagd"
+  # Test counts and step times as the gate itself reported them (BRL 9501
+  # §6.2–6.3): the test report and the release text are filled from this file.
+  node scripts/nta-gate-summary.mjs --log "$archive/gate.log" \
+    --reference "$archive/evidence/reference/reference-report.json" --out "$archive/gate-samenvatting.json"
 fi
 
 # Every ISSO 54 deeltest as a project file the app opens, with an outcome
@@ -224,8 +228,12 @@ node scripts/nta-leveringsdocument.mjs --out "$archive/leveringsdocument.md" \
 
 step "testrapport (docs/nta8800-testprotocol.md §7)"
 node --input-type=module -e "
-  import { readFileSync, writeFileSync } from 'node:fs';
+  import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+  import { renderGateSummaryMarkdown } from './scripts/nta-gate-summary.mjs';
+  const summaryFile = '$archive/gate-samenvatting.json';
+  const summary = existsSync(summaryFile) ? JSON.parse(readFileSync(summaryFile, 'utf8')) : null;
   const fields = {
+    GATE_SUMMARY: renderGateSummaryMarkdown(summary),
     PROGRAM_VERSION: '$program_version',
     KERNEL_VERSION: '$kernel_version',
     TAG: '$tag',
@@ -241,14 +249,18 @@ node --input-type=module -e "
 
 step "github-release.md (tekst voor de GitHub-release)"
 repo_remote="$(git remote get-url origin 2>/dev/null || true)"
+gate_summary_args=()
+if [[ -f "$archive/gate-samenvatting.json" ]]; then
+  gate_summary_args=(--gate-summary "$archive/gate-samenvatting.json")
+fi
 node scripts/nta-github-release.mjs --out "$archive/github-release.md" --tag "$tag" \
   --commit "$commit" --notes "$archive/releasenotes.md" --repo-url "$repo_remote" \
-  "${packages[@]}" "${manual_files[@]}" "$archive/leveringsdocument.md" "$archive/testrapport.md"
+  "${gate_summary_args[@]}" "${packages[@]}" "${manual_files[@]}" "$archive/leveringsdocument.md" "$archive/testrapport.md"
 
 step "manifest en SHA256SUMS"
 node --input-type=module -e "
   import { readIdentity, sha256File } from './scripts/nta-leveringsdocument.mjs';
-  import { readdirSync, writeFileSync } from 'node:fs';
+  import { readdirSync, writeFileSync, existsSync } from 'node:fs';
   const manifest = {
     ...readIdentity('.'),
     tag: '$tag',
@@ -257,6 +269,9 @@ node --input-type=module -e "
     dryRun: $dry_run === 1,
     gate: '$gate_status',
     packagesBuilt: $skip_build === 0,
+    gateSummary: existsSync('$archive/gate-samenvatting.json')
+      ? { file: 'gate-samenvatting.json', sha256: sha256File('$archive/gate-samenvatting.json') }
+      : null,
     manual: '${manual_files[*]}'.split(' ').filter(Boolean).map((path) => ({
       file: path.slice('$archive/'.length), sha256: sha256File(path),
     })),

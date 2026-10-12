@@ -45,12 +45,13 @@ CARGO_NET_OFFLINE=true scripts/verify-nta.sh            # met MSRV-run
 CARGO_NET_OFFLINE=true NTA_SKIP_MSRV=1 scripts/verify-nta.sh   # zonder, voor tussentijdse runs
 ```
 
-- **Duur:** 15 tot 30 minuten op een machine met 8 kernen.
+- **Duur:** ongeveer 30 minuten op een machine met 8 kernen (zie §5, doorlooptijd van de gate).
+- **Aantallen:** de aantallen tests hieronder zijn afgerond en verouderen; de geldende aantallen per vrijgave staan in `gate-samenvatting.json` en in het testrapport, uit het gatelog van die vrijgave.
 - **Bewijs:** de gate schrijft het referentierapport en de formulierdocumenten naar `$NTA_EVIDENCE_DIR`, standaard `nta-evidence/gate/` (niet in git). `scripts/release-nta.sh` zet dit per vrijgave in `release/<tag>/evidence/` en het gatelog in `release/<tag>/gate.log`.
 
 | | Niveau | Wat het dekt | Uitvoeren | Geslaagd als | Bewijs | Duur |
 |---|---|---|---|---|---|---|
-| a | Unittests van de kern | Elke formule, tabel en invoercontrole, met paginaverwijzing naar de norm in de testnaam of het commentaar | `cargo test --locked --manifest-path crates/nta8800-core/Cargo.toml --lib` | alle tests groen (~950) | gatelog | ~1 min |
+| a | Unittests van de kern | Elke formule, tabel en invoercontrole, met paginaverwijzing naar de norm in de testnaam of het commentaar | `cargo test --locked --manifest-path crates/nta8800-core/Cargo.toml --lib` | alle tests groen (bijna 1 000) | gatelog | ~1 min |
 | b | Differentiële tests per uitgave | Per schakelpunt verandert alleen de verwachte grootheid tussen opeenvolgende uitgaven; elk bronlabel noemt de berekende uitgave (`tests/edition_labels.rs`); een wissel van uitgave noemt elke weigering en eis met zijn schakelpunt (`tests/edition_switch.rs`). De verschillentabel per uitgave op de openbare gevallen staat in `tests/edition_deltas.rs` (`--ignored`). | `--test norm_versions`, `--test edition_labels`, `--test edition_switch` (zelfde manifest) | alle tests groen | gatelog | < 1 min |
 | c | Openbare gevallen A–O | Vijftien gepubliceerde BENG-berekeningen nagebouwd en in hun eigen uitgave doorgerekend; de banden en de verschilanalyse per post staan in [vergelijking openbare rapporten](nta8800-vergelijking-openbare-rapporten.md) | `--test public_comparison` | elke waarde binnen de vastgelegde band | gatelog | < 1 min |
 | d | Referentiesuites | De suites in `training-data/reference-suites/`: `openbare-gevallen.json` (A–O), `rvo-voorbeeldwoningen.json` (±6 % op Q_H;nd) en `isso54-v2.json` (260 deeltesten zonder verwachting) | gatestap "reference suites"; los: `cargo run --manifest-path crates/nta8800-service/Cargo.toml --bin reference_gate -- --suite <suite> --report-dir <map>` | afsluitcode 0. Een suite die alleen `pending_expectation` bevat, geeft los gedraaid afsluitcode 3 (`no_comparison`), wat geen geslaagd oordeel is. In de gate vergelijken de openbare gevallen en RVO wel, en is de afsluitcode 0. | `reference-report.json` en `.md` met commit, `KERNEL_VERSION`, uitgave, oordeel en SHA-256 per invoer en uitvoer | ~1 min |
@@ -60,9 +61,11 @@ CARGO_NET_OFFLINE=true NTA_SKIP_MSRV=1 scripts/verify-nta.sh   # zonder, voor tu
 | h | Robuustheid | Afwijkende en kapotte invoer, achtergehouden resultaten, null gelijk aan afwezig (`tests/robustness.rs`, `tests/null_as_absent.rs`), opname in alle uitgaven (`tests/survey_editions.rs`), overnemen van vloeren op de grond uit de opname (`tests/survey_takeover.rs`), opname- en formuliervormen (`tests/survey_form_shapes.rs`, `tests/project_form_shapes.rs`), bewijskoppelingen (`tests/evidence_link_registration.rs`) | `cargo test --locked --manifest-path crates/nta8800-core/Cargo.toml` | alle tests groen | gatelog | ~1 min |
 | i | Service, API en MCP | Operaties, foutmodel, gelijktijdigheid en wachtrij, time-outs, `Retry-After`, Host-controle, onbekende velden (`tests/api.rs`); MCP over stdio inclusief kapotte JSON-RPC (`tests/mcp_stdio.rs`); geheugengrens per verzoek (`tests/memory_bound.rs`) | `cargo test --locked --manifest-path crates/nta8800-service/Cargo.toml` | alle tests groen | gatelog | ~1 min |
 | j | Desktop-opdrachten | Kernopdrachten met uitgave en paniekafvang, atomair opslaan met `.bak`, recente bestanden na herstart (`src-tauri/src/lib.rs`, `src-tauri/src/project_files.rs`) | `cargo test --locked --manifest-path src-tauri/Cargo.toml --lib` | alle tests groen | gatelog | < 1 min |
-| k | Frontendtests (Vitest) | Ruim 1 300 tests in 139 bestanden in `src/__tests__/`; zie de lijst hieronder | `npx vitest run --maxWorkers=4` (limiet per test 60 s uit `vitest.config.ts`) | alle tests groen | gatelog | 5–10 min |
+| k | Frontendtests (Vitest) | Ruim 1 600 tests in ruim 170 bestanden in `src/__tests__/`, met de veegtest op gewiste velden (`nta-clear-field-sweep.test.tsx`); zie de lijst hieronder | `npx vitest run --maxWorkers=4` (limiet per test 60 s uit `vitest.config.ts`) | alle tests groen | gatelog | 5–10 min |
 | l | MSRV | De kern op Rust 1.77.2, de oudste ondersteunde versie | `cd crates/nta8800-core && CARGO_TARGET_DIR=target/msrv-core cargo +1.77.2 test --locked --offline` | alle tests groen | gatelog (stap "core on Rust 1.77.2") | ~3 min |
 | m | Versie- en handleidingstempel | Een uitkomstwijziging heeft een MINOR-stap van `KERNEL_VERSION`, uitgebrachte secties van de releasenotes zijn ongewijzigd, en de handleiding is gestempeld voor de huidige kern | `node scripts/nta-kernel-version.mjs check` en `node scripts/nta-manual.mjs check` | beide melden overeenstemming | gatelog (eerste twee stappen) | seconden |
+| n | App tegen de echte rekenkern | De hele app met elke `/api`-aanroep beantwoord door `crates/nta8800-service/examples/kernel_once.rs`, zonder server: openen en rekenen, opname overnemen, maatwerkadvies, uitgave wisselen, rapport en EP-Online-overzicht, een gat met "Ga naar"; wat het scherm toont moet gelijk zijn aan het antwoord van de kern (`real-kernel-e2e.test.tsx`) | gatestap "app against the real kernel (kernel_once)"; los: `OES_KERNEL_ONCE=<pad> npx vitest run src/__tests__/real-kernel-e2e.test.tsx` | alle tests groen | gatelog | ~1 min |
+| o | Formulierstanden en gewiste velden door de kern | De toestanden van de formulierbewaking en de veegtest (elk wisbaar veld afzonderlijk gewist) gaan door de kern; elk gewist veld geeft precies één gat op dat veld (`tests/project_form_guard.rs`) | gatestap "project-form states through the kernel" | alle tests groen | gatelog, `evidence/form-guard/` | ~1 min |
 
 **Ook in de gate:**
 
@@ -233,13 +236,13 @@ De herstellingen staan per ronde in de [releasenotes](nta8800-releasenotes.md).
 
 **Bij elke vrijgave.** `scripts/release-nta.sh` maakt het archief `release/<tag>/` met:
 
-- het gatelog (`gate.log`);
+- het gatelog (`gate.log`) en de samenvatting daarvan (`gate-samenvatting.json`: per gatestap de Rust- en Vitest-aantallen en de duur, en per referentiesuite de gevallen en het oordeel), waaruit het testrapport en `github-release.md` hun aantallen halen;
 - het referentierapport (`evidence/reference/reference-report.json` en `.md`);
 - de formulierdocumenten (`evidence/form-guard/`);
 - de pakketten, de handleiding, het leveringsdocument en `manifest.json`;
 - de tekst voor de GitHub-release (`github-release.md`), met de SHA-256 van de bestanden die bij de release horen;
 - `SHA256SUMS`;
-- een vooringevuld testrapport (`testrapport.md`) volgens het sjabloon [nta8800-testrapport](templates/nta8800-testrapport.md), met versies, commit, tag, datum en gatestatus al ingevuld.
+- een vooringevuld testrapport (`testrapport.md`) volgens het sjabloon [nta8800-testrapport](templates/nta8800-testrapport.md), met versies, commit, tag, datum, gatestatus en de gate-uitvoer per stap al ingevuld.
 
 De tester vult daarin de resultaten per niveau, de handmatige tests (§4), de afwijkingen en de aftekening in. Het ingevulde rapport wordt bewaard bij het archief, volgens het [archiefbeleid](kwaliteit/archiefbeleid.md).
 
