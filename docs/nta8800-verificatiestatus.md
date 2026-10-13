@@ -1,6 +1,8 @@
-# NTA 8800 verificatiestatus — 12 oktober 2026
+# NTA 8800 verificatiestatus — 13 oktober 2026
 
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. De laatste volledige technische testgate voor deze code is review 72 (`0dcd315`). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
+
+De bewaarde HTTP- en MCP-binaries leverden voor dezelfde voorbeeldtussenwoning beide BENG 2 = 80,56 kWh/m²·jaar en indicatieve klasse A+ met status `calculated_unverified` en `unattested`. De HTTP-gezondheidsroute en MCP-initialisatie slaagden. Dit controleert alleen de gebouwde transportadapters.
 
 ## Stand 12 oktober 2026: onafhankelijke herberekening van de voorbeeldprojecten (review 63)
 

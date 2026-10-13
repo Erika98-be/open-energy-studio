@@ -1,10 +1,12 @@
 # NTA 8800 dekkingsregister
 
-Bijgewerkt op 12 oktober 2026. De derde volledige dekkingsaudit vond op 3 oktober plaats.
+Bijgewerkt op 13 oktober 2026. De derde volledige dekkingsaudit vond op 3 oktober plaats.
 
 **Interne verificatie sinds de dekkingsaudit.** De hoofdstuksgewijze controle tegen NTA 8800:2025+C1:2026 staat in het [verificatiedossier](nta8800-verificatiestatus.md). De voorbeeldwoning en het voorbeeldkantoor zijn opnieuw onafhankelijk doorgerekend (782 grootheden); hoofdstuk 11 en de vaste C1-run zijn daarna afzonderlijk herberekend (1 041 grootheden). Voor routes buiten die voorbeelden zijn twaalf ventilatievarianten en zesendertig installatievarianten (reviews 66–70, met koelmethode 1, de varianten van bijlage Q en de herberekening bij overventilatie) als vaste tests opgenomen. Dit vergroot het interne bewijs voor de geïmplementeerde routes, maar verandert de kolommen *Referentie* en *Attest* hieronder niet. De actuele officiële ISSO 54-uitkomsten en de formele externe toets ontbreken nog; zes van de 266 historische deeltests blijven buiten de uitvoerbare scope wegens ontbrekende normroute of productverklaring.
 
 De [nieuwe Linux-devbuild van `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) is met een verse `npm ci` en vastgelegde locks gebouwd; pakket en drie Rust-servicebinaries zijn met SHA-256 bewaard en door de manifestlezer gecontroleerd. Dit is technisch bouwbewijs op een documentatiecommit na de geslaagde review-72-gate; de kolommen *Referentie* en *Attest* blijven ongewijzigd.
+
+De bewaarde HTTP- en MCP-binaries zijn daarna afzonderlijk gestart en gaven voor de voorbeeldtussenwoning dezelfde onverifieerde status, BENG 2 van 80,56 en indicatieve klasse A+. Deze transportcontrole verandert de normatieve dekking niet.
 
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
