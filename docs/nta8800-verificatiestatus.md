@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 12 oktober 2026
 
+**Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. De laatste volledige technische testgate voor deze code is review 72 (`0dcd315`). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
+
 ## Stand 12 oktober 2026: onafhankelijke herberekening van de voorbeeldprojecten (review 63)
 
 Na reviews 40–62 zijn de twee voorbeeldprojecten (`training-data/nta8800-example-terraced-dwelling.json` en `nta8800-example-office.json`, NTA 8800:2025+C1:2026) opnieuw van begin tot eind nagerekend met een eigen implementatie vanaf de normpagina's, zoals op 3 en 5 oktober. Uitgangspunt is de afgeleide invoer van de kern (`derivedInput`), niet haar tussenresultaten. Elke grootheid die de kern uitgeeft en die op dezelfde manier is bepaald, is tegen 1·10⁻⁶ relatief vergeleken; de herberekening zelf blijft buiten de repository.
