@@ -8,6 +8,8 @@ De [nieuwe Linux-devbuild van `4c871f1`](nta8800-build-verificatie-2026-10-13-4c
 
 De bewaarde HTTP- en MCP-binaries zijn daarna afzonderlijk gestart en gaven voor de voorbeeldtussenwoning dezelfde onverifieerde status, BENG 2 van 80,56 en indicatieve klasse A+. Deze transportcontrole verandert de normatieve dekking niet.
 
+De [wijzigingsimpact voor 2026](nta8800-2026-wijzigingen.md) is op de actuele Rust-implementatie afgestemd: opslag, GACS, nieuwe indicatoren en de overige wijzigingstakken staan nu als geïmplementeerd of gedeeltelijk geïmplementeerd met hun open bewijsgrenzen. Er is geen nieuwe reken- of referentietoets uitgevoerd.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

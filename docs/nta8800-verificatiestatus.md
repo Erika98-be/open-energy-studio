@@ -4,6 +4,8 @@
 
 De bewaarde HTTP- en MCP-binaries leverden voor dezelfde voorbeeldtussenwoning beide BENG 2 = 80,56 kWh/m²·jaar en indicatieve klasse A+ met status `calculated_unverified` en `unattested`. De HTTP-gezondheidsroute en MCP-initialisatie slaagden. Dit controleert alleen de gebouwde transportadapters.
 
+De [wijzigingsimpact voor de doeluitgave](nta8800-2026-wijzigingen.md) is op 14 oktober met het dekkingsregister in overeenstemming gebracht. Dit corrigeert een verouderde documentatiestatus, zonder nieuwe berekening of bewijs voor een attest.
+
 ## Stand 12 oktober 2026: onafhankelijke herberekening van de voorbeeldprojecten (review 63)
 
 Na reviews 40–62 zijn de twee voorbeeldprojecten (`training-data/nta8800-example-terraced-dwelling.json` en `nta8800-example-office.json`, NTA 8800:2025+C1:2026) opnieuw van begin tot eind nagerekend met een eigen implementatie vanaf de normpagina's, zoals op 3 en 5 oktober. Uitgangspunt is de afgeleide invoer van de kern (`derivedInput`), niet haar tussenresultaten. Elke grootheid die de kern uitgeeft en die op dezelfde manier is bepaald, is tegen 1·10⁻⁶ relatief vergeleken; de herberekening zelf blijft buiten de repository.
