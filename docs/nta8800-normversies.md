@@ -58,6 +58,8 @@ De invoer draagt de uitgave (`NtaCalculationInput.normVersion`, `BuildingPerform
 
 Dat wijkt bewust af van "alle parameters doorgeven". De kern rekent synchroon op één thread, en de bewaker herstelt de vorige uitgave ook bij een paniek. Zo hoeven niet tientallen functiesignaturen en struct-initialisaties te veranderen voor een getal dat in één uitgave anders is. Andere threads (de service, parallelle tests) rekenen ongestoord in hun eigen uitgave. Een rekenfunctie die zonder `with_version` wordt aangeroepen (een eenheidstest), rekent in 2025+C1. De service draait elk verzoek in een eigen blokkerende taak; een test met parallelle verzoeken in 2024 en 2025+C1 laat zien dat de uitgave niet tussen verzoeken lekt.
 
+Elk schakelpunt in de tabellen hieronder is in reviews 72 en 73 naast de tekst van beide uitgaven gelegd; een deel staat als kerntest met de waarden uit de tekst in `crates/nta8800-core/tests/edition_switches_independent.rs`. Per schakelpunt staat in de [verificatiestatus](nta8800-verificatiestatus.md) (stand 12 oktober) of het getal of alleen de route is nagelopen.
+
 ## Verschillen 2024 → 2025+C1 die de kern omschakelt
 
 | # | Onderwerp | 2024 (pagina) | 2025+C1 (pagina) | Kern |
