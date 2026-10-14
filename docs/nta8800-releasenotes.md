@@ -13,6 +13,10 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 14 oktober 2026 — Review 73: overige schakelpunten van oudere uitgaven nagelopen (geen rekenwijziging)
+- **Nagelopen:** alle schakelpunten die review 72 open liet, tegen de tekst van beide uitgaven. Tabel 13.4 van 2023 en tabel 7.10 van 2022 nu als kerntest met de waarden uit de tekst, plus een kerntest op de waarde per uitgave van de schakelpunten 7, 13, 29, 30/53, 37, 54, 59, 62, 73, 75 en 77 (`edition_switches_independent.rs`). Geen afwijking met de kern.
+- **Opgemerkt:** in 2024 spreken de definitie bij (5.20) (bron onder 20 °C telt niet) en 9.6.3.1.3 (bronwarmte vanaf 15 °C) elkaar tegen; de kern volgt 9.6.3.1.3 met het interpretatiedocument. Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
+
 ### 12 oktober 2026 — Review 72: schakelpunten van oudere uitgaven nagelopen; miscanthus/graswol en NEN-EN 13053 in 2022
 - **Nagelopen:** de schakelpunten die review 71 niet raakte, tegen de tekst van elke uitgave. Elf schakelpunten (6, 12, 15, 16, 19, 26, 27, 38, 60, 74 en 76) nu ook als kerntest met met de hand berekende waarden (`edition_switches_independent.rs`); een groot deel van de rest tekstueel. Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
 - **Miscanthus en graswol vóór 2025+C1:** tabel E.11 van 2020+A1 t/m 2024 heeft voor deze materialen geen waarde. De kern gaf ze de 2025+C1-waarde; nu `route_not_in_edition` op het materiaal. Invoer die al rekende verandert niet.
