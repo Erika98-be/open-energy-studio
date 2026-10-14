@@ -13,6 +13,11 @@ Dit bestand is de wijzigingsregistratie van de rekenkern (BRL 9501 §5.2, §6.2 
 
 ## Onuitgebracht
 
+### 14 oktober 2026 — Review 74: documentatie bijgewerkt na de onafhankelijke herberekeningen (geen rekenwijziging)
+- **Verificatiestatus:** bovenaan een overzicht van reviews 63–73 (wat per hoofdstuk, bijlage en uitgave is nagerekend, met aantallen grootheden) en wat niet onafhankelijk is nagerekend.
+- **Overzicht kern 0.4.0:** de invoerafhankelijke wijzigingen van reviews 70 en 72 toegevoegd; de open interpretaties lopen nu tot vraag 14.
+- **Overige documenten:** gereedheid, dekkingsregister, testprotocol en README noemen de herberekeningen en de testbestanden met onafhankelijk berekende waarden.
+
 ### 14 oktober 2026 — Review 73: overige schakelpunten van oudere uitgaven nagelopen (geen rekenwijziging)
 - **Nagelopen:** alle schakelpunten die review 72 open liet, tegen de tekst van beide uitgaven. Tabel 13.4 van 2023 en tabel 7.10 van 2022 nu als kerntest met de waarden uit de tekst, plus een kerntest op de waarde per uitgave van de schakelpunten 7, 13, 29, 30/53, 37, 54, 59, 62, 73, 75 en 77 (`edition_switches_independent.rs`). Geen afwijking met de kern.
 - **Opgemerkt:** in 2024 spreken de definitie bij (5.20) (bron onder 20 °C telt niet) en 9.6.3.1.3 (bronwarmte vanaf 15 °C) elkaar tegen; de kern volgt 9.6.3.1.3 met het interpretatiedocument. Zie de [verificatiestatus](nta8800-verificatiestatus.md), stand 12 oktober.
@@ -198,8 +203,10 @@ Samenvatting van de onuitgebrachte items hieronder die uitkomsten veranderen; de
   - **Koeling:** de condensorwarmte bij een verklaarde EER of ζ met waterzijdige warmteafvoer (review 48).
   - **Forfaitaire R_c:** thermokussens onder een vloer met een spouw krijgen geen spouwwaarde meer (review 50).
   - **Constructies:** nieuwe keuze voor een zwak geventileerde smalle luchtlaag, met de halve waarde van tabel F.1 (review 51; bestaande projecten ongewijzigd).
+  - **Overventilatie met een afvoerluchtwarmtepomp:** een opgegeven tapwaterdebiet onder het vereiste buitenluchtdebiet wordt opgehoogd tot q_V;ODA;req (13.148/13.148a; review 70).
+  - **Oudere uitgaven:** miscanthus en graswol worden vóór 2025+C1 geweigerd (tabel E.11), en η_hr volgens NEN-EN 13053 is in 2022 en 2020+A1 nu een route met aftrek 0,10 (review 72). Invoer die al rekende verandert niet.
   - **Eerdere items van 9 oktober:** PV boven 300/400 W/m², WKK met voorraadvat, opgegeven F_D;dayl, kelderwanden in A_ls, wanden en daken aan de grond, gemeenschappelijke ruimten (6.6.4).
-- **Open interpretaties.** De keuzes achter vragen 1–13 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
+- **Open interpretaties.** De keuzes achter vragen 1–14 aan NEN veranderen niet tot er een antwoord is ([vragen aan NEN](nta8800-vragen-nen.md), [brief](nta8800-vragen-nen-brief.md)).
 
 ### 11 oktober 2026 — Gedeelde serre: begrenzing 7.38 met het setpoint van elke zone
 Formule 7.38 (p. 187) begrenst de winst van een serre waaraan meerdere rekenzones grenzen met de som van H_zi,j;ztu·(θ_int;set;H;stc;zi − θ_e) over al die zones, elk met het eigen setpoint. De kern nam tot nu toe H_zi;ztu / F (7.36) met het setpoint van de eigen zone; dat is alleen exact bij gelijke setpoints (kanttekening van review 52).
