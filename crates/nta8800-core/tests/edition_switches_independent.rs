@@ -303,3 +303,93 @@ fn switch_12_table_13_18_interpolation() {
     ))
     .is_none());
 }
+
+/// Review 73, switch point 44: NTA 8800:2023 table 13.4 (p. 542) rows for an
+/// unknown diameter by type of system. "klein": 1,0 / 0,4 / 0,4 / 0,3 /
+/// 0,25 / 0,2; "overig": 2,0 / 0,74 / 0,74 / 0,56 / 0,46 / 0,4 for no,
+/// unknown, 10, 15, 20 and 25 mm insulation.
+#[test]
+fn switch_44_table_13_4_unknown_diameter_rows_2023() {
+    use nta8800_core::domestic_hot_water::{table_13_4_system_psi, PipeInsulation as Ins};
+    let columns = [
+        Ins::None,
+        Ins::Unknown,
+        Ins::Mm10,
+        Ins::Mm15,
+        Ins::Mm20,
+        Ins::Mm25,
+    ];
+    let small = [1.0, 0.4, 0.4, 0.3, 0.25, 0.2];
+    let other = [2.0, 0.74, 0.74, 0.56, 0.46, 0.4];
+    for (index, insulation) in columns.into_iter().enumerate() {
+        close(table_13_4_system_psi(true, insulation), small[index]);
+        close(table_13_4_system_psi(false, insulation), other[index]);
+    }
+}
+
+/// Review 73, switch point 58: NTA 8800:2022 table 7.10 (p. 181–182) by the
+/// mass of the construction per m² usable floor area: below 250 kg/m² 55/80,
+/// 250 to 500 110/180, 500 to 750 180/360, above 750 250/450 kJ/(m²K) for a
+/// closed or suspended ceiling / no or open ceiling.
+#[test]
+fn switch_58_table_7_10_by_mass_2022() {
+    use nta8800_core::monthly_demand::{specific_heat_capacity_by_mass, CeilingColumn};
+    let check = |mass, closed: f64, open: f64| {
+        close(
+            specific_heat_capacity_by_mass(mass, CeilingColumn::ClosedOrSuspended),
+            closed,
+        );
+        close(
+            specific_heat_capacity_by_mass(mass, CeilingColumn::OpenOrNone),
+            open,
+        );
+    };
+    check(200.0, 55.0, 80.0);
+    check(250.0, 110.0, 180.0);
+    check(499.0, 110.0, 180.0);
+    check(500.0, 180.0, 360.0);
+    check(750.0, 180.0, 360.0);
+    check(751.0, 250.0, 450.0);
+}
+
+/// Review 73: switch points whose kernel value is a per-edition constant,
+/// each checked against the text of the editions on both sides.
+/// 7: (9.62) has no f_cor.bron.col in 2024 (p. 314) and 0,022/0,009 in
+///    2025+C1 (p. 331–332).
+/// 13: 11.136 measured motor efficiency only when higher than table 11.20
+///    in 2024 (p. 499), free choice in 2025+C1 (p. 515).
+/// 29: P.6.5.4.8 geothermal efficiency is the forfait 20 in 2023 (p. 960)
+///    and temperature-dependent in 2024 (p. 958).
+/// 30 and 53: the bmA biomass limit names no kW value in 2022 (p. 96),
+///    100 kW in 2023 (p. 90, 92) and 500 kW in 2024 (p. 99, 103) and
+///    2025+C1 (p. 105).
+/// 37: U_rc of rooflights appears from 2024 (p. 210), not in 2023.
+/// 54: (9.58) has no f_gebouw;si;H in 2022 (p. 305) and has it in 2023
+///    (p. 309).
+/// 59: 8.47 h is fixed at 0,125 m from 2023 (p. 240), not in 2022 (p. 236).
+/// 62: swimming pools in (11.57) from 2023 (p. 459), not in 2022.
+/// 73: an unknown β may be taken as 0,5 in 2022 (p. 936, opmerking 2), with
+///    no such rule in 2020+A1 (p. 921–926).
+/// 75: (11.139) of 2020+A1 (p. 495) has one f_systype term; 2022 (p. 499)
+///    splits it over (11.140)–(11.142).
+/// 77: actual pipe length only for utility buildings in 2020+A1 (p. 292,
+///    363), for dwellings too in 2022 (p. 294, 367).
+#[test]
+fn review73_edition_constants_match_the_text() {
+    let p = |version: NormVersion| version.profile();
+    assert!(!p(V2024).collective_source_correction && p(V2025).collective_source_correction);
+    assert!(!p(V2024).motor_efficiency_free_choice && p(V2025).motor_efficiency_free_choice);
+    assert!(p(V2023).geothermal_efficiency_fixed && !p(V2024).geothermal_efficiency_fixed);
+    assert!(p(V2022).biomass_threshold_kw.is_infinite());
+    close(p(V2023).biomass_threshold_kw, 100.0);
+    close(p(V2024).biomass_threshold_kw, 500.0);
+    close(p(V2025).biomass_threshold_kw, 500.0);
+    assert!(!p(V2023).rooflight_route && p(V2024).rooflight_route);
+    assert!(!p(V2022).preference_beta_building_share && p(V2023).preference_beta_building_share);
+    assert!(!p(V2022).crawl_wall_height_fixed && p(V2023).crawl_wall_height_fixed);
+    assert!(!p(V2022).swimming_pool_route && p(V2023).swimming_pool_route);
+    assert!(!p(V2020).unknown_beta_route && p(V2022).unknown_beta_route);
+    assert_eq!(p(V2020).fan_systype_combined, Some(1.5));
+    assert_eq!(p(V2022).fan_systype_combined, None);
+    assert!(!p(V2020).residential_actual_pipe_length && p(V2022).residential_actual_pipe_length);
+}
