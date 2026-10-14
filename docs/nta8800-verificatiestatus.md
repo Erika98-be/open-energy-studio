@@ -6,6 +6,27 @@ De bewaarde HTTP- en MCP-binaries leverden voor dezelfde voorbeeldtussenwoning b
 
 De [wijzigingsimpact voor de doeluitgave](nta8800-2026-wijzigingen.md) is op 14 oktober met het dekkingsregister in overeenstemming gebracht. Dit corrigeert een verouderde documentatiestatus, zonder nieuwe berekening of bewijs voor een attest.
 
+## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
+
+Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 73 (sequentieel, exit 0).
+
+| Onderdeel | Uitgave | Review | Vergeleken grootheden | Uitkomst |
+|---|---|---|---|---|
+| Voorbeeldwoning en -kantoor, hoofdstukken 5, 7, 8, 9, 13, 14, 16 en TOjuli | 2025+C1 | 63 | 782 | gelijk |
+| Hoofdstuk 11 en de vaste C1-run (5.4.3) van beide voorbeelden | 2025+C1 | 64 | 1 041 | gelijk |
+| Hoofdstuk 11, routes buiten de voorbeelden (ventilatieve koeling, open verbranding, ≥ 15 m, kruipruimte, roosters, vorst, LBK-batterijen) | 2025+C1 | 65 | 12 008 | gelijk |
+| Installaties buiten de voorbeelden (stadswarmte, biomassa, forfaitaire warmtepompen, WKK methode 2, hybride, tapwater, douche-wtw, booster, koelmethode 3, PV en batterij) | 2025+C1 | 66 | 2 417 | gelijk |
+| Zonneboilers, koelmethode 2, gemeten booster, WKK methode 1 | 2025+C1 | 67 | 304 | gelijk |
+| Koelmethode 1, aan/uit-warmtepompen volgens bijlage Q | 2025+C1 | 68 | 492 | gelijk |
+| Overige bijlage Q-varianten (brine/water, water/water, afvoerlucht, lucht/lucht, hybride, modulerend) | 2025+C1 | 69 | 2 214 | gelijk |
+| Laatste bijlage Q-onderdelen (interval 5, Q.4.4, carnotbegrenzing, overventilatie Q.5.3) | 2025+C1 | 70 | 1 034 | gelijk na één herstel (11.23 met 13.148/13.148a) |
+| Voorbeelden en 31 ventilatievarianten in de oudere uitgaven | 2024, 2023, 2022, 2020+A1 | 71 | 14 639 per uitgave | gelijk |
+| Schakelpunten tussen de uitgaven | alle vijf | 72–73 | per schakelpunt tegen de tekst; 12 kerntests | twee herstellen (tabel E.11, NEN-EN 13053 in 2022) |
+
+**Vragen aan NEN** uit deze reeks: 13 (bronpomp dubbel geteld, review 69) en 14 (tapwatertijdfractie Q.86 tegenover 13.149, review 70); samen nu veertien ([vragen aan NEN](nta8800-vragen-nen.md)).
+
+**Niet onafhankelijk nagerekend:** Q.86–Q.88 zelf en Q.92 (de kern gebruikt ze niet), de luchtdebietinterpolatie van tabel Q.9 (niet uitgevoerd), het uurklimaat van 17.3.8 (geen NEN 5060-uurwaarden), en in de oudere uitgaven de hoofdstukken 10 en 13 en de bijlagen buiten wat de voorbeelden en de schakelpunten raken. Officiële referentie-uitkomsten (ISSO 54 v5.0) en externe toetsing ontbreken nog; deze herberekeningen vergroten het interne bewijs, niet de status *Referentie* of *Attest*.
+
 ## Stand 12 oktober 2026: onafhankelijke herberekening van de voorbeeldprojecten (review 63)
 
 Na reviews 40–62 zijn de twee voorbeeldprojecten (`training-data/nta8800-example-terraced-dwelling.json` en `nta8800-example-office.json`, NTA 8800:2025+C1:2026) opnieuw van begin tot eind nagerekend met een eigen implementatie vanaf de normpagina's, zoals op 3 en 5 oktober. Uitgangspunt is de afgeleide invoer van de kern (`derivedInput`), niet haar tussenresultaten. Elke grootheid die de kern uitgeeft en die op dezelfde manier is bepaald, is tegen 1·10⁻⁶ relatief vergeleken; de herberekening zelf blijft buiten de repository.
