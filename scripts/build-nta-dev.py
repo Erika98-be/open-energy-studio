@@ -42,6 +42,12 @@ def digest(path: Path) -> str:
     return sha.hexdigest()
 
 
+def copy_exclusive(source: Path, target: Path) -> None:
+    """Never replace existing build evidence, including a dangling symlink."""
+    with source.open("rb") as input_file, target.open("xb") as output_file:
+        shutil.copyfileobj(input_file, output_file)
+
+
 def clean_commit() -> str:
     if command("git", "status", "--porcelain", "--untracked-files=normal"):
         raise ValueError("Git worktree must be clean before the NTA dev build")
@@ -79,7 +85,7 @@ def main() -> int:
     }
     manifest_path = output / f"oes-nta8800-build_{short}_linux-amd64.json"
     for candidate in [manifest_path, *(output / name for name in filenames.values())]:
-        if candidate.exists():
+        if candidate.exists() or candidate.is_symlink():
             raise FileExistsError(f"Existing build evidence would be overwritten: {candidate}")
 
     if not args.skip_npm_ci:
@@ -107,7 +113,7 @@ def main() -> int:
         if not source.is_file():
             raise FileNotFoundError(source)
         target = output / filenames[name]
-        shutil.copy2(source, target)
+        copy_exclusive(source, target)
         artifacts[name] = {
             "file": target.name,
             "sha256": digest(target),
@@ -142,9 +148,8 @@ def main() -> int:
         "referenceVerified": False,
         "attestStatus": "unattested",
     }
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    with manifest_path.open("x", encoding="utf-8") as manifest_file:
+        manifest_file.write(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     print(manifest_path)
     return 0
 

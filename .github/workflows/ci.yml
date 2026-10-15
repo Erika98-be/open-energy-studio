@@ -32,6 +32,11 @@ jobs:
           node-version: 22
           cache: 'npm'
 
+      - name: Setup Python for build evidence checks
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
       - name: Install Rust stable with Clippy and rustfmt
         uses: dtolnay/rust-toolchain@stable
         with:

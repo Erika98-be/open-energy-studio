@@ -156,6 +156,9 @@ node scripts/nta-kernel-version.mjs check
 step "manual stamped for this kernel version"
 node scripts/nta-manual.mjs check
 
+step "NTA build evidence tests"
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py'
+
 if [[ -n "${NTA_REFERENCE_PLAN:-}" || -n "${NTA_REFERENCE_CASE_DIR:-}" ]]; then
   if [[ -z "${NTA_REFERENCE_PLAN:-}" || -z "${NTA_REFERENCE_CASE_DIR:-}" ]]; then
     printf 'Set both NTA_REFERENCE_PLAN and NTA_REFERENCE_CASE_DIR for the reference gate.\n' >&2

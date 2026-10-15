@@ -12,6 +12,8 @@ De [wijzigingsimpact voor 2026](nta8800-2026-wijzigingen.md) is op de actuele Ru
 
 Na review 73 zijn de resterende normeditie-schakelpunten nagezien zonder nieuwe kernfout. Review 74 heeft het interne herberekeningsoverzicht en de releasevoorbereiding bijgewerkt; de sequentiële releaseproef, inclusief technische gate op Rust 1.77.2, slaagde. Dit levert geen actuele ISSO-54-vergelijking of attest op.
 
+De NTA-devbuildschrijver weigert nu ook een hangende symbolische link als bestaande doelnaam en maakt pakketkopieën en manifest exclusief aan. Een gerichte schrijftest slaagde; dit beschermt bouwbewijs tegen onbedoeld overschrijven en verandert geen reken-, referentie- of attestkolom.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
