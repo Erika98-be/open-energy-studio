@@ -1,6 +1,6 @@
-# NTA 8800 verificatiestatus — 13 oktober 2026
+# NTA 8800 verificatiestatus — 15 oktober 2026
 
-**Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. De laatste volledige technische testgate voor deze code is review 72 (`0dcd315`). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
+**Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
 De bewaarde HTTP- en MCP-binaries leverden voor dezelfde voorbeeldtussenwoning beide BENG 2 = 80,56 kWh/m²·jaar en indicatieve klasse A+ met status `calculated_unverified` en `unattested`. De HTTP-gezondheidsroute en MCP-initialisatie slaagden. Dit controleert alleen de gebouwde transportadapters.
 
@@ -8,7 +8,7 @@ De [wijzigingsimpact voor de doeluitgave](nta8800-2026-wijzigingen.md) is op 14 
 
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
-Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 73 (sequentieel, exit 0).
+Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 74, als onderdeel van de sequentiële releaseproef (exit 0).
 
 | Onderdeel | Uitgave | Review | Vergeleken grootheden | Uitkomst |
 |---|---|---|---|---|

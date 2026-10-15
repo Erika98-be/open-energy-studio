@@ -1,6 +1,6 @@
 # Doeluitgave 2025+C1:2026 — wijzigingsimpact
 
-**Broncontrole:** 29 september 2026; implementatiestand bijgewerkt op 14 oktober 2026. De [Staatscourant 2026, nr. 18113](https://zoek.officielebekendmakingen.nl/stcrt-2026-18113.html) wijst NTA 8800:2025+C1:2026 aan en noemt BRL 9501 van 14 oktober 2025. De toelichting benoemt onderstaande onderwerpen. Zij bevat niet de volledige rekenregels, invoerdefinities of officiële EDR-uitkomsten. De gelicentieerde doeluitgave is lokaal beschikbaar en de Rust-routes zijn ertegen nagelopen; actuele officiële ISSO-54-uitkomsten, de toepasselijke volledige testset en de formele externe toets ontbreken nog. Dit overzicht volgt het [dekkingsregister](nta8800-dekkingsregister.md) en is geen conformiteitsverklaring.
+**Broncontrole:** 29 september 2026; implementatiestand bijgewerkt op 15 oktober 2026. De [Staatscourant 2026, nr. 18113](https://zoek.officielebekendmakingen.nl/stcrt-2026-18113.html) wijst NTA 8800:2025+C1:2026 aan en noemt BRL 9501 van 14 oktober 2025. De toelichting benoemt onderstaande onderwerpen. Zij bevat niet de volledige rekenregels, invoerdefinities of officiële EDR-uitkomsten. De gelicentieerde doeluitgave en de [aangewezen BRL 9501](nta8800-brl9501-gereedheid.md) zijn beschikbaar; de Rust-routes zijn tegen de doeluitgave nagelopen. Actuele officiële ISSO-54-uitkomsten, de toepasselijke volledige testset en de formele externe toets ontbreken nog. Dit overzicht volgt het [dekkingsregister](nta8800-dekkingsregister.md) en is geen conformiteitsverklaring.
 
 | Onderwerp uit de regeling | Huidige project-/Rust-dekking | Benodigd voor een toetsbare route |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ De regeling beschrijft globaal een positieve waardering voor bepaalde opslag en 
 
 ## Beslisvolgorde voor implementatie
 
-1. Behoud de rechtmatig verkregen geconsolideerde NTA buiten de repository; verkrijg de aangewezen BRL 9501 en actuele ISSO 54 met EDR-invoer en verwachte resultaten. Registreer editie, rechten en hash van elk bronbestand.
+1. Behoud de rechtmatig verkregen geconsolideerde NTA buiten de repository en de aangewezen BRL 9501 als eisenkader; verkrijg de actuele ISSO 54 met EDR-invoer en verwachte resultaten. Registreer editie, rechten en hash van elk bronbestand.
 2. Maak per rij een expliciet Rust-invoercontract en een normprofiel met paragraaf-/tabelverwijzingen. Voeg geen standaardwaarde toe zonder normbron.
 3. Sluit de open W- en U-varianten en invoergrenzen in de Rust-keten; vergelijk deelposten vóór eindindicatoren met onafhankelijke actuele gevallen.
 4. Maak de actuele EDR-set blokkerend voor elke release. Archiveer invoerhash, uitvoerhash, normprofiel, kernelversie, tolerantiebron en reviewer.
