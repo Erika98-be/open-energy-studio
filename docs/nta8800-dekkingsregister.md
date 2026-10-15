@@ -24,6 +24,8 @@ De [bouw op `966fea8`](nta8800-build-verificatie-2026-10-15-966fea8.md) bevestig
 
 De manifestlezer heeft een vergelijking van twee builds uit één commit gekregen. De twee `face280`-sets werden gelijk bevonden en een eerder afwijkend debpakket werd afgewezen; de gerichte tests slaagden. Dit is technische bytevergelijking, zonder wijziging van *Referentie* of *Attest*.
 
+Een handmatige Linux-bewijsworkflow voor een afzonderlijke GitHub-runner is toegevoegd, maar nog niet uitgevoerd. Pas een geslaagde run en vergelijking met een lokale bouw uit dezelfde commit kan de open cross-host-bouwvraag behandelen; de normatieve dekkingskolommen veranderen niet.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

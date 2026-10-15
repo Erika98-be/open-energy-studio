@@ -16,6 +16,8 @@ Met `--source-repo /pad/naar/repo` toetst dezelfde lezer bovendien of de geclaim
 
 Met `--compare-with /pad/naar/tweede-manifest.json` controleert de lezer beide artefactsets en vereist hij dezelfde broncommit en bytegelijke hashes en groottes van pakket, API, MCP en referentiegate. Combineer dit met `--source-repo` om beide manifesten tegen dezelfde bron te controleren. De opdracht toont of de bytes gelijk zijn; leg afzonderlijk vast op welke hosts en met welke toolchains de builds daadwerkelijk zijn gemaakt.
 
+De handmatig te starten GitHub Actions-workflow `NTA 8800 build evidence` bouwt dezelfde vier artefacten op een Ubuntu-runner zonder hergebruik van de lokale Cargo-cache, controleert het manifest tegen de uitgecheckte commit en bewaart de bestanden 30 dagen als workflow-artefact. Download die set samen met een lokale build van **dezelfde commit** en voer de vergelijking met `--compare-with` uit. De workflow is pas extern bewijs nadat een run daadwerkelijk is geslaagd en de host-/toolchaingegevens en uitkomst zijn vastgelegd; de definitie van een workflow alleen is geen bouwbewijs.
+
 Voer dit vanaf een gecommitte bronstand uit met Node/npm, Rust/Cargo, Tauri's Linux-ontwikkelbibliotheken en `dpkg-deb` op `PATH`:
 
 ```bash

@@ -18,6 +18,8 @@ De normalisatie zet nu ook oudere pakketbestandstijden en symbolische links expl
 
 De manifestlezer kan nu twee bewaarde builds uit dezelfde commit vergelijken. De gerichte tests (6), de positieve vergelijking van de twee `face280`-builds en de negatieve vergelijking van de eerdere afwijkende `a4e55b4`-debpakketten slaagden. Deze vergelijking koppelt bytes aan dezelfde opgegeven bron, maar stelt geen onafhankelijke host of normatieve juistheid vast.
 
+Een handmatige GitHub Actions-workflow voor een verse Linux-devbuild op een afzonderlijke runner is voorbereid, inclusief Python-bouwbewijstests, manifestcontrole en downloadbare artefacten. De workflow is nog niet op GitHub uitgevoerd; er is dus nog geen cross-host-uitkomst of nieuwe normatieve verificatie.
+
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
 Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 74, als onderdeel van de sequentiële releaseproef (exit 0).
