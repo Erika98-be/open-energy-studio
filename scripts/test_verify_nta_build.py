@@ -30,6 +30,10 @@ class BuildManifestTests(unittest.TestCase):
         second["sourceCommit"] = "d" * 40
         with self.assertRaisesRegex(ValueError, "different source commits"):
             MODULE.compare_builds(first, second)
+        second = json.loads(json.dumps(first))
+        second["targetNormVersion"] = "different edition"
+        with self.assertRaisesRegex(ValueError, "metadata differs: targetNormVersion"):
+            MODULE.compare_builds(first, second)
 
     def test_source_object_must_be_a_commit(self):
         with patch.object(MODULE.subprocess, "check_output", return_value="tree\n") as check:

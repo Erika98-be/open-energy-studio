@@ -16,7 +16,7 @@ Na normalisatie van de debarchiefmetadata slaagden [twee verse builds op commit 
 
 De normalisatie zet nu ook oudere pakketbestandstijden en symbolische links expliciet op de committijd. De [bouw op `966fea8`](nta8800-build-verificatie-2026-10-15-966fea8.md) en de gerichte test slaagden; alle 21 tar-ingangen dragen de vastgelegde tijd. Op deze commit is één lokale bouw bewaard. De normatieve dekkings-, referentie- en atteststatus veranderen niet.
 
-De manifestlezer kan nu twee bewaarde builds uit dezelfde commit vergelijken. De gerichte tests (6), de positieve vergelijking van de twee `face280`-builds en de negatieve vergelijking van de eerdere afwijkende `a4e55b4`-debpakketten slaagden. Deze vergelijking koppelt bytes aan dezelfde opgegeven bron, maar stelt geen onafhankelijke host of normatieve juistheid vast.
+De manifestlezer kan nu twee bewaarde builds uit dezelfde commit vergelijken, inclusief norm-/kernelversie, pakketmetadata en lockhashes. De gerichte tests (6), de positieve vergelijking van de twee `face280`-builds en de negatieve vergelijking van de eerdere afwijkende `a4e55b4`-debpakketten slaagden. Een gewijzigde normversie in één manifest wordt eveneens afgewezen. Deze vergelijking koppelt bytes aan dezelfde opgegeven bron, maar stelt geen onafhankelijke host of normatieve juistheid vast.
 
 Een handmatige GitHub Actions-workflow voor een verse Linux-devbuild op een afzonderlijke runner is voorbereid, inclusief Python-bouwbewijstests, manifestcontrole en downloadbare artefacten. De workflow is nog niet op GitHub uitgevoerd; er is dus nog geen cross-host-uitkomst of nieuwe normatieve verificatie.
 

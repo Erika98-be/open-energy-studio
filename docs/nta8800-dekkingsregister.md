@@ -22,7 +22,7 @@ Met vaste debarchiefmetadata zijn [twee verse herhaalbuilds op `face280`](nta880
 
 De [bouw op `966fea8`](nta8800-build-verificatie-2026-10-15-966fea8.md) bevestigt dat ook oudere ingangstijdstempels in de debbundel op de committijd worden gezet. De test bevat een symbolische link; één lokale bouw is bewaard en geverifieerd. Dit vergroot alleen de reproduceerbaarheid van de pakketvorm en verandert de dekkingskolommen niet.
 
-De manifestlezer heeft een vergelijking van twee builds uit één commit gekregen. De twee `face280`-sets werden gelijk bevonden en een eerder afwijkend debpakket werd afgewezen; de gerichte tests slaagden. Dit is technische bytevergelijking, zonder wijziging van *Referentie* of *Attest*.
+De manifestlezer vergelijkt twee builds uit één commit, met dezelfde norm-/kernelversie, pakketmetadata en lockhashes. De twee `face280`-sets werden gelijk bevonden; een eerder afwijkend debpakket en een synthetisch afwijkende normversie werden afgewezen. De gerichte tests slaagden. Dit is technische bytevergelijking, zonder wijziging van *Referentie* of *Attest*.
 
 Een handmatige Linux-bewijsworkflow voor een afzonderlijke GitHub-runner is toegevoegd, maar nog niet uitgevoerd. Pas een geslaagde run en vergelijking met een lokale bouw uit dezelfde commit kan de open cross-host-bouwvraag behandelen; de normatieve dekkingskolommen veranderen niet.
 

@@ -125,6 +125,9 @@ def compare_builds(first: dict, second: dict) -> None:
     """Require the same source and exact bytes for all four artifacts."""
     if first["sourceCommit"] != second["sourceCommit"]:
         raise ValueError("Builds use different source commits")
+    for field in ("targetNormVersion", "kernelVersion", "desktopPackage", "dependencyLocks"):
+        if first.get(field) != second.get(field):
+            raise ValueError(f"Build metadata differs: {field}")
     for key in sorted(ARTIFACTS):
         a, b = first["artifacts"][key], second["artifacts"][key]
         if (a["sha256"], a["bytes"]) != (b["sha256"], b["bytes"]):
