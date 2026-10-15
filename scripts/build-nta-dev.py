@@ -68,6 +68,11 @@ def normalize_deb(path: Path, source_date_epoch: int) -> None:
         normalized = staging / "normalized.deb"
         env = {**os.environ, "SOURCE_DATE_EPOCH": str(source_date_epoch)}
         run("dpkg-deb", "-R", str(path), str(tree))
+        # SOURCE_DATE_EPOCH only caps newer mtimes; normalize older inputs too.
+        entries = list(tree.rglob("*"))
+        for entry in entries:
+            os.utime(entry, (source_date_epoch, source_date_epoch), follow_symlinks=False)
+        os.utime(tree, (source_date_epoch, source_date_epoch))
         run(
             "dpkg-deb", "--build", "--root-owner-group", "-Zgzip", "-z1",
             str(tree), str(normalized), env=env,

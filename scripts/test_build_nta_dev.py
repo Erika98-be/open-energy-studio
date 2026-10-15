@@ -29,8 +29,9 @@ class BuildWriterTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (package_tree / "usr/share/test/file").write_bytes(b"same content")
+            (package_tree / "usr/share/test/link").symlink_to("file")
             results = []
-            for index, stamp in enumerate((1700000000, 1800000000)):
+            for index, stamp in enumerate((1500000000, 1800000000)):
                 for path in package_tree.rglob("*"):
                     os.utime(path, (stamp, stamp))
                 package = root / f"package-{index}.deb"
