@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -59,6 +60,21 @@ def package_field(path: Path, field: str) -> str:
     return command("dpkg-deb", "--field", str(path), field)
 
 
+def normalize_deb(path: Path, source_date_epoch: int) -> None:
+    """Repack the Tauri bundle with stable ownership, timestamps and compression."""
+    with tempfile.TemporaryDirectory(prefix="oes-nta-deb-", dir=path.parent) as temporary:
+        staging = Path(temporary)
+        tree = staging / "tree"
+        normalized = staging / "normalized.deb"
+        env = {**os.environ, "SOURCE_DATE_EPOCH": str(source_date_epoch)}
+        run("dpkg-deb", "-R", str(path), str(tree))
+        run(
+            "dpkg-deb", "--build", "--root-owner-group", "-Zgzip", "-z1",
+            str(tree), str(normalized), env=env,
+        )
+        normalized.replace(path)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -102,6 +118,7 @@ def main() -> int:
         raise ValueError("Git source changed during the NTA dev build")
     if not expected_deb.is_file():
         raise FileNotFoundError(expected_deb)
+    normalize_deb(expected_deb, source_date_epoch)
     if package_field(expected_deb, "Version") != package["version"]:
         raise ValueError("Desktop package version differs from package.json")
     if package_field(expected_deb, "Architecture") != "amd64":

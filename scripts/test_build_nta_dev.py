@@ -1,6 +1,9 @@
 """Checks that the NTA build writer preserves existing evidence."""
 
 import importlib.util
+import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,6 +16,32 @@ SPEC.loader.exec_module(MODULE)
 
 
 class BuildWriterTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("dpkg-deb"), "dpkg-deb unavailable")
+    def test_normalize_deb_stabilizes_package_timestamps(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            package_tree = root / "package"
+            (package_tree / "DEBIAN").mkdir(parents=True)
+            (package_tree / "usr/share/test").mkdir(parents=True)
+            (package_tree / "DEBIAN/control").write_text(
+                "Package: test-repro\nVersion: 1.0\nArchitecture: all\n"
+                "Maintainer: Test <test@example.invalid>\nDescription: Test package\n",
+                encoding="utf-8",
+            )
+            (package_tree / "usr/share/test/file").write_bytes(b"same content")
+            results = []
+            for index, stamp in enumerate((1700000000, 1800000000)):
+                for path in package_tree.rglob("*"):
+                    os.utime(path, (stamp, stamp))
+                package = root / f"package-{index}.deb"
+                subprocess.run(
+                    ["dpkg-deb", "--build", "--root-owner-group", str(package_tree), str(package)],
+                    check=True, capture_output=True,
+                )
+                MODULE.normalize_deb(package, 1600000000)
+                results.append(package.read_bytes())
+            self.assertEqual(results[0], results[1])
+
     def test_copy_exclusive_rejects_existing_file_and_dangling_symlink(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
