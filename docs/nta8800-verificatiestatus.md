@@ -14,6 +14,8 @@ De [nieuwe Linux-devbuild op `79148ab`](nta8800-build-verificatie-2026-10-15-791
 
 Na normalisatie van de debarchiefmetadata slaagden [twee verse builds op commit `face280`](nta8800-build-verificatie-2026-10-15-face280.md). Pakket, drie servicebinaries en beide manifesten zijn binnen deze host bytegelijk; de manifestlezer controleerde beide runs tegen de broncommit. De Python-bouwbewijstests slagen (5). Dit beperkt de eerder gevonden tijdstempelafwijking, maar bewijst geen reproduceerbaarheid op een onafhankelijke host, officiële referentie-uitkomst of attest.
 
+De normalisatie zet nu ook oudere pakketbestandstijden en symbolische links expliciet op de committijd. De [bouw op `966fea8`](nta8800-build-verificatie-2026-10-15-966fea8.md) en de gerichte test slaagden; alle 21 tar-ingangen dragen de vastgelegde tijd. Op deze commit is één lokale bouw bewaard. De normatieve dekkings-, referentie- en atteststatus veranderen niet.
+
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
 Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 74, als onderdeel van de sequentiële releaseproef (exit 0).

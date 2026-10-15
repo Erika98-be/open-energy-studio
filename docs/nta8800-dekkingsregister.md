@@ -20,6 +20,8 @@ De [nieuwe Linux-devbuild op `79148ab`](nta8800-build-verificatie-2026-10-15-791
 
 Met vaste debarchiefmetadata zijn [twee verse herhaalbuilds op `face280`](nta8800-build-verificatie-2026-10-15-face280.md) op dezelfde host volledig bytegelijk, inclusief pakket en manifest. Beide zijn met de manifestlezer en bronrepository gecontroleerd. Dit is nog geen onafhankelijke cross-host-bouw en verandert de kolommen *Referentie* en *Attest* niet.
 
+De [bouw op `966fea8`](nta8800-build-verificatie-2026-10-15-966fea8.md) bevestigt dat ook oudere ingangstijdstempels in de debbundel op de committijd worden gezet. De test bevat een symbolische link; één lokale bouw is bewaard en geverifieerd. Dit vergroot alleen de reproduceerbaarheid van de pakketvorm en verandert de dekkingskolommen niet.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
