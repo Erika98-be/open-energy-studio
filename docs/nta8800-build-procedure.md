@@ -14,6 +14,8 @@ Controleer een bewaard pakket later met `python3 scripts/verify-nta-build.py /pa
 
 Met `--source-repo /pad/naar/repo` toetst dezelfde lezer bovendien of de geclaimde SHA een Git-commit in die repository is en of de vier lockbestanden, pakketversie, kernelversie, doeluitgave en vastgelegde `SOURCE_DATE_EPOCH` (indien aanwezig) in die commit met het manifest overeenkomen. Een boom- of tagobject telt niet als broncommit. Deze koppeling bewijst nog niet dat de binaries werkelijk uit die bron zijn gecompileerd; daarvoor blijven een vertrouwde bouwomgeving en een reproduceerbare tweede bouw nodig.
 
+Met `--compare-with /pad/naar/tweede-manifest.json` controleert de lezer beide artefactsets en vereist hij dezelfde broncommit en bytegelijke hashes en groottes van pakket, API, MCP en referentiegate. Combineer dit met `--source-repo` om beide manifesten tegen dezelfde bron te controleren. De opdracht toont of de bytes gelijk zijn; leg afzonderlijk vast op welke hosts en met welke toolchains de builds daadwerkelijk zijn gemaakt.
+
 Voer dit vanaf een gecommitte bronstand uit met Node/npm, Rust/Cargo, Tauri's Linux-ontwikkelbibliotheken en `dpkg-deb` op `PATH`:
 
 ```bash

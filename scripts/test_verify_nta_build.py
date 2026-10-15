@@ -16,6 +16,21 @@ SPEC.loader.exec_module(MODULE)
 
 
 class BuildManifestTests(unittest.TestCase):
+    def test_compare_builds_requires_same_source_and_artifact_bytes(self):
+        first = {
+            "sourceCommit": "a" * 40,
+            "artifacts": {key: {"sha256": "b" * 64, "bytes": 10} for key in MODULE.ARTIFACTS},
+        }
+        second = json.loads(json.dumps(first))
+        MODULE.compare_builds(first, second)
+        second["artifacts"]["desktop"]["sha256"] = "c" * 64
+        with self.assertRaisesRegex(ValueError, "artifact differs: desktop"):
+            MODULE.compare_builds(first, second)
+        second = json.loads(json.dumps(first))
+        second["sourceCommit"] = "d" * 40
+        with self.assertRaisesRegex(ValueError, "different source commits"):
+            MODULE.compare_builds(first, second)
+
     def test_source_object_must_be_a_commit(self):
         with patch.object(MODULE.subprocess, "check_output", return_value="tree\n") as check:
             with self.assertRaisesRegex(ValueError, "not a Git commit"):
