@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -29,9 +30,9 @@ def command(*args: str) -> str:
     return subprocess.check_output(args, cwd=ROOT, text=True).strip()
 
 
-def run(*args: str) -> None:
+def run(*args: str, env: dict[str, str] | None = None) -> None:
     print("+", " ".join(args), flush=True)
-    subprocess.run(args, cwd=ROOT, check=True)
+    subprocess.run(args, cwd=ROOT, check=True, env=env)
 
 
 def digest(path: Path) -> str:
@@ -68,6 +69,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     source_commit = clean_commit()
+    source_date_epoch = int(command("git", "show", "-s", "--format=%ct", source_commit))
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     core = tomllib.loads((ROOT / "crates/nta8800-core/Cargo.toml").read_text(encoding="utf-8"))
     norm_source = (ROOT / "crates/nta8800-core/src/lib.rs").read_text(encoding="utf-8")
@@ -91,7 +93,11 @@ def main() -> int:
     if not args.skip_npm_ci:
         run("npm", "ci")
     run("cargo", "build", "--locked", "--manifest-path", "crates/nta8800-service/Cargo.toml", "--bins")
-    run("npm", "run", "tauri", "build", "--", "--debug", "--bundles", "deb")
+    # dpkg-deb clamps archive and tar entry times to this reproducible bound.
+    run(
+        "npm", "run", "tauri", "build", "--", "--debug", "--bundles", "deb",
+        env={**os.environ, "SOURCE_DATE_EPOCH": str(source_date_epoch)},
+    )
     if clean_commit() != source_commit:
         raise ValueError("Git source changed during the NTA dev build")
     if not expected_deb.is_file():
@@ -137,6 +143,7 @@ def main() -> int:
             "node": command("node", "--version"),
             "npm": command("npm", "--version"),
             "npmInstall": "preexisting_node_modules" if args.skip_npm_ci else "npm_ci",
+            "sourceDateEpoch": source_date_epoch,
         },
         "dependencyLocks": {
             "packageLockSha256": digest(PACKAGE_LOCK),

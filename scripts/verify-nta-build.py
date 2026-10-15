@@ -83,6 +83,17 @@ def verify_source(manifest: dict, repo: Path) -> None:
     ).strip()
     if object_type != "commit":
         raise ValueError("Claimed source object is not a Git commit")
+    toolchain = manifest.get("toolchain")
+    if not isinstance(toolchain, dict):
+        raise ValueError("Missing build toolchain metadata")
+    source_date_epoch = toolchain.get("sourceDateEpoch")
+    if source_date_epoch is not None:
+        actual_epoch = int(subprocess.check_output(
+            ["git", "-C", str(repo), "show", "-s", "--format=%ct", commit],
+            text=True,
+        ).strip())
+        if type(source_date_epoch) is not int or source_date_epoch != actual_epoch:
+            raise ValueError("SOURCE_DATE_EPOCH differs from source commit time")
 
     def source_bytes(path: str) -> bytes:
         return subprocess.check_output(

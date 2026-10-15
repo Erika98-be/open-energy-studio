@@ -2,6 +2,8 @@
 
 `scripts/build-nta-dev.py` bouwt op Linux amd64 het Tauri-debugpakket en de Rust-binaries voor HTTP, MCP en de referentiegate. De script weigert een niet-schone Git-werkboom, gebruikt `npm ci` en `cargo build --locked`, controleert de pakketversie en schrijft SHA-256, bestandsgrootte, broncommit, lockbestand-hashes en toolversies naar een JSON-manifest. De manifest bevat altijd `referenceVerified=false` en `attestStatus=unattested`.
 
+Voor de desktopbundel zet de schrijver `SOURCE_DATE_EPOCH` op de Git-committijd en legt die waarde in het manifest vast. `dpkg-deb` gebruikt die grens om archief- en tar-tijdstempels te stabiliseren. De bronrepositorycontrole vergelijkt de vastgelegde waarde met de commit. Dit beperkt één bekende oorzaak van afwijkende deb-hashes; toolchain, systeemlibraries en andere bronbestandsmetadata kunnen nog steeds verschillen.
+
 Voor dezelfde commit weigert de script bestaande artefactnamen in de uitvoermap te overschrijven. Gebruik een nieuwe uitvoermap voor een herbouw die u naast de eerdere artefacten wilt vergelijken.
 
 De schrijver maakt artefacten en het manifest exclusief aan. Ook een bestaande symbolische link naar een ontbrekend bestand blokkeert de bouwuitvoer; een doel dat tijdens de bouw verschijnt wordt niet vervangen. Dit beschermt bewaard bouwbewijs tegen onbedoeld overschrijven, maar maakt de bouw niet onafhankelijk of bit-identiek reproduceerbaar.
@@ -10,7 +12,7 @@ De technische gate voert de Python-tests van de schrijver en manifestlezer uit m
 
 Controleer een bewaard pakket later met `python3 scripts/verify-nta-build.py /pad/naar/oes-nta8800-build_...json`. Deze lezer controleert de vier bestandsgroottes en SHA-256-hashes, veilige unieke bestandsnamen zonder symbolische links, de Linux-debpakketmetadata en de expliciet ongetoetste status. Een gekopieerd manifest kan echter een willekeurige broncommit claimen; vergelijk de manifesthash met een afzonderlijk bewaard dossier en controleer de bronstand apart. Een geslaagde bytecontrole bewijst geen normatieve juistheid.
 
-Met `--source-repo /pad/naar/repo` toetst dezelfde lezer bovendien of de geclaimde SHA een Git-commit in die repository is en of de vier lockbestanden, pakketversie, kernelversie en doeluitgave in die commit met het manifest overeenkomen. Een boom- of tagobject telt niet als broncommit. Deze koppeling bewijst nog niet dat de binaries werkelijk uit die bron zijn gecompileerd; daarvoor blijven een vertrouwde bouwomgeving en een reproduceerbare tweede bouw nodig.
+Met `--source-repo /pad/naar/repo` toetst dezelfde lezer bovendien of de geclaimde SHA een Git-commit in die repository is en of de vier lockbestanden, pakketversie, kernelversie, doeluitgave en vastgelegde `SOURCE_DATE_EPOCH` (indien aanwezig) in die commit met het manifest overeenkomen. Een boom- of tagobject telt niet als broncommit. Deze koppeling bewijst nog niet dat de binaries werkelijk uit die bron zijn gecompileerd; daarvoor blijven een vertrouwde bouwomgeving en een reproduceerbare tweede bouw nodig.
 
 Voer dit vanaf een gecommitte bronstand uit met Node/npm, Rust/Cargo, Tauri's Linux-ontwikkelbibliotheken en `dpkg-deb` op `PATH`:
 
