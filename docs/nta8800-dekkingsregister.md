@@ -16,6 +16,8 @@ De NTA-devbuildschrijver weigert nu ook een hangende symbolische link als bestaa
 
 Op `b98ad9c` slaagde daarna de volledige lokale technische gate, inclusief de drie nieuwe Python-bouwbewijstests, Rust 1.77.2, Tauri, TypeScript/Vite, 1 629 UI-tests en de echte-kerncontroles. De suites bevatten 30 interne vergelijkingen en 260 waarden zonder verwachting; de actuele officiële referentieplanning bleef overgeslagen. De kolommen *Referentie* en *Attest* blijven ongewijzigd.
 
+De [nieuwe Linux-devbuild op `79148ab`](nta8800-build-verificatie-2026-10-15-79148ab.md) slaagde na `npm ci`; de manifestlezer bevestigde bytes en bronmetadata. Drie servicebinaries zijn bytegelijk aan de vorige bewaarde bouw, het debpakket niet. De herbouw op dezelfde host is geen onafhankelijke reproductie en verandert de dekkingskolommen niet.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
