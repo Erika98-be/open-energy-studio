@@ -32,7 +32,9 @@ De [cross-host-proef op `99466ee`](nta8800-crosshost-build-2026-10-16-99466ee.md
 
 Ook de [vervolgproef op `ee7ec3f` met gelijke Rust-, Node- en npm-versies en Ubuntu-basis](nta8800-crosshost-build-2026-10-16-ee7ec3f.md) is niet bytegelijk. Alle vijf CI-jobs zijn groen en beide debug-manifesten slagen voor de bron- en hashcontrole, maar de vier artefacten verschillen. GCC-patchversie en absolute Cargo-paden verschillen aantoonbaar; ook een kopie van de API zonder debugsymbolen en `.comment` is ongelijk. De precieze oorzaak en een reproduceerbare cross-host-bouw blijven open. `referenceVerified=false` en `attestStatus=unattested` blijven staan.
 
-De bouwschrijver geeft Cargo nu vaste bronpadnamen voor de werkboom, Cargo-cache en Rustup-cache en weigert vooraf ingestelde Rust-vlaggen. De Python-bouwbewijssuite slaagt met negen tests. Dit is een gerichte maatregel voor de waargenomen padverschillen; het effect op de bytes vereist een nieuwe lokale en runner-bouw van dezelfde commit. De GCC-patchverschillen en overige hostinvloeden zijn hiermee nog niet weggenomen.
+De bouwschrijver geeft Cargo nu vaste bronpadnamen voor de werkboom, Cargo-cache en Rustup-cache en weigert vooraf ingestelde Rust-vlaggen. De Python-bouwbewijssuite slaagt met negen tests. Dit is een gerichte maatregel voor de waargenomen padverschillen; het effect op cross-host-bytegelijkenis vereist een nieuwe lokale en runner-bouw van dezelfde commit. Overige hostinvloeden blijven te toetsen.
+
+Op `78e651d` zijn [twee lokale builds met deze padnormalisatie](nta8800-crosshost-build-2026-10-16-78e651d.md) bytegelijk voor de vier artefacten en het manifest. Beide manifesten zijn tegen de bron gecontroleerd; de API bevat geen lokaal `/home/aia04`-pad meer. Alle vijf GitHub-jobs slaagden, maar de bytevergelijking met de runner faalt opnieuw voor alle vier artefacten. Compiler-, npm-, GCC- en lockmetadata komen nu overeen. De precieze oorzaak van de resterende verschillen en cross-host-reproduceerbaarheid blijven open. De normatieve status verandert niet.
 
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 

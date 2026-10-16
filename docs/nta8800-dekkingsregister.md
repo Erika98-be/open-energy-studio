@@ -40,6 +40,8 @@ De [vervolgvergelijking op `ee7ec3f`](nta8800-crosshost-build-2026-10-16-ee7ec3f
 
 De bouwschrijver remapt nu bronpaden in de werkboom, Cargo-cache en Rustup-cache naar vaste namen en weigert externe Rust-vlaggen; negen gerichte Python-tests slagen. Dit moet nog met een nieuwe lokale en runner-bouw uit dezelfde commit worden vergeleken. De bytegelijkheid en normatieve dekkingskolommen blijven open.
 
+Op `78e651d` zijn [twee lokale debugbuilds](nta8800-crosshost-build-2026-10-16-78e651d.md) met verse `npm ci` opnieuw bytegelijk, inclusief het manifest. Alle vijf GitHub-jobs slagen, maar de bytevergelijking tussen hosts faalt opnieuw voor alle vier artefacten, ondanks gelijke toolchain-, GCC- en lockmetadata. *Referentie* en *Attest* veranderen niet.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
