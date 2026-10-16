@@ -52,6 +52,10 @@ class BuildManifestTests(unittest.TestCase):
         second["toolchain"]["sourceDateEpoch"] += 1
         with self.assertRaisesRegex(ValueError, "metadata differs: sourceDateEpoch"):
             MODULE.compare_builds(first, second)
+        second = json.loads(json.dumps(first))
+        second["toolchain"]["buildLayout"] = "fixed_tmp_v1"
+        with self.assertRaisesRegex(ValueError, "metadata differs: buildLayout"):
+            MODULE.compare_builds(first, second)
 
     def test_source_object_must_be_a_commit(self):
         with patch.object(MODULE.subprocess, "check_output", return_value="tree\n") as check:

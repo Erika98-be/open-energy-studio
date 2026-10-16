@@ -227,7 +227,7 @@ jobs:
         run: python3 -m unittest discover -s scripts -p 'test_*.py'
 
       - name: Build NTA dev evidence from this commit
-        run: python3 scripts/build-nta-dev.py --output-dir nta-evidence/remote-build
+        run: python3 scripts/build-nta-fixed-layout.py --output-dir nta-evidence/remote-build
 
       - name: Verify bytes and source metadata
         run: |

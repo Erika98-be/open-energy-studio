@@ -137,6 +137,8 @@ def compare_builds(first: dict, second: dict) -> None:
     second_epoch = second_toolchain.get("sourceDateEpoch")
     if type(first_epoch) is not int or first_epoch != second_epoch:
         raise ValueError("Build metadata differs: sourceDateEpoch")
+    if first_toolchain.get("buildLayout") != second_toolchain.get("buildLayout"):
+        raise ValueError("Build metadata differs: buildLayout")
     for key in sorted(ARTIFACTS):
         a, b = first["artifacts"][key], second["artifacts"][key]
         if (a["sha256"], a["bytes"]) != (b["sha256"], b["bytes"]):

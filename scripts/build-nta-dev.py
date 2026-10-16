@@ -41,8 +41,10 @@ def rust_build_env() -> dict[str, str]:
     env = os.environ.copy()
     if env.get("RUSTFLAGS") or env.get("CARGO_ENCODED_RUSTFLAGS"):
         raise ValueError("NTA build requires unset RUSTFLAGS and CARGO_ENCODED_RUSTFLAGS")
-    cargo_home = Path(env.get("CARGO_HOME", Path.home() / ".cargo")).resolve()
-    rustup_home = Path(env.get("RUSTUP_HOME", Path.home() / ".rustup")).resolve()
+    # Keep a deliberate symlink spelling: the fixed-layout runner gives Rustup
+    # the same path on each host, although its actual toolchain lives elsewhere.
+    cargo_home = Path(os.path.abspath(env.get("CARGO_HOME", Path.home() / ".cargo")))
+    rustup_home = Path(os.path.abspath(env.get("RUSTUP_HOME", Path.home() / ".rustup")))
     remaps = (
         (ROOT, "/workspace"),
         (cargo_home, "/cargo"),
@@ -186,6 +188,7 @@ def main() -> int:
             "npmInstall": "preexisting_node_modules" if args.skip_npm_ci else "npm_ci",
             "sourceDateEpoch": source_date_epoch,
             "debugPathRemap": "workspace:/workspace,cargo:/cargo,rustup:/rustup",
+            "buildLayout": "fixed_tmp_v1" if os.environ.get("NTA_EVIDENCE_FIXED_LAYOUT") == "1" else "caller_checkout",
         },
         "dependencyLocks": {
             "packageLockSha256": digest(PACKAGE_LOCK),

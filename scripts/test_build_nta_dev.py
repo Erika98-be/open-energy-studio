@@ -31,6 +31,11 @@ class BuildWriterTests(unittest.TestCase):
             with patch.dict(os.environ, {"RUSTFLAGS": "-C opt-level=3"}, clear=True):
                 with self.assertRaisesRegex(ValueError, "requires unset RUSTFLAGS"):
                     MODULE.rust_build_env()
+            (root / "real-rustup").mkdir()
+            (root / "linked-rustup").symlink_to(root / "real-rustup", target_is_directory=True)
+            with patch.dict(os.environ, {"RUSTUP_HOME": str(root / "linked-rustup")}, clear=True):
+                env = MODULE.rust_build_env()
+            self.assertIn(f"--remap-path-prefix={root / 'linked-rustup'}=/rustup", env["CARGO_ENCODED_RUSTFLAGS"])
 
     @unittest.skipUnless(shutil.which("dpkg-deb"), "dpkg-deb unavailable")
     def test_normalize_deb_stabilizes_package_timestamps(self):
