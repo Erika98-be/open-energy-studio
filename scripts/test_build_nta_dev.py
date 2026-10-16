@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).with_name("build-nta-dev.py")
@@ -16,6 +17,21 @@ SPEC.loader.exec_module(MODULE)
 
 
 class BuildWriterTests(unittest.TestCase):
+    def test_rust_build_env_remaps_host_paths_and_rejects_custom_flags(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.dict(os.environ, {"CARGO_HOME": str(root / "cargo"), "RUSTUP_HOME": str(root / "rustup")}, clear=True):
+                env = MODULE.rust_build_env()
+            self.assertEqual(
+                env["CARGO_ENCODED_RUSTFLAGS"],
+                f"--remap-path-prefix={MODULE.ROOT}=/workspace\x1f"
+                f"--remap-path-prefix={root / 'cargo'}=/cargo\x1f"
+                f"--remap-path-prefix={root / 'rustup'}=/rustup",
+            )
+            with patch.dict(os.environ, {"RUSTFLAGS": "-C opt-level=3"}, clear=True):
+                with self.assertRaisesRegex(ValueError, "requires unset RUSTFLAGS"):
+                    MODULE.rust_build_env()
+
     @unittest.skipUnless(shutil.which("dpkg-deb"), "dpkg-deb unavailable")
     def test_normalize_deb_stabilizes_package_timestamps(self):
         with tempfile.TemporaryDirectory() as temporary:

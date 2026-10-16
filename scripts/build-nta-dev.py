@@ -36,6 +36,24 @@ def run(*args: str, env: dict[str, str] | None = None) -> None:
     subprocess.run(args, cwd=ROOT, check=True, env=env)
 
 
+def rust_build_env() -> dict[str, str]:
+    """Give debug information stable source paths on different build hosts."""
+    env = os.environ.copy()
+    if env.get("RUSTFLAGS") or env.get("CARGO_ENCODED_RUSTFLAGS"):
+        raise ValueError("NTA build requires unset RUSTFLAGS and CARGO_ENCODED_RUSTFLAGS")
+    cargo_home = Path(env.get("CARGO_HOME", Path.home() / ".cargo")).resolve()
+    rustup_home = Path(env.get("RUSTUP_HOME", Path.home() / ".rustup")).resolve()
+    remaps = (
+        (ROOT, "/workspace"),
+        (cargo_home, "/cargo"),
+        (rustup_home, "/rustup"),
+    )
+    env["CARGO_ENCODED_RUSTFLAGS"] = "\x1f".join(
+        f"--remap-path-prefix={source}={target}" for source, target in remaps
+    )
+    return env
+
+
 def digest(path: Path) -> str:
     sha = hashlib.sha256()
     with path.open("rb") as data:
@@ -113,11 +131,12 @@ def main() -> int:
 
     if not args.skip_npm_ci:
         run("npm", "ci")
-    run("cargo", "build", "--locked", "--manifest-path", "crates/nta8800-service/Cargo.toml", "--bins")
+    build_env = rust_build_env()
+    run("cargo", "build", "--locked", "--manifest-path", "crates/nta8800-service/Cargo.toml", "--bins", env=build_env)
     # dpkg-deb clamps archive and tar entry times to this reproducible bound.
     run(
         "npm", "run", "tauri", "build", "--", "--debug", "--bundles", "deb",
-        env={**os.environ, "SOURCE_DATE_EPOCH": str(source_date_epoch)},
+        env={**build_env, "SOURCE_DATE_EPOCH": str(source_date_epoch)},
     )
     if clean_commit() != source_commit:
         raise ValueError("Git source changed during the NTA dev build")
@@ -166,6 +185,7 @@ def main() -> int:
             "npm": command("npm", "--version"),
             "npmInstall": "preexisting_node_modules" if args.skip_npm_ci else "npm_ci",
             "sourceDateEpoch": source_date_epoch,
+            "debugPathRemap": "workspace:/workspace,cargo:/cargo,rustup:/rustup",
         },
         "dependencyLocks": {
             "packageLockSha256": digest(PACKAGE_LOCK),

@@ -32,6 +32,8 @@ De [cross-host-proef op `99466ee`](nta8800-crosshost-build-2026-10-16-99466ee.md
 
 Ook de [vervolgproef op `ee7ec3f` met gelijke Rust-, Node- en npm-versies en Ubuntu-basis](nta8800-crosshost-build-2026-10-16-ee7ec3f.md) is niet bytegelijk. Alle vijf CI-jobs zijn groen en beide debug-manifesten slagen voor de bron- en hashcontrole, maar de vier artefacten verschillen. GCC-patchversie en absolute Cargo-paden verschillen aantoonbaar; ook een kopie van de API zonder debugsymbolen en `.comment` is ongelijk. De precieze oorzaak en een reproduceerbare cross-host-bouw blijven open. `referenceVerified=false` en `attestStatus=unattested` blijven staan.
 
+De bouwschrijver geeft Cargo nu vaste bronpadnamen voor de werkboom, Cargo-cache en Rustup-cache en weigert vooraf ingestelde Rust-vlaggen. De Python-bouwbewijssuite slaagt met negen tests. Dit is een gerichte maatregel voor de waargenomen padverschillen; het effect op de bytes vereist een nieuwe lokale en runner-bouw van dezelfde commit. De GCC-patchverschillen en overige hostinvloeden zijn hiermee nog niet weggenomen.
+
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
 Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 74, als onderdeel van de sequentiële releaseproef (exit 0).
