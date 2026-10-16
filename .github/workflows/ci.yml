@@ -193,7 +193,7 @@ jobs:
       github.ref == 'refs/heads/nta8800-kernel' &&
       contains(github.event.head_commit.message, '[nta-evidence]')
     needs: gate
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v6
@@ -201,7 +201,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: '24.21.0'
+
+      - name: Pin npm for build evidence
+        run: npm install --global npm@12.2.0
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -210,6 +213,8 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.99.0
 
       - name: Install Linux desktop dependencies
         run: |
