@@ -20,6 +20,8 @@ De manifestlezer kan nu twee bewaarde builds uit dezelfde commit vergelijken, in
 
 Een handmatige GitHub Actions-workflow voor een verse Linux-devbuild op een afzonderlijke runner is voorbereid, inclusief Python-bouwbewijstests, manifestcontrole en downloadbare artefacten. De workflow is nog niet op GitHub uitgevoerd; er is dus nog geen cross-host-uitkomst of nieuwe normatieve verificatie.
 
+**Manifestlezer, 16 oktober.** Bij een geslaagde controle met `--source-repo` meldde de CLI abusievelijk dat de bron niet was gecontroleerd: de correcte bronbevestiging stond na een onbereikbare `return`. De uitvoermelding volgt nu de daadwerkelijk uitgevoerde broncontrole. Een gerichte CLI-test en de Python-bouwbewijssuite slagen. De validatie zelf en de eerdere bouwbewijzen veranderen niet; er is geen nieuwe desktopbouw of externe vergelijking.
+
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
 Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 74, als onderdeel van de sequentiële releaseproef (exit 0).

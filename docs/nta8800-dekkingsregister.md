@@ -26,6 +26,8 @@ De manifestlezer vergelijkt twee builds uit één commit, met dezelfde norm-/ker
 
 Een handmatige Linux-bewijsworkflow voor een afzonderlijke GitHub-runner is toegevoegd, maar nog niet uitgevoerd. Pas een geslaagde run en vergelijking met een lokale bouw uit dezelfde commit kan de open cross-host-bouwvraag behandelen; de normatieve dekkingskolommen veranderen niet.
 
+Op 16 oktober is de succesmelding van de manifestlezer bij `--source-repo` hersteld. De broncontrole werd al uitgevoerd, maar de CLI meldde ten onrechte dat dit niet zo was. De gerichte test en de Python-bouwbewijssuite slagen; dit verandert geen reken-, referentie- of attestkolom.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

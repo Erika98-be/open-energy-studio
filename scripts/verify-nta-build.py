@@ -150,6 +150,7 @@ def main() -> int:
         compare_builds(manifest, second)
         print("Both manifests verify and all four artifacts are byte-identical for the same commit. Build-host independence, normative reference and attest remain unverified.")
         return 0
+    if args.source_repo is not None:
         print(f"Build bytes and source metadata match commit {manifest['sourceCommit']} in the supplied repository. Build provenance, normative reference and attest remain unverified.")
     else:
         print(f"Build bytes verified; claimed source {manifest['sourceCommit']} was not checked against a repository. Normative reference and attest remain unverified.")

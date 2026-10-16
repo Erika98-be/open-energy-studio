@@ -2,9 +2,11 @@
 
 import hashlib
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,6 +18,17 @@ SPEC.loader.exec_module(MODULE)
 
 
 class BuildManifestTests(unittest.TestCase):
+    def test_source_checked_message_only_after_source_verification(self):
+        manifest = {"sourceCommit": "a" * 40}
+        with patch.object(MODULE.sys, "argv", ["verify-nta-build.py", "build.json", "--source-repo", "."]), \
+                patch.object(MODULE, "verify", return_value=manifest), \
+                patch.object(MODULE, "verify_source") as verify_source, \
+                redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(MODULE.main(), 0)
+        verify_source.assert_called_once_with(manifest, Path("."))
+        self.assertIn("source metadata match commit", output.getvalue())
+        self.assertNotIn("was not checked", output.getvalue())
+
     def test_compare_builds_requires_same_source_and_artifact_bytes(self):
         first = {
             "sourceCommit": "a" * 40,
