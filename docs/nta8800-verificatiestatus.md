@@ -1,4 +1,4 @@
-# NTA 8800 verificatiestatus — 15 oktober 2026
+# NTA 8800 verificatiestatus — 16 oktober 2026
 
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
@@ -21,6 +21,8 @@ De manifestlezer kan nu twee bewaarde builds uit dezelfde commit vergelijken, in
 Een handmatige GitHub Actions-workflow voor een verse Linux-devbuild op een afzonderlijke runner is voorbereid, inclusief Python-bouwbewijstests, manifestcontrole en downloadbare artefacten. De workflow is nog niet op GitHub uitgevoerd; er is dus nog geen cross-host-uitkomst of nieuwe normatieve verificatie.
 
 **Manifestlezer, 16 oktober.** Bij een geslaagde controle met `--source-repo` meldde de CLI abusievelijk dat de bron niet was gecontroleerd: de correcte bronbevestiging stond na een onbereikbare `return`. De uitvoermelding volgt nu de daadwerkelijk uitgevoerde broncontrole. Een gerichte CLI-test en de Python-bouwbewijssuite slagen. De validatie zelf en de eerdere bouwbewijzen veranderen niet; er is geen nieuwe desktopbouw of externe vergelijking.
+
+De broncontrole eist nu ook de `sourceDateEpoch` in het manifest en vergelijkt die met de tijd van de opgegeven Git-commit. De twee-buildvergelijking wijst een ontbrekende of verschillende epoch af. De Python-bouwbewijssuite slaagt met acht tests. Dit sluit een lacune in de bewijsmetadata, zonder nieuwe pakketbouw of normatieve verificatie.
 
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 

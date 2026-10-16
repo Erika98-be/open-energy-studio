@@ -32,6 +32,7 @@ class BuildManifestTests(unittest.TestCase):
     def test_compare_builds_requires_same_source_and_artifact_bytes(self):
         first = {
             "sourceCommit": "a" * 40,
+            "toolchain": {"sourceDateEpoch": 1700000000},
             "artifacts": {key: {"sha256": "b" * 64, "bytes": 10} for key in MODULE.ARTIFACTS},
         }
         second = json.loads(json.dumps(first))
@@ -47,6 +48,10 @@ class BuildManifestTests(unittest.TestCase):
         second["targetNormVersion"] = "different edition"
         with self.assertRaisesRegex(ValueError, "metadata differs: targetNormVersion"):
             MODULE.compare_builds(first, second)
+        second = json.loads(json.dumps(first))
+        second["toolchain"]["sourceDateEpoch"] += 1
+        with self.assertRaisesRegex(ValueError, "metadata differs: sourceDateEpoch"):
+            MODULE.compare_builds(first, second)
 
     def test_source_object_must_be_a_commit(self):
         with patch.object(MODULE.subprocess, "check_output", return_value="tree\n") as check:
@@ -61,6 +66,12 @@ class BuildManifestTests(unittest.TestCase):
         }
         with patch.object(MODULE.subprocess, "check_output", side_effect=["commit\n", "1700000000\n"]):
             with self.assertRaisesRegex(ValueError, "SOURCE_DATE_EPOCH differs"):
+                MODULE.verify_source(manifest, Path("/unused"))
+
+    def test_source_date_epoch_must_be_present(self):
+        manifest = {"sourceCommit": "a" * 40, "toolchain": {}}
+        with patch.object(MODULE.subprocess, "check_output", return_value="commit\n"):
+            with self.assertRaisesRegex(ValueError, "Missing or invalid SOURCE_DATE_EPOCH"):
                 MODULE.verify_source(manifest, Path("/unused"))
 
     def test_artifacts_must_be_files_in_manifest_directory(self):
