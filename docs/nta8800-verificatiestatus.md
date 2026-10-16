@@ -24,6 +24,8 @@ Een handmatige GitHub Actions-workflow voor een verse Linux-devbuild op een afzo
 
 De broncontrole eist nu ook de `sourceDateEpoch` in het manifest en vergelijkt die met de tijd van de opgegeven Git-commit. De twee-buildvergelijking wijst een ontbrekende of verschillende epoch af. De Python-bouwbewijssuite slaagt met acht tests. Dit sluit een lacune in de bewijsmetadata, zonder nieuwe pakketbouw of normatieve verificatie.
 
+Daarna slaagden [twee verse lokale builds van `f70749d`](nta8800-build-verificatie-2026-10-16-f70749d.md), elk met `npm ci`. De manifestlezer controleerde beide tegen de opgegeven broncommit en vond vier bytegelijke artefacten plus bytegelijke manifesten. Dit is een herhaalproef op dezelfde host met Cargo-cache, geen onafhankelijke tweede host, actuele officiële referentie of attest.
+
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
 Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 74, als onderdeel van de sequentiële releaseproef (exit 0).

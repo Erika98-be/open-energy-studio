@@ -30,6 +30,8 @@ Op 16 oktober is de succesmelding van de manifestlezer bij `--source-repo` herst
 
 Dezelfde manifestlezer eist nu een commitgebonden `sourceDateEpoch` en vergelijkt die bij twee builds. Een ontbrekende of afwijkende waarde wordt afgewezen; acht Python-bouwbewijstests slagen. De normatieve dekkingskolommen blijven ongewijzigd.
 
+De [twee verse Linux-devbuilds op `f70749d`](nta8800-build-verificatie-2026-10-16-f70749d.md) waren binnen één host bytegelijk voor pakket, API, MCP, referentiegate en manifest. De bron- en bytecontrole slaagde. Een afzonderlijke host en actuele officiële referentiegevallen zijn nog niet getoetst; de kolommen *Referentie* en *Attest* blijven ongewijzigd.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
