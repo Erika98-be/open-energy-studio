@@ -38,6 +38,8 @@ Op `78e651d` zijn [twee lokale builds met deze padnormalisatie](nta8800-crosshos
 
 Een volgende bouwproef gebruikt een eigen checkout, Cargo-cache en Rustup-pad op identieke absolute tijdelijke paden en schakelt incrementele Cargo-bouw uit. De bestaande debug-bouwschrijver registreert dit als afzonderlijke bouwlayout; de manifestvergelijker weigert een vergelijking met een andere layout. De Python-bouwbewijssuite slaagt met negen tests. Resultaten van deze nieuwe layout moeten nog worden gebouwd en vergeleken; de eerdere cross-host-afwijking en normatieve status blijven staan.
 
+Op `0d4e239` zijn [twee lokale builds met de vaste layout](nta8800-crosshost-build-2026-10-16-0d4e239.md) uit een schone checkout en met een schone Cargo-cache volledig bytegelijk, inclusief de manifesten. De brongebonden manifestcontrole slaagt. De afzonderlijke runner-bouw en cross-host-vergelijking zijn nog niet afgerond; `referenceVerified=false` en `attestStatus=unattested` blijven staan.
+
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
 Sinds 12 oktober is de kern opnieuw nagerekend met een eigen implementatie vanaf de normpagina's, steeds vanaf de afgeleide invoer van de kern en zonder eerst de kerncode van de route te lezen. Tolerantie 10⁻⁶ relatief. De herberekeningen zelf blijven buiten de repository; varianten met de onafhankelijk berekende waarden staan als vaste test in `tests/ventilation_independent.rs` (12), `tests/installations_independent.rs` (37) en `tests/edition_switches_independent.rs` (12). De laatste volledige gate na deze reviews is die van review 74, als onderdeel van de sequentiële releaseproef (exit 0).
