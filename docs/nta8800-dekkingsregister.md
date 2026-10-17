@@ -44,7 +44,7 @@ Op `78e651d` zijn [twee lokale debugbuilds](nta8800-crosshost-build-2026-10-16-7
 
 Voor de volgende bouwproef is een vaste absolute tijdelijke checkout met eigen Cargo-cache, vast Rustup-pad en uitgeschakelde incrementele compilatie voorbereid. De manifestvergelijker bewaakt de bouwlayout. Negen Python-bouwbewijstests slagen; de proef zelf staat nog uit en verandert geen normatieve dekkingskolom.
 
-Op `0d4e239` zijn [twee lokale vaste-layout-bouwsets](nta8800-crosshost-build-2026-10-16-0d4e239.md) uit een schone checkout en Cargo-cache bytegelijk, ook hun manifesten. De runnervergelijking moet nog volgen; *Referentie* en *Attest* blijven ongewijzigd.
+Op `0d4e239` zijn [twee lokale vaste-layout-bouwsets](nta8800-crosshost-build-2026-10-16-0d4e239.md) uit een schone checkout en Cargo-cache bytegelijk, ook hun manifesten. De runnervergelijking toont drie bytegelijke Rust-servicebinaries tussen hosts. Alleen de desktop-ELF heeft dezelfde CSP-hashes in een andere volgorde; de daardoor gewijzigde build-ID en pakketcontrolesom verschillen ook. Tauri's asset-codegeneratie sorteert deze invoer nu via een lokale patch; een cross-host-herbouw moet de werking aantonen. *Referentie* en *Attest* blijven ongewijzigd.
 
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
