@@ -1,6 +1,7 @@
 """Checks that the NTA build writer preserves existing evidence."""
 
 import importlib.util
+import hashlib
 import os
 import shutil
 import subprocess
@@ -50,9 +51,18 @@ class BuildWriterTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (package_tree / "usr/share/test/file").write_bytes(b"same content")
+            (package_tree / "usr/share/test/other").write_bytes(b"other content")
             (package_tree / "usr/share/test/link").symlink_to("file")
+            checksums = tuple(
+                f"{hashlib.md5((package_tree / relative).read_bytes()).hexdigest()}  {relative}"
+                for relative in ("usr/share/test/file", "usr/share/test/other")
+            )
             results = []
             for index, stamp in enumerate((1500000000, 1800000000)):
+                (package_tree / "DEBIAN/md5sums").write_text(
+                    "\n".join(checksums if index == 0 else reversed(checksums)) + "\n",
+                    encoding="utf-8",
+                )
                 for path in package_tree.rglob("*"):
                     os.utime(path, (stamp, stamp))
                 package = root / f"package-{index}.deb"

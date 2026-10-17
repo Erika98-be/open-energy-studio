@@ -88,6 +88,20 @@ def normalize_deb(path: Path, source_date_epoch: int) -> None:
         normalized = staging / "normalized.deb"
         env = {**os.environ, "SOURCE_DATE_EPOCH": str(source_date_epoch)}
         run("dpkg-deb", "-R", str(path), str(tree))
+        # Tauri may enumerate files in a different order when writing this
+        # control file, even when every packaged payload byte is identical.
+        md5sums = tree / "DEBIAN/md5sums"
+        if md5sums.exists():
+            lines = md5sums.read_text(encoding="utf-8").splitlines()
+            if any("  " not in line for line in lines):
+                raise ValueError("Malformed deb md5sums")
+            paths = [line.split("  ", 1)[1] for line in lines]
+            if len(paths) != len(set(paths)):
+                raise ValueError("Duplicate path in deb md5sums")
+            md5sums.write_text(
+                "\n".join(line for _, line in sorted(zip(paths, lines))) + "\n",
+                encoding="utf-8",
+            )
         # SOURCE_DATE_EPOCH only caps newer mtimes; normalize older inputs too.
         entries = list(tree.rglob("*"))
         for entry in entries:
