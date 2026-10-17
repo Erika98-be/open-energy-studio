@@ -1,4 +1,4 @@
-# NTA 8800 verificatiestatus — 16 oktober 2026
+# NTA 8800 verificatiestatus — 17 oktober 2026
 
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
@@ -39,6 +39,8 @@ Op `78e651d` zijn [twee lokale builds met deze padnormalisatie](nta8800-crosshos
 Een volgende bouwproef gebruikt een eigen checkout, Cargo-cache en Rustup-pad op identieke absolute tijdelijke paden en schakelt incrementele Cargo-bouw uit. De bestaande debug-bouwschrijver registreert dit als afzonderlijke bouwlayout; de manifestvergelijker weigert een vergelijking met een andere layout. De Python-bouwbewijssuite slaagt met negen tests. Resultaten van deze nieuwe layout moeten nog worden gebouwd en vergeleken; de eerdere cross-host-afwijking en normatieve status blijven staan.
 
 Op `0d4e239` zijn [twee lokale builds met de vaste layout](nta8800-crosshost-build-2026-10-16-0d4e239.md) uit een schone checkout en met een schone Cargo-cache volledig bytegelijk, inclusief de manifesten. Alle vijf GitHub-jobs slagen. De brongebonden runner-bouw heeft bytegelijke API-, MCP- en referentiegatebinaries. Het desktoppakket verschilt nog: in de uitgepakte ELF staat dezelfde verzameling van 25 CSP-hashes in een andere volgorde, naast de daarvan afhankelijke build-ID. De bron van Tauri's asset-codegeneratie is voor deze desktopbouw lokaal gepatcht om assets en hashes te sorteren. Het resultaat daarvan wacht op een nieuwe bouw van dezelfde commit op beide hosts; `referenceVerified=false` en `attestStatus=unattested` blijven staan.
+
+Op `9a3c74c` zijn [twee lokale vaste-layout-builds met gesorteerde Tauri-assetcodegeneratie](nta8800-crosshost-build-2026-10-17-9a3c74c.md) opnieuw bytegelijk, inclusief het desktoppakket en de manifesten. De gerichte codegeneratietest, desktopcheck en negen Python-bouwbewijstests slagen. De cross-host-bytevergelijking met de nieuwe GitHub-run staat nog open; de normatieve en atteststatus veranderen niet.
 
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
