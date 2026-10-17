@@ -48,7 +48,7 @@ Op `0d4e239` zijn [twee lokale vaste-layout-bouwsets](nta8800-crosshost-build-20
 
 Op `9a3c74c` zijn [twee lokale herbouwsets](nta8800-crosshost-build-2026-10-17-9a3c74c.md) met de gesorteerde Tauri-codegeneratie en telkens een schone Cargo-cache bytegelijk, inclusief desktop en manifest. Alle vijf runnerjobs slagen; drie binaries en alle uitgepakte desktoppayloadbestanden zijn tussen hosts bytegelijk. Alleen de regelvolgorde in `DEBIAN/md5sums` verschilt. De bouwschrijver sorteert die regels nu; kopieën van de bewaarde pakketten worden daarmee bytegelijk. Een verse cross-host-herbouw van deze laatste wijziging staat nog open. *Referentie* en *Attest* blijven ongewijzigd.
 
-Op `7436583` is de [lokale herbouw](nta8800-crosshost-build-2026-10-18-7436583.md) met gesorteerde deb-controlesommen en brongebonden manifestcontrole geslaagd. De onafhankelijke runnerbouw van dezelfde commit loopt nog; *Referentie* en *Attest* blijven ongewijzigd.
+Op `7436583` is de [lokale en runnerherbouw](nta8800-crosshost-build-2026-10-18-7436583.md) met gesorteerde deb-controlesommen en brongebonden manifestcontrole geslaagd. Alle vijf CI-jobs zijn groen; de vier Linux-debug-artefacten en het manifest zijn tussen de twee hosts bytegelijk. Dit sluit de specifieke technische cross-host-bouwproef af, zonder wijziging van *Referentie* of *Attest*.
 
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
