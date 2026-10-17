@@ -1,4 +1,4 @@
-# NTA 8800 verificatiestatus — 17 oktober 2026
+# NTA 8800 verificatiestatus — 18 oktober 2026
 
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
@@ -41,6 +41,8 @@ Een volgende bouwproef gebruikt een eigen checkout, Cargo-cache en Rustup-pad op
 Op `0d4e239` zijn [twee lokale builds met de vaste layout](nta8800-crosshost-build-2026-10-16-0d4e239.md) uit een schone checkout en met een schone Cargo-cache volledig bytegelijk, inclusief de manifesten. Alle vijf GitHub-jobs slagen. De brongebonden runner-bouw heeft bytegelijke API-, MCP- en referentiegatebinaries. Het desktoppakket verschilt nog: in de uitgepakte ELF staat dezelfde verzameling van 25 CSP-hashes in een andere volgorde, naast de daarvan afhankelijke build-ID. De bron van Tauri's asset-codegeneratie is voor deze desktopbouw lokaal gepatcht om assets en hashes te sorteren. Het resultaat daarvan wacht op een nieuwe bouw van dezelfde commit op beide hosts; `referenceVerified=false` en `attestStatus=unattested` blijven staan.
 
 Op `9a3c74c` zijn [twee lokale vaste-layout-builds met gesorteerde Tauri-assetcodegeneratie](nta8800-crosshost-build-2026-10-17-9a3c74c.md) opnieuw bytegelijk, inclusief het desktoppakket en de manifesten. De gerichte codegeneratietest, desktopcheck en negen Python-bouwbewijstests slagen. Alle vijf GitHub-jobs slagen. API, MCP, referentiegate en alle uitgepakte desktoppayloadbestanden zijn bytegelijk tussen de hosts; alleen de regelvolgorde van `DEBIAN/md5sums` verschilt. De bouwschrijver sorteert deze regels nu. Toegepast op kopieën van de twee bestaande pakketten geeft dat identieke bytes; een verse cross-host-proef van de gewijzigde procedure staat nog open. De normatieve en atteststatus veranderen niet.
+
+Op `7436583` is de [vaste-layout-herbouw met gesorteerde deb-controlesommen](nta8800-crosshost-build-2026-10-18-7436583.md) lokaal geslaagd; de negen Python-bouwbewijstests en de brongebonden manifestcontrole slagen. De CI-gate en runnerbouw lopen nog. Ook bij bytegelijkheid blijven actuele officiële referentiegevallen en externe toetsing vereist.
 
 ## Overzicht: onafhankelijke herberekening (reviews 63–73, stand 14 oktober 2026)
 
