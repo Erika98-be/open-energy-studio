@@ -289,6 +289,18 @@ fn check_coverage(plan: CoveragePlan, report: &mut GateReport) -> bool {
                 passed = false;
             }
             Some(case) => {
+                if case.comparison.target_norm_version != plan.target_norm_version {
+                    report.errors.push(GateError {
+                        file: case.file.clone(),
+                        error: format!(
+                            "Case {} calculates in {}, not the coverage plan edition {}",
+                            required.case_id,
+                            case.comparison.target_norm_version,
+                            plan.target_norm_version
+                        ),
+                    });
+                    passed = false;
+                }
                 if case.comparison.manifest_fingerprint != required.manifest_fingerprint {
                     report.errors.push(GateError {
                         file: case.file.clone(),
@@ -1083,6 +1095,38 @@ mod tests {
             .errors
             .iter()
             .any(|error| error.error.contains("Missing compared path")));
+        fs::remove_file(case_path).unwrap();
+        fs::remove_file(plan_path).unwrap();
+    }
+
+    #[test]
+    fn coverage_plan_cannot_count_a_legacy_case_for_the_target_edition() {
+        let mut legacy = case(8.17);
+        legacy.norm_version = "2022".into();
+        legacy.project["ntaCalculation"]["normVersion"] = json!("2022");
+        let calculated = compare_reference_case(legacy.clone());
+        assert!(calculated.calculation_available);
+        legacy.expected[0].value = calculated.metrics[0].actual;
+        let comparison = compare_reference_case(legacy.clone());
+        assert_eq!(comparison.status, "compared_pass");
+        let case_path = temporary_case_file(&legacy);
+        let plan_path = case_path.with_extension("plan.json");
+        fs::write(
+            &plan_path,
+            json!({"targetNormVersion":TARGET_NORM_VERSION,
+                "requiredCases":[{"caseId":legacy.case_id,
+                    "manifestFingerprint":comparison.manifest_fingerprint,
+                    "requiredPaths":["beng2"]}]})
+            .to_string(),
+        )
+        .unwrap();
+        let report = run(std::slice::from_ref(&case_path), Some(&plan_path));
+        assert!(report.numeric_comparison_passed);
+        assert_eq!(report.planned_coverage_passed, Some(false));
+        assert!(report
+            .errors
+            .iter()
+            .any(|error| error.error.contains("not the coverage plan edition")));
         fs::remove_file(case_path).unwrap();
         fs::remove_file(plan_path).unwrap();
     }

@@ -54,6 +54,8 @@ De referentiesuite-adapter decodeert nu de laatste JSON Pointer-token in `projec
 
 Bij de testsetexport worden nu de suitebytes, projectbestandbytes en opgeloste case-invoer opnieuw tegen het vergelijkingsrapport gehasht. De export weigert een tussentijds gewijzigde suite of projectfile; beide gevallen zijn in de referentiegate-tests aangetoond. Dit sluit een bewijsadministratief gat, maar levert geen actuele officiële referentie-uitkomst op. *Referentie* en *Attest* blijven open.
 
+Het dekkingsplan telt een geval nu alleen mee wanneer de berekende normeditie gelijk is aan `targetNormVersion` van het plan. Een synthetisch 2022-geval met geslaagde numerieke vergelijking faalt daarom als bewijs voor de doeluitgave 2025+C1. De aparte plantoets slaagt; *Referentie* en *Attest* blijven open.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
