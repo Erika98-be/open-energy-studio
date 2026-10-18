@@ -199,7 +199,9 @@ if [[ -n "${NTA_REFERENCE_PLAN:-}" || -n "${NTA_REFERENCE_CASE_DIR:-}" ]]; then
   mapfile -d '' -t nta_reference_cases < <(find "$NTA_REFERENCE_CASE_DIR" -maxdepth 1 -type f -name '*.json' -print0 | sort -z)
   step "planned reference comparisons"
   cargo run --locked --quiet --manifest-path crates/nta8800-service/Cargo.toml \
-    --bin reference_gate -- --plan "$NTA_REFERENCE_PLAN" "${nta_reference_cases[@]}"
+    --bin reference_gate -- --commit "$nta_commit" \
+    --report-dir "$nta_evidence_dir/planned-reference" \
+    --plan "$NTA_REFERENCE_PLAN" "${nta_reference_cases[@]}"
 else
   step "planned reference comparisons skipped (no plan or case directory configured)"
 fi
