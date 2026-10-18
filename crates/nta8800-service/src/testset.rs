@@ -94,9 +94,10 @@ pub fn apply_patch(project: &mut Value, steps: Vec<PatchStep>) -> Result<(), Str
                 }
             },
             Value::Array(array) => {
-                let index = decoded_key.parse::<usize>().ok().filter(|index| {
-                    (decoded_key == "0" || !decoded_key.starts_with('0')) && *index < array.len()
-                });
+                let index = decoded_key
+                    .parse::<usize>()
+                    .ok()
+                    .filter(|index| decoded_key == index.to_string() && *index < array.len());
                 let index = index.ok_or_else(|| {
                     format!("Patch array index is invalid or missing: {}", step.pointer)
                 })?;
@@ -507,7 +508,7 @@ mod tests {
         apply_patch(&mut project, steps).unwrap();
         assert_eq!(project, json!({"items": ["B", "c"]}));
 
-        for token in ["02", "2", "-", "x"] {
+        for token in ["02", "+1", "2", "-", "x"] {
             let steps: Vec<PatchStep> = serde_json::from_value(json!([
                 {"op": "set", "pointer": format!("/items/{token}"), "value": "wrong"}
             ]))

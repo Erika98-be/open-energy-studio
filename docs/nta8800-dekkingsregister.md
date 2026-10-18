@@ -56,7 +56,7 @@ Bij de testsetexport worden nu de suitebytes, projectbestandbytes en opgeloste c
 
 Het dekkingsplan telt een geval nu alleen mee wanneer de berekende normeditie gelijk is aan `targetNormVersion` van het plan. Een synthetisch 2022-geval met geslaagde numerieke vergelijking faalt daarom als bewijs voor de doeluitgave 2025+C1. De aparte plantoets slaagt; *Referentie* en *Attest* blijven open.
 
-`projectPatch` ondersteunt nu ook het vervangen en verwijderen van bestaande array-elementen in een referentieproject. Een regressietest wijst ongeldige of buiten bereik liggende indexen af. Dit breidt alleen de voorbereide referentie-invoer uit; er zijn nog geen actuele externe verwachtwaarden toegevoegd.
+`projectPatch` ondersteunt nu ook het vervangen en verwijderen van bestaande array-elementen in een referentieproject. Een regressietest wijst ongeldige, niet-canonieke (`02`, `+1`) en buiten bereik liggende indexen af. De CI-run van de eerste array-implementatie slaagde op alle vijf jobs; de aanscherping voor `+1` is lokaal gericht getest. Dit breidt alleen de voorbereide referentie-invoer uit; er zijn nog geen actuele externe verwachtwaarden toegevoegd.
 
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
