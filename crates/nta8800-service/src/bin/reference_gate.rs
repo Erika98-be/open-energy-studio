@@ -561,6 +561,7 @@ fn write_testset(
         return Err(format!("{} is not empty", projects.display()));
     }
     let mut file_names = HashSet::new();
+    let mut project_files = Vec::new();
     let mut rows = Vec::new();
     for path in suites {
         let bytes = fs::read(path).map_err(|error| format!("{}: {error}", path.display()))?;
@@ -607,7 +608,9 @@ fn write_testset(
                     "{case_id}: the opened project file calculates with another input fingerprint"
                 ));
             }
-            fs::write(projects.join(&file_name), &text).map_err(|error| error.to_string())?;
+            // Resolve and validate every case before writing any project file.
+            // A stale later case must not leave a partial dossier behind.
+            project_files.push((file_name.clone(), text.clone()));
             let comparison =
                 serde_json::to_value(&recorded_case.comparison).expect("comparison serializes");
             rows.push(testset::row(
@@ -619,6 +622,9 @@ fn write_testset(
                 Some(&comparison),
             ));
         }
+    }
+    for (file_name, text) in project_files {
+        fs::write(projects.join(file_name), text).map_err(|error| error.to_string())?;
     }
     let header = [
         (
@@ -1282,6 +1288,36 @@ mod tests {
         assert!(changed
             .unwrap_err()
             .contains("project changed after comparison"));
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn testset_dossier_can_retry_after_a_later_case_fails_validation() {
+        let dir = suite_dir();
+        let suite = dir.join("suite.json");
+        let mut second = suite_case(8.2, json!([]));
+        second["caseId"] = json!("second-case");
+        fs::write(
+            &suite,
+            json!({"suiteId":"s", "description":"d",
+                "cases":[suite_case(8.2, json!([])), second]})
+            .to_string(),
+        )
+        .unwrap();
+        let complete = run_with(&[], std::slice::from_ref(&suite), None);
+        let mut incomplete = run_with(&[], std::slice::from_ref(&suite), None);
+        incomplete.cases.pop();
+        let out = dir.join("dossier");
+        let failed = write_testset(&out, None, std::slice::from_ref(&suite), &incomplete);
+        assert!(failed
+            .unwrap_err()
+            .contains("absent from the comparison report"));
+        assert_eq!(fs::read_dir(out.join("projecten")).unwrap().count(), 0);
+        assert_eq!(
+            write_testset(&out, None, std::slice::from_ref(&suite), &complete),
+            Ok(2)
+        );
+        assert_eq!(fs::read_dir(out.join("projecten")).unwrap().count(), 2);
         fs::remove_dir_all(dir).unwrap();
     }
 
