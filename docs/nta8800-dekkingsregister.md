@@ -52,6 +52,8 @@ Op `7436583` is de [lokale en runnerherbouw](nta8800-crosshost-build-2026-10-18-
 
 De referentiesuite-adapter decodeert nu de laatste JSON Pointer-token in `projectPatch` en weigert ongeldige `~`-escapes. Een gerichte regressietest dekt `set` en `remove` bij sleutels met `/` en `~`; de bestaande suitepaden veranderen niet. Dit voorkomt dat een dossier ongemerkt een gelijkende letterlijke sleutel wijzigt. *Referentie* en *Attest* blijven open.
 
+Bij de testsetexport worden nu de suitebytes, projectbestandbytes en opgeloste case-invoer opnieuw tegen het vergelijkingsrapport gehasht. De export weigert een tussentijds gewijzigde suite of projectfile; beide gevallen zijn in de referentiegate-tests aangetoond. Dit sluit een bewijsadministratief gat, maar levert geen actuele officiële referentie-uitkomst op. *Referentie* en *Attest* blijven open.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

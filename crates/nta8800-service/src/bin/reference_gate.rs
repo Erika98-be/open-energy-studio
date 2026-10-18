@@ -552,17 +552,40 @@ fn write_testset(
     let mut rows = Vec::new();
     for path in suites {
         let bytes = fs::read(path).map_err(|error| format!("{}: {error}", path.display()))?;
+        let file = path.display().to_string();
+        let recorded_suite = report
+            .suites
+            .iter()
+            .find(|suite| suite.file == file)
+            .ok_or_else(|| format!("{file}: suite is absent from the comparison report"))?;
+        if sha256(&bytes) != recorded_suite.sha256 {
+            return Err(format!("{file}: suite changed after comparison"));
+        }
         let suite: Suite = serde_json::from_slice(&bytes).map_err(|error| error.to_string())?;
         let suite_dir = path.parent().unwrap_or(Path::new("."));
-        for raw in suite.cases {
+        for (index, raw) in suite.cases.into_iter().enumerate() {
             let resolved = resolve_suite_case(raw, suite_dir)?;
             let case_id = resolved.case.case_id.clone();
-            let project = resolved.case.project;
-            let first = testset::calculate(&project);
             let file_name = testset::project_file_name(&case_id)?;
             if !file_names.insert(file_name.clone()) {
                 return Err(format!("Duplicate caseId: {case_id}"));
             }
+            let case_file = format!("{file}#cases[{index}]");
+            let recorded_case = report
+                .cases
+                .iter()
+                .find(|item| item.file == case_file)
+                .ok_or_else(|| format!("{case_file}: case is absent from the comparison report"))?;
+            let resolved_hash =
+                sha256(&serde_json::to_vec(&resolved.case).expect("reference case serializes"));
+            if recorded_case.input_sha256 != resolved_hash
+                || recorded_case.project_file_sha256.as_deref()
+                    != Some(resolved.project_file_sha256.as_str())
+            {
+                return Err(format!("{case_file}: project changed after comparison"));
+            }
+            let project = resolved.case.project;
+            let first = testset::calculate(&project);
             let text = testset::project_file(&project, &first);
             // What the app sends after opening the file; the overview is its answer.
             let opened = testset::open_project_file(&text)?;
@@ -573,18 +596,15 @@ fn write_testset(
                 ));
             }
             fs::write(projects.join(&file_name), &text).map_err(|error| error.to_string())?;
-            let comparison = report
-                .cases
-                .iter()
-                .find(|item| item.comparison.case_id == case_id)
-                .map(|item| serde_json::to_value(&item.comparison).expect("comparison serializes"));
+            let comparison =
+                serde_json::to_value(&recorded_case.comparison).expect("comparison serializes");
             rows.push(testset::row(
                 &case_id,
                 testset::topic(&case_id, &topics),
                 &format!("projecten/{file_name}"),
                 &text,
                 &assessment,
-                comparison.as_ref(),
+                Some(&comparison),
             ));
         }
     }
@@ -1168,15 +1188,56 @@ mod tests {
         assert!(again.unwrap_err().contains("is not empty"));
 
         let suite = write_suite(vec![suite_case(8.2, json!([])), suite_case(8.2, json!([]))]);
-        let duplicate = write_testset(&dir.join("d2"), None, std::slice::from_ref(&suite), &report);
+        let duplicate_report = run_with(&[], std::slice::from_ref(&suite), None);
+        let duplicate = write_testset(
+            &dir.join("d2"),
+            None,
+            std::slice::from_ref(&suite),
+            &duplicate_report,
+        );
         assert!(duplicate.unwrap_err().contains("Duplicate caseId"));
 
         let mut escaping = suite_case(8.2, json!([]));
         escaping["caseId"] = json!("../escaped");
         let suite = write_suite(vec![escaping]);
-        let unsafe_id = write_testset(&dir.join("d3"), None, std::slice::from_ref(&suite), &report);
+        let unsafe_report = run_with(&[], std::slice::from_ref(&suite), None);
+        let unsafe_id = write_testset(
+            &dir.join("d3"),
+            None,
+            std::slice::from_ref(&suite),
+            &unsafe_report,
+        );
         assert!(unsafe_id.unwrap_err().contains("not a plain file name"));
         assert!(!dir.join("d3/escaped.oes.json").exists());
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn testset_dossier_refuses_suite_or_project_changed_after_comparison() {
+        let dir = suite_dir();
+        let suite = dir.join("suite.json");
+        let suite_value = json!({"suiteId":"s", "description":"d",
+            "cases":[suite_case(8.2, json!([]))]});
+        fs::write(&suite, suite_value.to_string()).unwrap();
+        let report = run_with(&[], std::slice::from_ref(&suite), None);
+
+        let mut changed_suite = suite_value.clone();
+        changed_suite["description"] = json!("different");
+        fs::write(&suite, changed_suite.to_string()).unwrap();
+        let changed = write_testset(&dir.join("d1"), None, std::slice::from_ref(&suite), &report);
+        assert!(changed
+            .unwrap_err()
+            .contains("suite changed after comparison"));
+
+        fs::write(&suite, suite_value.to_string()).unwrap();
+        let project_file = dir.join("project.json");
+        let mut project: Value = serde_json::from_slice(&fs::read(&project_file).unwrap()).unwrap();
+        project["name"] = json!("changed after comparison");
+        fs::write(&project_file, project.to_string()).unwrap();
+        let changed = write_testset(&dir.join("d2"), None, std::slice::from_ref(&suite), &report);
+        assert!(changed
+            .unwrap_err()
+            .contains("project changed after comparison"));
         fs::remove_dir_all(dir).unwrap();
     }
 
