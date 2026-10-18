@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Bijgewerkt op 16 oktober 2026. De derde volledige dekkingsaudit vond op 3 oktober plaats.
+Bijgewerkt op 18 oktober 2026. De derde volledige dekkingsaudit vond op 3 oktober plaats.
 
 **Interne verificatie sinds de dekkingsaudit.** De hoofdstuksgewijze controle tegen NTA 8800:2025+C1:2026 staat in het [verificatiedossier](nta8800-verificatiestatus.md). De voorbeeldwoning en het voorbeeldkantoor zijn opnieuw onafhankelijk doorgerekend (782 grootheden); hoofdstuk 11 en de vaste C1-run zijn daarna afzonderlijk herberekend (1 041 grootheden). Voor routes buiten die voorbeelden zijn twaalf ventilatievarianten en zesendertig installatievarianten (reviews 66–70, met koelmethode 1, de varianten van bijlage Q en de herberekening bij overventilatie) als vaste tests opgenomen. De oudere uitgaven (2024, 2023, 2022, 2020+A1) zijn met dezelfde voorbeelden en ventilatievarianten nagerekend (review 71, 14 639 grootheden per uitgave) en de schakelpunten tussen de uitgaven zijn tegen de tekst gelegd, twaalf als kerntest (reviews 72–73). Dit vergroot het interne bewijs voor de geïmplementeerde routes, maar verandert de kolommen *Referentie* en *Attest* hieronder niet. De actuele officiële ISSO 54-uitkomsten en de formele externe toets ontbreken nog; zes van de 266 historische deeltests blijven buiten de uitvoerbare scope wegens ontbrekende normroute of productverklaring.
 
@@ -49,6 +49,8 @@ Op `0d4e239` zijn [twee lokale vaste-layout-bouwsets](nta8800-crosshost-build-20
 Op `9a3c74c` zijn [twee lokale herbouwsets](nta8800-crosshost-build-2026-10-17-9a3c74c.md) met de gesorteerde Tauri-codegeneratie en telkens een schone Cargo-cache bytegelijk, inclusief desktop en manifest. Alle vijf runnerjobs slagen; drie binaries en alle uitgepakte desktoppayloadbestanden zijn tussen hosts bytegelijk. Alleen de regelvolgorde in `DEBIAN/md5sums` verschilt. De bouwschrijver sorteert die regels nu; kopieën van de bewaarde pakketten worden daarmee bytegelijk. Een verse cross-host-herbouw van deze laatste wijziging staat nog open. *Referentie* en *Attest* blijven ongewijzigd.
 
 Op `7436583` is de [lokale en runnerherbouw](nta8800-crosshost-build-2026-10-18-7436583.md) met gesorteerde deb-controlesommen en brongebonden manifestcontrole geslaagd. Alle vijf CI-jobs zijn groen; de vier Linux-debug-artefacten en het manifest zijn tussen de twee hosts bytegelijk. Dit sluit de specifieke technische cross-host-bouwproef af, zonder wijziging van *Referentie* of *Attest*.
+
+De referentiesuite-adapter decodeert nu de laatste JSON Pointer-token in `projectPatch` en weigert ongeldige `~`-escapes. Een gerichte regressietest dekt `set` en `remove` bij sleutels met `/` en `~`; de bestaande suitepaden veranderen niet. Dit voorkomt dat een dossier ongemerkt een gelijkende letterlijke sleutel wijzigt. *Referentie* en *Attest* blijven open.
 
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 

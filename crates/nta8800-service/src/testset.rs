@@ -50,10 +50,31 @@ pub enum PatchOp {
 /// cannot silently turn a patch into a no-op.
 pub fn apply_patch(project: &mut Value, steps: Vec<PatchStep>) -> Result<(), String> {
     for step in steps {
+        if !step.pointer.starts_with('/') {
+            return Err(format!(
+                "Patch pointer must start with '/': {}",
+                step.pointer
+            ));
+        }
         let (parent, key) = step
             .pointer
             .rsplit_once('/')
-            .ok_or_else(|| format!("Patch pointer must start with '/': {}", step.pointer))?;
+            .expect("a pointer starting with '/' has a final token");
+        // serde_json resolves escapes in the parent pointer; decode the final
+        // token too, otherwise /a~1b silently edits a literal "a~1b" key.
+        let mut decoded_key = String::new();
+        let mut chars = key.chars();
+        while let Some(ch) = chars.next() {
+            if ch == '~' {
+                match chars.next() {
+                    Some('0') => decoded_key.push('~'),
+                    Some('1') => decoded_key.push('/'),
+                    _ => return Err(format!("Invalid patch pointer escape: {}", step.pointer)),
+                }
+            } else {
+                decoded_key.push(ch);
+            }
+        }
         let object = project
             .pointer_mut(parent)
             .and_then(Value::as_object_mut)
@@ -63,11 +84,11 @@ pub fn apply_patch(project: &mut Value, steps: Vec<PatchStep>) -> Result<(), Str
                 let value = step
                     .value
                     .ok_or_else(|| format!("Patch set needs a value: {}", step.pointer))?;
-                object.insert(key.to_string(), value);
+                object.insert(decoded_key, value);
             }
             PatchOp::Remove => {
                 object
-                    .remove(key)
+                    .remove(&decoded_key)
                     .ok_or_else(|| format!("Patch remove target is missing: {}", step.pointer))?;
             }
         }
@@ -429,6 +450,25 @@ pub fn markdown(rows: &[TestsetRow], header: &[(&str, String)]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn patch_decodes_json_pointer_tokens_without_touching_similarly_named_keys() {
+        let mut project = json!({"a/b": {"c~d": 1}, "a~1b": {"c~0d": 2}});
+        let steps: Vec<PatchStep> = serde_json::from_value(json!([
+            {"op": "set", "pointer": "/a~1b/c~0d", "value": 3},
+            {"op": "remove", "pointer": "/a~1b/c~0d"}
+        ]))
+        .unwrap();
+        apply_patch(&mut project, steps).unwrap();
+        assert_eq!(project, json!({"a/b": {}, "a~1b": {"c~0d": 2}}));
+
+        let invalid: Vec<PatchStep> = serde_json::from_value(json!([
+            {"op": "set", "pointer": "/a~2b", "value": 4}
+        ]))
+        .unwrap();
+        assert!(apply_patch(&mut project, invalid).is_err());
+        assert!(project.get("a~2b").is_none());
+    }
 
     #[test]
     fn test_ids_and_topics() {
