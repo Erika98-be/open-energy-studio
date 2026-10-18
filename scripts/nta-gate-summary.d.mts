@@ -36,9 +36,23 @@ export interface ReferenceSummary {
 export interface GateSummary {
   gate: GateLogSummary;
   reference: ReferenceSummary | null;
+  plannedReference?: PlannedReferenceSummary | null;
+}
+export interface PlannedReferenceSummary {
+  verdict: string | null;
+  comparedCases: number | null;
+  pendingExpectationCases: number | null;
+  totalCases: number;
+  numericComparisonPassed: boolean;
+  plannedCoveragePassed: boolean;
+  coveragePlanFingerprint: string | null;
+  commit: string | null;
+  referenceVerified: boolean;
+  attestStatus: string | null;
 }
 export function summariseGateLog(logText: string): GateLogSummary;
 export function summariseReferenceReport(report: unknown): ReferenceSummary;
+export function summarisePlannedReferenceReport(report: unknown): PlannedReferenceSummary;
 export function renderGateSummaryMarkdown(summary: GateSummary | null): string;
 export function renderGateSummaryEnglish(summary: GateSummary | null): string;
 export const REQUIRED_STEPS: string[];

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import {
   REQUIRED_STEPS,
   gateSummaryProblems,
@@ -8,6 +10,7 @@ import {
   renderGateSummaryMarkdown,
   summariseGateLog,
   summariseReferenceReport,
+  summarisePlannedReferenceReport,
 } from '../../scripts/nta-gate-summary.mjs';
 import { readIdentity } from '../../scripts/nta-leveringsdocument.mjs';
 import { renderGithubRelease } from '../../scripts/nta-github-release.mjs';
@@ -223,5 +226,46 @@ describe('gate summary (scripts/nta-gate-summary.mjs)', () => {
     expect(body).toContain('1984 Rust tests passed');
     expect(body).toContain('2 of 3 cases compared');
     expect(body).toContain('gate-samenvatting.json');
+  });
+
+  it('separates a planned batch from internal suites without claiming verification', () => {
+    const plannedReference = summarisePlannedReferenceReport({
+      comparisonVerdict: 'passed', comparedCases: 1, pendingExpectationCases: 0,
+      numericComparisonPassed: true, plannedCoveragePassed: true,
+      coveragePlanFingerprint: 'a'.repeat(64), commit: 'b'.repeat(40),
+      referenceVerified: false, attestStatus: 'unattested', cases: [{}],
+    });
+    const summary = { gate: summariseGateLog(LOG), reference: summariseReferenceReport(REPORT), plannedReference };
+    expect(renderGateSummaryMarkdown(summary)).toContain('Onafhankelijke referentieverificatie: nee');
+    expect(renderGateSummaryMarkdown(summary)).toContain(`Plan-SHA-256: \`${'a'.repeat(64)}\``);
+    expect(renderGateSummaryEnglish(summary)).toContain('plan coverage passed (independent verification not recorded)');
+    expect(renderGateSummaryMarkdown({ ...summary, plannedReference: null })).toContain('niet uitgevoerd of rapport ontbreekt');
+  });
+
+  it('refuses a release summary when a planned batch ran but its report is missing', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'nta-gate-summary-'));
+    try {
+      const log = join(dir, 'gate.log');
+      const report = join(dir, 'planned.json');
+      const out = join(dir, 'summary.json');
+      writeFileSync(log, LOG.replace('planned reference comparisons skipped (no plan or case directory configured)', 'planned reference comparisons'));
+      const args = ['scripts/nta-gate-summary.mjs', '--log', log, '--planned-reference', report,
+        '--out', out, '--require-pass', '--allow-missing-steps'];
+      const missing = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
+      expect(missing.status).toBe(1);
+      expect(missing.stderr).toContain('rapport van de uitgevoerde geplande referentiebatch ontbreekt');
+      writeFileSync(report, JSON.stringify({ comparisonVerdict: 'passed', comparedCases: 1,
+        numericComparisonPassed: true, plannedCoveragePassed: true, cases: [{}] }));
+      const present = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
+      expect(present.status).toBe(0);
+      expect(JSON.parse(readFileSync(out, 'utf8')).plannedReference.plannedCoveragePassed).toBe(true);
+      writeFileSync(report, JSON.stringify({ comparisonVerdict: 'failed', comparedCases: 1,
+        numericComparisonPassed: true, plannedCoveragePassed: false, cases: [{}] }));
+      const failed = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
+      expect(failed.status).toBe(1);
+      expect(failed.stderr).toContain('geplande referentiebatch is niet numeriek en qua plandekking geslaagd');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
