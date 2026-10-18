@@ -34,8 +34,17 @@ pub const SERVICES: [(&str, &str); 7] = [
 pub struct PatchStep {
     pub op: PatchOp,
     pub pointer: String,
-    #[serde(default)]
+    // Preserve an explicitly supplied JSON null. Plain Option<Value> treats
+    // null like an absent value, making a valid `set` to null impossible.
+    #[serde(default, deserialize_with = "present_patch_value")]
     pub value: Option<Value>,
+}
+
+fn present_patch_value<'de, D>(deserializer: D) -> Result<Option<Value>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    Value::deserialize(deserializer).map(Some)
 }
 
 #[derive(Deserialize, PartialEq)]
@@ -516,6 +525,24 @@ mod tests {
             assert!(apply_patch(&mut project, steps).is_err(), "{token}");
             assert_eq!(project, json!({"items": ["B", "c"]}));
         }
+    }
+
+    #[test]
+    fn patch_set_distinguishes_explicit_null_from_missing_value() {
+        let mut project = json!({"optional": 3});
+        let null_step: Vec<PatchStep> = serde_json::from_value(json!([
+            {"op": "set", "pointer": "/optional", "value": null}
+        ]))
+        .unwrap();
+        apply_patch(&mut project, null_step).unwrap();
+        assert_eq!(project, json!({"optional": null}));
+
+        let missing_step: Vec<PatchStep> = serde_json::from_value(json!([
+            {"op": "set", "pointer": "/optional"}
+        ]))
+        .unwrap();
+        assert!(apply_patch(&mut project, missing_step).is_err());
+        assert_eq!(project, json!({"optional": null}));
     }
 
     #[test]

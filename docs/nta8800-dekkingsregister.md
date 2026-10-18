@@ -62,6 +62,8 @@ Als een externe referentiebatch met plan wordt aangeleverd, schrijft de technisc
 
 De vrijgavesamenvatting houdt een eventueel geplande batch nu apart van de interne suites en toont numerieke vergelijking, plandekking, planvingerafdruk en commit. Een uitgevoerde batch zonder rapport of met falende plan-/numerieke status blokkeert de vrijgave. Gerichte scriptproeven, TypeScript en shell-syntax slagen. Dit verandert de kolommen *Referentie* en *Attest* niet; een goedgekeurd plan en actuele onafhankelijke uitkomsten ontbreken.
 
+In `projectPatch` werkt `set` met een expliciete JSON-`null` nu als invoerwaarde; een ontbrekend `value`-veld blijft een fout. De volledige servicesuite, formatcontrole en Clippy slagen. Dit verruimt de referentie-invoeradapter, zonder nieuwe rekenroute of wijziging van *Referentie* of *Attest*.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
