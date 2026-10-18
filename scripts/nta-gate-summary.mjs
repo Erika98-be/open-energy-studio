@@ -326,11 +326,17 @@ function main(argv) {
     if (gate.steps.some((step) => step.name.startsWith('reference suites')) && !reference) {
       problems.push('rapport van de interne referentiesuites ontbreekt');
     }
+    if (reference && reference.verdict !== 'passed') {
+      problems.push('interne referentiesuites zijn niet geslaagd');
+    }
     if (gate.steps.some((step) => step.name === 'planned reference comparisons') && !plannedReference) {
       problems.push('rapport van de uitgevoerde geplande referentiebatch ontbreekt');
     }
     if (plannedReference && (!plannedReference.numericComparisonPassed || !plannedReference.plannedCoveragePassed)) {
       problems.push('geplande referentiebatch is niet numeriek en qua plandekking geslaagd');
+    }
+    if (plannedReference && plannedReference.verdict !== 'passed') {
+      problems.push('oordeel van de geplande referentiebatch is niet geslaagd');
     }
     if (plannedReference && (!reference?.commit || !plannedReference.commit || reference.commit !== plannedReference.commit)) {
       problems.push('broncommit van de geplande referentiebatch komt niet overeen met de interne gate');

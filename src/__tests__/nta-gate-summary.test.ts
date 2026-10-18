@@ -250,7 +250,7 @@ describe('gate summary (scripts/nta-gate-summary.mjs)', () => {
       const report = join(dir, 'planned.json');
       const out = join(dir, 'summary.json');
       writeFileSync(log, LOG.replace('planned reference comparisons skipped (no plan or case directory configured)', 'planned reference comparisons'));
-      writeFileSync(internal, JSON.stringify({ commit: 'b'.repeat(40), cases: [] }));
+      writeFileSync(internal, JSON.stringify({ commit: 'b'.repeat(40), comparisonVerdict: 'passed', cases: [] }));
       const args = ['scripts/nta-gate-summary.mjs', '--log', log, '--reference', internal, '--planned-reference', report,
         '--out', out, '--require-pass', '--allow-missing-steps'];
       const missing = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
@@ -262,6 +262,17 @@ describe('gate summary (scripts/nta-gate-summary.mjs)', () => {
       const present = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
       expect(present.status).toBe(0);
       expect(JSON.parse(readFileSync(out, 'utf8')).plannedReference.plannedCoveragePassed).toBe(true);
+      writeFileSync(report, JSON.stringify({ comparisonVerdict: 'failed', comparedCases: 1,
+        numericComparisonPassed: true, plannedCoveragePassed: true, cases: [{}],
+        commit: 'b'.repeat(40), coveragePlanFingerprint: `sha256:${'a'.repeat(64)}` }));
+      const failedVerdict = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
+      expect(failedVerdict.status).toBe(1);
+      expect(failedVerdict.stderr).toContain('oordeel van de geplande referentiebatch is niet geslaagd');
+      writeFileSync(internal, JSON.stringify({ commit: 'b'.repeat(40), comparisonVerdict: 'failed', cases: [] }));
+      const failedInternalVerdict = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
+      expect(failedInternalVerdict.status).toBe(1);
+      expect(failedInternalVerdict.stderr).toContain('interne referentiesuites zijn niet geslaagd');
+      writeFileSync(internal, JSON.stringify({ commit: 'b'.repeat(40), comparisonVerdict: 'passed', cases: [] }));
       writeFileSync(report, JSON.stringify({ comparisonVerdict: 'failed', comparedCases: 1,
         numericComparisonPassed: true, plannedCoveragePassed: false, cases: [{}],
         commit: 'b'.repeat(40), coveragePlanFingerprint: `sha256:${'a'.repeat(64)}` }));

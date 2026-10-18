@@ -70,6 +70,8 @@ De testsetexport schrijft projectbestanden pas nadat alle cases aan het vergelij
 
 De CI-desktopmatrix faalt nu wanneer Windows-, Linux- of macOS-installateurs ontbreken; voor Linux zijn `.deb` en AppImage elk verplicht. Op `a1dbdba` zijn de gate en alle drie platformbuilds in [CI-run 39126459648](https://github.com/Erika98-be/open-energy-studio/actions/runs/39126459648) geslaagd; de optionele bouwbewijsjob is overgeslagen. Dit bewaakt de beschikbaarheid van distributieartefacten en verandert de normatieve dekkingskolommen niet.
 
+De vrijgavesamenvatting weigert nu ook een intern of gepland referentierapport met een niet-geslaagd `comparisonVerdict`, zelfs wanneer de overige geplande statusvlaggen op geslaagd staan. De gerichte CLI-regressies, 15 Vitest-tests en TypeScript slagen. Dit bewaakt bewijsconsistentie; *Referentie* en *Attest* blijven open.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.
