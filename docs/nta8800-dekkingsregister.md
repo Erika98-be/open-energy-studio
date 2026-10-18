@@ -68,7 +68,7 @@ Een gepland batchrapport telt in de vrijgave alleen mee als de broncommit overee
 
 De testsetexport schrijft projectbestanden pas nadat alle cases aan het vergelijkingsrapport zijn gekoppeld. Een fout in een latere case laat daardoor geen half dossier achter; een gerichte fout- en herstelproef slaagt. Dit bewaakt dossierconsistentie en verandert *Referentie* of *Attest* niet.
 
-De CI-desktopmatrix faalt nu wanneer Windows-, Linux- of macOS-installateurs ontbreken; voor Linux zijn `.deb` en AppImage elk verplicht. De workflow is syntactisch gecontroleerd, maar moet nog op de runners draaien. Dit bewaakt de beschikbaarheid van distributieartefacten en verandert de normatieve dekkingskolommen niet.
+De CI-desktopmatrix faalt nu wanneer Windows-, Linux- of macOS-installateurs ontbreken; voor Linux zijn `.deb` en AppImage elk verplicht. Op `a1dbdba` zijn de gate en alle drie platformbuilds in [CI-run 39126459648](https://github.com/Erika98-be/open-energy-studio/actions/runs/39126459648) geslaagd; de optionele bouwbewijsjob is overgeslagen. Dit bewaakt de beschikbaarheid van distributieartefacten en verandert de normatieve dekkingskolommen niet.
 
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
