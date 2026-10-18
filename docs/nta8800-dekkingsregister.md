@@ -56,6 +56,8 @@ Bij de testsetexport worden nu de suitebytes, projectbestandbytes en opgeloste c
 
 Het dekkingsplan telt een geval nu alleen mee wanneer de berekende normeditie gelijk is aan `targetNormVersion` van het plan. Een synthetisch 2022-geval met geslaagde numerieke vergelijking faalt daarom als bewijs voor de doeluitgave 2025+C1. De aparte plantoets slaagt; *Referentie* en *Attest* blijven open.
 
+`projectPatch` ondersteunt nu ook het vervangen en verwijderen van bestaande array-elementen in een referentieproject. Een regressietest wijst ongeldige of buiten bereik liggende indexen af. Dit breidt alleen de voorbereide referentie-invoer uit; er zijn nog geen actuele externe verwachtwaarden toegevoegd.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

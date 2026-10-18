@@ -45,9 +45,10 @@ pub enum PatchOp {
     Remove,
 }
 
-/// Applies `set`/`remove` steps at JSON pointers. A step whose target (or,
-/// for `set`, whose parent) is missing is an error, so a fixture change
-/// cannot silently turn a patch into a no-op.
+/// Applies `set`/`remove` steps at JSON pointers. An object `set` may add a
+/// member; an array `set` replaces an existing index. A missing parent or
+/// target is an error, so a fixture change cannot silently turn a patch into
+/// a no-op.
 pub fn apply_patch(project: &mut Value, steps: Vec<PatchStep>) -> Result<(), String> {
     for step in steps {
         if !step.pointer.starts_with('/') {
@@ -75,21 +76,46 @@ pub fn apply_patch(project: &mut Value, steps: Vec<PatchStep>) -> Result<(), Str
                 decoded_key.push(ch);
             }
         }
-        let object = project
+        let parent_value = project
             .pointer_mut(parent)
-            .and_then(Value::as_object_mut)
-            .ok_or_else(|| format!("Patch parent is not an object: {}", step.pointer))?;
-        match step.op {
-            PatchOp::Set => {
-                let value = step
-                    .value
-                    .ok_or_else(|| format!("Patch set needs a value: {}", step.pointer))?;
-                object.insert(decoded_key, value);
+            .ok_or_else(|| format!("Patch parent is missing: {}", step.pointer))?;
+        match parent_value {
+            Value::Object(object) => match step.op {
+                PatchOp::Set => {
+                    let value = step
+                        .value
+                        .ok_or_else(|| format!("Patch set needs a value: {}", step.pointer))?;
+                    object.insert(decoded_key, value);
+                }
+                PatchOp::Remove => {
+                    object.remove(&decoded_key).ok_or_else(|| {
+                        format!("Patch remove target is missing: {}", step.pointer)
+                    })?;
+                }
+            },
+            Value::Array(array) => {
+                let index = decoded_key.parse::<usize>().ok().filter(|index| {
+                    (decoded_key == "0" || !decoded_key.starts_with('0')) && *index < array.len()
+                });
+                let index = index.ok_or_else(|| {
+                    format!("Patch array index is invalid or missing: {}", step.pointer)
+                })?;
+                match step.op {
+                    PatchOp::Set => {
+                        array[index] = step
+                            .value
+                            .ok_or_else(|| format!("Patch set needs a value: {}", step.pointer))?;
+                    }
+                    PatchOp::Remove => {
+                        array.remove(index);
+                    }
+                }
             }
-            PatchOp::Remove => {
-                object
-                    .remove(&decoded_key)
-                    .ok_or_else(|| format!("Patch remove target is missing: {}", step.pointer))?;
+            _ => {
+                return Err(format!(
+                    "Patch parent is not an object or array: {}",
+                    step.pointer
+                ));
             }
         }
     }
@@ -468,6 +494,27 @@ mod tests {
         .unwrap();
         assert!(apply_patch(&mut project, invalid).is_err());
         assert!(project.get("a~2b").is_none());
+    }
+
+    #[test]
+    fn patch_replaces_or_removes_array_items_only_at_existing_indices() {
+        let mut project = json!({"items": ["a", "b", "c"]});
+        let steps: Vec<PatchStep> = serde_json::from_value(json!([
+            {"op": "set", "pointer": "/items/1", "value": "B"},
+            {"op": "remove", "pointer": "/items/0"}
+        ]))
+        .unwrap();
+        apply_patch(&mut project, steps).unwrap();
+        assert_eq!(project, json!({"items": ["B", "c"]}));
+
+        for token in ["02", "2", "-", "x"] {
+            let steps: Vec<PatchStep> = serde_json::from_value(json!([
+                {"op": "set", "pointer": format!("/items/{token}"), "value": "wrong"}
+            ]))
+            .unwrap();
+            assert!(apply_patch(&mut project, steps).is_err(), "{token}");
+            assert_eq!(project, json!({"items": ["B", "c"]}));
+        }
     }
 
     #[test]
