@@ -68,6 +68,8 @@ Een gepland batchrapport telt in de vrijgave alleen mee als de broncommit overee
 
 De testsetexport schrijft projectbestanden pas nadat alle cases aan het vergelijkingsrapport zijn gekoppeld. Een fout in een latere case laat daardoor geen half dossier achter; een gerichte fout- en herstelproef slaagt. Dit bewaakt dossierconsistentie en verandert *Referentie* of *Attest* niet.
 
+De CI-desktopmatrix faalt nu wanneer Windows-, Linux- of macOS-installateurs ontbreken; voor Linux zijn `.deb` en AppImage elk verplicht. De workflow is syntactisch gecontroleerd, maar moet nog op de runners draaien. Dit bewaakt de beschikbaarheid van distributieartefacten en verandert de normatieve dekkingskolommen niet.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

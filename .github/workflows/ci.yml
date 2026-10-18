@@ -161,7 +161,19 @@ jobs:
           path: |
             src-tauri/target/release/bundle/nsis/*.exe
           retention-days: 30
-          if-no-files-found: ignore
+          if-no-files-found: error
+
+      - name: Require both Linux installer formats
+        if: matrix.platform == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          shopt -s nullglob
+          debs=(src-tauri/target/release/bundle/deb/*.deb)
+          appimages=(src-tauri/target/release/bundle/appimage/*.AppImage)
+          if (( ${#debs[@]} == 0 || ${#appimages[@]} == 0 )); then
+            echo 'Missing Linux .deb or AppImage build output' >&2
+            exit 1
+          fi
 
       - name: Upload artifacts (Linux)
         if: matrix.platform == 'ubuntu-22.04'
@@ -172,7 +184,7 @@ jobs:
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/appimage/*.AppImage
           retention-days: 30
-          if-no-files-found: ignore
+          if-no-files-found: error
 
       - name: Upload artifacts (macOS)
         if: matrix.platform == 'macos-latest'
@@ -182,7 +194,7 @@ jobs:
           path: |
             src-tauri/target/release/bundle/dmg/*.dmg
           retention-days: 30
-          if-no-files-found: ignore
+          if-no-files-found: error
 
   # The standalone workflow_dispatch file cannot run before it reaches the
   # default branch. An explicitly marked push can collect comparable evidence
