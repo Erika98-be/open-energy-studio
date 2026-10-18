@@ -246,24 +246,39 @@ describe('gate summary (scripts/nta-gate-summary.mjs)', () => {
     const dir = mkdtempSync(join(tmpdir(), 'nta-gate-summary-'));
     try {
       const log = join(dir, 'gate.log');
+      const internal = join(dir, 'internal.json');
       const report = join(dir, 'planned.json');
       const out = join(dir, 'summary.json');
       writeFileSync(log, LOG.replace('planned reference comparisons skipped (no plan or case directory configured)', 'planned reference comparisons'));
-      const args = ['scripts/nta-gate-summary.mjs', '--log', log, '--planned-reference', report,
+      writeFileSync(internal, JSON.stringify({ commit: 'b'.repeat(40), cases: [] }));
+      const args = ['scripts/nta-gate-summary.mjs', '--log', log, '--reference', internal, '--planned-reference', report,
         '--out', out, '--require-pass', '--allow-missing-steps'];
       const missing = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
       expect(missing.status).toBe(1);
       expect(missing.stderr).toContain('rapport van de uitgevoerde geplande referentiebatch ontbreekt');
       writeFileSync(report, JSON.stringify({ comparisonVerdict: 'passed', comparedCases: 1,
-        numericComparisonPassed: true, plannedCoveragePassed: true, cases: [{}] }));
+        numericComparisonPassed: true, plannedCoveragePassed: true, cases: [{}],
+        commit: 'b'.repeat(40), coveragePlanFingerprint: `sha256:${'a'.repeat(64)}` }));
       const present = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
       expect(present.status).toBe(0);
       expect(JSON.parse(readFileSync(out, 'utf8')).plannedReference.plannedCoveragePassed).toBe(true);
       writeFileSync(report, JSON.stringify({ comparisonVerdict: 'failed', comparedCases: 1,
-        numericComparisonPassed: true, plannedCoveragePassed: false, cases: [{}] }));
+        numericComparisonPassed: true, plannedCoveragePassed: false, cases: [{}],
+        commit: 'b'.repeat(40), coveragePlanFingerprint: `sha256:${'a'.repeat(64)}` }));
       const failed = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
       expect(failed.status).toBe(1);
       expect(failed.stderr).toContain('geplande referentiebatch is niet numeriek en qua plandekking geslaagd');
+      writeFileSync(report, JSON.stringify({ comparisonVerdict: 'passed', comparedCases: 1,
+        numericComparisonPassed: true, plannedCoveragePassed: true, cases: [{}],
+        commit: 'c'.repeat(40), coveragePlanFingerprint: null }));
+      const unrelated = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
+      expect(unrelated.status).toBe(1);
+      expect(unrelated.stderr).toContain('broncommit van de geplande referentiebatch komt niet overeen');
+      expect(unrelated.stderr).toContain('geldige planvingerafdruk');
+      rmSync(internal);
+      const missingInternal = spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
+      expect(missingInternal.status).toBe(1);
+      expect(missingInternal.stderr).toContain('rapport van de interne referentiesuites ontbreekt');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -177,6 +177,7 @@ export function summariseReferenceReport(report) {
     pendingExpectationCases: report.pendingExpectationCases ?? null,
     totalCases: (report.cases ?? []).length,
     kernelVersion: report.kernelVersion ?? null,
+    commit: report.commit ?? null,
     suites: [...suites.values()],
   };
 }
@@ -322,11 +323,20 @@ function main(argv) {
   // --allow-missing-steps: a dry run may use the skip switches.
   if (options['require-pass'] !== undefined) {
     const problems = gateSummaryProblems(gate, { requireAllSteps: options['allow-missing-steps'] === undefined });
+    if (gate.steps.some((step) => step.name.startsWith('reference suites')) && !reference) {
+      problems.push('rapport van de interne referentiesuites ontbreekt');
+    }
     if (gate.steps.some((step) => step.name === 'planned reference comparisons') && !plannedReference) {
       problems.push('rapport van de uitgevoerde geplande referentiebatch ontbreekt');
     }
     if (plannedReference && (!plannedReference.numericComparisonPassed || !plannedReference.plannedCoveragePassed)) {
       problems.push('geplande referentiebatch is niet numeriek en qua plandekking geslaagd');
+    }
+    if (plannedReference && (!reference?.commit || !plannedReference.commit || reference.commit !== plannedReference.commit)) {
+      problems.push('broncommit van de geplande referentiebatch komt niet overeen met de interne gate');
+    }
+    if (plannedReference && !/^sha256:[0-9a-f]{64}$/.test(plannedReference.coveragePlanFingerprint ?? '')) {
+      problems.push('geldige planvingerafdruk van de geplande referentiebatch ontbreekt');
     }
     if (problems.length) {
       console.error(`Gate-samenvatting is geen bewijs voor een vrijgave: ${problems.join('; ')}.`);

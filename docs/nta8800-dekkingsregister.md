@@ -64,6 +64,8 @@ De vrijgavesamenvatting houdt een eventueel geplande batch nu apart van de inter
 
 In `projectPatch` werkt `set` met een expliciete JSON-`null` nu als invoerwaarde; een ontbrekend `value`-veld blijft een fout. De volledige servicesuite, formatcontrole en Clippy slagen. Dit verruimt de referentie-invoeradapter, zonder nieuwe rekenroute of wijziging van *Referentie* of *Attest*.
 
+Een gepland batchrapport telt in de vrijgave alleen mee als de broncommit overeenkomt met de interne gate en de planvingerafdruk een geldige SHA-256 is. Ook een ontbrekend intern referentierapport blokkeert de vrijgave. De CLI-regressie wijst al deze bewijsfouten af. Dit bewaakt bewijsherkomst; *Referentie* en *Attest* blijven open.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

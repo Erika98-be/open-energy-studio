@@ -31,6 +31,7 @@ export interface ReferenceSummary {
   pendingExpectationCases: number | null;
   totalCases: number;
   kernelVersion: string | null;
+  commit: string | null;
   suites: { suite: string; total: number; compared: number; passed: number; pending: number; other: number }[];
 }
 export interface GateSummary {
