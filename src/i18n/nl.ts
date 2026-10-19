@@ -1158,6 +1158,7 @@ export const nl: Record<string, string> = {
   'kernel.gasForfait.temperature': 'Ontwerp-aanvoertemperatuur (°C)',
   'kernel.gasForfait.temperatureReference': 'Bewijs aanvoertemperatuur',
   'kernel.gasForfait.correction': 'Aangeleverde broncorrectie csource',
+  'kernel.gasForfait.groundwaterCorrection': 'Bij grondwater is csource 1,00; de regeneratiecorrectie van bijlage V geldt alleen voor een bodemwarmtewisselaar.',
   'kernel.gasForfait.correctionReference': 'Bewijs broncorrectie',
   'kernel.gasForfait.lookup': 'Zoek concept-COP gas op',
   'kernel.gasForfait.save': 'Bewaar gastabelinvoer',

@@ -1158,6 +1158,7 @@ export const en: Record<string, string> = {
   'kernel.gasForfait.temperature': 'Design supply temperature (°C)',
   'kernel.gasForfait.temperatureReference': 'Supply temperature evidence',
   'kernel.gasForfait.correction': 'Supplied source correction csource',
+  'kernel.gasForfait.groundwaterCorrection': 'For groundwater, csource is 1.00; the Annex V regeneration correction applies only to a ground heat exchanger.',
   'kernel.gasForfait.correctionReference': 'Source correction evidence',
   'kernel.gasForfait.lookup': 'Look up gas draft COP',
   'kernel.gasForfait.save': 'Save gas table input',
