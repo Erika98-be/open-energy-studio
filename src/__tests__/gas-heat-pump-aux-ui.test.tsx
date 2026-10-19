@@ -36,7 +36,7 @@ describe('gas heat pump draft auxiliary UI', () => {
     vi.stubGlobal('fetch', fetchMock);
     const view = renderWithProviders(<GasHeatPumpAuxPanel pump={pump} onSave={onSave} />);
     await user.click(screen.getByRole('button', { name: 'Calculate draft auxiliary electricity' }));
-    expect(screen.getByRole('alert')).toHaveTextContent('twelve valid months');
+    expect(screen.getByRole('alert')).toHaveTextContent('NTA 8800 table 17.1');
     expect(fetchMock).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText('Building-share evidence'), { target: { value: 'whole building' } });
     fireEvent.change(screen.getByLabelText('Month-hours evidence'), { target: { value: 'hour schedule' } });
@@ -61,7 +61,7 @@ describe('gas heat pump draft auxiliary UI', () => {
     fireEvent.change(screen.getByLabelText('Month hours (h) 2'), { target: { value: '744' } });
     await user.click(screen.getByRole('button', { name: 'Calculate draft auxiliary electricity' }));
     expect(fetchMock).toHaveBeenCalledTimes(requests);
-    expect(screen.getByRole('alert')).toHaveTextContent('twelve valid months');
+    expect(screen.getByRole('alert')).toHaveTextContent('NTA 8800 table 17.1');
     fireEvent.change(screen.getByLabelText('Generator heat (kWh) 1'), { target: { value: '900' } });
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     view.unmount();
