@@ -334,7 +334,7 @@ mod tests {
             .map(|month| json!({"month":month,"energyKwh":1000.0}))
             .collect::<Vec<_>>();
         let aux_months = (1..=12)
-            .map(|month| json!({"month":month,"hours":730.0,"generatorOutputKwh":1000.0}))
+            .map(|month| json!({"month":month,"hours":nta8800_core::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0}))
             .collect::<Vec<_>>();
         let evidence = json!({
             "chain": {
@@ -1457,7 +1457,7 @@ mod tests {
             "modulationReference":"draft 9.6.8.2.3", "buildingShare":1.0,
             "buildingShareReference":"whole building", "forfaitCopUsed":true,
             "monthHoursReference":"hour schedule", "generatorOutputReference":"generator ledger",
-            "months":(1..=12).map(|month| json!({"month":month,"hours":730.0,"generatorOutputKwh":1000.0})).collect::<Vec<_>>()
+            "months":(1..=12).map(|month| json!({"month":month,"hours":nta8800_core::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0})).collect::<Vec<_>>()
         });
         let endpoint = "/v1/nta8800/heat-pumps/gas-aux-draft/diagnose";
         let request = |input: &Value| {
@@ -1475,7 +1475,7 @@ mod tests {
             (value["monthly"][0]["auxiliaryElectricityKwh"]
                 .as_f64()
                 .unwrap()
-                - 8.4)
+                - 8.54)
                 .abs()
                 < 1e-12
         );
@@ -1543,7 +1543,7 @@ mod tests {
             .map(|month| json!({"month":month,"energyKwh":1000.0}))
             .collect::<Vec<_>>();
         let aux_months = (1..=12)
-            .map(|month| json!({"month":month,"hours":730.0,"generatorOutputKwh":1000.0}))
+            .map(|month| json!({"month":month,"hours":nta8800_core::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0}))
             .collect::<Vec<_>>();
         let mut input = json!({
             "monthly":{
@@ -1583,7 +1583,10 @@ mod tests {
             value["monthly"][0]["equation962UnallocatedInputTermKwh"],
             625.0
         );
-        assert_eq!(value["monthly"][0]["equipmentAuxiliaryElectricityKwh"], 8.4);
+        assert_eq!(
+            value["monthly"][0]["equipmentAuxiliaryElectricityKwh"],
+            8.54
+        );
         assert_eq!(value["carrierAllocationAvailable"], false);
         input["auxiliary"]["months"][0]["generatorOutputKwh"] = json!(900.0);
         let response = app().oneshot(request(&input)).await.unwrap();
@@ -1602,7 +1605,7 @@ mod tests {
             .map(|month| json!({"month":month,"energyKwh":1000.0}))
             .collect::<Vec<_>>();
         let aux_months = (1..=12)
-            .map(|month| json!({"month":month,"hours":730.0,"generatorOutputKwh":1000.0}))
+            .map(|month| json!({"month":month,"hours":nta8800_core::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0}))
             .collect::<Vec<_>>();
         let mut input = json!({
             "chain": {
@@ -1654,14 +1657,14 @@ mod tests {
             .map(|month| json!({"month":month,"energyKwh":1000.0}))
             .collect::<Vec<_>>();
         let aux_monthly = (1..=12)
-            .map(|month| json!({"month":month,"hours":730.0,"generatorOutputKwh":1000.0}))
+            .map(|month| json!({"month":month,"hours":nta8800_core::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0}))
             .collect::<Vec<_>>();
         let mut expected = Vec::new();
         for month in 1..=12 {
             expected.push(json!({"metric":"equation962_unallocated_input_term","month":month,
                 "valueKwh":625.0,"absoluteToleranceKwh":1e-9,"calculationBasis":"synthetic arithmetic"}));
             expected.push(json!({"metric":"equipment_auxiliary_electricity","month":month,
-                "valueKwh":8.4,"absoluteToleranceKwh":1e-9,"calculationBasis":"synthetic arithmetic"}));
+                "valueKwh":nta8800_core::climate::MONTH_HOURS[(month - 1) as usize] * 0.01 + 1.1,"absoluteToleranceKwh":1e-9,"calculationBasis":"synthetic arithmetic"}));
         }
         expected.push(json!({"metric":"annual_equipment_auxiliary_electricity","month":null,
             "valueKwh":100.8,"absoluteToleranceKwh":1e-9,"calculationBasis":"synthetic arithmetic"}));

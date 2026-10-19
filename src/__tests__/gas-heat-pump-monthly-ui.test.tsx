@@ -6,6 +6,8 @@ import { renderWithProviders, userEvent } from './test-utils';
 
 afterEach(() => vi.unstubAllGlobals());
 
+const normativeMonthHours = [744, 672, 744, 720, 744, 720, 744, 744, 720, 744, 720, 744];
+
 describe('gas heat pump draft monthly terms UI', () => {
   it('sends collective temperature and declaration evidence to the dh diagnostic and clears stale results', async () => {
     const pump: INtaHeatPumpInput = {
@@ -24,7 +26,7 @@ describe('gas heat pump draft monthly terms UI', () => {
         solutionPumpWPerKw: 0, coefficientsReference: 'draft', meanModulation: 1,
         modulationReference: 'draft', buildingShare: 1, buildingShareReference: 'whole building',
         forfaitCopUsed: true, monthHoursReference: 'hours', generatorOutputReference: 'meter',
-        months: Array.from({ length: 12 }, (_, index) => ({ month: index + 1, hours: 730, generatorOutputKwh: 1000 })),
+        months: Array.from({ length: 12 }, (_, index) => ({ month: index + 1, hours: normativeMonthHours[index], generatorOutputKwh: 1000 })),
       },
     };
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
@@ -74,13 +76,13 @@ describe('gas heat pump draft monthly terms UI', () => {
         coefficientsReference: 'draft', meanModulation: 1, modulationReference: 'draft',
         buildingShare: 1, buildingShareReference: 'building', forfaitCopUsed: true,
         monthHoursReference: 'hours', generatorOutputReference: 'meter',
-        months: Array.from({ length: 12 }, (_, index) => ({ month: index + 1, hours: 730, generatorOutputKwh: 1000 })),
+        months: Array.from({ length: 12 }, (_, index) => ({ month: index + 1, hours: normativeMonthHours[index], generatorOutputKwh: 1000 })),
       },
     };
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
       status: 'diagnostic_valid', annualEquipmentAuxiliaryElectricityKwh: 100.8,
       monthly: Array.from({ length: 12 }, (_, index) => ({ month: index + 1,
-        equation962UnallocatedInputTermKwh: 625, equipmentAuxiliaryElectricityKwh: 8.4 })),
+        equation962UnallocatedInputTermKwh: 625, equipmentAuxiliaryElectricityKwh: 0.01 * normativeMonthHours[index] + 1.1 })),
       inputFingerprint: 'sha256:linked', carrierAllocationAvailable: false,
       gasInputEnergyAvailable: false, bengCalculationAvailable: false, issues: [],
     }) });
@@ -95,7 +97,7 @@ describe('gas heat pump draft monthly terms UI', () => {
     expect(sent.monthly.generatorOutputKwh[0].energyKwh).toBe(sent.auxiliary.months[0].generatorOutputKwh);
     expect(screen.getByRole('status')).toHaveTextContent('100.80 kWh');
     expect(screen.getByRole('status')).toHaveTextContent('625.00');
-    expect(screen.getByRole('status')).toHaveTextContent('8.40');
+    expect(screen.getByRole('status')).toHaveTextContent('8.54');
     fireEvent.change(screen.getByLabelText('Generator heat (kWh) 1'), { target: { value: '900' } });
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });

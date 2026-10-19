@@ -227,7 +227,10 @@ mod tests {
         for month in 1..=12 {
             for (metric, value_kwh) in [
                 (GasChainMetric::Equation962UnallocatedInputTerm, 625.0),
-                (GasChainMetric::EquipmentAuxiliaryElectricity, 8.4),
+                (
+                    GasChainMetric::EquipmentAuxiliaryElectricity,
+                    crate::climate::MONTH_HOURS[(month - 1) as usize] * 0.01 + 1.1,
+                ),
             ] {
                 expected.push(GasChainExpectedMetric {
                     metric,
@@ -270,7 +273,7 @@ mod tests {
                     "solutionPumpWPerKw":0.0,"coefficientsReference":"draft","meanModulation":1.0,
                     "modulationReference":"draft","buildingShare":1.0,"buildingShareReference":"whole building",
                     "forfaitCopUsed":true,"monthHoursReference":"schedule","generatorOutputReference":"meter",
-                    "months":(1..=12).map(|month|json!({"month":month,"hours":730.0,"generatorOutputKwh":1000.0})).collect::<Vec<_>>()}
+                    "months":(1..=12).map(|month|json!({"month":month,"hours":crate::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0})).collect::<Vec<_>>()}
             })).unwrap(),
             expected,
         }

@@ -72,6 +72,8 @@ De CI-desktopmatrix faalt nu wanneer Windows-, Linux- of macOS-installateurs ont
 
 De vrijgavesamenvatting weigert nu ook een intern of gepland referentierapport met een niet-geslaagd `comparisonVerdict`, zelfs wanneer de overige geplande statusvlaggen op geslaagd staan. De gerichte CLI-regressies, 15 Vitest-tests en TypeScript slagen. Dit bewaakt bewijsconsistentie; *Referentie* en *Attest* blijven open.
 
+De gaswarmtepomp-hulpstroomdiagnose controleert de twaalf aangeleverde maanduren nu tegen tabel 17.1 van de doeluitgave. De UI vult die uren vooraf in; een afwijkende waarde verhindert een geldige diagnose. Formules 9.91/9.92 en de maandduur zijn visueel tegen de gelicentieerde NTA 8800:2025+C1:2026 nagezien. Gerichte kern-, service- en UI-tests slagen. Dit herstelt de maandterm maar sluit de gas-/bronpomp-/BENG-route niet; *Referentie* en *Attest* blijven open.
+
 **Nieuwe begrensde deelroute:** de [collectieve gaswarmtepompbron-conceptdiagnose](nta8800-gaswarmtepomp-collectieve-bron-concept.md) rekent bronwarmte uit een geldige twaalfmaandsketen apart als `dh` door. Temperatuur- en verklaringbewijs zijn verplicht. De route levert alleen conceptbijdragen, zonder onafhankelijke actuele referentie, attest, gasdragerboeking of BENG.
 
 Doeluitgave: **NTA 8800:2025+C1:2026**. Dit register beschrijft implementatiedekking; het kent geen normconformiteit toe. Het [bronnenregister](nta8800-bronnenregister.md) legt vast welke primaire documenten en onafhankelijke uitkomsten nog ontbreken. `Model` betekent dat invoer kan worden vastgelegd, `Audit` dat basiscontroles bestaan, `Rekenroute` dat normformules zijn geïmplementeerd, `Referentie` dat deelresultaten onafhankelijk zijn vergeleken, en `Attest` dat de variant in de extern getoetste scope valt.

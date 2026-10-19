@@ -253,7 +253,7 @@ mod tests {
                     "solutionPumpWPerKw":0.0,"coefficientsReference":"draft","meanModulation":1.0,
                     "modulationReference":"draft","buildingShare":1.0,"buildingShareReference":"whole building",
                     "forfaitCopUsed":true,"monthHoursReference":"schedule","generatorOutputReference":"heat meter",
-                    "months":(1..=12).map(|month|json!({"month":month,"hours":730.0,"generatorOutputKwh":1000.0})).collect::<Vec<_>>()}
+                    "months":(1..=12).map(|month|json!({"month":month,"hours":crate::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0})).collect::<Vec<_>>()}
             },
             "sourceTemperatureClass":"below20_c","sourceTemperatureReference":"source design",
             "noQualityDeclarationConfirmed":true,"noQualityDeclarationReference":"register check"
