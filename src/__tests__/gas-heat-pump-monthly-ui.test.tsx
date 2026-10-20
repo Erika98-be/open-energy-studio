@@ -22,6 +22,23 @@ const groundPump: INtaHeatPumpInput = {
 };
 
 describe('gas heat pump draft monthly terms UI', () => {
+  it('explains a Rust source audit rejection in the selected UI language', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+      status: 'invalid', issues: [{ code: 'source_system_mismatch', path: 'sourceSystem' }],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    renderWithProviders(<GasHeatPumpMonthlyPanel pump={groundPump} />);
+    fireEvent.change(screen.getByLabelText('Source-system evidence'), { target: { value: 'source plan' } });
+    fireEvent.change(screen.getByLabelText('Monthly generator heat evidence'), { target: { value: 'meter' } });
+    for (let month = 1; month <= 12; month += 1) {
+      fireEvent.change(screen.getByLabelText(`Generator heat (kWh) ${month}`), { target: { value: '1000' } });
+    }
+    await user.click(screen.getByRole('button', { name: 'Calculate draft 9.62 terms' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(screen.getByRole('alert')).toHaveTextContent('The source system does not fit the chosen source');
+    expect(screen.getByRole('alert')).not.toHaveTextContent('source_system_mismatch');
+  });
   it('requires evidence for the 15 °C collective ground-source correction boundary', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
       status: 'diagnostic_valid', correctedCop: 1.6, collectiveSourceCorrectionFactor: 0.022,

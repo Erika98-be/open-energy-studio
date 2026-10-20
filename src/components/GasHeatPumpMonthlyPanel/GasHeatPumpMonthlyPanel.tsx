@@ -76,7 +76,7 @@ export function GasHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }) {
       if (kind === 'source') setSourceResult(assessment as GasCollectiveSourceDraftAssessment);
       else if (kind === 'linked') setChainResult(assessment as GasHeatPumpChainDraftAssessment);
       else setResult(assessment as GasHeatPumpMonthlyDraftAssessment);
-      if (assessment.status === 'invalid') setError(assessment.issues.map((item) => item.code).join(', '));
+      if (assessment.status === 'invalid') setError(assessment.issues.map((item) => t(`kernel.issue.${item.code}`, { defaultValue: item.code })).join(' '));
     } catch (reason) {
       if (sequence.current === current) { setLoading(false); setError(String(reason)); }
     }

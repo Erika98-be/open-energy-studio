@@ -65,7 +65,7 @@ export function GasHeatPumpAuxPanel({ pump, onSave }: {
       const assessment = await diagnoseGasHeatPumpAuxDraftWithRust(input, edition);
       if (current !== sequence.current) return;
       setLoading(false); setResult(assessment);
-      if (assessment.status === 'invalid') setError(assessment.issues.map((item) => item.code).join(', '));
+      if (assessment.status === 'invalid') setError(assessment.issues.map((item) => t(`kernel.issue.${item.code}`, { defaultValue: item.code })).join(' '));
       else if (save) onSave(input);
     } catch (reason) {
       if (current === sequence.current) { setLoading(false); setError(String(reason)); }
