@@ -30,6 +30,8 @@ De [CI-run op `90f1d56`](https://github.com/Erika98-be/open-energy-studio/action
 
 De [CI-run op `7fd6ad2`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39479263729) slaagde eveneens voor gate en drie platformbuilds. De CI- en releaseworkflow controleren voortaan met `lipo` dat de gebouwde macOS-desktopbinary zowel `x86_64` als `arm64` bevat vóór upload. Die aanvullende architectuurcontrole moet nog in CI slagen; een release-tagbouw is evenmin uitgevoerd. De normatieve referentie- en atteststatus veranderen niet.
 
+De [CI-run op `1bf6807`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39487846568) slaagde voor de volledige gate en alle drie platformbuilds. De nieuwe `lipo`-stap rapporteerde `x86_64 arm64` voor de macOS-binary en de DMG werd geüpload. De CI-controle van beide architecturen is daarmee geslaagd. Een release-tagbouw en onafhankelijke actuele normreferentie blijven open; `referenceVerified=false` en `attestStatus=unattested` veranderen niet.
+
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
 De bewaarde HTTP- en MCP-binaries leverden voor dezelfde voorbeeldtussenwoning beide BENG 2 = 80,56 kWh/m²·jaar en indicatieve klasse A+ met status `calculated_unverified` en `unattested`. De HTTP-gezondheidsroute en MCP-initialisatie slaagden. Dit controleert alleen de gebouwde transportadapters.
