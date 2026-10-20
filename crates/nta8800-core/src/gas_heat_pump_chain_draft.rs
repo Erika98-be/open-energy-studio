@@ -232,4 +232,30 @@ mod tests {
             .any(|item| item.code == "generator_output_reference_mismatch"));
         assert!(mismatch.monthly.is_empty());
     }
+
+    #[test]
+    fn collective_ground_temperature_boundary_flows_through_linked_terms() {
+        let mut input = sample();
+        input.monthly.forfait.source = crate::gas_heat_pump_forfait_draft::GasPumpSource::Ground;
+        input.monthly.source_system =
+            crate::forfait_heat_pump_monthly_draft::SourceSystem::CollectiveGround;
+        let missing = assess_gas_heat_pump_chain_draft(&input);
+        assert_eq!(missing.status, "invalid");
+        assert!(missing.monthly.is_empty());
+        input.monthly.collective_source_temperature_reference = Some("source design".into());
+        input.monthly.collective_source_temperature_c = Some(14.9);
+        let cold = assess_gas_heat_pump_chain_draft(&input);
+        assert_eq!(cold.status, "diagnostic_valid");
+        input.monthly.collective_source_temperature_c = Some(15.0);
+        let warm = assess_gas_heat_pump_chain_draft(&input);
+        assert_eq!(warm.status, "diagnostic_valid");
+        assert!(
+            warm.monthly[0].equation_962_unallocated_input_term_kwh
+                < cold.monthly[0].equation_962_unallocated_input_term_kwh
+        );
+        assert_eq!(
+            warm.monthly[0].equipment_auxiliary_electricity_kwh,
+            cold.monthly[0].equipment_auxiliary_electricity_kwh
+        );
+    }
 }

@@ -116,7 +116,12 @@ pub fn assess_gas_collective_source_draft(
     }
     let source = input.chain.monthly.forfait.source;
     match (source, input.source_temperature_class) {
-        (GasPumpSource::Ground, SourceTemperatureClass::Below20C) => {}
+        (GasPumpSource::Ground, SourceTemperatureClass::Below20C)
+            if input
+                .chain
+                .monthly
+                .collective_source_temperature_c
+                .is_some_and(|value| value < 20.0) => {}
         (GasPumpSource::Ground, _) => issues.push(issue(
             "ground_temperature_class_invalid",
             "sourceTemperatureClass",
@@ -313,6 +318,25 @@ mod tests {
             .iter()
             .any(|item| item.code == "ground_temperature_class_invalid"));
         assert!(result.monthly.is_empty());
+    }
+
+    #[test]
+    fn ground_temperature_evidence_must_agree_with_below20_source_class() {
+        let mut input = sample("ground", "collective_ground");
+        input.chain.monthly.collective_source_temperature_c = Some(19.9);
+        input.chain.monthly.collective_source_temperature_reference =
+            Some("source measurement".into());
+        let valid = assess_gas_collective_source_draft(&input);
+        assert_eq!(valid.status, "diagnostic_valid");
+        assert_eq!(valid.monthly.len(), 12);
+        input.chain.monthly.collective_source_temperature_c = Some(20.0);
+        let invalid = assess_gas_collective_source_draft(&input);
+        assert_eq!(invalid.status, "invalid");
+        assert!(invalid.monthly.is_empty());
+        assert!(invalid
+            .issues
+            .iter()
+            .any(|issue| issue.code == "ground_temperature_class_invalid"));
     }
 
     #[test]
