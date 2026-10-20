@@ -1,34 +1,35 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { GasHeatPumpMonthlyPanel } from '../components/GasHeatPumpMonthlyPanel/GasHeatPumpMonthlyPanel';
+import * as EnergyContext from '../context/EnergyContext';
 import type { INtaHeatPumpInput } from '../core/energy/types';
 import { renderWithProviders, userEvent } from './test-utils';
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 const normativeMonthHours = [744, 672, 744, 720, 744, 720, 744, 744, 720, 744, 720, 744];
+const groundPump: INtaHeatPumpInput = {
+  id: 'gg-1', drive: 'gas_engine', source: 'ground', sink: 'hydronic',
+  reversible: false, hybrid: false, booster: false,
+  performanceEvidence: { kind: 'normative_default', reference: null },
+  gasHeatPumpForfaitDraft: {
+    generatorId: 'gg-1', drive: 'gas_engine', application: 'utility',
+    applicationReference: 'office', collectiveBuildingInstallation: false,
+    externalHeatSupply: false, thermalCapacityKw: 40, capacityReference: 'plate',
+    source: 'ground', sourceReference: 'source plan', designSupplyTemperatureC: 35,
+    designSupplyReference: 'heating design',
+  },
+};
 
 describe('gas heat pump draft monthly terms UI', () => {
   it('requires evidence for the 15 °C collective ground-source correction boundary', async () => {
-    const pump: INtaHeatPumpInput = {
-      id: 'gg-1', drive: 'gas_engine', source: 'ground', sink: 'hydronic',
-      reversible: false, hybrid: false, booster: false,
-      performanceEvidence: { kind: 'normative_default', reference: null },
-      gasHeatPumpForfaitDraft: {
-        generatorId: 'gg-1', drive: 'gas_engine', application: 'utility',
-        applicationReference: 'office', collectiveBuildingInstallation: false,
-        externalHeatSupply: false, thermalCapacityKw: 40, capacityReference: 'plate',
-        source: 'ground', sourceReference: 'source plan', designSupplyTemperatureC: 35,
-        designSupplyReference: 'heating design',
-      },
-    };
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
       status: 'diagnostic_valid', correctedCop: 1.6, collectiveSourceCorrectionFactor: 0.022,
       collectiveSourceHeatDerived: true, monthly: [], inputFingerprint: 'sha256:ground', issues: [],
     }) });
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
-    renderWithProviders(<GasHeatPumpMonthlyPanel pump={pump} />);
+    renderWithProviders(<GasHeatPumpMonthlyPanel pump={groundPump} />);
     await user.selectOptions(screen.getByLabelText('Source system'), 'collective_ground');
     fireEvent.change(screen.getByLabelText('Source-system evidence'), { target: { value: 'source design' } });
     fireEvent.change(screen.getByLabelText('Monthly generator heat evidence'), { target: { value: 'meter' } });
@@ -44,6 +45,13 @@ describe('gas heat pump draft monthly terms UI', () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body).input).toMatchObject({
       collectiveSourceTemperatureC: 15, collectiveSourceTemperatureReference: 'source design',
     });
+  });
+  it('does not require the 2025+C1-only source correction evidence in the 2024 edition', async () => {
+    vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue('2024');
+    const user = userEvent.setup();
+    renderWithProviders(<GasHeatPumpMonthlyPanel pump={groundPump} />);
+    await user.selectOptions(screen.getByLabelText('Source system'), 'collective_ground');
+    expect(screen.queryByLabelText('Collective ground-source temperature (°C)')).not.toBeInTheDocument();
   });
   it('sends collective temperature and declaration evidence to the dh diagnostic and clears stale results', async () => {
     const pump: INtaHeatPumpInput = {
