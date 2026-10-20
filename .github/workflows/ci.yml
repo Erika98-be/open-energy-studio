@@ -91,7 +91,7 @@ jobs:
         include:
           - platform: 'ubuntu-22.04'
           - platform: 'windows-latest'
-          - platform: 'macos-latest'
+          - platform: 'macos-15-intel'
 
     runs-on: ${{ matrix.platform }}
     env:
@@ -109,7 +109,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Rust targets (macOS universal)
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-15-intel'
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
       - name: Rust cache
@@ -134,9 +134,15 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app
+        if: matrix.platform != 'macos-15-intel'
         env:
           APPIMAGE_EXTRACT_AND_RUN: '1'
         run: npm run tauri:build
+
+      # Match the release workflow: one DMG must contain both Mac architectures.
+      - name: Build universal macOS DMG
+        if: matrix.platform == 'macos-15-intel'
+        run: npm run tauri:build -- --target universal-apple-darwin --bundles dmg
 
       - name: Sign Windows exe and installer with Azure Trusted Signing
         if: matrix.platform == 'windows-latest' && env.AZURE_CLIENT_ID != ''
@@ -187,12 +193,12 @@ jobs:
           if-no-files-found: error
 
       - name: Upload artifacts (macOS)
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-15-intel'
         uses: actions/upload-artifact@v7
         with:
           name: macos-installer
           path: |
-            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
           retention-days: 30
           if-no-files-found: error
 
