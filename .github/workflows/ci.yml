@@ -146,6 +146,16 @@ jobs:
         if: matrix.platform == 'macos-15-intel'
         run: npm run tauri:build -- --target universal-apple-darwin --bundles dmg
 
+      - name: Verify both macOS architectures
+        if: matrix.platform == 'macos-15-intel'
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary=src-tauri/target/universal-apple-darwin/release/open-energy-studio
+          archs="$(lipo -archs "$binary")"
+          echo "Desktop binary architectures: $archs"
+          [[ " $archs " == *" x86_64 "* && " $archs " == *" arm64 "* ]]
+
       - name: Sign Windows exe and installer with Azure Trusted Signing
         if: matrix.platform == 'windows-latest' && env.AZURE_CLIENT_ID != ''
         uses: azure/trusted-signing-action@v1
