@@ -10,6 +10,8 @@ De [CI-run op `84c226d`](https://github.com/Erika98-be/open-energy-studio/action
 
 De [CI-run op `073ac10`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39376662039) slaagde eveneens voor gate en de drie platformbuilds. Het maandpaneel vraagt het nieuwe collectieve bodemtemperatuurbewijs nu alleen bij het doelprofiel 2025+C1, overeenkomstig de versieafhankelijke factor in Rust; oudere NTA-edities hebben die 9.62-correctie niet. Een afzonderlijke 2024-UI-proef en de vijf gerichte paneeltests slagen; TypeScript en Vite bouwen. Dit verandert geen actuele normatieve referentiedekking.
 
+De [CI-run op `1e26fbc`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39382496672) bevestigde die versieafhankelijke UI-wijziging met een geslaagde volledige technische gate en Linux-, macOS- en Windows-builds. De optionele debug-bouwbewijsjob was overgeslagen. Actuele officiële referentie-uitkomsten en externe attestering ontbreken nog.
+
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
 De bewaarde HTTP- en MCP-binaries leverden voor dezelfde voorbeeldtussenwoning beide BENG 2 = 80,56 kWh/m²·jaar en indicatieve klasse A+ met status `calculated_unverified` en `unattested`. De HTTP-gezondheidsroute en MCP-initialisatie slaagden. Dit controleert alleen de gebouwde transportadapters.
