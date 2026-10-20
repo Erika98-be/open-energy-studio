@@ -1742,6 +1742,43 @@ mod tests {
                 .unwrap();
         assert_eq!(result["status"], "invalid_case");
         assert!(result["metrics"].as_array().unwrap().is_empty());
+        case["input"]["monthly"]["forfait"]["source"] = json!("groundwater_aquifer");
+        case["input"]["monthly"]["sourceSystem"] =
+            json!("collective_groundwater_surface_or_at_least15_c");
+        let source_heat = 1000.0 * (1.0 - 1.0 / 2.1);
+        let input_term = 1000.0 / 2.1 - source_heat * 0.022;
+        for metric in case["expected"].as_array_mut().unwrap() {
+            if metric["metric"] == "equation962_unallocated_input_term" {
+                metric["valueKwh"] = json!(input_term);
+            }
+        }
+        case["expected"].as_array_mut().unwrap().push(json!({
+            "metric":"annual_equipment_auxiliary_electricity","month":null,
+            "valueKwh":100.8,"absoluteToleranceKwh":1e-9,"calculationBasis":"synthetic arithmetic"
+        }));
+        for month in 1..=12 {
+            case["expected"].as_array_mut().unwrap().push(json!({
+                "metric":"collective_source_heat","month":month,
+                "valueKwh":source_heat,"absoluteToleranceKwh":1e-9,
+                "calculationBasis":"synthetic source-heat arithmetic"
+            }));
+        }
+        let response = app().oneshot(request(&case)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert_eq!(result["status"], "compared_pass");
+        assert_eq!(result["metrics"].as_array().unwrap().len(), 37);
+        assert_eq!(result["referenceVerified"], false);
+        case["expected"].as_array_mut().unwrap().pop();
+        let response = app().oneshot(request(&case)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert_eq!(result["status"], "invalid_case");
+        assert!(result["metrics"].as_array().unwrap().is_empty());
     }
 
     #[tokio::test]
