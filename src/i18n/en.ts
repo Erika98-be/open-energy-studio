@@ -1201,6 +1201,8 @@ export const en: Record<string, string> = {
   'kernel.gasMonthly.sourceSystem.collective_ground': 'Collective ground source',
   'kernel.gasMonthly.sourceSystem.collective_groundwater_surface_or_at_least15_c': 'Collective groundwater or surface-water source',
   'kernel.gasMonthly.sourceReference': 'Source-system evidence',
+  'kernel.gasMonthly.collectiveTemperature': 'Collective ground-source temperature (°C)',
+  'kernel.gasMonthly.collectiveTemperatureReference': 'Source-temperature evidence for 15 °C boundary',
   'kernel.gasMonthly.outputReference': 'Monthly generator heat evidence',
   'kernel.gasMonthly.month': 'Month',
   'kernel.gasMonthly.output': 'Generator heat (kWh)',

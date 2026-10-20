@@ -1201,6 +1201,8 @@ export const nl: Record<string, string> = {
   'kernel.gasMonthly.sourceSystem.collective_ground': 'Collectieve bodembron',
   'kernel.gasMonthly.sourceSystem.collective_groundwater_surface_or_at_least15_c': 'Collectieve grondwater- of oppervlaktewaterbron',
   'kernel.gasMonthly.sourceReference': 'Bewijs bronstelsel',
+  'kernel.gasMonthly.collectiveTemperature': 'Temperatuur collectieve bodembron (°C)',
+  'kernel.gasMonthly.collectiveTemperatureReference': 'Bewijs brontemperatuur voor 15 °C-grens',
   'kernel.gasMonthly.outputReference': 'Bewijs maandelijkse generatorwarmte',
   'kernel.gasMonthly.month': 'Maand',
   'kernel.gasMonthly.output': 'Generatorwarmte (kWh)',

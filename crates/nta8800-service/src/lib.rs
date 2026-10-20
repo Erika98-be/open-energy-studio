@@ -1535,6 +1535,18 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert!(value["monthly"].as_array().unwrap().is_empty());
+        input["forfait"]["source"] = json!("ground");
+        input["forfait"]["drive"] = json!("gas_engine");
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        input["collectiveSourceTemperatureC"] = json!(15.0);
+        input["collectiveSourceTemperatureReference"] = json!("measured source temperature");
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert_eq!(value["collectiveSourceCorrectionFactor"], 0.022);
     }
 
     #[tokio::test]

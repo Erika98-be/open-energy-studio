@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 19 oktober 2026
+# NTA 8800 verificatiestatus — 20 oktober 2026
+
+**Collectieve bodembron bij gaswarmtepomp, 20 oktober.** De maanddiagnose onderscheidt nu de 15 °C-grens van formule 9.62: bij een opgegeven collectieve bodembron zijn brontemperatuur en bewijsverwijzing verplicht; onder 15 °C geldt in deze deelroute 0,009, vanaf 15 °C 0,022. Bij ontbrekend bewijs blijft de maandterm leeg. De factorregel is visueel met de gelicentieerde doeluitgave p. 332 vergeleken. De volledige kernsuite (987 unit- en integratietests), servicesuite (70 unit- en integratietests), vier gerichte UI-tests, Clippy, rustfmt en de TypeScript-/Vite-build slagen lokaal. De rekenroute is een begrensde diagnose; product-/bronbewijs, gasdrager en bronpompelektriciteit zijn niet onafhankelijk geverifieerd. `referenceVerified=false` en `attestStatus=unattested` blijven staan.
 
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 

@@ -9,6 +9,42 @@ afterEach(() => vi.unstubAllGlobals());
 const normativeMonthHours = [744, 672, 744, 720, 744, 720, 744, 744, 720, 744, 720, 744];
 
 describe('gas heat pump draft monthly terms UI', () => {
+  it('requires evidence for the 15 °C collective ground-source correction boundary', async () => {
+    const pump: INtaHeatPumpInput = {
+      id: 'gg-1', drive: 'gas_engine', source: 'ground', sink: 'hydronic',
+      reversible: false, hybrid: false, booster: false,
+      performanceEvidence: { kind: 'normative_default', reference: null },
+      gasHeatPumpForfaitDraft: {
+        generatorId: 'gg-1', drive: 'gas_engine', application: 'utility',
+        applicationReference: 'office', collectiveBuildingInstallation: false,
+        externalHeatSupply: false, thermalCapacityKw: 40, capacityReference: 'plate',
+        source: 'ground', sourceReference: 'source plan', designSupplyTemperatureC: 35,
+        designSupplyReference: 'heating design',
+      },
+    };
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+      status: 'diagnostic_valid', correctedCop: 1.6, collectiveSourceCorrectionFactor: 0.022,
+      collectiveSourceHeatDerived: true, monthly: [], inputFingerprint: 'sha256:ground', issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    renderWithProviders(<GasHeatPumpMonthlyPanel pump={pump} />);
+    await user.selectOptions(screen.getByLabelText('Source system'), 'collective_ground');
+    fireEvent.change(screen.getByLabelText('Source-system evidence'), { target: { value: 'source design' } });
+    fireEvent.change(screen.getByLabelText('Monthly generator heat evidence'), { target: { value: 'meter' } });
+    for (let month = 1; month <= 12; month += 1) {
+      fireEvent.change(screen.getByLabelText(`Generator heat (kWh) ${month}`), { target: { value: '1000' } });
+    }
+    await user.click(screen.getByRole('button', { name: 'Calculate draft 9.62 terms' }));
+    expect(fetchMock).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('Collective ground-source temperature (°C)'), { target: { value: '15' } });
+    fireEvent.change(screen.getByLabelText('Source-temperature evidence for 15 °C boundary'), { target: { value: 'source design' } });
+    await user.click(screen.getByRole('button', { name: 'Calculate draft 9.62 terms' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input).toMatchObject({
+      collectiveSourceTemperatureC: 15, collectiveSourceTemperatureReference: 'source design',
+    });
+  });
   it('sends collective temperature and declaration evidence to the dh diagnostic and clears stale results', async () => {
     const pump: INtaHeatPumpInput = {
       id: 'ga-1', drive: 'absorption', source: 'groundwater', sink: 'hydronic',
