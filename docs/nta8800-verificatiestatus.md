@@ -1,4 +1,4 @@
-# NTA 8800 verificatiestatus — 20 oktober 2026
+# NTA 8800 verificatiestatus — 21 oktober 2026
 
 **Collectieve bodembron bij gaswarmtepomp, 20 oktober.** De maanddiagnose onderscheidt nu de 15 °C-grens van formule 9.62: bij een opgegeven collectieve bodembron zijn brontemperatuur en bewijsverwijzing verplicht; onder 15 °C geldt in deze deelroute 0,009, vanaf 15 °C 0,022. Bij ontbrekend bewijs blijft de maandterm leeg. De factorregel is visueel met de gelicentieerde doeluitgave p. 332 vergeleken. De volledige kernsuite (987 unit- en integratietests), servicesuite (70 unit- en integratietests), vier gerichte UI-tests, Clippy, rustfmt en de TypeScript-/Vite-build slagen lokaal. De rekenroute is een begrensde diagnose; product-/bronbewijs, gasdrager en bronpompelektriciteit zijn niet onafhankelijk geverifieerd. `referenceVerified=false` en `attestStatus=unattested` blijven staan.
 
@@ -31,6 +31,8 @@ De [CI-run op `90f1d56`](https://github.com/Erika98-be/open-energy-studio/action
 De [CI-run op `7fd6ad2`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39479263729) slaagde eveneens voor gate en drie platformbuilds. De CI- en releaseworkflow controleren voortaan met `lipo` dat de gebouwde macOS-desktopbinary zowel `x86_64` als `arm64` bevat vóór upload. Die aanvullende architectuurcontrole moet nog in CI slagen; een release-tagbouw is evenmin uitgevoerd. De normatieve referentie- en atteststatus veranderen niet.
 
 De [CI-run op `1bf6807`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39487846568) slaagde voor de volledige gate en alle drie platformbuilds. De nieuwe `lipo`-stap rapporteerde `x86_64 arm64` voor de macOS-binary en de DMG werd geüpload. De CI-controle van beide architecturen is daarmee geslaagd. Een release-tagbouw en onafhankelijke actuele normreferentie blijven open; `referenceVerified=false` en `attestStatus=unattested` veranderen niet.
+
+De [CI-run op `b9d23ca`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39504445756) slaagde voor de technische gate en de drie platformbuilds. De gaswarmtepomprij in het dekkingsregister is met de bestaande 25/37-postenscope van het vergelijkingsharnas in overeenstemming gebracht. Dit is een documentatiecorrectie, zonder nieuwe normatieve referentie of attestering.
 
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
