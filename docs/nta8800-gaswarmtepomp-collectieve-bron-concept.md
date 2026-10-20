@@ -18,4 +18,4 @@ Via het optionele veld `gasCollectiveSourceEvidence` kan de [EPUS-conceptdiagnos
 - MCP: `diagnose_gas_collective_source_draft` met `{ "input": { ... } }`.
 - Tauri: `diagnose_gas_collective_source_draft` met dezelfde getypeerde invoer.
 - Project-UI: paneel voor gaswarmtepompmaandtermen, zichtbaar bij een collectief bronsysteem met opgeslagen hulpenergie. Bronklasse, bronverwijzing en controle op kwaliteitsverklaring zijn expliciete velden.
-- Regressie: vijf Rust-kernproeven, een HTTP-adapterproef en een UI-componentproef testen scheiding van `dh`, factorselectie, bewijsgrenzen en het wissen van verouderde uitkomsten. Dit zijn **interne** tests; er is geen onafhankelijke actuele EDR-referentiecase voor deze route.
+- Regressie: vijf Rust-kernproeven, een HTTP-adapterproef en een UI-componentproef testen scheiding van `dh`, factorselectie, bewijsgrenzen, de grens 19,9/20 °C en het wissen van verouderde uitkomsten. Dit zijn **interne** tests; er is geen onafhankelijke actuele EDR-referentiecase voor deze route.

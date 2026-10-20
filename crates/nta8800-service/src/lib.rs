@@ -1661,6 +1661,20 @@ mod tests {
                 .unwrap();
         assert!(value["monthly"].as_array().unwrap().is_empty());
         assert!(value["annualDeliveredSourceHeatKwh"].is_null());
+        input["noQualityDeclarationReference"] = json!("register check");
+        input["chain"]["monthly"]["forfait"]["source"] = json!("ground");
+        input["chain"]["monthly"]["sourceSystem"] = json!("collective_ground");
+        input["chain"]["monthly"]["collectiveSourceTemperatureReference"] = json!("source design");
+        input["chain"]["monthly"]["collectiveSourceTemperatureC"] = json!(20.0);
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        input["chain"]["monthly"]["collectiveSourceTemperatureC"] = json!(19.9);
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
     }
 
     #[tokio::test]
