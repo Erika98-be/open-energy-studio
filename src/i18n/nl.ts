@@ -1254,6 +1254,7 @@ export const nl: Record<string, string> = {
   'kernel.gasReference.difference': 'Verschil (kWh)',
   'kernel.gasReference.tolerance': 'Tolerantie (kWh)',
   'kernel.gasReference.metric.equation962_unallocated_input_term': '9.62-invoerterm, niet toegewezen',
+  'kernel.gasReference.metric.collective_source_heat': 'Collectieve bronwarmte',
   'kernel.gasReference.metric.equipment_auxiliary_electricity': 'Toestelhulpstroom',
   'kernel.gasReference.metric.annual_equipment_auxiliary_electricity': 'Jaarlijkse toestelhulpstroom',
   'kernel.gasReference.caseFingerprint': 'Case-vingerafdruk',

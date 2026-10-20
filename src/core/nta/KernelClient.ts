@@ -1262,7 +1262,7 @@ export async function diagnoseGasCollectiveSourceDraftWithRust(input: GasCollect
 }
 
 export type GasChainDiagnosticMetric = 'equation962_unallocated_input_term'
-  | 'equipment_auxiliary_electricity' | 'annual_equipment_auxiliary_electricity';
+  | 'collective_source_heat' | 'equipment_auxiliary_electricity' | 'annual_equipment_auxiliary_electricity';
 
 export interface GasChainDiagnosticCase {
   caseId: string;

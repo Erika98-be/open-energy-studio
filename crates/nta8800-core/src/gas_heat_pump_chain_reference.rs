@@ -1,6 +1,7 @@
 //! Comparison harness for a complete twelve-month gas heat-pump draft chain.
 //! Submitted expectations and matching values cannot establish independent provenance.
 
+use crate::forfait_heat_pump_monthly_draft::SourceSystem;
 use crate::gas_heat_pump_chain_draft::{
     assess_gas_heat_pump_chain_draft, GasHeatPumpChainDraftInput,
 };
@@ -23,6 +24,7 @@ pub struct GasChainDiagnosticCase {
 #[serde(rename_all = "snake_case")]
 pub enum GasChainMetric {
     Equation962UnallocatedInputTerm,
+    CollectiveSourceHeat,
     EquipmentAuxiliaryElectricity,
     AnnualEquipmentAuxiliaryElectricity,
 }
@@ -109,6 +111,7 @@ pub fn compare_gas_heat_pump_chain_diagnostic(
             issues.push(issue(problem.code, format!("input.{}", problem.path)));
         }
     }
+    let collective = case.input.monthly.source_system != SourceSystem::Individual;
     let mut seen = HashSet::new();
     for (index, metric) in case.expected.iter().enumerate() {
         let path = format!("expected[{index}]");
@@ -120,6 +123,9 @@ pub fn compare_gas_heat_pump_chain_diagnostic(
             issues.push(issue("metric_month_invalid", format!("{path}.month")));
         } else if !seen.insert((metric.metric, metric.month)) {
             issues.push(issue("metric_duplicate", path.clone()));
+        }
+        if metric.metric == GasChainMetric::CollectiveSourceHeat && !collective {
+            issues.push(issue("metric_not_applicable", path.clone()));
         }
         if !metric.value_kwh.is_finite() {
             issues.push(issue("expected_value_invalid", format!("{path}.valueKwh")));
@@ -138,10 +144,12 @@ pub fn compare_gas_heat_pump_chain_diagnostic(
         }
     }
     for month in 1..=12 {
-        for metric in [
-            GasChainMetric::Equation962UnallocatedInputTerm,
-            GasChainMetric::EquipmentAuxiliaryElectricity,
-        ] {
+        let required = [
+            Some(GasChainMetric::Equation962UnallocatedInputTerm),
+            Some(GasChainMetric::EquipmentAuxiliaryElectricity),
+            collective.then_some(GasChainMetric::CollectiveSourceHeat),
+        ];
+        for metric in required.into_iter().flatten() {
             if !seen.contains(&(metric, Some(month))) {
                 issues.push(issue(
                     "metric_required",
@@ -166,6 +174,10 @@ pub fn compare_gas_heat_pump_chain_diagnostic(
                 GasChainMetric::Equation962UnallocatedInputTerm => {
                     assessment.monthly[usize::from(expected.month.expect("validated month") - 1)]
                         .equation_962_unallocated_input_term_kwh
+                }
+                GasChainMetric::CollectiveSourceHeat => {
+                    assessment.monthly[usize::from(expected.month.expect("validated month") - 1)]
+                        .collective_source_heat_kwh
                 }
                 GasChainMetric::EquipmentAuxiliaryElectricity => {
                     assessment.monthly[usize::from(expected.month.expect("validated month") - 1)]
@@ -194,7 +206,9 @@ pub fn compare_gas_heat_pump_chain_diagnostic(
     if !issues.is_empty() {
         metrics.clear();
     }
-    let passed = metrics.len() == 25 && metrics.iter().all(|item| item.within_tolerance);
+    let required_count = if collective { 37 } else { 25 };
+    let passed =
+        metrics.len() == required_count && metrics.iter().all(|item| item.within_tolerance);
     GasChainDiagnosticComparison {
         case_id: case.case_id,
         status: if !issues.is_empty() {
@@ -287,6 +301,75 @@ mod tests {
         assert!(result.all_metrics_within_tolerance);
         assert!(!result.reference_verified && !result.carrier_allocation_available);
         assert!(!result.beng_calculation_available);
+    }
+
+    #[test]
+    fn collective_case_requires_and_compares_all_twelve_source_heat_terms() {
+        let mut case = sample();
+        case.input.monthly.forfait.source =
+            crate::gas_heat_pump_forfait_draft::GasPumpSource::GroundwaterAquifer;
+        case.input.monthly.source_system = SourceSystem::CollectiveGroundwaterSurfaceOrAtLeast15C;
+        let source_heat = 1000.0 * (1.0 - 1.0 / 2.1);
+        let input_term = 1000.0 / 2.1 - source_heat * 0.022;
+        for metric in &mut case.expected {
+            if metric.metric == GasChainMetric::Equation962UnallocatedInputTerm {
+                metric.value_kwh = input_term;
+            }
+        }
+        let missing = compare_gas_heat_pump_chain_diagnostic(case.clone());
+        assert_eq!(missing.status, "invalid_case");
+        assert!(missing.metrics.is_empty());
+        assert_eq!(
+            missing
+                .issues
+                .iter()
+                .filter(|item| item.code == "metric_required")
+                .count(),
+            12
+        );
+        for month in 1..=12 {
+            case.expected.push(GasChainExpectedMetric {
+                metric: GasChainMetric::CollectiveSourceHeat,
+                month: Some(month),
+                value_kwh: source_heat,
+                absolute_tolerance_kwh: 1e-9,
+                calculation_basis: "independent synthetic source-heat arithmetic".into(),
+            });
+        }
+        let passed = compare_gas_heat_pump_chain_diagnostic(case.clone());
+        assert_eq!(passed.status, "compared_pass");
+        assert_eq!(passed.metrics.len(), 37);
+        assert!(!passed.reference_verified && !passed.carrier_allocation_available);
+        case.expected.last_mut().unwrap().value_kwh += 1.0;
+        let failed = compare_gas_heat_pump_chain_diagnostic(case);
+        assert_eq!(failed.status, "compared_fail");
+        assert_eq!(
+            failed
+                .metrics
+                .iter()
+                .filter(|item| !item.within_tolerance)
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn individual_case_rejects_collective_source_heat_expectation() {
+        let mut case = sample();
+        case.expected.push(GasChainExpectedMetric {
+            metric: GasChainMetric::CollectiveSourceHeat,
+            month: Some(1),
+            value_kwh: 0.0,
+            absolute_tolerance_kwh: 1e-9,
+            calculation_basis: "synthetic".into(),
+        });
+        let result = compare_gas_heat_pump_chain_diagnostic(case);
+        assert_eq!(result.status, "invalid_case");
+        assert!(result.metrics.is_empty());
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "metric_not_applicable"));
     }
 
     #[test]

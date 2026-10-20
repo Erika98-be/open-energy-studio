@@ -1254,6 +1254,7 @@ export const en: Record<string, string> = {
   'kernel.gasReference.difference': 'Difference (kWh)',
   'kernel.gasReference.tolerance': 'Tolerance (kWh)',
   'kernel.gasReference.metric.equation962_unallocated_input_term': '9.62 input term, unallocated',
+  'kernel.gasReference.metric.collective_source_heat': 'Collective source heat',
   'kernel.gasReference.metric.equipment_auxiliary_electricity': 'Equipment electricity',
   'kernel.gasReference.metric.annual_equipment_auxiliary_electricity': 'Annual equipment electricity',
   'kernel.gasReference.caseFingerprint': 'Case fingerprint',
