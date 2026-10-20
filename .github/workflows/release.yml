@@ -158,7 +158,7 @@ jobs:
           - platform: ubuntu-22.04
             args: '--bundles deb,rpm,appimage'
             bundles: 'deb rpm appimage'
-          - platform: macos-latest
+          - platform: macos-15-intel
             args: '--target universal-apple-darwin --bundles dmg'
             bundles: 'dmg'
           - platform: windows-latest
