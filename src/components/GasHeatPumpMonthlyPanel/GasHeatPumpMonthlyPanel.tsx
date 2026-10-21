@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useProjectEdition } from '../../context/EnergyContext';
 import type { INtaHeatPumpInput } from '../../core/energy/types';
-import { diagnoseGasCollectiveSourceDraftWithRust, diagnoseGasHeatPumpChainDraftWithRust, diagnoseGasHeatPumpMonthlyDraftWithRust, type GasCollectiveSourceDraftAssessment, type GasCollectiveSourceTemperatureClass, type GasHeatPumpChainDraftAssessment, type GasHeatPumpMonthlyDraftAssessment, type GasHeatPumpMonthlyDraftInput } from '../../core/nta/KernelClient';
+import { diagnoseGasCollectiveSourceDraftWithRust, diagnoseGasHeatPumpChainDraftWithRust, diagnoseGasHeatPumpMonthlyDraftWithRust, type GasCollectiveSourceDraftAssessment, type GasCollectiveSourceEvidenceKind, type GasCollectiveSourceTemperatureClass, type GasHeatPumpChainDraftAssessment, type GasHeatPumpMonthlyDraftAssessment, type GasHeatPumpMonthlyDraftInput } from '../../core/nta/KernelClient';
 import { useI18n } from '../../i18n/i18n';
 import '../HeatPumpForfaitMonthlyPanel/HeatPumpForfaitMonthlyPanel.css';
 import { DecimalInput } from '../ui';
@@ -33,6 +33,7 @@ export function GasHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }) {
   const [chainResult, setChainResult] = useState<GasHeatPumpChainDraftAssessment | null>(null);
   const [sourceResult, setSourceResult] = useState<GasCollectiveSourceDraftAssessment | null>(null);
   const [temperatureClass, setTemperatureClass] = useState<GasCollectiveSourceTemperatureClass>('unknown');
+  const [sourceEvidenceKind, setSourceEvidenceKind] = useState<GasCollectiveSourceEvidenceKind | null>(null);
   const [temperatureReference, setTemperatureReference] = useState('');
   const [noDeclaration, setNoDeclaration] = useState(false);
   const [declarationReference, setDeclarationReference] = useState('');
@@ -66,7 +67,8 @@ export function GasHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }) {
     try {
       const chain = pump.gasHeatPumpAuxDraft ? { monthly: input, auxiliary: pump.gasHeatPumpAuxDraft } : null;
       const assessment = kind === 'source' && chain
-        ? await diagnoseGasCollectiveSourceDraftWithRust({ chain, sourceTemperatureClass: temperatureClass,
+        ? await diagnoseGasCollectiveSourceDraftWithRust({ chain, collectiveSourceEvidenceKind: sourceEvidenceKind,
+          sourceTemperatureClass: temperatureClass,
           sourceTemperatureReference: temperatureReference.trim(), noQualityDeclarationConfirmed: noDeclaration,
           noQualityDeclarationReference: declarationReference.trim() }, edition)
         : kind === 'linked' && chain ? await diagnoseGasHeatPumpChainDraftWithRust(chain, edition)
@@ -110,6 +112,11 @@ export function GasHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }) {
     {pump.gasHeatPumpAuxDraft && sourceSystem !== 'individual' && <fieldset>
       <legend>{t('kernel.gasMonthly.collectiveSource')}</legend>
       <p>{t('kernel.gasMonthly.collectiveScope')}</p>
+      <label>{t('kernel.gasMonthly.collectiveEvidenceKind')}<select value={sourceEvidenceKind ?? ''} onChange={(event) => { invalidate(); setSourceEvidenceKind(event.target.value ? event.target.value as GasCollectiveSourceEvidenceKind : null); }}>
+        <option value="">{t('kernel.gasMonthly.collectiveEvidenceKind.select')}</option>
+        <option value="supplier_records">{t('kernel.gasMonthly.collectiveEvidenceKind.supplier_records')}</option>
+        <option value="design_documents">{t('kernel.gasMonthly.collectiveEvidenceKind.design_documents')}</option>
+      </select></label>
       <label>{t('kernel.gasMonthly.temperatureClass')}<select value={temperatureClass} onChange={(event) => { invalidate(); setTemperatureClass(event.target.value as GasCollectiveSourceTemperatureClass); }}>
         {(['unknown', 'below20_c', 'at_least20_c'] as const).map((value) => <option key={value} value={value}>{t(`kernel.gasMonthly.temperatureClass.${value}`)}</option>)}
       </select></label>

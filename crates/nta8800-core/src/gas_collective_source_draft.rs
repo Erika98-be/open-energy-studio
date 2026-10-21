@@ -23,10 +23,19 @@ pub enum SourceTemperatureClass {
     Unknown,
 }
 
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum CollectiveSourceEvidenceKind {
+    SupplierRecords,
+    DesignDocuments,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct GasCollectiveSourceDraftInput {
     pub chain: GasHeatPumpChainDraftInput,
+    #[serde(default)]
+    pub collective_source_evidence_kind: Option<CollectiveSourceEvidenceKind>,
     pub source_temperature_class: SourceTemperatureClass,
     pub source_temperature_reference: String,
     pub no_quality_declaration_confirmed: bool,
@@ -94,6 +103,12 @@ pub fn assess_gas_collective_source_draft(
         issues.push(issue(
             "collective_source_required",
             "chain.monthly.sourceSystem",
+        ));
+    }
+    if input.collective_source_evidence_kind.is_none() {
+        issues.push(issue(
+            "collective_source_evidence_kind_required",
+            "collectiveSourceEvidenceKind",
         ));
     }
     if input.source_temperature_reference.trim().is_empty() {
@@ -260,6 +275,7 @@ mod tests {
                     "forfaitCopUsed":true,"monthHoursReference":"schedule","generatorOutputReference":"heat meter",
                     "months":(1..=12).map(|month|json!({"month":month,"hours":crate::climate::MONTH_HOURS[(month - 1) as usize],"generatorOutputKwh":1000.0})).collect::<Vec<_>>()}
             },
+            "collectiveSourceEvidenceKind":"supplier_records",
             "sourceTemperatureClass":"below20_c","sourceTemperatureReference":"source design",
             "noQualityDeclarationConfirmed":true,"noQualityDeclarationReference":"register check"
         })).unwrap()
@@ -281,6 +297,26 @@ mod tests {
         assert!((result.monthly[0].draft_primary_renewable_kwh - source_heat * 0.95).abs() < 1e-10);
         assert_eq!(result.source_energy_carrier, "dh");
         assert!(!result.gas_input_energy_available && !result.beng_calculation_available);
+    }
+
+    #[test]
+    fn collective_source_requires_a_declared_supplier_or_design_evidence_kind() {
+        let mut input = sample(
+            "groundwater_aquifer",
+            "collective_groundwater_surface_or_at_least15_c",
+        );
+        input.collective_source_evidence_kind = None;
+        let missing = assess_gas_collective_source_draft(&input);
+        assert_eq!(missing.status, "invalid");
+        assert!(missing.monthly.is_empty());
+        assert!(missing
+            .issues
+            .iter()
+            .any(|item| item.code == "collective_source_evidence_kind_required"));
+        input.collective_source_evidence_kind = Some(CollectiveSourceEvidenceKind::DesignDocuments);
+        let declared = assess_gas_collective_source_draft(&input);
+        assert_eq!(declared.status, "diagnostic_valid");
+        assert!(!declared.reference_verified);
     }
 
     #[test]

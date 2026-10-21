@@ -1219,9 +1219,11 @@ export async function diagnoseGasHeatPumpChainDraftWithRust(input: GasHeatPumpCh
 }
 
 export type GasCollectiveSourceTemperatureClass = 'below20_c' | 'at_least20_c' | 'unknown';
+export type GasCollectiveSourceEvidenceKind = 'supplier_records' | 'design_documents';
 
 export interface GasCollectiveSourceDraftInput {
   chain: GasHeatPumpChainDraftInput;
+  collectiveSourceEvidenceKind: GasCollectiveSourceEvidenceKind | null;
   sourceTemperatureClass: GasCollectiveSourceTemperatureClass;
   sourceTemperatureReference: string;
   noQualityDeclarationConfirmed: boolean;

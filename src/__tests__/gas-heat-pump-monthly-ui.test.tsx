@@ -101,6 +101,7 @@ describe('gas heat pump draft monthly terms UI', () => {
     renderWithProviders(<GasHeatPumpMonthlyPanel pump={pump} />);
     await user.selectOptions(screen.getByLabelText('Source system'), 'collective_groundwater_surface_or_at_least15_c');
     fireEvent.change(screen.getByLabelText('Source-system evidence'), { target: { value: 'invoice' } });
+    await user.selectOptions(screen.getByLabelText('Collective source evidence type'), 'supplier_records');
     await user.selectOptions(screen.getByLabelText('Source temperature class'), 'below20_c');
     fireEvent.change(screen.getByLabelText('Temperature class evidence'), { target: { value: 'source design' } });
     await user.click(screen.getByLabelText('No quality declaration applies (checked)'));
@@ -109,6 +110,7 @@ describe('gas heat pump draft monthly terms UI', () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/nta8800/heat-pumps/gas-collective-source-draft/diagnose');
     expect(JSON.parse(fetchMock.mock.calls[0][1].body).input).toMatchObject({
+      collectiveSourceEvidenceKind: 'supplier_records',
       sourceTemperatureClass: 'below20_c', noQualityDeclarationConfirmed: true,
       noQualityDeclarationReference: 'register check', chain: { monthly: {
         sourceSystem: 'collective_groundwater_surface_or_at_least15_c',

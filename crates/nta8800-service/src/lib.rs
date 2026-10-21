@@ -350,6 +350,7 @@ mod tests {
                     "modulationReference":"draft","buildingShare":1.0,"buildingShareReference":"whole building",
                     "forfaitCopUsed":true,"monthHoursReference":"schedule","generatorOutputReference":"heat meter","months":aux_months}
             },
+            "collectiveSourceEvidenceKind":"supplier_records",
             "sourceTemperatureClass":"below20_c","sourceTemperatureReference":"source design",
             "noQualityDeclarationConfirmed":true,"noQualityDeclarationReference":"register check"
         });
@@ -1633,6 +1634,7 @@ mod tests {
                     "modulationReference":"draft","buildingShare":1.0,"buildingShareReference":"whole building",
                     "forfaitCopUsed":true,"monthHoursReference":"schedule","generatorOutputReference":"heat meter","months":aux_months}
             },
+            "collectiveSourceEvidenceKind":"supplier_records",
             "sourceTemperatureClass":"below20_c","sourceTemperatureReference":"source design",
             "noQualityDeclarationConfirmed":true,"noQualityDeclarationReference":"register check"
         });
@@ -1653,6 +1655,18 @@ mod tests {
         assert_eq!(value["primaryRenewableFactor"], 0.95);
         assert_eq!(value["gasInputEnergyAvailable"], false);
         assert_eq!(value["bengCalculationAvailable"], false);
+        input["collectiveSourceEvidenceKind"] = Value::Null;
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        assert_eq!(
+            value["issues"][0]["code"],
+            "collective_source_evidence_kind_required"
+        );
+        input["collectiveSourceEvidenceKind"] = json!("supplier_records");
         input["noQualityDeclarationReference"] = json!("");
         let response = app().oneshot(request(&input)).await.unwrap();
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
