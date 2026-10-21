@@ -1236,6 +1236,7 @@ export const en: Record<string, string> = {
   'kernel.gasReference.title': 'Gas heat pump reference comparison',
   'kernel.gasReference.scope': 'Load a 25-value case for an individual source or 37 values for a collective source to compare the draft calculation. Matching submitted values do not establish independent evidence, NTA compliance or an energy label.',
   'kernel.gasReference.example': 'Load synthetic example',
+  'kernel.gasReference.collectiveExample': 'Load synthetic collective example',
   'kernel.gasReference.file': 'Import JSON case',
   'kernel.gasReference.json': 'Case JSON',
   'kernel.gasReference.jsonObject': 'The case must be a JSON object.',

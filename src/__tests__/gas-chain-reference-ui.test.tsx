@@ -6,6 +6,18 @@ import { renderWithProviders, userEvent } from './test-utils';
 afterEach(() => vi.unstubAllGlobals());
 
 describe('gas chain reference comparison UI', () => {
+  it('loads a clearly synthetic collective case with all 37 required expectations', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<GasChainReferencePanel />);
+    await user.click(screen.getByText('Gas heat pump reference comparison'));
+    await user.click(screen.getByRole('button', { name: 'Load synthetic collective example' }));
+    const caseInput = JSON.parse((screen.getByLabelText('Case JSON') as HTMLTextAreaElement).value);
+    expect(caseInput.expected).toHaveLength(37);
+    expect(caseInput.input.monthly.sourceSystem).toBe('collective_groundwater_surface_or_at_least15_c');
+    expect(caseInput.source.documentId).toContain('not ISSO 54');
+    expect(caseInput.source.independentReviewer).toContain('external verification pending');
+  });
+
   it('loads the synthetic 25-value case, compares via Rust API, and keeps verification unavailable', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: async () => JSON.stringify({
       status: 'compared_pass', caseId: 'synthetic-gas-chain-2026-draft',

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import syntheticCase from '../../../training-data/nta8800-gas-chain-diagnostic-synthetic.json';
+import collectiveSyntheticCase from '../../../training-data/nta8800-gas-chain-diagnostic-collective-synthetic.json';
 import { compareGasHeatPumpChainDiagnosticWithRust, type GasChainDiagnosticCase, type GasChainDiagnosticComparison } from '../../core/nta/KernelClient';
 import { useI18n } from '../../i18n/i18n';
 import { FileButton } from '../ui';
@@ -79,6 +80,9 @@ export function GasChainReferencePanel() {
       <div className="gas-chain-reference-actions">
         <button type="button" onClick={() => setCaseText(JSON.stringify(syntheticCase, null, 2))}>
           {t('kernel.gasReference.example')}
+        </button>
+        <button type="button" onClick={() => setCaseText(JSON.stringify(collectiveSyntheticCase, null, 2))}>
+          {t('kernel.gasReference.collectiveExample')}
         </button>
         <label htmlFor="gas-reference-file">{t('kernel.gasReference.file')}</label>
         <FileButton id="gas-reference-file" accept=".json,application/json"

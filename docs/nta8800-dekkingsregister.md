@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Het projectpaneel kan nu naast het individuele 25-postenvoorbeeld ook een synthetische collectieve grondwatercase met 37 posten laden. Een kerntest vergelijkt beide fixtures; acht UI-/vertaaltests en de frontendbouw slagen lokaal. Deze voorbeeldcases leveren geen actuele officiële uitkomsten. Op de voorafgaande commit `8c7cbdd` zijn gate en Linux-/Windows-build groen; de macOS-job loopt nog. *Referentie* en *Attest* blijven open.
+
 De MCP-stdio-adapterproef vergelijkt nu ook een synthetische collectieve gaswarmtepompbron met alle 37 posten naast de individuele 25 posten; bronveld, berekeningsbasis en onverifieerde status blijven zichtbaar. De gerichte test slaagt lokaal. Dit breidt transportdekking uit, terwijl *Referentie* en *Attest* open blijven. De [CI-run op de voorafgaande commit `3d6f23c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39566662450) slaagde voor gate en alle drie platformbuilds.
 
 De [CI-run op `c3b0c84`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39559515387) slaagde voor gate en drie platformbuilds. Een gerichte regressie bewaakt nu dat gewijzigde bronmetadata of postberekeningsbasis de casevingerafdruk verandert, maar de invoervingerafdruk en rekenwaarden niet. Dit is auditbewijs met synthetische cases; *Referentie* en *Attest* blijven open.

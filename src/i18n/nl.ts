@@ -1236,6 +1236,7 @@ export const nl: Record<string, string> = {
   'kernel.gasReference.title': 'Gaswarmtepomp-referentievergelijking',
   'kernel.gasReference.scope': 'Laad een case met 25 waarden voor een individuele bron of 37 voor een collectieve bron om de conceptberekening te vergelijken. Overeenkomende aangeleverde waarden bewijzen geen onafhankelijk bronbewijs, NTA-conformiteit of energielabel.',
   'kernel.gasReference.example': 'Laad synthetisch voorbeeld',
+  'kernel.gasReference.collectiveExample': 'Laad synthetisch collectief voorbeeld',
   'kernel.gasReference.file': 'Importeer JSON-case',
   'kernel.gasReference.json': 'Case-JSON',
   'kernel.gasReference.jsonObject': 'De case moet een JSON-object zijn.',

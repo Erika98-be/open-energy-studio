@@ -406,6 +406,16 @@ mod tests {
         assert_eq!(result.status, "compared_pass");
         assert_eq!(result.metrics.len(), 25);
         assert!(!result.reference_verified);
+
+        let raw = include_str!(
+            "../../../training-data/nta8800-gas-chain-diagnostic-collective-synthetic.json"
+        );
+        let case: GasChainDiagnosticCase = serde_json::from_str(raw).unwrap();
+        assert!(case.source.document_id.contains("not ISSO 54"));
+        let result = compare_gas_heat_pump_chain_diagnostic(case);
+        assert_eq!(result.status, "compared_pass", "{:?}", result.issues);
+        assert_eq!(result.metrics.len(), 37);
+        assert!(!result.reference_verified);
     }
 
     #[test]
