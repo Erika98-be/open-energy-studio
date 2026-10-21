@@ -1726,6 +1726,10 @@ mod tests {
                 .unwrap();
         assert_eq!(result["status"], "compared_pass");
         assert_eq!(result["metrics"].as_array().unwrap().len(), 25);
+        assert_eq!(
+            result["metrics"][0]["calculationBasis"],
+            "synthetic arithmetic"
+        );
         assert_eq!(result["referenceVerified"], false);
         case["expected"][0]["valueKwh"] = json!(626.0);
         let response = app().oneshot(request(&case)).await.unwrap();
@@ -1770,6 +1774,10 @@ mod tests {
                 .unwrap();
         assert_eq!(result["status"], "compared_pass");
         assert_eq!(result["metrics"].as_array().unwrap().len(), 37);
+        assert_eq!(
+            result["metrics"][36]["calculationBasis"],
+            "synthetic source-heat arithmetic"
+        );
         assert_eq!(result["referenceVerified"], false);
         case["expected"].as_array_mut().unwrap().pop();
         let response = app().oneshot(request(&case)).await.unwrap();
