@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De [CI-run op `e53982f`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39530708326) slaagde voor technische gate en drie platformbuilds. In het gaswarmtepompvergelijkingsharnas wordt de per post aangeleverde berekeningsbasis nu ook in het resultaat en de UI getoond; dit is een herleidbaarheidsverbetering voor de 25/37 posten. De basis blijft een case-invoer zonder onafhankelijke broncontrole. *Referentie* en *Attest* blijven open.
+
 **Gaswarmtepomp 9.62, collectieve bodembron:** de Rust-/HTTP-/MCP-/desktopdiagnose eist nu brontemperatuur en bronbewijs voor de 15 °C-grens. Onder de grens blijft de conceptfactor 0,009; vanaf de grens geldt 0,022. De invoer- en grensproeven gebruiken synthetische waarden. Zonder actuele onafhankelijke deeluitkomst en toets blijven *Referentie* en *Attest* open; gasdrager, bronhulpenergie, BENG en label zijn niet berekend.
 
 De eerste CI-run van deze wijziging faalde uitsluitend op ontbrekende NL/EN-foutcodelabels; de labels en de gerichte regressie zijn toegevoegd. De [hernieuwde CI-run op `3f3f494`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39365874335) slaagde voor de technische gate en de drie platformbuilds. De kolommen *Referentie* en *Attest* veranderen hierdoor niet.

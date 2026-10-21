@@ -1248,6 +1248,7 @@ export const nl: Record<string, string> = {
   'kernel.gasReference.unverified': 'Referentie niet onafhankelijk geverifieerd. Energiedragertoedeling, BENG en energielabel blijven niet beschikbaar.',
   'kernel.gasReference.metric': 'Post',
   'kernel.gasReference.month': 'Maand',
+  'kernel.gasReference.calculationBasis': 'Aangeleverde berekeningsbasis',
   'kernel.gasReference.year': 'Jaar',
   'kernel.gasReference.expected': 'Verwacht (kWh)',
   'kernel.gasReference.actual': 'Berekend (kWh)',

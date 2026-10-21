@@ -10,7 +10,8 @@ describe('gas chain reference comparison UI', () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: async () => JSON.stringify({
       status: 'compared_pass', caseId: 'synthetic-gas-chain-2026-draft',
       referenceVerified: false, carrierAllocationAvailable: false, bengCalculationAvailable: false,
-      metrics: [{ metric: 'equation962_unallocated_input_term', month: 1, expectedKwh: 625,
+      metrics: [{ metric: 'equation962_unallocated_input_term', month: 1,
+        calculationBasis: 'synthetic worksheet A, row 1', expectedKwh: 625,
         actualKwh: 625, absoluteDifferenceKwh: 0, absoluteToleranceKwh: 1e-9, withinTolerance: true }],
       inputFingerprint: 'sha256:input', caseFingerprint: 'sha256:case', issues: [],
     }) });
@@ -31,6 +32,8 @@ describe('gas chain reference comparison UI', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Reference not independently verified');
     expect(screen.getByRole('status')).toHaveTextContent('625.000');
     expect(screen.getByRole('columnheader', { name: 'Assessment' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Submitted calculation basis' })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /9.62 input term, unallocated/ })).toHaveTextContent('synthetic worksheet A, row 1');
     expect(screen.getByRole('row', { name: /9.62 input term, unallocated/ })).toHaveTextContent('Within tolerance');
     const provenance = screen.getByLabelText('Reference case provenance');
     expect(provenance).toHaveTextContent('Open Energy Studio internal arithmetic');

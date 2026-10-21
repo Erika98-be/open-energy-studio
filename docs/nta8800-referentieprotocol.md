@@ -44,6 +44,8 @@ Voor de [gekoppelde gaswarmtepomp-conceptdiagnose](nta8800-gaswarmtepomp-gekoppe
 
 ## Vereisten voor een normatief referentiegeval
 
+Bij de gaswarmtepompvergelijking staat de door de case aangeleverde `calculationBasis` nu bij iedere resultaatpost, ook in de HTTP-/MCP-/desktopresponse en de UI-tabel. Daarmee kan een beoordelaar de verwachte waarde en haar opgegeven basis naast het verschil zien. Het veld is door de indiener ingevuld en vormt op zichzelf geen onafhankelijk bewijs.
+
 1. Leg de exacte editie van NTA 8800, het correctieblad, toepasselijke interpretaties en de voor de case gebruikte software-/referentiedataset vast.
 2. Bewaar een volledige, reproduceerbare opname: geometrie, zones, gebruiksfunctie, schil, ventilatie, opwekkers, verdeling, tapwater, koeling, PV en de herkomst van elke waarde. Noteer ook onbekende en forfaitaire waarden expliciet.
 3. Bewaar onafhankelijke verwachte deeluitkomsten per zone en maand, per energiedienst en energiedrager, plus eindindicatoren, toepassingsgrenzen en afronding. Vermeld de bevoegde bron, toestemming voor gebruik en eventuele licentiebeperkingen.

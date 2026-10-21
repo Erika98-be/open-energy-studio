@@ -117,6 +117,7 @@ export function GasChainReferencePanel() {
           <li key={`${item.path}-${item.code}-${index}`}><code>{item.path}</code>: {t(`kernel.issue.${item.code}`, { defaultValue: item.code })}</li>)}</ul>}
         {result.metrics.length > 0 && <div className="gas-chain-reference-table-wrap"><table>
           <thead><tr><th>{t('kernel.gasReference.metric')}</th><th>{t('kernel.gasReference.month')}</th>
+            <th>{t('kernel.gasReference.calculationBasis')}</th>
             <th>{t('kernel.gasReference.expected')}</th><th>{t('kernel.gasReference.actual')}</th>
             <th>{t('kernel.gasReference.difference')}</th><th>{t('kernel.gasReference.tolerance')}</th>
             <th>{locale === 'nl' ? 'Beoordeling' : 'Assessment'}</th></tr></thead>
@@ -124,6 +125,7 @@ export function GasChainReferencePanel() {
             className={item.withinTolerance ? '' : 'outside-tolerance'}>
             <th scope="row">{t(`kernel.gasReference.metric.${item.metric}`)}</th>
             <td>{item.month ?? t('kernel.gasReference.year')}</td>
+            <td className="gas-chain-reference-basis">{item.calculationBasis}</td>
             <td>{item.expectedKwh.toFixed(3)}</td><td>{item.actualKwh.toFixed(3)}</td>
             <td>{item.absoluteDifferenceKwh.toFixed(3)}</td><td>{item.absoluteToleranceKwh.toExponential(1)}</td>
             <td>{item.withinTolerance ? (locale === 'nl' ? 'Binnen tolerantie' : 'Within tolerance')

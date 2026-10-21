@@ -1248,6 +1248,7 @@ export const en: Record<string, string> = {
   'kernel.gasReference.unverified': 'Reference not independently verified. Carrier allocation, BENG and energy label remain unavailable.',
   'kernel.gasReference.metric': 'Metric',
   'kernel.gasReference.month': 'Month',
+  'kernel.gasReference.calculationBasis': 'Submitted calculation basis',
   'kernel.gasReference.year': 'Year',
   'kernel.gasReference.expected': 'Expected (kWh)',
   'kernel.gasReference.actual': 'Actual (kWh)',

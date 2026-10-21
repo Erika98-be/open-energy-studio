@@ -1292,6 +1292,7 @@ export interface GasChainDiagnosticComparison {
   metrics: Array<{
     metric: GasChainDiagnosticMetric;
     month: number | null;
+    calculationBasis: string;
     expectedKwh: number;
     actualKwh: number;
     absoluteDifferenceKwh: number;

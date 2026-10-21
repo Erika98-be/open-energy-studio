@@ -61,6 +61,7 @@ pub struct GasChainDiagnosticComparison {
 pub struct GasChainMetricComparison {
     pub metric: GasChainMetric,
     pub month: Option<u8>,
+    pub calculation_basis: String,
     pub expected_kwh: f64,
     pub actual_kwh: f64,
     pub absolute_difference_kwh: f64,
@@ -195,6 +196,7 @@ pub fn compare_gas_heat_pump_chain_diagnostic(
             metrics.push(GasChainMetricComparison {
                 metric: expected.metric,
                 month: expected.month,
+                calculation_basis: expected.calculation_basis.clone(),
                 expected_kwh: expected.value_kwh,
                 actual_kwh: actual,
                 absolute_difference_kwh: difference,
@@ -295,9 +297,20 @@ mod tests {
 
     #[test]
     fn complete_synthetic_values_compare_without_claiming_verification() {
-        let result = compare_gas_heat_pump_chain_diagnostic(sample());
+        let mut case = sample();
+        case.expected[0].calculation_basis = "case-specific synthetic arithmetic".into();
+        let result = compare_gas_heat_pump_chain_diagnostic(case);
         assert_eq!(result.status, "compared_pass");
         assert_eq!(result.metrics.len(), 25);
+        assert_eq!(
+            result.metrics[0].calculation_basis,
+            "case-specific synthetic arithmetic"
+        );
+        let response = serde_json::to_value(&result).unwrap();
+        assert_eq!(
+            response["metrics"][0]["calculationBasis"],
+            "case-specific synthetic arithmetic"
+        );
         assert!(result.all_metrics_within_tolerance);
         assert!(!result.reference_verified && !result.carrier_allocation_available);
         assert!(!result.beng_calculation_available);
@@ -339,6 +352,10 @@ mod tests {
         let passed = compare_gas_heat_pump_chain_diagnostic(case.clone());
         assert_eq!(passed.status, "compared_pass");
         assert_eq!(passed.metrics.len(), 37);
+        assert_eq!(
+            passed.metrics.last().unwrap().calculation_basis,
+            "independent synthetic source-heat arithmetic"
+        );
         assert!(!passed.reference_verified && !passed.carrier_allocation_available);
         case.expected.last_mut().unwrap().value_kwh += 1.0;
         let failed = compare_gas_heat_pump_chain_diagnostic(case);
