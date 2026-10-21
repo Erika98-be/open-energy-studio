@@ -428,6 +428,34 @@ mod tests {
     }
 
     #[test]
+    fn changed_reference_metadata_changes_case_fingerprint_not_calculation() {
+        let baseline = compare_gas_heat_pump_chain_diagnostic(sample());
+        let mut source_change = sample();
+        source_change.source.document_id = "different submitted document".into();
+        let source_result = compare_gas_heat_pump_chain_diagnostic(source_change);
+        assert_eq!(source_result.status, "compared_pass");
+        assert_eq!(source_result.input_fingerprint, baseline.input_fingerprint);
+        assert_ne!(source_result.case_fingerprint, baseline.case_fingerprint);
+        assert_eq!(
+            source_result.source.document_id,
+            "different submitted document"
+        );
+        assert!(!source_result.reference_verified);
+
+        let mut basis_change = sample();
+        basis_change.expected[0].calculation_basis = "different submitted method".into();
+        let basis_result = compare_gas_heat_pump_chain_diagnostic(basis_change);
+        assert_eq!(basis_result.status, "compared_pass");
+        assert_eq!(basis_result.input_fingerprint, baseline.input_fingerprint);
+        assert_ne!(basis_result.case_fingerprint, baseline.case_fingerprint);
+        assert_eq!(
+            basis_result.metrics[0].calculation_basis,
+            "different submitted method"
+        );
+        assert!(!basis_result.reference_verified);
+    }
+
+    #[test]
     fn missing_duplicate_or_invalid_input_never_emit_partial_comparisons() {
         let mut case = sample();
         case.expected.pop();
