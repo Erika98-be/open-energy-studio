@@ -154,24 +154,11 @@ fn gas_chain_reference_mcp_returns_submitted_basis_and_source_without_verificati
         *comparison
     );
 
-    let mut collective = case;
-    collective["input"]["monthly"]["forfait"]["source"] = json!("groundwater_aquifer");
-    collective["input"]["monthly"]["sourceSystem"] =
-        json!("collective_groundwater_surface_or_at_least15_c");
-    let source_heat = 1000.0 * (1.0 - 1.0 / 2.1);
-    let input_term = 1000.0 / 2.1 - source_heat * 0.022;
-    for metric in collective["expected"].as_array_mut().unwrap() {
-        if metric["metric"] == "equation962_unallocated_input_term" {
-            metric["valueKwh"] = json!(input_term);
-        }
-    }
-    for month in 1..=12 {
-        collective["expected"].as_array_mut().unwrap().push(json!({
-            "metric": "collective_source_heat", "month": month,
-            "valueKwh": source_heat, "absoluteToleranceKwh": 1e-9,
-            "calculationBasis": "synthetic collective source-heat arithmetic"
-        }));
-    }
+    let path = format!(
+        "{}/../../training-data/nta8800-gas-chain-diagnostic-collective-synthetic.json",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    let collective: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
     let response = server.request(
         3,
         "tools/call",
@@ -187,9 +174,13 @@ fn gas_chain_reference_mcp_returns_submitted_basis_and_source_without_verificati
     );
     assert_eq!(
         comparison["metrics"][36]["calculationBasis"],
-        "synthetic collective source-heat arithmetic"
+        collective["expected"][36]["calculationBasis"]
     );
     assert_eq!(comparison["referenceVerified"], false);
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *comparison
+    );
 }
 
 #[test]
