@@ -114,7 +114,7 @@ export function GasChainReferencePanel() {
           <div><dt>{locale === 'nl' ? 'Onafhankelijke controleur' : 'Independent reviewer'}</dt><dd>{comparedSource.independentReviewer}</dd></div>
         </dl>}
         {result.issues.length > 0 && <ul>{result.issues.map((item, index) =>
-          <li key={`${item.path}-${item.code}-${index}`}><code>{item.path}</code>: {item.code}</li>)}</ul>}
+          <li key={`${item.path}-${item.code}-${index}`}><code>{item.path}</code>: {t(`kernel.issue.${item.code}`, { defaultValue: item.code })}</li>)}</ul>}
         {result.metrics.length > 0 && <div className="gas-chain-reference-table-wrap"><table>
           <thead><tr><th>{t('kernel.gasReference.metric')}</th><th>{t('kernel.gasReference.month')}</th>
             <th>{t('kernel.gasReference.expected')}</th><th>{t('kernel.gasReference.actual')}</th>

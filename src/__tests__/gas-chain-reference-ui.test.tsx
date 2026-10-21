@@ -65,7 +65,10 @@ describe('gas chain reference comparison UI', () => {
       status: 'invalid_case', caseId: 'incomplete', referenceVerified: false,
       carrierAllocationAvailable: false, bengCalculationAvailable: false,
       metrics: [], inputFingerprint: 'sha256:input', caseFingerprint: 'sha256:case',
-      issues: [{ path: 'expected.annualEquipmentAuxiliaryElectricity', code: 'metric_required' }],
+      issues: [
+        { path: 'expected.annualEquipmentAuxiliaryElectricity', code: 'metric_required' },
+        { path: 'input.unknown', code: 'future_kernel_issue' },
+      ],
     }) });
     vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
@@ -74,7 +77,8 @@ describe('gas chain reference comparison UI', () => {
     fireEvent.change(screen.getByLabelText('Case JSON'), { target: { value: '{"caseId":"incomplete"}' } });
     await user.click(screen.getByRole('button', { name: 'Compare draft values' }));
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Case incomplete or invalid'));
-    expect(screen.getByRole('status')).toHaveTextContent('metric_required');
+    expect(screen.getByRole('status')).toHaveTextContent('expected.annualEquipmentAuxiliaryElectricity: This required metric is missing.');
+    expect(screen.getByRole('status')).toHaveTextContent('input.unknown: future_kernel_issue');
     expect(screen.queryByLabelText('Reference case provenance')).not.toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
