@@ -114,6 +114,48 @@ fn example_project() -> Value {
 }
 
 #[test]
+fn gas_chain_reference_mcp_returns_submitted_basis_and_source_without_verification() {
+    let path = format!(
+        "{}/../../training-data/nta8800-gas-chain-diagnostic-synthetic.json",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    let case: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18",
+            "capabilities": {},
+            "clientInfo": { "name": "gas-chain-test", "version": "1" }
+        }),
+    );
+    server.send(json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({ "name": "compare_gas_heat_pump_chain_diagnostic", "arguments": { "case": case } }),
+    );
+    assert_eq!(response["isError"], false, "{response}");
+    let comparison = &response["structuredContent"];
+    assert_eq!(comparison["status"], "compared_pass");
+    assert_eq!(comparison["metrics"].as_array().unwrap().len(), 25);
+    assert_eq!(
+        comparison["source"]["documentId"],
+        case["source"]["documentId"]
+    );
+    assert_eq!(
+        comparison["metrics"][0]["calculationBasis"],
+        case["expected"][0]["calculationBasis"]
+    );
+    assert_eq!(comparison["referenceVerified"], false);
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *comparison
+    );
+}
+
+#[test]
 fn mcp_server_speaks_the_protocol() {
     let mut server = Server::start();
     let init = server.request(

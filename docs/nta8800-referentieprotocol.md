@@ -44,7 +44,7 @@ Voor de [gekoppelde gaswarmtepomp-conceptdiagnose](nta8800-gaswarmtepomp-gekoppe
 
 ## Vereisten voor een normatief referentiegeval
 
-Bij de gaswarmtepompvergelijking staat de door de case aangeleverde `calculationBasis` nu bij iedere resultaatpost, ook in de HTTP-/MCP-/desktopresponse en de UI-tabel. De response bevat tevens de ingediende `source`-velden; de UI toont die uit dezelfde response als de verschillen. Daarmee kan een beoordelaar de verwachte waarde, haar opgegeven basis en de bronverklaring naast het verschil zien. Deze velden zijn door de indiener ingevuld en vormen op zichzelf geen onafhankelijk bewijs.
+Bij de gaswarmtepompvergelijking staat de door de case aangeleverde `calculationBasis` nu bij iedere resultaatpost, ook in de HTTP-/MCP-/desktopresponse en de UI-tabel. De response bevat tevens de ingediende `source`-velden; de UI toont die uit dezelfde response als de verschillen. Een MCP-stdio-integratietest bewaakt dat het gestructureerde resultaat en de JSON-tekst dezelfde bron en berekeningsbasis bevatten. Daarmee kan een beoordelaar de verwachte waarde, haar opgegeven basis en de bronverklaring naast het verschil zien. Deze velden zijn door de indiener ingevuld en vormen op zichzelf geen onafhankelijk bewijs.
 
 1. Leg de exacte editie van NTA 8800, het correctieblad, toepasselijke interpretaties en de voor de case gebruikte software-/referentiedataset vast.
 2. Bewaar een volledige, reproduceerbare opname: geometrie, zones, gebruiksfunctie, schil, ventilatie, opwekkers, verdeling, tapwater, koeling, PV en de herkomst van elke waarde. Noteer ook onbekende en forfaitaire waarden expliciet.
