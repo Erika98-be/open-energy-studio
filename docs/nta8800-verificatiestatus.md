@@ -34,6 +34,8 @@ De [CI-run op `1bf6807`](https://github.com/Erika98-be/open-energy-studio/action
 
 De [CI-run op `b9d23ca`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39504445756) slaagde voor de technische gate en de drie platformbuilds. De gaswarmtepomprij in het dekkingsregister is met de bestaande 25/37-postenscope van het vergelijkingsharnas in overeenstemming gebracht. Dit is een documentatiecorrectie, zonder nieuwe normatieve referentie of attestering.
 
+Het importpaneel voor gaswarmtepompreferenties vermeldt nu ook de bestaande 37 vereiste posten voor collectieve bronnen, naast 25 voor individuele bronnen; de Engelse en Nederlandse scopeteksten zijn gelijkgetrokken met het Rust-contract. De vijf gerichte UI-tests en de TypeScript-/Vite-build slagen lokaal. Dit verandert geen rekenroute. In [CI op `1312b58`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39511812152) zijn gate en Linux-/Windows-build groen; de macOS-bouw liep bij deze controle nog.
+
 **Bouwcontrole 13 oktober 2026.** De [Linux-devbuild van broncommit `4c871f1`](nta8800-build-verificatie-2026-10-13-4c871f1.md) slaagde na een verse `npm ci`; de manifestlezer bevestigde de bewaarde bytes en bronmetadata. Daarna slaagde de releaseproef van review 74 met de volledige technische gate en Rust 1.77.2 (`e9987e1`, exit 0). Een tweede onafhankelijke bouw, actuele officiële referentiegevallen, visuele desktopacceptatie en externe attestering blijven open.
 
 De bewaarde HTTP- en MCP-binaries leverden voor dezelfde voorbeeldtussenwoning beide BENG 2 = 80,56 kWh/m²·jaar en indicatieve klasse A+ met status `calculated_unverified` en `unattested`. De HTTP-gezondheidsroute en MCP-initialisatie slaagden. Dit controleert alleen de gebouwde transportadapters.

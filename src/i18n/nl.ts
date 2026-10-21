@@ -1234,7 +1234,7 @@ export const nl: Record<string, string> = {
   'kernel.gasMonthly.inputTerm': 'Invoerterm vergelijking 9.62 (kWh)',
   'kernel.gasMonthly.limit': 'Deze term is niet aan gas of elektriciteit toegewezen. Hulpenergie, BENG en energielabel blijven niet beschikbaar.',
   'kernel.gasReference.title': 'Gaswarmtepomp-referentievergelijking',
-  'kernel.gasReference.scope': 'Laad een case met 25 waarden om de conceptberekening te vergelijken. Overeenkomende aangeleverde waarden bewijzen geen onafhankelijk bronbewijs, NTA-conformiteit of energielabel.',
+  'kernel.gasReference.scope': 'Laad een case met 25 waarden voor een individuele bron of 37 voor een collectieve bron om de conceptberekening te vergelijken. Overeenkomende aangeleverde waarden bewijzen geen onafhankelijk bronbewijs, NTA-conformiteit of energielabel.',
   'kernel.gasReference.example': 'Laad synthetisch voorbeeld',
   'kernel.gasReference.file': 'Importeer JSON-case',
   'kernel.gasReference.json': 'Case-JSON',

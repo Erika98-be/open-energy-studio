@@ -1234,7 +1234,7 @@ export const en: Record<string, string> = {
   'kernel.gasMonthly.inputTerm': 'Equation 9.62 input term (kWh)',
   'kernel.gasMonthly.limit': 'This term is not assigned to gas or electricity. Auxiliary energy, BENG and the energy label remain unavailable.',
   'kernel.gasReference.title': 'Gas heat pump reference comparison',
-  'kernel.gasReference.scope': 'Load a 25-value case to compare the draft calculation. Matching submitted values do not establish independent evidence, NTA compliance or an energy label.',
+  'kernel.gasReference.scope': 'Load a 25-value case for an individual source or 37 values for a collective source to compare the draft calculation. Matching submitted values do not establish independent evidence, NTA compliance or an energy label.',
   'kernel.gasReference.example': 'Load synthetic example',
   'kernel.gasReference.file': 'Import JSON case',
   'kernel.gasReference.json': 'Case JSON',
