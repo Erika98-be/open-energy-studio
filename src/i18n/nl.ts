@@ -1246,6 +1246,7 @@ export const nl: Record<string, string> = {
   'kernel.gasReference.status.compared_fail': 'Aangeleverde waarden wijken af',
   'kernel.gasReference.status.invalid_case': 'Case onvolledig of ongeldig',
   'kernel.gasReference.unverified': 'Referentie niet onafhankelijk geverifieerd. Energiedragertoedeling, BENG en energielabel blijven niet beschikbaar.',
+  'kernel.gasReference.submittedSource': 'Aangeleverde referentiebrongegevens',
   'kernel.gasReference.metric': 'Post',
   'kernel.gasReference.month': 'Maand',
   'kernel.gasReference.calculationBasis': 'Aangeleverde berekeningsbasis',

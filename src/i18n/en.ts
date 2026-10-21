@@ -1246,6 +1246,7 @@ export const en: Record<string, string> = {
   'kernel.gasReference.status.compared_fail': 'Submitted values differ',
   'kernel.gasReference.status.invalid_case': 'Case incomplete or invalid',
   'kernel.gasReference.unverified': 'Reference not independently verified. Carrier allocation, BENG and energy label remain unavailable.',
+  'kernel.gasReference.submittedSource': 'Submitted reference source details',
   'kernel.gasReference.metric': 'Metric',
   'kernel.gasReference.month': 'Month',
   'kernel.gasReference.calculationBasis': 'Submitted calculation basis',

@@ -9,6 +9,8 @@ describe('gas chain reference comparison UI', () => {
   it('loads the synthetic 25-value case, compares via Rust API, and keeps verification unavailable', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: async () => JSON.stringify({
       status: 'compared_pass', caseId: 'synthetic-gas-chain-2026-draft',
+      source: { publisher: 'Source returned by Rust', documentId: 'synthetic gas heat-pump hand calculation; not ISSO 54',
+        edition: 'draft', usePermission: 'internal test', independentReviewer: 'none; external verification pending' },
       referenceVerified: false, carrierAllocationAvailable: false, bengCalculationAvailable: false,
       metrics: [{ metric: 'equation962_unallocated_input_term', month: 1,
         calculationBasis: 'synthetic worksheet A, row 1', expectedKwh: 625,
@@ -35,13 +37,15 @@ describe('gas chain reference comparison UI', () => {
     expect(screen.getByRole('columnheader', { name: 'Submitted calculation basis' })).toBeInTheDocument();
     expect(screen.getByRole('row', { name: /9.62 input term, unallocated/ })).toHaveTextContent('synthetic worksheet A, row 1');
     expect(screen.getByRole('row', { name: /9.62 input term, unallocated/ })).toHaveTextContent('Within tolerance');
-    const provenance = screen.getByLabelText('Reference case provenance');
-    expect(provenance).toHaveTextContent('Open Energy Studio internal arithmetic');
+    const provenance = screen.getByLabelText('Submitted reference source details');
+    expect(provenance).toHaveTextContent('Source returned by Rust');
     expect(provenance).toHaveTextContent('synthetic gas heat-pump hand calculation; not ISSO 54');
+    expect(provenance).toHaveTextContent('Use permission');
+    expect(provenance).toHaveTextContent('internal test');
     expect(provenance).toHaveTextContent('none; external verification pending');
     fireEvent.change(screen.getByLabelText('Case JSON'), { target: { value: '{invalid' } });
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Reference case provenance')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Submitted reference source details')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Compare draft values' }));
     expect(screen.getByRole('alert')).toHaveTextContent('SyntaxError');
     expect(fetchMock).toHaveBeenCalledOnce();
@@ -82,7 +86,7 @@ describe('gas chain reference comparison UI', () => {
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Case incomplete or invalid'));
     expect(screen.getByRole('status')).toHaveTextContent('expected.annualEquipmentAuxiliaryElectricity: This required metric is missing.');
     expect(screen.getByRole('status')).toHaveTextContent('input.unknown: future_kernel_issue');
-    expect(screen.queryByLabelText('Reference case provenance')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Submitted reference source details')).not.toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 

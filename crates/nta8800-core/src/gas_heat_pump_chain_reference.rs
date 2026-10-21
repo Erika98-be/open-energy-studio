@@ -43,6 +43,7 @@ pub struct GasChainExpectedMetric {
 #[serde(rename_all = "camelCase")]
 pub struct GasChainDiagnosticComparison {
     pub case_id: String,
+    pub source: ReferenceSource,
     pub status: &'static str,
     pub target_norm_version: &'static str,
     pub kernel_version: &'static str,
@@ -213,6 +214,7 @@ pub fn compare_gas_heat_pump_chain_diagnostic(
         metrics.len() == required_count && metrics.iter().all(|item| item.within_tolerance);
     GasChainDiagnosticComparison {
         case_id: case.case_id,
+        source: case.source,
         status: if !issues.is_empty() {
             "invalid_case"
         } else if passed {
@@ -302,6 +304,7 @@ mod tests {
         let result = compare_gas_heat_pump_chain_diagnostic(case);
         assert_eq!(result.status, "compared_pass");
         assert_eq!(result.metrics.len(), 25);
+        assert_eq!(result.source.document_id, "synthetic hand calculation");
         assert_eq!(
             result.metrics[0].calculation_basis,
             "case-specific synthetic arithmetic"
@@ -310,6 +313,10 @@ mod tests {
         assert_eq!(
             response["metrics"][0]["calculationBasis"],
             "case-specific synthetic arithmetic"
+        );
+        assert_eq!(
+            response["source"]["documentId"],
+            "synthetic hand calculation"
         );
         assert!(result.all_metrics_within_tolerance);
         assert!(!result.reference_verified && !result.carrier_allocation_available);

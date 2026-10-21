@@ -1280,6 +1280,7 @@ export interface GasChainDiagnosticCase {
 
 export interface GasChainDiagnosticComparison {
   caseId: string;
+  source: GasChainDiagnosticCase['source'];
   status: 'invalid_case' | 'compared_pass' | 'compared_fail';
   targetNormVersion: string;
   kernelVersion: string;

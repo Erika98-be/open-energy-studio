@@ -1726,6 +1726,7 @@ mod tests {
                 .unwrap();
         assert_eq!(result["status"], "compared_pass");
         assert_eq!(result["metrics"].as_array().unwrap().len(), 25);
+        assert_eq!(result["source"]["documentId"], "synthetic hand calculation");
         assert_eq!(
             result["metrics"][0]["calculationBasis"],
             "synthetic arithmetic"
