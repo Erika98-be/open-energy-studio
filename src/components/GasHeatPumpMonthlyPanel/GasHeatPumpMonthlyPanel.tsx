@@ -156,6 +156,8 @@ export function GasHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }) {
     </div>}
     {sourceResult?.status === 'diagnostic_valid' && <div role="status" className="heat-pump-forfait-monthly-result">
       <p>{t('kernel.gasMonthly.collectiveEvidenceKind')}: {sourceResult.collectiveSourceEvidenceKind && t(`kernel.gasMonthly.collectiveEvidenceKind.${sourceResult.collectiveSourceEvidenceKind}`)} · {t('kernel.gasMonthly.sourceReference')}: {sourceResult.sourceSystemReference}</p>
+      <p>{t('kernel.gasMonthly.temperatureClass')}: {t(`kernel.gasMonthly.temperatureClass.${sourceResult.sourceTemperatureClass}`)} · {t('kernel.gasMonthly.temperatureReference')}: {sourceResult.sourceTemperatureReference}</p>
+      <p>{t('kernel.gasMonthly.noDeclaration')} · {t('kernel.gasMonthly.declarationReference')}: {sourceResult.noQualityDeclarationReference}</p>
       <p>{t('kernel.gasMonthly.annualSourceHeat')}: {sourceResult.annualDeliveredSourceHeatKwh?.toFixed(2)} kWh (dh)</p>
       <p>{t('kernel.gasMonthly.fossilFactor')}: {sourceResult.primaryFossilFactor?.toFixed(5)} · {t('kernel.gasMonthly.renewableFactor')}: {sourceResult.primaryRenewableFactor?.toFixed(2)}</p>
       <p>{t('kernel.gasMonthly.annualFossil')}: {sourceResult.annualDraftPrimaryFossilKwh?.toFixed(2)} kWh · {t('kernel.gasMonthly.annualRenewable')}: {sourceResult.annualDraftPrimaryRenewableKwh?.toFixed(2)} kWh</p>

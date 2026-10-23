@@ -54,6 +54,10 @@ pub struct GasCollectiveSourceDraftAssessment {
     pub input_fingerprint: String,
     pub collective_source_evidence_kind: Option<CollectiveSourceEvidenceKind>,
     pub source_system_reference: String,
+    pub source_temperature_class: SourceTemperatureClass,
+    pub source_temperature_reference: String,
+    pub no_quality_declaration_confirmed: bool,
+    pub no_quality_declaration_reference: String,
     pub source_energy_carrier: &'static str,
     pub primary_fossil_factor: Option<f64>,
     pub primary_renewable_factor: Option<f64>,
@@ -218,6 +222,10 @@ pub fn assess_gas_collective_source_draft(
         input_fingerprint: input_fingerprint(&json!(input)),
         collective_source_evidence_kind: input.collective_source_evidence_kind,
         source_system_reference: input.chain.monthly.source_system_reference.clone(),
+        source_temperature_class: input.source_temperature_class,
+        source_temperature_reference: input.source_temperature_reference.clone(),
+        no_quality_declaration_confirmed: input.no_quality_declaration_confirmed,
+        no_quality_declaration_reference: input.no_quality_declaration_reference.clone(),
         source_energy_carrier: "dh",
         primary_fossil_factor: if issues.is_empty() {
             Some(fossil_factor)
@@ -325,6 +333,13 @@ mod tests {
             Some(CollectiveSourceEvidenceKind::DesignDocuments)
         );
         assert_eq!(declared.source_system_reference, "invoice");
+        assert_eq!(
+            declared.source_temperature_class,
+            SourceTemperatureClass::Below20C
+        );
+        assert_eq!(declared.source_temperature_reference, "source design");
+        assert!(declared.no_quality_declaration_confirmed);
+        assert_eq!(declared.no_quality_declaration_reference, "register check");
         assert!(!declared.reference_verified);
     }
 

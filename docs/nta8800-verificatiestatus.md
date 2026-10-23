@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 23 oktober 2026
 
+De auditresponse van de collectieve `dh`-bron geeft nu ook de opgegeven temperatuurklasse en haar verwijzing, plus de bevestiging en naslagverwijzing voor het ontbreken van een kwaliteitsverklaring terug. Het projectpaneel toont deze gegevens uit de Rust-response bij de deeluitkomst. Dit maakt de gekozen forfaitaire factor achteraf beter te volgen; de verklaringen en documenten blijven niet onafhankelijk geauthenticeerd. Gerichte kern-, HTTP-, MCP- en UI-proeven, rustfmt en de TypeScript-/Vite-build slagen lokaal.
+
 De [CI-run op `ea30ee38`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39993870702) slaagde voor de volledige NTA-gate en de Linux-, Windows- en universele macOS-build. De optionele debug-bouwbewijsjob was overgeslagen. De technische transport- en bouwcontrole verandert de ontbrekende onafhankelijke referentie- en atteststatus niet.
 
 De collectieve `dh`-diagnose geeft de ingediende bewijssoort en bronstelselverwijzing nu samen met de berekende deelwaarden terug. Het projectpaneel toont beide velden uit dezelfde Rust-response; gerichte kern-, HTTP-, MCP- en UI-proeven, rustfmt en de TypeScript-/Vite-build slagen lokaal. Dit maakt de gebruikersverklaring bij de uitkomst leesbaar, zonder documentauthenticatie of onafhankelijke referentietoets. `referenceVerified=false` en `attestStatus=unattested` blijven van kracht.

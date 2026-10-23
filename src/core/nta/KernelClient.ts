@@ -1236,6 +1236,10 @@ export interface GasCollectiveSourceDraftAssessment {
   inputFingerprint: string;
   collectiveSourceEvidenceKind: GasCollectiveSourceEvidenceKind | null;
   sourceSystemReference: string;
+  sourceTemperatureClass: GasCollectiveSourceTemperatureClass;
+  sourceTemperatureReference: string;
+  noQualityDeclarationConfirmed: boolean;
+  noQualityDeclarationReference: string;
   sourceEnergyCarrier: 'dh';
   primaryFossilFactor: number | null;
   primaryRenewableFactor: number | null;

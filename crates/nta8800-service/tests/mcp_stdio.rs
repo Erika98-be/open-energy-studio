@@ -225,6 +225,22 @@ fn collective_gas_source_mcp_requires_a_declared_evidence_kind() {
         response["structuredContent"]["sourceSystemReference"],
         "synthetic collective source plan"
     );
+    assert_eq!(
+        response["structuredContent"]["sourceTemperatureClass"],
+        "below20_c"
+    );
+    assert_eq!(
+        response["structuredContent"]["sourceTemperatureReference"],
+        "synthetic source plan"
+    );
+    assert_eq!(
+        response["structuredContent"]["noQualityDeclarationConfirmed"],
+        true
+    );
+    assert_eq!(
+        response["structuredContent"]["noQualityDeclarationReference"],
+        "synthetic register check"
+    );
     assert_eq!(response["structuredContent"]["referenceVerified"], false);
     input["collectiveSourceEvidenceKind"] = Value::Null;
     let response = server.request(

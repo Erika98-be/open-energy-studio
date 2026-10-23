@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De collectieve `dh`-auditresponse neemt nu ook de ingediende temperatuurklasse, temperatuurverwijzing en kwaliteitsverklaringscontrole over naar Rust, HTTP, MCP en het projectpaneel. De factorbasis is daarmee bij de uitkomst leesbaar, maar de opgegeven stukken zijn niet geauthenticeerd. *Referentie* en *Attest* blijven open.
+
 De [CI-run op `ea30ee38`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39993870702) bevestigde de NTA-gate en alle drie desktopplatforms voor de auditresponse van de collectieve bron. De optionele debug-bouwbewijsjob was overgeslagen; *Referentie* en *Attest* blijven open.
 
 De collectieve gaswarmtepompdiagnose echoot de opgegeven bewijssoort en bronstelselverwijzing in Rust, HTTP en MCP; het projectpaneel toont ze naast de `dh`-deeluitkomst. Dit versterkt de controleerbaarheid van de invoerverklaring, zonder haar inhoud te verifiëren. *Referentie* en *Attest* blijven open.

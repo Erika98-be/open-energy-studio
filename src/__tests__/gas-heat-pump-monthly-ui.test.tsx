@@ -93,6 +93,8 @@ describe('gas heat pump draft monthly terms UI', () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
       status: 'diagnostic_valid', annualDeliveredSourceHeatKwh: 5000,
       collectiveSourceEvidenceKind: 'supplier_records', sourceSystemReference: 'invoice',
+      sourceTemperatureClass: 'below20_c', sourceTemperatureReference: 'source design',
+      noQualityDeclarationConfirmed: true, noQualityDeclarationReference: 'register check',
       primaryFossilFactor: 1.45 / 23, primaryRenewableFactor: 0.95,
       annualDraftPrimaryFossilKwh: 5000 * 1.45 / 23, annualDraftPrimaryRenewableKwh: 4750,
       inputFingerprint: 'sha256:source', issues: [],
@@ -120,6 +122,9 @@ describe('gas heat pump draft monthly terms UI', () => {
     expect(screen.getByRole('status')).toHaveTextContent('5000.00 kWh (dh)');
     expect(screen.getByRole('status')).toHaveTextContent('Supplier invoice or consumption cost record');
     expect(screen.getByRole('status')).toHaveTextContent('Source-system evidence: invoice');
+    expect(screen.getByRole('status')).toHaveTextContent('Source temperature class: Below 20 °C');
+    expect(screen.getByRole('status')).toHaveTextContent('Temperature class evidence: source design');
+    expect(screen.getByRole('status')).toHaveTextContent('Quality declaration check evidence: register check');
     fireEvent.change(screen.getByLabelText('Temperature class evidence'), { target: { value: 'revised design' } });
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });

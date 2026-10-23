@@ -2,7 +2,7 @@
 
 ## Collective gas heat-pump source draft
 
-For a collective source, the input also requires `collectiveSourceEvidenceKind` with value `supplier_records` or `design_documents`. A missing kind yields HTTP 422 without partial values. The response echoes this kind and the submitted `sourceSystemReference` alongside the draft values. This is a submitted evidence classification; the service does not authenticate the document.
+For a collective source, the input also requires `collectiveSourceEvidenceKind` with value `supplier_records` or `design_documents`. A missing kind yields HTTP 422 without partial values. The response echoes this kind, `sourceSystemReference`, the submitted temperature class and reference, and the quality-declaration check fields alongside the draft values. These are submitted declarations; the service does not authenticate the documents.
 
 `POST /v1/nta8800/heat-pumps/gas-collective-source-draft/diagnose` and MCP tool `diagnose_gas_collective_source_draft` accept `{ "input": { "chain": { ... }, "collectiveSourceEvidenceKind": "supplier_records", "sourceTemperatureClass": "below20_c", "sourceTemperatureReference": "...", "noQualityDeclarationConfirmed": true, "noQualityDeclarationReference": "..." } }`. The validated twelve-month linked gas chain is reused. Results keep collective source heat on the separate `dh` carrier and expose only draft fossil/renewable primary contributions from public consultation chapters 5 and 9. Invalid evidence returns HTTP 422 or an MCP tool error without partial numbers. Gas input, source pump/fan, final-edition verification, BENG and label are unavailable. See `docs/nta8800-gaswarmtepomp-collectieve-bron-concept.md`.
 
