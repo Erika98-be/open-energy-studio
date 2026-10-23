@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De collectieve gaswarmtepompdiagnose echoot de opgegeven bewijssoort en bronstelselverwijzing in Rust, HTTP en MCP; het projectpaneel toont ze naast de `dh`-deeluitkomst. Dit versterkt de controleerbaarheid van de invoerverklaring, zonder haar inhoud te verifiëren. *Referentie* en *Attest* blijven open.
+
 De [CI-run op `38d5328`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39746684054) op `main` slaagde voor de NTA-gate en alle drie desktopplatforms; de optionele debug-bouwbewijsjob was overgeslagen. De ingediende bewijssoort voor collectieve bronnen blijft een niet-geauthenticeerde gebruikersverklaring. *Referentie* en *Attest* blijven open.
 
 De visuele deelcontrole van de gelicentieerde doeluitgave (§9.6.8.1.1.2.3, p. 362) bevestigt de maandelijkse collectieve bronwarmte en de afzonderlijke `dh`-route. De `dh`-diagnose vraagt nu een opgegeven bewijssoort naast de bronverwijzing en geeft zonder die keuze geen deelwaarden. Rust controleert de documentinhoud en authenticiteit niet; dit blijft een open invoerauditpunt naast de ontbrekende onafhankelijke referentie- en attesttoets.

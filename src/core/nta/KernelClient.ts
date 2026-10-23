@@ -1234,6 +1234,8 @@ export interface GasCollectiveSourceDraftAssessment {
   status: 'diagnostic_valid' | 'invalid';
   scope: string;
   inputFingerprint: string;
+  collectiveSourceEvidenceKind: GasCollectiveSourceEvidenceKind | null;
+  sourceSystemReference: string;
   sourceEnergyCarrier: 'dh';
   primaryFossilFactor: number | null;
   primaryRenewableFactor: number | null;

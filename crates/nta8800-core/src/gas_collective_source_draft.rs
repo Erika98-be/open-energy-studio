@@ -52,6 +52,8 @@ pub struct GasCollectiveSourceDraftAssessment {
     pub target_norm_version: &'static str,
     pub kernel_version: &'static str,
     pub input_fingerprint: String,
+    pub collective_source_evidence_kind: Option<CollectiveSourceEvidenceKind>,
+    pub source_system_reference: String,
     pub source_energy_carrier: &'static str,
     pub primary_fossil_factor: Option<f64>,
     pub primary_renewable_factor: Option<f64>,
@@ -214,6 +216,8 @@ pub fn assess_gas_collective_source_draft(
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),
+        collective_source_evidence_kind: input.collective_source_evidence_kind,
+        source_system_reference: input.chain.monthly.source_system_reference.clone(),
         source_energy_carrier: "dh",
         primary_fossil_factor: if issues.is_empty() {
             Some(fossil_factor)
@@ -316,6 +320,11 @@ mod tests {
         input.collective_source_evidence_kind = Some(CollectiveSourceEvidenceKind::DesignDocuments);
         let declared = assess_gas_collective_source_draft(&input);
         assert_eq!(declared.status, "diagnostic_valid");
+        assert_eq!(
+            declared.collective_source_evidence_kind,
+            Some(CollectiveSourceEvidenceKind::DesignDocuments)
+        );
+        assert_eq!(declared.source_system_reference, "invoice");
         assert!(!declared.reference_verified);
     }
 

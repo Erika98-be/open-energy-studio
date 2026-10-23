@@ -1651,6 +1651,8 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(value["sourceEnergyCarrier"], "dh");
+        assert_eq!(value["collectiveSourceEvidenceKind"], "supplier_records");
+        assert_eq!(value["sourceSystemReference"], "invoice");
         assert_eq!(value["primaryFossilFactor"], 1.45 / 23.0);
         assert_eq!(value["primaryRenewableFactor"], 0.95);
         assert_eq!(value["gasInputEnergyAvailable"], false);

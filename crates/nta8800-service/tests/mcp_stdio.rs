@@ -217,6 +217,14 @@ fn collective_gas_source_mcp_requires_a_declared_evidence_kind() {
     assert_eq!(response["isError"], false, "{response}");
     assert_eq!(response["structuredContent"]["status"], "diagnostic_valid");
     assert_eq!(response["structuredContent"]["sourceEnergyCarrier"], "dh");
+    assert_eq!(
+        response["structuredContent"]["collectiveSourceEvidenceKind"],
+        "design_documents"
+    );
+    assert_eq!(
+        response["structuredContent"]["sourceSystemReference"],
+        "synthetic collective source plan"
+    );
     assert_eq!(response["structuredContent"]["referenceVerified"], false);
     input["collectiveSourceEvidenceKind"] = Value::Null;
     let response = server.request(
