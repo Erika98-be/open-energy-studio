@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 23 oktober 2026
 
+De [CI-run op `ea30ee38`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39993870702) slaagde voor de volledige NTA-gate en de Linux-, Windows- en universele macOS-build. De optionele debug-bouwbewijsjob was overgeslagen. De technische transport- en bouwcontrole verandert de ontbrekende onafhankelijke referentie- en atteststatus niet.
+
 De collectieve `dh`-diagnose geeft de ingediende bewijssoort en bronstelselverwijzing nu samen met de berekende deelwaarden terug. Het projectpaneel toont beide velden uit dezelfde Rust-response; gerichte kern-, HTTP-, MCP- en UI-proeven, rustfmt en de TypeScript-/Vite-build slagen lokaal. Dit maakt de gebruikersverklaring bij de uitkomst leesbaar, zonder documentauthenticatie of onafhankelijke referentietoets. `referenceVerified=false` en `attestStatus=unattested` blijven van kracht.
 
 De [CI-run op `38d5328`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39746684054) slaagde na opname in `main`: de technische gate en de Windows-, Linux- en universele macOS-build zijn groen. De optionele debug-bouwbewijsjob was overgeslagen. Dit bevestigt de technische controle van de bewijssoortwijziging; onafhankelijke EDR-uitkomsten en attestering ontbreken nog.

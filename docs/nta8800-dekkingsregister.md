@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De [CI-run op `ea30ee38`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39993870702) bevestigde de NTA-gate en alle drie desktopplatforms voor de auditresponse van de collectieve bron. De optionele debug-bouwbewijsjob was overgeslagen; *Referentie* en *Attest* blijven open.
+
 De collectieve gaswarmtepompdiagnose echoot de opgegeven bewijssoort en bronstelselverwijzing in Rust, HTTP en MCP; het projectpaneel toont ze naast de `dh`-deeluitkomst. Dit versterkt de controleerbaarheid van de invoerverklaring, zonder haar inhoud te verifiëren. *Referentie* en *Attest* blijven open.
 
 De [CI-run op `38d5328`](https://github.com/Erika98-be/open-energy-studio/actions/runs/39746684054) op `main` slaagde voor de NTA-gate en alle drie desktopplatforms; de optionele debug-bouwbewijsjob was overgeslagen. De ingediende bewijssoort voor collectieve bronnen blijft een niet-geauthenticeerde gebruikersverklaring. *Referentie* en *Attest* blijven open.
