@@ -114,6 +114,81 @@ fn example_project() -> Value {
 }
 
 #[test]
+fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
+    let input = json!({
+        "dispatch": {
+            "nodeInputKwh": (1..=12).map(|month| json!({"month": month, "energyKwh": 1000.0})).collect::<Vec<_>>(),
+            "nodeInputReference": "node balance", "designContext": "new_build",
+            "generators": [
+                {"id": "hp", "class": "heat_pump", "classificationReference": "design schedule",
+                 "nominalThermalPowerKw": 4.0, "powerReference": "plate", "priorityEfficiency": 4.8,
+                 "efficiencyReference": "table"},
+                {"id": "boiler", "class": "other_boiler", "classificationReference": "design schedule",
+                 "nominalThermalPowerKw": 6.0, "powerReference": "plate", "priorityEfficiency": 0.95,
+                 "efficiencyReference": "table 9.25"}
+            ]
+        },
+        "forfait": {"generatorId": "hp", "classificationSourceReference": "source design",
+            "scope": "residential_at_most25_kw", "source": "collective15_to20_c", "sink": "hydronic",
+            "designSupplyTemperatureC": 35.0, "thermalCapacityKw": 4.0,
+            "capacitySourceReference": "plate", "collectiveBuildingInstallation": false,
+            "sourceCorrectionFactor": null, "sourceCorrectionReference": null,
+            "sourceTemperatureC": 15.0, "sourceTemperatureEvidenceReference": "source meter"},
+        "sourceSystem": "collective_groundwater_surface_or_at_least15_c",
+        "sourceSystemReference": "source design",
+        "boiler": {"generatorId": "boiler", "role": "individual_supplementary",
+            "location": "inside_thermal_boundary", "kind": "hr107", "fuel": "natural_gas",
+            "averageDesignEmissionTemperatureC": 45.0, "emissionCircuit": "direct",
+            "equipmentReference": "boiler plate", "locationReference": "site inspection",
+            "temperatureAndCircuitReference": "heating design", "pilotFlamePresent": false},
+        "heatPumpAuxiliaryMeasurements": {"generatorId": "hp", "generatorSourceReference": "hp plate",
+            "measurements": {"standbyElectronicsW": 10.0, "deliveryPumpDuringCompressorW": 200.0,
+                "deliveryPumpPrePostW": 90.0, "pumpPreRunSeconds": 300.0,
+                "pumpPostRunSeconds": 300.0, "averageCompressorOnSeconds": 600.0,
+                "meanCompressorModulation": 0.5, "nominalElectricDriveKw": 2.0,
+                "measurementSourceReference": "", "timingSourceReference": "cycle measurements"}},
+        "declaredOperatingLimitsPresent": false
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "hybrid-audit-test", "version": "1"}
+        }),
+    );
+    server.send(json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({
+            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["dispatch"].is_null());
+    assert!(assessment["heatPump"].is_null());
+    assert!(assessment["boiler"].is_null());
+    assert!(assessment["heatPumpAuxiliary"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "source_required"
+                && issue["path"]
+                    == "heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn gas_chain_reference_mcp_returns_submitted_basis_and_source_without_verification() {
     let path = format!(
         "{}/../../training-data/nta8800-gas-chain-diagnostic-synthetic.json",
