@@ -1661,6 +1661,17 @@ mod tests {
         assert_eq!(value["primaryRenewableFactor"], 0.95);
         assert_eq!(value["gasInputEnergyAvailable"], false);
         assert_eq!(value["bengCalculationAvailable"], false);
+        input["chain"]["auxiliary"]["generatorId"] = json!("other-generator");
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        assert!(value["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "generator_mismatch" && issue["path"] == "chain.auxiliary.generatorId"
+        }));
+        input["chain"]["auxiliary"]["generatorId"] = json!("ga-1");
         input["collectiveSourceEvidenceKind"] = Value::Null;
         let response = app().oneshot(request(&input)).await.unwrap();
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);

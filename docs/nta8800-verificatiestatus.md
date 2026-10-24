@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 24 oktober 2026
 
+De collectieve gaswarmtepompbron-diagnose geeft bij een ongeldige gekoppelde keten nu ook de onderliggende foutcode en het volledige invoerpad terug, bijvoorbeeld `chain.auxiliary.generatorId`. Rust, HTTP en MCP behouden bij zo'n fout lege maandwaarden en geen jaartotaal. De gerichte kern-, HTTP- en MCP-proeven en Rust-formatcontrole slagen. Dit verbetert de herstelbaarheid van invoerfouten; bronbewijs en normatieve uitkomsten zijn niet onafhankelijk geverifieerd.
+
 De [handmatige bouwbewijsworkflow en lokale herbouw van `5606713d`](nta8800-crosshost-build-2026-10-24-5606713d.md) zijn geslaagd: API, desktop-`.deb`, MCP, referentiegate en het manifest zijn bytegelijk op de GitHub-runner en een afzonderlijke Linux-host. Ook de reguliere CI-gate en de drie platformbuilds slaagden. Dit is reproduceerbaar technisch bouwbewijs voor deze commit en toolchain; officiële onafhankelijke referentiegevallen en formele externe toets ontbreken nog.
 
 De [CI-run op `1cc6986c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40033136558) slaagde voor de NTA-gate en Linux-, Windows- en universele macOS-builds; de optionele debug-bouwbewijsjob was overgeslagen. Hiermee is de technische controle van de aanvullende auditresponse bevestigd, zonder onafhankelijke referentie- of attesttoets.

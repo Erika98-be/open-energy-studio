@@ -104,6 +104,9 @@ pub fn assess_gas_collective_source_draft(
     let chain = assess_gas_heat_pump_chain_draft(&input.chain);
     if chain.status == "invalid" {
         issues.push(issue("chain_invalid", "chain"));
+        for problem in &chain.issues {
+            issues.push(issue(problem.code, format!("chain.{}", problem.path)));
+        }
     }
     if input.chain.monthly.source_system == SourceSystem::Individual {
         issues.push(issue(
@@ -341,6 +344,26 @@ mod tests {
         assert!(declared.no_quality_declaration_confirmed);
         assert_eq!(declared.no_quality_declaration_reference, "register check");
         assert!(!declared.reference_verified);
+    }
+
+    #[test]
+    fn invalid_chain_exposes_the_underlying_audit_path_without_partial_values() {
+        let mut input = sample(
+            "groundwater_aquifer",
+            "collective_groundwater_surface_or_at_least15_c",
+        );
+        input.chain.auxiliary.generator_id = "other-generator".into();
+        let result = assess_gas_collective_source_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.monthly.is_empty());
+        assert!(result.annual_delivered_source_heat_kwh.is_none());
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "chain_invalid" && item.path == "chain"));
+        assert!(result.issues.iter().any(|item| {
+            item.code == "generator_mismatch" && item.path == "chain.auxiliary.generatorId"
+        }));
     }
 
     #[test]

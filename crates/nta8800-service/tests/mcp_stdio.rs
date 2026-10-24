@@ -254,6 +254,21 @@ fn collective_gas_source_mcp_requires_a_declared_evidence_kind() {
         .as_array()
         .unwrap()
         .is_empty());
+    input["collectiveSourceEvidenceKind"] = json!("design_documents");
+    input["chain"]["auxiliary"]["generatorId"] = json!("other-generator");
+    let response = server.request(
+        4,
+        "tools/call",
+        json!({ "name": "diagnose_gas_collective_source_draft", "arguments": { "input": input } }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    assert!(response["structuredContent"]["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "generator_mismatch" && issue["path"] == "chain.auxiliary.generatorId"
+        }));
 }
 
 #[test]
