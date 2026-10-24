@@ -1,6 +1,6 @@
-# NTA 8800 verificatiestatus — 24 oktober 2026
+# NTA 8800 verificatiestatus — 25 oktober 2026
 
-De hybride keteldiagnose laat de algemene `boiler_lookup_invalid`-melding nu weg wanneer de onderliggende ketelcontrole al concrete veldfouten teruggeeft. Rust en HTTP blijven bij zulke invoer zonder deeluitkomsten. Gerichte kern- en HTTP-tests en rustfmt slagen lokaal; de volledige CI-controle van deze wijziging staat nog open. Dit maakt de invoeraudit minder dubbelzinnig en verandert de normatieve verificatiestatus niet.
+De hybride keteldiagnose laat de algemene `boiler_lookup_invalid`-melding nu weg wanneer de onderliggende ketelcontrole al concrete veldfouten teruggeeft. Rust en HTTP blijven bij zulke invoer zonder deeluitkomsten. Gerichte kern- en HTTP-tests en rustfmt slagen lokaal; de [CI-run op `b550e35c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40135958109) bevestigt de volledige NTA-gate en alle drie desktopplatforms. Dit maakt de invoeraudit minder dubbelzinnig en verandert de normatieve verificatiestatus niet.
 
 De echte MCP-stdio-adapter is nu ook met een ongeldige hybride warmtepomphulpenergiemeting beproefd. Het antwoord bewaart `source_required` met het volledige meetbronpad in zowel de gestructureerde als de tekstresponse en geeft geen warmteverdeling, warmtepomp-, ketel- of hulpenergie-uitkomst vrij. De gerichte integratietest en rustfmt slagen lokaal; de [CI-run op `c0f147ef`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40131567489) bevestigt de NTA-gate en alle drie desktopplatforms. Dit is transport- en invoerauditbewijs, geen onafhankelijke normvergelijking.
 

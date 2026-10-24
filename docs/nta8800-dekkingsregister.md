@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Bij een ongeldige ketellookup met concrete veldfouten toont de hybride route geen extra algemene lookupfout meer. Gerichte Rust- en HTTP-tests slagen; CI voor deze wijziging staat nog open. Dit maakt *Audit* preciezer; *Referentie* en *Attest* blijven open.
+Bij een ongeldige ketellookup met concrete veldfouten toont de hybride route geen extra algemene lookupfout meer. Gerichte Rust- en HTTP-tests en [CI op `b550e35c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40135958109) met drie desktopplatforms slagen. Dit maakt *Audit* preciezer; *Referentie* en *Attest* blijven open.
 
 Een gerichte echte MCP-stdio-proef van de hybride route bevestigt de volledige meetbronfout in tekst en `structuredContent` en het ontbreken van deeluitkomsten bij ongeldige hulpenergie-invoer. De proef en [CI op `c0f147ef`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40131567489) met drie desktopplatforms slagen. Dit versterkt *Audit* en MCP-transport, zonder verandering van *Referentie* of *Attest*.
 
