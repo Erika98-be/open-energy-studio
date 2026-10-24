@@ -269,6 +269,21 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
                     "heat_pump_auxiliary_invalid",
                     "heatPumpAuxiliaryMeasurements",
                 ));
+                // The measured auxiliary assessment also validates derived
+                // monthly electricity. Only its source and measurement paths
+                // refer to fields actually supplied in the hybrid request.
+                for item in &assessed_aux.issues {
+                    if item.path == "generatorSourceReference"
+                        || item.path == "generatorId"
+                        || item.path == "measurements"
+                        || item.path.starts_with("measurements.")
+                    {
+                        issues.push(issue(
+                            item.code,
+                            format!("heatPumpAuxiliaryMeasurements.{}", item.path),
+                        ));
+                    }
+                }
             } else {
                 heat_pump_auxiliary = Some(assessed_aux);
             }
@@ -425,6 +440,27 @@ mod tests {
         let rejected_aux = assess_hybrid_heat_pump_monthly_draft(&individual);
         assert_eq!(rejected_aux.status, "invalid");
         assert!(rejected_aux.dispatch.is_none() && rejected_aux.heat_pump_auxiliary.is_none());
+        let aux = individual
+            .heat_pump_auxiliary_measurements
+            .as_mut()
+            .unwrap();
+        aux.generator_id = "hp".into();
+        aux.measurements.measurement_source_reference.clear();
+        aux.measurements.average_compressor_on_seconds = 0.0;
+        let rejected_measurements = assess_hybrid_heat_pump_monthly_draft(&individual);
+        assert_eq!(rejected_measurements.status, "invalid");
+        assert!(rejected_measurements.dispatch.is_none());
+        assert!(rejected_measurements.heat_pump_auxiliary.is_none());
+        assert!(rejected_measurements.issues.iter().any(|item| {
+            item.code == "source_required"
+                && item.path
+                    == "heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference"
+        }));
+        assert!(rejected_measurements.issues.iter().any(|item| {
+            item.code == "aux_input_invalid"
+                && item.path
+                    == "heatPumpAuxiliaryMeasurements.measurements.averageCompressorOnSeconds"
+        }));
         let mut missing_evidence = input.clone();
         missing_evidence.boiler.equipment_reference.clear();
         missing_evidence.dispatch.node_input_reference.clear();

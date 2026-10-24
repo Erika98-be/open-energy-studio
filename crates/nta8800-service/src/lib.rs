@@ -1341,6 +1341,29 @@ mod tests {
                 .unwrap();
         assert!(invalid["heatPump"].is_null() && invalid["dispatch"].is_null());
         input["dispatch"]["generators"][0]["priorityEfficiency"] = json!(4.8);
+        input["heatPumpAuxiliaryMeasurements"]["measurements"]["measurementSourceReference"] =
+            json!("");
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(invalid["heatPumpAuxiliary"].is_null() && invalid["dispatch"].is_null());
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "source_required"
+                && issue["path"]
+                    == "heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference"
+        }));
+        input["heatPumpAuxiliaryMeasurements"]["measurements"]["measurementSourceReference"] =
+            json!("power measurements");
         input["dispatch"]["nodeInputReference"] = json!("");
         input["boiler"]["equipmentReference"] = json!("");
         let response = app()
