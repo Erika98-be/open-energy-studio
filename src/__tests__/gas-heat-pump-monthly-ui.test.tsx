@@ -127,6 +127,16 @@ describe('gas heat pump draft monthly terms UI', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Quality declaration check evidence: register check');
     fireEvent.change(screen.getByLabelText('Temperature class evidence'), { target: { value: 'revised design' } });
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    fetchMock.mockResolvedValueOnce({ ok: false, json: async () => ({
+      status: 'invalid', monthly: [], annualDeliveredSourceHeatKwh: null,
+      issues: [
+        { code: 'chain_invalid', path: 'chain' },
+        { code: 'generator_mismatch', path: 'chain.auxiliary.generatorId' },
+      ],
+    }) });
+    await user.click(screen.getByRole('button', { name: 'Calculate collective source contribution' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('The generator in the auxiliary input differs from the one in the COP table.');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
   it('links saved auxiliary input to the same twelve heat values without assigning the input carrier', async () => {
     const pump: INtaHeatPumpInput = {
