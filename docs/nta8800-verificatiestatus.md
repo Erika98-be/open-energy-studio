@@ -1,6 +1,6 @@
-# NTA 8800 verificatiestatus — 23 oktober 2026
+# NTA 8800 verificatiestatus — 24 oktober 2026
 
-De handmatig startbare NTA-bouwbewijsworkflow gebruikt nu dezelfde vaste absolute bouwlayout en gepinde Ubuntu-, Node-, npm- en Rust-versies als de eerder bytegelijk bevonden debug-bouwproef. Daarmee kan een nieuwe hoofdbranchcommit met de lokale vaste-layout-bouw worden vergeleken. De workflowwijziging moet nog op een nieuwe runnerproef slagen; dit is bouwbewijs en geen normatieve referentie- of attesttoets.
+De [handmatige bouwbewijsworkflow en lokale herbouw van `5606713d`](nta8800-crosshost-build-2026-10-24-5606713d.md) zijn geslaagd: API, desktop-`.deb`, MCP, referentiegate en het manifest zijn bytegelijk op de GitHub-runner en een afzonderlijke Linux-host. Ook de reguliere CI-gate en de drie platformbuilds slaagden. Dit is reproduceerbaar technisch bouwbewijs voor deze commit en toolchain; officiële onafhankelijke referentiegevallen en formele externe toets ontbreken nog.
 
 De [CI-run op `1cc6986c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40033136558) slaagde voor de NTA-gate en Linux-, Windows- en universele macOS-builds; de optionele debug-bouwbewijsjob was overgeslagen. Hiermee is de technische controle van de aanvullende auditresponse bevestigd, zonder onafhankelijke referentie- of attesttoets.
 
