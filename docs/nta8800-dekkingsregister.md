@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De hybride maandroute toont een ontbrekende bronstelselverwijzing nu als `source_required` op `sourceSystemReference`, zonder deelwaarden vrij te geven. Gerichte Rust- en HTTP-tests slagen; CI voor deze wijziging staat open. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
+De hybride maandroute toont een ontbrekende bronstelselverwijzing nu als `source_required` op `sourceSystemReference`, zonder deelwaarden vrij te geven. Gerichte Rust- en HTTP-tests en [CI op `d54bd4d8`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40122450896) met drie desktopplatforms slagen. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De hybride warmtepompdiagnose toont onderliggende meet- en bronfouten van de gekoppelde hulpenergie met het feitelijke invoerpad, terwijl afgeleide maandvelden alleen een algemene ketenfout houden. Gerichte Rust-, HTTP- en UI-tests slagen lokaal; de [CI-run op `bbdf0bcd`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40113038613) bevestigt de NTA-gate en alle drie desktopplatforms voor de Rust- en HTTP-wijziging. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
