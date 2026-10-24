@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De handmatige bouwbewijsworkflow is met de eerder bewezen vaste layout en gepinde toolchain in lijn gebracht, zodat ook huidige `main`-commits cross-host vergeleken kunnen worden. Een nieuwe runner- en lokale vergelijking staat nog uit; *Referentie* en *Attest* veranderen niet.
+
 De [CI-run op `1cc6986c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40033136558) slaagde voor gate en drie platformbuilds. De uitgebreide `dh`-auditresponse is daarmee technisch gecontroleerd; *Referentie* en *Attest* blijven open.
 
 De collectieve `dh`-auditresponse neemt nu ook de ingediende temperatuurklasse, temperatuurverwijzing en kwaliteitsverklaringscontrole over naar Rust, HTTP, MCP en het projectpaneel. De factorbasis is daarmee bij de uitkomst leesbaar, maar de opgegeven stukken zijn niet geauthenticeerd. *Referentie* en *Attest* blijven open.

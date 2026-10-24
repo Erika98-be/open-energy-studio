@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 23 oktober 2026
 
+De handmatig startbare NTA-bouwbewijsworkflow gebruikt nu dezelfde vaste absolute bouwlayout en gepinde Ubuntu-, Node-, npm- en Rust-versies als de eerder bytegelijk bevonden debug-bouwproef. Daarmee kan een nieuwe hoofdbranchcommit met de lokale vaste-layout-bouw worden vergeleken. De workflowwijziging moet nog op een nieuwe runnerproef slagen; dit is bouwbewijs en geen normatieve referentie- of attesttoets.
+
 De [CI-run op `1cc6986c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40033136558) slaagde voor de NTA-gate en Linux-, Windows- en universele macOS-builds; de optionele debug-bouwbewijsjob was overgeslagen. Hiermee is de technische controle van de aanvullende auditresponse bevestigd, zonder onafhankelijke referentie- of attesttoets.
 
 De auditresponse van de collectieve `dh`-bron geeft nu ook de opgegeven temperatuurklasse en haar verwijzing, plus de bevestiging en naslagverwijzing voor het ontbreken van een kwaliteitsverklaring terug. Het projectpaneel toont deze gegevens uit de Rust-response bij de deeluitkomst. Dit maakt de gekozen forfaitaire factor achteraf beter te volgen; de verklaringen en documenten blijven niet onafhankelijk geauthenticeerd. Gerichte kern-, HTTP-, MCP- en UI-proeven, rustfmt en de TypeScript-/Vite-build slagen lokaal.
