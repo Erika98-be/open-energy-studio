@@ -6,6 +6,7 @@ import {
   type BoilerForfaitDraftInput, type ForfaitHeatPumpMonthlyDraftInput, type HybridHeatPumpMonthlyDraftAssessment,
 } from '../../core/nta/KernelClient';
 import { useI18n } from '../../i18n/i18n';
+import { kernelCodeLabel } from '../../i18n/format';
 import './HeatPumpForfaitMonthlyPanel.css';
 import { DecimalInput } from '../ui';
 
@@ -155,7 +156,11 @@ export function HybridHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }
         onChange={(event) => updateMonth(index, event.target.value)} /></td></tr>)}</tbody></table></div>
     <button type="button" disabled={loading} onClick={() => void diagnose()}>{loading ? t('kernel.loading') : t('kernel.hybridDraft.calculate')}</button>
     {error && <p role="alert" className="heat-pump-forfait-monthly-error">{error}</p>}
-    {result?.status === 'invalid' && <p role="alert" className="heat-pump-forfait-monthly-error">{result.issues.map((item) => item.code).join(', ')}</p>}
+    {result?.status === 'invalid' && <div role="alert" className="heat-pump-forfait-monthly-error"><ul>
+      {result.issues.map((item, index) => <li key={`${item.path}-${item.code}-${index}`}>
+        <code>{item.path}</code>: {kernelCodeLabel(t, item.code).text}
+      </li>)}
+    </ul></div>}
     {result?.status === 'diagnostic_valid' && result.dispatch && result.heatPump && result.boiler && <div role="status" className="heat-pump-forfait-monthly-result">
       <div className="heat-pump-forfait-monthly-table-wrap"><table><thead><tr>
         <th>{t('kernel.forfaitMonthly.month')}</th><th>{t('kernel.hybridDraft.heatPumpOutput')}</th>
