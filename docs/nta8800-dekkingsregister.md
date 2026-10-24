@@ -1,6 +1,8 @@
 # NTA 8800 dekkingsregister
 
-Een gerichte echte MCP-stdio-proef van de hybride route bevestigt de volledige meetbronfout in tekst en `structuredContent` en het ontbreken van deeluitkomsten bij ongeldige hulpenergie-invoer. De proef slaagt lokaal; CI staat open. Dit versterkt *Audit* en MCP-transport, zonder verandering van *Referentie* of *Attest*.
+Bij een ongeldige ketellookup met concrete veldfouten toont de hybride route geen extra algemene lookupfout meer. Gerichte Rust- en HTTP-tests slagen; CI voor deze wijziging staat nog open. Dit maakt *Audit* preciezer; *Referentie* en *Attest* blijven open.
+
+Een gerichte echte MCP-stdio-proef van de hybride route bevestigt de volledige meetbronfout in tekst en `structuredContent` en het ontbreken van deeluitkomsten bij ongeldige hulpenergie-invoer. De proef en [CI op `c0f147ef`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40131567489) met drie desktopplatforms slagen. Dit versterkt *Audit* en MCP-transport, zonder verandering van *Referentie* of *Attest*.
 
 De hybride maandroute toont een ontbrekende bronstelselverwijzing nu als `source_required` op `sourceSystemReference`, zonder deelwaarden vrij te geven. Gerichte Rust- en HTTP-tests en [CI op `d54bd4d8`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40122450896) met drie desktopplatforms slagen. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 

@@ -122,7 +122,9 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
             ));
         }
     }
-    if boiler_lookup.status == "invalid" || boiler_lookup.generation_efficiency.is_none() {
+    if (boiler_lookup.status == "invalid" || boiler_lookup.generation_efficiency.is_none())
+        && boiler_lookup.issues.is_empty()
+    {
         issues.push(issue("boiler_lookup_invalid", "boiler"));
     }
     for item in &boiler_lookup.issues {
@@ -486,6 +488,10 @@ mod tests {
         assert!(rejected_evidence.issues.iter().any(|item| {
             item.code == "source_required" && item.path == "boiler.equipmentReference"
         }));
+        assert!(!rejected_evidence
+            .issues
+            .iter()
+            .any(|item| item.code == "boiler_lookup_invalid"));
         assert!(rejected_evidence.issues.iter().any(|item| {
             item.code == "source_required" && item.path == "dispatch.nodeInputReference"
         }));

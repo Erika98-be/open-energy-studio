@@ -1402,6 +1402,11 @@ mod tests {
         assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
             issue["code"] == "source_required" && issue["path"] == "boiler.equipmentReference"
         }));
+        assert!(!invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|issue| issue["code"] == "boiler_lookup_invalid"));
         assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
             issue["code"] == "source_required" && issue["path"] == "dispatch.nodeInputReference"
         }));
