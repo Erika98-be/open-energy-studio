@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De hybride warmtepompketen geeft onderliggende ketel- en verdelingsfouten nu met volledig invoerpad terug, terwijl zij bij ongeldige invoer geen deelwaarden vrijgeeft. Gerichte Rust- en HTTP-proeven slagen. Dit verbetert *Audit*; *Referentie* en *Attest* blijven open.
+
 Een ongeldige koppeling tussen gaswarmtepomp en hulpenergie toont nu de onderliggende fout met volledig invoerpad in Rust, HTTP en MCP. De collectieve `dh`-diagnose geeft daarbij geen deelwaarden of jaartotaal; een UI-proef controleert de leesbare foutmelding. Gerichte tests en [CI op `95ba18a4`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40086424750) slagen; dit versterkt *Audit*, zonder wijziging van *Referentie* of *Attest*.
 
 De [nieuwe vaste-layout-bouw op `5606713d`](nta8800-crosshost-build-2026-10-24-5606713d.md) is op de GitHub-runner en lokaal vergeleken: vier artefacten en het manifest zijn bytegelijk. De reguliere CI-gate en drie platformbuilds slaagden. Dit bevestigt technisch bouwbewijs voor die commit; *Referentie* en *Attest* veranderen niet.

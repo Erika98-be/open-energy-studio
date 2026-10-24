@@ -125,6 +125,9 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
     if boiler_lookup.status == "invalid" || boiler_lookup.generation_efficiency.is_none() {
         issues.push(issue("boiler_lookup_invalid", "boiler"));
     }
+    for item in &boiler_lookup.issues {
+        issues.push(issue(item.code, format!("boiler.{}", item.path)));
+    }
     if input.boiler.role != BoilerRole::IndividualSupplementary {
         issues.push(issue(
             "boiler_must_be_individual_supplementary",
@@ -202,6 +205,9 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
     let dispatch = assess_generator_dispatch_draft(&input.dispatch);
     if dispatch.status == "invalid" {
         issues.push(issue("dispatch_invalid", "dispatch"));
+        for item in &dispatch.issues {
+            issues.push(issue(item.code, format!("dispatch.{}", item.path)));
+        }
     }
     let mut heat_pump = None;
     let mut boiler_result = None;
@@ -419,6 +425,18 @@ mod tests {
         let rejected_aux = assess_hybrid_heat_pump_monthly_draft(&individual);
         assert_eq!(rejected_aux.status, "invalid");
         assert!(rejected_aux.dispatch.is_none() && rejected_aux.heat_pump_auxiliary.is_none());
+        let mut missing_evidence = input.clone();
+        missing_evidence.boiler.equipment_reference.clear();
+        missing_evidence.dispatch.node_input_reference.clear();
+        let rejected_evidence = assess_hybrid_heat_pump_monthly_draft(&missing_evidence);
+        assert_eq!(rejected_evidence.status, "invalid");
+        assert!(rejected_evidence.dispatch.is_none() && rejected_evidence.heat_pump.is_none());
+        assert!(rejected_evidence.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "boiler.equipmentReference"
+        }));
+        assert!(rejected_evidence.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "dispatch.nodeInputReference"
+        }));
         let mut high_temperature = input;
         high_temperature.forfait.design_supply_temperature_c = Some(56.0);
         let rejected = assess_hybrid_heat_pump_monthly_draft(&high_temperature);
