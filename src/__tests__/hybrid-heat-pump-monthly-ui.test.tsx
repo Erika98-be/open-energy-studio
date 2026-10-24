@@ -118,5 +118,23 @@ describe('new-build hybrid draft UI', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('dispatch.nodeInputReference');
     expect(screen.getByRole('alert')).toHaveTextContent('A source reference is missing');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => ({ status: 'input_valid', correctedCop: 4.8,
+        inputFingerprint: 'sha256:cop' }) })
+      .mockResolvedValueOnce({ json: async () => ({ status: 'diagnostic_valid', generationEfficiency: 0.95,
+        inputFingerprint: 'sha256:boiler' }) })
+      .mockResolvedValueOnce({ json: async () => ({ status: 'invalid', dispatch: null, heatPump: null,
+        heatPumpAuxiliary: null, issues: [
+          { code: 'heat_pump_auxiliary_invalid', path: 'heatPumpAuxiliaryMeasurements' },
+          { code: 'source_required',
+            path: 'heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference' },
+        ] }) });
+    await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(11));
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference',
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('A source reference is missing');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 });

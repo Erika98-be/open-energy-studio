@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De hybride warmtepompdiagnose toont onderliggende meet- en bronfouten van de gekoppelde hulpenergie met het feitelijke invoerpad, terwijl afgeleide maandvelden alleen een algemene ketenfout houden. Gerichte Rust- en HTTP-tests slagen lokaal; CI staat nog open. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
+De hybride warmtepompdiagnose toont onderliggende meet- en bronfouten van de gekoppelde hulpenergie met het feitelijke invoerpad, terwijl afgeleide maandvelden alleen een algemene ketenfout houden. Gerichte Rust-, HTTP- en UI-tests slagen lokaal; de [CI-run op `bbdf0bcd`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40113038613) bevestigt de NTA-gate en alle drie desktopplatforms voor de Rust- en HTTP-wijziging. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De [CI-run op `b7da3bd1`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40100418290) bevestigde bij herhaling de NTA-gate en drie desktopplatforms. De eerste macOS-poging strandde bij het maken van de DMG; de tweede slaagde zonder codewijziging. *Referentie* en *Attest* blijven open.
 
