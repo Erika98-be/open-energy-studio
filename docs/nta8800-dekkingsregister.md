@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De testsetexport weigert een symbolische link op de dossiermap of `projecten/`; een gerichte Rust-proef bevestigt dat een gelinkte projectmap geen bestanden buiten het dossier ontvangt. Dit versterkt de integriteit van de technische bewijsuitvoer; *Referentie* en *Attest* blijven open.
+De testsetexport weigert een symbolische link op de dossiermap of `projecten/` en maakt project- en overzichtsbestanden exclusief aan. Gerichte Rust-proeven bevestigen dat gelinkte doelen buiten het dossier niet worden gewijzigd. Dit versterkt de integriteit van de technische bewijsuitvoer; *Referentie* en *Attest* blijven open.
 
 Bij de CI-run op `6ce277c4` faalde de macOS-DMG-bundeling opnieuw na geslaagde NTA-gate, Linux-/Windows-build en beide Mac-architecturen. CI en release herhalen nu alleen een bereikte DMG-bundelstap één keer op dezelfde runner; een tweede fout blijft fataal. YAML-controle slaagt. De [CI-run op `0a9051bc`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40148392521) slaagde voor gate en alle drie platformbuilds, met macOS-DMG bij de eerste poging; de retrytak is nog niet beproefd. Dit raakt de technische bouwkolom; *Referentie* en *Attest* blijven open.
 

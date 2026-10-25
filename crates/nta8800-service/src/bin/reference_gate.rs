@@ -23,6 +23,7 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::collections::HashSet;
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -568,6 +569,12 @@ fn write_testset(
     {
         return Err(format!("{} is not empty", projects.display()));
     }
+    for name in ["testset.md", "testset.csv", "testset.json"] {
+        let path = dir.join(name);
+        if fs::symlink_metadata(&path).is_ok() {
+            return Err(format!("{} already exists", path.display()));
+        }
+    }
     let mut file_names = HashSet::new();
     let mut project_files = Vec::new();
     let mut rows = Vec::new();
@@ -632,7 +639,7 @@ fn write_testset(
         }
     }
     for (file_name, text) in project_files {
-        fs::write(projects.join(file_name), text).map_err(|error| error.to_string())?;
+        write_new(&projects.join(file_name), text.as_bytes())?;
     }
     let header = [
         (
@@ -653,19 +660,29 @@ fn write_testset(
                 .join(", "),
         ),
     ];
-    let written = fs::write(dir.join("testset.md"), testset::markdown(&rows, &header))
-        .and_then(|()| fs::write(dir.join("testset.csv"), testset::csv(&rows)))
-        .and_then(|()| {
-            fs::write(
-                dir.join("testset.json"),
-                format!(
-                    "{}\n",
-                    serde_json::to_string_pretty(&rows).expect("rows serialize")
-                ),
-            )
-        });
-    written.map_err(|error| error.to_string())?;
+    write_new(
+        &dir.join("testset.md"),
+        testset::markdown(&rows, &header).as_bytes(),
+    )?;
+    write_new(&dir.join("testset.csv"), testset::csv(&rows).as_bytes())?;
+    write_new(
+        &dir.join("testset.json"),
+        format!(
+            "{}\n",
+            serde_json::to_string_pretty(&rows).expect("rows serialize")
+        )
+        .as_bytes(),
+    )?;
     Ok(rows.len())
+}
+
+fn write_new(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .and_then(|mut file| file.write_all(bytes))
+        .map_err(|error| format!("{}: {error}", path.display()))
 }
 
 /// Shown when no commit was supplied (a Dutch word, not a kernel code).
@@ -1353,6 +1370,34 @@ mod tests {
         let error = write_testset(&out, None, std::slice::from_ref(&suite), &report).unwrap_err();
         assert!(error.contains("symbolic link"));
         assert_eq!(fs::read_dir(&outside).unwrap().count(), 0);
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn testset_dossier_does_not_follow_linked_overview_file() {
+        use std::os::unix::fs::symlink;
+
+        let dir = suite_dir();
+        let suite = dir.join("suite.json");
+        fs::write(
+            &suite,
+            json!({"suiteId":"s", "description":"d",
+                "cases":[suite_case(8.2, json!([]))]})
+            .to_string(),
+        )
+        .unwrap();
+        let report = run_with(&[], std::slice::from_ref(&suite), None);
+        let outside = dir.join("outside.md");
+        fs::write(&outside, "sentinel").unwrap();
+        let out = dir.join("dossier");
+        fs::create_dir(&out).unwrap();
+        symlink(&outside, out.join("testset.md")).unwrap();
+
+        let error = write_testset(&out, None, std::slice::from_ref(&suite), &report).unwrap_err();
+        assert!(error.contains("already exists"));
+        assert_eq!(fs::read_to_string(&outside).unwrap(), "sentinel");
+        assert_eq!(fs::read_dir(out.join("projecten")).unwrap().count(), 0);
         fs::remove_dir_all(dir).unwrap();
     }
 
