@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Bij de CI-run op `6ce277c4` faalde de macOS-DMG-bundeling opnieuw na geslaagde NTA-gate, Linux-/Windows-build en beide Mac-architecturen. CI en release herhalen nu alleen een bereikte DMG-bundelstap één keer op dezelfde runner; een tweede fout blijft fataal. YAML-controle slaagt, volledige CI-verificatie van deze maatregel staat open. Dit raakt de technische bouwkolom; *Referentie* en *Attest* blijven open.
+Bij de CI-run op `6ce277c4` faalde de macOS-DMG-bundeling opnieuw na geslaagde NTA-gate, Linux-/Windows-build en beide Mac-architecturen. CI en release herhalen nu alleen een bereikte DMG-bundelstap één keer op dezelfde runner; een tweede fout blijft fataal. YAML-controle slaagt. De [CI-run op `0a9051bc`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40148392521) slaagde voor gate en alle drie platformbuilds, met macOS-DMG bij de eerste poging; de retrytak is nog niet beproefd. Dit raakt de technische bouwkolom; *Referentie* en *Attest* blijven open.
 
 Bij een ongeldige ketellookup met concrete veldfouten toont de hybride route geen extra algemene lookupfout meer. Gerichte Rust- en HTTP-tests en [CI op `b550e35c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40135958109) met drie desktopplatforms slagen. Dit maakt *Audit* preciezer; *Referentie* en *Attest* blijven open.
 
