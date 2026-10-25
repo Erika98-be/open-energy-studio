@@ -550,6 +550,14 @@ fn write_testset(
         }
     };
     let projects = dir.join("projecten");
+    // A pre-existing link could redirect project files outside the dossier.
+    for path in [dir, projects.as_path()] {
+        if let Ok(metadata) = fs::symlink_metadata(path) {
+            if metadata.file_type().is_symlink() {
+                return Err(format!("{} is a symbolic link", path.display()));
+            }
+        }
+    }
     fs::create_dir_all(&projects).map_err(|error| error.to_string())?;
     // The dossier lists exactly the files it writes: an earlier run's files
     // would be counted and hashed with it in the release manifest.
@@ -1318,6 +1326,33 @@ mod tests {
             Ok(2)
         );
         assert_eq!(fs::read_dir(out.join("projecten")).unwrap().count(), 2);
+        fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn testset_dossier_rejects_linked_project_directory() {
+        use std::os::unix::fs::symlink;
+
+        let dir = suite_dir();
+        let suite = dir.join("suite.json");
+        fs::write(
+            &suite,
+            json!({"suiteId":"s", "description":"d",
+                "cases":[suite_case(8.2, json!([]))]})
+            .to_string(),
+        )
+        .unwrap();
+        let report = run_with(&[], std::slice::from_ref(&suite), None);
+        let outside = dir.join("outside");
+        fs::create_dir(&outside).unwrap();
+        let out = dir.join("dossier");
+        fs::create_dir(&out).unwrap();
+        symlink(&outside, out.join("projecten")).unwrap();
+
+        let error = write_testset(&out, None, std::slice::from_ref(&suite), &report).unwrap_err();
+        assert!(error.contains("symbolic link"));
+        assert_eq!(fs::read_dir(&outside).unwrap().count(), 0);
         fs::remove_dir_all(dir).unwrap();
     }
 
