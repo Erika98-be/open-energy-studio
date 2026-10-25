@@ -203,7 +203,24 @@ jobs:
         shell: bash
         env:
           APPIMAGE_EXTRACT_AND_RUN: '1'
-        run: npm run tauri:build -- ${{ matrix.args }}
+        run: |
+          set -euo pipefail
+          if [[ "$RUNNER_OS" != 'macOS' ]]; then
+            npm run tauri:build -- ${{ matrix.args }}
+            exit 0
+          fi
+          dmg_script=src-tauri/target/universal-apple-darwin/release/bundle/dmg/bundle_dmg.sh
+          rm -f "$dmg_script"
+          if npm run tauri:build -- ${{ matrix.args }}; then
+            exit 0
+          fi
+          if [[ ! -f "$dmg_script" ]]; then
+            echo "Build failed before DMG bundling; no packaging retry" >&2
+            exit 1
+          fi
+          echo "::warning::DMG bundling failed; retrying the build once on this runner"
+          sleep 5
+          npm run tauri:build -- ${{ matrix.args }}
 
       - name: Verify both macOS architectures
         if: runner.os == 'macOS'

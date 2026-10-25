@@ -144,7 +144,21 @@ jobs:
       # Match the release workflow: one DMG must contain both Mac architectures.
       - name: Build universal macOS DMG
         if: matrix.platform == 'macos-15-intel'
-        run: npm run tauri:build -- --target universal-apple-darwin --bundles dmg
+        shell: bash
+        run: |
+          set -euo pipefail
+          dmg_script=src-tauri/target/universal-apple-darwin/release/bundle/dmg/bundle_dmg.sh
+          rm -f "$dmg_script"
+          if npm run tauri:build -- --target universal-apple-darwin --bundles dmg; then
+            exit 0
+          fi
+          if [[ ! -f "$dmg_script" ]]; then
+            echo "Build failed before DMG bundling; no packaging retry" >&2
+            exit 1
+          fi
+          echo "::warning::DMG bundling failed; retrying the build once on this runner"
+          sleep 5
+          npm run tauri:build -- --target universal-apple-darwin --bundles dmg
 
       - name: Verify both macOS architectures
         if: matrix.platform == 'macos-15-intel'
