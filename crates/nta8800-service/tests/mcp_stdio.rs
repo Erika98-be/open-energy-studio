@@ -228,6 +228,21 @@ fn gas_chain_reference_mcp_returns_submitted_basis_and_source_without_verificati
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
         *comparison
     );
+    let mut invalid_case = case.clone();
+    invalid_case["input"]["monthly"]["forfait"]["capacityReference"] = json!("");
+    let response = server.request(
+        3,
+        "tools/call",
+        json!({ "name": "compare_gas_heat_pump_chain_diagnostic", "arguments": { "case": invalid_case } }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let comparison = &response["structuredContent"];
+    assert_eq!(comparison["status"], "invalid_case");
+    assert!(comparison["issues"].as_array().unwrap().iter().any(|item| {
+        item["code"] == "source_required"
+            && item["path"] == "input.monthly.forfait.capacityReference"
+    }));
+    assert!(comparison["metrics"].as_array().unwrap().is_empty());
 
     let path = format!(
         "{}/../../training-data/nta8800-gas-chain-diagnostic-collective-synthetic.json",
@@ -235,7 +250,7 @@ fn gas_chain_reference_mcp_returns_submitted_basis_and_source_without_verificati
     );
     let collective: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
     let response = server.request(
-        3,
+        4,
         "tools/call",
         json!({ "name": "compare_gas_heat_pump_chain_diagnostic", "arguments": { "case": collective } }),
     );

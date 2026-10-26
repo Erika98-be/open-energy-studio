@@ -1850,6 +1850,19 @@ mod tests {
             "synthetic arithmetic"
         );
         assert_eq!(result["referenceVerified"], false);
+        case["input"]["monthly"]["forfait"]["capacityReference"] = json!("");
+        let response = app().oneshot(request(&case)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert_eq!(invalid["status"], "invalid_case");
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "source_required"
+                && item["path"] == "input.monthly.forfait.capacityReference"
+        }));
+        assert!(invalid["metrics"].as_array().unwrap().is_empty());
+        case["input"]["monthly"]["forfait"]["capacityReference"] = json!("plate");
         case["expected"][0]["valueKwh"] = json!(626.0);
         let response = app().oneshot(request(&case)).await.unwrap();
         assert_eq!(response.status(), StatusCode::OK);

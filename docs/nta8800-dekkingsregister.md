@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Het getypeerde gaswarmtepomp-vergelijkingsharnas bewaart een fout in de COP-bronverwijzing als volledig `input.monthly.forfait.capacityReference`-pad en geeft dan geen vergelijkingsposten. Rust-, HTTP- en MCP-regressies dekken dit met een synthetische case af. Dit versterkt *Audit* en het referentieharnas; *Referentie* en *Attest* blijven open.
+
 De collectieve gaswarmtepompbronroute toont bij een concrete ketenfout geen algemene `chain_invalid`-melding meer; Rust, HTTP, MCP en UI behouden het volledige foutpad en geven geen `dh`-deeluitkomst vrij. Dit verbetert *Audit*; *Referentie* en *Attest* blijven open.
 
 De gaswarmtepompdiagnose geeft bij concrete veldfouten geen dubbele algemene maand-, hulpstroom- of COP-fout meer. Gerichte Rust-tests en [CI op `68841863`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40368481636) met gate en drie desktopplatforms dekken dit af; dit maakt *Audit* leesbaarder, terwijl *Referentie* en *Attest* open blijven.

@@ -489,6 +489,20 @@ mod tests {
     }
 
     #[test]
+    fn invalid_cop_evidence_retains_full_case_input_path_without_metrics() {
+        let mut case = sample();
+        case.input.monthly.forfait.capacity_reference.clear();
+        let result = compare_gas_heat_pump_chain_diagnostic(case);
+        assert_eq!(result.status, "invalid_case");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "input.monthly.forfait.capacityReference"
+        }));
+        assert!(result.metrics.is_empty());
+        assert!(!result.all_metrics_within_tolerance);
+        assert!(!result.reference_verified);
+    }
+
+    #[test]
     fn finite_values_with_overflowed_difference_invalidate_case() {
         let mut case = sample();
         case.expected[0].value_kwh = -f64::MAX;
