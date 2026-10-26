@@ -259,6 +259,45 @@ fn gas_chain_reference_mcp_returns_submitted_basis_and_source_without_verificati
 }
 
 #[test]
+fn gas_chain_mcp_exposes_nested_cop_evidence_path_without_partial_results() {
+    let path = format!(
+        "{}/../../training-data/nta8800-gas-chain-diagnostic-synthetic.json",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    let case: Value = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
+    let mut input = case["input"].clone();
+    input["monthly"]["forfait"]["capacityReference"] = json!("");
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18",
+            "capabilities": {},
+            "clientInfo": { "name": "gas-chain-audit-test", "version": "1" }
+        }),
+    );
+    server.send(json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({ "name": "diagnose_gas_heat_pump_chain_draft", "arguments": { "input": input } }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["issues"].as_array().unwrap().iter().any(|item| {
+        item["code"] == "source_required" && item["path"] == "monthly.forfait.capacityReference"
+    }));
+    assert!(assessment["monthly"].as_array().unwrap().is_empty());
+    assert!(assessment["annualEquipmentAuxiliaryElectricityKwh"].is_null());
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn collective_gas_source_mcp_requires_a_declared_evidence_kind() {
     let path = format!(
         "{}/../../training-data/nta8800-gas-chain-diagnostic-collective-synthetic.json",

@@ -179,6 +179,15 @@ describe('gas heat pump draft monthly terms UI', () => {
     expect(screen.getByRole('status')).toHaveTextContent('100.80 kWh');
     expect(screen.getByRole('status')).toHaveTextContent('625.00');
     expect(screen.getByRole('status')).toHaveTextContent('8.54');
+    fetchMock.mockResolvedValueOnce({ ok: false, json: async () => ({
+      status: 'invalid', monthly: [], annualEquipmentAuxiliaryElectricityKwh: null,
+      issues: [{ code: 'source_required', path: 'monthly.forfait.capacityReference' }],
+    }) });
+    await user.click(screen.getByRole('button', { name: 'Calculate linked 9.62 and equipment electricity' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(await screen.findByRole('alert')).toHaveTextContent('monthly.forfait.capacityReference');
+    expect(screen.getByRole('alert')).not.toHaveTextContent('source_required');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Generator heat (kWh) 1'), { target: { value: '900' } });
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });

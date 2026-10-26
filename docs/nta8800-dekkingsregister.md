@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De gekoppelde gaswarmtepompketen geeft onderliggende maandterm-, COP-tabelinvoer- en hulpstroomfouten met het volledige invoerpad terug en onderdrukt bij ongeldige invoer beide deeluitkomsten. Gerichte Rust- en HTTP-regressies dekken dit af. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
+De gekoppelde gaswarmtepompketen geeft onderliggende maandterm-, COP-tabelinvoer- en hulpstroomfouten met het volledige invoerpad terug en onderdrukt bij ongeldige invoer beide deeluitkomsten. Gerichte Rust-, HTTP-, MCP- en UI-regressies dekken dit af; het projectpaneel toont het herstelpad. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De testsetexport weigert een symbolische link op de dossiermap of `projecten/` en maakt project- en overzichtsbestanden exclusief aan. Gerichte Rust-proeven bevestigen dat gelinkte doelen buiten het dossier niet worden gewijzigd. Dit versterkt de integriteit van de technische bewijsuitvoer; *Referentie* en *Attest* blijven open.
 
