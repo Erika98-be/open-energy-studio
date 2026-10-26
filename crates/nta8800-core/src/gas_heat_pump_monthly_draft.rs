@@ -83,6 +83,9 @@ pub fn assess_gas_heat_pump_monthly_draft(
     let lookup = assess_gas_heat_pump_forfait_draft(&input.forfait);
     if lookup.status == "invalid" || lookup.corrected_cop.is_none() {
         issues.push(issue("forfait_lookup_invalid", "forfait"));
+        for problem in &lookup.issues {
+            issues.push(issue(problem.code, format!("forfait.{}", problem.path)));
+        }
     }
     if input.generator_output_reference.trim().is_empty() {
         issues.push(issue("source_required", "generatorOutputReference"));
@@ -356,5 +359,18 @@ mod tests {
         let invalid = assess_gas_heat_pump_monthly_draft(&input);
         assert_eq!(invalid.status, "invalid");
         assert!(invalid.monthly.is_empty() && invalid.corrected_cop.is_none());
+    }
+
+    #[test]
+    fn invalid_forfait_field_is_exposed_at_its_submitted_path() {
+        let mut input = sample("outdoor_air", SourceSystem::Individual);
+        input.forfait.capacity_reference.clear();
+        let result = assess_gas_heat_pump_monthly_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "forfait.capacityReference"
+        }));
+        assert!(result.monthly.is_empty());
+        assert!(result.corrected_cop.is_none());
     }
 }

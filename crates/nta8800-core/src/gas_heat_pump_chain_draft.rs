@@ -274,6 +274,7 @@ mod tests {
         let mut input = sample();
         input.monthly.generator_output_reference.clear();
         input.auxiliary.capacity_reference.clear();
+        input.monthly.forfait.capacity_reference.clear();
         let result = assess_gas_heat_pump_chain_draft(&input);
         assert_eq!(result.status, "invalid");
         assert!(result.issues.iter().any(|item| {
@@ -281,6 +282,9 @@ mod tests {
         }));
         assert!(result.issues.iter().any(|item| {
             item.code == "source_required" && item.path == "auxiliary.capacityReference"
+        }));
+        assert!(result.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "monthly.forfait.capacityReference"
         }));
         assert!(result.monthly.is_empty());
         assert!(result.annual_equipment_auxiliary_electricity_kwh.is_none());

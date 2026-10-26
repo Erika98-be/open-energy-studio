@@ -1679,6 +1679,18 @@ mod tests {
                 .unwrap();
         assert!(value["monthly"].as_array().unwrap().is_empty());
         assert_eq!(value["annualEquipmentAuxiliaryElectricityKwh"], Value::Null);
+        input["auxiliary"]["months"][0]["generatorOutputKwh"] = json!(1000.0);
+        input["monthly"]["forfait"]["capacityReference"] = json!("");
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "source_required" && item["path"] == "monthly.forfait.capacityReference"
+        }));
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        assert_eq!(value["annualEquipmentAuxiliaryElectricityKwh"], Value::Null);
     }
 
     #[tokio::test]
