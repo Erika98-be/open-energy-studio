@@ -163,15 +163,16 @@ pub fn assess_gas_heat_pump_aux_draft(
     }
     let mut seen = HashSet::new();
     for (index, month) in input.months.iter().enumerate() {
-        if !(1..=12).contains(&month.month) || !seen.insert(month.month) {
+        let valid_month = (1..=12).contains(&month.month);
+        if !valid_month || !seen.insert(month.month) {
             issues.push(issue(
                 "month_invalid_or_duplicate",
                 format!("months[{index}].month"),
             ));
         }
-        if !(1..=12).contains(&month.month)
-            || !month.hours.is_finite()
-            || (month.hours - MONTH_HOURS[usize::from(month.month - 1)]).abs() > 1e-9
+        if valid_month
+            && (!month.hours.is_finite()
+                || (month.hours - MONTH_HOURS[usize::from(month.month - 1)]).abs() > 1e-9)
         {
             issues.push(issue(
                 "month_hours_not_normative",
@@ -322,6 +323,22 @@ mod tests {
                     && item.path == "months[1].hours")
         );
         assert!(result.monthly.is_empty());
+    }
+
+    #[test]
+    fn invalid_month_does_not_claim_its_hours_violate_the_table() {
+        let mut input = sample();
+        input.months[0].month = 0;
+        let result = assess_gas_heat_pump_aux_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "month_invalid_or_duplicate" && item.path == "months[0].month"
+        }));
+        assert!(!result.issues.iter().any(|item| {
+            item.code == "month_hours_not_normative" && item.path == "months[0].hours"
+        }));
+        assert!(result.monthly.is_empty());
+        assert!(result.annual_auxiliary_electricity_kwh.is_none());
     }
 
     #[test]

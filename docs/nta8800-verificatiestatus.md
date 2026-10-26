@@ -1,6 +1,8 @@
 # NTA 8800 verificatiestatus — 26 oktober 2026
 
-De gaswarmtepomp-hulpstroomaudit geeft bij een coëfficiënt buiten het toegestane waardebereik alleen de primaire bereikfout voor dat veld. De forfaitaire afwijkingsmelding verschijnt dan niet dubbel; bij geldige maar afwijkende waarden blijft zij wel zichtbaar. Een gerichte Rust-regressie controleert dit en het ontbreken van deeluitkomsten. Dit verandert geen normatieve referentie- of atteststatus.
+Een ongeldige maandindex in de gaswarmtepomp-hulpstroominvoer levert nu alleen een fout op het maandveld op; de controle stelt dan niet ook dat de uren afwijken van een niet-bestaande maand in tabel 17.1. Een gerichte Rust-regressie controleert de melding en lege deeluitkomsten. Dit is invoeraudit, geen onafhankelijke rekenreferentie.
+
+De gaswarmtepomp-hulpstroomaudit geeft bij een coëfficiënt buiten het toegestane waardebereik alleen de primaire bereikfout voor dat veld. De forfaitaire afwijkingsmelding verschijnt dan niet dubbel; bij geldige maar afwijkende waarden blijft zij wel zichtbaar. Een gerichte Rust-regressie controleert dit en het ontbreken van deeluitkomsten. [CI-run 40403976809](https://github.com/Erika98-be/open-energy-studio/actions/runs/40403976809) slaagde voor de gate en Linux-, Windows- en macOS-build. Dit verandert geen normatieve referentie- of atteststatus.
 
 De forfaitaire gaswarmtepomp-hulpstroomdiagnose benoemt bij afwijkende vaste coëfficiënten nu elk daadwerkelijk foutief invoerveld, in plaats van alleen de bronverwijzing. Rust en HTTP onderdrukken dan alle maand- en jaarwaarden; het projectpaneel toont de leesbare fout met het invoerpad. Gerichte kern-, HTTP- en UI-tests en formatcontrole slagen lokaal. Dit verbetert de invoeraudit zonder onafhankelijke numerieke referentie of attest.
 
