@@ -82,7 +82,9 @@ pub fn assess_gas_heat_pump_monthly_draft(
     let mut issues = Vec::new();
     let lookup = assess_gas_heat_pump_forfait_draft(&input.forfait);
     if lookup.status == "invalid" || lookup.corrected_cop.is_none() {
-        issues.push(issue("forfait_lookup_invalid", "forfait"));
+        if lookup.issues.is_empty() {
+            issues.push(issue("forfait_lookup_invalid", "forfait"));
+        }
         for problem in &lookup.issues {
             issues.push(issue(problem.code, format!("forfait.{}", problem.path)));
         }
@@ -370,6 +372,10 @@ mod tests {
         assert!(result.issues.iter().any(|item| {
             item.code == "source_required" && item.path == "forfait.capacityReference"
         }));
+        assert!(!result
+            .issues
+            .iter()
+            .any(|item| item.code == "forfait_lookup_invalid"));
         assert!(result.monthly.is_empty());
         assert!(result.corrected_cop.is_none());
     }

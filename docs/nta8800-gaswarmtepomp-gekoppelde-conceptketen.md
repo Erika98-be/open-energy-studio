@@ -8,7 +8,7 @@ De diagnose eist één toestel-ID, aandrijving, thermisch vermogen, forfaitaire 
 - de nog **niet aan een energiedrager toegewezen** invoerterm uit 9.62;
 - de begrensde bedrijfsuren en elektrische toestelhulpstroom uit 9.91/9.92.
 
-Bij een ongeldige maandterm of toestelhulpstroom geeft de keten naast de algemene fout ook de onderliggende foutcode met het volledige invoerpad terug, inclusief fouten in de forfaitaire COP-tabelinvoer. Het projectpaneel toont het pad bij de leesbare foutmelding. Zo kan de ingediende bron of waarde gericht hersteld worden. Zij geeft daarbij geen maandwaarden of jaartotaal vrij.
+Bij een ongeldige maandterm of toestelhulpstroom geeft de keten de onderliggende foutcode met het volledige invoerpad terug, inclusief fouten in de forfaitaire COP-tabelinvoer. Alleen als de onderliggende controle geen eigen fout opgeeft, verschijnt een algemene fout. Het projectpaneel toont het pad bij de leesbare foutmelding. Zo kan de ingediende bron of waarde gericht hersteld worden. Zij geeft daarbij geen maandwaarden of jaartotaal vrij.
 
 Bij een collectieve bodembron loopt het temperatuur- en bronbewijs uit de maandterm mee door deze keten. Een ontbrekende temperatuur verhindert alle gekoppelde deelwaarden; bij 15 °C verandert de correctie van 0,009 naar 0,022, terwijl de apart berekende toestelhulpstroom gelijk blijft. Een gerichte Rust-regressie dekt deze koppeling.
 

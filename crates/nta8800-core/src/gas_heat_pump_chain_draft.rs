@@ -87,14 +87,18 @@ pub fn assess_gas_heat_pump_chain_draft(
     }
     let monthly_assessment = assess_gas_heat_pump_monthly_draft(&input.monthly);
     if monthly_assessment.status == "invalid" {
-        issues.push(issue("monthly_terms_invalid", "monthly"));
+        if monthly_assessment.issues.is_empty() {
+            issues.push(issue("monthly_terms_invalid", "monthly"));
+        }
         for problem in &monthly_assessment.issues {
             issues.push(issue(problem.code, format!("monthly.{}", problem.path)));
         }
     }
     let auxiliary_assessment = assess_gas_heat_pump_aux_draft(auxiliary);
     if auxiliary_assessment.status == "invalid" {
-        issues.push(issue("auxiliary_invalid", "auxiliary"));
+        if auxiliary_assessment.issues.is_empty() {
+            issues.push(issue("auxiliary_invalid", "auxiliary"));
+        }
         for problem in &auxiliary_assessment.issues {
             issues.push(issue(problem.code, format!("auxiliary.{}", problem.path)));
         }
@@ -286,6 +290,10 @@ mod tests {
         assert!(result.issues.iter().any(|item| {
             item.code == "source_required" && item.path == "monthly.forfait.capacityReference"
         }));
+        assert!(!result
+            .issues
+            .iter()
+            .any(|item| { matches!(item.code, "monthly_terms_invalid" | "auxiliary_invalid") }));
         assert!(result.monthly.is_empty());
         assert!(result.annual_equipment_auxiliary_electricity_kwh.is_none());
     }
