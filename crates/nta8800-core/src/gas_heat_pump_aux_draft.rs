@@ -133,16 +133,27 @@ pub fn assess_gas_heat_pump_aux_draft(
         ));
     }
     if input.forfait_cop_used {
-        for (path, value, expected) in [
-            ("standbyElectronicsW", input.standby_electronics_w, 10.0),
+        for (path, value, expected, in_domain) in [
+            (
+                "standbyElectronicsW",
+                input.standby_electronics_w,
+                10.0,
+                nonnegative(input.standby_electronics_w),
+            ),
             (
                 "burnerAuxiliaryWPerKw",
                 input.burner_auxiliary_w_per_kw,
                 1.0,
+                nonnegative(input.burner_auxiliary_w_per_kw),
             ),
-            ("meanModulation", input.mean_modulation, 1.0),
+            (
+                "meanModulation",
+                input.mean_modulation,
+                1.0,
+                positive(input.mean_modulation) && input.mean_modulation <= 1.0,
+            ),
         ] {
-            if value != expected {
+            if in_domain && value != expected {
                 issues.push(issue("forfait_coefficients_mismatch", path));
             }
         }
@@ -335,6 +346,28 @@ mod tests {
                 "meanModulation"
             ]
         );
+        assert!(result.monthly.is_empty());
+        assert!(result.annual_auxiliary_electricity_kwh.is_none());
+    }
+
+    #[test]
+    fn forfait_coefficients_do_not_repeat_out_of_domain_errors() {
+        let mut input = sample();
+        input.standby_electronics_w = -1.0;
+        input.mean_modulation = 0.0;
+        let result = assess_gas_heat_pump_aux_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "coefficient_invalid" && item.path == "standbyElectronicsW"
+        }));
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "modulation_invalid" && item.path == "meanModulation"));
+        assert!(!result
+            .issues
+            .iter()
+            .any(|item| item.code == "forfait_coefficients_mismatch"));
         assert!(result.monthly.is_empty());
         assert!(result.annual_auxiliary_electricity_kwh.is_none());
     }
