@@ -88,10 +88,16 @@ pub fn assess_gas_heat_pump_chain_draft(
     let monthly_assessment = assess_gas_heat_pump_monthly_draft(&input.monthly);
     if monthly_assessment.status == "invalid" {
         issues.push(issue("monthly_terms_invalid", "monthly"));
+        for problem in &monthly_assessment.issues {
+            issues.push(issue(problem.code, format!("monthly.{}", problem.path)));
+        }
     }
     let auxiliary_assessment = assess_gas_heat_pump_aux_draft(auxiliary);
     if auxiliary_assessment.status == "invalid" {
         issues.push(issue("auxiliary_invalid", "auxiliary"));
+        for problem in &auxiliary_assessment.issues {
+            issues.push(issue(problem.code, format!("auxiliary.{}", problem.path)));
+        }
     }
     if monthly_assessment.status == "diagnostic_valid"
         && auxiliary_assessment.status == "diagnostic_valid"
@@ -242,6 +248,10 @@ mod tests {
         let missing = assess_gas_heat_pump_chain_draft(&input);
         assert_eq!(missing.status, "invalid");
         assert!(missing.monthly.is_empty());
+        assert!(missing.issues.iter().any(|item| {
+            item.code == "collective_source_temperature_required"
+                && item.path == "monthly.collectiveSourceTemperatureC"
+        }));
         input.monthly.collective_source_temperature_reference = Some("source design".into());
         input.monthly.collective_source_temperature_c = Some(14.9);
         let cold = assess_gas_heat_pump_chain_draft(&input);
@@ -257,5 +267,22 @@ mod tests {
             warm.monthly[0].equipment_auxiliary_electricity_kwh,
             cold.monthly[0].equipment_auxiliary_electricity_kwh
         );
+    }
+
+    #[test]
+    fn child_audit_paths_are_exposed_without_partial_results() {
+        let mut input = sample();
+        input.monthly.generator_output_reference.clear();
+        input.auxiliary.capacity_reference.clear();
+        let result = assess_gas_heat_pump_chain_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "monthly.generatorOutputReference"
+        }));
+        assert!(result.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "auxiliary.capacityReference"
+        }));
+        assert!(result.monthly.is_empty());
+        assert!(result.annual_equipment_auxiliary_electricity_kwh.is_none());
     }
 }

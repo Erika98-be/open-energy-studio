@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De gekoppelde gaswarmtepompketen geeft onderliggende maandterm- en hulpstroomfouten met het volledige invoerpad terug en onderdrukt bij ongeldige invoer beide deeluitkomsten. Een gerichte Rust-regressie dekt dit af. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
+
 De testsetexport weigert een symbolische link op de dossiermap of `projecten/` en maakt project- en overzichtsbestanden exclusief aan. Gerichte Rust-proeven bevestigen dat gelinkte doelen buiten het dossier niet worden gewijzigd. Dit versterkt de integriteit van de technische bewijsuitvoer; *Referentie* en *Attest* blijven open.
 
 De volledige lokale ISSO 54-v2-export op `1a529249` schreef 260 projectbestanden, drie overzichten en het vergelijkingsrapport. Een afzonderlijke controle bevestigde 260 unieke projectpaden en overeenkomende SHA-256-bestandshashes in alle overzichtsrijen. Exitcode 3 bevestigt dat de suite nog geen verwachte uitkomsten bevat; [CI op `1a529249`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40175079671) en [CI op `d17db009`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40219864468) slaagden voor gate en drie desktopplatforms. De technische uitvoer is daarmee gecontroleerd, zonder wijziging van *Referentie* of *Attest*.

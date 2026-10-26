@@ -8,6 +8,8 @@ De diagnose eist één toestel-ID, aandrijving, thermisch vermogen, forfaitaire 
 - de nog **niet aan een energiedrager toegewezen** invoerterm uit 9.62;
 - de begrensde bedrijfsuren en elektrische toestelhulpstroom uit 9.91/9.92.
 
+Bij een ongeldige maandterm of toestelhulpstroom geeft de keten naast de algemene fout ook de onderliggende foutcode met het volledige invoerpad terug, zodat de ingediende bron of waarde gericht hersteld kan worden. Zij geeft daarbij geen maandwaarden of jaartotaal vrij.
+
 Bij een collectieve bodembron loopt het temperatuur- en bronbewijs uit de maandterm mee door deze keten. Een ontbrekende temperatuur verhindert alle gekoppelde deelwaarden; bij 15 °C verandert de correctie van 0,009 naar 0,022, terwijl de apart berekende toestelhulpstroom gelijk blijft. Een gerichte Rust-regressie dekt deze koppeling.
 
 Bij individuele buitenlucht, absorptie-COP 1,6, 20 kW vermogen, 1.000 kWh aangeleverde warmte en 744 normuren in januari geeft de synthetische handcontrole 625 kWh voor de **niet toegewezen** 9.62-term en 8,54 kWh toestelhulpstroom. De laatste is apart elektriciteit. Dit zijn interne rekencontroles, geen onafhankelijke EDR-uitkomsten.
