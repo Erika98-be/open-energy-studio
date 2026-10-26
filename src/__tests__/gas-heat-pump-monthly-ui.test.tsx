@@ -130,7 +130,6 @@ describe('gas heat pump draft monthly terms UI', () => {
     fetchMock.mockResolvedValueOnce({ ok: false, json: async () => ({
       status: 'invalid', monthly: [], annualDeliveredSourceHeatKwh: null,
       issues: [
-        { code: 'chain_invalid', path: 'chain' },
         { code: 'generator_mismatch', path: 'chain.auxiliary.generatorId' },
       ],
     }) });

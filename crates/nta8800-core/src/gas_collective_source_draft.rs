@@ -103,7 +103,9 @@ pub fn assess_gas_collective_source_draft(
     let mut issues = Vec::new();
     let chain = assess_gas_heat_pump_chain_draft(&input.chain);
     if chain.status == "invalid" {
-        issues.push(issue("chain_invalid", "chain"));
+        if chain.issues.is_empty() {
+            issues.push(issue("chain_invalid", "chain"));
+        }
         for problem in &chain.issues {
             issues.push(issue(problem.code, format!("chain.{}", problem.path)));
         }
@@ -357,10 +359,10 @@ mod tests {
         assert_eq!(result.status, "invalid");
         assert!(result.monthly.is_empty());
         assert!(result.annual_delivered_source_heat_kwh.is_none());
-        assert!(result
+        assert!(!result
             .issues
             .iter()
-            .any(|item| item.code == "chain_invalid" && item.path == "chain"));
+            .any(|item| item.code == "chain_invalid"));
         assert!(result.issues.iter().any(|item| {
             item.code == "generator_mismatch" && item.path == "chain.auxiliary.generatorId"
         }));
@@ -438,7 +440,11 @@ mod tests {
         input.chain.auxiliary.months[0].generator_output_kwh = 900.0;
         let result = assess_gas_collective_source_draft(&input);
         assert!(result.monthly.is_empty());
-        assert!(result
+        assert!(result.issues.iter().any(|item| {
+            item.code == "generator_output_mismatch"
+                && item.path == "chain.auxiliary.months[0].generatorOutputKwh"
+        }));
+        assert!(!result
             .issues
             .iter()
             .any(|item| item.code == "chain_invalid"));

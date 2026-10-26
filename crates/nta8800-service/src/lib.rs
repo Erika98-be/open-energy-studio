@@ -1753,6 +1753,11 @@ mod tests {
         assert!(value["issues"].as_array().unwrap().iter().any(|issue| {
             issue["code"] == "generator_mismatch" && issue["path"] == "chain.auxiliary.generatorId"
         }));
+        assert!(!value["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|issue| { issue["code"] == "chain_invalid" }));
         input["chain"]["auxiliary"]["generatorId"] = json!("ga-1");
         input["collectiveSourceEvidenceKind"] = Value::Null;
         let response = app().oneshot(request(&input)).await.unwrap();

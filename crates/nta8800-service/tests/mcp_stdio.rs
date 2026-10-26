@@ -383,6 +383,11 @@ fn collective_gas_source_mcp_requires_a_declared_evidence_kind() {
         .any(|issue| {
             issue["code"] == "generator_mismatch" && issue["path"] == "chain.auxiliary.generatorId"
         }));
+    assert!(!response["structuredContent"]["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| issue["code"] == "chain_invalid"));
 }
 
 #[test]

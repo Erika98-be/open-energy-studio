@@ -1,6 +1,8 @@
 # NTA 8800 dekkingsregister
 
-De gaswarmtepompdiagnose geeft bij concrete veldfouten geen dubbele algemene maand-, hulpstroom- of COP-fout meer. Gerichte Rust-tests dekken dit af; dit maakt *Audit* leesbaarder, terwijl *Referentie* en *Attest* open blijven.
+De collectieve gaswarmtepompbronroute toont bij een concrete ketenfout geen algemene `chain_invalid`-melding meer; Rust, HTTP, MCP en UI behouden het volledige foutpad en geven geen `dh`-deeluitkomst vrij. Dit verbetert *Audit*; *Referentie* en *Attest* blijven open.
+
+De gaswarmtepompdiagnose geeft bij concrete veldfouten geen dubbele algemene maand-, hulpstroom- of COP-fout meer. Gerichte Rust-tests en [CI op `68841863`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40368481636) met gate en drie desktopplatforms dekken dit af; dit maakt *Audit* leesbaarder, terwijl *Referentie* en *Attest* open blijven.
 
 De gekoppelde gaswarmtepompketen geeft onderliggende maandterm-, COP-tabelinvoer- en hulpstroomfouten met het volledige invoerpad terug en onderdrukt bij ongeldige invoer beide deeluitkomsten. Gerichte Rust-, HTTP-, MCP- en UI-regressies dekken dit af; het projectpaneel toont het herstelpad. [CI op `1cf5d3fa`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40358739211) slaagde voor gate en drie desktopplatforms. Dit versterkt *Audit* en technisch bouwbewijs; *Referentie* en *Attest* blijven open.
 
