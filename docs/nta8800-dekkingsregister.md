@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Een ongeldige maandindex in de gaswarmtepomp-hulpstroominvoer geeft geen afgeleide tabel-17.1-urenfout meer voor die niet-bestaande maand. Een Rust-regressie bewaakt deze *Audit*-melding en de lege uitkomst; *Referentie* en *Attest* blijven open.
+Een ongeldige maandindex in de gaswarmtepomp-hulpstroominvoer geeft geen afgeleide tabel-17.1-urenfout meer voor die niet-bestaande maand. Een Rust-regressie en echte MCP-stdio-proef bewaken deze *Audit*-melding en de lege uitkomst; *Referentie* en *Attest* blijven open.
 
 De gaswarmtepomp-hulpstroomaudit onderdrukt een dubbele forfaitaire afwijkingsmelding bij reeds ongeldige coëfficiënten of modulatie. Een gerichte Rust-proef dekt dit af; alleen *Audit* verandert, niet *Referentie* of *Attest*.
 

@@ -114,6 +114,68 @@ fn example_project() -> Value {
 }
 
 #[test]
+fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
+    let mut months = (1..=12)
+        .map(|month| {
+            json!({
+                "month": month,
+                "hours": nta8800_core::climate::MONTH_HOURS[(month - 1) as usize],
+                "generatorOutputKwh": 1000.0
+            })
+        })
+        .collect::<Vec<_>>();
+    months[0]["month"] = json!(0);
+    let input = json!({
+        "generatorId": "ga-1", "drive": "absorption", "nominalThermalCapacityKw": 20.0,
+        "capacityReference": "plate", "standbyElectronicsW": 10.0,
+        "burnerAuxiliaryWPerKw": 1.0, "solutionPumpWPerKw": 0.0,
+        "coefficientsReference": "draft 9.6.8.2.3", "meanModulation": 1.0,
+        "modulationReference": "draft 9.6.8.2.3", "buildingShare": 1.0,
+        "buildingShareReference": "whole building", "forfaitCopUsed": true,
+        "monthHoursReference": "hour schedule", "generatorOutputReference": "generator ledger",
+        "months": months
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": { "name": "gas-auxiliary-audit-test", "version": "1" }
+        }),
+    );
+    server.send(json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({ "name": "diagnose_gas_heat_pump_aux_draft", "arguments": { "input": input } }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["monthly"].as_array().unwrap().is_empty());
+    assert!(assessment["annualAuxiliaryElectricityKwh"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "month_invalid_or_duplicate" && issue["path"] == "months[0].month"
+        }));
+    assert!(!assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "month_hours_not_normative" && issue["path"] == "months[0].hours"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
     let input = json!({
         "dispatch": {

@@ -1,6 +1,6 @@
 # NTA 8800 verificatiestatus — 26 oktober 2026
 
-Een ongeldige maandindex in de gaswarmtepomp-hulpstroominvoer levert nu alleen een fout op het maandveld op; de controle stelt dan niet ook dat de uren afwijken van een niet-bestaande maand in tabel 17.1. Een gerichte Rust-regressie controleert de melding en lege deeluitkomsten. Dit is invoeraudit, geen onafhankelijke rekenreferentie.
+Een ongeldige maandindex in de gaswarmtepomp-hulpstroominvoer levert nu alleen een fout op het maandveld op; de controle stelt dan niet ook dat de uren afwijken van een niet-bestaande maand in tabel 17.1. Een gerichte Rust-regressie en een echte MCP-stdio-proef controleren het foutpad, gelijke gestructureerde/tekstrespons en lege deeluitkomsten; de MCP-proef slaagt lokaal. [CI-run 40413296239](https://github.com/Erika98-be/open-energy-studio/actions/runs/40413296239) bevestigde de voorafgaande kernwijziging met gate en drie platformbuilds. Dit is invoeraudit, geen onafhankelijke rekenreferentie.
 
 De gaswarmtepomp-hulpstroomaudit geeft bij een coëfficiënt buiten het toegestane waardebereik alleen de primaire bereikfout voor dat veld. De forfaitaire afwijkingsmelding verschijnt dan niet dubbel; bij geldige maar afwijkende waarden blijft zij wel zichtbaar. Een gerichte Rust-regressie controleert dit en het ontbreken van deeluitkomsten. [CI-run 40403976809](https://github.com/Erika98-be/open-energy-studio/actions/runs/40403976809) slaagde voor de gate en Linux-, Windows- en macOS-build. Dit verandert geen normatieve referentie- of atteststatus.
 
