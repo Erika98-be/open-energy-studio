@@ -132,15 +132,20 @@ pub fn assess_gas_heat_pump_aux_draft(
             "solutionPumpWPerKw",
         ));
     }
-    if input.forfait_cop_used
-        && (input.standby_electronics_w != 10.0
-            || input.burner_auxiliary_w_per_kw != 1.0
-            || input.mean_modulation != 1.0)
-    {
-        issues.push(issue(
-            "forfait_coefficients_mismatch",
-            "coefficientsReference",
-        ));
+    if input.forfait_cop_used {
+        for (path, value, expected) in [
+            ("standbyElectronicsW", input.standby_electronics_w, 10.0),
+            (
+                "burnerAuxiliaryWPerKw",
+                input.burner_auxiliary_w_per_kw,
+                1.0,
+            ),
+            ("meanModulation", input.mean_modulation, 1.0),
+        ] {
+            if value != expected {
+                issues.push(issue("forfait_coefficients_mismatch", path));
+            }
+        }
     }
     if input.months.len() != 12 {
         issues.push(issue("twelve_months_required", "months"));
@@ -306,5 +311,31 @@ mod tests {
                     && item.path == "months[1].hours")
         );
         assert!(result.monthly.is_empty());
+    }
+
+    #[test]
+    fn forfait_coefficients_report_each_incorrect_input_field() {
+        let mut input = sample();
+        input.standby_electronics_w = 11.0;
+        input.burner_auxiliary_w_per_kw = 2.0;
+        input.mean_modulation = 0.9;
+        let result = assess_gas_heat_pump_aux_draft(&input);
+        assert_eq!(result.status, "invalid");
+        let paths = result
+            .issues
+            .iter()
+            .filter(|item| item.code == "forfait_coefficients_mismatch")
+            .map(|item| item.path.as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            paths,
+            [
+                "standbyElectronicsW",
+                "burnerAuxiliaryWPerKw",
+                "meanModulation"
+            ]
+        );
+        assert!(result.monthly.is_empty());
+        assert!(result.annual_auxiliary_electricity_kwh.is_none());
     }
 }

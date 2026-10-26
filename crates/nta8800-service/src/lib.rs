@@ -1559,6 +1559,18 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert!(value["monthly"].as_array().unwrap().is_empty());
+        input["solutionPumpWPerKw"] = json!(0.0);
+        input["standbyElectronicsW"] = json!(11.0);
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "forfait_coefficients_mismatch" && item["path"] == "standbyElectronicsW"
+        }));
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        assert!(value["annualAuxiliaryElectricityKwh"].is_null());
     }
 
     #[tokio::test]

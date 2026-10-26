@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De forfaitaire gaswarmtepomp-hulpstroomcontrole wijst afwijkende vaste coëfficiënten nu aan op het ingediende veld en houdt bij zulke fouten maand- en jaaruitkomsten leeg. Rust-, HTTP- en UI-proeven controleren de paden; dit versterkt *Audit*, niet *Referentie* of *Attest*.
+
 Het getypeerde gaswarmtepomp-vergelijkingsharnas bewaart een fout in de COP-bronverwijzing als volledig `input.monthly.forfait.capacityReference`-pad en geeft dan geen vergelijkingsposten. Rust-, HTTP- en MCP-regressies dekken dit met een synthetische case af. Dit versterkt *Audit* en het referentieharnas; *Referentie* en *Attest* blijven open.
 
 De collectieve gaswarmtepompbronroute toont bij een concrete ketenfout geen algemene `chain_invalid`-melding meer; Rust, HTTP, MCP en UI behouden het volledige foutpad en geven geen `dh`-deeluitkomst vrij. Dit verbetert *Audit*; *Referentie* en *Attest* blijven open.

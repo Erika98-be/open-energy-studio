@@ -55,6 +55,14 @@ describe('gas heat pump draft auxiliary UI', () => {
     expect(input).toMatchObject({ forfaitCopUsed: true, solutionPumpWPerKw: 0, nominalThermalCapacityKw: 20 });
     expect(screen.getByRole('status')).toHaveTextContent('100.80 kWh');
     expect(screen.getByRole('status')).toHaveTextContent('Source pump/fan, gas use, final norm, BENG and label remain unverified');
+    fetchMock.mockResolvedValueOnce({ ok: false, json: async () => ({
+      status: 'invalid', monthly: [], annualAuxiliaryElectricityKwh: null,
+      issues: [{ code: 'forfait_coefficients_mismatch', path: 'standbyElectronicsW' }],
+    }) });
+    await user.click(screen.getByRole('button', { name: 'Calculate draft auxiliary electricity' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('standbyElectronicsW');
+    expect(screen.getByRole('alert')).not.toHaveTextContent('forfait_coefficients_mismatch');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Save gas auxiliary input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ generatorId: 'ga-1' })));
     const requests = fetchMock.mock.calls.length;
