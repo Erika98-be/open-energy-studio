@@ -333,7 +333,7 @@ fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
         3,
         "tools/call",
         json!({
-            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input}
+            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input.clone()}
         }),
     );
     assert_eq!(response["isError"], true, "{response}");
@@ -351,6 +351,34 @@ fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
         .unwrap()
         .iter()
         .any(|issue| { issue["code"] == "heat_pump_monthly_invalid" }));
+    assert!(assessment["dispatch"].is_null());
+    assert!(assessment["heatPump"].is_null());
+    assert!(assessment["boiler"].is_null());
+    assert!(assessment["heatPumpAuxiliary"].is_null());
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+    input["sourceSystemReference"] = json!("source design");
+    input["dispatch"]["designContext"] = json!("existing_added_preferred");
+    let response = server.request(
+        4,
+        "tools/call",
+        json!({
+            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "hybrid_new_build_required"
+                && issue["path"] == "dispatch.designContext"
+        }));
     assert!(assessment["dispatch"].is_null());
     assert!(assessment["heatPump"].is_null());
     assert!(assessment["boiler"].is_null());
