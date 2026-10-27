@@ -4967,7 +4967,9 @@ fn generate(
                     node_input_reference: "derived by space_heating_chain".into(),
                     design_context: generator.design_context.clone(),
                     generators: generator.generators.clone(),
-                    building_fraction: Some(building_fraction),
+                    // The linked hybrid concept route is new-build only;
+                    // 9.58's building share belongs to added-generator dispatch.
+                    building_fraction: None,
                 },
                 forfait: generator.forfait.clone(),
                 boiler: placed_boiler(&generator.boiler, conditions.large_system),
