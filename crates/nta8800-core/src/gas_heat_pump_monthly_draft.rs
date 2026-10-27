@@ -138,6 +138,7 @@ pub fn assess_gas_heat_pump_monthly_draft(
         ));
     }
     let mut months = [None; 12];
+    let mut present = [false; 12];
     for (index, item) in input.generator_output_kwh.iter().enumerate() {
         if !(1..=12).contains(&item.month) {
             issues.push(issue(
@@ -146,22 +147,25 @@ pub fn assess_gas_heat_pump_monthly_draft(
             ));
             continue;
         }
-        let slot = &mut months[usize::from(item.month - 1)];
-        if slot.is_some() {
+        let month_index = usize::from(item.month - 1);
+        if present[month_index] {
             issues.push(issue(
                 "month_duplicate",
                 format!("generatorOutputKwh[{index}].month"),
             ));
-        } else if !item.energy_kwh.is_finite() || item.energy_kwh < 0.0 {
+            continue;
+        }
+        present[month_index] = true;
+        if !item.energy_kwh.is_finite() || item.energy_kwh < 0.0 {
             issues.push(issue(
                 "monthly_heat_invalid",
                 format!("generatorOutputKwh[{index}].energyKwh"),
             ));
         } else {
-            *slot = Some(item.energy_kwh);
+            months[month_index] = Some(item.energy_kwh);
         }
     }
-    if months.iter().any(Option::is_none) {
+    if present.contains(&false) {
         issues.push(issue("months_incomplete", "generatorOutputKwh"));
     }
     let collective = input.source_system != SourceSystem::Individual;
@@ -343,9 +347,12 @@ mod tests {
             .is_empty());
         input.source_system = SourceSystem::Individual;
         input.generator_output_kwh.pop();
-        assert!(assess_gas_heat_pump_monthly_draft(&input)
-            .monthly
-            .is_empty());
+        let incomplete = assess_gas_heat_pump_monthly_draft(&input);
+        assert!(incomplete.monthly.is_empty());
+        assert!(incomplete
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
         input.generator_output_kwh.push(MonthlyEnergy {
             month: 12,
             energy_kwh: 1000.0,
@@ -378,5 +385,36 @@ mod tests {
             .any(|item| item.code == "forfait_lookup_invalid"));
         assert!(result.monthly.is_empty());
         assert!(result.corrected_cop.is_none());
+    }
+
+    #[test]
+    fn invalid_monthly_heat_does_not_claim_a_present_month_is_missing() {
+        let mut input = sample("outdoor_air", SourceSystem::Individual);
+        input.generator_output_kwh[0].energy_kwh = -1.0;
+        let result = assess_gas_heat_pump_monthly_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "monthly_heat_invalid" && item.path == "generatorOutputKwh[0].energyKwh"
+        }));
+        assert!(!result
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(result.monthly.is_empty());
+        assert!(result.corrected_cop.is_none());
+
+        input.generator_output_kwh.push(MonthlyEnergy {
+            month: 1,
+            energy_kwh: 1000.0,
+        });
+        let duplicate = assess_gas_heat_pump_monthly_draft(&input);
+        assert!(duplicate.issues.iter().any(|item| {
+            item.code == "month_duplicate" && item.path == "generatorOutputKwh[12].month"
+        }));
+        assert!(!duplicate
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(duplicate.monthly.is_empty());
     }
 }

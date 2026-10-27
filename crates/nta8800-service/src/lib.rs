@@ -1630,6 +1630,23 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(value["collectiveSourceCorrectionFactor"], 0.022);
+        input["generatorOutputKwh"][0]["energyKwh"] = json!(-1.0);
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "monthly_heat_invalid"
+                && item["path"] == "generatorOutputKwh[0].energyKwh"
+        }));
+        assert!(!value["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|item| item["code"] == "months_incomplete"));
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        assert!(value["correctedCop"].is_null());
     }
 
     #[tokio::test]

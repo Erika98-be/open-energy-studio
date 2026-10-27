@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De gaswarmtepomp-maandterm onderscheidt een werkelijk ontbrekend maandnummer van een aanwezige post met ongeldige warmte en herkent een duplicaat ook na zo'n fout. Rust- en HTTP-regressies controleren concrete paden en lege uitkomsten; dit versterkt *Audit*, terwijl *Referentie* en *Attest* open blijven.
+
 Een ongeldige maandindex in de gaswarmtepomp-hulpstroominvoer geeft geen afgeleide tabel-17.1-urenfout meer voor die niet-bestaande maand. Een Rust-regressie en echte MCP-stdio-proef bewaken deze *Audit*-melding en de lege uitkomst; *Referentie* en *Attest* blijven open.
 
 De gaswarmtepomp-hulpstroomaudit onderdrukt een dubbele forfaitaire afwijkingsmelding bij reeds ongeldige coëfficiënten of modulatie. Een gerichte Rust-proef dekt dit af; alleen *Audit* verandert, niet *Referentie* of *Attest*.
