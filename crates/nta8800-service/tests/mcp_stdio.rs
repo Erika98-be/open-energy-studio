@@ -233,7 +233,7 @@ fn generator_dispatch_mcp_preserves_invalid_present_month_without_partial_result
 
 #[test]
 fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
-    let input = json!({
+    let mut input = json!({
         "dispatch": {
             "nodeInputKwh": (1..=12).map(|month| json!({"month": month, "energyKwh": 1000.0})).collect::<Vec<_>>(),
             "nodeInputReference": "node balance", "designContext": "new_build",
@@ -281,7 +281,7 @@ fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
         2,
         "tools/call",
         json!({
-            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input}
+            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input.clone()}
         }),
     );
     assert_eq!(response["isError"], true, "{response}");
@@ -300,6 +300,39 @@ fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
                 && issue["path"]
                     == "heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference"
         }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+    input["heatPumpAuxiliaryMeasurements"]["measurements"]["measurementSourceReference"] =
+        json!("power measurements");
+    input["sourceSystemReference"] = json!("");
+    let response = server.request(
+        3,
+        "tools/call",
+        json!({
+            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "source_required" && issue["path"] == "sourceSystemReference"
+        }));
+    assert!(!assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| { issue["code"] == "heat_pump_monthly_invalid" }));
+    assert!(assessment["dispatch"].is_null());
+    assert!(assessment["heatPump"].is_null());
+    assert!(assessment["boiler"].is_null());
+    assert!(assessment["heatPumpAuxiliary"].is_null());
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment
