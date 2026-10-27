@@ -541,6 +541,15 @@ mod tests {
             assert!(result.dispatch.is_some());
             assert!(result.heat_pump.is_some());
             assert!(result.boiler.is_some());
+            if context == "existing_added_preferred" {
+                existing.dispatch.building_fraction = Some(0.5);
+                let shared = assess_hybrid_heat_pump_monthly_draft(&existing);
+                assert_eq!(shared.status, "diagnostic_valid");
+                assert!(
+                    shared.heat_pump.as_ref().unwrap().monthly[0].generator_output_kwh
+                        < result.heat_pump.as_ref().unwrap().monthly[0].generator_output_kwh
+                );
+            }
         }
         let mut high_temperature = input;
         high_temperature.forfait.design_supply_temperature_c = Some(56.0);
