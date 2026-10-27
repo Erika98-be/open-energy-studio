@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De elektrische forfaitaire warmtepompmaandroute telt aanwezige maandnummers onafhankelijk van de geldigheid van hun warmte en weigert een herhaald nummer ook na een ongeldige post. Rust en HTTP bewaken de concrete invoerfout zonder `months_incomplete` en zonder deelresultaat; alleen *Audit* verandert, *Referentie* en *Attest* blijven open.
+
 De projectaudit behoudt het precieze veldpad bij een ongeldige maand in opgeslagen gaswarmtepomp-hulpstroominvoer; een Rust-proef controleert ook dat geen niet-toepasselijke urenfout verschijnt. Dit versterkt *Audit*, niet *Referentie* of *Attest*.
 
 De gekoppelde gaswarmtepompketen behoudt bij ongeldige aanwezige maandwarmte het volledige veldpad zonder `months_incomplete` of deelresultaat. Rust en HTTP controleren dit; *Audit* wordt preciezer, *Referentie* en *Attest* blijven open.

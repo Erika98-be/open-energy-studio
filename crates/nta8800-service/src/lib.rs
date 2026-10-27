@@ -1181,6 +1181,16 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert!(invalid["monthly"].as_array().unwrap().is_empty());
+        assert!(invalid["correctedCop"].is_null());
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "monthly_heat_invalid"
+                && item["path"] == "generatorOutputKwh[0].energyKwh"
+        }));
+        assert!(!invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|item| item["code"] == "months_incomplete"));
     }
 
     #[tokio::test]

@@ -95,23 +95,29 @@ fn monthly_values(
     issues: &mut Vec<DraftIssue>,
 ) -> Option<[f64; 12]> {
     let mut months = [None; 12];
+    let mut present = [false; 12];
     for (index, entry) in values.iter().enumerate() {
         let field = format!("{path}[{index}]");
         if !(1..=12).contains(&entry.month) {
             issues.push(issue("month_out_of_range", format!("{field}.month")));
             continue;
         }
-        let slot = &mut months[usize::from(entry.month - 1)];
-        if slot.is_some() {
+        let month_index = usize::from(entry.month - 1);
+        if present[month_index] {
             issues.push(issue("month_duplicate", format!("{field}.month")));
-        } else if !entry.energy_kwh.is_finite() || entry.energy_kwh < 0.0 {
+            continue;
+        }
+        present[month_index] = true;
+        if !entry.energy_kwh.is_finite() || entry.energy_kwh < 0.0 {
             issues.push(issue("monthly_heat_invalid", format!("{field}.energyKwh")));
         } else {
-            *slot = Some(entry.energy_kwh);
+            months[month_index] = Some(entry.energy_kwh);
         }
     }
-    if months.iter().any(Option::is_none) {
+    if present.contains(&false) {
         issues.push(issue("months_incomplete", path));
+    }
+    if months.iter().any(Option::is_none) {
         None
     } else {
         Some(months.map(|value| value.expect("all months checked")))
@@ -341,9 +347,12 @@ mod tests {
             SourceSystem::CollectiveGroundwaterSurfaceOrAtLeast15C,
         );
         input.generator_output_kwh.pop();
-        assert!(assess_forfait_heat_pump_monthly_draft(&input)
-            .monthly
-            .is_empty());
+        let incomplete = assess_forfait_heat_pump_monthly_draft(&input);
+        assert!(incomplete.monthly.is_empty());
+        assert!(incomplete
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
         input.generator_output_kwh.push(MonthlyEnergy {
             month: 12,
             energy_kwh: 1000.0,
@@ -352,6 +361,26 @@ mod tests {
         let invalid = assess_forfait_heat_pump_monthly_draft(&input);
         assert_eq!(invalid.status, "invalid");
         assert!(invalid.monthly.is_empty());
+        assert!(invalid.issues.iter().any(|item| {
+            item.code == "monthly_heat_invalid" && item.path == "generatorOutputKwh[0].energyKwh"
+        }));
+        assert!(!invalid
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        input.generator_output_kwh.push(MonthlyEnergy {
+            month: 1,
+            energy_kwh: 1000.0,
+        });
+        let duplicate = assess_forfait_heat_pump_monthly_draft(&input);
+        assert!(duplicate.issues.iter().any(|item| {
+            item.code == "month_duplicate" && item.path == "generatorOutputKwh[12].month"
+        }));
+        assert!(!duplicate
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(duplicate.monthly.is_empty());
     }
 
     /// A correction that would drive the generator input to overflow (here
