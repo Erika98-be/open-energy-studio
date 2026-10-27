@@ -176,12 +176,12 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
 }
 
 #[test]
-fn generator_dispatch_mcp_preserves_invalid_present_month_without_partial_results() {
+fn generator_dispatch_mcp_preserves_invalid_month_and_overflow_without_partial_results() {
     let mut node_input = (1..=12)
         .map(|month| json!({"month": month, "energyKwh": 1000.0}))
         .collect::<Vec<_>>();
     node_input[0]["energyKwh"] = json!(-1.0);
-    let input = json!({
+    let mut input = json!({
         "nodeInputKwh": node_input,
         "nodeInputReference": "node balance",
         "designContext": "new_build",
@@ -207,7 +207,7 @@ fn generator_dispatch_mcp_preserves_invalid_present_month_without_partial_result
     let response = server.request(
         2,
         "tools/call",
-        json!({ "name": "diagnose_generator_dispatch_draft", "arguments": { "input": input } }),
+        json!({ "name": "diagnose_generator_dispatch_draft", "arguments": { "input": input.clone() } }),
     );
     assert_eq!(response["isError"], true, "{response}");
     let assessment = &response["structuredContent"];
@@ -224,6 +224,28 @@ fn generator_dispatch_mcp_preserves_invalid_present_month_without_partial_result
         .unwrap()
         .iter()
         .any(|issue| issue["code"] == "months_incomplete"));
+    assert!(assessment["monthly"].as_array().unwrap().is_empty());
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+    input["designContext"] = json!("existing_added_preferred");
+    for month in input["nodeInputKwh"].as_array_mut().unwrap() {
+        month["energyKwh"] = json!(1e308);
+    }
+    let response = server.request(
+        3,
+        "tools/call",
+        json!({ "name": "diagnose_generator_dispatch_draft", "arguments": { "input": input } }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| { issue["code"] == "dispatch_overflow" && issue["path"] == "nodeInputKwh" }));
     assert!(assessment["monthly"].as_array().unwrap().is_empty());
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
