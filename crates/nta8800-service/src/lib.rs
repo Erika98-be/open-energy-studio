@@ -1269,6 +1269,29 @@ mod tests {
             .iter()
             .any(|item| item["code"] == "months_incomplete"));
         assert!(invalid["monthly"].as_array().unwrap().is_empty());
+        input["designContext"] = json!("existing_added_preferred");
+        for month in input["nodeInputKwh"].as_array_mut().unwrap() {
+            month["energyKwh"] = json!(1e308);
+        }
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|item| { item["code"] == "dispatch_overflow" && item["path"] == "nodeInputKwh" }));
+        assert!(invalid["monthly"].as_array().unwrap().is_empty());
     }
 
     #[tokio::test]

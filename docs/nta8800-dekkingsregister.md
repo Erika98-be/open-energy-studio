@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De opwekkerverdeling in de bestaande-bouwroute met toegevoegde voorkeursopwekker weigert nu een overlopende twaalfmaandensom als `dispatch_overflow`, zonder maanduitkomsten. Rust en HTTP bewaken dit numerieke bereik; het versterkt *Audit* en rekenveiligheid, terwijl *Referentie* en *Attest* open blijven.
+
 Een direct ontbrekende bronstelselverwijzing in de hybride maandroute verschijnt zonder de dubbele algemene maandfout. Rust, HTTP en een echte MCP-stdio-proef bewaken het werkelijke veld en lege deeluitkomsten. [CI op `eb20ce92`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40475767347) slaagde voor gate en drie platformbuilds vóór de MCP-aanvulling. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De hybride warmtepompketen geeft een concrete fout uit de opwekkerverdeling met volledig invoerpad door en verbergt alle deeluitkomsten. De overbodige algemene `dispatch_invalid`-melding vervalt wanneer er concrete veldfouten zijn; Rust, HTTP en een gerichte UI-proef controleren dit. [CI op `f272c3cd`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40468590444) slaagde voor gate en drie platformbuilds met de UI-proef. Dit versterkt *Audit*, terwijl *Rekenroute*, *Referentie* en *Attest* open blijven.

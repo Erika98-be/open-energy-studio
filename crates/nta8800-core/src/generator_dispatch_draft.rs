@@ -246,6 +246,9 @@ pub fn assess_generator_dispatch_draft(
     } else {
         total_power
     };
+    if added_preferred && !reference.is_finite() {
+        issues.push(issue("dispatch_overflow", "nodeInputKwh"));
+    }
     let scale = if added_preferred {
         building_fraction
     } else {
@@ -463,5 +466,21 @@ mod tests {
             .iter()
             .any(|item| item.code == "months_incomplete"));
         assert!(duplicate.monthly.is_empty());
+    }
+
+    #[test]
+    fn annual_node_energy_overflow_does_not_produce_dispatch() {
+        let mut input = case();
+        input.design_context = "existing_added_preferred".into();
+        for month in &mut input.node_input_kwh {
+            month.energy_kwh = 1e308;
+        }
+        let result = assess_generator_dispatch_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "dispatch_overflow" && item.path == "nodeInputKwh"));
+        assert!(result.monthly.is_empty());
     }
 }
