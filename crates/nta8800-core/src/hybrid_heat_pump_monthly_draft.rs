@@ -287,13 +287,10 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
             };
             let assessed_aux = assess_heating_aux_measured_draft(&aux_input);
             if assessed_aux.status == "invalid" {
-                issues.push(issue(
-                    "heat_pump_auxiliary_invalid",
-                    "heatPumpAuxiliaryMeasurements",
-                ));
                 // The measured auxiliary assessment also validates derived
                 // monthly electricity. Only its source and measurement paths
                 // refer to fields actually supplied in the hybrid request.
+                let before = issues.len();
                 for item in &assessed_aux.issues {
                     if item.path == "generatorSourceReference"
                         || item.path == "generatorId"
@@ -305,6 +302,12 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
                             format!("heatPumpAuxiliaryMeasurements.{}", item.path),
                         ));
                     }
+                }
+                if issues.len() == before {
+                    issues.push(issue(
+                        "heat_pump_auxiliary_invalid",
+                        "heatPumpAuxiliaryMeasurements",
+                    ));
                 }
             } else {
                 heat_pump_auxiliary = Some(assessed_aux);
@@ -483,6 +486,10 @@ mod tests {
                 && item.path
                     == "heatPumpAuxiliaryMeasurements.measurements.averageCompressorOnSeconds"
         }));
+        assert!(!rejected_measurements
+            .issues
+            .iter()
+            .any(|item| item.code == "heat_pump_auxiliary_invalid"));
         let mut missing_source_system_evidence = input.clone();
         missing_source_system_evidence
             .source_system_reference

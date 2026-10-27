@@ -1419,6 +1419,11 @@ mod tests {
                 && issue["path"]
                     == "heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference"
         }));
+        assert!(!invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|issue| issue["code"] == "heat_pump_auxiliary_invalid"));
         input["heatPumpAuxiliaryMeasurements"]["measurements"]["measurementSourceReference"] =
             json!("power measurements");
         input["sourceSystemReference"] = json!("");

@@ -322,6 +322,11 @@ fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
                 && issue["path"]
                     == "heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference"
         }));
+    assert!(!assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| issue["code"] == "heat_pump_auxiliary_invalid"));
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment

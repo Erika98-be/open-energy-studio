@@ -1,6 +1,8 @@
 # NTA 8800 dekkingsregister
 
-De gekoppelde hybride conceptmaandroute wordt nu ook in Rust, HTTP en MCP tot nieuwbouw beperkt; bestaande bouw en bestaande bouw met toegevoegde voorkeursopwekker geven `hybrid_new_build_required` en geen deeluitkomst. De zelfstandige opwekkerverdeling voor bestaande bouw blijft beschikbaar. Dit bewaakt de grens van *Rekenroute* en versterkt *Audit*; *Referentie* en *Attest* blijven open.
+De gekoppelde hybride hulpstroomaudit laat bij een concreet fout invoerveld de algemene `heat_pump_auxiliary_invalid`-melding weg. Rust, HTTP, MCP en de UI-proef bewaken het volledige veldpad en lege deeluitkomsten. Dit verduidelijkt *Audit*; *Referentie* en *Attest* blijven open.
+
+De gekoppelde hybride conceptmaandroute wordt nu ook in Rust, HTTP en MCP tot nieuwbouw beperkt; bestaande bouw en bestaande bouw met toegevoegde voorkeursopwekker geven `hybrid_new_build_required` en geen deeluitkomst. De zelfstandige opwekkerverdeling voor bestaande bouw blijft beschikbaar. [CI op `85f2133b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40514971228) slaagde voor de gate en drie platformbuilds. Dit bewaakt de grens van *Rekenroute* en versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De opwekkerverdeling in de bestaande-bouwroute met toegevoegde voorkeursopwekker weigert nu een overlopende twaalfmaandensom als `dispatch_overflow`, zonder maanduitkomsten. Rust, HTTP en MCP-stdio bewaken dit numerieke bereik; [CI op `253dbd52`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40490839755) slaagde voor gate en drie platformbuilds vóór de MCP-aanvulling. Dit versterkt *Audit* en rekenveiligheid, terwijl *Referentie* en *Attest* open blijven.
 

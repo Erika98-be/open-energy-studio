@@ -124,7 +124,6 @@ describe('new-build hybrid draft UI', () => {
         inputFingerprint: 'sha256:boiler' }) })
       .mockResolvedValueOnce({ json: async () => ({ status: 'invalid', dispatch: null, heatPump: null,
         heatPumpAuxiliary: null, issues: [
-          { code: 'heat_pump_auxiliary_invalid', path: 'heatPumpAuxiliaryMeasurements' },
           { code: 'source_required',
             path: 'heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference' },
         ] }) });
