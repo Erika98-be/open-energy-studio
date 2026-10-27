@@ -6966,6 +6966,46 @@ mod tests {
             assessed.monthly[0].heat_pump_output_kwh
                 < unscaled.monthly[0].generators[0].delivered_heat_kwh
         );
+
+        // The same connection in the existing-system route retains the
+        // installed-power basis of 9.56/9.57.
+        let mut existing = shared;
+        let Generator::HybridHeatPump(generator) = &mut existing.generator else {
+            unreachable!()
+        };
+        generator.design_context = "existing".into();
+        let assessed_existing = assess_space_heating_chain(&existing);
+        assert_eq!(
+            assessed_existing.status, "calculated_unverified",
+            "{:?}",
+            assessed_existing.issues
+        );
+        let Generator::HybridHeatPump(generator) = &existing.generator else {
+            unreachable!()
+        };
+        let expected_existing = crate::generator_dispatch_draft::assess_generator_dispatch_draft(
+            &crate::generator_dispatch_draft::GeneratorDispatchDraftInput {
+                node_input_kwh: assessed_existing
+                    .monthly
+                    .iter()
+                    .map(|row| crate::final_energy_draft::MonthlyEnergy {
+                        month: row.month,
+                        energy_kwh: row.generator_output_kwh,
+                    })
+                    .collect(),
+                node_input_reference: "derived by space_heating_chain".into(),
+                design_context: "existing".into(),
+                generators: generator.generators.clone(),
+                building_fraction: None,
+            },
+        );
+        assert_eq!(expected_existing.status, "diagnostic_valid");
+        assert!(
+            (assessed_existing.monthly[0].heat_pump_output_kwh
+                - expected_existing.monthly[0].generators[0].delivered_heat_kwh)
+                .abs()
+                < 1e-6
+        );
     }
 
     #[test]
