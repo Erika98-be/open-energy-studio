@@ -1444,6 +1444,38 @@ mod tests {
         assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
             issue["code"] == "source_required" && issue["path"] == "dispatch.nodeInputReference"
         }));
+        assert!(!invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|issue| issue["code"] == "dispatch_invalid"));
+        input["dispatch"]["nodeInputReference"] = json!("node balance");
+        input["boiler"]["equipmentReference"] = json!("boiler plate");
+        input["dispatch"]["nodeInputKwh"][0]["energyKwh"] = json!(-1.0);
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "node_input_invalid"
+                && issue["path"] == "dispatch.nodeInputKwh[0].energyKwh"
+        }));
+        assert!(!invalid["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "months_incomplete" || issue["code"] == "dispatch_invalid"
+        }));
+        assert!(invalid["dispatch"].is_null());
+        assert!(invalid["heatPump"].is_null());
+        assert!(invalid["boiler"].is_null());
+        assert!(invalid["heatPumpAuxiliary"].is_null());
     }
 
     #[tokio::test]

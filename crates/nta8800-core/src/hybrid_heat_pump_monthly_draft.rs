@@ -206,7 +206,9 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
     }
     let dispatch = assess_generator_dispatch_draft(&input.dispatch);
     if dispatch.status == "invalid" {
-        issues.push(issue("dispatch_invalid", "dispatch"));
+        if dispatch.issues.is_empty() {
+            issues.push(issue("dispatch_invalid", "dispatch"));
+        }
         for item in &dispatch.issues {
             issues.push(issue(item.code, format!("dispatch.{}", item.path)));
         }
@@ -495,6 +497,24 @@ mod tests {
         assert!(rejected_evidence.issues.iter().any(|item| {
             item.code == "source_required" && item.path == "dispatch.nodeInputReference"
         }));
+        assert!(!rejected_evidence
+            .issues
+            .iter()
+            .any(|item| item.code == "dispatch_invalid"));
+        let mut invalid_node_month = input.clone();
+        invalid_node_month.dispatch.node_input_kwh[0].energy_kwh = -1.0;
+        let rejected_node = assess_hybrid_heat_pump_monthly_draft(&invalid_node_month);
+        assert_eq!(rejected_node.status, "invalid");
+        assert!(rejected_node.issues.iter().any(|item| {
+            item.code == "node_input_invalid" && item.path == "dispatch.nodeInputKwh[0].energyKwh"
+        }));
+        assert!(!rejected_node
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete" || item.code == "dispatch_invalid"));
+        assert!(rejected_node.dispatch.is_none());
+        assert!(rejected_node.heat_pump.is_none());
+        assert!(rejected_node.boiler.is_none());
         let mut high_temperature = input;
         high_temperature.forfait.design_supply_temperature_c = Some(56.0);
         let rejected = assess_hybrid_heat_pump_monthly_draft(&high_temperature);
