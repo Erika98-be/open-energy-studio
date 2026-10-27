@@ -1,6 +1,8 @@
 # NTA 8800 verificatiestatus — 27 oktober 2026
 
-De gekoppelde gaswarmtepompketen bewaart nu ook een ongeldige aanwezige maandwarmte als `monthly.generatorOutputKwh[0].energyKwh`, zonder de misleidende melding `months_incomplete` of deeluitkomsten. Gerichte Rust- en HTTP-regressies controleren dit. Het is een transport- en invoerauditcontrole; de numerieke normvergelijking blijft open.
+De projectinvoeraudit voor een opgeslagen gaswarmtepomp-hulpstroom bewaart bij maandnummer 0 het concrete veld `gasHeatPumpAuxDraft.months[0].month` en voegt geen afgeleide urenfout toe. Een gerichte Rust-proef dekt daarmee ook de opslagroute af; de berekende uitkomsten en de externe verificatiestatus veranderen niet.
+
+De gekoppelde gaswarmtepompketen bewaart nu ook een ongeldige aanwezige maandwarmte als `monthly.generatorOutputKwh[0].energyKwh`, zonder de misleidende melding `months_incomplete` of deeluitkomsten. Gerichte Rust- en HTTP-regressies controleren dit; [CI-run 40433627975](https://github.com/Erika98-be/open-energy-studio/actions/runs/40433627975) slaagde voor gate en drie platformbuilds. Het is een transport- en invoerauditcontrole; de numerieke normvergelijking blijft open.
 
 De gaswarmtepomp-maandterm controleert nu of alle twaalf maandnummers aanwezig zijn los van de geldigheid van de opgegeven warmte. Een negatieve maandwarmte geeft daardoor de concrete `monthly_heat_invalid`-melding zonder onterechte `months_incomplete`; een herhaald maandnummer blijft ook na een foutieve eerste post een duplicaat. Rust- en HTTP-regressies controleren de foutpaden en lege deeluitkomsten. [CI-run 40427282716](https://github.com/Erika98-be/open-energy-studio/actions/runs/40427282716) slaagde voor gate en drie platformbuilds. Dit versterkt de invoeraudit, zonder onafhankelijke normreferentie of attest.
 

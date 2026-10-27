@@ -1098,6 +1098,7 @@ mod tests {
             }
         })).unwrap();
         assert!(pump.validate_inputs().is_empty());
+        let forfait = pump.gas_heat_pump_forfait_draft.clone();
         pump.gas_heat_pump_aux_draft
             .as_mut()
             .unwrap()
@@ -1120,6 +1121,19 @@ mod tests {
             .validate_inputs()
             .iter()
             .any(|item| item.code == "gas_heat_pump_aux_draft_scope_invalid"));
+        pump.gas_heat_pump_forfait_draft = forfait;
+        let aux = pump.gas_heat_pump_aux_draft.as_mut().unwrap();
+        aux.generator_id = "ga-1".into();
+        aux.months[0].month = 0;
+        let issues = pump.validate_inputs();
+        assert!(issues.iter().any(|item| {
+            item.code == "gas_heat_pump_aux_draft_input_invalid"
+                && item.field == "gasHeatPumpAuxDraft.months[0].month"
+        }));
+        assert!(!issues.iter().any(|item| {
+            item.code == "gas_heat_pump_aux_draft_input_invalid"
+                && item.field == "gasHeatPumpAuxDraft.months[0].hours"
+        }));
     }
 
     #[test]
