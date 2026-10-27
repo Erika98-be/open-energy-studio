@@ -1533,6 +1533,7 @@ mod tests {
         assert!(invalid["heatPumpAuxiliary"].is_null());
         input["dispatch"]["nodeInputKwh"][0]["energyKwh"] = json!(1000.0);
         input["dispatch"]["designContext"] = json!("existing_added_preferred");
+        input["dispatch"]["buildingFraction"] = json!(0.5);
         let response = app()
             .oneshot(
                 Request::post(endpoint)
@@ -1542,17 +1543,14 @@ mod tests {
             )
             .await
             .unwrap();
-        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
-        let invalid: Value =
+        assert_eq!(response.status(), StatusCode::OK);
+        let result: Value =
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
-        assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
-            issue["code"] == "hybrid_new_build_required"
-                && issue["path"] == "dispatch.designContext"
-        }));
-        assert!(invalid["dispatch"].is_null());
-        assert!(invalid["heatPump"].is_null());
-        assert!(invalid["boiler"].is_null());
+        assert_eq!(result["status"], "diagnostic_valid");
+        assert_eq!(result["dispatch"]["monthly"].as_array().unwrap().len(), 12);
+        assert!(!result["heatPump"].is_null());
+        assert!(!result["boiler"].is_null());
     }
 
     #[tokio::test]

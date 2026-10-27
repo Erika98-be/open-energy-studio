@@ -87,7 +87,7 @@ Bij één opwekker geeft tabel 9.1 `β = 1`, dus 100% dekking van `Q_H;gen;out` 
   - Bij `F_H;gen < 1` is een `backup` verplicht: `electric_resistance` (COP 1) of `gas_boiler` (tabel 9.25). Die levert `1 − F` van elke maand.
   - Bronpomp en circulatiepomp zitten in `η_H;gen;hp` (Q.1); de hulpenergie van de warmtepomp is daarom 0 en de distributiepomp mag `included_in_generator_auxiliary` zijn.
   - Bij een bodemwarmtewisselaar mag `regeneration` (bijlage V) `c_source` afleiden; die vermenigvuldigt het rendement.
-- `hybrid_heat_pump`: warmtepomp met individuele bijverwarmingsketel, gesplitst met de [generatorverdeling](nta8800-generatorverdeling-concept.md) volgens tabel 9.1/9.23 (alleen nieuwbouw). Hulpenergie: ketel 9.85, warmtepomp gemeten of 9.85-forfait.
+- `hybrid_heat_pump`: warmtepomp met individuele bijverwarmingsketel, gesplitst met de [generatorverdeling](nta8800-generatorverdeling-concept.md) volgens tabel 9.1/9.23; `new_build` en `existing` volgen 9.56/9.57, `existing_added_preferred` volgt 9.58/9.59. Het aparte UI-diagnoseformulier is nog op nieuwbouw gericht. Hulpenergie: ketel 9.85, warmtepomp gemeten of 9.85-forfait.
 - `external_heat`: 9.84 met `η = 1,0` en `f_prac = 1`, drager `dh`. De hulpenergie loopt via 9.91 (§9.6.7.2). Of een afleverset als "toestel" voor de 10 W telt, staat in `electricallyConnectedDevices`; dit is een interpretatie (zie het verificatiedossier). Een kwaliteitsverklaring (bijlage P) wordt geweigerd.
 - `electric_resistance`: COP 1,0 (tabel 9.27). Hulpenergie volgens 9.91: 10 W per toestel of paneel.
 - `biomass`: 9.64 met tabel 9.30, alleen klasse bmB (bijlage R).

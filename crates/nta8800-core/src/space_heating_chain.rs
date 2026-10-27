@@ -4967,9 +4967,10 @@ fn generate(
                     node_input_reference: "derived by space_heating_chain".into(),
                     design_context: generator.design_context.clone(),
                     generators: generator.generators.clone(),
-                    // The linked hybrid concept route is new-build only;
-                    // 9.58's building share belongs to added-generator dispatch.
-                    building_fraction: None,
+                    // 9.58 uses the building share only when a preferred
+                    // generator is added to an existing installation.
+                    building_fraction: (generator.design_context == "existing_added_preferred")
+                        .then_some(building_fraction),
                 },
                 forfait: generator.forfait.clone(),
                 boiler: placed_boiler(&generator.boiler, conditions.large_system),
@@ -6896,6 +6897,20 @@ mod tests {
         assert!((jan.generator_electricity_kwh - jan.heat_pump_output_kwh / cop).abs() < 1e-6);
         assert_eq!(result.generation_efficiency, Some(cop));
         assert!(input.generator.heat_pump().is_some());
+        for context in ["existing", "existing_added_preferred"] {
+            let mut existing = input.clone();
+            let Generator::HybridHeatPump(generator) = &mut existing.generator else {
+                unreachable!()
+            };
+            generator.design_context = context.into();
+            let assessed = assess_space_heating_chain(&existing);
+            assert_eq!(
+                assessed.status, "calculated_unverified",
+                "{context}: {:?}",
+                assessed.issues
+            );
+            assert!(assessed.monthly[0].heat_pump_output_kwh > 0.0);
+        }
     }
 
     #[test]

@@ -82,12 +82,6 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
     input: &HybridHeatPumpMonthlyDraftInput,
 ) -> HybridHeatPumpMonthlyDraftAssessment {
     let mut issues = Vec::new();
-    if matches!(
-        input.dispatch.design_context.as_str(),
-        "existing" | "existing_added_preferred"
-    ) {
-        issues.push(issue("hybrid_new_build_required", "dispatch.designContext"));
-    }
     let lookup = assess_forfait_heat_pump_draft(&input.forfait);
     let boiler_lookup = assess_boiler_forfait_draft(&input.boiler);
     // The lookup's own issues below name the field; the summary only when
@@ -352,7 +346,7 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_new_build_dispatch_electric_heat_pump_gas_boiler_and_optional_measured_aux",
+        scope: "public_chapter_9_draft_dispatch_electric_heat_pump_gas_boiler_and_optional_measured_aux",
         kernel_version: KERNEL_VERSION,
         target_norm_version: crate::norm_versions::current_label(),
         input_fingerprint: input_fingerprint(&json!(input)),
@@ -540,16 +534,13 @@ mod tests {
         assert!(rejected_node.heat_pump.is_none());
         assert!(rejected_node.boiler.is_none());
         for context in ["existing", "existing_added_preferred"] {
-            let mut outside_scope = input.clone();
-            outside_scope.dispatch.design_context = context.into();
-            let result = assess_hybrid_heat_pump_monthly_draft(&outside_scope);
-            assert_eq!(result.status, "invalid");
-            assert!(result.issues.iter().any(|item| {
-                item.code == "hybrid_new_build_required" && item.path == "dispatch.designContext"
-            }));
-            assert!(result.dispatch.is_none());
-            assert!(result.heat_pump.is_none());
-            assert!(result.boiler.is_none());
+            let mut existing = input.clone();
+            existing.dispatch.design_context = context.into();
+            let result = assess_hybrid_heat_pump_monthly_draft(&existing);
+            assert_eq!(result.status, "diagnostic_valid", "{context}");
+            assert!(result.dispatch.is_some());
+            assert!(result.heat_pump.is_some());
+            assert!(result.boiler.is_some());
         }
         let mut high_temperature = input;
         high_temperature.forfait.design_supply_temperature_c = Some(56.0);

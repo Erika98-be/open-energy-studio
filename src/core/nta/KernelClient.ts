@@ -1506,7 +1506,7 @@ export interface HybridHeatPumpMonthlyDraftInput {
 
 export interface HybridHeatPumpMonthlyDraftAssessment {
   status: 'diagnostic_valid' | 'invalid';
-  scope: 'public_chapter_9_draft_new_build_dispatch_electric_heat_pump_gas_boiler_and_optional_measured_aux';
+  scope: 'public_chapter_9_draft_dispatch_electric_heat_pump_gas_boiler_and_optional_measured_aux';
   kernelVersion: string;
   targetNormVersion: string;
   inputFingerprint: string;
