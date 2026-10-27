@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De collectieve projectketen voor een hybride warmtepomp in `existing_added_preferred` is nu met een gebouwaandeel van 0,5 vergeleken met de zelfstandige opwekkerverdeling op dezelfde afgeleide nodevraag. De warmtepomptoedeling stemt overeen met die verdeling en is kleiner dan zonder aandeel; de gerichte proef en alle 1006 kernunitproeven slagen lokaal. Dit versterkt de dekking van *Rekenroute* en *Audit* voor de doorvoer van 9.58; onafhankelijke *Referentie* en *Attest* blijven open. CI en desktopbuilds voor deze proef zijn nog niet afgerond.
+
 Een expliciet `buildingFraction` wordt alleen in `existing_added_preferred` gebruikt. Rust, HTTP en MCP weigeren het veld nu in `new_build` of `existing` met `building_fraction_not_applicable`, zodat een opgegeven gebouwaandeel niet stilzwijgend buiten de 9.58/9.59-route wordt genegeerd. De eerste CI-run vond een interne nieuwbouwketenaanroep die dit veld nog doorgaf; die aanroep is gecorrigeerd en de volledige kernsuite slaagt lokaal (1006 tests). CI en desktopbuilds moeten opnieuw slagen. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De gekoppelde hybride hulpstroomaudit laat bij een concreet fout invoerveld de algemene `heat_pump_auxiliary_invalid`-melding weg. Rust, HTTP, MCP en de UI-proef bewaken het volledige veldpad en lege deeluitkomsten. [CI op `d1f967dd`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40524843702) slaagde voor de gate en drie platformbuilds. Dit verduidelijkt *Audit*; *Referentie* en *Attest* blijven open.

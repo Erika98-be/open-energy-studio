@@ -6911,6 +6911,61 @@ mod tests {
             );
             assert!(assessed.monthly[0].heat_pump_output_kwh > 0.0);
         }
+
+        // The project route must pass its connected-building share into 9.58.
+        // Compare with the standalone dispatch on the same derived node load,
+        // so any distribution effects of the connection cannot mask the wiring.
+        let mut shared = input.clone();
+        shared.collective_connection = Some(CollectiveConnection {
+            connected_usable_area_m2: shared.demand.usable_floor_area_m2 * 2.0,
+            source_reference: "building plan".into(),
+        });
+        let Generator::HybridHeatPump(generator) = &mut shared.generator else {
+            unreachable!()
+        };
+        generator.design_context = "existing_added_preferred".into();
+        let assessed = assess_space_heating_chain(&shared);
+        let Generator::HybridHeatPump(generator) = &shared.generator else {
+            unreachable!()
+        };
+        assert_eq!(
+            assessed.status, "calculated_unverified",
+            "{:?}",
+            assessed.issues
+        );
+        let node_input_kwh = assessed
+            .monthly
+            .iter()
+            .map(|row| crate::final_energy_draft::MonthlyEnergy {
+                month: row.month,
+                energy_kwh: row.generator_output_kwh,
+            })
+            .collect();
+        let dispatch = crate::generator_dispatch_draft::GeneratorDispatchDraftInput {
+            node_input_kwh,
+            node_input_reference: "derived by space_heating_chain".into(),
+            design_context: generator.design_context.clone(),
+            generators: generator.generators.clone(),
+            building_fraction: Some(0.5),
+        };
+        let expected = crate::generator_dispatch_draft::assess_generator_dispatch_draft(&dispatch);
+        assert_eq!(expected.status, "diagnostic_valid", "{:?}", expected.issues);
+        assert!(
+            (assessed.monthly[0].heat_pump_output_kwh
+                - expected.monthly[0].generators[0].delivered_heat_kwh)
+                .abs()
+                < 1e-6
+        );
+        let unscaled = crate::generator_dispatch_draft::assess_generator_dispatch_draft(
+            &crate::generator_dispatch_draft::GeneratorDispatchDraftInput {
+                building_fraction: None,
+                ..dispatch
+            },
+        );
+        assert!(
+            assessed.monthly[0].heat_pump_output_kwh
+                < unscaled.monthly[0].generators[0].delivered_heat_kwh
+        );
     }
 
     #[test]
