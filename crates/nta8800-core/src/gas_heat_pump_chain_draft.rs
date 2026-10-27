@@ -297,4 +297,22 @@ mod tests {
         assert!(result.monthly.is_empty());
         assert!(result.annual_equipment_auxiliary_electricity_kwh.is_none());
     }
+
+    #[test]
+    fn invalid_present_month_propagates_without_incomplete_summary() {
+        let mut input = sample();
+        input.monthly.generator_output_kwh[0].energy_kwh = -1.0;
+        let result = assess_gas_heat_pump_chain_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "monthly_heat_invalid"
+                && item.path == "monthly.generatorOutputKwh[0].energyKwh"
+        }));
+        assert!(!result
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(result.monthly.is_empty());
+        assert!(result.annual_equipment_auxiliary_electricity_kwh.is_none());
+    }
 }
