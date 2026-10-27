@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De forfaitaire ketelmaandroute en opwekkerverdeling scheiden aanwezige maar ongeldige energie van werkelijk ontbrekende maandnummers en herkennen duplicaten na een foutieve post. Rust en HTTP controleren de concrete paden en lege resultaten. Dit versterkt *Audit* voor de verwarmingsketen; *Referentie* en *Attest* blijven open.
+De forfaitaire ketelmaandroute en opwekkerverdeling scheiden aanwezige maar ongeldige energie van werkelijk ontbrekende maandnummers en herkennen duplicaten na een foutieve post. Rust en HTTP controleren de concrete paden en lege resultaten; de echte MCP-stdio-proef controleert hetzelfde invoerpad en de lege uitkomst voor de opwekkerverdeling. [CI op `79b0fb65`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40450877641) slaagde voor gate en drie platformbuilds vóór de MCP-aanvulling. Dit versterkt *Audit* voor de verwarmingsketen; *Referentie* en *Attest* blijven open.
 
 De elektrische forfaitaire warmtepompmaandroute telt aanwezige maandnummers onafhankelijk van de geldigheid van hun warmte en weigert een herhaald nummer ook na een ongeldige post. Rust en HTTP bewaken de concrete invoerfout zonder `months_incomplete` en zonder deelresultaat; alleen *Audit* verandert, *Referentie* en *Attest* blijven open.
 

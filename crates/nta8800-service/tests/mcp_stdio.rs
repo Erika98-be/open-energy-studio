@@ -176,6 +176,62 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
 }
 
 #[test]
+fn generator_dispatch_mcp_preserves_invalid_present_month_without_partial_results() {
+    let mut node_input = (1..=12)
+        .map(|month| json!({"month": month, "energyKwh": 1000.0}))
+        .collect::<Vec<_>>();
+    node_input[0]["energyKwh"] = json!(-1.0);
+    let input = json!({
+        "nodeInputKwh": node_input,
+        "nodeInputReference": "node balance",
+        "designContext": "new_build",
+        "generators": [
+            {"id": "hp", "class": "heat_pump", "classificationReference": "design schedule",
+             "nominalThermalPowerKw": 4.5, "powerReference": "plate",
+             "priorityEfficiency": 4.0, "efficiencyReference": "COP"},
+            {"id": "boiler", "class": "other_boiler", "classificationReference": "design schedule",
+             "nominalThermalPowerKw": 5.5, "powerReference": "plate",
+             "priorityEfficiency": 0.9, "efficiencyReference": "declaration"}
+        ]
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": { "name": "generator-dispatch-audit-test", "version": "1" }
+        }),
+    );
+    server.send(json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({ "name": "diagnose_generator_dispatch_draft", "arguments": { "input": input } }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "node_input_invalid" && issue["path"] == "nodeInputKwh[0].energyKwh"
+        }));
+    assert!(!assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| issue["code"] == "months_incomplete"));
+    assert!(assessment["monthly"].as_array().unwrap().is_empty());
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
     let input = json!({
         "dispatch": {
