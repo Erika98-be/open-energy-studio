@@ -242,7 +242,14 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
         };
         let assessed = assess_forfait_heat_pump_monthly_draft(&monthly_input);
         if assessed.status == "invalid" {
-            issues.push(issue("heat_pump_monthly_invalid", "heatPump"));
+            if assessed
+                .issues
+                .iter()
+                .any(|item| item.path != "sourceSystem" && item.path != "sourceSystemReference")
+                || assessed.issues.is_empty()
+            {
+                issues.push(issue("heat_pump_monthly_invalid", "heatPump"));
+            }
             for item in &assessed.issues {
                 if item.path == "sourceSystem" || item.path == "sourceSystemReference" {
                     issues.push(issue(item.code, item.path.clone()));
@@ -481,6 +488,10 @@ mod tests {
         assert!(rejected_source.issues.iter().any(|item| {
             item.code == "source_required" && item.path == "sourceSystemReference"
         }));
+        assert!(!rejected_source
+            .issues
+            .iter()
+            .any(|item| item.code == "heat_pump_monthly_invalid"));
         let mut missing_evidence = input.clone();
         missing_evidence.boiler.equipment_reference.clear();
         missing_evidence.dispatch.node_input_reference.clear();

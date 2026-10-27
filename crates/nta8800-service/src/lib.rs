@@ -1416,6 +1416,11 @@ mod tests {
         assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
             issue["code"] == "source_required" && issue["path"] == "sourceSystemReference"
         }));
+        assert!(!invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|issue| issue["code"] == "heat_pump_monthly_invalid"));
         input["sourceSystemReference"] = json!("source design");
         input["dispatch"]["nodeInputReference"] = json!("");
         input["boiler"]["equipmentReference"] = json!("");
