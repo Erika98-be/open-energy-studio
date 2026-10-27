@@ -1292,6 +1292,28 @@ mod tests {
             .iter()
             .any(|item| { item["code"] == "dispatch_overflow" && item["path"] == "nodeInputKwh" }));
         assert!(invalid["monthly"].as_array().unwrap().is_empty());
+        input["designContext"] = json!("new_build");
+        input["buildingFraction"] = json!(0.5);
+        for month in input["nodeInputKwh"].as_array_mut().unwrap() {
+            month["energyKwh"] = json!(1000.0);
+        }
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "building_fraction_not_applicable" && item["path"] == "buildingFraction"
+        }));
+        assert!(invalid["monthly"].as_array().unwrap().is_empty());
     }
 
     #[tokio::test]

@@ -236,7 +236,7 @@ fn generator_dispatch_mcp_preserves_invalid_month_and_overflow_without_partial_r
     let response = server.request(
         3,
         "tools/call",
-        json!({ "name": "diagnose_generator_dispatch_draft", "arguments": { "input": input } }),
+        json!({ "name": "diagnose_generator_dispatch_draft", "arguments": { "input": input.clone() } }),
     );
     assert_eq!(response["isError"], true, "{response}");
     let assessment = &response["structuredContent"];
@@ -246,6 +246,32 @@ fn generator_dispatch_mcp_preserves_invalid_month_and_overflow_without_partial_r
         .unwrap()
         .iter()
         .any(|issue| { issue["code"] == "dispatch_overflow" && issue["path"] == "nodeInputKwh" }));
+    assert!(assessment["monthly"].as_array().unwrap().is_empty());
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+    input["designContext"] = json!("existing");
+    input["buildingFraction"] = json!(0.5);
+    for month in input["nodeInputKwh"].as_array_mut().unwrap() {
+        month["energyKwh"] = json!(1000.0);
+    }
+    let response = server.request(
+        4,
+        "tools/call",
+        json!({ "name": "diagnose_generator_dispatch_draft", "arguments": { "input": input } }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "building_fraction_not_applicable"
+                && issue["path"] == "buildingFraction"
+        }));
     assert!(assessment["monthly"].as_array().unwrap().is_empty());
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),

@@ -149,6 +149,13 @@ pub fn assess_generator_dispatch_draft(
     let building_fraction = input.building_fraction.unwrap_or(1.0);
     if !(building_fraction.is_finite() && building_fraction > 0.0 && building_fraction <= 1.0) {
         issues.push(issue("building_fraction_invalid", "buildingFraction"));
+    } else if input.building_fraction.is_some()
+        && matches!(input.design_context.as_str(), "new_build" | "existing")
+    {
+        issues.push(issue(
+            "building_fraction_not_applicable",
+            "buildingFraction",
+        ));
     }
     let mut months = [None; 12];
     let mut present = [false; 12];
@@ -422,8 +429,30 @@ mod tests {
             .map(|item| item.delivered_heat_kwh)
             .sum();
         assert!((total - 1000.0).abs() < 1e-9);
+        added.building_fraction = Some(0.5);
+        let shared = assess_generator_dispatch_draft(&added);
+        assert_eq!(shared.status, "diagnostic_valid");
+        assert!(
+            shared.monthly[0].generators[0].delivered_heat_kwh
+                < result.monthly[0].generators[0].delivered_heat_kwh
+        );
         added.design_context = "renovation".into();
         assert_eq!(assess_generator_dispatch_draft(&added).status, "invalid");
+    }
+
+    #[test]
+    fn building_fraction_is_not_silently_ignored_outside_added_preferred_route() {
+        for context in ["new_build", "existing"] {
+            let mut input = case();
+            input.design_context = context.into();
+            input.building_fraction = Some(0.5);
+            let result = assess_generator_dispatch_draft(&input);
+            assert_eq!(result.status, "invalid");
+            assert!(result.issues.iter().any(|item| {
+                item.code == "building_fraction_not_applicable" && item.path == "buildingFraction"
+            }));
+            assert!(result.monthly.is_empty());
+        }
     }
 
     #[test]

@@ -1,6 +1,8 @@
 # NTA 8800 dekkingsregister
 
-De gekoppelde hybride hulpstroomaudit laat bij een concreet fout invoerveld de algemene `heat_pump_auxiliary_invalid`-melding weg. Rust, HTTP, MCP en de UI-proef bewaken het volledige veldpad en lege deeluitkomsten. Dit verduidelijkt *Audit*; *Referentie* en *Attest* blijven open.
+Een expliciet `buildingFraction` wordt alleen in `existing_added_preferred` gebruikt. Rust, HTTP en MCP weigeren het veld nu in `new_build` of `existing` met `building_fraction_not_applicable`, zodat een opgegeven gebouwaandeel niet stilzwijgend buiten de 9.58/9.59-route wordt genegeerd. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
+
+De gekoppelde hybride hulpstroomaudit laat bij een concreet fout invoerveld de algemene `heat_pump_auxiliary_invalid`-melding weg. Rust, HTTP, MCP en de UI-proef bewaken het volledige veldpad en lege deeluitkomsten. [CI op `d1f967dd`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40524843702) slaagde voor de gate en drie platformbuilds. Dit verduidelijkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De gekoppelde hybride conceptmaandroute wordt nu ook in Rust, HTTP en MCP tot nieuwbouw beperkt; bestaande bouw en bestaande bouw met toegevoegde voorkeursopwekker geven `hybrid_new_build_required` en geen deeluitkomst. De zelfstandige opwekkerverdeling voor bestaande bouw blijft beschikbaar. [CI op `85f2133b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40514971228) slaagde voor de gate en drie platformbuilds. Dit bewaakt de grens van *Rekenroute* en versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
