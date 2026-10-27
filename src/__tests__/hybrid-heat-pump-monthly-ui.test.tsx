@@ -110,7 +110,6 @@ describe('new-build hybrid draft UI', () => {
         inputFingerprint: 'sha256:boiler' }) })
       .mockResolvedValueOnce({ json: async () => ({ status: 'invalid', dispatch: null, heatPump: null,
         issues: [
-          { code: 'dispatch_invalid', path: 'dispatch' },
           { code: 'source_required', path: 'dispatch.nodeInputReference' },
         ] }) });
     await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
@@ -135,6 +134,21 @@ describe('new-build hybrid draft UI', () => {
       'heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference',
     );
     expect(screen.getByRole('alert')).toHaveTextContent('A source reference is missing');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    fetchMock
+      .mockResolvedValueOnce({ json: async () => ({ status: 'input_valid', correctedCop: 4.8,
+        inputFingerprint: 'sha256:cop' }) })
+      .mockResolvedValueOnce({ json: async () => ({ status: 'diagnostic_valid', generationEfficiency: 0.95,
+        inputFingerprint: 'sha256:boiler' }) })
+      .mockResolvedValueOnce({ json: async () => ({ status: 'invalid', dispatch: null, heatPump: null,
+        boiler: null, heatPumpAuxiliary: null,
+        issues: [{ code: 'node_input_invalid', path: 'dispatch.nodeInputKwh[0].energyKwh' }],
+      }) });
+    await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(14));
+    expect(screen.getByRole('alert')).toHaveTextContent('dispatch.nodeInputKwh[0].energyKwh');
+    expect(screen.getByRole('alert')).toHaveTextContent('A monthly heat demand is negative or invalid');
+    expect(screen.getByRole('alert')).not.toHaveTextContent('The generator split is invalid');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 });

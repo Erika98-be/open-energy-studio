@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De hybride warmtepompketen geeft een concrete fout uit de opwekkerverdeling met volledig invoerpad door en verbergt alle deeluitkomsten. De overbodige algemene `dispatch_invalid`-melding vervalt wanneer er concrete veldfouten zijn; Rust en HTTP controleren dit. Dit versterkt *Audit*, terwijl *Rekenroute*, *Referentie* en *Attest* open blijven.
+De hybride warmtepompketen geeft een concrete fout uit de opwekkerverdeling met volledig invoerpad door en verbergt alle deeluitkomsten. De overbodige algemene `dispatch_invalid`-melding vervalt wanneer er concrete veldfouten zijn; Rust, HTTP en een gerichte UI-proef controleren dit. [CI op `830bd264`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40462823845) slaagde voor gate en drie platformbuilds vóór de UI-proef. Dit versterkt *Audit*, terwijl *Rekenroute*, *Referentie* en *Attest* open blijven.
 
 De forfaitaire ketelmaandroute en opwekkerverdeling scheiden aanwezige maar ongeldige energie van werkelijk ontbrekende maandnummers en herkennen duplicaten na een foutieve post. Rust en HTTP controleren de concrete paden en lege resultaten; de echte MCP-stdio-proef controleert hetzelfde invoerpad en de lege uitkomst voor de opwekkerverdeling. [CI op `fe6402c1`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40456802335) slaagde voor gate en drie platformbuilds met de MCP-proef. Dit versterkt *Audit* voor de verwarmingsketen; *Referentie* en *Attest* blijven open.
 
