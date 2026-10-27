@@ -151,20 +151,26 @@ pub fn assess_generator_dispatch_draft(
         issues.push(issue("building_fraction_invalid", "buildingFraction"));
     }
     let mut months = [None; 12];
+    let mut present = [false; 12];
     for (index, value) in input.node_input_kwh.iter().enumerate() {
         let path = format!("nodeInputKwh[{index}]");
         if !(1..=12).contains(&value.month) {
             issues.push(issue("month_out_of_range", format!("{path}.month")));
-        } else if !value.energy_kwh.is_finite() || value.energy_kwh < 0.0 {
-            issues.push(issue("node_input_invalid", format!("{path}.energyKwh")));
-        } else if months[usize::from(value.month - 1)]
-            .replace(value.energy_kwh)
-            .is_some()
-        {
+            continue;
+        }
+        let month_index = usize::from(value.month - 1);
+        if present[month_index] {
             issues.push(issue("month_duplicate", format!("{path}.month")));
+            continue;
+        }
+        present[month_index] = true;
+        if !value.energy_kwh.is_finite() || value.energy_kwh < 0.0 {
+            issues.push(issue("node_input_invalid", format!("{path}.energyKwh")));
+        } else {
+            months[month_index] = Some(value.energy_kwh);
         }
     }
-    if months.iter().any(Option::is_none) {
+    if present.contains(&false) {
         issues.push(issue("months_incomplete", "nodeInputKwh"));
     }
     if input.generators.is_empty() {
@@ -427,5 +433,35 @@ mod tests {
         let result = assess_generator_dispatch_draft(&input);
         assert_eq!(result.status, "invalid");
         assert!(result.monthly.is_empty());
+    }
+
+    #[test]
+    fn invalid_present_node_month_is_not_reported_missing() {
+        let mut input = case();
+        input.node_input_kwh[0].energy_kwh = -1.0;
+        let invalid = assess_generator_dispatch_draft(&input);
+        assert_eq!(invalid.status, "invalid");
+        assert!(invalid.issues.iter().any(|item| {
+            item.code == "node_input_invalid" && item.path == "nodeInputKwh[0].energyKwh"
+        }));
+        assert!(!invalid
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(invalid.monthly.is_empty());
+
+        input.node_input_kwh.push(MonthlyEnergy {
+            month: 1,
+            energy_kwh: 1000.0,
+        });
+        let duplicate = assess_generator_dispatch_draft(&input);
+        assert!(duplicate.issues.iter().any(|item| {
+            item.code == "month_duplicate" && item.path == "nodeInputKwh[12].month"
+        }));
+        assert!(!duplicate
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(duplicate.monthly.is_empty());
     }
 }

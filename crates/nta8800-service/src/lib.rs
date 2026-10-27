@@ -1245,6 +1245,30 @@ mod tests {
                 .unwrap();
         assert_eq!(invalid["status"], "invalid");
         assert!(invalid["monthly"].as_array().unwrap().is_empty());
+        input["generators"][0]["powerReference"] = json!("plate");
+        input["nodeInputKwh"][0]["energyKwh"] = json!(-1.0);
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "node_input_invalid" && item["path"] == "nodeInputKwh[0].energyKwh"
+        }));
+        assert!(!invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|item| item["code"] == "months_incomplete"));
+        assert!(invalid["monthly"].as_array().unwrap().is_empty());
     }
 
     #[tokio::test]
@@ -1446,7 +1470,7 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(result["generationEfficiency"], 0.95);
-        let monthly = json!({"boiler":boiler,
+        let mut monthly = json!({"boiler":boiler,
             "generatorOutputKwh":(1..=12).map(|month| json!({"month":month,"energyKwh":250.0})).collect::<Vec<_>>(),
             "generatorOutputReference":"dispatch fingerprint"});
         let response = app()
@@ -1472,6 +1496,31 @@ mod tests {
                 .unwrap()
                 > 10.0
         );
+        monthly["generatorOutputKwh"][0]["energyKwh"] = json!(-1.0);
+        let response = app()
+            .oneshot(
+                Request::post("/v1/nta8800/boilers/forfait-monthly-draft/diagnose")
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":monthly}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "generator_output_invalid"
+                && item["path"] == "generatorOutputKwh[0].energyKwh"
+        }));
+        assert!(!invalid["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|item| item["code"] == "months_incomplete"));
+        assert!(invalid["monthly"].as_array().unwrap().is_empty());
+        assert!(invalid["annualAuxiliaryElectricityKwh"].is_null());
         boiler["pilotFlamePresent"] = json!(true);
         let response = app()
             .oneshot(

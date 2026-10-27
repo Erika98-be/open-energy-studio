@@ -328,23 +328,29 @@ pub fn assess_boiler_forfait_monthly_draft(
         issues.push(issue("source_required", "generatorOutputReference"));
     }
     let mut months = [None; 12];
+    let mut present = [false; 12];
     for (index, value) in input.generator_output_kwh.iter().enumerate() {
         let path = format!("generatorOutputKwh[{index}]");
         if !(1..=12).contains(&value.month) {
             issues.push(issue("month_out_of_range", format!("{path}.month")));
-        } else if !value.energy_kwh.is_finite() || value.energy_kwh < 0.0 {
+            continue;
+        }
+        let month_index = usize::from(value.month - 1);
+        if present[month_index] {
+            issues.push(issue("month_duplicate", format!("{path}.month")));
+            continue;
+        }
+        present[month_index] = true;
+        if !value.energy_kwh.is_finite() || value.energy_kwh < 0.0 {
             issues.push(issue(
                 "generator_output_invalid",
                 format!("{path}.energyKwh"),
             ));
-        } else if months[usize::from(value.month - 1)]
-            .replace(value.energy_kwh)
-            .is_some()
-        {
-            issues.push(issue("month_duplicate", format!("{path}.month")));
+        } else {
+            months[month_index] = Some(value.energy_kwh);
         }
     }
-    if months.iter().any(Option::is_none) {
+    if present.contains(&false) {
         issues.push(issue("months_incomplete", "generatorOutputKwh"));
     }
     let mut monthly = Vec::new();
@@ -610,5 +616,46 @@ mod tests {
             (pilot.monthly[0].pilot_flame_natural_gas_kwh - 695.0 * 744.0 / 8760.0).abs() < 1e-9
         );
         assert!((pilot.monthly[0].input_natural_gas_kwh - 250.0 / 0.95).abs() < 1e-9);
+    }
+
+    #[test]
+    fn invalid_present_generator_month_is_not_reported_missing() {
+        let mut input = BoilerForfaitMonthlyDraftInput {
+            boiler: sample(),
+            generator_output_kwh: (1..=12)
+                .map(|month| MonthlyEnergy {
+                    month,
+                    energy_kwh: 250.0,
+                })
+                .collect(),
+            generator_output_reference: "dispatch heat".into(),
+        };
+        input.generator_output_kwh[0].energy_kwh = -1.0;
+        let invalid = assess_boiler_forfait_monthly_draft(&input);
+        assert_eq!(invalid.status, "invalid");
+        assert!(invalid.issues.iter().any(|item| {
+            item.code == "generator_output_invalid"
+                && item.path == "generatorOutputKwh[0].energyKwh"
+        }));
+        assert!(!invalid
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(invalid.monthly.is_empty());
+        assert!(invalid.annual_auxiliary_electricity_kwh.is_none());
+
+        input.generator_output_kwh.push(MonthlyEnergy {
+            month: 1,
+            energy_kwh: 250.0,
+        });
+        let duplicate = assess_boiler_forfait_monthly_draft(&input);
+        assert!(duplicate.issues.iter().any(|item| {
+            item.code == "month_duplicate" && item.path == "generatorOutputKwh[12].month"
+        }));
+        assert!(!duplicate
+            .issues
+            .iter()
+            .any(|item| item.code == "months_incomplete"));
+        assert!(duplicate.monthly.is_empty());
     }
 }

@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 27 oktober 2026
 
+De maandinvoer voor de forfaitaire ketel en de opwekkerverdeling onderscheidt nu eveneens een ontbrekend maandnummer van een aanwezige post met ongeldige energie. Een tweede post voor hetzelfde nummer blijft ook na een foutieve eerste post een duplicaat. Rust- en HTTP-proeven controleren de concrete invoervelden, het ontbreken van `months_incomplete` bij een aanwezige maand en lege deeluitkomsten. Dit is een auditcorrectie, geen nieuwe normatieve berekening of externe toets.
+
 De elektrische forfaitaire warmtepompmaandterm onderscheidt nu, net als de gasvariant, een ontbrekend maandnummer van een aanwezige post met ongeldige warmte. Een negatieve warmte geeft `monthly_heat_invalid` op het veld zonder onterechte `months_incomplete`; een tweede post voor dat maandnummer blijft een duplicaat. Rust- en HTTP-proeven controleren de paden en onderdrukken alle deeluitkomsten. Dit verbetert de invoeraudit en is geen onafhankelijke normvergelijking.
 
 De projectinvoeraudit voor een opgeslagen gaswarmtepomp-hulpstroom bewaart bij maandnummer 0 het concrete veld `gasHeatPumpAuxDraft.months[0].month` en voegt geen afgeleide urenfout toe. Een gerichte Rust-proef dekt daarmee ook de opslagroute af; [CI-run 40440013540](https://github.com/Erika98-be/open-energy-studio/actions/runs/40440013540) slaagde voor gate en drie platformbuilds. De berekende uitkomsten en de externe verificatiestatus veranderen niet.
