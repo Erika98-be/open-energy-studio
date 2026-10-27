@@ -82,6 +82,12 @@ pub fn assess_hybrid_heat_pump_monthly_draft(
     input: &HybridHeatPumpMonthlyDraftInput,
 ) -> HybridHeatPumpMonthlyDraftAssessment {
     let mut issues = Vec::new();
+    if matches!(
+        input.dispatch.design_context.as_str(),
+        "existing" | "existing_added_preferred"
+    ) {
+        issues.push(issue("hybrid_new_build_required", "dispatch.designContext"));
+    }
     let lookup = assess_forfait_heat_pump_draft(&input.forfait);
     let boiler_lookup = assess_boiler_forfait_draft(&input.boiler);
     // The lookup's own issues below name the field; the summary only when
@@ -526,6 +532,18 @@ mod tests {
         assert!(rejected_node.dispatch.is_none());
         assert!(rejected_node.heat_pump.is_none());
         assert!(rejected_node.boiler.is_none());
+        for context in ["existing", "existing_added_preferred"] {
+            let mut outside_scope = input.clone();
+            outside_scope.dispatch.design_context = context.into();
+            let result = assess_hybrid_heat_pump_monthly_draft(&outside_scope);
+            assert_eq!(result.status, "invalid");
+            assert!(result.issues.iter().any(|item| {
+                item.code == "hybrid_new_build_required" && item.path == "dispatch.designContext"
+            }));
+            assert!(result.dispatch.is_none());
+            assert!(result.heat_pump.is_none());
+            assert!(result.boiler.is_none());
+        }
         let mut high_temperature = input;
         high_temperature.forfait.design_supply_temperature_c = Some(56.0);
         let rejected = assess_hybrid_heat_pump_monthly_draft(&high_temperature);

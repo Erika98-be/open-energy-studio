@@ -1504,6 +1504,28 @@ mod tests {
         assert!(invalid["heatPump"].is_null());
         assert!(invalid["boiler"].is_null());
         assert!(invalid["heatPumpAuxiliary"].is_null());
+        input["dispatch"]["nodeInputKwh"][0]["energyKwh"] = json!(1000.0);
+        input["dispatch"]["designContext"] = json!("existing_added_preferred");
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let invalid: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(invalid["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "hybrid_new_build_required"
+                && issue["path"] == "dispatch.designContext"
+        }));
+        assert!(invalid["dispatch"].is_null());
+        assert!(invalid["heatPump"].is_null());
+        assert!(invalid["boiler"].is_null());
     }
 
     #[tokio::test]
