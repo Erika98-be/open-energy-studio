@@ -237,7 +237,11 @@ pub fn assess_boiler_forfait_draft(
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_gas_water_boiler_table_9_25_only",
+        scope: if input.fuel == "oil" {
+            "public_chapter_9_draft_oil_water_boiler_table_9_25_only"
+        } else {
+            "public_chapter_9_draft_gas_water_boiler_table_9_25_only"
+        },
         consultation_source: crate::norm_versions::cite(DRAFT_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
@@ -423,7 +427,11 @@ pub fn assess_boiler_forfait_monthly_draft(
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_gas_water_boiler_9_61_and_individual_forfait_aux_9_85",
+        scope: if input.boiler.fuel == "oil" {
+            "public_chapter_9_draft_oil_water_boiler_9_61_and_individual_forfait_aux_9_85"
+        } else {
+            "public_chapter_9_draft_gas_water_boiler_9_61_and_individual_forfait_aux_9_85"
+        },
         consultation_source: crate::norm_versions::cite(DRAFT_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
@@ -476,10 +484,9 @@ mod tests {
             .iter()
             .any(|item| item.code == "oil_boiler_must_be_conventional"));
         input.kind = BoilerKind::Conventional;
-        assert_eq!(
-            assess_boiler_forfait_draft(&input).generation_efficiency,
-            Some(0.75)
-        );
+        let lookup = assess_boiler_forfait_draft(&input);
+        assert_eq!(lookup.generation_efficiency, Some(0.75));
+        assert!(lookup.scope.contains("oil_water_boiler"));
         let monthly = assess_boiler_forfait_monthly_draft(&BoilerForfaitMonthlyDraftInput {
             boiler: input.clone(),
             generator_output_kwh: (1..=12)
@@ -492,6 +499,7 @@ mod tests {
         });
         assert_eq!(monthly.monthly[0].input_natural_gas_kwh, 0.0);
         assert!((monthly.monthly[0].input_oil_kwh - 400.0).abs() < 1e-9);
+        assert!(monthly.scope.contains("oil_water_boiler"));
         // Table 9.25 a): unknown collective generator 0,70.
         let mut unknown = sample();
         unknown.kind = BoilerKind::Unknown;
