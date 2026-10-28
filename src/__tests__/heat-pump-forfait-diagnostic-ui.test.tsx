@@ -61,10 +61,14 @@ describe('draft COP table UI', () => {
     fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '36' } });
     expect(screen.queryByText('Draft table COP: 2.40')).not.toBeInTheDocument();
     view.unmount();
-    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: input }}
+    const savedView = renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: input }}
       buildingFunction="residential" onSave={vi.fn()} />);
     expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('35');
     expect(screen.getByText(/Table input saved in this project/)).toBeInTheDocument();
+    savedView.unmount();
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: input }}
+      buildingFunction="office" onSave={vi.fn()} />);
+    expect(screen.getByLabelText('Table class')).toHaveValue('utility_collective_or_over25_kw');
   });
 
   it('requires an explicit source correction for a residential ground loop', async () => {

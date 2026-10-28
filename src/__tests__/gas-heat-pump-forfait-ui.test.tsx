@@ -42,10 +42,14 @@ describe('gas heat pump draft COP UI', () => {
     await user.click(screen.getByRole('button', { name: 'Save gas table input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ generatorId: 'gas-1', application: 'utility' })));
     view.unmount();
-    renderWithProviders(<GasHeatPumpForfaitPanel pump={{ ...pump, gasHeatPumpForfaitDraft: onSave.mock.calls[0][0] }}
+    const savedView = renderWithProviders(<GasHeatPumpForfaitPanel pump={{ ...pump, gasHeatPumpForfaitDraft: onSave.mock.calls[0][0] }}
       buildingFunction="office" onSave={vi.fn()} />);
     expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('40');
     expect(screen.getByText(/Gas table input saved in this project/)).toBeInTheDocument();
+    savedView.unmount();
+    renderWithProviders(<GasHeatPumpForfaitPanel pump={{ ...pump, gasHeatPumpForfaitDraft: onSave.mock.calls[0][0] }}
+      buildingFunction="residential" onSave={vi.fn()} />);
+    expect(screen.getByLabelText('Table application')).toHaveValue('over25_kw');
   });
 
   it('persists and removes the gas table input in the inventory', async () => {

@@ -17,8 +17,13 @@ export function GasHeatPumpForfaitPanel({ pump, buildingFunction, onSave }: {
 }) {
   const { t } = useI18n();
   const saved = pump.gasHeatPumpForfaitDraft;
+  const defaultApplication: GasHeatPumpForfaitDraftInput['application'] = buildingFunction !== 'residential'
+    ? 'utility' : saved && saved.thermalCapacityKw > 25 ? 'over25_kw' : 'residential_collective_at_most25_kw';
+  const savedApplication = saved?.application;
   const [application, setApplication] = useState<GasHeatPumpForfaitDraftInput['application']>(
-    saved?.application ?? (buildingFunction === 'residential' ? 'residential_collective_at_most25_kw' : 'utility'));
+    (savedApplication === 'utility' && buildingFunction === 'residential')
+      || (savedApplication === 'residential_collective_at_most25_kw' && buildingFunction !== 'residential')
+      ? defaultApplication : savedApplication ?? defaultApplication);
   const [applicationReference, setApplicationReference] = useState(saved?.applicationReference ?? '');
   const [collective, setCollective] = useState(saved?.collectiveBuildingInstallation ?? false);
   const [externalHeat, setExternalHeat] = useState(saved?.externalHeatSupply ?? false);

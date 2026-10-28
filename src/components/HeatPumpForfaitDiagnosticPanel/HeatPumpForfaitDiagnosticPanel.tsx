@@ -49,8 +49,11 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   const { t } = useI18n();
   const saved = pump.forfaitHeatPumpDraft;
   const options = sourcesFor(pump);
+  const initialScope = buildingFunction !== 'residential' && saved?.scope === 'residential_at_most25_kw'
+    ? 'utility_collective_or_over25_kw' : saved?.scope ?? (buildingFunction === 'residential'
+      ? 'residential_at_most25_kw' : 'utility_collective_or_over25_kw');
   const [scope, setScope] = useState<ForfaitHeatPumpDraftInput['scope']>(
-    saved?.scope ?? (buildingFunction === 'residential' ? 'residential_at_most25_kw' : 'utility_collective_or_over25_kw'));
+    initialScope);
   const [source, setSource] = useState<Source | ''>(saved?.source ?? (options.length === 1 ? options[0] : ''));
   const [temperature, setTemperature] = useState(saved?.designSupplyTemperatureC == null ? '' : String(saved.designSupplyTemperatureC));
   const [factor, setFactor] = useState(saved?.sourceCorrectionFactor == null ? '' : String(saved.sourceCorrectionFactor));
@@ -59,7 +62,8 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   const [capacity, setCapacity] = useState(saved?.thermalCapacityKw == null ? '' : String(saved.thermalCapacityKw));
   const [capacityReference, setCapacityReference] = useState(saved?.capacitySourceReference ?? '');
   const [collective, setCollective] = useState(saved?.collectiveBuildingInstallation == null ? '' : String(saved.collectiveBuildingInstallation));
-  const [rowVariant, setRowVariant] = useState<NonNullable<ForfaitHeatPumpDraftInput['rowVariant']>>(saved?.rowVariant ?? 'base');
+  const [rowVariant, setRowVariant] = useState<NonNullable<ForfaitHeatPumpDraftInput['rowVariant']>>(
+    initialScope === 'residential_at_most25_kw' ? saved?.rowVariant ?? 'base' : 'base');
   const [productReference, setProductReference] = useState(saved?.highEfficiencyEvidence?.productReference ?? '');
   const [testReportReference, setTestReportReference] = useState(saved?.highEfficiencyEvidence?.testReportReference ?? '');
   const [testCops, setTestCops] = useState<Partial<Record<TestCondition, string>>>(() => Object.fromEntries(

@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De elektrische en gasgestookte COP-tabeldiagnoses openen na een gebouwfunctiewijziging met een beschikbare toepassingsklasse. De bestaande opgeslagen classificatie blijft behouden tot de gebruiker opnieuw opslaat; Rust toetst haar onafhankelijk van de UI. Tien gerichte UI-proeven en TypeScript slagen lokaal. Dit versterkt *Invoer* en *Audit*, zonder *Referentie* of *Attest*.
+
 De zichtbare conceptdiagnoses in het warmtepompinventarispaneel worden vervangen bij een wijziging van opgeslagen productgegevens buiten hun eigen formulier; de elektrische en gasgestookte COP-tabeldiagnoses ook bij een wijziging van de gebouwfunctie. Het opslaan van het eigen formulier laat de getoonde diagnose bestaan. Een UI-proef controleert gewijzigde productreferentie en gebouwfunctie. Vijftien inventarisproeven en TypeScript slagen lokaal; [CI op `24ffbf40`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40713825980) slaagde voor gate en drie desktopplatforms. Dit versterkt *Invoer* en *Audit*; *Referentie* en *Attest* blijven open.
 
 Het warmtepompinventarispaneel vervangt alle getoonde conceptdiagnoses wanneer de NTA-editie wijzigt. De hybride diagnose wordt daarnaast vervangen wanneer opgeslagen hulpmetingen of productgebonden afschakelgrenzen wijzigen. Zo hoort de zichtbare deeluitkomst bij de actuele invoer. TypeScript-controle, de gerichte resetproef en negentien inventaris-/gaswarmtepomp-UI-proeven slagen lokaal; dit versterkt *Invoer* en *Audit*, niet *Referentie* of *Attest*.
