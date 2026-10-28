@@ -168,6 +168,7 @@ export function HybridHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }
         <th>{t('kernel.forfaitMonthly.month')}</th><th>{t('kernel.hybridDraft.heatPumpOutput')}</th>
         <th>{t('kernel.hybridDraft.backupOutput')}</th><th>{t('kernel.forfaitMonthly.generatorElectricity')}</th>
         <th>{t('kernel.hybridDraft.boilerGas')}</th>
+        <th>{t('kernel.hybridDraft.pilotGas')}</th>
         <th>{t('kernel.hybridDraft.boilerAux')}</th>
         <th>{t('kernel.hybridDraft.pumpAux')}</th>
       </tr></thead><tbody>{result.dispatch.monthly.map((month, index) => <tr key={month.month}>
@@ -175,7 +176,8 @@ export function HybridHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }
         <td>{result.heatPump!.monthly[index].generatorOutputKwh.toFixed(2)}</td>
         <td>{month.generators.find((item) => item.generatorId === backupId.trim())?.deliveredHeatKwh.toFixed(2)}</td>
         <td>{result.heatPump!.monthly[index].generatorInputElectricityKwh.toFixed(2)}</td>
-        <td>{result.boiler!.monthly[index].inputNaturalGasKwh.toFixed(2)}</td>
+        <td>{(result.boiler!.monthly[index].inputNaturalGasKwh + result.boiler!.monthly[index].pilotFlameNaturalGasKwh).toFixed(2)}</td>
+        <td>{result.boiler!.monthly[index].pilotFlameNaturalGasKwh.toFixed(2)}</td>
         <td>{result.boiler!.monthly[index].auxiliaryElectricityKwh?.toFixed(2) ?? '—'}</td>
         <td>{result.heatPumpAuxiliary?.auxiliary?.monthlyAuxiliaryElectricityKwh[index]?.electricityKwh.toFixed(2) ?? '—'}</td>
       </tr>)}</tbody></table></div>

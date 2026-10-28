@@ -404,6 +404,11 @@ mod tests {
         })).unwrap();
         let result = assess_hybrid_heat_pump_monthly_draft(&input);
         assert_eq!(result.status, "diagnostic_valid", "{}", json!(result));
+        let mut with_pilot = input.clone();
+        with_pilot.boiler.pilot_flame_present = true;
+        let pilot = assess_hybrid_heat_pump_monthly_draft(&with_pilot);
+        assert_eq!(pilot.status, "diagnostic_valid", "{}", json!(pilot));
+        assert!(pilot.boiler.as_ref().unwrap().monthly[0].pilot_flame_natural_gas_kwh > 0.0);
         let heat_pump = result.heat_pump.unwrap();
         assert!((heat_pump.monthly[0].generator_output_kwh - 750.0).abs() < 1e-9);
         assert!(

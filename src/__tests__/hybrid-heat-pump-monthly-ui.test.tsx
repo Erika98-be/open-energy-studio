@@ -30,6 +30,21 @@ const pump: INtaHeatPumpInput = {
 
 afterEach(() => vi.unstubAllGlobals());
 
+const hybridResponse = (pilotGas = 0) => ({
+  status: 'diagnostic_valid', inputFingerprint: 'sha256:hybrid', issues: [],
+  dispatch: { monthly: Array.from({ length: 12 }, (_, index) => ({ month: index + 1,
+    generators: [{ generatorId: 'hp-hybrid', deliveredHeatKwh: index === 4 ? 980 : 750 },
+      { generatorId: 'boiler', deliveredHeatKwh: index === 4 ? 20 : 250 }] })) },
+  heatPump: { monthly: Array.from({ length: 12 }, (_, index) => ({ month: index + 1,
+    generatorOutputKwh: index === 4 ? 980 : 750, generatorInputElectricityKwh: 143.19 })) },
+  heatPumpAuxiliary: { auxiliary: { monthlyAuxiliaryElectricityKwh: Array.from({ length: 12 }, (_, index) => ({
+    month: index + 1, electricityKwh: 34.51 })) } },
+  boiler: { monthly: Array.from({ length: 12 }, (_, index) => ({ month: index + 1,
+    inputNaturalGasKwh: index === 4 ? 20 / 0.95 : 250 / 0.95,
+    pilotFlameNaturalGasKwh: index === 0 ? pilotGas : 0,
+    auxiliaryElectricityKwh: 7.27 })) },
+});
+
 describe('new-build hybrid draft UI', () => {
   it('passes node demand, provenance and matched COP to one Rust chain', async () => {
     const user = userEvent.setup();
@@ -38,23 +53,12 @@ describe('new-build hybrid draft UI', () => {
         inputFingerprint: 'sha256:cop' }) })
       .mockResolvedValueOnce({ json: async () => ({ status: 'diagnostic_valid', generationEfficiency: 0.95,
         inputFingerprint: 'sha256:boiler' }) })
-      .mockResolvedValueOnce({ json: async () => ({
-        status: 'diagnostic_valid', inputFingerprint: 'sha256:hybrid', issues: [],
-        dispatch: { monthly: Array.from({ length: 12 }, (_, index) => ({ month: index + 1,
-          generators: [{ generatorId: 'hp-hybrid', deliveredHeatKwh: index === 4 ? 980 : 750 },
-            { generatorId: 'boiler', deliveredHeatKwh: index === 4 ? 20 : 250 }] })) },
-        heatPump: { monthly: Array.from({ length: 12 }, (_, index) => ({ month: index + 1,
-          generatorOutputKwh: index === 4 ? 980 : 750, generatorInputElectricityKwh: 143.19 })) },
-        heatPumpAuxiliary: { auxiliary: { monthlyAuxiliaryElectricityKwh: Array.from({ length: 12 }, (_, index) => ({
-          month: index + 1, electricityKwh: 34.51 })) } },
-        boiler: { monthly: Array.from({ length: 12 }, (_, index) => ({ month: index + 1,
-          inputNaturalGasKwh: index === 4 ? 20 / 0.95 : 250 / 0.95,
-          auxiliaryElectricityKwh: 7.27 })) },
-      }) })
+      .mockResolvedValueOnce({ json: async () => hybridResponse() })
       .mockResolvedValueOnce({ json: async () => ({ status: 'input_valid', correctedCop: 4.8,
         inputFingerprint: 'sha256:cop' }) })
-      .mockResolvedValueOnce({ json: async () => ({ status: 'invalid', generationEfficiency: null,
-        issues: [{ code: 'pilot_flame_route_unavailable', path: 'pilotFlamePresent' }] }) });
+      .mockResolvedValueOnce({ json: async () => ({ status: 'diagnostic_valid', generationEfficiency: 0.95,
+        inputFingerprint: 'sha256:boiler-pilot' }) })
+      .mockResolvedValueOnce({ json: async () => hybridResponse(60) });
     vi.stubGlobal('fetch', fetchMock);
     renderWithProviders(<HybridHeatPumpMonthlyPanel pump={pump} />);
     await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
@@ -95,14 +99,16 @@ describe('new-build hybrid draft UI', () => {
     expect(screen.getByRole('status')).toHaveTextContent('263.16');
     expect(screen.getByRole('status')).toHaveTextContent('7.27');
     expect(screen.getByRole('status')).toHaveTextContent('34.51');
-    expect(screen.getByRole('status')).toHaveTextContent('source pump/fan, pilot flame');
-    await user.click(screen.getByLabelText('Pilot flame present (this draft route will reject it)'));
+    expect(screen.getByRole('status')).toHaveTextContent('source pump/fan');
+    expect(screen.getByRole('status')).toHaveTextContent('Of which pilot flame (kWh)');
+    await user.click(screen.getByLabelText('Pilot flame present'));
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5));
-    expect(JSON.parse(fetchMock.mock.calls[4][1].body).input.pilotFlamePresent).toBe(true);
-    expect(screen.getByRole('alert')).toHaveTextContent('draft boiler table input is invalid');
-    await user.click(screen.getByLabelText('Pilot flame present (this draft route will reject it)'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
+    expect(JSON.parse(fetchMock.mock.calls[5][1].body).input.boiler.pilotFlamePresent).toBe(true);
+    expect(screen.getByRole('status')).toHaveTextContent('323.16');
+    expect(screen.getByRole('status')).toHaveTextContent('60.00');
+    await user.click(screen.getByLabelText('Pilot flame present'));
     fetchMock
       .mockResolvedValueOnce({ json: async () => ({ status: 'input_valid', correctedCop: 4.8,
         inputFingerprint: 'sha256:cop' }) })
@@ -113,7 +119,7 @@ describe('new-build hybrid draft UI', () => {
           { code: 'source_required', path: 'dispatch.nodeInputReference' },
         ] }) });
     await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(8));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(9));
     expect(screen.getByRole('alert')).toHaveTextContent('dispatch.nodeInputReference');
     expect(screen.getByRole('alert')).toHaveTextContent('A source reference is missing');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -128,7 +134,7 @@ describe('new-build hybrid draft UI', () => {
             path: 'heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference' },
         ] }) });
     await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(11));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(12));
     expect(screen.getByRole('alert')).toHaveTextContent(
       'heatPumpAuxiliaryMeasurements.measurements.measurementSourceReference',
     );
@@ -144,7 +150,7 @@ describe('new-build hybrid draft UI', () => {
         issues: [{ code: 'node_input_invalid', path: 'dispatch.nodeInputKwh[0].energyKwh' }],
       }) });
     await user.click(screen.getByRole('button', { name: 'Calculate draft hybrid months' }));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(14));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(15));
     expect(screen.getByRole('alert')).toHaveTextContent('dispatch.nodeInputKwh[0].energyKwh');
     expect(screen.getByRole('alert')).toHaveTextContent('A monthly heat demand is negative or invalid');
     expect(screen.getByRole('alert')).not.toHaveTextContent('The generator split is invalid');

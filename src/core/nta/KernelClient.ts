@@ -1477,7 +1477,7 @@ export interface BoilerForfaitDraftAssessment {
 export interface BoilerForfaitMonthlyDraftAssessment {
   status: 'diagnostic_valid' | 'invalid';
   generationEfficiency: number | null;
-  monthly: Array<{ month: number; generatorOutputKwh: number; inputNaturalGasKwh: number; auxiliaryElectricityKwh: number | null }>;
+  monthly: Array<{ month: number; generatorOutputKwh: number; inputNaturalGasKwh: number; auxiliaryElectricityKwh: number | null; pilotFlameNaturalGasKwh: number }>;
   auxiliaryYearClass: 'before_2015_or_unknown' | 'from_2015' | null;
   annualAuxiliaryElectricityKwh: number | null;
   issues: Array<{ code: string; path: string }>;
