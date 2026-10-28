@@ -176,7 +176,7 @@ export function HeatPumpInventoryPanel() {
       onSave={(input) => dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...forfaitPump, forfaitHeatPumpDraft: input } })} />}
     {monthlyPump && <HeatPumpForfaitMonthlyPanel key={`${monthlyPump.id}:${JSON.stringify(monthlyPump.forfaitHeatPumpDraft)}`} pump={monthlyPump} />}
     {hybridPump && <HybridHeatPumpMonthlyPanel
-      key={`${hybridPump.id}:${JSON.stringify(hybridPump.forfaitHeatPumpDraft)}:${JSON.stringify(hybridPump.heatingAuxMeasuredDraft)}:${JSON.stringify(hybridPump.declaredOperatingLimits)}`}
+      key={`${hybridPump.id}:${project.ntaCalculation?.normVersion ?? ''}:${JSON.stringify(hybridPump.forfaitHeatPumpDraft)}:${JSON.stringify(hybridPump.heatingAuxMeasuredDraft)}:${JSON.stringify(hybridPump.declaredOperatingLimits)}`}
       pump={hybridPump} />}
     {gasPump && <GasHeatPumpForfaitPanel key={gasPump.id} pump={gasPump} buildingFunction={project.buildingFunction}
       onSave={(input) => dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...gasPump, gasHeatPumpForfaitDraft: input,

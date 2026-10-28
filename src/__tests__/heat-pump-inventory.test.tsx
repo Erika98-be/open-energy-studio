@@ -4,6 +4,7 @@ import { useEnergy } from '../context/EnergyContext';
 import { HeatPumpInventoryPanel } from '../components/HeatPumpInventoryPanel/HeatPumpInventoryPanel';
 import { PreviewPanel } from '../components/PreviewPanel/PreviewPanel';
 import { renderWithProviders, userEvent } from './test-utils';
+import type { NtaCalculationInput } from '../core/nta/KernelClient';
 import { SLOW_UI_TEST_MS } from './timeouts';
 
 function InventoryWithState() {
@@ -16,6 +17,10 @@ function InventoryWithState() {
         maximumSupplyTemperatureC: 55,
       } } });
     }}>Update saved operating limits</button>
+    <button type="button" onClick={() => dispatch({ type: 'SET_NTA_CALCULATION',
+      payload: { ...state.project.ntaCalculation, normVersion: '2024' } as NtaCalculationInput })}>
+      Change NTA edition
+    </button>
     <output data-testid="assets">{state.project.ntaHeatPumps?.map((pump) => `${pump.source}:${pump.servedZoneIds?.join(',')}`).join('|') ?? ''}</output>
     <output data-testid="points">{JSON.stringify(state.project.ntaHeatPumps?.[0]?.performancePoints ?? [])}</output>
     <output data-testid="dhw-test-points">{JSON.stringify(state.project.ntaHeatPumps?.[0]?.dhwTestPoints ?? [])}</output>
@@ -53,6 +58,9 @@ describe('standalone NTA heat pump inventory', () => {
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' }), { target: { value: '1000' } });
     expect(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' })).toHaveValue('1000');
     await user.click(screen.getByRole('button', { name: 'Update saved operating limits' }));
+    expect(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' })).toHaveValue('');
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' }), { target: { value: '900' } });
+    await user.click(screen.getByRole('button', { name: 'Change NTA edition' }));
     expect(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' })).toHaveValue('');
     expect(document.querySelector('.preview-energy-label')).not.toBeInTheDocument();
   });

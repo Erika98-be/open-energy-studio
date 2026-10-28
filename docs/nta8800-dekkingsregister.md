@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Het hybride inventarispaneel vervangt een getoonde diagnose wanneer opgeslagen hulpmetingen of productgebonden afschakelgrenzen van de geselecteerde warmtepomp wijzigen. Zo hoort de zichtbare deeluitkomst bij de actuele invoer. TypeScript-controle, de gerichte resetproef en de bestaande hybride/inventaris-UI-proeven slagen lokaal; dit versterkt *Invoer* en *Audit*, niet *Referentie* of *Attest*.
+Het hybride inventarispaneel vervangt een getoonde diagnose wanneer opgeslagen hulpmetingen, productgebonden afschakelgrenzen of de gekozen NTA-editie wijzigen. Zo hoort de zichtbare deeluitkomst bij de actuele invoer. TypeScript-controle, de gerichte resetproef en de bestaande hybride/inventaris-UI-proeven slagen lokaal; dit versterkt *Invoer* en *Audit*, niet *Referentie* of *Attest*.
 
 De ketelconceptdocumentatie beschrijft nu de al aanwezige afzonderlijke olie- en waakvlamgasposten. Bij conventionele olie krijgt de Rust-tabellookup en maanddiagnose een oliescope in plaats van een onjuiste gasscope; een gerichte Rust-proef, HTTP-proef en echte MCP-stdio-proef bewaken beide antwoorden en de afzonderlijke energiedrager. [CI op `a12c5141`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40678133427) slaagde voor gate en drie desktopplatforms inclusief HTTP- en MCP-proeven. Dit verduidelijkt *Audit* en documentatie, zonder nieuwe *Referentie* of *Attest*.
 
