@@ -17,6 +17,14 @@ function InventoryWithState() {
         maximumSupplyTemperatureC: 55,
       } } });
     }}>Update saved operating limits</button>
+    <button type="button" onClick={() => {
+      const pump = state.project.ntaHeatPumps?.[0];
+      if (pump) dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...pump,
+        performanceEvidence: { ...pump.performanceEvidence, reference: 'updated evidence' } } });
+    }}>Update pump evidence</button>
+    <button type="button" onClick={() => dispatch({ type: 'UPDATE_PROJECT_INFO', payload: {
+      buildingFunction: state.project.buildingFunction === 'residential' ? 'office' : 'residential',
+    } })}>Change building function</button>
     <button type="button" onClick={() => dispatch({ type: 'SET_NTA_CALCULATION',
       payload: { ...state.project.ntaCalculation, normVersion: '2024' } as NtaCalculationInput })}>
       Change NTA edition
@@ -37,10 +45,12 @@ afterEach(() => vi.unstubAllGlobals());
 describe('standalone NTA heat pump inventory', () => {
   it('opens the hybrid draft and clears its input after saved operating limits change', async () => {
     const user = userEvent.setup();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: async () => ({
-      status: 'input_valid', table: '9.27', correctedCop: 2.4,
-      inputFingerprint: 'sha256:hybrid-table', issues: [],
-    }) }));
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ({ json: async () =>
+      url.includes('/project/performance')
+        ? { status: 'input_incomplete', gaps: [] }
+        : { status: 'input_valid', table: '9.27', correctedCop: 2.4,
+          inputFingerprint: 'sha256:hybrid-table', issues: [] },
+    })));
     renderWithProviders(<InventoryWithState />);
     await user.click(screen.getByRole('button', { name: 'Add heat pump' }));
     await user.click(screen.getByLabelText('Hybrid'));
@@ -62,7 +72,22 @@ describe('standalone NTA heat pump inventory', () => {
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' }), { target: { value: '900' } });
     await user.click(screen.getByRole('button', { name: 'Change NTA edition' }));
     expect(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' })).toHaveValue('');
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' }), { target: { value: '800' } });
+    await user.click(screen.getByRole('button', { name: 'Update pump evidence' }));
+    expect(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' })).toHaveValue('');
     expect(document.querySelector('.preview-energy-label')).not.toBeInTheDocument();
+  });
+
+  it('clears a table draft when the building function changes', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<InventoryWithState />);
+    await user.click(screen.getByRole('button', { name: 'Add heat pump' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
+    fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '35' } });
+    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('35');
+    await user.click(screen.getByRole('button', { name: 'Change building function' }));
+    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('');
   });
 
   it('saves and reopens a COP table classification without creating a result', async () => {
