@@ -397,7 +397,7 @@ fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
         4,
         "tools/call",
         json!({
-            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input}
+            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input.clone()}
         }),
     );
     assert_eq!(response["isError"], false, "{response}");
@@ -410,6 +410,28 @@ fn hybrid_mcp_preserves_nested_auxiliary_audit_path_without_partial_results() {
     assert!(!assessment["heatPump"].is_null());
     assert!(!assessment["boiler"].is_null());
     assert!(!assessment["heatPumpAuxiliary"].is_null());
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+    input["boiler"]["pilotFlamePresent"] = json!(true);
+    let response = server.request(
+        5,
+        "tools/call",
+        json!({
+            "name": "diagnose_hybrid_heat_pump_monthly_draft", "arguments": {"input": input}
+        }),
+    );
+    assert_eq!(response["isError"], false, "{response}");
+    let assessment = &response["structuredContent"];
+    assert!(
+        (assessment["boiler"]["monthly"][0]["pilotFlameNaturalGasKwh"]
+            .as_f64()
+            .unwrap()
+            - 695.0 * 744.0 / 8760.0)
+            .abs()
+            < 1e-9
+    );
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment

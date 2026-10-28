@@ -1404,6 +1404,29 @@ mod tests {
                 .abs()
                 < 1e-9
         );
+        input["boiler"]["pilotFlamePresent"] = json!(true);
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let with_pilot: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(
+            (with_pilot["boiler"]["monthly"][0]["pilotFlameNaturalGasKwh"]
+                .as_f64()
+                .unwrap()
+                - 695.0 * 744.0 / 8760.0)
+                .abs()
+                < 1e-9
+        );
+        input["boiler"]["pilotFlamePresent"] = json!(false);
         input["dispatch"]["generators"][0]["priorityEfficiency"] = json!(5.0);
         let response = app()
             .oneshot(
