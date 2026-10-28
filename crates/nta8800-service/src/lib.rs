@@ -1577,7 +1577,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn boiler_endpoints_use_table_925_and_accept_pilot_flame() {
+    async fn boiler_endpoints_report_gas_pilot_and_oil_carriers() {
         let mut boiler = json!({
             "generatorId":"boiler", "role":"individual_supplementary",
             "location":"inside_thermal_boundary", "kind":"hr107", "fuel":"natural_gas",
@@ -1663,6 +1663,51 @@ mod tests {
             .unwrap();
         // §9.6.2.1: a pilot flame is counted (695 kWh/year), not rejected.
         assert_eq!(response.status(), StatusCode::OK);
+        boiler["kind"] = json!("conventional");
+        boiler["fuel"] = json!("oil");
+        boiler["pilotFlamePresent"] = json!(false);
+        let response = app()
+            .oneshot(
+                Request::post(endpoint)
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":boiler}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let oil_lookup: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(oil_lookup["scope"]
+            .as_str()
+            .unwrap()
+            .contains("oil_water_boiler"));
+        let oil_monthly = json!({
+            "boiler":boiler,
+            "generatorOutputKwh":(1..=12).map(|month| json!({"month":month,"energyKwh":300.0})).collect::<Vec<_>>(),
+            "generatorOutputReference":"dispatch fingerprint"
+        });
+        let response = app()
+            .oneshot(
+                Request::post("/v1/nta8800/boilers/forfait-monthly-draft/diagnose")
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":oil_monthly}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let oil_result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(oil_result["scope"]
+            .as_str()
+            .unwrap()
+            .contains("oil_water_boiler"));
+        assert_eq!(oil_result["monthly"][0]["inputNaturalGasKwh"], 0.0);
+        assert_eq!(oil_result["monthly"][0]["pilotFlameNaturalGasKwh"], 0.0);
+        assert!((oil_result["monthly"][0]["inputOilKwh"].as_f64().unwrap() - 400.0).abs() < 1e-9);
     }
 
     #[tokio::test]
