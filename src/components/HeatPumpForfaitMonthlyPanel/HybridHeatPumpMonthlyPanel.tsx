@@ -12,6 +12,8 @@ import { DecimalInput } from '../ui';
 
 type SourceSystem = ForfaitHeatPumpMonthlyDraftInput['sourceSystem'];
 const months = Array.from({ length: 12 }, (_, index) => index + 1);
+// Keep the planning range aligned with the Rust input audit's LATEST_PLAUSIBLE_YEAR.
+const latestPlausibleYear = 2100;
 
 function systemsFor(source: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']>['source']): SourceSystem[] {
   if (source === 'ground') return ['individual', 'collective_ground'];
@@ -65,7 +67,7 @@ export function HybridHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }
       || backupId.trim() === forfait.generatorId || !backupClassReference.trim() || !finitePositive(backupPower)
       || !backupPowerReference.trim() || !locationReference.trim() || !emissionReference.trim()
       || (boilerYear.trim() === '' && boilerYearReference.trim() !== '')
-      || (boilerYear.trim() !== '' && (!Number.isInteger(Number(boilerYear)) || Number(boilerYear) < 1900 || Number(boilerYear) > 2026 || !boilerYearReference.trim()))
+      || (boilerYear.trim() !== '' && (!Number.isInteger(Number(boilerYear)) || Number(boilerYear) < 1900 || Number(boilerYear) > latestPlausibleYear || !boilerYearReference.trim()))
       || emissionTemperature.trim() === '' || !Number.isFinite(Number(emissionTemperature))) {
       setError(t('kernel.hybridDraft.invalid')); setResult(null); return;
     }
@@ -146,7 +148,7 @@ export function HybridHeatPumpMonthlyPanel({ pump }: { pump: INtaHeatPumpInput }
         {(['direct', 'mixing_with_return_limit', 'mixing_without_return_limit'] as const).map((circuit) => <option key={circuit} value={circuit}>{t(`kernel.hybridDraft.emissionCircuit.${circuit}`)}</option>)}
       </select></label>
       <label>{t('kernel.hybridDraft.emissionReference')}<input value={emissionReference} onChange={(event) => { invalidate(); setEmissionReference(event.target.value); }} /></label>
-      <label>{t('kernel.hybridDraft.boilerYear')}<DecimalInput min="1900" max="2026" step="1" value={boilerYear} onChange={(event) => { invalidate(); setBoilerYear(event.target.value); }} /></label>
+      <label>{t('kernel.hybridDraft.boilerYear')}<DecimalInput min="1900" max={latestPlausibleYear} step="1" value={boilerYear} onChange={(event) => { invalidate(); setBoilerYear(event.target.value); }} /></label>
       <label>{t('kernel.hybridDraft.boilerYearReference')}<input value={boilerYearReference} onChange={(event) => { invalidate(); setBoilerYearReference(event.target.value); }} /></label>
       <label><input type="checkbox" checked={pilotFlamePresent} onChange={(event) => { invalidate(); setPilotFlamePresent(event.target.checked); }} />{t('kernel.hybridDraft.pilotFlame')}</label>
     </div>

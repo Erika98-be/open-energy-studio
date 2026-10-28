@@ -69,7 +69,7 @@ describe('new-build hybrid draft UI', () => {
     fireEvent.change(screen.getByLabelText('Boiler location evidence'), { target: { value: 'site inspection' } });
     fireEvent.change(screen.getByLabelText('Average design emission temperature (°C)'), { target: { value: '45' } });
     fireEvent.change(screen.getByLabelText('Temperature and circuit evidence'), { target: { value: 'heating design' } });
-    fireEvent.change(screen.getByLabelText('Boiler installation year (blank = unknown)'), { target: { value: '2015' } });
+    fireEvent.change(screen.getByLabelText('Boiler installation year (blank = unknown)'), { target: { value: '2027' } });
     fireEvent.change(screen.getByLabelText('Installation year evidence'), { target: { value: 'commissioning certificate' } });
     for (let month = 1; month <= 12; month += 1) {
       fireEvent.change(screen.getByLabelText(`Node heat (kWh) ${month}`), { target: { value: '1000' } });
@@ -84,7 +84,7 @@ describe('new-build hybrid draft UI', () => {
     expect(input.dispatch.generators[1]).toMatchObject({ id: 'boiler', nominalThermalPowerKw: 6,
       priorityEfficiency: 0.95, efficiencyReference: 'boiler_forfait_sha256:sha256:boiler' });
     expect(input.boiler).toMatchObject({ role: 'individual_supplementary', kind: 'hr107',
-      averageDesignEmissionTemperatureC: 45, fuel: 'natural_gas', installationYear: 2015,
+      averageDesignEmissionTemperatureC: 45, fuel: 'natural_gas', installationYear: 2027,
       installationYearReference: 'commissioning certificate' });
     expect(input.heatPumpAuxiliaryMeasurements).toMatchObject({ generatorId: 'hp-hybrid',
       measurements: { standbyElectronicsW: 10, nominalElectricDriveKw: 2 } });
