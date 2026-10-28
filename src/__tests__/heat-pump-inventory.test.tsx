@@ -7,8 +7,15 @@ import { renderWithProviders, userEvent } from './test-utils';
 import { SLOW_UI_TEST_MS } from './timeouts';
 
 function InventoryWithState() {
-  const { state } = useEnergy();
+  const { state, dispatch } = useEnergy();
   return <><HeatPumpInventoryPanel /><PreviewPanel />
+    <button type="button" onClick={() => {
+      const pump = state.project.ntaHeatPumps?.[0];
+      if (pump) dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...pump, declaredOperatingLimits: {
+        declarationNormVersion: 'NTA 8800:2025+C1:2026', sourceReference: 'product declaration',
+        maximumSupplyTemperatureC: 55,
+      } } });
+    }}>Update saved operating limits</button>
     <output data-testid="assets">{state.project.ntaHeatPumps?.map((pump) => `${pump.source}:${pump.servedZoneIds?.join(',')}`).join('|') ?? ''}</output>
     <output data-testid="points">{JSON.stringify(state.project.ntaHeatPumps?.[0]?.performancePoints ?? [])}</output>
     <output data-testid="dhw-test-points">{JSON.stringify(state.project.ntaHeatPumps?.[0]?.dhwTestPoints ?? [])}</output>
@@ -23,7 +30,7 @@ function InventoryWithState() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('standalone NTA heat pump inventory', () => {
-  it('keeps a hybrid pump table input and opens the draft dispatch without an energy label', async () => {
+  it('opens the hybrid draft and clears its input after saved operating limits change', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: async () => ({
       status: 'input_valid', table: '9.27', correctedCop: 2.4,
@@ -43,6 +50,10 @@ describe('standalone NTA heat pump inventory', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Draft hybrid monthly dispatch' })).toBeInTheDocument());
     await user.click(screen.getByRole('button', { name: 'Draft hybrid monthly dispatch' }));
     expect(screen.getByRole('region', { name: 'Hybrid heat pump: monthly dispatch' })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' }), { target: { value: '1000' } });
+    expect(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' })).toHaveValue('1000');
+    await user.click(screen.getByRole('button', { name: 'Update saved operating limits' }));
+    expect(screen.getByRole('spinbutton', { name: 'Node heat (kWh) 1' })).toHaveValue('');
     expect(document.querySelector('.preview-energy-label')).not.toBeInTheDocument();
   });
 
