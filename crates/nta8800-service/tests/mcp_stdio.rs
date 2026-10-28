@@ -114,6 +114,60 @@ fn example_project() -> Value {
 }
 
 #[test]
+fn oil_boiler_mcp_reports_oil_scope_and_carrier_in_both_diagnostics() {
+    let boiler = json!({
+        "generatorId":"oil-boiler", "role":"individual_main",
+        "location":"inside_thermal_boundary", "kind":"conventional", "fuel":"oil",
+        "averageDesignEmissionTemperatureC":45.0, "emissionCircuit":"direct",
+        "equipmentReference":"boiler plate", "locationReference":"site inspection",
+        "temperatureAndCircuitReference":"heating design", "pilotFlamePresent":false
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"oil-boiler-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let lookup = server.request(
+        2,
+        "tools/call",
+        json!({"name":"diagnose_boiler_forfait_draft", "arguments":{"input":boiler}}),
+    );
+    assert_eq!(lookup["isError"], false, "{lookup}");
+    assert_eq!(lookup["structuredContent"]["generationEfficiency"], 0.75);
+    assert!(lookup["structuredContent"]["scope"]
+        .as_str()
+        .unwrap()
+        .contains("oil_water_boiler"));
+    let monthly = server.request(
+        3,
+        "tools/call",
+        json!({"name":"diagnose_boiler_forfait_monthly_draft", "arguments":{"input":{
+            "boiler":boiler,
+            "generatorOutputKwh":(1..=12).map(|month| json!({"month":month,"energyKwh":300.0})).collect::<Vec<_>>(),
+            "generatorOutputReference":"dispatch ledger"
+        }}}),
+    );
+    assert_eq!(monthly["isError"], false, "{monthly}");
+    let assessment = &monthly["structuredContent"];
+    assert!(assessment["scope"]
+        .as_str()
+        .unwrap()
+        .contains("oil_water_boiler"));
+    assert_eq!(assessment["monthly"][0]["inputNaturalGasKwh"], 0.0);
+    assert_eq!(assessment["monthly"][0]["pilotFlameNaturalGasKwh"], 0.0);
+    assert_eq!(assessment["monthly"][0]["inputOilKwh"], 400.0);
+    assert_eq!(
+        serde_json::from_str::<Value>(monthly["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
     let mut months = (1..=12)
         .map(|month| {
