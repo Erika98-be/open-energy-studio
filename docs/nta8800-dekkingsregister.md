@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Bij de gaswarmtepomp-maanddiagnose worden collectieve bodemtemperatuur en temperatuurbronverwijzing in edities zonder collectieve 9.62-broncorrectie nu als niet-toepasselijk geweigerd. De 2024-route accepteert dezelfde invoer zonder die velden en rekent met correctiefactor nul. Een gerichte Rust-regressie controleert beide paden en lege deelresultaten bij een fout; alle vijf maanddiagnoseproeven en rustfmt slagen lokaal. Dit versterkt *Audit* en editiegrens; *Referentie* en *Attest* blijven open.
+
 De gaswarmtepomp-hulpenergiediagnose weigert nu een overlopende bedrijfsurentussenwaarde voordat de maandurenbegrenzing die fout kan maskeren. Gerichte Rust-, HTTP- en echte MCP-stdio-proeven controleren het exacte invoerpad en lege deelresultaten; HTTP geeft 422 en MCP bewaart gelijke tekst en structuur. [CI op `48e0a319`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40890648945) slaagde voor de gate en drie desktopplatforms inclusief de MCP-proef. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De aangewezen [BRL 9501 van 29 mei 2026](https://installq.nl/files/BRL-en/brl-9501-installq-2026-aangewezen.pdf) is als eisenkader beschikbaar en in het [BRL-gereedheidsdossier](nta8800-brl9501-gereedheid.md) verwerkt. De toepasselijke ISSO 54-uitgave met officiële verwachte uitkomsten en de externe toets blijven open; dit verandert geen *Referentie*- of *Attest*-status.

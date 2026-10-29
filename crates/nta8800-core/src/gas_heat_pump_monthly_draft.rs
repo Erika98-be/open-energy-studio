@@ -128,14 +128,19 @@ pub fn assess_gas_heat_pump_monthly_draft(
                 "collectiveSourceTemperatureReference",
             ));
         }
-    } else if !ground_collective
-        && (input.collective_source_temperature_c.is_some()
-            || input.collective_source_temperature_reference.is_some())
-    {
-        issues.push(issue(
-            "collective_source_temperature_not_applicable",
-            "collectiveSourceTemperatureC",
-        ));
+    } else if !ground_collective || !crate::norm_versions::profile().collective_source_correction {
+        if input.collective_source_temperature_c.is_some() {
+            issues.push(issue(
+                "collective_source_temperature_not_applicable",
+                "collectiveSourceTemperatureC",
+            ));
+        }
+        if input.collective_source_temperature_reference.is_some() {
+            issues.push(issue(
+                "collective_source_temperature_not_applicable",
+                "collectiveSourceTemperatureReference",
+            ));
+        }
     }
     let mut months = [None; 12];
     let mut present = [false; 12];
@@ -278,6 +283,40 @@ mod tests {
             "generatorOutputReference":"monthly heat ledger", "sourceSystem":system,
             "sourceSystemReference":"source design"
         })).unwrap()
+    }
+
+    #[test]
+    fn legacy_collective_ground_rejects_ignored_temperature_evidence() {
+        let mut input = sample("ground", SourceSystem::CollectiveGround);
+        input.collective_source_temperature_c = Some(14.9);
+        input.collective_source_temperature_reference = Some("source design".into());
+        let legacy =
+            crate::norm_versions::with_version(crate::norm_versions::NormVersion::V2024, || {
+                assess_gas_heat_pump_monthly_draft(&input)
+            });
+        assert_eq!(legacy.status, "invalid");
+        assert!(legacy.issues.iter().any(|item| {
+            item.code == "collective_source_temperature_not_applicable"
+                && item.path == "collectiveSourceTemperatureC"
+        }));
+        assert!(legacy.issues.iter().any(|item| {
+            item.code == "collective_source_temperature_not_applicable"
+                && item.path == "collectiveSourceTemperatureReference"
+        }));
+        assert!(legacy.monthly.is_empty());
+        assert!(legacy.corrected_cop.is_none());
+
+        input.collective_source_temperature_c = None;
+        input.collective_source_temperature_reference = None;
+        let without_ignored_fields =
+            crate::norm_versions::with_version(crate::norm_versions::NormVersion::V2024, || {
+                assess_gas_heat_pump_monthly_draft(&input)
+            });
+        assert_eq!(without_ignored_fields.status, "diagnostic_valid");
+        assert_eq!(
+            without_ignored_fields.collective_source_correction_factor,
+            Some(0.0)
+        );
     }
 
     #[test]
