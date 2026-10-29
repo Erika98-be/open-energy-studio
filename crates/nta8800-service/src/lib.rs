@@ -1876,6 +1876,43 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(value["collectiveSourceCorrectionFactor"], 0.022);
+        let legacy_request = |input: &Value| {
+            Request::post(endpoint)
+                .header("content-type", "application/json")
+                .body(Body::from(
+                    json!({"input": input, "normVersion": "2024"}).to_string(),
+                ))
+                .unwrap()
+        };
+        let response = app().oneshot(legacy_request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        for path in [
+            "collectiveSourceTemperatureC",
+            "collectiveSourceTemperatureReference",
+        ] {
+            assert!(value["issues"].as_array().unwrap().iter().any(|item| {
+                item["code"] == "collective_source_temperature_not_applicable"
+                    && item["path"] == path
+            }));
+        }
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        input
+            .as_object_mut()
+            .unwrap()
+            .remove("collectiveSourceTemperatureC");
+        input
+            .as_object_mut()
+            .unwrap()
+            .remove("collectiveSourceTemperatureReference");
+        let response = app().oneshot(legacy_request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert_eq!(value["collectiveSourceCorrectionFactor"], 0.0);
         input["generatorOutputKwh"][0]["energyKwh"] = json!(-1.0);
         let response = app().oneshot(request(&input)).await.unwrap();
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
