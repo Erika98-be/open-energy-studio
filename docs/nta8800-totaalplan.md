@@ -4,11 +4,13 @@
 **Doel:** een zelfstandig toetsbare NTA 8800-rekenbibliotheek in Open Energy Studio, met volledige invoer- en resultatenworkflow voor woningen, woongebouwen en utiliteitsbouw, gevolgd door BRL 9501-attestering.  
 **Status:** onderzoeks- en uitvoeringsplan; geen conformiteitsverklaring.
 
+De uitvoeringsstanden hieronder zijn gedateerde momentopnames. De actuele dekking en blokkades staan in het [dekkingsregister](nta8800-dekkingsregister.md) en de [verificatiestatus](nta8800-verificatiestatus.md). De aangewezen BRL 9501:2026 en de gelicentieerde NTA 8800:2025+C1:2026 zijn inmiddels beschikbaar; officiële actuele ISSO 54-referentie-uitkomsten en een extern attest ontbreken nog.
+
 ## 1. Normatieve basis en afbakening
 
 1. Leg één doelversie vast: **NTA 8800:2025+C1:2026**. NEN vermeldt dat deze de uitgave 2025 vervangt en dat de volledige norm kosteloos via een gratis NEN Connect-account in te zien is; de losse PDF staat op € 0,00 maar blijft auteursrechtelijk beschermd. Verkrijg een rechtmatige werkkopie voor formule-review en bewaar daarnaast historische versies als expliciete rekenprofielen. Bron: [NEN](https://www.nen.nl/nta-8800-2025-c1-2026-nl-349740).
 2. Maak voor iedere formule, tabel, default, invoerregel en afronding een normregister: normversie, hoofdstuk/paragraaf, toepassingsgebied, codefunctie, test, eigenaar en reviewstatus. De normtekst blijft buiten de openbare repository tenzij hergebruik is toegestaan.
-3. Richt attestering op het **NL-EPBD/EDR-attest Energieprestatie onder BRL 9501:2026**. Controleer de definitieve tekst en testset rechtstreeks bij InstallQ en de attesteringsinstelling. BRL 9500 en opnameprotocollen zijn nodig voor het werkproces van EP-adviseurs, maar zijn een apart certificeringstraject. Bronnen: [InstallQ BRL-overzicht](https://installq.nl/controllers/brl), [InstallQ attestering](https://installq.nl/energiediagnose-referentie), [RVO](https://www.rvo.nl/onderwerpen/wetten-en-regels-gebouwen/informatie-epa).
+3. Richt attestering op het **NL-EPBD/EDR-attest Energieprestatie onder BRL 9501:2026**. De [aangewezen BRL-tekst](https://installq.nl/files/BRL-en/brl-9501-installq-2026-aangewezen.pdf) is gecontroleerd; bevestig de verplichte actuele testset en procedure met de attesteringsinstelling. BRL 9500 en opnameprotocollen zijn nodig voor het werkproces van EP-adviseurs, maar zijn een apart certificeringstraject. Bronnen: [InstallQ BRL-overzicht](https://installq.nl/controllers/brl), [InstallQ attestering](https://installq.nl/energiediagnose-referentie), [RVO](https://www.rvo.nl/onderwerpen/wetten-en-regels-gebouwen/informatie-epa).
 4. Het product toont vóór attestering uitsluitend **indicatieve** uitkomsten. Het mag geen officieel energielabel of wettelijke conformiteit suggereren. Voer registratie in EP-Online pas als aparte integratie uit zodra rollen, autorisatie, formaat en attest zijn bevestigd.
 5. Houd **NTA 8800-energieprestatie** gescheiden van warmteverliesdimensionering volgens ISSO 51 / EN 12831. Een dimensioneringslast is geen BENG-energiebehoefte.
 
@@ -89,7 +91,7 @@ Het resultatenscherm toont: berekenstatus (`indicatief`/`gevalideerd`/`geatteste
 | 6. Productworkflow | Invoerassistent, validatie, resultaten, rapport, projectversies | Adviseur kan complete case reproduceren |
 | 7. Attestering | Kwaliteitshandboek, release-/klachtenproces, testdossier, externe toets | BRL 9501-attest voor afgebakende scope |
 
-Begin intern met **woningen** als eerste ontwikkel- en referentiescope. Ga er voor de formele attestering niet van uit dat een attest voor alleen woningen mogelijk is: de publiek beschikbare [ISSO 54-errata bij de uitgave 2020](https://documenten.isso.nl/s/UoQ7KSAd2EgbXfm-WrdPTayzG-pn1jE6/Errata%20publicatie%2054%2001-07-2020.pdf) vermeldt expliciet dat een rekenprogramma destijds zowel woningen/woongebouwen als utiliteitsgebouwen moest dekken. [InstallQ](https://installq.nl/controllers/brl) verwijst naar ISSO 54 (2024), terwijl [BouwZo](https://bouwzo.nl/search?Publisher=ISSO) een uitgave van 14 november 2025 vermeldt. De toepasselijke editie, inhoud en [BRL 9501:2026](https://bouwzo.nl/reader/publicatie/brl-9501/2026) moeten met de attesteringsinstelling worden bevestigd voordat de aanvraagomvang wordt vastgelegd. Zie het [bronnenregister](nta8800-bronnenregister.md). Bouw de generieke bibliotheek vanaf het begin voor beide gebruiksgebieden en leg per release vast welke scope werkelijk extern is getoetst.
+Begin intern met **woningen** als eerste ontwikkel- en referentiescope. Ga er voor de formele attestering niet van uit dat een attest voor alleen woningen mogelijk is: de publiek beschikbare [ISSO 54-errata bij de uitgave 2020](https://documenten.isso.nl/s/UoQ7KSAd2EgbXfm-WrdPTayzG-pn1jE6/Errata%20publicatie%2054%2001-07-2020.pdf) vermeldt expliciet dat een rekenprogramma destijds zowel woningen/woongebouwen als utiliteitsgebouwen moest dekken. De aangewezen [BRL 9501:2026](https://installq.nl/files/BRL-en/brl-9501-installq-2026-aangewezen.pdf) verwijst naar ISSO 54 versie 5.0:2026. Die uitgave en haar officiële referentie-uitkomsten ontbreken nog; bevestig de aanvraagomvang met de attesteringsinstelling. Zie het [bronnenregister](nta8800-bronnenregister.md). Bouw de generieke bibliotheek vanaf het begin voor beide gebruiksgebieden en leg per release vast welke scope werkelijk extern is getoetst.
 
 ## 9. Eerste uitvoeringsweek
 
@@ -109,7 +111,7 @@ Begin intern met **woningen** als eerste ontwikkel- en referentiescope. Ga er vo
 
 Deze beslissingen blokkeren de baseline, normmatrix en eerste modelverbeteringen niet; ze bepalen wel de formele attestscope en testdata.
 
-## 11. Uitvoeringsstand: Rust-kernel en interfaces
+## 11. Historische uitvoeringsstand: Rust-kernel en interfaces (september 2026)
 
 De nieuwe `crates/nta8800-core` is de enige beoogde plaats voor de toekomstige normberekening. Tauri roept deze crate aan voor projectvalidatie. `crates/nta8800-service` biedt een lokale HTTP-API en een stdio MCP-server, beide op dezelfde kernel. De service documenteert routes, tools en foutstatussen in zijn README. De warmtepomptaxonomie modelleert bron, afgifte, aandrijving, reversibiliteit, hybride/boosteropties en herkomst van prestatiegegevens. Daarnaast kunnen gemeten of verklaarde prestatiepunten per dienst, temperaturen, vermogens en energiedrager worden vastgelegd. Hulpcomponenten bewaren nominaal vermogen, energiedrager, dienst, bewijs en meetgrens, zodat de latere normroute dubbeltelling kan voorkomen. Systeemkoppelingen leggen bij-/reserveopwekkers, voorgeschakelde warmtepompen en gedeelde bronnen expliciet vast; de audit controleert doelen en cycli. Dit is een invoermodel; geen van deze gegevens activeert al een normatieve warmtepomprekenroute, schakelstrategie of jaarenergiepost.
 
@@ -132,6 +134,6 @@ Werkinstructie: [nta8800-werkinstructie.md](nta8800-werkinstructie.md). Stand en
 
 De volgende stappen vereisen externe input:
 
-1. de normtekst NTA 8800:2025+C1:2026, voor de review van de transcripties en voor hoofdstuk 11, distributie 9.26 en de rendementstabellen;
+1. ~~de normtekst NTA 8800:2025+C1:2026~~: sinds 2 oktober beschikbaar als gelicentieerde PDF buiten de repository; de normreview staat in de verificatiestatus;
 2. de actuele EDR-testset met de uitkomsten uit bijlage 2;
 3. afstemming over de attestscope met InstallQ.
