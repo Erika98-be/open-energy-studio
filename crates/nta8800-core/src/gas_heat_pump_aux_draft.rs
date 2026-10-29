@@ -190,9 +190,16 @@ pub fn assess_gas_heat_pump_aux_draft(
     let mut annual = 0.0_f64;
     if issues.is_empty() {
         for (index, month) in input.months.iter().enumerate() {
-            let on_hours = (month.generator_output_kwh * 1.1
-                / (input.nominal_thermal_capacity_kw * input.mean_modulation))
-                .min(month.hours);
+            let uncapped_on_hours = month.generator_output_kwh * 1.1
+                / (input.nominal_thermal_capacity_kw * input.mean_modulation);
+            if !uncapped_on_hours.is_finite() {
+                issues.push(issue(
+                    "auxiliary_overflow",
+                    format!("months[{index}].generatorOutputKwh"),
+                ));
+                break;
+            }
+            let on_hours = uncapped_on_hours.min(month.hours);
             let electricity = (input.standby_electronics_w * month.hours
                 + (input.burner_auxiliary_w_per_kw + input.solution_pump_w_per_kw)
                     * input.nominal_thermal_capacity_kw
@@ -323,6 +330,19 @@ mod tests {
                     && item.path == "months[1].hours")
         );
         assert!(result.monthly.is_empty());
+    }
+
+    #[test]
+    fn overflowing_runtime_is_not_hidden_by_the_month_hour_cap() {
+        let mut input = sample();
+        input.months[0].generator_output_kwh = f64::MAX;
+        let result = assess_gas_heat_pump_aux_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.issues.iter().any(|item| {
+            item.code == "auxiliary_overflow" && item.path == "months[0].generatorOutputKwh"
+        }));
+        assert!(result.monthly.is_empty());
+        assert!(result.annual_auxiliary_electricity_kwh.is_none());
     }
 
     #[test]
