@@ -271,6 +271,25 @@ mod tests {
             warm.monthly[0].equipment_auxiliary_electricity_kwh,
             cold.monthly[0].equipment_auxiliary_electricity_kwh
         );
+        let legacy =
+            crate::norm_versions::with_version(crate::norm_versions::NormVersion::V2024, || {
+                assess_gas_heat_pump_chain_draft(&input)
+            });
+        assert_eq!(legacy.status, "invalid");
+        assert!(legacy.issues.iter().any(|item| {
+            item.code == "collective_source_temperature_not_applicable"
+                && item.path == "monthly.collectiveSourceTemperatureC"
+        }));
+        assert!(legacy.monthly.is_empty());
+        assert!(legacy.annual_equipment_auxiliary_electricity_kwh.is_none());
+        input.monthly.collective_source_temperature_c = None;
+        input.monthly.collective_source_temperature_reference = None;
+        let legacy_without_ignored_fields =
+            crate::norm_versions::with_version(crate::norm_versions::NormVersion::V2024, || {
+                assess_gas_heat_pump_chain_draft(&input)
+            });
+        assert_eq!(legacy_without_ignored_fields.status, "diagnostic_valid");
+        assert_eq!(legacy_without_ignored_fields.monthly.len(), 12);
     }
 
     #[test]
