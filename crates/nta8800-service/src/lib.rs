@@ -1805,6 +1805,18 @@ mod tests {
         }));
         assert!(value["monthly"].as_array().unwrap().is_empty());
         assert!(value["annualAuxiliaryElectricityKwh"].is_null());
+        input["standbyElectronicsW"] = json!(10.0);
+        input["months"][0]["generatorOutputKwh"] = json!(f64::MAX);
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "auxiliary_overflow" && item["path"] == "months[0].generatorOutputKwh"
+        }));
+        assert!(value["monthly"].as_array().unwrap().is_empty());
+        assert!(value["annualAuxiliaryElectricityKwh"].is_null());
     }
 
     #[tokio::test]

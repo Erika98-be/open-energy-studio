@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De gaswarmtepomp-hulpenergiediagnose weigert nu een overlopende bedrijfsurentussenwaarde voordat de maandurenbegrenzing die fout kan maskeren. Een gerichte Rust-proef controleert het exacte invoerpad en lege deelresultaten; [CI op `c3a489ff`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40849248646) slaagde voor de gate en drie desktopplatforms. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
+De gaswarmtepomp-hulpenergiediagnose weigert nu een overlopende bedrijfsurentussenwaarde voordat de maandurenbegrenzing die fout kan maskeren. Gerichte Rust- en HTTP-proeven controleren het exacte invoerpad, lege deelresultaten en de HTTP-422-status; [CI op `c3a489ff`](https://github.com/Erika98-be/open-energy-studio/actions/runs/40849248646) slaagde voor de gate en drie desktopplatforms vóór de HTTP-aanvulling. Dit versterkt *Audit*; *Referentie* en *Attest* blijven open.
 
 De aangewezen [BRL 9501 van 29 mei 2026](https://installq.nl/files/BRL-en/brl-9501-installq-2026-aangewezen.pdf) is als eisenkader beschikbaar en in het [BRL-gereedheidsdossier](nta8800-brl9501-gereedheid.md) verwerkt. De toepasselijke ISSO 54-uitgave met officiële verwachte uitkomsten en de externe toets blijven open; dit verandert geen *Referentie*- of *Attest*-status.
 
