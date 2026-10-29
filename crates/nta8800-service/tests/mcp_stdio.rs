@@ -179,7 +179,7 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
         })
         .collect::<Vec<_>>();
     months[0]["month"] = json!(0);
-    let input = json!({
+    let mut input = json!({
         "generatorId": "ga-1", "drive": "absorption", "nominalThermalCapacityKw": 20.0,
         "capacityReference": "plate", "standbyElectronicsW": 10.0,
         "burnerAuxiliaryWPerKw": 1.0, "solutionPumpWPerKw": 0.0,
@@ -202,7 +202,7 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
     let response = server.request(
         2,
         "tools/call",
-        json!({ "name": "diagnose_gas_heat_pump_aux_draft", "arguments": { "input": input } }),
+        json!({ "name": "diagnose_gas_heat_pump_aux_draft", "arguments": { "input": input.clone() } }),
     );
     assert_eq!(response["isError"], true, "{response}");
     let assessment = &response["structuredContent"];
@@ -225,6 +225,29 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
         }));
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+    input["months"][0]["month"] = json!(1);
+    input["months"][0]["generatorOutputKwh"] = json!(f64::MAX);
+    let overflow = server.request(
+        3,
+        "tools/call",
+        json!({ "name": "diagnose_gas_heat_pump_aux_draft", "arguments": { "input": input } }),
+    );
+    assert_eq!(overflow["isError"], true, "{overflow}");
+    let assessment = &overflow["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["monthly"].as_array().unwrap().is_empty());
+    assert!(assessment["annualAuxiliaryElectricityKwh"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "auxiliary_overflow" && issue["path"] == "months[0].generatorOutputKwh"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(overflow["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment
     );
 }
