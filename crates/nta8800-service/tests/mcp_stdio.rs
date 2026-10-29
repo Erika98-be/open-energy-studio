@@ -168,6 +168,71 @@ fn oil_boiler_mcp_reports_oil_scope_and_carrier_in_both_diagnostics() {
 }
 
 #[test]
+fn legacy_gas_monthly_mcp_rejects_ignored_collective_temperature_evidence() {
+    let mut input = json!({
+        "forfait": {
+            "generatorId":"ga-1", "drive":"gas_engine", "application":"utility",
+            "applicationReference":"office design", "collectiveBuildingInstallation":false,
+            "externalHeatSupply":false, "thermalCapacityKw":40.0, "capacityReference":"plate",
+            "source":"ground", "sourceReference":"source design",
+            "designSupplyTemperatureC":35.0, "designSupplyReference":"heating design"
+        },
+        "generatorOutputKwh":(1..=12).map(|month| json!({"month":month,"energyKwh":1000.0})).collect::<Vec<_>>(),
+        "generatorOutputReference":"heat meter", "sourceSystem":"collective_ground",
+        "sourceSystemReference":"source design", "collectiveSourceTemperatureC":14.9,
+        "collectiveSourceTemperatureReference":"temperature measurement"
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"legacy-gas-monthly-audit-test","version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let call = |input: &Value| {
+        json!({
+            "name":"diagnose_gas_heat_pump_monthly_draft",
+            "arguments":{"input":input, "normVersion":"2024"}
+        })
+    };
+    let refused = server.request(2, "tools/call", call(&input));
+    assert_eq!(refused["isError"], true, "{refused}");
+    let assessment = &refused["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["monthly"].as_array().unwrap().is_empty());
+    for path in [
+        "collectiveSourceTemperatureC",
+        "collectiveSourceTemperatureReference",
+    ] {
+        assert!(assessment["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "collective_source_temperature_not_applicable" && item["path"] == path
+        }));
+    }
+    assert_eq!(
+        serde_json::from_str::<Value>(refused["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+    input
+        .as_object_mut()
+        .unwrap()
+        .remove("collectiveSourceTemperatureC");
+    input
+        .as_object_mut()
+        .unwrap()
+        .remove("collectiveSourceTemperatureReference");
+    let valid = server.request(3, "tools/call", call(&input));
+    assert_eq!(valid["isError"], false, "{valid}");
+    assert_eq!(valid["structuredContent"]["status"], "diagnostic_valid");
+    assert_eq!(
+        valid["structuredContent"]["collectiveSourceCorrectionFactor"],
+        0.0
+    );
+}
+
+#[test]
 fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
     let mut months = (1..=12)
         .map(|month| {
