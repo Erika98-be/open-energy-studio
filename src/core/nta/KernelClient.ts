@@ -1069,8 +1069,9 @@ export async function diagnoseGasHeatPumpForfaitDraftWithRust(input: GasHeatPump
     const response = await fetch('/api/v1/nta8800/heat-pumps/gas-forfait-cop-draft/diagnose', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    if (!response.ok) throw new Error(`Gas heat pump diagnostic: HTTP ${response.status}`);
-    return response.json() as Promise<GasHeatPumpForfaitDraftAssessment>;
+    const assessment = await response.json() as GasHeatPumpForfaitDraftAssessment;
+    if (!response.ok && assessment.status !== 'invalid') throw new Error(`Gas heat pump diagnostic: HTTP ${response.status}`);
+    return assessment;
   }
   throw new Error('Rust gas heat-pump diagnostics are available in the desktop app and local development server.');
 }

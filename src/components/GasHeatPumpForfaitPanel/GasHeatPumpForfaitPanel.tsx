@@ -82,7 +82,7 @@ export function GasHeatPumpForfaitPanel({ pump, buildingFunction, onSave }: {
       const assessment = await diagnoseGasHeatPumpForfaitDraftWithRust(input, edition);
       if (current !== sequence.current) return;
       setResult(assessment);
-      if (assessment.status === 'invalid') setError(assessment.issues.map((issue) => t(`kernel.issue.${issue.code}`, { defaultValue: issue.code })).join(' '));
+      if (assessment.status === 'invalid') setError(assessment.issues.map((issue) => `${t(`kernel.issue.${issue.code}`, { defaultValue: issue.code })} (${issue.path})`).join(' '));
       else if (saveInput) onSave(input);
     } catch (cause) {
       if (current === sequence.current) setError(String(cause));

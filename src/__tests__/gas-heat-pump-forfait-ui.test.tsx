@@ -9,6 +9,34 @@ import { renderWithProviders, userEvent } from './test-utils';
 afterEach(() => vi.unstubAllGlobals());
 
 describe('gas heat pump draft COP UI', () => {
+  it('shows a Rust field error returned with HTTP 422', async () => {
+    const pump: INtaHeatPumpInput = {
+      id: 'gas-audit', drive: 'gas_engine', source: 'ground', sink: 'hydronic',
+      reversible: false, hybrid: false, booster: false,
+      performanceEvidence: { kind: 'normative_default', reference: null },
+      gasHeatPumpForfaitDraft: {
+        generatorId: 'gas-audit', drive: 'gas_engine', application: 'utility',
+        applicationReference: 'building schedule', collectiveBuildingInstallation: false,
+        externalHeatSupply: false, thermalCapacityKw: 40, capacityReference: 'plate',
+        source: 'ground', sourceReference: 'ground design', designSupplyTemperatureC: 35,
+        designSupplyReference: 'heating design', sourceCorrectionFactor: null,
+        sourceCorrectionReference: null,
+      },
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 422, json: async () => ({
+      status: 'invalid', correctedCop: null,
+      issues: [{ code: 'source_correction_not_applicable', path: 'sourceCorrectionReference' }],
+    }) }));
+    const onSave = vi.fn();
+    const user = userEvent.setup();
+    renderWithProviders(<GasHeatPumpForfaitPanel pump={pump} buildingFunction="office" onSave={onSave} />);
+    await user.click(screen.getByRole('button', { name: 'Save gas table input' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('sourceCorrectionReference');
+    expect(screen.getByRole('alert')).toHaveTextContent('source reference');
+    expect(screen.queryByText(/Draft table COP/)).not.toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it('requires traceable evidence and shows a COP without implying gas use', async () => {
     const pump: INtaHeatPumpInput = {
       id: 'gas-1', drive: 'absorption', source: 'exhaust_air', sink: 'hydronic',
