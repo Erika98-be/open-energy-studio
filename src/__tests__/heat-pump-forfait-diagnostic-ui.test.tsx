@@ -98,7 +98,7 @@ describe('draft COP table UI', () => {
   it('keeps a Rust-rejected correction out of the saved project', async () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: async () => ({
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 422, json: async () => ({
       status: 'invalid', table: '9.27', correctedCop: null, issues: [{ code: 'cop_overflow', path: 'sourceCorrectionFactor' }],
     }) }));
     renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'ground' }}
@@ -115,13 +115,19 @@ describe('draft COP table UI', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('The corrected COP is out of range');
     expect(screen.getByRole('alert')).toHaveTextContent('sourceCorrectionFactor');
     expect(onSave).not.toHaveBeenCalled();
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: async () => ({
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 422, json: async () => ({
       status: 'invalid', table: '9.27', correctedCop: null,
       issues: [{ code: 'source_correction_not_applicable', path: 'sourceCorrectionReference' }],
     }) }));
     await user.click(screen.getByRole('button', { name: 'Save table input' }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('sourceCorrectionReference'));
     expect(screen.getByRole('alert')).toHaveTextContent('source reference');
+    expect(onSave).not.toHaveBeenCalled();
+    const parseServerError = vi.fn();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500, json: parseServerError }));
+    await user.click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('HTTP 500'));
+    expect(parseServerError).not.toHaveBeenCalled();
     expect(onSave).not.toHaveBeenCalled();
   });
 

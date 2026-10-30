@@ -1023,7 +1023,10 @@ export async function diagnoseForfaitHeatPumpDraftWithRust(input: ForfaitHeatPum
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<ForfaitHeatPumpDraftAssessment>;
+    if (response.ok === false && response.status !== 422) throw new Error(`Heat pump table diagnostic: HTTP ${response.status}`);
+    const assessment = await response.json() as ForfaitHeatPumpDraftAssessment;
+    if (response.ok === false && assessment.status !== 'invalid') throw new Error(`Heat pump table diagnostic: HTTP ${response.status}`);
+    return assessment;
   }
   throw new Error('Rust draft heat-pump forfait diagnostics are available in the desktop app and local development server.');
 }
