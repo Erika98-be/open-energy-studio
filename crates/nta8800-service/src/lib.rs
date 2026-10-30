@@ -1119,6 +1119,28 @@ mod tests {
             result["issues"][0]["code"],
             "high_test_cop_below_requirement"
         );
+
+        input["rowVariant"] = json!("base");
+        input["highEfficiencyEvidence"] = Value::Null;
+        input["sourceCorrectionReference"] = json!("unrelated source note");
+        let response = app()
+            .oneshot(
+                Request::post("/v1/nta8800/heat-pumps/forfait-cop-draft/diagnose")
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(result["correctedCop"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "source_correction_not_applicable"
+                && item["path"] == "sourceCorrectionReference"
+        }));
     }
 
     #[tokio::test]

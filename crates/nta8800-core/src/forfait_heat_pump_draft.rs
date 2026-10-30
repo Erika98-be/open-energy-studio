@@ -577,10 +577,16 @@ pub fn assess_forfait_heat_pump_draft(
                 "designSupplyTemperatureC",
             ));
         }
-        if input.source_correction_factor.is_some() || input.source_correction_reference.is_some() {
+        if input.source_correction_factor.is_some() {
             issues.push(issue(
                 "source_correction_not_applicable",
                 "sourceCorrectionFactor",
+            ));
+        }
+        if input.source_correction_reference.is_some() {
+            issues.push(issue(
+                "source_correction_not_applicable",
+                "sourceCorrectionReference",
             ));
         }
         if issues.is_empty() {
@@ -638,13 +644,19 @@ pub fn assess_forfait_heat_pump_draft(
             {
                 issues.push(issue("source_required", "sourceCorrectionReference"));
             }
-        } else if input.source_correction_factor.is_some()
-            || input.source_correction_reference.is_some()
-        {
-            issues.push(issue(
-                "source_correction_not_applicable",
-                "sourceCorrectionFactor",
-            ));
+        } else {
+            if input.source_correction_factor.is_some() {
+                issues.push(issue(
+                    "source_correction_not_applicable",
+                    "sourceCorrectionFactor",
+                ));
+            }
+            if input.source_correction_reference.is_some() {
+                issues.push(issue(
+                    "source_correction_not_applicable",
+                    "sourceCorrectionReference",
+                ));
+            }
         }
         if let Some(index) = index {
             selected_band = Some(BANDS[index]);
@@ -731,6 +743,44 @@ mod tests {
             source_temperature_evidence_reference: None,
             source_quality_declaration_reference: None,
             quality_declaration: None,
+        }
+    }
+
+    #[test]
+    fn non_applicable_source_correction_reports_supplied_fields() {
+        for sink in [TableSink::Hydronic, TableSink::IndoorAir] {
+            let mut input = example(
+                TableScope::UtilityCollectiveOrOver25Kw,
+                TableSource::OutdoorAir,
+                35.0,
+            );
+            input.sink = sink;
+            if sink == TableSink::IndoorAir {
+                input.design_supply_temperature_c = None;
+            }
+            input.source_correction_reference = Some("unrelated source note".into());
+            let reference_only = assess_forfait_heat_pump_draft(&input);
+            assert!(reference_only.issues.iter().any(|item| {
+                item.code == "source_correction_not_applicable"
+                    && item.path == "sourceCorrectionReference"
+            }));
+            assert!(!reference_only.issues.iter().any(|item| {
+                item.code == "source_correction_not_applicable"
+                    && item.path == "sourceCorrectionFactor"
+            }));
+            assert!(reference_only.corrected_cop.is_none());
+
+            input.source_correction_factor = Some(1.0);
+            let both = assess_forfait_heat_pump_draft(&input);
+            assert!(both.issues.iter().any(|item| {
+                item.code == "source_correction_not_applicable"
+                    && item.path == "sourceCorrectionFactor"
+            }));
+            assert!(both.issues.iter().any(|item| {
+                item.code == "source_correction_not_applicable"
+                    && item.path == "sourceCorrectionReference"
+            }));
+            assert!(both.corrected_cop.is_none());
         }
     }
 
