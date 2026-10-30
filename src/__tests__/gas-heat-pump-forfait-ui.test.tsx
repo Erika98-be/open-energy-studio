@@ -35,6 +35,13 @@ describe('gas heat pump draft COP UI', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('source reference');
     expect(screen.queryByText(/Draft table COP/)).not.toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
+
+    const parseServerError = vi.fn();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500, json: parseServerError }));
+    await user.click(screen.getByRole('button', { name: 'Save gas table input' }));
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('HTTP 500'));
+    expect(parseServerError).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
   });
 
   it('requires traceable evidence and shows a COP without implying gas use', async () => {

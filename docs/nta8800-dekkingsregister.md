@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De gaswarmtepomp-COP-tabel-UI verwerkt een HTTP-422-antwoord met `status=invalid` nu als Rust-invoeraudit, toont het concrete veldpad en voorkomt opslaan. Een gerichte UI-proef bewaakt de fout bij `sourceCorrectionReference`, lege COP en geen opslag; vier UI-proeven en TypeScript slagen lokaal. [CI op `67b41bcb`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41085533035) slaagde voor de voorafgaande gate en drie desktopplatforms. Dit versterkt *Audit* en *Weergave*; *Referentie* en *Attest* blijven open.
+De gaswarmtepomp-COP-tabel-UI verwerkt een HTTP-422-antwoord met `status=invalid` nu als Rust-invoeraudit, toont het concrete veldpad en voorkomt opslaan. Een andere HTTP-fout blijft een transportfout. Een gerichte UI-proef bewaakt de fout bij `sourceCorrectionReference`, lege COP, geen opslag en de aparte 500-route; vier UI-proeven en TypeScript slagen lokaal. [CI op `02dca04b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41095060228) slaagde voor de voorafgaande gate en drie desktopplatforms. Dit versterkt *Audit* en *Weergave*; *Referentie* en *Attest* blijven open.
 
 De NL/EN-broncorrectiemeldingen beschrijven nu de brongebonden toegestane factorwaarden in plaats van alleen `> 0`, en noemen bij een niet-toepasselijke correctie zowel factor als bronverwijzing. Zeven bestaande gaswarmtepomp-UI- en berichtproeven slagen lokaal. Dit versterkt *Weergave* van de Rust-invoeraudit; *Referentie* en *Attest* blijven open.
 
