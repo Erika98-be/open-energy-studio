@@ -169,10 +169,16 @@ pub fn assess_gas_heat_pump_forfait_draft(
                 "sourceCorrectionReference",
             );
         }
-    } else if input.source_correction_factor.is_some()
-        || input.source_correction_reference.is_some()
-    {
-        add("source_correction_not_applicable", "sourceCorrectionFactor");
+    } else {
+        if input.source_correction_factor.is_some() {
+            add("source_correction_not_applicable", "sourceCorrectionFactor");
+        }
+        if input.source_correction_reference.is_some() {
+            add(
+                "source_correction_not_applicable",
+                "sourceCorrectionReference",
+            );
+        }
     }
     if input.external_heat_supply {
         add(
@@ -432,6 +438,33 @@ mod tests {
         let accepted = assess_gas_heat_pump_forfait_draft(&input);
         assert_eq!(accepted.status, "diagnostic_valid");
         assert_eq!(accepted.corrected_cop, accepted.forfait_cop);
+    }
+
+    #[test]
+    fn non_applicable_source_correction_reports_each_supplied_field() {
+        let mut input = sample();
+        input.source_correction_reference = Some("unrelated source note".into());
+        let reference_only = assess_gas_heat_pump_forfait_draft(&input);
+        assert_eq!(reference_only.status, "invalid");
+        assert!(reference_only.issues.iter().any(|item| {
+            item.code == "source_correction_not_applicable"
+                && item.path == "sourceCorrectionReference"
+        }));
+        assert!(!reference_only.issues.iter().any(|item| {
+            item.code == "source_correction_not_applicable" && item.path == "sourceCorrectionFactor"
+        }));
+        assert!(reference_only.corrected_cop.is_none());
+
+        input.source_correction_factor = Some(1.0);
+        let both = assess_gas_heat_pump_forfait_draft(&input);
+        assert!(both.issues.iter().any(|item| {
+            item.code == "source_correction_not_applicable" && item.path == "sourceCorrectionFactor"
+        }));
+        assert!(both.issues.iter().any(|item| {
+            item.code == "source_correction_not_applicable"
+                && item.path == "sourceCorrectionReference"
+        }));
+        assert!(both.corrected_cop.is_none());
     }
 
     #[test]

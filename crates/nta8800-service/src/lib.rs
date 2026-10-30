@@ -2281,6 +2281,20 @@ mod tests {
         input["sourceCorrectionReference"] = Value::Null;
         let response = app().oneshot(request(&input)).await.unwrap();
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        input["application"] = json!("utility");
+        input["collectiveBuildingInstallation"] = json!(false);
+        input["sourceCorrectionFactor"] = Value::Null;
+        input["sourceCorrectionReference"] = json!("unrelated source note");
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "source_correction_not_applicable"
+                && item["path"] == "sourceCorrectionReference"
+        }));
+        assert!(value["correctedCop"].is_null());
     }
 
     #[tokio::test]
