@@ -112,7 +112,16 @@ describe('draft COP table UI', () => {
     fireEvent.change(screen.getByLabelText('Supplied source correction csource'), { target: { value: '1e308' } });
     fireEvent.change(screen.getByLabelText('Source correction evidence'), { target: { value: 'source report' } });
     await user.click(screen.getByRole('button', { name: 'Save table input' }));
-    expect(await screen.findByText(/cop_overflow/)).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent('The corrected COP is out of range');
+    expect(screen.getByRole('alert')).toHaveTextContent('sourceCorrectionFactor');
+    expect(onSave).not.toHaveBeenCalled();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: async () => ({
+      status: 'invalid', table: '9.27', correctedCop: null,
+      issues: [{ code: 'source_correction_not_applicable', path: 'sourceCorrectionReference' }],
+    }) }));
+    await user.click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('sourceCorrectionReference'));
+    expect(screen.getByRole('alert')).toHaveTextContent('source reference');
     expect(onSave).not.toHaveBeenCalled();
   });
 

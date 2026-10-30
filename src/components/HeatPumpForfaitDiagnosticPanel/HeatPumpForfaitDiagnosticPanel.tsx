@@ -237,7 +237,7 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
     {saved && <p>{t('kernel.forfait.saved')}</p>}
     {error && <p role="alert" className="heat-pump-forfait-draft-error">{error}</p>}
     {result?.status === 'invalid' && <p role="alert" className="heat-pump-forfait-draft-error">
-      {t('kernel.forfait.invalid')} {result.issues.map((item) => item.code).join(', ')}
+      {t('kernel.forfait.invalid')} {result.issues.map((item) => `${t(`kernel.issue.${item.code}`, { defaultValue: item.code })} (${item.path})`).join(' ')}
     </p>}
     {result?.status === 'input_valid' && <div className="heat-pump-forfait-draft-result" role="status">
       <strong>{t('kernel.forfait.result')}: {result.correctedCop?.toFixed(2)}</strong>
