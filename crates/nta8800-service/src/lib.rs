@@ -1141,6 +1141,29 @@ mod tests {
             item["code"] == "source_correction_not_applicable"
                 && item["path"] == "sourceCorrectionReference"
         }));
+
+        input["sourceCorrectionReference"] = Value::Null;
+        input["sourceTemperatureC"] = json!(12.0);
+        input["sourceTemperatureEvidenceReference"] = json!("unrelated meter");
+        let response = app()
+            .oneshot(
+                Request::post("/v1/nta8800/heat-pumps/forfait-cop-draft/diagnose")
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(result["correctedCop"].is_null());
+        for path in ["sourceTemperatureC", "sourceTemperatureEvidenceReference"] {
+            assert!(result["issues"].as_array().unwrap().iter().any(|item| {
+                item["code"] == "source_temperature_not_applicable" && item["path"] == path
+            }));
+        }
     }
 
     #[tokio::test]

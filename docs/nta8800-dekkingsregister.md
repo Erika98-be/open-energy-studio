@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De elektrische COP-tabelroute weigert `sourceTemperatureC` en `sourceTemperatureEvidenceReference` wanneer de bronrij geen temperatuurklasse kent, ook voor grondwater bij 2020+A1/2022. Rust meldt beide concrete veldpaden en houdt de gecorrigeerde COP leeg; HTTP antwoordt met 422. De UI laat deze velden voor de oudere edities weg. Gerichte kern-, HTTP- en UI-proeven bewaken dit. Dit versterkt *Audit* en *Weergave*; *Referentie* en *Attest* blijven open.
+
 De elektrische COP-tabel-HTTP-client leest 422 alleen als Rust-invoeraudit bij `status=invalid`; 500 blijft een transportfout. De UI-proef bewaakt beide 422-veldmeldingen, de aparte 500-route en geen opslag; zeven formulierproeven en TypeScript slagen lokaal. [CI op `8f194b23`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41128010564) slaagde voor de voorafgaande gate en drie desktopplatforms. Dit versterkt *Audit* en de HTTP-grens; *Referentie* en *Attest* blijven open.
 
 De elektrische COP-tabel-UI vertaalt een Rust-foutcode nu en toont het veldpad. Een gerichte UI-proef bewaakt `sourceCorrectionFactor` en `sourceCorrectionReference` als afzonderlijke herstelpunten, zonder ongeldige invoer op te slaan; zeven formulierproeven en TypeScript slagen lokaal. [CI op `613a06c8`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41119977885) slaagde voor de voorafgaande gate en drie desktopplatforms inclusief MCP. Dit versterkt *Audit* en *Weergave*; *Referentie* en *Attest* blijven open.

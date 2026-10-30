@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 30 oktober 2026
+# NTA 8800 verificatiestatus — 31 oktober 2026
+
+De elektrische COP-tabeldiagnose wijst een opgegeven brontemperatuur en temperatuurbronverwijzing nu afzonderlijk af wanneer de gekozen bronrij geen temperatuurklasse gebruikt. Dit geldt ook voor de grondwaterrij van NTA 8800:2020+A1/2022, die geen temperatuurklasse heeft. Rust geeft `source_temperature_not_applicable` op de twee ingediende veldpaden en geen gecorrigeerde COP; HTTP geeft 422. Het formulier verbergt en verzendt deze velden niet voor die oudere edities. Gerichte Rust-, HTTP- en UI-proeven controleren de veldpaden, de lege deeluitkomst en de editiegebonden aanvraag. Dit is invoeraudit en weergave; onafhankelijke referentie-uitkomsten en attestering blijven open.
 
 De browserroute van de elektrische COP-tabeldiagnose accepteert een HTTP-422-antwoord uitsluitend als de Rust-response `status=invalid` bevat. Een serverfout zoals 500 blijft een transportfout en wordt niet als invoeraudit getoond. De bestaande UI-proef controleert nu beide 422-foutvelden en de aparte 500-route zonder opslag; zeven formulierproeven en TypeScript slagen lokaal. [CI op `8f194b23`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41128010564) slaagde voor de voorafgaande NTA-gate en drie desktopplatforms. Dit verduidelijkt de grens tussen invoeraudit en transportfout; referentie en attest blijven open.
 

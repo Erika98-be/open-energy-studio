@@ -89,6 +89,7 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   const highRow = rowVariant === 'table_9_28_high_efficiency';
   const highRowAvailable = scope === 'residential_at_most25_kw' && pump.sink === 'hydronic' && conditions.length > 0;
   const sourceTemperatureBounds = (() => {
+    if (edition === '2020+A1' || edition === '2022') return null;
     switch (source) {
       case 'groundwater_below15_c': return [-Infinity, 15] as const;
       case 'collective15_to20_c': return [15, 20] as const;

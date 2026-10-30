@@ -407,6 +407,22 @@ fn high_evidence_issues(input: &ForfaitHeatPumpDraftInput) -> Vec<TableIssue> {
 
 fn source_classification_issues(input: &ForfaitHeatPumpDraftInput) -> Vec<TableIssue> {
     use TableSource::*;
+    let unused_temperature_issues = || {
+        let mut issues = Vec::new();
+        if input.source_temperature_c.is_some() {
+            issues.push(issue(
+                "source_temperature_not_applicable",
+                "sourceTemperatureC",
+            ));
+        }
+        if input.source_temperature_evidence_reference.is_some() {
+            issues.push(issue(
+                "source_temperature_not_applicable",
+                "sourceTemperatureEvidenceReference",
+            ));
+        }
+        issues
+    };
     let bounds = match input.source {
         GroundwaterBelow15C => Some((f64::NEG_INFINITY, 15.0)),
         Collective15To20C => Some((15.0, 20.0)),
@@ -415,16 +431,18 @@ fn source_classification_issues(input: &ForfaitHeatPumpDraftInput) -> Vec<TableI
         _ => None,
     };
     let Some((lower, upper)) = bounds else {
-        return Vec::new();
+        return unused_temperature_issues();
     };
     // NTA 8800:2022 tables 9.27/9.29 (p. 314–317): "grondwater" without a
     // source temperature; the warmer source rows do not exist.
     if crate::norm_versions::profile().heat_pump_tables_2022 {
-        return if input.source == GroundwaterBelow15C {
+        let mut issues = if input.source == GroundwaterBelow15C {
             Vec::new()
         } else {
             vec![issue("route_not_in_edition", "source")]
         };
+        issues.extend(unused_temperature_issues());
+        return issues;
     }
     let mut issues = Vec::new();
     if input.source_temperature_c.map_or(true, |value| {
@@ -785,6 +803,46 @@ mod tests {
     }
 
     #[test]
+    fn source_temperature_fields_are_rejected_when_table_does_not_use_them() {
+        use crate::norm_versions::{with_version, NormVersion};
+        let mut air = example(
+            TableScope::UtilityCollectiveOrOver25Kw,
+            TableSource::OutdoorAir,
+            35.0,
+        );
+        air.source_temperature_c = Some(12.0);
+        air.source_temperature_evidence_reference = Some("unrelated meter".into());
+        let air_result = assess_forfait_heat_pump_draft(&air);
+        for path in ["sourceTemperatureC", "sourceTemperatureEvidenceReference"] {
+            assert!(air_result.issues.iter().any(|item| {
+                item.code == "source_temperature_not_applicable" && item.path == path
+            }));
+        }
+        assert!(air_result.corrected_cop.is_none());
+
+        let mut groundwater = example(
+            TableScope::UtilityCollectiveOrOver25Kw,
+            TableSource::GroundwaterBelow15C,
+            35.0,
+        );
+        for edition in [NormVersion::V2020A1, NormVersion::V2022] {
+            let legacy = with_version(edition, || assess_forfait_heat_pump_draft(&groundwater));
+            assert!(legacy.issues.is_empty(), "{:?}", legacy.issues);
+            groundwater.source_temperature_c = Some(10.0);
+            groundwater.source_temperature_evidence_reference = Some("unrelated meter".into());
+            let legacy = with_version(edition, || assess_forfait_heat_pump_draft(&groundwater));
+            for path in ["sourceTemperatureC", "sourceTemperatureEvidenceReference"] {
+                assert!(legacy.issues.iter().any(|item| {
+                    item.code == "source_temperature_not_applicable" && item.path == path
+                }));
+            }
+            assert!(legacy.corrected_cop.is_none());
+            groundwater.source_temperature_c = None;
+            groundwater.source_temperature_evidence_reference = None;
+        }
+    }
+
+    #[test]
     fn tables_9_27_and_9_29_of_2022() {
         use crate::norm_versions::{with_version, NormVersion};
         let codes = |edition, input: &ForfaitHeatPumpDraftInput| {
@@ -830,7 +888,14 @@ mod tests {
         assert!(codes(NormVersion::V2023, &warm).is_empty());
         assert_eq!(
             codes(NormVersion::V2022, &warm),
-            vec![("route_not_in_edition", "source")]
+            vec![
+                ("route_not_in_edition", "source"),
+                ("source_temperature_not_applicable", "sourceTemperatureC"),
+                (
+                    "source_temperature_not_applicable",
+                    "sourceTemperatureEvidenceReference"
+                ),
+            ]
         );
         // "Grondwater" without a temperature, and table 9.27 for every
         // dwelling: no 25 kW or collective boundary in 2022 (p. 314).

@@ -4,6 +4,7 @@ import { HeatPumpForfaitDiagnosticPanel } from '../components/HeatPumpForfaitDia
 import type { INtaHeatPumpInput } from '../core/energy/types';
 import { heatPumpHighTestStandard } from '../core/nta/KernelClient';
 import { renderWithProviders, userEvent } from './test-utils';
+import * as EnergyContext from '../context/EnergyContext';
 
 const pump: INtaHeatPumpInput = {
   id: 'hp-forfait', source: 'outdoor_air', sink: 'hydronic', drive: 'electric_compression',
@@ -11,7 +12,7 @@ const pump: INtaHeatPumpInput = {
   performanceEvidence: { kind: 'normative_default', reference: null },
 };
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('table 9.28 test standard per edition', () => {
   // Edition-delta audit (10 October 2026): the panel wrote :2022 for every
@@ -26,6 +27,32 @@ describe('table 9.28 test standard per edition', () => {
 });
 
 describe('draft COP table UI', () => {
+  it('omits the source-temperature fields for a 2022 groundwater table', async () => {
+    vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue('2022');
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'system design',
+      scope: 'utility_collective_or_over25_kw', source: 'groundwater_below15_c',
+      sink: 'hydronic', designSupplyTemperatureC: 35, thermalCapacityKw: 30,
+      capacitySourceReference: 'plate', collectiveBuildingInstallation: false,
+      sourceCorrectionFactor: null, sourceCorrectionReference: null,
+      sourceTemperatureC: 10, sourceTemperatureEvidenceReference: 'old meter',
+    };
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({
+      status: 'input_valid', correctedCop: 4, issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'groundwater', forfaitHeatPumpDraft: saved }}
+      buildingFunction="office" onSave={vi.fn()} />);
+    expect(screen.queryByLabelText('Declared source temperature (°C)')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Look up draft COP' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    const request = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(request.normVersion).toBe('2022');
+    expect(request.input.sourceTemperatureC).toBeNull();
+    expect(request.input.sourceTemperatureEvidenceReference).toBeNull();
+  });
+
   it('requires evidence, uses the Rust lookup and restores saved table input', async () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
