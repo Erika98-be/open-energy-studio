@@ -114,6 +114,50 @@ fn example_project() -> Value {
 }
 
 #[test]
+fn gas_pump_mcp_preserves_non_applicable_source_reference_path() {
+    let input = json!({
+        "generatorId":"gwp-1", "drive":"gas_engine", "application":"utility",
+        "applicationReference":"building installation schedule",
+        "collectiveBuildingInstallation":false, "externalHeatSupply":false,
+        "thermalCapacityKw":40.0, "capacityReference":"plate",
+        "source":"ground", "sourceReference":"product schedule",
+        "designSupplyTemperatureC":35.0, "designSupplyReference":"heating design",
+        "sourceCorrectionReference":"unrelated source note"
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"gas-pump-audit-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name":"diagnose_gas_heat_pump_forfait_draft", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["correctedCop"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "source_correction_not_applicable"
+                && issue["path"] == "sourceCorrectionReference"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn oil_boiler_mcp_reports_oil_scope_and_carrier_in_both_diagnostics() {
     let boiler = json!({
         "generatorId":"oil-boiler", "role":"individual_main",
