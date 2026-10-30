@@ -65,10 +65,27 @@ describe('gas heat pump draft monthly terms UI', () => {
   });
   it('does not require the 2025+C1-only source correction evidence in the 2024 edition', async () => {
     vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue('2024');
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+      status: 'diagnostic_valid', correctedCop: 1.6, collectiveSourceCorrectionFactor: 0,
+      collectiveSourceHeatDerived: true, monthly: [], inputFingerprint: 'sha256:legacy', issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
     const user = userEvent.setup();
     renderWithProviders(<GasHeatPumpMonthlyPanel pump={groundPump} />);
     await user.selectOptions(screen.getByLabelText('Source system'), 'collective_ground');
     expect(screen.queryByLabelText('Collective ground-source temperature (°C)')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Source-system evidence'), { target: { value: 'source design' } });
+    fireEvent.change(screen.getByLabelText('Monthly generator heat evidence'), { target: { value: 'meter' } });
+    for (let month = 1; month <= 12; month += 1) {
+      fireEvent.change(screen.getByLabelText(`Generator heat (kWh) ${month}`), { target: { value: '1000' } });
+    }
+    await user.click(screen.getByRole('button', { name: 'Calculate draft 9.62 terms' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    const request = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(request.normVersion).toBe('2024');
+    expect(request.input.sourceSystem).toBe('collective_ground');
+    expect(request.input).not.toHaveProperty('collectiveSourceTemperatureC');
+    expect(request.input).not.toHaveProperty('collectiveSourceTemperatureReference');
   });
   it('sends collective temperature and declaration evidence to the dh diagnostic and clears stale results', async () => {
     const pump: INtaHeatPumpInput = {
