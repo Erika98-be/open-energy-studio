@@ -226,6 +226,38 @@ fn electric_pump_mcp_preserves_non_applicable_source_reference_paths() {
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment
     );
+
+    let response = server.request(
+        4,
+        "tools/call",
+        json!({
+            "name":"diagnose_forfait_heat_pump_draft",
+            "arguments":{"input":{
+                "generatorId":"hp-groundwater", "classificationSourceReference":"source design",
+                "scope":"utility_collective_or_over25_kw", "source":"groundwater_below15_c",
+                "sink":"hydronic", "designSupplyTemperatureC":35.0,
+                "sourceTemperatureC":10.0,
+                "sourceTemperatureEvidenceReference":"source design",
+                "sourceQualityDeclarationReference":"  "
+            }}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["correctedCop"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "source_required"
+                && issue["path"] == "sourceQualityDeclarationReference"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
 }
 
 #[test]
