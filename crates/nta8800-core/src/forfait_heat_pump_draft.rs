@@ -501,6 +501,17 @@ pub fn assess_forfait_heat_pump_draft(
             "sourceQualityDeclarationReference",
         ));
     }
+    if input.source == TableSource::GroundwaterBelow15C
+        && input
+            .source_quality_declaration_reference
+            .as_deref()
+            .is_some_and(|reference| reference.trim().is_empty())
+    {
+        issues.push(issue(
+            "source_required",
+            "sourceQualityDeclarationReference",
+        ));
+    }
     // The installation year only enters 9.85 under NTA 8800:2020+A1 (A 87,6
     // or 13,0 kWh, 2020 p. 334–336); from 2022 heat pumps have their own
     // constants without a year. Where it changes nothing, a value left
@@ -880,6 +891,13 @@ mod tests {
         let result = assess_forfait_heat_pump_draft(&groundwater);
         assert!(result.issues.is_empty(), "{:?}", result.issues);
         assert!(result.corrected_cop.is_some());
+
+        groundwater.source_quality_declaration_reference = Some("  ".into());
+        let empty = assess_forfait_heat_pump_draft(&groundwater);
+        assert!(empty.issues.iter().any(|item| {
+            item.code == "source_required" && item.path == "sourceQualityDeclarationReference"
+        }));
+        assert!(empty.corrected_cop.is_none());
     }
 
     #[test]

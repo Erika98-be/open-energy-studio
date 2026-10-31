@@ -1189,6 +1189,47 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn groundwater_source_declaration_reference_must_not_be_blank() {
+        let mut input = json!({
+            "generatorId":"hp-groundwater", "classificationSourceReference":"source design",
+            "scope":"utility_collective_or_over25_kw", "source":"groundwater_below15_c",
+            "sink":"hydronic", "designSupplyTemperatureC":35.0,
+            "sourceCorrectionFactor":null, "sourceCorrectionReference":null,
+            "sourceTemperatureC":10.0, "sourceTemperatureEvidenceReference":"source design",
+            "sourceQualityDeclarationReference":"  "
+        });
+        let response = app()
+            .oneshot(
+                Request::post("/v1/nta8800/heat-pumps/forfait-cop-draft/diagnose")
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(result["correctedCop"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "source_required" && item["path"] == "sourceQualityDeclarationReference"
+        }));
+
+        input["sourceQualityDeclarationReference"] = json!("source declaration QD-1");
+        let response = app()
+            .oneshot(
+                Request::post("/v1/nta8800/heat-pumps/forfait-cop-draft/diagnose")
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
     async fn forfait_monthly_draft_derives_source_heat_without_enabling_beng() {
         let months = (1..=12)
             .map(|month| json!({"month":month,"energyKwh":1000.0}))
