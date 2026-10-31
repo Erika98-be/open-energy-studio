@@ -54,6 +54,7 @@ describe('draft COP table UI', () => {
   });
 
   it('keeps an existing declared performance instead of silently reverting to the table COP', async () => {
+    const user = userEvent.setup();
     const onSave = vi.fn();
     const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({
       status: 'input_valid', correctedCop: 4.3, issues: [],
@@ -72,12 +73,27 @@ describe('draft COP table UI', () => {
       buildingFunction="residential" onSave={onSave} />);
     expect(screen.getByLabelText('Use declared heat pump performance (§9.1)')).toBeChecked();
     expect(screen.getByLabelText('Declared generation efficiency (COP)')).toHaveValue('4.32');
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    await user.click(screen.getByRole('button', { name: 'Save table input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
       qualityDeclaration: saved.qualityDeclaration,
     })));
     expect(JSON.parse(fetchMock.mock.calls[0][1].body).input.qualityDeclaration)
       .toEqual(saved.qualityDeclaration);
+
+    fireEvent.change(screen.getByLabelText('Declared generation efficiency (COP)'), { target: { value: '0.04' } });
+    await user.click(screen.getByRole('button', { name: 'Save table input' }));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(screen.getByLabelText('Declared generation efficiency (COP)'), { target: { value: '4.35' } });
+    await user.click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(2));
+    expect(onSave.mock.calls[1][0].qualityDeclaration.generationEfficiency).toBe(4.35);
+
+    await user.click(screen.getByLabelText('Use declared heat pump performance (§9.1)'));
+    await user.click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(3));
+    expect(onSave.mock.calls[2][0].qualityDeclaration).toBeNull();
   });
 
   it('preserves a saved groundwater source declaration as provenance', async () => {
