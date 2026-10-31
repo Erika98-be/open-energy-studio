@@ -567,6 +567,7 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
     );
     input["months"][0]["month"] = json!(1);
     input["months"][0]["generatorOutputKwh"] = json!(f64::MAX);
+    input["months"].as_array_mut().unwrap().reverse();
     let overflow = server.request(
         3,
         "tools/call",
@@ -582,7 +583,8 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
         .unwrap()
         .iter()
         .any(|issue| {
-            issue["code"] == "auxiliary_overflow" && issue["path"] == "months[0].generatorOutputKwh"
+            issue["code"] == "auxiliary_overflow"
+                && issue["path"] == "months[11].generatorOutputKwh"
         }));
     assert_eq!(
         serde_json::from_str::<Value>(overflow["content"][0]["text"].as_str().unwrap()).unwrap(),

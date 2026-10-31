@@ -368,10 +368,11 @@ mod tests {
     fn overflowing_runtime_is_not_hidden_by_the_month_hour_cap() {
         let mut input = sample();
         input.months[0].generator_output_kwh = f64::MAX;
+        input.months.reverse();
         let result = assess_gas_heat_pump_aux_draft(&input);
         assert_eq!(result.status, "invalid");
         assert!(result.issues.iter().any(|item| {
-            item.code == "auxiliary_overflow" && item.path == "months[0].generatorOutputKwh"
+            item.code == "auxiliary_overflow" && item.path == "months[11].generatorOutputKwh"
         }));
         assert!(result.monthly.is_empty());
         assert!(result.annual_auxiliary_electricity_kwh.is_none());
