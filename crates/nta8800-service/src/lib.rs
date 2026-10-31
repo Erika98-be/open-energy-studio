@@ -1959,6 +1959,14 @@ mod tests {
         let value: Value =
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
+        assert_eq!(
+            value["scope"],
+            "edition_specific_9_91_9_92_gas_generator_auxiliary_only"
+        );
+        assert!(value["draftSource"]
+            .as_str()
+            .unwrap()
+            .contains("formules 9.91 en 9.92"));
         assert!(
             (value["monthly"][0]["auxiliaryElectricityKwh"]
                 .as_f64()
@@ -2029,6 +2037,14 @@ mod tests {
         let value: Value =
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
+        assert_eq!(
+            value["scope"],
+            "edition_specific_equation_9_62_gas_pump_terms_without_carrier_allocation"
+        );
+        assert!(value["draftSource"]
+            .as_str()
+            .unwrap()
+            .contains("formule 9.62"));
         let heat = 1000.0 * (1.0 - 1.0 / 2.1);
         assert!(
             (value["monthly"][0]["equation962InputTermKwh"]

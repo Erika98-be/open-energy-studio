@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashSet;
 
-const DRAFT_SOURCE: &str = "NTA 8800:2025+C1:2026, §9.6.8.2, formules 9.91 en 9.92 (p. 363–364)";
+const FORMULA_SOURCE: &str = "NTA 8800:2025+C1:2026, §9.6.8.2, formules 9.91 en 9.92 (p. 363–364)";
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -231,8 +231,8 @@ pub fn assess_gas_heat_pump_aux_draft(
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_9_91_9_92_gas_generator_auxiliary_only",
-        draft_source: crate::norm_versions::cite(DRAFT_SOURCE),
+        scope: "edition_specific_9_91_9_92_gas_generator_auxiliary_only",
+        draft_source: crate::norm_versions::cite(FORMULA_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),
