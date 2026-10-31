@@ -1322,6 +1322,18 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(result["status"], "diagnostic_valid");
+        assert_eq!(
+            result["scope"],
+            "edition_specific_equation_9_62_supplied_monthly_flows_only"
+        );
+        assert!(result["consultationSource"]
+            .as_str()
+            .unwrap()
+            .contains("formule 9.62"));
+        assert!(result["consultationSource"]
+            .as_str()
+            .unwrap()
+            .contains("§9.6.8.1.1.2.3"));
         assert_eq!(result["monthly"].as_array().unwrap().len(), 12);
         assert!(
             (result["monthly"][0]["generatorInputElectricityKwh"]

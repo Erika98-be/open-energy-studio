@@ -1,8 +1,8 @@
-# Warmtepomp maandelijkse generatorinvoer — consultatieconcept
+# Warmtepomp maandelijkse generatorinvoer — begrensde diagnose
 
-Bron: [openbaar concept NTA 8800:2026 hoofdstuk 9](https://www.internetconsultatie.nl/epg2026/document/14150), §9.6.3.1, formule 9.62 en §9.6.8.1.1.2.3 (PDF-pagina 50–51 en 83–84), met tabellen 9.27/9.29. De onderzochte PDF heeft SHA-256 `89465ebe5cdfbba0a6d2da7596107e2d16bc26b0297ef3d7a2297fe8cd04d035`. Dit is geen gecontroleerde eindtekst van NTA 8800:2025+C1:2026.
+Gegevensherkomst: [openbaar concept NTA 8800:2026 hoofdstuk 9](https://www.internetconsultatie.nl/epg2026/document/14150), §9.6.3.1, formule 9.62 en §9.6.8.1.1.2.3 (PDF-pagina 50–51 en 83–84), met tabellen 9.27/9.29. De onderzochte PDF heeft SHA-256 `89465ebe5cdfbba0a6d2da7596107e2d16bc26b0297ef3d7a2297fe8cd04d035`. Formule 9.62 (p. 331–332), §9.6.8.1.1.2.3 (p. 362) en de tabelcellen zijn later tegen de gelicentieerde NTA 8800:2025+C1:2026 gecontroleerd. Dit is geen onafhankelijke EDR-vergelijking van de gehele maandroute.
 
-De afzonderlijke Rust-diagnose combineert twee conceptregels voor iedere maand:
+De afzonderlijke Rust-diagnose combineert twee editiegebonden regels voor iedere maand:
 
 - Voor een collectieve warmtepompbron: `Q_HD,hp,in,bron = Q_H,gen,out × (1 − 1/COP_gi,mi)` volgens §9.6.8.1.1.2.3. Voor een individuele bron wordt deze collectieve leveringspost nul.
 - Generator-elektriciteit: `E_H,gen,in = Q_H,gen,out / COP_gi,mi × f_prac − Q_HD,hp,in,bron × f_cor,bron,col` volgens 9.62, met `f_prac = 1` in dit concept.
@@ -15,4 +15,6 @@ Voorbeeld van de rekenstap: collectieve bron van 15–<20 °C, woningbouw, ontwe
 
 HTTP: `POST /v1/nta8800/heat-pumps/forfait-monthly-draft/diagnose` met `{ "input": { ... } }`. MCP: `diagnose_forfait_heat_pump_monthly_draft` met dezelfde `input`. De response toont per maand aangeleverde generatorwarmte, afgeleide bronwarmte, ongecorrigeerde elektriciteit, broncorrectie en concept-elektriciteit. `generatorOutputDerived=false`, `auxiliariesIncluded=false`, `annualPerformanceAvailable=false`, `bengCalculationAvailable=false` en `finalEditionVerified=false` blijven expliciet; `collectiveSourceHeatDerived=true` alleen bij een geldige collectieve berekening. Hulpenergie uit §9.6.8.1, primaire energie, hernieuwbare fractie, BENG en energielabel worden hier niet berekend.
 
-Voor normconforme vrijgave ontbreken de gecontroleerde eindtekst en correctiebladen, de upstream generatorverdeling, product-/bronbewijs, onafhankelijke actuele EDR-deeluitkomsten en externe attestering.
+De response gebruikt `scope=edition_specific_equation_9_62_supplied_monthly_flows_only`. De API-veldnaam `consultationSource` blijft voor compatibiliteit en noemt nu formule 9.62 en §9.6.8.1.1.2.3 van de actieve normeditie; clients die de oude `scope`-waarde letterlijk vergelijken, moeten de nieuwe waarde gebruiken. `finalEditionVerified=false` blijft gelden voor de niet volledig getoetste toepasselijkheid en maandketen.
+
+Voor normconforme vrijgave ontbreken de onafhankelijke toets van toepassingsgrenzen en correctiebladen, de upstream generatorverdeling, product-/bronbewijs, onafhankelijke actuele EDR-deeluitkomsten en externe attestering.

@@ -1348,7 +1348,7 @@ export interface ForfaitHeatPumpMonthlyDraftInput {
 
 export interface ForfaitHeatPumpMonthlyDraftAssessment {
   status: 'diagnostic_valid' | 'invalid';
-  scope: 'public_chapter_9_draft_equation_9_62_supplied_monthly_flows_only';
+  scope: 'edition_specific_equation_9_62_supplied_monthly_flows_only';
   consultationSource: string;
   targetNormVersion: string;
   kernelVersion: string;

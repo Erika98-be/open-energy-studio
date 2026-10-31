@@ -4,11 +4,14 @@
 
 use crate::final_energy_draft::MonthlyEnergy;
 use crate::forfait_heat_pump_draft::{
-    assess_forfait_heat_pump_draft, ForfaitHeatPumpDraftInput, TableSource, TABLE_SOURCE,
+    assess_forfait_heat_pump_draft, ForfaitHeatPumpDraftInput, TableSource,
 };
 use crate::{input_fingerprint, KERNEL_VERSION};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+
+const FORMULA_SOURCE: &str =
+    "NTA 8800:2025+C1:2026, formule 9.62 (p. 331–332) en §9.6.8.1.1.2.3 (p. 362)";
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -219,8 +222,8 @@ pub fn assess_forfait_heat_pump_monthly_draft(
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_equation_9_62_supplied_monthly_flows_only",
-        consultation_source: crate::norm_versions::cite(TABLE_SOURCE),
+        scope: "edition_specific_equation_9_62_supplied_monthly_flows_only",
+        consultation_source: crate::norm_versions::cite(FORMULA_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),
