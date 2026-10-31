@@ -844,6 +844,7 @@ export const en: Record<string, string> = {
   'kernel.forfait.sourceTemperature': 'Declared source temperature (°C)',
   'kernel.forfait.sourceTemperatureReference': 'Source temperature evidence',
   'kernel.forfait.sourceQualityReference': 'Source quality declaration reference (if available)',
+  'kernel.forfait.sourceQualityBlank': 'Enter a source quality declaration reference or clear the optional field.',
   'kernel.forfait.useQualityDeclaration': 'Use declared heat pump performance (§9.1)',
   'kernel.forfait.declarationReference': 'Heat pump performance declaration reference',
   'kernel.forfait.declaredCop': 'Declared generation efficiency (COP)',

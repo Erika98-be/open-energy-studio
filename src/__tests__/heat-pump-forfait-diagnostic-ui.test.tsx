@@ -125,6 +125,7 @@ describe('draft COP table UI', () => {
     await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
     expect(fetchMock).not.toHaveBeenCalled();
     expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert')).toHaveTextContent('Enter a source quality declaration reference or clear the optional field.');
     fireEvent.change(screen.getByLabelText('Source quality declaration reference (if available)'),
       { target: { value: 'groundwater declaration QD-1' } });
     await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));

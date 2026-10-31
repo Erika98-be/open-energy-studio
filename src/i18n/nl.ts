@@ -844,6 +844,7 @@ export const nl: Record<string, string> = {
   'kernel.forfait.sourceTemperature': 'Opgegeven brontemperatuur (°C)',
   'kernel.forfait.sourceTemperatureReference': 'Bewijs brontemperatuur',
   'kernel.forfait.sourceQualityReference': 'Referentie kwaliteitsverklaring bron (indien beschikbaar)',
+  'kernel.forfait.sourceQualityBlank': 'Vul een referentie voor de bronkwaliteitsverklaring in of maak het optionele veld leeg.',
   'kernel.forfait.useQualityDeclaration': 'Gebruik opgegeven warmtepompprestatie (§9.1)',
   'kernel.forfait.declarationReference': 'Referentie prestatieverklaring warmtepomp',
   'kernel.forfait.declaredCop': 'Opgegeven opwekkingsrendement (COP)',

@@ -127,6 +127,12 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
     const declaredAuxiliaryValue = declaredAuxiliary.trim() === '' ? null : Number(declaredAuxiliary);
     const installationYearValue = edition === '2020+A1' && installationYear.trim() !== ''
       ? Number(installationYear) : null;
+    if (source === 'groundwater_below15_c' && sourceQualityReference.length > 0
+      && !sourceQualityReference.trim()) {
+      setError(t('kernel.forfait.sourceQualityBlank'));
+      setResult(null);
+      return null;
+    }
     if (!source || !options.includes(source) || !classificationReference.trim()
       || (sourceTemperatureBounds && (sourceTemperatureValue === null || !Number.isFinite(sourceTemperatureValue)
         || sourceTemperatureValue < sourceTemperatureBounds[0] || sourceTemperatureValue >= sourceTemperatureBounds[1]
@@ -148,8 +154,6 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       || (pump.sink === 'hydronic' && (supply === null || !Number.isFinite(supply) || supply <= 0 || supply > 70))
       || (scope === 'residential_at_most25_kw' && source === 'surface_water')
       || (source === 'collective_at_least40_c' && !fallbackToGroundwater && supply !== null && supply <= 40)
-      || (source === 'groundwater_below15_c' && sourceQualityReference.length > 0
-        && !sourceQualityReference.trim())
       || (useQualityDeclaration && (!declarationReference.trim() || declaredCopValue === null
         || !Number.isFinite(declaredCopValue) || declaredCopValue < 0.05 || declaredCopValue > 15
         || (declaredFractionValue !== null && (!Number.isFinite(declaredFractionValue)
