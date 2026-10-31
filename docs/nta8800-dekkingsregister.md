@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De 9.85-hulpenergiediagnose voor één individuele elektrische warmtepomp retourneert geldige maanden nu in kalendermaandvolgorde. Rust- en HTTP-proeven vergelijken omgekeerde invoer met de chronologische uitkomst; de volledige kernsuite (1014/1014) en servicesuite (72/72) slagen lokaal. Dit versterkt *Weergave* en reproduceerbaarheid; de volledige keten, onafhankelijke *Referentie* en *Attest* blijven open.
+
 Rust-, HTTP- en MCP-proeven controleren bij omgekeerde gaswarmtepomp-hulpstroommaanden dat een numerieke overloop het oorspronkelijke invoerpad `months[11].generatorOutputKwh` meldt en geen deeluitkomst vrijgeeft; alle drie slagen lokaal. Dit versterkt *Audit* na de kalenderordening van geldige resultaten; *Referentie* en *Attest* blijven open.
 
 De gaswarmtepomp-toestelhulpstroomdiagnose verwerkt geldige maanden nu altijd in kalendermaandvolgorde. Een Rust-proef met ongelijke maandwarmte en een HTTP-proef met omgekeerde invoer bewaken gelijke maandwaarden en jaarsom; beide slagen lokaal. Dit versterkt reproduceerbaarheid van de begrensde deelroute; onafhankelijke *Referentie* en *Attest* blijven open.

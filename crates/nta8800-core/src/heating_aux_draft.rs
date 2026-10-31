@@ -396,7 +396,9 @@ pub fn assess_heating_aux_draft(input: &HeatingAuxDraftInput) -> HeatingAuxDraft
             let fixed = a.checked_div(Decimal::from(12));
             if let (Some(denominator), Some(fixed)) = (denominator, fixed) {
                 let mut sum = Decimal::ZERO;
-                for (month, energy) in input.months.iter().zip(inputs) {
+                let mut ordered_months = input.months.iter().zip(inputs).collect::<Vec<_>>();
+                ordered_months.sort_by_key(|(month, _)| month.month);
+                for (month, energy) in ordered_months {
                     let result = energy
                         .and_then(|energy| b.checked_mul(energy))
                         .and_then(|variable| variable.checked_div(denominator))
@@ -503,6 +505,35 @@ mod tests {
             5.0
         );
         assert_eq!(result.annual_auxiliary_electricity_kwh, Some(170.0));
+    }
+    #[test]
+    fn supplied_month_order_does_not_change_auxiliary_months() {
+        let mut input = sample();
+        input.months[0].generator_input_electricity_kwh = 0.0;
+        input.months[6].generator_input_electricity_kwh = 200.0;
+        let chronological = assess_heating_aux_draft(&input);
+        input.months.reverse();
+        let reversed = assess_heating_aux_draft(&input);
+        assert_eq!(reversed.status, "input_valid");
+        assert_eq!(
+            reversed
+                .monthly_auxiliary_electricity_kwh
+                .iter()
+                .map(|item| item.month)
+                .collect::<Vec<_>>(),
+            (1..=12).collect::<Vec<_>>()
+        );
+        assert_eq!(
+            reversed.annual_auxiliary_electricity_kwh,
+            chronological.annual_auxiliary_electricity_kwh
+        );
+        for (actual, expected) in reversed
+            .monthly_auxiliary_electricity_kwh
+            .iter()
+            .zip(&chronological.monthly_auxiliary_electricity_kwh)
+        {
+            assert_eq!(actual.electricity_kwh, expected.electricity_kwh);
+        }
     }
     #[test]
     fn incomplete_or_invalid_input_yields_no_partial_electricity() {

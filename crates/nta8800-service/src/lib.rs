@@ -168,6 +168,20 @@ mod tests {
         assert_eq!(value["annualAuxiliaryElectricityKwh"], 180.0);
         assert_eq!(value["forfaitUsed"], false);
         assert_eq!(value["bengCalculationAvailable"], false);
+        input["months"].as_array_mut().unwrap().reverse();
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let reversed: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert_eq!(
+            reversed["monthlyAuxiliaryElectricityKwh"],
+            value["monthlyAuxiliaryElectricityKwh"]
+        );
+        assert_eq!(
+            reversed["annualAuxiliaryElectricityKwh"],
+            value["annualAuxiliaryElectricityKwh"]
+        );
         input["coefficients"]["cDimensionless"] = json!(0);
         let response = app().oneshot(request(&input)).await.unwrap();
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);

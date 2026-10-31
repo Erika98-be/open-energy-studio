@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 31 oktober 2026
+# NTA 8800 verificatiestatus — 1 november 2026
+
+De losse elektrische warmtepomp-hulpenergiediagnose volgens 9.85 verwerkt geldige aangeleverde maanden nu in kalendermaandvolgorde. Eerder volgde de response de invoervolgorde, terwijl andere maandroutes kalendermaanden teruggeven. Een Rust-proef met ongelijke ingangsenergie en een HTTP-proef met omgekeerde maanden bewaken de identieke maandwaarden en jaarsom. De volledige kernsuite (1014/1014), servicesuite (72/72), rustfmt en `git diff --check` slagen lokaal. Dit verduidelijkt het begrensde contract; onafhankelijke normreferentie en attest blijven open.
 
 De overloopproeven van de gaswarmtepomp-toestelhulpstroom gebruiken nu omgekeerde maandvolgorde. Rust, HTTP en de echte MCP-stdio-route melden de fout op de oorspronkelijke invoerpositie `months[11].generatorOutputKwh`, met lege maand- en jaaruitkomsten. Alle drie gerichte proeven, rustfmt en `git diff --check` slagen lokaal. [CI op `82411270`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41243135670) slaagde voor de voorafgaande NTA-gate en drie desktopplatforms. Dit bewaakt dat kalenderordening van geldige resultaten de herstelbare veldpaden bij ongeldige invoer niet verschuift; onafhankelijke normreferentie en attest blijven open.
 
