@@ -1,6 +1,8 @@
-# Gaswarmtepomp: gekoppelde concepttermen 9.62 en 9.91/9.92
+# Gaswarmtepomp: begrensde koppeling van termen 9.62 en 9.91/9.92
 
-De Rust-module `gas_heat_pump_chain_draft` koppelt de al afzonderlijk aanwezige [maandterm](nta8800-gaswarmtepomp-maandtermen-concept.md) en [toestelhulpstroom](nta8800-gaswarmtepomp-hulpenergie-concept.md). Bron voor beide is het [openbare consultatieconcept van hoofdstuk 9](https://www.internetconsultatie.nl/epg2026/document/14150), §§9.6.3.1 en 9.6.8.2.2–9.6.8.2.3, vergelijkingen 9.62, 9.91 en 9.92. De voor deze lezing bewaarde PDF heeft SHA-256 `92053f92d0490bc2fc5ae9fac3c99904f4d80aaf80a3bacc0f6c00f41661118a`.
+De response gebruikt `scope=edition_specific_gas_9_62_and_9_91_9_92_linked_terms_only`. De afzonderlijke formules zijn visueel met de gelicentieerde NTA 8800:2025+C1:2026 vergeleken; de gekoppelde systeemroute en energiedragertoedeling zijn niet onafhankelijk geverifieerd. Clients die de oude `scope` letterlijk vergelijken, moeten de nieuwe waarde gebruiken.
+
+De Rust-module `gas_heat_pump_chain_draft` koppelt de al afzonderlijk aanwezige [maandterm](nta8800-gaswarmtepomp-maandtermen-concept.md) en [toestelhulpstroom](nta8800-gaswarmtepomp-hulpenergie-concept.md). De transcriptie begon bij het [openbare consultatieconcept van hoofdstuk 9](https://www.internetconsultatie.nl/epg2026/document/14150), §§9.6.3.1 en 9.6.8.2.2–9.6.8.2.3, vergelijkingen 9.62, 9.91 en 9.92. De voor deze lezing bewaarde PDF heeft SHA-256 `92053f92d0490bc2fc5ae9fac3c99904f4d80aaf80a3bacc0f6c00f41661118a`.
 
 De diagnose eist één toestel-ID, aandrijving, thermisch vermogen, forfaitaire COP-basis, letterlijk dezelfde bewijsreferentie voor generatorwarmte en twaalf gelijke, afzonderlijk gevalideerde maandwaarden in beide invoeren. Bij elke afwijking worden **alle maanduitkomsten onderdrukt**. Daarmee kan een verschillend warmtevolume niet stilzwijgend in de twee conceptformules terechtkomen. De uitvoer toont per maand afzonderlijk:
 

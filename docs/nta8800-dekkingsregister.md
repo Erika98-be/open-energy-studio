@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De gekoppelde gaswarmtepompdiagnose gebruikt nu een editiegebonden `scope` voor 9.62 en 9.91/9.92. De gerichte HTTP-contractproef en rustfmt slagen lokaal. Dit verduidelijkt *Bron* en *Weergave* van de beperkte keten; energiedragertoedeling, bronpomp, onafhankelijke *Referentie* en *Attest* blijven open.
+
 De losse gaswarmtepomp-maandterm en toestelhulpstroom dragen nu een editiegebonden `scope` voor formules 9.62 en 9.91/9.92; de bronvermelding wijst op de gecontroleerde doeluitgave. HTTP-proeven bewaken beide responsecontracten; de volledige kernsuite (1012/1012), servicesuite (72/72) en rustfmt slagen lokaal. Dit verduidelijkt *Bron* en *Weergave*. Gasdrager- en bronpompboeking, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De elektrische maanddiagnose verwijst in `consultationSource` nu naar de toepasselijke formule 9.62 en §9.6.8.1.1.2.3 van NTA 8800:2025+C1:2026, in plaats van de COP-tabellen 9.27/9.29. De `scope` is editiegebonden; een HTTP-contractproef bewaakt beide responsevelden. Dit versterkt *Bron* en *Weergave* voor de begrensde deelberekening. De upstream maandketen, onafhankelijke *Referentie* en *Attest* blijven open.

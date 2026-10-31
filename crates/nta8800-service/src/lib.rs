@@ -2178,6 +2178,10 @@ mod tests {
             625.0
         );
         assert_eq!(
+            value["scope"],
+            "edition_specific_gas_9_62_and_9_91_9_92_linked_terms_only"
+        );
+        assert_eq!(
             value["monthly"][0]["equipmentAuxiliaryElectricityKwh"],
             8.54
         );

@@ -1,4 +1,4 @@
-//! Coupled consultation diagnostics for gas heat-pump 9.62 and 9.91/9.92 terms.
+//! Coupled edition-specific diagnostics for gas heat-pump 9.62 and 9.91/9.92 terms.
 //! Supplied monthly heat must match exactly across both inputs; no carrier allocation.
 
 use crate::gas_heat_pump_aux_draft::{assess_gas_heat_pump_aux_draft, GasHeatPumpAuxDraftInput};
@@ -145,7 +145,7 @@ pub fn assess_gas_heat_pump_chain_draft(
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_gas_9_62_and_9_91_linked_terms_only",
+        scope: "edition_specific_gas_9_62_and_9_91_9_92_linked_terms_only",
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),
