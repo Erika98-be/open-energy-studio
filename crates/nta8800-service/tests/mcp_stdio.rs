@@ -459,6 +459,14 @@ fn legacy_gas_monthly_mcp_rejects_ignored_collective_temperature_evidence() {
     assert_eq!(refused["isError"], true, "{refused}");
     let assessment = &refused["structuredContent"];
     assert_eq!(assessment["status"], "invalid");
+    assert_eq!(
+        assessment["scope"],
+        "edition_specific_equation_9_62_gas_pump_terms_without_carrier_allocation"
+    );
+    assert_eq!(
+        assessment["draftSource"],
+        "NTA 8800:2024 met INT-V1:2024, hoofdstuk 9"
+    );
     assert!(assessment["monthly"].as_array().unwrap().is_empty());
     for path in [
         "collectiveSourceTemperatureC",
@@ -529,6 +537,14 @@ fn gas_auxiliary_mcp_preserves_invalid_month_path_without_partial_results() {
     assert_eq!(response["isError"], true, "{response}");
     let assessment = &response["structuredContent"];
     assert_eq!(assessment["status"], "invalid");
+    assert_eq!(
+        assessment["scope"],
+        "edition_specific_9_91_9_92_gas_generator_auxiliary_only"
+    );
+    assert!(assessment["draftSource"]
+        .as_str()
+        .unwrap()
+        .contains("formules 9.91 en 9.92"));
     assert!(assessment["monthly"].as_array().unwrap().is_empty());
     assert!(assessment["annualAuxiliaryElectricityKwh"].is_null());
     assert!(assessment["issues"]
@@ -950,6 +966,10 @@ fn gas_chain_mcp_exposes_nested_cop_evidence_path_without_partial_results() {
     assert_eq!(response["isError"], true, "{response}");
     let assessment = &response["structuredContent"];
     assert_eq!(assessment["status"], "invalid");
+    assert_eq!(
+        assessment["scope"],
+        "edition_specific_gas_9_62_and_9_91_9_92_linked_terms_only"
+    );
     assert!(assessment["issues"].as_array().unwrap().iter().any(|item| {
         item["code"] == "source_required" && item["path"] == "monthly.forfait.capacityReference"
     }));

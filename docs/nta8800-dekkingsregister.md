@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+MCP-stdio-contractproeven bewaken nu de editiegebonden `scope` van drie gaswarmtepompdeelroutes, de 2024-hoofdstukcitatie bij 9.62 en de formulebron bij 9.91/9.92. De bestaande vergelijking van tekst en structuur bewaakt dezelfde foutuitkomst over het MCP-transport; alle 14 MCP-stdio-proeven slagen lokaal. Dit versterkt *Bron*, *Audit* en *Weergave*; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De gekoppelde gaswarmtepompdiagnose gebruikt nu een editiegebonden `scope` voor 9.62 en 9.91/9.92. De gerichte HTTP-contractproef en rustfmt slagen lokaal. Dit verduidelijkt *Bron* en *Weergave* van de beperkte keten; energiedragertoedeling, bronpomp, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De losse gaswarmtepomp-maandterm en toestelhulpstroom dragen nu een editiegebonden `scope` voor formules 9.62 en 9.91/9.92; de bronvermelding wijst op de gecontroleerde doeluitgave. HTTP-proeven bewaken beide responsecontracten; de volledige kernsuite (1012/1012), servicesuite (72/72) en rustfmt slagen lokaal. Dit verduidelijkt *Bron* en *Weergave*. Gasdrager- en bronpompboeking, onafhankelijke *Referentie* en *Attest* blijven open.
