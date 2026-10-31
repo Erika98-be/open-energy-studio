@@ -993,7 +993,7 @@ export interface HeatPumpQualityDeclaration {
 
 export interface ForfaitHeatPumpDraftAssessment {
   status: 'input_valid' | 'invalid';
-  scope: 'public_chapter_9_draft_electric_heat_pump_forfait_lookup_only';
+  scope: 'edition_specific_electric_heat_pump_forfait_lookup_only';
   consultationSource: string;
   targetNormVersion: string;
   kernelVersion: string;

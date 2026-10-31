@@ -1213,6 +1213,14 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(result["status"], "input_valid");
+        assert_eq!(
+            result["scope"],
+            "edition_specific_electric_heat_pump_forfait_lookup_only"
+        );
+        assert!(result["consultationSource"]
+            .as_str()
+            .unwrap()
+            .contains("NTA 8800"));
         assert!((result["correctedCop"].as_f64().unwrap() - 4.30).abs() < 1e-9);
         assert_eq!(result["annualPerformanceAvailable"], false);
         assert_eq!(result["bengCalculationAvailable"], false);
@@ -1893,6 +1901,10 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(result["forfaitCop"], 2.4);
+        assert_eq!(
+            result["scope"],
+            "edition_specific_tables_9_27_9_29_gas_engine_or_absorption_lookup_only"
+        );
         assert_eq!(result["gasInputEnergyAvailable"], false);
         input["designSupplyTemperatureC"] = json!(55.01);
         let response = app()

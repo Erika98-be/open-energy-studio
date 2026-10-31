@@ -7,7 +7,7 @@ use crate::{input_fingerprint, KERNEL_VERSION};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-const DRAFT_SOURCE: &str = "NTA 8800:2025+C1:2026, tabellen 9.27 (p. 333–334) en 9.29 (p. 337–338)";
+const TABLE_SOURCE: &str = "NTA 8800:2025+C1:2026, tabellen 9.27 (p. 333–334) en 9.29 (p. 337–338)";
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -224,8 +224,8 @@ pub fn assess_gas_heat_pump_forfait_draft(
     let valid = issues.is_empty();
     GasHeatPumpForfaitDraftAssessment {
         status: if valid { "diagnostic_valid" } else { "invalid" },
-        scope: "public_chapter_9_draft_tables_9_27_9_29_gas_engine_or_absorption_lookup_only",
-        consultation_source: crate::norm_versions::cite(DRAFT_SOURCE),
+        scope: "edition_specific_tables_9_27_9_29_gas_engine_or_absorption_lookup_only",
+        consultation_source: crate::norm_versions::cite(TABLE_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),
@@ -321,7 +321,7 @@ mod tests {
         .unwrap();
         assert_eq!(fixture.kind, "source_table_transcription_not_edr_reference");
         // The transcription was made from the consultation draft; the final
-        // edition (DRAFT_SOURCE) has the same gas rows.
+        // edition (TABLE_SOURCE) has the same gas rows.
         assert_eq!(
             fixture.source_url,
             "https://www.internetconsultatie.nl/epg2026/document/14150"

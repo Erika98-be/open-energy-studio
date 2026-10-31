@@ -7,8 +7,8 @@ use crate::{input_fingerprint, KERNEL_VERSION};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-/// Final-edition citation of the tables; the name is kept for the output field.
-pub const DRAFT_SOURCE: &str =
+/// Final-edition citation of the tables; the response field keeps its legacy name.
+pub const TABLE_SOURCE: &str =
     "NTA 8800:2025+C1:2026, tabellen 9.27 (p. 333–334) en 9.29 (p. 337–338)";
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
@@ -739,8 +739,8 @@ pub fn assess_forfait_heat_pump_draft(
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_electric_heat_pump_forfait_lookup_only",
-        consultation_source: crate::norm_versions::cite(DRAFT_SOURCE),
+        scope: "edition_specific_electric_heat_pump_forfait_lookup_only",
+        consultation_source: crate::norm_versions::cite(TABLE_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),

@@ -1,10 +1,10 @@
-//! Consultation-draft equations 9.62 and 9.6.8.1.1.2.3 for supplied monthly generator output.
+//! Edition-specific equations 9.62 and 9.6.8.1.1.2.3 for supplied monthly generator output.
 //! Upstream generator dispatch (9.2.2.1.3), auxiliaries and annual/BENG accounting
 //! are outside this diagnostic.
 
 use crate::final_energy_draft::MonthlyEnergy;
 use crate::forfait_heat_pump_draft::{
-    assess_forfait_heat_pump_draft, ForfaitHeatPumpDraftInput, TableSource, DRAFT_SOURCE,
+    assess_forfait_heat_pump_draft, ForfaitHeatPumpDraftInput, TableSource, TABLE_SOURCE,
 };
 use crate::{input_fingerprint, KERNEL_VERSION};
 use serde::{Deserialize, Serialize};
@@ -220,7 +220,7 @@ pub fn assess_forfait_heat_pump_monthly_draft(
             "invalid"
         },
         scope: "public_chapter_9_draft_equation_9_62_supplied_monthly_flows_only",
-        consultation_source: crate::norm_versions::cite(DRAFT_SOURCE),
+        consultation_source: crate::norm_versions::cite(TABLE_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),

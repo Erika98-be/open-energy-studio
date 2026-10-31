@@ -289,6 +289,10 @@ fn electric_pump_mcp_uses_declared_cop_and_rejects_blank_declaration_reference()
     assert_eq!(response["isError"], false, "{response}");
     let assessment = &response["structuredContent"];
     assert_eq!(assessment["status"], "input_valid");
+    assert_eq!(
+        assessment["scope"],
+        "edition_specific_electric_heat_pump_forfait_lookup_only"
+    );
     assert!((assessment["correctedCop"].as_f64().unwrap() - 4.30).abs() < 1e-9);
     assert_eq!(assessment["bengCalculationAvailable"], false);
     assert_eq!(
