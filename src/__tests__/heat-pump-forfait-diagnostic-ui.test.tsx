@@ -27,6 +27,35 @@ describe('table 9.28 test standard per edition', () => {
 });
 
 describe('draft COP table UI', () => {
+  it('preserves a saved groundwater source declaration as provenance', async () => {
+    const onSave = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({
+      status: 'input_valid', correctedCop: 4.45, issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'source design',
+      scope: 'utility_collective_or_over25_kw', source: 'groundwater_below15_c', sink: 'hydronic',
+      designSupplyTemperatureC: 35, thermalCapacityKw: 30,
+      capacitySourceReference: 'plate', collectiveBuildingInstallation: false,
+      sourceCorrectionFactor: null, sourceCorrectionReference: null,
+      sourceTemperatureC: 10, sourceTemperatureEvidenceReference: 'source design',
+      sourceQualityDeclarationReference: 'groundwater declaration QD-1',
+    };
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'groundwater', forfaitHeatPumpDraft: saved }}
+      buildingFunction="office" onSave={onSave} />);
+    expect(screen.getByLabelText('Source quality declaration reference (if available)'))
+      .toHaveValue('groundwater declaration QD-1');
+    expect(screen.queryByText(/groundwater-below-15 °C row/)).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      source: 'groundwater_below15_c',
+      sourceQualityDeclarationReference: 'groundwater declaration QD-1',
+    })));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input.sourceQualityDeclarationReference)
+      .toBe('groundwater declaration QD-1');
+  });
+
   it('hides collective source rows absent from the 2022 table', () => {
     vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue('2022');
     const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {

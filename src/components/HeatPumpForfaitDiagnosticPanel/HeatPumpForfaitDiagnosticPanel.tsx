@@ -84,8 +84,11 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
 
   useEffect(() => () => { sequence.current += 1; }, []);
   const invalidate = () => { sequence.current += 1; setResult(null); setError(null); setLoading(false); };
-  const sourceQualityRelevant = source === 'collective20_to40_c' || source === 'collective_at_least40_c';
-  const fallbackToGroundwater = sourceQualityRelevant && !sourceQualityReference.trim();
+  const collectiveQualityRow = source === 'collective20_to40_c' || source === 'collective_at_least40_c';
+  // A groundwater declaration can be intake provenance without selecting a
+  // warmer collective row. Keep it editable and preserve it on save.
+  const sourceQualityRelevant = collectiveQualityRow || source === 'groundwater_below15_c';
+  const fallbackToGroundwater = collectiveQualityRow && !sourceQualityReference.trim();
   const fallbackToGround = source === 'ground_or_groundwater_unknown';
   const correctionRequired = scope === 'residential_at_most25_kw'
     && (source === 'ground' || source === 'groundwater_below15_c' || fallbackToGroundwater || fallbackToGround);
