@@ -72,6 +72,8 @@ describe('draft COP table UI', () => {
     renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: saved }}
       buildingFunction="residential" onSave={onSave} />);
     expect(screen.getByLabelText('Use declared heat pump performance (§9.1)')).toBeChecked();
+    expect(screen.getByText(/Read the values from the declaration at the design supply temperature/))
+      .toBeInTheDocument();
     expect(screen.getByLabelText('Declared generation efficiency (COP)')).toHaveValue('4.32');
     await user.click(screen.getByRole('button', { name: 'Save table input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
@@ -91,6 +93,8 @@ describe('draft COP table UI', () => {
     expect(onSave.mock.calls[1][0].qualityDeclaration.generationEfficiency).toBe(4.35);
 
     await user.click(screen.getByLabelText('Use declared heat pump performance (§9.1)'));
+    expect(screen.queryByText(/Read the values from the declaration at the design supply temperature/))
+      .toBeNull();
     await user.click(screen.getByRole('button', { name: 'Save table input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(3));
     expect(onSave.mock.calls[2][0].qualityDeclaration).toBeNull();

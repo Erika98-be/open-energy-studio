@@ -245,6 +245,7 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       <label><span>{t('kernel.forfait.useQualityDeclaration')}</span><input type="checkbox" checked={useQualityDeclaration}
         onChange={(event) => { invalidate(); setUseQualityDeclaration(event.target.checked); }} /></label>
       {useQualityDeclaration && <>
+        <p className="heat-pump-forfait-draft-note">{t('nta.form.hpDeclaration.note')}</p>
         <label><span>{t('kernel.forfait.declarationReference')}</span><input type="text" value={declarationReference}
           onChange={(event) => { invalidate(); setDeclarationReference(event.target.value); }} /></label>
         <label><span>{t('kernel.forfait.declaredCop')}</span><DecimalInput min="0.05" max="15" step="any" value={declaredCop}
