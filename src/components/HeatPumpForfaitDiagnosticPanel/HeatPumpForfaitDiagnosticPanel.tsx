@@ -148,6 +148,8 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       || (pump.sink === 'hydronic' && (supply === null || !Number.isFinite(supply) || supply <= 0 || supply > 70))
       || (scope === 'residential_at_most25_kw' && source === 'surface_water')
       || (source === 'collective_at_least40_c' && !fallbackToGroundwater && supply !== null && supply <= 40)
+      || (source === 'groundwater_below15_c' && sourceQualityReference.length > 0
+        && !sourceQualityReference.trim())
       || (useQualityDeclaration && (!declarationReference.trim() || declaredCopValue === null
         || !Number.isFinite(declaredCopValue) || declaredCopValue < 0.05 || declaredCopValue > 15
         || (declaredFractionValue !== null && (!Number.isFinite(declaredFractionValue)

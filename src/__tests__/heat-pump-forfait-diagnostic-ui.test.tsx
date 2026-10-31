@@ -120,6 +120,13 @@ describe('draft COP table UI', () => {
     expect(screen.getByLabelText('Source quality declaration reference (if available)'))
       .toHaveValue('groundwater declaration QD-1');
     expect(screen.queryByText(/groundwater-below-15 °C row/)).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Source quality declaration reference (if available)'),
+      { target: { value: '   ' } });
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(onSave).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('Source quality declaration reference (if available)'),
+      { target: { value: 'groundwater declaration QD-1' } });
     await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
       source: 'groundwater_below15_c',
