@@ -199,6 +199,52 @@ fn electric_pump_mcp_preserves_non_applicable_source_reference_path() {
 }
 
 #[test]
+fn electric_pump_mcp_rejects_legacy_groundwater_temperature_fields() {
+    let input = json!({
+        "generatorId":"hp-legacy", "classificationSourceReference":"system design",
+        "scope":"utility_collective_or_over25_kw", "source":"groundwater_below15_c",
+        "sink":"hydronic", "designSupplyTemperatureC":35.0,
+        "sourceTemperatureC":10.0,
+        "sourceTemperatureEvidenceReference":"unrelated meter"
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"legacy-electric-pump-audit-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({
+            "name":"diagnose_forfait_heat_pump_draft",
+            "arguments":{"input":input, "normVersion":"2022"}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["correctedCop"].is_null());
+    for path in ["sourceTemperatureC", "sourceTemperatureEvidenceReference"] {
+        assert!(assessment["issues"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|issue| {
+                issue["code"] == "source_temperature_not_applicable" && issue["path"] == path
+            }));
+    }
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn oil_boiler_mcp_reports_oil_scope_and_carrier_in_both_diagnostics() {
     let boiler = json!({
         "generatorId":"oil-boiler", "role":"individual_main",
