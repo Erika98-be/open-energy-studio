@@ -189,7 +189,9 @@ pub fn assess_gas_heat_pump_aux_draft(
     let mut monthly = Vec::new();
     let mut annual = 0.0_f64;
     if issues.is_empty() {
-        for (index, month) in input.months.iter().enumerate() {
+        let mut ordered_months = input.months.iter().enumerate().collect::<Vec<_>>();
+        ordered_months.sort_by_key(|(_, month)| month.month);
+        for (index, month) in ordered_months {
             let uncapped_on_hours = month.generator_output_kwh * 1.1
                 / (input.nominal_thermal_capacity_kw * input.mean_modulation);
             if !uncapped_on_hours.is_finite() {
@@ -295,6 +297,36 @@ mod tests {
         let capped = assess_gas_heat_pump_aux_draft(&input);
         assert_eq!(capped.monthly[0].capped_on_hours, 744.0);
         assert_eq!(capped.monthly[0].auxiliary_electricity_kwh, 22.32);
+    }
+
+    #[test]
+    fn supplied_month_order_does_not_change_calendar_output_or_annual_sum() {
+        let mut input = sample();
+        input.months[0].generator_output_kwh = 500.0;
+        input.months[6].generator_output_kwh = 1500.0;
+        let chronological = assess_gas_heat_pump_aux_draft(&input);
+        input.months.reverse();
+        let reversed = assess_gas_heat_pump_aux_draft(&input);
+        assert_eq!(reversed.status, "diagnostic_valid");
+        assert_eq!(
+            reversed
+                .monthly
+                .iter()
+                .map(|item| item.month)
+                .collect::<Vec<_>>(),
+            (1..=12).collect::<Vec<_>>()
+        );
+        assert_eq!(
+            reversed.annual_auxiliary_electricity_kwh,
+            chronological.annual_auxiliary_electricity_kwh
+        );
+        for (actual, expected) in reversed.monthly.iter().zip(&chronological.monthly) {
+            assert_eq!(
+                actual.auxiliary_electricity_kwh,
+                expected.auxiliary_electricity_kwh
+            );
+            assert_eq!(actual.capped_on_hours, expected.capped_on_hours);
+        }
     }
 
     #[test]

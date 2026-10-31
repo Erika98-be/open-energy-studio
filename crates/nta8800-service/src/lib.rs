@@ -1977,6 +1977,18 @@ mod tests {
         );
         assert_eq!(value["gasInputEnergyAvailable"], false);
         assert_eq!(value["bengCalculationAvailable"], false);
+        input["months"].as_array_mut().unwrap().reverse();
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let reordered: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert_eq!(reordered["monthly"], value["monthly"]);
+        assert_eq!(
+            reordered["annualAuxiliaryElectricityKwh"],
+            value["annualAuxiliaryElectricityKwh"]
+        );
+        input["months"].as_array_mut().unwrap().reverse();
         input["solutionPumpWPerKw"] = json!(10.0);
         let response = app().oneshot(request(&input)).await.unwrap();
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);

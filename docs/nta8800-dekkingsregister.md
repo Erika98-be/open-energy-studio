@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De gaswarmtepomp-toestelhulpstroomdiagnose verwerkt geldige maanden nu altijd in kalendermaandvolgorde. Een Rust-proef met ongelijke maandwarmte en een HTTP-proef met omgekeerde invoer bewaken gelijke maandwaarden en jaarsom; beide slagen lokaal. Dit versterkt reproduceerbaarheid van de begrensde deelroute; onafhankelijke *Referentie* en *Attest* blijven open.
+
 MCP-stdio-contractproeven bewaken nu de editiegebonden `scope` van drie gaswarmtepompdeelroutes, de 2024-hoofdstukcitatie bij 9.62 en de formulebron bij 9.91/9.92. De bestaande vergelijking van tekst en structuur bewaakt dezelfde foutuitkomst over het MCP-transport; alle 14 MCP-stdio-proeven slagen lokaal. Dit versterkt *Bron*, *Audit* en *Weergave*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De gekoppelde gaswarmtepompdiagnose gebruikt nu een editiegebonden `scope` voor 9.62 en 9.91/9.92. De gerichte HTTP-contractproef en rustfmt slagen lokaal. Dit verduidelijkt *Bron* en *Weergave* van de beperkte keten; energiedragertoedeling, bronpomp, onafhankelijke *Referentie* en *Attest* blijven open.
