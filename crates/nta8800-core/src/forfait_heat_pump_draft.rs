@@ -488,9 +488,12 @@ pub fn assess_forfait_heat_pump_draft(
         issues.push(issue("source_required", "classificationSourceReference"));
     }
     issues.extend(source_classification_issues(input));
-    if !matches!(
+    // The intake can carry a source declaration for groundwater as provenance
+    // even when it does not select a warmer collective table row. Reject only
+    // ambient-air rows, where this field cannot describe the table source.
+    if matches!(
         input.source,
-        TableSource::Collective20To40C | TableSource::CollectiveAtLeast40C
+        TableSource::OutdoorAir | TableSource::ExhaustAir
     ) && input.source_quality_declaration_reference.is_some()
     {
         issues.push(issue(
@@ -853,20 +856,30 @@ mod tests {
     }
 
     #[test]
-    fn source_quality_declaration_reference_is_rejected_outside_warm_collective_rows() {
-        let mut air = example(
+    fn source_quality_declaration_reference_is_rejected_for_ambient_air_rows() {
+        for source in [TableSource::OutdoorAir, TableSource::ExhaustAir] {
+            let mut air = example(TableScope::UtilityCollectiveOrOver25Kw, source, 35.0);
+            assert!(assess_forfait_heat_pump_draft(&air).issues.is_empty());
+            air.source_quality_declaration_reference = Some("unrelated declaration".into());
+            let result = assess_forfait_heat_pump_draft(&air);
+            assert!(result.issues.iter().any(|item| {
+                item.code == "source_quality_declaration_not_applicable"
+                    && item.path == "sourceQualityDeclarationReference"
+            }));
+            assert!(result.corrected_cop.is_none());
+        }
+
+        let mut groundwater = example(
             TableScope::UtilityCollectiveOrOver25Kw,
-            TableSource::OutdoorAir,
+            TableSource::GroundwaterBelow15C,
             35.0,
         );
-        assert!(assess_forfait_heat_pump_draft(&air).issues.is_empty());
-        air.source_quality_declaration_reference = Some("unrelated declaration".into());
-        let result = assess_forfait_heat_pump_draft(&air);
-        assert!(result.issues.iter().any(|item| {
-            item.code == "source_quality_declaration_not_applicable"
-                && item.path == "sourceQualityDeclarationReference"
-        }));
-        assert!(result.corrected_cop.is_none());
+        groundwater.source_temperature_c = Some(10.0);
+        groundwater.source_temperature_evidence_reference = Some("source design".into());
+        groundwater.source_quality_declaration_reference = Some("source declaration".into());
+        let result = assess_forfait_heat_pump_draft(&groundwater);
+        assert!(result.issues.is_empty(), "{:?}", result.issues);
+        assert!(result.corrected_cop.is_some());
     }
 
     #[test]
