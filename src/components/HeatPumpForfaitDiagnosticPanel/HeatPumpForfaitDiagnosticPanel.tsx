@@ -47,14 +47,19 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   onSave: (input: ForfaitHeatPumpDraftInput) => void;
 }) {
   const { t } = useI18n();
+  const edition = useProjectEdition();
+  const dwellingTableWithoutCapacityBoundary = edition === '2020+A1' || edition === '2022';
   const saved = pump.forfaitHeatPumpDraft;
-  const options = sourcesFor(pump);
-  const initialScope = buildingFunction !== 'residential' && saved?.scope === 'residential_at_most25_kw'
+  const options = sourcesFor(pump).filter((item) =>
+    !dwellingTableWithoutCapacityBoundary || !collectiveSources.includes(item));
+  const initialScope = dwellingTableWithoutCapacityBoundary && buildingFunction === 'residential'
+    ? 'residential_at_most25_kw' : buildingFunction !== 'residential' && saved?.scope === 'residential_at_most25_kw'
     ? 'utility_collective_or_over25_kw' : saved?.scope ?? (buildingFunction === 'residential'
       ? 'residential_at_most25_kw' : 'utility_collective_or_over25_kw');
   const [scope, setScope] = useState<ForfaitHeatPumpDraftInput['scope']>(
     initialScope);
-  const [source, setSource] = useState<Source | ''>(saved?.source ?? (options.length === 1 ? options[0] : ''));
+  const [source, setSource] = useState<Source | ''>(
+    saved?.source && options.includes(saved.source) ? saved.source : options.length === 1 ? options[0] : '');
   const [temperature, setTemperature] = useState(saved?.designSupplyTemperatureC == null ? '' : String(saved.designSupplyTemperatureC));
   const [factor, setFactor] = useState(saved?.sourceCorrectionFactor == null ? '' : String(saved.sourceCorrectionFactor));
   const [factorReference, setFactorReference] = useState(saved?.sourceCorrectionReference ?? '');
@@ -77,7 +82,6 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   const [loading, setLoading] = useState(false);
   const sequence = useRef(0);
 
-  const edition = useProjectEdition();
   useEffect(() => () => { sequence.current += 1; }, []);
   const invalidate = () => { sequence.current += 1; setResult(null); setError(null); setLoading(false); };
   const sourceQualityRelevant = source === 'collective20_to40_c' || source === 'collective_at_least40_c';
@@ -110,7 +114,10 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
         || !sourceTemperatureReference.trim()))
       || thermalCapacity === null || !Number.isFinite(thermalCapacity) || thermalCapacity <= 0
       || !capacityReference.trim() || collective === ''
-      || (scope === 'residential_at_most25_kw' && (thermalCapacity > 25 || collective === 'true'))
+      || (!dwellingTableWithoutCapacityBoundary && scope === 'residential_at_most25_kw'
+        && (thermalCapacity > 25 || collective === 'true'))
+      || (dwellingTableWithoutCapacityBoundary && buildingFunction === 'residential'
+        && scope !== 'residential_at_most25_kw')
       || (scope === 'utility_collective_or_over25_kw' && buildingFunction === 'residential'
         && collective === 'false' && thermalCapacity <= 25)
       || (highRow && (!highRowAvailable || !productReference.trim() || !testReportReference.trim()
@@ -178,8 +185,13 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       <label><span>{t('kernel.forfait.scope')}</span><select value={scope} onChange={(event) => {
         invalidate(); setScope(event.target.value as ForfaitHeatPumpDraftInput['scope']); setRowVariant('base');
       }}>
-        {buildingFunction === 'residential' && <option value="residential_at_most25_kw">{t('kernel.forfait.residential')}</option>}
-        <option value="utility_collective_or_over25_kw">{t('kernel.forfait.utility')}</option>
+        {buildingFunction === 'residential' && <option value="residential_at_most25_kw">
+          {t(dwellingTableWithoutCapacityBoundary ? 'kernel.forfait.residentialLegacy' : 'kernel.forfait.residential')}
+        </option>}
+        {(!dwellingTableWithoutCapacityBoundary || buildingFunction !== 'residential')
+          && <option value="utility_collective_or_over25_kw">
+            {t(dwellingTableWithoutCapacityBoundary ? 'kernel.forfait.utilityLegacy' : 'kernel.forfait.utility')}
+          </option>}
       </select></label>
       <label><span>{t('kernel.forfait.source')}</span><select value={source} onChange={(event) => {
         invalidate(); setSource(event.target.value as Source | ''); setRowVariant('base');

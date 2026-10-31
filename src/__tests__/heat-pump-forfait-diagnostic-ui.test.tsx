@@ -27,6 +27,56 @@ describe('table 9.28 test standard per edition', () => {
 });
 
 describe('draft COP table UI', () => {
+  it('hides collective source rows absent from the 2022 table', () => {
+    vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue('2022');
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'old design',
+      scope: 'residential_at_most25_kw', source: 'collective20_to40_c', sink: 'hydronic',
+      designSupplyTemperatureC: 35, thermalCapacityKw: 20,
+      capacitySourceReference: 'old plate', collectiveBuildingInstallation: false,
+      sourceCorrectionFactor: null, sourceCorrectionReference: null,
+    };
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'ground', forfaitHeatPumpDraft: saved }}
+      buildingFunction="residential" onSave={vi.fn()} />);
+    expect(screen.getByLabelText('Table source class')).toHaveValue('ground');
+    expect(screen.getByLabelText('Table source class').querySelector('option[value="collective20_to40_c"]'))
+      .not.toBeInTheDocument();
+  });
+
+  it.each(['2020+A1', '2022'] as const)('uses dwelling table 9.27 above 25 kW for %s', async (edition) => {
+    vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue(edition);
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({
+      status: 'input_valid', table: '9.27', correctedCop: 2.4, issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'old design',
+      scope: 'utility_collective_or_over25_kw', source: 'outdoor_air', sink: 'hydronic',
+      designSupplyTemperatureC: 35, thermalCapacityKw: 40,
+      capacitySourceReference: 'old plate', collectiveBuildingInstallation: true,
+      sourceCorrectionFactor: null, sourceCorrectionReference: null,
+    };
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: saved }}
+      buildingFunction="residential" onSave={vi.fn()} />);
+    expect(screen.getByLabelText('Table class')).toHaveValue('residential_at_most25_kw');
+    expect(screen.getByRole('option', { name: 'Residential (table 9.27)' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Table class').querySelector('option[value="utility_collective_or_over25_kw"]'))
+      .not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '35' } });
+    fireEvent.change(screen.getByLabelText('Scope and source evidence'), { target: { value: 'design sheet' } });
+    fireEvent.change(screen.getByLabelText('Declared thermal capacity (kW)'), { target: { value: '40' } });
+    fireEvent.change(screen.getByLabelText('Thermal capacity evidence'), { target: { value: 'plate' } });
+    await user.selectOptions(screen.getByLabelText('Building installation'), 'true');
+    await user.click(screen.getByRole('button', { name: 'Look up draft COP' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    const request = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(request.normVersion).toBe(edition);
+    expect(request.input).toMatchObject({
+      scope: 'residential_at_most25_kw', thermalCapacityKw: 40, collectiveBuildingInstallation: true,
+    });
+  });
+
   it('omits the source-temperature fields for a 2022 groundwater table', async () => {
     vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue('2022');
     const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
