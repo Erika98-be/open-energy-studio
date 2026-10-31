@@ -77,6 +77,17 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   const [sourceTemperature, setSourceTemperature] = useState(saved?.sourceTemperatureC == null ? '' : String(saved.sourceTemperatureC));
   const [sourceTemperatureReference, setSourceTemperatureReference] = useState(saved?.sourceTemperatureEvidenceReference ?? '');
   const [sourceQualityReference, setSourceQualityReference] = useState(saved?.sourceQualityDeclarationReference ?? '');
+  const [useQualityDeclaration, setUseQualityDeclaration] = useState(saved?.qualityDeclaration != null);
+  const [declarationReference, setDeclarationReference] = useState(saved?.qualityDeclaration?.declarationReference ?? '');
+  const [declaredCop, setDeclaredCop] = useState(saved?.qualityDeclaration?.generationEfficiency == null
+    ? '' : String(saved.qualityDeclaration.generationEfficiency));
+  const [declaredFraction, setDeclaredFraction] = useState(saved?.qualityDeclaration?.energyFraction == null
+    ? '' : String(saved.qualityDeclaration.energyFraction));
+  const [declaredAuxiliary, setDeclaredAuxiliary] = useState(saved?.qualityDeclaration?.auxiliaryKwhPerYear == null
+    ? '' : String(saved.qualityDeclaration.auxiliaryKwhPerYear));
+  const [installationYear, setInstallationYear] = useState(saved?.installationYear == null
+    ? '' : String(saved.installationYear));
+  const [installationYearReference, setInstallationYearReference] = useState(saved?.installationYearReference ?? '');
   const [result, setResult] = useState<ForfaitHeatPumpDraftAssessment | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -111,6 +122,11 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
     const correction = correctionRequired && factor.trim() !== '' ? Number(factor) : null;
     const thermalCapacity = capacity.trim() === '' ? null : Number(capacity);
     const sourceTemperatureValue = sourceTemperatureBounds && sourceTemperature.trim() !== '' ? Number(sourceTemperature) : null;
+    const declaredCopValue = declaredCop.trim() === '' ? null : Number(declaredCop);
+    const declaredFractionValue = declaredFraction.trim() === '' ? null : Number(declaredFraction);
+    const declaredAuxiliaryValue = declaredAuxiliary.trim() === '' ? null : Number(declaredAuxiliary);
+    const installationYearValue = edition === '2020+A1' && installationYear.trim() !== ''
+      ? Number(installationYear) : null;
     if (!source || !options.includes(source) || !classificationReference.trim()
       || (sourceTemperatureBounds && (sourceTemperatureValue === null || !Number.isFinite(sourceTemperatureValue)
         || sourceTemperatureValue < sourceTemperatureBounds[0] || sourceTemperatureValue >= sourceTemperatureBounds[1]
@@ -132,6 +148,15 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       || (pump.sink === 'hydronic' && (supply === null || !Number.isFinite(supply) || supply <= 0 || supply > 70))
       || (scope === 'residential_at_most25_kw' && source === 'surface_water')
       || (source === 'collective_at_least40_c' && !fallbackToGroundwater && supply !== null && supply <= 40)
+      || (useQualityDeclaration && (!declarationReference.trim() || declaredCopValue === null
+        || !Number.isFinite(declaredCopValue) || declaredCopValue < 0.05 || declaredCopValue > 15
+        || (declaredFractionValue !== null && (!Number.isFinite(declaredFractionValue)
+          || declaredFractionValue <= 0 || declaredFractionValue > 1))
+        || (declaredAuxiliaryValue !== null && (!Number.isFinite(declaredAuxiliaryValue)
+          || declaredAuxiliaryValue < 0))))
+      || (installationYearValue !== null && (!Number.isInteger(installationYearValue)
+        || installationYearValue < 1900 || installationYearValue > 2100
+        || !installationYearReference.trim()))
       || (correctionRequired && (correction === null || !Number.isFinite(correction) || correction <= 0 || !factorReference.trim()))) {
       setError(t('kernel.forfait.invalid'));
       setResult(null);
@@ -159,6 +184,14 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       sourceTemperatureC: sourceTemperatureValue,
       sourceTemperatureEvidenceReference: sourceTemperatureBounds ? sourceTemperatureReference.trim() : null,
       sourceQualityDeclarationReference: sourceQualityRelevant && sourceQualityReference.trim() ? sourceQualityReference.trim() : null,
+      qualityDeclaration: useQualityDeclaration ? {
+        declarationReference: declarationReference.trim(),
+        generationEfficiency: declaredCopValue!,
+        energyFraction: declaredFractionValue,
+        auxiliaryKwhPerYear: declaredAuxiliaryValue,
+      } : null,
+      installationYear: installationYearValue,
+      installationYearReference: installationYearValue === null ? null : installationYearReference.trim(),
     };
   };
 
@@ -209,6 +242,24 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       </>}
       {sourceQualityRelevant && <label><span>{t('kernel.forfait.sourceQualityReference')}</span><input type="text" value={sourceQualityReference}
         onChange={(event) => { invalidate(); setSourceQualityReference(event.target.value); }} /></label>}
+      <label><span>{t('kernel.forfait.useQualityDeclaration')}</span><input type="checkbox" checked={useQualityDeclaration}
+        onChange={(event) => { invalidate(); setUseQualityDeclaration(event.target.checked); }} /></label>
+      {useQualityDeclaration && <>
+        <label><span>{t('kernel.forfait.declarationReference')}</span><input type="text" value={declarationReference}
+          onChange={(event) => { invalidate(); setDeclarationReference(event.target.value); }} /></label>
+        <label><span>{t('kernel.forfait.declaredCop')}</span><DecimalInput min="0.05" max="15" step="any" value={declaredCop}
+          onChange={(event) => { invalidate(); setDeclaredCop(event.target.value); }} /></label>
+        <label><span>{t('kernel.forfait.declaredFraction')}</span><DecimalInput min="0" max="1" step="any" value={declaredFraction}
+          onChange={(event) => { invalidate(); setDeclaredFraction(event.target.value); }} /></label>
+        <label><span>{t('kernel.forfait.declaredAuxiliary')}</span><DecimalInput min="0" step="any" value={declaredAuxiliary}
+          onChange={(event) => { invalidate(); setDeclaredAuxiliary(event.target.value); }} /></label>
+      </>}
+      {edition === '2020+A1' && <>
+        <label><span>{t('kernel.forfait.installationYear')}</span><DecimalInput min="1900" max="2100" step="1" value={installationYear}
+          onChange={(event) => { invalidate(); setInstallationYear(event.target.value); }} /></label>
+        {installationYear.trim() !== '' && <label><span>{t('kernel.forfait.installationYearReference')}</span><input type="text" value={installationYearReference}
+          onChange={(event) => { invalidate(); setInstallationYearReference(event.target.value); }} /></label>}
+      </>}
       {fallbackToGroundwater && <p className="heat-pump-forfait-draft-warning">{t('kernel.forfait.sourceFallback')}</p>}
       {fallbackToGround && <p className="heat-pump-forfait-draft-warning">{t('kernel.forfait.unknownGroundFallback')}</p>}
       <label><span>{t('kernel.forfait.rowVariant')}</span><select value={rowVariant} onChange={(event) => {

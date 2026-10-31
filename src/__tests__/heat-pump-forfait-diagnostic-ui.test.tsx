@@ -27,6 +27,59 @@ describe('table 9.28 test standard per edition', () => {
 });
 
 describe('draft COP table UI', () => {
+  it('preserves the 2020 build year used by the auxiliary-energy route', async () => {
+    vi.spyOn(EnergyContext, 'useProjectEdition').mockReturnValue('2020+A1');
+    const onSave = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({
+      status: 'input_valid', correctedCop: 2.4, issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'design',
+      scope: 'residential_at_most25_kw', source: 'outdoor_air', sink: 'hydronic',
+      designSupplyTemperatureC: 35, thermalCapacityKw: 10,
+      capacitySourceReference: 'plate', collectiveBuildingInstallation: false,
+      sourceCorrectionFactor: null, sourceCorrectionReference: null,
+      installationYear: 2015, installationYearReference: 'product record',
+    };
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: saved }}
+      buildingFunction="residential" onSave={onSave} />);
+    expect(screen.getByLabelText('Heat pump build year (2020 edition, optional)'))
+      .toHaveValue('2015');
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      installationYear: 2015, installationYearReference: 'product record',
+    })));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input.installationYear).toBe(2015);
+  });
+
+  it('keeps an existing declared performance instead of silently reverting to the table COP', async () => {
+    const onSave = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({
+      status: 'input_valid', correctedCop: 4.3, issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'design',
+      scope: 'residential_at_most25_kw', source: 'outdoor_air', sink: 'hydronic',
+      designSupplyTemperatureC: 35, thermalCapacityKw: 10,
+      capacitySourceReference: 'plate', collectiveBuildingInstallation: false,
+      sourceCorrectionFactor: null, sourceCorrectionReference: null,
+      qualityDeclaration: { declarationReference: 'BCRG QD-1', generationEfficiency: 4.32,
+        energyFraction: 0.85, auxiliaryKwhPerYear: 120 },
+    };
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: saved }}
+      buildingFunction="residential" onSave={onSave} />);
+    expect(screen.getByLabelText('Use declared heat pump performance (§9.1)')).toBeChecked();
+    expect(screen.getByLabelText('Declared generation efficiency (COP)')).toHaveValue('4.32');
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      qualityDeclaration: saved.qualityDeclaration,
+    })));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input.qualityDeclaration)
+      .toEqual(saved.qualityDeclaration);
+  });
+
   it('preserves a saved groundwater source declaration as provenance', async () => {
     const onSave = vi.fn();
     const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({
