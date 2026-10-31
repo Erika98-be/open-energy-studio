@@ -158,7 +158,7 @@ fn gas_pump_mcp_preserves_non_applicable_source_reference_path() {
 }
 
 #[test]
-fn electric_pump_mcp_preserves_non_applicable_source_reference_path() {
+fn electric_pump_mcp_preserves_non_applicable_source_reference_paths() {
     let input = json!({
         "generatorId":"hp-1", "classificationSourceReference":"system design",
         "scope":"utility_collective_or_over25_kw", "source":"outdoor_air",
@@ -191,6 +191,36 @@ fn electric_pump_mcp_preserves_non_applicable_source_reference_path() {
         .any(|issue| {
             issue["code"] == "source_correction_not_applicable"
                 && issue["path"] == "sourceCorrectionReference"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+
+    let response = server.request(
+        3,
+        "tools/call",
+        json!({
+            "name":"diagnose_forfait_heat_pump_draft",
+            "arguments":{"input":{
+                "generatorId":"hp-1", "classificationSourceReference":"system design",
+                "scope":"utility_collective_or_over25_kw", "source":"outdoor_air",
+                "sink":"hydronic", "designSupplyTemperatureC":35.0,
+                "sourceQualityDeclarationReference":"unrelated declaration"
+            }}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["correctedCop"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "source_quality_declaration_not_applicable"
+                && issue["path"] == "sourceQualityDeclarationReference"
         }));
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
