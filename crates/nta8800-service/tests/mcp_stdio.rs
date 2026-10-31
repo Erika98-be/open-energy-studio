@@ -261,6 +261,66 @@ fn electric_pump_mcp_preserves_non_applicable_source_reference_paths() {
 }
 
 #[test]
+fn electric_pump_mcp_uses_declared_cop_and_rejects_blank_declaration_reference() {
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"electric-declaration-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let mut input = json!({
+        "generatorId":"hp-air", "classificationSourceReference":"design sheet",
+        "scope":"residential_at_most25_kw", "source":"outdoor_air", "sink":"hydronic",
+        "designSupplyTemperatureC":35.0,
+        "qualityDeclaration":{
+            "declarationReference":"BCRG 0000/01", "generationEfficiency":4.349,
+            "energyFraction":1.0, "auxiliaryKwhPerYear":30.0
+        }
+    });
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name":"diagnose_forfait_heat_pump_draft", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], false, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "input_valid");
+    assert!((assessment["correctedCop"].as_f64().unwrap() - 4.30).abs() < 1e-9);
+    assert_eq!(assessment["bengCalculationAvailable"], false);
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+
+    input["qualityDeclaration"]["declarationReference"] = json!("  ");
+    let response = server.request(
+        3,
+        "tools/call",
+        json!({"name":"diagnose_forfait_heat_pump_draft", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["correctedCop"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "source_required"
+                && issue["path"] == "qualityDeclaration.declarationReference"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn electric_pump_mcp_rejects_legacy_groundwater_temperature_fields() {
     let input = json!({
         "generatorId":"hp-legacy", "classificationSourceReference":"system design",

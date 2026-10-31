@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De echte HTTP- en MCP-routes voor de §9.1-prestatieverklaring bewaken nu een verklaarde COP 4,349 → 4,30, een ontbrekende inhoud in de verklaringreferentie, geen COP bij de veldfout en geen vrijgegeven jaarprestatie of BENG. HTTP geeft 422; MCP geeft `isError=true` en gelijke tekst en structuur. De volledige service-`cargo test` en rustfmt slagen lokaal. Dit versterkt *Audit* en adapterdekking; *Referentie* en *Attest* blijven open.
+
 Een ingevulde grondwaterbronverklaring met alleen witruimte stopt nu in het elektrische COP-tabelformulier vóór HTTP en opslag; een lege optionele waarde en een geldige verwijzing blijven mogelijk. De gerichte UI-proef bewaakt het behoud van een geldige verwijzing, de weigering van witruimte en een gerichte hersteltekst; veertien formulierproeven, TypeScript en Vite slagen lokaal. [CI op `3da63ae0`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41204222582) bevestigde de voorafgaande NTA-gate en drie desktopplatforms. Dit versterkt *Invoeraudit*; *Referentie* en *Attest* blijven open.
 
 De tabelrijen voor elektrische en gasgestookte warmtepompdiagnoses scheiden nu concepttranscriptie als gegevensherkomst, vergelijking van de cellen met de gelicentieerde eindtekst en de nog ontbrekende onafhankelijke EDR-uitkomsten. Het blijven begrensde diagnoses zonder attest. [CI op `8274f175`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41196071372) slaagde voor de voorafgaande NTA-gate en drie desktopplatforms; deze dossiercorrectie verandert geen code of rekenuitkomst.
