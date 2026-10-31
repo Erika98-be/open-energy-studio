@@ -55,7 +55,7 @@ describe('standalone NTA heat pump inventory', () => {
     await user.click(screen.getByRole('button', { name: 'Add heat pump' }));
     await user.click(screen.getByLabelText('Hybrid'));
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
+    await user.click(screen.getByRole('button', { name: 'COP table lookup' }));
     fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '35' } });
     fireEvent.change(screen.getByLabelText('Scope and source evidence'), { target: { value: 'design sheet' } });
     fireEvent.change(screen.getByLabelText('Declared thermal capacity (kW)'), { target: { value: '8' } });
@@ -83,7 +83,7 @@ describe('standalone NTA heat pump inventory', () => {
     renderWithProviders(<InventoryWithState />);
     await user.click(screen.getByRole('button', { name: 'Add heat pump' }));
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
+    await user.click(screen.getByRole('button', { name: 'COP table lookup' }));
     fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '35' } });
     expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('35');
     await user.click(screen.getByRole('button', { name: 'Change building function' }));
@@ -99,7 +99,7 @@ describe('standalone NTA heat pump inventory', () => {
     renderWithProviders(<InventoryWithState />);
     await user.click(screen.getByRole('button', { name: 'Add heat pump' }));
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
+    await user.click(screen.getByRole('button', { name: 'COP table lookup' }));
     fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '35' } });
     fireEvent.change(screen.getByLabelText('Scope and source evidence'), { target: { value: 'design sheet' } });
     fireEvent.change(screen.getByLabelText('Declared thermal capacity (kW)'), { target: { value: '8' } });
@@ -109,8 +109,8 @@ describe('standalone NTA heat pump inventory', () => {
     await waitFor(() => expect(JSON.parse(screen.getByTestId('forfait-input').textContent ?? 'null')).toMatchObject({
       source: 'outdoor_air', designSupplyTemperatureC: 35,
     }));
-    await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
-    await user.click(screen.getByRole('button', { name: 'Draft COP table' }));
+    await user.click(screen.getByRole('button', { name: 'COP table lookup' }));
+    await user.click(screen.getByRole('button', { name: 'COP table lookup' }));
     expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('35');
     expect(screen.getByText(/Table input saved in this project/)).toBeInTheDocument();
     expect(document.querySelector('.preview-energy-label')).not.toBeInTheDocument();
@@ -124,7 +124,7 @@ describe('standalone NTA heat pump inventory', () => {
     await user.selectOptions(screen.getByLabelText('Heat source'), 'ground');
     await user.selectOptions(screen.getByLabelText('Sink / service'), 'indoor_air');
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    expect(screen.queryByRole('button', { name: 'Draft COP table' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'COP table lookup' })).not.toBeInTheDocument();
   });
   it('opens the scoped measured-auxiliary diagnostic for an eligible pump', async () => {
     const user = userEvent.setup();

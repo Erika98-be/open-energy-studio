@@ -150,7 +150,7 @@ describe('draft COP table UI', () => {
     fireEvent.change(screen.getByLabelText('Declared thermal capacity (kW)'), { target: { value: '40' } });
     fireEvent.change(screen.getByLabelText('Thermal capacity evidence'), { target: { value: 'plate' } });
     await user.selectOptions(screen.getByLabelText('Building installation'), 'true');
-    await user.click(screen.getByRole('button', { name: 'Look up draft COP' }));
+    await user.click(screen.getByRole('button', { name: 'Look up table COP' }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     const request = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(request.normVersion).toBe(edition);
@@ -177,7 +177,7 @@ describe('draft COP table UI', () => {
     renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'groundwater', forfaitHeatPumpDraft: saved }}
       buildingFunction="office" onSave={vi.fn()} />);
     expect(screen.queryByLabelText('Declared source temperature (°C)')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Look up draft COP' }));
+    await user.click(screen.getByRole('button', { name: 'Look up table COP' }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
     const request = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(request.normVersion).toBe('2022');
@@ -196,7 +196,9 @@ describe('draft COP table UI', () => {
     }) });
     vi.stubGlobal('fetch', fetchMock);
     const view = renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={pump} buildingFunction="residential" onSave={onSave} />);
-    await user.click(screen.getByRole('button', { name: 'Look up draft COP' }));
+    expect(screen.getByText('Electric heat pump COP · NTA table lookup')).toBeInTheDocument();
+    expect(screen.getByText(/Tables 9\.27\/9\.29 for the selected NTA edition/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Look up table COP' }));
     expect(screen.getByRole('alert')).toHaveTextContent('traceable evidence');
     expect(fetchMock).not.toHaveBeenCalled();
 
@@ -205,9 +207,9 @@ describe('draft COP table UI', () => {
     fireEvent.change(screen.getByLabelText('Declared thermal capacity (kW)'), { target: { value: '25' } });
     fireEvent.change(screen.getByLabelText('Thermal capacity evidence'), { target: { value: 'manufacturer sheet' } });
     await user.selectOptions(screen.getByLabelText('Building installation'), 'false');
-    await user.click(screen.getByRole('button', { name: 'Look up draft COP' }));
-    expect(await screen.findByText('Draft table COP: 2.40')).toBeInTheDocument();
-    expect(screen.getByText(/final edition, applicability, seasonal performance and BENG calculation are unverified/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Look up table COP' }));
+    expect(await screen.findByText('Table COP: 2.40')).toBeInTheDocument();
+    expect(screen.getByText(/Independent reference results, full applicability, seasonal performance and BENG calculation are unverified/i)).toBeInTheDocument();
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe('/api/v1/nta8800/heat-pumps/forfait-cop-draft/diagnose');
     const input = JSON.parse(options.body).input;
@@ -218,7 +220,7 @@ describe('draft COP table UI', () => {
     await user.click(screen.getByRole('button', { name: 'Save table input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(input));
     fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '36' } });
-    expect(screen.queryByText('Draft table COP: 2.40')).not.toBeInTheDocument();
+    expect(screen.queryByText('Table COP: 2.40')).not.toBeInTheDocument();
     view.unmount();
     const savedView = renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, forfaitHeatPumpDraft: input }}
       buildingFunction="residential" onSave={vi.fn()} />);
