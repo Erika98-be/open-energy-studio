@@ -209,6 +209,23 @@ mod tests {
             .as_array()
             .unwrap()
             .is_empty());
+        input["coefficients"]["cDimensionless"] = json!(0.5);
+        input["coefficients"]["bKw"] = json!(1e20);
+        input["months"][11]["generatorInputElectricityKwh"] = json!(1e20);
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["monthlyAuxiliaryElectricityKwh"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+        assert!(value["annualAuxiliaryElectricityKwh"].is_null());
+        assert!(value["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "aux_arithmetic_overflow"
+                && issue["path"] == "months[11].generatorInputElectricityKwh"
+        }));
     }
 
     #[tokio::test]

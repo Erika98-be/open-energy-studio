@@ -397,9 +397,14 @@ pub fn assess_heating_aux_draft(input: &HeatingAuxDraftInput) -> HeatingAuxDraft
             let fixed = a.checked_div(Decimal::from(12));
             if let (Some(denominator), Some(fixed)) = (denominator, fixed) {
                 let mut sum = Decimal::ZERO;
-                let mut ordered_months = input.months.iter().zip(inputs).collect::<Vec<_>>();
-                ordered_months.sort_by_key(|(month, _)| month.month);
-                for (month, energy) in ordered_months {
+                let mut ordered_months = input
+                    .months
+                    .iter()
+                    .zip(inputs)
+                    .enumerate()
+                    .collect::<Vec<_>>();
+                ordered_months.sort_by_key(|(_, (month, _))| month.month);
+                for (input_index, (month, energy)) in ordered_months {
                     let result = energy
                         .and_then(|energy| b.checked_mul(energy))
                         .and_then(|variable| variable.checked_div(denominator))
@@ -415,12 +420,18 @@ pub fn assess_heating_aux_draft(input: &HeatingAuxDraftInput) -> HeatingAuxDraft
                                 sum = next;
                             }
                             None => {
-                                issues.push(issue("aux_arithmetic_overflow", "months"));
+                                issues.push(issue(
+                                    "aux_arithmetic_overflow",
+                                    format!("months[{input_index}].generatorInputElectricityKwh"),
+                                ));
                                 break;
                             }
                         },
                         None => {
-                            issues.push(issue("aux_arithmetic_overflow", "months"));
+                            issues.push(issue(
+                                "aux_arithmetic_overflow",
+                                format!("months[{input_index}].generatorInputElectricityKwh"),
+                            ));
                             break;
                         }
                     }
@@ -540,6 +551,21 @@ mod tests {
         {
             assert_eq!(actual.electricity_kwh, expected.electricity_kwh);
         }
+    }
+    #[test]
+    fn arithmetic_overflow_keeps_original_month_input_path() {
+        let mut input = sample();
+        input.coefficients.b_kw = 1e20;
+        input.months[0].generator_input_electricity_kwh = 1e20;
+        input.months.reverse();
+        let result = assess_heating_aux_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.monthly_auxiliary_electricity_kwh.is_empty());
+        assert!(result.annual_auxiliary_electricity_kwh.is_none());
+        assert!(result.issues.iter().any(|item| {
+            item.code == "aux_arithmetic_overflow"
+                && item.path == "months[11].generatorInputElectricityKwh"
+        }));
     }
     #[test]
     fn incomplete_or_invalid_input_yields_no_partial_electricity() {

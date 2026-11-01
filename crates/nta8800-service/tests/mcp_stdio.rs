@@ -683,6 +683,29 @@ fn heating_auxiliary_mcp_orders_months_and_refuses_partial_invalid_result() {
         serde_json::from_str::<Value>(refused["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment
     );
+    input["coefficients"]["cDimensionless"] = json!(0.5);
+    input["coefficients"]["bKw"] = json!(1e20);
+    input["months"][11]["generatorInputElectricityKwh"] = json!(1e20);
+    let overflow = server.request(4, "tools/call", call(&input));
+    assert_eq!(overflow["isError"], true, "{overflow}");
+    let assessment = &overflow["structuredContent"];
+    assert!(assessment["monthlyAuxiliaryElectricityKwh"]
+        .as_array()
+        .unwrap()
+        .is_empty());
+    assert!(assessment["annualAuxiliaryElectricityKwh"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "aux_arithmetic_overflow"
+                && issue["path"] == "months[11].generatorInputElectricityKwh"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(overflow["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
 }
 
 #[test]
