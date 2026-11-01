@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useProjectEdition } from '../../context/EnergyContext';
+import { useEnergy, useProjectEdition } from '../../context/EnergyContext';
 import type { INtaHeatPumpInput } from '../../core/energy/types';
 import {
   diagnoseHeatingAuxMeasuredDraftWithRust,
@@ -35,6 +35,7 @@ const savedMonths = (input?: HeatingAuxMeasuredDraftInput): string[] => Array.fr
 
 export function HeatPumpAuxDiagnosticPanel({ pump, onSave }: { pump: INtaHeatPumpInput; onSave?: (input: HeatingAuxMeasuredDraftInput) => void }) {
   const { t } = useI18n();
+  const projectId = useEnergy().state.project.id;
   const saved = pump.heatingAuxMeasuredDraft;
   const savedInputKey = JSON.stringify(saved ?? null);
   const [numbers, setNumbers] = useState(() => saved
@@ -65,7 +66,7 @@ export function HeatPumpAuxDiagnosticPanel({ pump, onSave }: { pump: INtaHeatPum
     setError(null);
     setLoading(false);
     return () => { requestSequence.current += 1; };
-  }, [pump.id, pump.performanceEvidence.reference, savedInputKey]);
+  }, [projectId, pump.id, pump.performanceEvidence.reference, savedInputKey]);
 
   const invalidate = () => {
     requestSequence.current += 1;

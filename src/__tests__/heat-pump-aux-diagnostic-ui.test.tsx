@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { HeatPumpAuxDiagnosticPanel } from '../components/HeatPumpAuxDiagnosticPanel/HeatPumpAuxDiagnosticPanel';
+import { useEnergy } from '../context/EnergyContext';
 import type { INtaHeatPumpInput } from '../core/energy/types';
 import { renderWithProviders, userEvent } from './test-utils';
 
@@ -13,6 +14,24 @@ const pump: INtaHeatPumpInput = {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('draft heat-pump auxiliary UI', () => {
+  it('clears an unsaved draft when the project changes but the pump ID does not', async () => {
+    const user = userEvent.setup();
+    function ProjectSwitch() {
+      const { state, dispatch } = useEnergy();
+      return <>
+        <HeatPumpAuxDiagnosticPanel pump={pump} />
+        <button type="button" onClick={() => dispatch({
+          type: 'SET_PROJECT', payload: { ...state.project, id: 'another-project' },
+        })}>Switch project</button>
+      </>;
+    }
+    renderWithProviders(<ProjectSwitch />);
+    fireEvent.change(screen.getByLabelText('Electronics standby power (W)'), { target: { value: '10' } });
+    expect(screen.getByLabelText('Electronics standby power (W)')).toHaveValue('10');
+    await user.click(screen.getByRole('button', { name: 'Switch project' }));
+    expect(screen.getByLabelText('Electronics standby power (W)')).toHaveValue('');
+  });
+
   it('reloads measured inputs when another project has the same pump ID', () => {
     const savedInput = (standbyElectronicsW: number, decemberKwh: number) => ({
       generatorId: pump.id, generatorSourceReference: 'product schedule',
