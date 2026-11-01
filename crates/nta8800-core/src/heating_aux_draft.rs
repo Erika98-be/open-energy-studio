@@ -443,7 +443,7 @@ pub fn assess_heating_aux_draft(input: &HeatingAuxDraftInput) -> HeatingAuxDraft
         } else {
             "invalid"
         },
-        scope: "public_chapter_9_draft_9_85_measured_coefficients_one_individual_generator_only",
+        scope: "edition_specific_equation_9_85_supplied_coefficients_one_individual_generator_only",
         draft_source: crate::norm_versions::cite(DRAFT_SOURCE),
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
@@ -487,6 +487,11 @@ mod tests {
     fn hand_case_applies_fixed_and_variable_terms_without_source_pump() {
         let result = assess_heating_aux_draft(&sample());
         assert_eq!(result.status, "input_valid");
+        assert_eq!(
+            result.scope,
+            "edition_specific_equation_9_85_supplied_coefficients_one_individual_generator_only"
+        );
+        assert!(result.draft_source.contains("NTA 8800:2025+C1:2026"));
         assert_eq!(
             result.monthly_auxiliary_electricity_kwh[0].electricity_kwh,
             15.0

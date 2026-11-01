@@ -902,7 +902,7 @@ export interface HeatingAuxDraftInput {
 
 export interface HeatingAuxDraftAssessment {
   status: 'input_valid' | 'invalid';
-  scope: 'public_chapter_9_draft_9_85_measured_coefficients_one_individual_generator_only';
+  scope: 'edition_specific_equation_9_85_supplied_coefficients_one_individual_generator_only';
   draftSource: string;
   targetNormVersion: string;
   kernelVersion: string;

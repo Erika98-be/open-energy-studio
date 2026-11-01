@@ -162,6 +162,14 @@ mod tests {
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
         assert_eq!(
+            value["scope"],
+            "edition_specific_equation_9_85_supplied_coefficients_one_individual_generator_only"
+        );
+        assert!(value["draftSource"]
+            .as_str()
+            .unwrap()
+            .contains("NTA 8800:2025+C1:2026"));
+        assert_eq!(
             value["monthlyAuxiliaryElectricityKwh"][0]["electricityKwh"],
             15.0
         );

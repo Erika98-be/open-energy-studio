@@ -632,6 +632,14 @@ fn heating_auxiliary_mcp_orders_months_and_refuses_partial_invalid_result() {
     assert_eq!(valid["isError"], false, "{valid}");
     let assessment = &valid["structuredContent"];
     assert_eq!(assessment["status"], "input_valid");
+    assert_eq!(
+        assessment["scope"],
+        "edition_specific_equation_9_85_supplied_coefficients_one_individual_generator_only"
+    );
+    assert!(assessment["draftSource"]
+        .as_str()
+        .unwrap()
+        .contains("NTA 8800:2025+C1:2026"));
     assert_eq!(assessment["annualAuxiliaryElectricityKwh"], 180.0);
     assert_eq!(assessment["monthlyAuxiliaryElectricityKwh"][0]["month"], 1);
     assert_eq!(
