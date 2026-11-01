@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De HTTP-clients voor elektrische hulpenergie 9.85 en voorlopige meetcomponenten 9.86–9.88 onderscheiden nu een Rust-422-invoeraudit (`status: invalid`) van HTTP-storingen. Clientproeven bewaken 422, 500 zonder JSON-parsing en een tegenstrijdige 422-response; de bestaande UI-proef en TypeScript slagen lokaal. Dit versterkt *Audit* en *Weergave* aan de HTTP-grens; onafhankelijke *Referentie* en *Attest* blijven open.
+
 Het elektrische meetcomponentenformulier toont de Rust-422-audit van een hulpenergie-overloop nu met exact veldpad en NL/EN-hersteltekst, zonder ruwe foutcode of de misleidende lokale melding voor onvolledige velden. Een gerichte UI-proef bewaakt de respons en het wissen van de vorige uitkomst; TypeScript slaagt. Dit versterkt *Weergave* en *Audit* in de UI; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Rust-, HTTP- en MCP-proeven controleren voor de losse elektrische 9.85-route een rekenkundige overloop bij omgekeerde maandinvoer: de fout blijft op het originele `months[11].generatorInputElectricityKwh` en er verschijnt geen maand- of jaaruitkomst. De 1015 kern-unittests en volledige servicesuite slagen lokaal. [CI op `cc823cba`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41265068650) bevestigde de voorafgaande NTA-gate en drie desktopplatforms. Dit versterkt *Audit* na kalenderordening; onafhankelijke *Referentie* en *Attest* blijven open.

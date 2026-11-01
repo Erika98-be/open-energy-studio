@@ -928,7 +928,10 @@ export async function diagnoseHeatingAuxDraftWithRust(input: HeatingAuxDraftInpu
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<HeatingAuxDraftAssessment>;
+    if (!response.ok && response.status !== 422) throw new Error(`Heat pump auxiliary diagnostic: HTTP ${response.status}`);
+    const assessment = await response.json() as HeatingAuxDraftAssessment;
+    if (!response.ok && assessment.status !== 'invalid') throw new Error(`Heat pump auxiliary diagnostic: HTTP ${response.status}`);
+    return assessment;
   }
   throw new Error('Rust draft heat-pump auxiliary diagnostics are available in the desktop app and local development server.');
 }
@@ -1571,7 +1574,10 @@ export async function diagnoseHeatingAuxMeasuredDraftWithRust(input: HeatingAuxM
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<HeatingAuxMeasuredDraftAssessment>;
+    if (!response.ok && response.status !== 422) throw new Error(`Measured heat pump auxiliary diagnostic: HTTP ${response.status}`);
+    const assessment = await response.json() as HeatingAuxMeasuredDraftAssessment;
+    if (!response.ok && assessment.status !== 'invalid') throw new Error(`Measured heat pump auxiliary diagnostic: HTTP ${response.status}`);
+    return assessment;
   }
   throw new Error('Rust draft heat-pump measurement diagnostics are available in the desktop app and local development server.');
 }
