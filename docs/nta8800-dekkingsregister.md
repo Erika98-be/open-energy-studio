@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Constructie-, ventilatie-, opname- en ruimteverwarmingsketenclients bewaken nu via zes gerichte HTTP-proeven dat 422-invoeraudit zichtbaar blijft, `derived_input_rejected` bij beide opnameroutes doorloopt en 500 geen diagnosebody oplevert. TypeScript en de Vite-productiebouw slagen lokaal. Dit versterkt *Audit* en *Weergave*; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De HTTP-clients voor verklaarde verwarming en tapwater, eindenergie, EPus, maandvraag en BACS onderscheiden nu 422-invoeraudit van 500-transportfout. Drie routes behouden een `incomplete`-uitkomst bij HTTP 200; zeven gerichte clientproeven slagen lokaal. Dit versterkt *Audit* en *Weergave* over HTTP; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De HTTP-responses van voorlopige indicatoren, gebouwprestatie en projectprestatie bewaken nu 422-invoeraudit, projectstatus `incomplete` met gap-paden en 500 als transportfout zonder JSON-parsing. Vier gerichte clientproeven en de bestaande projectproeven slagen lokaal. Dit versterkt *Audit* en *Weergave* voor BENG en het indicatieve label; onafhankelijke *Referentie* en *Attest* blijven open.

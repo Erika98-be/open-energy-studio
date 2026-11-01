@@ -2397,7 +2397,7 @@ export async function calculateConstructionsWithRust(input: EnvelopeInput, normV
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<EnvelopeAssessment>;
+    return readAssessmentResponse<EnvelopeAssessment>(response, 'Envelope calculation');
   }
   throw new Error('Rust construction calculation is available in the desktop app and local development server.');
 }
@@ -2619,7 +2619,7 @@ export async function calculateVentilationWithRust(input: VentilationInput, norm
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<VentilationAssessment>;
+    return readAssessmentResponse<VentilationAssessment>(response, 'Ventilation calculation');
   }
   throw new Error('Rust ventilation calculation is available in the desktop app and local development server.');
 }
@@ -2929,7 +2929,7 @@ export async function assessResidentialSurveyWithRust(survey: ResidentialSurvey)
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ survey }),
     });
-    return response.json() as Promise<OpnameAssessment>;
+    return readAssessmentResponse<OpnameAssessment>(response, 'Residential survey assessment', ['invalid', 'derived_input_rejected']);
   }
   throw new Error('Rust basic survey is available in the desktop app and local development server.');
 }
@@ -3160,7 +3160,7 @@ export async function assessUtilitySurveyWithRust(survey: UtilitySurvey): Promis
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ survey }),
     });
-    return response.json() as Promise<OpnameAssessment>;
+    return readAssessmentResponse<OpnameAssessment>(response, 'Utility survey assessment', ['invalid', 'derived_input_rejected']);
   }
   throw new Error('Rust basic survey is available in the desktop app and local development server.');
 }
@@ -3175,7 +3175,7 @@ export async function calculateSpaceHeatingChainWithRust(input: SpaceHeatingChai
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<SpaceHeatingChainAssessment>;
+    return readAssessmentResponse<SpaceHeatingChainAssessment>(response, 'Space heating chain calculation');
   }
   throw new Error('Rust heating chain calculation is available in the desktop app and local development server.');
 }

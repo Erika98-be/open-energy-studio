@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 1 november 2026
 
+Ook de HTTP-clients voor constructies, ventilatie, opname van woningen en utiliteit en de ruimteverwarmingsketen onderscheiden nu een Rust-422-audit van een HTTP-500-storing. De twee opnameroutes behouden `derived_input_rejected` als 422-audit met veldpaden. Zes gerichte clientproeven, TypeScript en de Vite-productiebouw slagen lokaal; een serverfout wordt niet als berekeningsuitkomst gelezen. De bestaande begrenzing van normreferentie en attest blijft gelden.
+
 Zes aanvullende HTTP-clients voor prestatieverklaringen, eindenergie, EPus, maandvraag en BACS geven een Rust-422-invoeraudit door, maar behandelen een HTTP-500-response als transportfout zonder haar body als diagnose te lezen. Voor eindenergie, EPus en BACS blijft `incomplete` bij HTTP 200 een gewone, begrensde audituitkomst. Zeven gerichte clientproeven slagen lokaal. Deze afbakening verbetert de betrouwbaarheid van het antwoordcontract, zonder de normberekening of referentiestatus te wijzigen.
 
 De HTTP-clients voor voorlopige BENG-indicatoren, de gebouwprestatie en de projectprestatie maken nu onderscheid tussen een Rust-invoeraudit en een transportstoring. Een 422 met `invalid` blijft zichtbaar als audit; de projectroute laat ook `incomplete` met concrete ontbrekende invoerpaden door. Een 500 wordt zonder JSON-parsing als fout doorgegeven, en een tegenstrijdig 422-antwoord wordt geweigerd. Vier gerichte clientproeven plus bestaande routeproeven slagen lokaal. Deze contractgrens levert geen onafhankelijke BENG- of labelverificatie op.
