@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Een overloop bij de afleiding van de jaarlijkse standbycoëfficiënt voor de elektrische 9.86–9.88-meetroute meldt nu `measurements.standbyElectronicsW`; Rust en HTTP bewaken 422 en lege deelresultaten. Alle 1016 kernunitproeven, rustfmt en de volledige servicesuite slagen lokaal; de lange kernintegratiesuite is niet volledig afgerond. Dit versterkt *Audit* voor de conceptmeetroute; onafhankelijke *Referentie* en *Attest* blijven open.
+Een overloop bij de afleiding van de jaarlijkse standbycoëfficiënt voor de elektrische 9.86–9.88-meetroute meldt nu `measurements.standbyElectronicsW`; Rust, HTTP en echte MCP-stdio bewaken 422 of `isError=true`, lege deelresultaten en gelijke MCP-tekst en structuur. Alle 1016 kernunitproeven, 16 MCP-stdio-proeven, rustfmt en de volledige servicesuite slagen lokaal; de lange kernintegratiesuite is niet volledig afgerond. Dit versterkt *Audit* voor de conceptmeetroute; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Constructie-, ventilatie-, opname- en ruimteverwarmingsketenclients bewaken nu via zes gerichte HTTP-proeven dat 422-invoeraudit zichtbaar blijft, `derived_input_rejected` bij beide opnameroutes doorloopt en 500 geen diagnosebody oplevert. TypeScript en de Vite-productiebouw slagen lokaal. Dit versterkt *Audit* en *Weergave*; onafhankelijke *Referentie* en *Attest* blijven open.
 
