@@ -2,16 +2,28 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   diagnoseHeatingAuxDraftWithRust,
   diagnoseHeatingAuxMeasuredDraftWithRust,
+  diagnoseForfaitHeatPumpMonthlyDraftWithRust,
+  diagnoseGeneratorDispatchDraftWithRust,
+  diagnoseBoilerForfaitDraftWithRust,
+  diagnoseHybridHeatPumpMonthlyDraftWithRust,
   type HeatingAuxDraftInput,
   type HeatingAuxMeasuredDraftInput,
+  type ForfaitHeatPumpMonthlyDraftInput,
+  type GeneratorDispatchDraftInput,
+  type BoilerForfaitDraftInput,
+  type HybridHeatPumpMonthlyDraftInput,
 } from '../core/nta/KernelClient';
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe('heat pump auxiliary HTTP diagnostic boundary', () => {
+describe('heat pump and linked heating HTTP diagnostic boundary', () => {
   const routes = [
     ['supplied coefficients', () => diagnoseHeatingAuxDraftWithRust({} as HeatingAuxDraftInput)],
     ['measured components', () => diagnoseHeatingAuxMeasuredDraftWithRust({} as HeatingAuxMeasuredDraftInput)],
+    ['monthly heat pump', () => diagnoseForfaitHeatPumpMonthlyDraftWithRust({} as ForfaitHeatPumpMonthlyDraftInput)],
+    ['generator dispatch', () => diagnoseGeneratorDispatchDraftWithRust({} as GeneratorDispatchDraftInput)],
+    ['boiler forfait', () => diagnoseBoilerForfaitDraftWithRust({} as BoilerForfaitDraftInput)],
+    ['hybrid heat pump', () => diagnoseHybridHeatPumpMonthlyDraftWithRust({} as HybridHeatPumpMonthlyDraftInput)],
   ] as const;
 
   for (const [route, diagnose] of routes) {

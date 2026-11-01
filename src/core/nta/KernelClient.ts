@@ -3,6 +3,13 @@ import { invoke, isTauri } from '@tauri-apps/api/core';
 import type { IProject, INtaHeatPumpInput } from '../energy/types';
 import { kernelProject, projectRouteInput } from './KernelInput';
 
+async function readDraftDiagnosticResponse<T extends { status: string }>(response: Response, label: string): Promise<T> {
+  if (response.ok === false && response.status !== 422) throw new Error(`${label}: HTTP ${response.status}`);
+  const assessment = await response.json() as T;
+  if (response.ok === false && assessment.status !== 'invalid') throw new Error(`${label}: HTTP ${response.status}`);
+  return assessment;
+}
+
 /** Annex T Gaskeur test report (gas water heaters and combi appliances). */
 export type NtaAnnexTTest =
   | {
@@ -928,10 +935,7 @@ export async function diagnoseHeatingAuxDraftWithRust(input: HeatingAuxDraftInpu
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    if (!response.ok && response.status !== 422) throw new Error(`Heat pump auxiliary diagnostic: HTTP ${response.status}`);
-    const assessment = await response.json() as HeatingAuxDraftAssessment;
-    if (!response.ok && assessment.status !== 'invalid') throw new Error(`Heat pump auxiliary diagnostic: HTTP ${response.status}`);
-    return assessment;
+    return readDraftDiagnosticResponse<HeatingAuxDraftAssessment>(response, 'Heat pump auxiliary diagnostic');
   }
   throw new Error('Rust draft heat-pump auxiliary diagnostics are available in the desktop app and local development server.');
 }
@@ -1388,7 +1392,7 @@ export async function diagnoseForfaitHeatPumpMonthlyDraftWithRust(
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<ForfaitHeatPumpMonthlyDraftAssessment>;
+    return readDraftDiagnosticResponse<ForfaitHeatPumpMonthlyDraftAssessment>(response, 'Heat pump monthly diagnostic');
   }
   throw new Error('Rust draft monthly heat-pump diagnostics are available in the desktop app and local development server.');
 }
@@ -1450,7 +1454,7 @@ export async function diagnoseGeneratorDispatchDraftWithRust(
     const response = await fetch('/api/v1/nta8800/heating/generator-dispatch-draft/diagnose', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<GeneratorDispatchDraftAssessment>;
+    return readDraftDiagnosticResponse<GeneratorDispatchDraftAssessment>(response, 'Generator dispatch diagnostic');
   }
   throw new Error('Rust draft generator dispatch is available in the desktop app and local development server.');
 }
@@ -1497,7 +1501,7 @@ export async function diagnoseBoilerForfaitDraftWithRust(input: BoilerForfaitDra
     const response = await fetch('/api/v1/nta8800/boilers/forfait-draft/diagnose', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<BoilerForfaitDraftAssessment>;
+    return readDraftDiagnosticResponse<BoilerForfaitDraftAssessment>(response, 'Boiler forfait diagnostic');
   }
   throw new Error('Rust draft boiler diagnostics are available in the desktop app and local development server.');
 }
@@ -1542,7 +1546,7 @@ export async function diagnoseHybridHeatPumpMonthlyDraftWithRust(
     const response = await fetch('/api/v1/nta8800/heat-pumps/hybrid-monthly-draft/diagnose', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<HybridHeatPumpMonthlyDraftAssessment>;
+    return readDraftDiagnosticResponse<HybridHeatPumpMonthlyDraftAssessment>(response, 'Hybrid heat pump diagnostic');
   }
   throw new Error('Rust draft hybrid heat-pump diagnostics are available in the desktop app and local development server.');
 }
@@ -1574,10 +1578,7 @@ export async function diagnoseHeatingAuxMeasuredDraftWithRust(input: HeatingAuxM
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    if (!response.ok && response.status !== 422) throw new Error(`Measured heat pump auxiliary diagnostic: HTTP ${response.status}`);
-    const assessment = await response.json() as HeatingAuxMeasuredDraftAssessment;
-    if (!response.ok && assessment.status !== 'invalid') throw new Error(`Measured heat pump auxiliary diagnostic: HTTP ${response.status}`);
-    return assessment;
+    return readDraftDiagnosticResponse<HeatingAuxMeasuredDraftAssessment>(response, 'Measured heat pump auxiliary diagnostic');
   }
   throw new Error('Rust draft heat-pump measurement diagnostics are available in the desktop app and local development server.');
 }

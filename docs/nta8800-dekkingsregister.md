@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De HTTP-grens voor zes elektrische en hybride verwarmingsdiagnoses bewaakt nu 422 met `status: invalid`, 500 zonder JSON-parsing en een tegenstrijdige 422-response. Dit omvat hulpenergie, meetcomponenten, maandterm, opwekkerverdeling, ketel en hybride maandketen; negen gerichte client-, editie- en UI-proeven slagen lokaal. Dit versterkt *Audit* en *Weergave* over HTTP; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De HTTP-clients voor elektrische hulpenergie 9.85 en voorlopige meetcomponenten 9.86–9.88 onderscheiden nu een Rust-422-invoeraudit (`status: invalid`) van HTTP-storingen. Clientproeven bewaken 422, 500 zonder JSON-parsing en een tegenstrijdige 422-response; de bestaande UI-proef en TypeScript slagen lokaal. Dit versterkt *Audit* en *Weergave* aan de HTTP-grens; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Het elektrische meetcomponentenformulier toont de Rust-422-audit van een hulpenergie-overloop nu met exact veldpad en NL/EN-hersteltekst, zonder ruwe foutcode of de misleidende lokale melding voor onvolledige velden. Een gerichte UI-proef bewaakt de respons en het wissen van de vorige uitkomst; TypeScript slaagt. Dit versterkt *Weergave* en *Audit* in de UI; onafhankelijke *Referentie* en *Attest* blijven open.
