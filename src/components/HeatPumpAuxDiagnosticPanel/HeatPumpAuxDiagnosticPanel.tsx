@@ -36,6 +36,7 @@ const savedMonths = (input?: HeatingAuxMeasuredDraftInput): string[] => Array.fr
 export function HeatPumpAuxDiagnosticPanel({ pump, onSave }: { pump: INtaHeatPumpInput; onSave?: (input: HeatingAuxMeasuredDraftInput) => void }) {
   const { t } = useI18n();
   const saved = pump.heatingAuxMeasuredDraft;
+  const savedInputKey = JSON.stringify(saved ?? null);
   const [numbers, setNumbers] = useState(() => saved
     ? Object.fromEntries(numericFields.map((field) => [field, String(saved.measurements[field])])) as Record<NumericField, string>
     : emptyNumbers());
@@ -64,7 +65,7 @@ export function HeatPumpAuxDiagnosticPanel({ pump, onSave }: { pump: INtaHeatPum
     setError(null);
     setLoading(false);
     return () => { requestSequence.current += 1; };
-  }, [pump.id, pump.performanceEvidence.reference]);
+  }, [pump.id, pump.performanceEvidence.reference, savedInputKey]);
 
   const invalidate = () => {
     requestSequence.current += 1;

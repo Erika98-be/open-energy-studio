@@ -13,6 +13,35 @@ const pump: INtaHeatPumpInput = {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('draft heat-pump auxiliary UI', () => {
+  it('reloads measured inputs when another project has the same pump ID', () => {
+    const savedInput = (standbyElectronicsW: number, decemberKwh: number) => ({
+      generatorId: pump.id, generatorSourceReference: 'product schedule',
+      measurements: {
+        standbyElectronicsW, deliveryPumpDuringCompressorW: 200,
+        deliveryPumpPrePostW: 90, pumpPreRunSeconds: 300, pumpPostRunSeconds: 300,
+        averageCompressorOnSeconds: 600, meanCompressorModulation: 0.5,
+        nominalElectricDriveKw: 2, measurementSourceReference: 'meter',
+        timingSourceReference: 'cycle',
+      },
+      inputEnergySourceReference: 'monthly meter',
+      months: Array.from({ length: 12 }, (_, index) => ({
+        month: index + 1,
+        generatorInputElectricityKwh: index === 11 ? decemberKwh : 100,
+      })),
+    });
+    const view = renderWithProviders(<HeatPumpAuxDiagnosticPanel pump={{
+      ...pump, heatingAuxMeasuredDraft: savedInput(10, 100),
+    }} />);
+    expect(screen.getByLabelText('Electronics standby power (W)')).toHaveValue('10');
+    expect(screen.getByLabelText('Month 12')).toHaveValue('100');
+
+    view.rerender(<HeatPumpAuxDiagnosticPanel pump={{
+      ...pump, heatingAuxMeasuredDraft: savedInput(20, 250),
+    }} />);
+    expect(screen.getByLabelText('Electronics standby power (W)')).toHaveValue('20');
+    expect(screen.getByLabelText('Month 12')).toHaveValue('250');
+  });
+
   it('requires every month, sends traceable measured input and keeps the result scoped', async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({
