@@ -984,6 +984,7 @@ export const nl: Record<string, string> = {
   'kernel.auxDraft.month': 'Maand',
   'kernel.auxDraft.calculate': 'Conceptdiagnose berekenen',
   'kernel.auxDraft.invalid': 'Vul alle velden met herleidbare bronnen en geldige niet-negatieve waarden in; aan-tijd, modulatie en nominaal vermogen moeten positief zijn.',
+  'kernel.auxDraft.rustInvalid': 'De Rust-audit wijst deze invoer af. Controleer de genoemde velden.',
   'kernel.auxDraft.result': 'Concept-hulpenergie, één opwekker',
   'kernel.auxDraft.kwhPerYear': 'kWh/jaar',
   'kernel.auxDraft.annual': 'Jaarlijkse hulpenergie',

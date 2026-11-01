@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Het elektrische meetcomponentenformulier toont de Rust-422-audit van een hulpenergie-overloop nu met exact veldpad en NL/EN-hersteltekst, zonder ruwe foutcode of de misleidende lokale melding voor onvolledige velden. Een gerichte UI-proef bewaakt de respons en het wissen van de vorige uitkomst; TypeScript slaagt. Dit versterkt *Weergave* en *Audit* in de UI; onafhankelijke *Referentie* en *Attest* blijven open.
+
 Rust-, HTTP- en MCP-proeven controleren voor de losse elektrische 9.85-route een rekenkundige overloop bij omgekeerde maandinvoer: de fout blijft op het originele `months[11].generatorInputElectricityKwh` en er verschijnt geen maand- of jaaruitkomst. De 1015 kern-unittests en volledige servicesuite slagen lokaal. [CI op `cc823cba`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41265068650) bevestigde de voorafgaande NTA-gate en drie desktopplatforms. Dit versterkt *Audit* na kalenderordening; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De voorlopige elektrische meetafleiding 9.86–9.88 citeert nu expliciet het openbare consultatieconcept; de geneste losse 9.85-formule houdt de bronvermelding van de gelicentieerde doeluitgave. Rust-, HTTP- en MCP-proeven bewaken deze bronscheiding, inclusief een ongeldige compressortijd zonder deeluitkomst. De volledige servicesuite met 16 MCP-stdio-proeven en de gerichte kernproef slagen lokaal. Dit corrigeert *Bron* en versterkt *Audit*; de meetafleiding heeft geen onafhankelijke *Referentie* of *Attest*.

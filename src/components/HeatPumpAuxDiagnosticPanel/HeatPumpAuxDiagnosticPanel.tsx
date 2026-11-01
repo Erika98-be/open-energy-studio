@@ -7,6 +7,7 @@ import {
   type HeatingAuxMeasuredDraftInput,
 } from '../../core/nta/KernelClient';
 import { useI18n } from '../../i18n/i18n';
+import { kernelCodeLabel } from '../../i18n/format';
 import './HeatPumpAuxDiagnosticPanel.css';
 import { DecimalInput } from '../ui';
 
@@ -155,7 +156,9 @@ export function HeatPumpAuxDiagnosticPanel({ pump, onSave }: { pump: INtaHeatPum
     {saved && <p>{t('kernel.auxDraft.saved')}</p>}
     {error && <p className="heat-pump-aux-draft-error" role="alert">{error}</p>}
     {result?.status === 'invalid' && <div className="heat-pump-aux-draft-error" role="alert">
-      {t('kernel.auxDraft.invalid')} <ul>{result.issues.map((item, index) => <li key={`${item.path}-${index}`}>{item.path}: {item.code}</li>)}</ul>
+      {t('kernel.auxDraft.rustInvalid')} <ul>{result.issues.map((item, index) => <li key={`${item.path}-${index}`}>
+        <code>{item.path}</code>: {kernelCodeLabel(t, item.code).text}
+      </li>)}</ul>
     </div>}
     {result?.status === 'input_valid' && result.derivedCoefficients && result.auxiliary && <div className="heat-pump-aux-draft-result" role="status">
       <strong>{t('kernel.auxDraft.result')}</strong>

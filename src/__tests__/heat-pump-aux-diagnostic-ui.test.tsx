@@ -62,6 +62,22 @@ describe('draft heat-pump auxiliary UI', () => {
     expect(input.months).toHaveLength(12);
     expect(input.months[11]).toEqual({ month: 12, generatorInputElectricityKwh: 100 });
 
+    fetchMock.mockResolvedValueOnce({
+      ok: false, status: 422,
+      json: async () => ({
+        status: 'invalid', derivedCoefficients: null, auxiliary: null,
+        issues: [{ code: 'aux_arithmetic_overflow', path: 'months[11].generatorInputElectricityKwh' }],
+      }),
+    });
+    await user.click(screen.getByRole('button', { name: 'Calculate draft diagnostic' }));
+    const audit = await screen.findByRole('alert');
+    expect(audit).toHaveTextContent('The Rust audit rejects this input.');
+    expect(audit).not.toHaveTextContent('Complete every field');
+    expect(audit).toHaveTextContent('months[11].generatorInputElectricityKwh');
+    expect(audit).toHaveTextContent('The auxiliary energy calculation is out of range.');
+    expect(audit).not.toHaveTextContent('aux_arithmetic_overflow');
+    expect(screen.queryByText('315.60 kWh/year')).not.toBeInTheDocument();
+
     await user.click(screen.getByRole('button', { name: 'Save measured inputs' }));
     expect(onSave).toHaveBeenCalledWith(input);
     fill('Electronics standby power (W)', '11');

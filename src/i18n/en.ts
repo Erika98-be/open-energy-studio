@@ -984,6 +984,7 @@ export const en: Record<string, string> = {
   'kernel.auxDraft.month': 'Month',
   'kernel.auxDraft.calculate': 'Calculate draft diagnostic',
   'kernel.auxDraft.invalid': 'Complete every field with traceable sources and valid nonnegative values; on-time, modulation and nominal power must be positive.',
+  'kernel.auxDraft.rustInvalid': 'The Rust audit rejects this input. Check the listed fields.',
   'kernel.auxDraft.result': 'Draft auxiliary electricity, one generator',
   'kernel.auxDraft.kwhPerYear': 'kWh/year',
   'kernel.auxDraft.annual': 'Annual auxiliary electricity',
