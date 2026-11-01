@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De HTTP-clients voor verklaarde verwarming en tapwater, eindenergie, EPus, maandvraag en BACS onderscheiden nu 422-invoeraudit van 500-transportfout. Drie routes behouden een `incomplete`-uitkomst bij HTTP 200; zeven gerichte clientproeven slagen lokaal. Dit versterkt *Audit* en *Weergave* over HTTP; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De HTTP-responses van voorlopige indicatoren, gebouwprestatie en projectprestatie bewaken nu 422-invoeraudit, projectstatus `incomplete` met gap-paden en 500 als transportfout zonder JSON-parsing. Vier gerichte clientproeven en de bestaande projectproeven slagen lokaal. Dit versterkt *Audit* en *Weergave* voor BENG en het indicatieve label; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De HTTP-grens voor zes elektrische en hybride verwarmingsdiagnoses bewaakt nu 422 met `status: invalid`, 500 zonder JSON-parsing en een tegenstrijdige 422-response. Dit omvat hulpenergie, meetcomponenten, maandterm, opwekkerverdeling, ketel en hybride maandketen; negen gerichte client-, editie- en UI-proeven slagen lokaal. Dit versterkt *Audit* en *Weergave* over HTTP; onafhankelijke *Referentie* en *Attest* blijven open.

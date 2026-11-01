@@ -204,7 +204,7 @@ export async function diagnoseDeclaredHeatingTableWithRust(input: DeclaredHeatin
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<DeclaredHeatingTableAssessment>;
+    return readAssessmentResponse<DeclaredHeatingTableAssessment>(response, 'Declared heating table diagnostic');
   }
   throw new Error('Rust table diagnostics are available in the desktop app and local development server.');
 }
@@ -242,7 +242,7 @@ export async function diagnoseDeclaredDhwWithRust(input: INtaHeatPumpInput, norm
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<DeclaredDhwAssessment>;
+    return readAssessmentResponse<DeclaredDhwAssessment>(response, 'Declared DHW diagnostic');
   }
   throw new Error('Rust declaration diagnostics are available in the desktop app and local development server.');
 }
@@ -292,7 +292,7 @@ export async function diagnoseFinalEnergyDraftWithRust(input: FinalEnergyDraftIn
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<FinalEnergyDraftAssessment>;
+    return readAssessmentResponse<FinalEnergyDraftAssessment>(response, 'Final energy diagnostic');
   }
   throw new Error('Rust draft energy diagnostics are available in the desktop app and local development server.');
 }
@@ -359,7 +359,7 @@ export async function diagnoseEpusDraftWithRust(input: EpusDraftInput, normVersi
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<EpusDraftAssessment>;
+    return readAssessmentResponse<EpusDraftAssessment>(response, 'EPus diagnostic');
   }
   throw new Error('Rust draft energy diagnostics are available in the desktop app and local development server.');
 }
@@ -775,7 +775,7 @@ export async function calculateMonthlyDemandWithRust(input: MonthlyDemandInput, 
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<MonthlyDemandAssessment>;
+    return readAssessmentResponse<MonthlyDemandAssessment>(response, 'Monthly demand calculation');
   }
   throw new Error('Rust demand calculation is available in the desktop app and local development server.');
 }
@@ -839,7 +839,7 @@ export async function diagnoseBacsDraftWithRust(input: BacsDraftInput, normVersi
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<BacsDraftAssessment>;
+    return readAssessmentResponse<BacsDraftAssessment>(response, 'BACS diagnostic');
   }
   throw new Error('Rust draft BACS diagnostics are available in the desktop app and local development server.');
 }
