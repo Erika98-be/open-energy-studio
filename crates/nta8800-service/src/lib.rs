@@ -171,6 +171,20 @@ mod tests {
             item["code"] == "coefficient_arithmetic_overflow"
                 && item["path"] == "measurements.pumpPostRunSeconds"
         }));
+        input["measurements"]["pumpPreRunSeconds"] = json!(300);
+        input["measurements"]["pumpPostRunSeconds"] = json!(300);
+        input["measurements"]["averageCompressorOnSeconds"] = json!(300);
+        input["measurements"]["deliveryPumpPrePostW"] = json!(5e28);
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let value: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(value["derivedCoefficients"].is_null() && value["auxiliary"].is_null());
+        assert!(value["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "coefficient_arithmetic_overflow"
+                && item["path"] == "measurements.deliveryPumpPrePostW"
+        }));
     }
 
     #[tokio::test]

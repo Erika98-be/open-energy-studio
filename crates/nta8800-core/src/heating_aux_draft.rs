@@ -242,16 +242,13 @@ pub fn assess_heating_aux_measured_draft(
                 .checked_mul(Decimal::from(8760))
                 .and_then(|value| value.checked_div(Decimal::from(1000)));
             let pump_runtime = pre.checked_add(post);
+            let runtime_ratio = pump_runtime.and_then(|runtime| runtime.checked_div(on));
+            let pump_run = runtime_ratio.and_then(|runtime| pump_pre_post.checked_mul(runtime));
+            let pump_total = pump_run.and_then(|pump_run| pump_during.checked_add(pump_run));
             let b = useful_fraction
                 .checked_div(primary_factor)
                 .and_then(|ratio| Decimal::ONE.checked_sub(ratio))
-                .and_then(|factor| {
-                    pump_runtime
-                        .and_then(|runtime| runtime.checked_div(on))
-                        .and_then(|runtime| pump_pre_post.checked_mul(runtime))
-                        .and_then(|pump_run| pump_during.checked_add(pump_run))
-                        .and_then(|pump_total| factor.checked_mul(pump_total))
-                })
+                .and_then(|factor| pump_total.and_then(|pump_total| factor.checked_mul(pump_total)))
                 .and_then(|value| value.checked_div(Decimal::from(1000)));
             if a.is_none() {
                 issues.push(issue(
@@ -264,6 +261,12 @@ pub fn assess_heating_aux_measured_draft(
                     "coefficient_arithmetic_overflow",
                     if pump_runtime.is_none() {
                         "measurements.pumpPostRunSeconds"
+                    } else if runtime_ratio.is_none() {
+                        "measurements.averageCompressorOnSeconds"
+                    } else if pump_run.is_none() {
+                        "measurements.deliveryPumpPrePostW"
+                    } else if pump_total.is_none() {
+                        "measurements.deliveryPumpDuringCompressorW"
                     } else {
                         "measurements"
                     },
@@ -697,8 +700,8 @@ mod tests {
     }
 
     #[test]
-    fn measured_pump_runtime_overflow_names_the_second_timing_measurement() {
-        let input = HeatingAuxMeasuredDraftInput {
+    fn measured_pump_coefficient_overflows_name_the_input_stage() {
+        let mut input = HeatingAuxMeasuredDraftInput {
             generator_id: "hp-1".into(),
             generator_source_reference: "schedule".into(),
             measurements: ElectricHeatPumpAuxMeasurements {
@@ -716,12 +719,27 @@ mod tests {
             input_energy_source_reference: "generator energy".into(),
             months: sample().months,
         };
-        let result = assess_heating_aux_measured_draft(&input);
-        assert_eq!(result.status, "invalid");
-        assert!(result.derived_coefficients.is_none() && result.auxiliary.is_none());
-        assert!(result.issues.iter().any(|item| {
-            item.code == "coefficient_arithmetic_overflow"
-                && item.path == "measurements.pumpPostRunSeconds"
-        }));
+        let assert_path = |input: &HeatingAuxMeasuredDraftInput, path: &str| {
+            let result = assess_heating_aux_measured_draft(input);
+            assert_eq!(result.status, "invalid");
+            assert!(result.derived_coefficients.is_none() && result.auxiliary.is_none());
+            assert!(result.issues.iter().any(|item| {
+                item.code == "coefficient_arithmetic_overflow" && item.path == path
+            }));
+        };
+        assert_path(&input, "measurements.pumpPostRunSeconds");
+
+        input.measurements.pump_pre_run_seconds = 300.0;
+        input.measurements.pump_post_run_seconds = 300.0;
+        input.measurements.average_compressor_on_seconds = 1e-27;
+        assert_path(&input, "measurements.averageCompressorOnSeconds");
+
+        input.measurements.average_compressor_on_seconds = 300.0;
+        input.measurements.delivery_pump_pre_post_w = 5e28;
+        assert_path(&input, "measurements.deliveryPumpPrePostW");
+
+        input.measurements.average_compressor_on_seconds = 600.0;
+        input.measurements.delivery_pump_during_compressor_w = 5e28;
+        assert_path(&input, "measurements.deliveryPumpDuringCompressorW");
     }
 }
