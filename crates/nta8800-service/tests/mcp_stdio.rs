@@ -804,6 +804,28 @@ fn measured_heating_auxiliary_mcp_separates_consultation_and_edition_sources() {
         serde_json::from_str::<Value>(overflow["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment
     );
+
+    input["measurements"]["standbyElectronicsW"] = json!(10);
+    input["measurements"]["pumpPreRunSeconds"] = json!(5e28);
+    input["measurements"]["pumpPostRunSeconds"] = json!(5e28);
+    let runtime_overflow = server.request(5, "tools/call", call(&input));
+    assert_eq!(runtime_overflow["isError"], true, "{runtime_overflow}");
+    let assessment = &runtime_overflow["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["derivedCoefficients"].is_null() && assessment["auxiliary"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "coefficient_arithmetic_overflow"
+                && issue["path"] == "measurements.pumpPostRunSeconds"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(runtime_overflow["content"][0]["text"].as_str().unwrap())
+            .unwrap(),
+        *assessment
+    );
 }
 
 #[test]

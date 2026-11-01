@@ -241,11 +241,12 @@ pub fn assess_heating_aux_measured_draft(
             let a = standby
                 .checked_mul(Decimal::from(8760))
                 .and_then(|value| value.checked_div(Decimal::from(1000)));
+            let pump_runtime = pre.checked_add(post);
             let b = useful_fraction
                 .checked_div(primary_factor)
                 .and_then(|ratio| Decimal::ONE.checked_sub(ratio))
                 .and_then(|factor| {
-                    pre.checked_add(post)
+                    pump_runtime
                         .and_then(|runtime| runtime.checked_div(on))
                         .and_then(|runtime| pump_pre_post.checked_mul(runtime))
                         .and_then(|pump_run| pump_during.checked_add(pump_run))
@@ -259,7 +260,14 @@ pub fn assess_heating_aux_measured_draft(
                 ));
             }
             if b.is_none() {
-                issues.push(issue("coefficient_arithmetic_overflow", "measurements"));
+                issues.push(issue(
+                    "coefficient_arithmetic_overflow",
+                    if pump_runtime.is_none() {
+                        "measurements.pumpPostRunSeconds"
+                    } else {
+                        "measurements"
+                    },
+                ));
             }
             if let (
                 Some(a),
@@ -685,6 +693,35 @@ mod tests {
         assert!(result.issues.iter().any(|item| {
             item.code == "coefficient_arithmetic_overflow"
                 && item.path == "measurements.standbyElectronicsW"
+        }));
+    }
+
+    #[test]
+    fn measured_pump_runtime_overflow_names_the_second_timing_measurement() {
+        let input = HeatingAuxMeasuredDraftInput {
+            generator_id: "hp-1".into(),
+            generator_source_reference: "schedule".into(),
+            measurements: ElectricHeatPumpAuxMeasurements {
+                standby_electronics_w: 10.0,
+                delivery_pump_during_compressor_w: 200.0,
+                delivery_pump_pre_post_w: 90.0,
+                pump_pre_run_seconds: 5e28,
+                pump_post_run_seconds: 5e28,
+                average_compressor_on_seconds: 600.0,
+                mean_compressor_modulation: 0.5,
+                nominal_electric_drive_kw: 2.0,
+                measurement_source_reference: "meter".into(),
+                timing_source_reference: "cycle".into(),
+            },
+            input_energy_source_reference: "generator energy".into(),
+            months: sample().months,
+        };
+        let result = assess_heating_aux_measured_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.derived_coefficients.is_none() && result.auxiliary.is_none());
+        assert!(result.issues.iter().any(|item| {
+            item.code == "coefficient_arithmetic_overflow"
+                && item.path == "measurements.pumpPostRunSeconds"
         }));
     }
 }
