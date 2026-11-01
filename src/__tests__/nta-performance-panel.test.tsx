@@ -61,7 +61,7 @@ describe('NTA performance panel', () => {
   it('discards an open NTA editor when another project is loaded', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
+      ok: false, status: 422,
       json: async () => ({ status: 'incomplete', gaps: [], performance: null, derivedInput: null }),
     }));
     renderWithProviders(<ProjectSwitchHarness />);
@@ -81,7 +81,7 @@ describe('NTA performance panel', () => {
   it('lists input gaps and stores an edited NTA block in the project', async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue({
-      ok: false,
+      ok: false, status: 422,
       json: async () => ({
         status: 'incomplete', targetNormVersion: 'NTA 8800:2025+C1:2026', kernelVersion: 'test-kernel',
         inputFingerprint: 'sha256:x', attestStatus: 'unattested',
@@ -221,7 +221,7 @@ describe('NTA performance panel', () => {
   it('edits the NTA block through the structured form', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
+      ok: false, status: 422,
       json: async () => ({ status: 'incomplete', inputFingerprint: 'sha256:x', attestStatus: 'unattested',
         gaps: [{ code: 'nta_calculation_block_missing', path: 'ntaCalculation' }], derivedInput: null, performance: null }),
     }));
@@ -264,7 +264,7 @@ describe('NTA performance panel', () => {
   it('states the vertical pipes and lists plausibility warnings', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
+      ok: false, status: 422,
       json: async () => ({ status: 'incomplete', inputFingerprint: 'sha256:x', attestStatus: 'unattested',
         geometry: null, gaps: [{ code: 'vertical_pipes_unknown', path: 'ntaCalculation.verticalPipes' }],
         warnings: [{ code: 'declared_hot_water_efficiency_above_one', path: 'ntaCalculation.declaredUses[0].monthlyKwh',
@@ -302,7 +302,7 @@ describe('NTA performance panel', () => {
   it('switches the form to chapter 11 ventilation and saves a mirrored block', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
+      ok: false, status: 422,
       json: async () => ({ status: 'incomplete', inputFingerprint: 'sha256:x', attestStatus: 'unattested',
         geometry: null, gaps: [], derivedInput: null, performance: null }),
     }));

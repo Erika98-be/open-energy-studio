@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De [CI-gate op `9511fcbb`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41297895883) faalde op twee projectprestatie-UI-proeven met een onvolledige HTTP-mock (`ok: false` zonder statuscode). Vijf 422-fixtures dragen nu de echte HTTP-status; alle 12 gerichte projectprestatie-/clientproeven slagen lokaal. Dit herstelt de testdekking van *Audit* en *Weergave*; de volledige CI-gate is nog niet opnieuw bevestigd.
+
 Een overloop bij de afleiding van de jaarlijkse standbycoëfficiënt voor de elektrische 9.86–9.88-meetroute meldt nu `measurements.standbyElectronicsW`; Rust, HTTP en echte MCP-stdio bewaken 422 of `isError=true`, lege deelresultaten en gelijke MCP-tekst en structuur. Alle 1016 kernunitproeven, 16 MCP-stdio-proeven, rustfmt en de volledige servicesuite slagen lokaal; de lange kernintegratiesuite is niet volledig afgerond. Dit versterkt *Audit* voor de conceptmeetroute; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Constructie-, ventilatie-, opname- en ruimteverwarmingsketenclients bewaken nu via zes gerichte HTTP-proeven dat 422-invoeraudit zichtbaar blijft, `derived_input_rejected` bij beide opnameroutes doorloopt en 500 geen diagnosebody oplevert. TypeScript en de Vite-productiebouw slagen lokaal. Dit versterkt *Audit* en *Weergave*; onafhankelijke *Referentie* en *Attest* blijven open.
