@@ -78,6 +78,20 @@ describe('draft heat-pump auxiliary UI', () => {
     expect(audit).not.toHaveTextContent('aux_arithmetic_overflow');
     expect(screen.queryByText('315.60 kWh/year')).not.toBeInTheDocument();
 
+    fetchMock.mockResolvedValueOnce({
+      ok: false, status: 422,
+      json: async () => ({
+        status: 'invalid', derivedCoefficients: null, auxiliary: null,
+        issues: [{ code: 'coefficient_arithmetic_overflow', path: 'measurements.pumpPostRunSeconds' }],
+      }),
+    });
+    await user.click(screen.getByRole('button', { name: 'Calculate draft diagnostic' }));
+    const timingAudit = await screen.findByRole('alert');
+    expect(timingAudit).toHaveTextContent('measurements.pumpPostRunSeconds');
+    expect(timingAudit).toHaveTextContent('The coefficient calculation is out of range.');
+    expect(timingAudit).not.toHaveTextContent('coefficient_arithmetic_overflow');
+    expect(screen.queryByText('315.60 kWh/year')).not.toBeInTheDocument();
+
     await user.click(screen.getByRole('button', { name: 'Save measured inputs' }));
     expect(onSave).toHaveBeenCalledWith(input);
     fill('Electronics standby power (W)', '11');
