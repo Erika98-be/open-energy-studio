@@ -10,6 +10,7 @@ use serde_json::json;
 use std::collections::HashSet;
 
 pub const DRAFT_SOURCE: &str = "NTA 8800:2025+C1:2026, §9.6.8.1.1, formule 9.85 (p. 357–359)";
+pub const MEASURED_CONSULTATION_SOURCE: &str = "Openbaar EPG 2026-consultatieconcept, hoofdstuk 9, §9.6.8.1.1.2.2, formules 9.86–9.88 (https://www.internetconsultatie.nl/epg2026/document/14150)";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -310,7 +311,7 @@ pub fn assess_heating_aux_measured_draft(
             "invalid"
         },
         scope: "public_chapter_9_draft_9_86_9_88_measured_electric_heat_pump_only",
-        draft_source: crate::norm_versions::cite(DRAFT_SOURCE),
+        draft_source: MEASURED_CONSULTATION_SOURCE,
         target_norm_version: crate::norm_versions::current_label(),
         kernel_version: KERNEL_VERSION,
         input_fingerprint: input_fingerprint(&json!(input)),
@@ -577,6 +578,9 @@ mod tests {
         };
         let result = assess_heating_aux_measured_draft(&input);
         assert_eq!(result.status, "input_valid");
+        assert_eq!(result.draft_source, MEASURED_CONSULTATION_SOURCE);
+        assert!(result.draft_source.contains("9.86–9.88"));
+        assert!(!result.final_edition_verified);
         let coefficients = result.derived_coefficients.unwrap();
         assert_eq!(coefficients.a_annual_kwh, 87.6);
         assert!((coefficients.b_kw - 0.19).abs() < 1e-12);

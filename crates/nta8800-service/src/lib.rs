@@ -122,6 +122,15 @@ mod tests {
         let value: Value =
             serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
                 .unwrap();
+        assert!(value["draftSource"]
+            .as_str()
+            .unwrap()
+            .contains("EPG 2026-consultatieconcept"));
+        assert!(value["draftSource"].as_str().unwrap().contains("9.86–9.88"));
+        assert_eq!(
+            value["auxiliary"]["scope"],
+            "edition_specific_equation_9_85_supplied_coefficients_one_individual_generator_only"
+        );
         assert_eq!(value["derivedCoefficients"]["aAnnualKwh"], 87.6);
         assert_eq!(value["derivedCoefficients"]["bKw"], 0.19);
         assert_eq!(

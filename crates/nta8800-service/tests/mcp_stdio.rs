@@ -686,6 +686,84 @@ fn heating_auxiliary_mcp_orders_months_and_refuses_partial_invalid_result() {
 }
 
 #[test]
+fn measured_heating_auxiliary_mcp_separates_consultation_and_edition_sources() {
+    let months = (1..=12)
+        .map(|month| json!({ "month": month, "generatorInputElectricityKwh": 100.0 }))
+        .collect::<Vec<_>>();
+    let mut input = json!({
+        "generatorId": "hp-1", "generatorSourceReference": "generator schedule",
+        "measurements": {
+            "standbyElectronicsW": 10.0,
+            "deliveryPumpDuringCompressorW": 200.0,
+            "deliveryPumpPrePostW": 90.0,
+            "pumpPreRunSeconds": 300.0, "pumpPostRunSeconds": 300.0,
+            "averageCompressorOnSeconds": 600.0,
+            "meanCompressorModulation": 0.5,
+            "nominalElectricDriveKw": 2.0,
+            "measurementSourceReference": "meter", "timingSourceReference": "cycle"
+        },
+        "inputEnergySourceReference": "generator electricity ledger", "months": months
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": { "name": "measured-heating-auxiliary-source-test", "version": "1" }
+        }),
+    );
+    server.send(json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
+    let call = |input: &Value| json!({ "name": "diagnose_heating_aux_measured_draft", "arguments": { "input": input } });
+    let valid = server.request(2, "tools/call", call(&input));
+    assert_eq!(valid["isError"], false, "{valid}");
+    let assessment = &valid["structuredContent"];
+    assert_eq!(assessment["status"], "input_valid");
+    assert!(assessment["draftSource"]
+        .as_str()
+        .unwrap()
+        .contains("EPG 2026-consultatieconcept"));
+    assert!(assessment["draftSource"]
+        .as_str()
+        .unwrap()
+        .contains("9.86–9.88"));
+    assert!(assessment["auxiliary"]["draftSource"]
+        .as_str()
+        .unwrap()
+        .contains("NTA 8800:2025+C1:2026"));
+    assert_eq!(
+        assessment["auxiliary"]["annualAuxiliaryElectricityKwh"],
+        315.6
+    );
+    assert_eq!(assessment["finalEditionVerified"], false);
+    assert_eq!(assessment["bengCalculationAvailable"], false);
+    assert_eq!(
+        serde_json::from_str::<Value>(valid["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+
+    input["measurements"]["averageCompressorOnSeconds"] = json!(0);
+    let refused = server.request(3, "tools/call", call(&input));
+    assert_eq!(refused["isError"], true, "{refused}");
+    let assessment = &refused["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["derivedCoefficients"].is_null());
+    assert!(assessment["auxiliary"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "aux_input_invalid"
+                && issue["path"] == "measurements.averageCompressorOnSeconds"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(refused["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn generator_dispatch_mcp_preserves_invalid_month_and_overflow_without_partial_results() {
     let mut node_input = (1..=12)
         .map(|month| json!({"month": month, "energyKwh": 1000.0}))
