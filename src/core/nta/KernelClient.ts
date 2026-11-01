@@ -3,10 +3,12 @@ import { invoke, isTauri } from '@tauri-apps/api/core';
 import type { IProject, INtaHeatPumpInput } from '../energy/types';
 import { kernelProject, projectRouteInput } from './KernelInput';
 
-async function readDraftDiagnosticResponse<T extends { status: string }>(response: Response, label: string): Promise<T> {
+async function readAssessmentResponse<T extends { status: string }>(
+  response: Response, label: string, acceptedAuditStatuses: readonly string[] = ['invalid'],
+): Promise<T> {
   if (response.ok === false && response.status !== 422) throw new Error(`${label}: HTTP ${response.status}`);
   const assessment = await response.json() as T;
-  if (response.ok === false && assessment.status !== 'invalid') throw new Error(`${label}: HTTP ${response.status}`);
+  if (response.ok === false && !acceptedAuditStatuses.includes(assessment.status)) throw new Error(`${label}: HTTP ${response.status}`);
   return assessment;
 }
 
@@ -888,7 +890,7 @@ export async function diagnoseIndicatorsDraftWithRust(input: IndicatorsDraftInpu
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return response.json() as Promise<IndicatorsDraftAssessment>;
+    return readAssessmentResponse<IndicatorsDraftAssessment>(response, 'BENG indicators diagnostic');
   }
   throw new Error('Rust draft indicator diagnostics are available in the desktop app and local development server.');
 }
@@ -935,7 +937,7 @@ export async function diagnoseHeatingAuxDraftWithRust(input: HeatingAuxDraftInpu
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return readDraftDiagnosticResponse<HeatingAuxDraftAssessment>(response, 'Heat pump auxiliary diagnostic');
+    return readAssessmentResponse<HeatingAuxDraftAssessment>(response, 'Heat pump auxiliary diagnostic');
   }
   throw new Error('Rust draft heat-pump auxiliary diagnostics are available in the desktop app and local development server.');
 }
@@ -1392,7 +1394,7 @@ export async function diagnoseForfaitHeatPumpMonthlyDraftWithRust(
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return readDraftDiagnosticResponse<ForfaitHeatPumpMonthlyDraftAssessment>(response, 'Heat pump monthly diagnostic');
+    return readAssessmentResponse<ForfaitHeatPumpMonthlyDraftAssessment>(response, 'Heat pump monthly diagnostic');
   }
   throw new Error('Rust draft monthly heat-pump diagnostics are available in the desktop app and local development server.');
 }
@@ -1454,7 +1456,7 @@ export async function diagnoseGeneratorDispatchDraftWithRust(
     const response = await fetch('/api/v1/nta8800/heating/generator-dispatch-draft/diagnose', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return readDraftDiagnosticResponse<GeneratorDispatchDraftAssessment>(response, 'Generator dispatch diagnostic');
+    return readAssessmentResponse<GeneratorDispatchDraftAssessment>(response, 'Generator dispatch diagnostic');
   }
   throw new Error('Rust draft generator dispatch is available in the desktop app and local development server.');
 }
@@ -1501,7 +1503,7 @@ export async function diagnoseBoilerForfaitDraftWithRust(input: BoilerForfaitDra
     const response = await fetch('/api/v1/nta8800/boilers/forfait-draft/diagnose', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return readDraftDiagnosticResponse<BoilerForfaitDraftAssessment>(response, 'Boiler forfait diagnostic');
+    return readAssessmentResponse<BoilerForfaitDraftAssessment>(response, 'Boiler forfait diagnostic');
   }
   throw new Error('Rust draft boiler diagnostics are available in the desktop app and local development server.');
 }
@@ -1546,7 +1548,7 @@ export async function diagnoseHybridHeatPumpMonthlyDraftWithRust(
     const response = await fetch('/api/v1/nta8800/heat-pumps/hybrid-monthly-draft/diagnose', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return readDraftDiagnosticResponse<HybridHeatPumpMonthlyDraftAssessment>(response, 'Hybrid heat pump diagnostic');
+    return readAssessmentResponse<HybridHeatPumpMonthlyDraftAssessment>(response, 'Hybrid heat pump diagnostic');
   }
   throw new Error('Rust draft hybrid heat-pump diagnostics are available in the desktop app and local development server.');
 }
@@ -1578,7 +1580,7 @@ export async function diagnoseHeatingAuxMeasuredDraftWithRust(input: HeatingAuxM
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input, ...editionArgs(normVersion) }),
     });
-    return readDraftDiagnosticResponse<HeatingAuxMeasuredDraftAssessment>(response, 'Measured heat pump auxiliary diagnostic');
+    return readAssessmentResponse<HeatingAuxMeasuredDraftAssessment>(response, 'Measured heat pump auxiliary diagnostic');
   }
   throw new Error('Rust draft heat-pump measurement diagnostics are available in the desktop app and local development server.');
 }
@@ -4325,7 +4327,7 @@ export async function calculateBuildingPerformanceWithRust(input: BuildingPerfor
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ input }),
     });
-    return response.json() as Promise<BuildingPerformanceAssessment>;
+    return readAssessmentResponse<BuildingPerformanceAssessment>(response, 'Building performance calculation');
   }
   throw new Error('Rust performance calculation is available in the desktop app and local development server.');
 }
@@ -5227,7 +5229,7 @@ export async function calculateProjectPerformanceWithRust(input: IProject): Prom
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ project }),
     });
-    return response.json() as Promise<ProjectPerformanceAssessment>;
+    return readAssessmentResponse<ProjectPerformanceAssessment>(response, 'Project performance calculation', ['invalid', 'incomplete']);
   }
   throw new Error('Rust project calculation is available in the desktop app and local development server.');
 }

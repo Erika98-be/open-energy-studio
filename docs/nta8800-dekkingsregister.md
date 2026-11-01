@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De HTTP-responses van voorlopige indicatoren, gebouwprestatie en projectprestatie bewaken nu 422-invoeraudit, projectstatus `incomplete` met gap-paden en 500 als transportfout zonder JSON-parsing. Vier gerichte clientproeven en de bestaande projectproeven slagen lokaal. Dit versterkt *Audit* en *Weergave* voor BENG en het indicatieve label; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De HTTP-grens voor zes elektrische en hybride verwarmingsdiagnoses bewaakt nu 422 met `status: invalid`, 500 zonder JSON-parsing en een tegenstrijdige 422-response. Dit omvat hulpenergie, meetcomponenten, maandterm, opwekkerverdeling, ketel en hybride maandketen; negen gerichte client-, editie- en UI-proeven slagen lokaal. Dit versterkt *Audit* en *Weergave* over HTTP; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De HTTP-clients voor elektrische hulpenergie 9.85 en voorlopige meetcomponenten 9.86–9.88 onderscheiden nu een Rust-422-invoeraudit (`status: invalid`) van HTTP-storingen. Clientproeven bewaken 422, 500 zonder JSON-parsing en een tegenstrijdige 422-response; de bestaande UI-proef en TypeScript slagen lokaal. Dit versterkt *Audit* en *Weergave* aan de HTTP-grens; onafhankelijke *Referentie* en *Attest* blijven open.
