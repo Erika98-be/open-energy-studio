@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De MCP-stdio-adapter voor de begrensde elektrische 9.85-hulpenergiediagnose bewaakt nu kalenderordening bij omgekeerde maandinvoer, de maand- en jaarsom, het exacte foutveld bij een ongeldige modulatiecoëfficiënt en lege deeluitkomsten. Tekst en structuur zijn gelijk; alle 15 MCP-stdio-proeven en de volledige servicesuite slagen lokaal. [CI op `16649c87`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41251958247) bevestigde de voorafgaande NTA-gate en drie desktopplatforms. Dit versterkt *Audit* en *Weergave* over MCP; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De 9.85-hulpenergiediagnose voor één individuele elektrische warmtepomp retourneert geldige maanden nu in kalendermaandvolgorde. Rust- en HTTP-proeven vergelijken omgekeerde invoer met de chronologische uitkomst; de volledige kernsuite (1014/1014) en servicesuite (72/72) slagen lokaal. Dit versterkt *Weergave* en reproduceerbaarheid; de volledige keten, onafhankelijke *Referentie* en *Attest* blijven open.
 
 Rust-, HTTP- en MCP-proeven controleren bij omgekeerde gaswarmtepomp-hulpstroommaanden dat een numerieke overloop het oorspronkelijke invoerpad `months[11].generatorOutputKwh` meldt en geen deeluitkomst vrijgeeft; alle drie slagen lokaal. Dit versterkt *Audit* na de kalenderordening van geldige resultaten; *Referentie* en *Attest* blijven open.
