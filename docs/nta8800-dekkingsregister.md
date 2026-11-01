@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Een overloop bij de afleiding van de jaarlijkse standbycoëfficiënt voor de elektrische 9.86–9.88-meetroute meldt nu `measurements.standbyElectronicsW`; Rust en HTTP bewaken 422 en lege deelresultaten. Alle 1016 kernunitproeven, rustfmt en de volledige servicesuite slagen lokaal; de lange kernintegratiesuite is niet volledig afgerond. Dit versterkt *Audit* voor de conceptmeetroute; onafhankelijke *Referentie* en *Attest* blijven open.
+
 Constructie-, ventilatie-, opname- en ruimteverwarmingsketenclients bewaken nu via zes gerichte HTTP-proeven dat 422-invoeraudit zichtbaar blijft, `derived_input_rejected` bij beide opnameroutes doorloopt en 500 geen diagnosebody oplevert. TypeScript en de Vite-productiebouw slagen lokaal. Dit versterkt *Audit* en *Weergave*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De HTTP-clients voor verklaarde verwarming en tapwater, eindenergie, EPus, maandvraag en BACS onderscheiden nu 422-invoeraudit van 500-transportfout. Drie routes behouden een `incomplete`-uitkomst bij HTTP 200; zeven gerichte clientproeven slagen lokaal. Dit versterkt *Audit* en *Weergave* over HTTP; onafhankelijke *Referentie* en *Attest* blijven open.

@@ -252,6 +252,15 @@ pub fn assess_heating_aux_measured_draft(
                         .and_then(|pump_total| factor.checked_mul(pump_total))
                 })
                 .and_then(|value| value.checked_div(Decimal::from(1000)));
+            if a.is_none() {
+                issues.push(issue(
+                    "coefficient_arithmetic_overflow",
+                    "measurements.standbyElectronicsW",
+                ));
+            }
+            if b.is_none() {
+                issues.push(issue("coefficient_arithmetic_overflow", "measurements"));
+            }
             if let (
                 Some(a),
                 Some(b),
@@ -300,7 +309,9 @@ pub fn assess_heating_aux_measured_draft(
                     issues.push(issue("coefficient_arithmetic_invalid", "measurements"));
                 }
             } else {
-                issues.push(issue("coefficient_arithmetic_overflow", "measurements"));
+                if issues.is_empty() {
+                    issues.push(issue("coefficient_arithmetic_overflow", "measurements"));
+                }
             }
         }
     }
@@ -646,5 +657,34 @@ mod tests {
         let result = assess_heating_aux_measured_draft(&input);
         assert_eq!(result.status, "invalid");
         assert!(result.derived_coefficients.is_none() && result.auxiliary.is_none());
+    }
+
+    #[test]
+    fn measured_standby_overflow_names_the_original_measurement() {
+        let input = HeatingAuxMeasuredDraftInput {
+            generator_id: "hp-1".into(),
+            generator_source_reference: "schedule".into(),
+            measurements: ElectricHeatPumpAuxMeasurements {
+                standby_electronics_w: 1e26,
+                delivery_pump_during_compressor_w: 200.0,
+                delivery_pump_pre_post_w: 90.0,
+                pump_pre_run_seconds: 300.0,
+                pump_post_run_seconds: 300.0,
+                average_compressor_on_seconds: 600.0,
+                mean_compressor_modulation: 0.5,
+                nominal_electric_drive_kw: 2.0,
+                measurement_source_reference: "meter".into(),
+                timing_source_reference: "cycle".into(),
+            },
+            input_energy_source_reference: "generator energy".into(),
+            months: sample().months,
+        };
+        let result = assess_heating_aux_measured_draft(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.derived_coefficients.is_none() && result.auxiliary.is_none());
+        assert!(result.issues.iter().any(|item| {
+            item.code == "coefficient_arithmetic_overflow"
+                && item.path == "measurements.standbyElectronicsW"
+        }));
     }
 }
