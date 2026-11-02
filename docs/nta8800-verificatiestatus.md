@@ -868,7 +868,7 @@ Hoofdstuk 13 kwam op elke maandterm overeen. In hoofdstuk 10 bleek één echte f
 - **Randen van tabel 13.18.**
   - Onder 765 kWh geldt de eerste kolom: de klasse wordt niet overschreden en de tabel heeft geen lagere kolom.
   - Boven de laatste kolom van het gemeten profiel geeft de kern `hot_water_heat_pump_class_exceeded`. P. 630 verbiedt gebruik in een hogere klasse dan de gemeten klasse, en voor profielen groter dan XL bestaan geen factoren.
-- **Circulatie met standaardwaarden.** Ontbreekt de lengte (13.31) of de diameter/Ψ (13.29/tabel 13.4), en is het jaarlijkse η_W;dis lager dan 0,2? Dan meldt de kern de niet-blokkerende waarschuwing `hot_water_circulation_defaults_low_efficiency`. De berekening zelf blijft normconform.
+- **Circulatie met standaardwaarden.** Ontbreekt de lengte (13.31) of de diameter/Ψ (13.29/tabel 13.4), en is het jaarlijkse η_W;dis lager dan 0,2? Dan meldt de kern de niet-blokkerende waarschuwing `hot_water_circulation_defaults_low_efficiency`. De waarschuwing verandert de berekende waarde niet; conformiteit is nog niet onafhankelijk vastgesteld.
 - Niet nagerekend: koelmethode 1 (NEN-EN 14825, 10.53–10.64); zie de volgende alinea.
 
 **Herberekening van bijlage Q (verwarming) en koelmethode 1 (H10), 3 oktober 2026.** Eigen Python-implementatie vanuit de normpagina's (p. 340, 1028–1065 en 402–409). Getest zijn negen warmtepompscenario's: lucht/water modulerend en aan/uit, brine/water forfaitair en modulerend, lucht/lucht en bivalente gevallen. Voor koeling zijn een kamerairco zonder en een koelmachine met vijfde meetpunt getest. Alle bin- en maandtermen kwamen overeen (≈ 1e-12). Vastgelegd of aangepast:
