@@ -52,7 +52,7 @@ describe('standalone NTA heat pump inventory', () => {
       registryRecord: { registrationNumber: '20260214GK', productName: 'Model A',
         manufacturer: 'Supplier', sourceUrl: 'https://bcrg.nl/declaration/example' } };
     expect(hasIncompleteRegistryRecord(draft)).toBe(false);
-    for (const sourceUrl of ['https://?query', 'https://#fragment']) {
+    for (const sourceUrl of ['https://?query', 'https://#fragment', 'https://:443/path', 'https://@/path']) {
       draft.performanceEvidence.registryRecord!.sourceUrl = sourceUrl;
       expect(hasIncompleteRegistryRecord(draft)).toBe(true);
     }

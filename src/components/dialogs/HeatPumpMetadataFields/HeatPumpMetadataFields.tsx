@@ -14,9 +14,11 @@ export function hasElectricCarrierMismatch(value: HeatPumpDraft): boolean {
 
 export function hasIncompleteRegistryRecord(value: HeatPumpDraft): boolean {
   const record = value.performanceEvidence.registryRecord;
+  const authority = record && /^https:\/\/([^/?#\s]+)/.exec(record.sourceUrl)?.[1];
+  const host = authority?.split('@').pop();
   return Boolean(record && (value.performanceEvidence.kind !== 'controlled_quality_declaration'
     || !record.registrationNumber.trim() || !record.productName.trim()
-    || !record.manufacturer.trim() || !/^https:\/\/[^/?#\s]+/.test(record.sourceUrl)
+    || !record.manufacturer.trim() || !host || host.startsWith(':')
     || /\s/.test(record.sourceUrl)));
 }
 
