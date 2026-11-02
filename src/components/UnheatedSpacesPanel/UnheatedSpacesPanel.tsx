@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useEnergy } from '../../context/EnergyContext';
 import { useI18n } from '../../i18n/i18n';
 import './UnheatedSpacesPanel.css';
@@ -13,6 +13,16 @@ export function UnheatedSpacesPanel() {
   const [factor, setFactor] = useState('');
   const [source, setSource] = useState('');
   const [error, setError] = useState(false);
+  const editorProjectId = useRef(state.project.id);
+  useEffect(() => {
+    if (editorProjectId.current === state.project.id) return;
+    editorProjectId.current = state.project.id;
+    setEditingId(null);
+    setName('');
+    setFactor('');
+    setSource('');
+    setError(false);
+  }, [state.project.id]);
   const edit = (id: string | null) => {
     const selected = spaces.find((space) => space.id === id);
     setEditingId(id ?? '');
@@ -45,7 +55,7 @@ export function UnheatedSpacesPanel() {
       <button type="button" className="btn" onClick={() => dispatch({ type: 'SET_UNHEATED_SPACES', payload: spaces.filter((item) => item.id !== space.id) })}
         aria-label={`${t('kernel.inventory.remove')}: ${space.id}`}>×</button>
     </li>)}</ul>}
-    {editingId !== null && <div className="unheated-spaces-form">
+    {editingId !== null && editorProjectId.current === state.project.id && <div className="unheated-spaces-form">
       <label>{t('properties.name')}<input value={name} onChange={(event) => setName(event.target.value)} /></label>
       <label>{t('kernel.unheated.factor')}<DecimalInput min="0" max="1" step="any" value={factor}
         onChange={(event) => setFactor(event.target.value)} /></label>

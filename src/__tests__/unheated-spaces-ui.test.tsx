@@ -17,7 +17,29 @@ function ProjectEditor() {
   </>;
 }
 
+function ProjectSwitcher() {
+  const { state, dispatch } = useEnergy();
+  return <><UnheatedSpacesPanel />
+    <button type="button" onClick={() => dispatch({ type: 'SET_PROJECT',
+      payload: { ...state.project, id: 'another-project' } })}>Switch project</button>
+    <output data-testid="space-data">{JSON.stringify(state.project.unheatedSpaces ?? [])}</output>
+  </>;
+}
+
 describe('unheated space project editor', () => {
+  it('discards an unsaved space when the project changes', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProjectSwitcher />);
+    const panel = within(screen.getByRole('region', { name: 'Unheated spaces' }));
+    await user.click(panel.getByRole('button', { name: 'Add space' }));
+    await user.type(panel.getByLabelText('Name'), 'Previous project garage');
+    await user.click(screen.getByRole('button', { name: 'Switch project' }));
+    expect(panel.queryByLabelText('Name')).not.toBeInTheDocument();
+    await user.click(panel.getByRole('button', { name: 'Add space' }));
+    expect(panel.getByLabelText('Name')).toHaveValue('');
+    expect(screen.getByTestId('space-data')).toHaveTextContent('[]');
+  });
+
   it('requires a factor source and links a surface to the recorded space', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ProjectEditor />);
