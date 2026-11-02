@@ -45,6 +45,20 @@ function InventoryWithState() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('standalone NTA heat pump inventory', () => {
+  it('closes an unsaved metadata edit when switching projects with the same pump ID', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<InventoryWithState />);
+    await user.click(screen.getByRole('button', { name: 'Add heat pump' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Edit' }));
+    await user.selectOptions(screen.getByLabelText('Heat source'), 'ground');
+    expect(screen.getByLabelText('Heat source')).toHaveValue('ground');
+    await user.click(screen.getByRole('button', { name: 'Switch project' }));
+    expect(screen.queryByLabelText('Heat source')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Edit' }));
+    expect(screen.getByLabelText('Heat source')).toHaveValue('outdoor_air');
+  });
+
   it('clears a COP table draft when another project reuses the same pump ID', async () => {
     const user = userEvent.setup();
     renderWithProviders(<InventoryWithState />);

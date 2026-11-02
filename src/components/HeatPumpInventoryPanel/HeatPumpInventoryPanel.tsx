@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useEnergy } from '../../context/EnergyContext';
 import { useI18n } from '../../i18n/i18n';
@@ -28,6 +28,14 @@ export function HeatPumpInventoryPanel() {
   const [gasPumpId, setGasPumpId] = useState<string | null>(null);
   const [gasAuxPumpId, setGasAuxPumpId] = useState<string | null>(null);
   const [gasMonthlyPumpId, setGasMonthlyPumpId] = useState<string | null>(null);
+  const editorProjectId = useRef(project.id);
+  useEffect(() => {
+    if (editorProjectId.current === project.id) return;
+    editorProjectId.current = project.id;
+    setEditingId(null);
+    setDraft(null);
+    setError(null);
+  }, [project.id]);
   const diagnosticPump = pumps.find((pump) => pump.id === diagnosticPumpId && pump.drive === 'electric_compression'
     && pump.sink === 'hydronic' && !pump.hybrid && !pump.booster);
   const forfaitPump = pumps.find((pump) => pump.id === forfaitPumpId && pump.drive === 'electric_compression'
@@ -186,7 +194,7 @@ export function HeatPumpInventoryPanel() {
     {gasAuxPump && <GasHeatPumpAuxPanel key={`${project.id}:${editionKey}:${JSON.stringify({ ...gasAuxPump, gasHeatPumpAuxDraft: undefined })}`} pump={gasAuxPump}
       onSave={(input) => dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...gasAuxPump, gasHeatPumpAuxDraft: input } })} />}
     {gasMonthlyPump && <GasHeatPumpMonthlyPanel key={`${project.id}:${editionKey}:${JSON.stringify(gasMonthlyPump)}`} pump={gasMonthlyPump} />}
-    {draft && <div className="heat-pump-inventory-editor">
+    {draft && editorProjectId.current === project.id && <div className="heat-pump-inventory-editor">
       <HeatPumpMetadataFields value={draft} onChange={setDraft} selfId={editingId} />
       <fieldset>
         <legend>{t('kernel.inventory.zones')}</legend>
