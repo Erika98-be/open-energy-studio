@@ -425,7 +425,9 @@ impl HeatPumpInput {
                 .source_url
                 .strip_prefix("https://")
                 .map_or(true, |rest| {
-                    rest.split('/').next().map_or(true, str::is_empty)
+                    rest.split(|c| matches!(c, '/' | '?' | '#'))
+                        .next()
+                        .map_or(true, str::is_empty)
                 })
                 || record.source_url.chars().any(char::is_whitespace)
             {
@@ -1169,6 +1171,16 @@ mod tests {
             .validate_inputs()
             .iter()
             .any(|item| item.code == "quality_declaration_source_url_invalid"));
+        for source_url in ["https://?query", "https://#fragment"] {
+            let mut hostless = serde_json::to_value(&pump).unwrap();
+            hostless["performanceEvidence"]["registryRecord"]["sourceUrl"] =
+                serde_json::json!(source_url);
+            let pump: HeatPumpInput = serde_json::from_value(hostless).unwrap();
+            assert!(pump.validate_inputs().iter().any(|item| {
+                item.code == "quality_declaration_source_url_invalid"
+                    && item.field == "performanceEvidence.registryRecord.sourceUrl"
+            }));
+        }
     }
 
     #[test]

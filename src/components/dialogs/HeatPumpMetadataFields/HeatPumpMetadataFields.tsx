@@ -16,7 +16,7 @@ export function hasIncompleteRegistryRecord(value: HeatPumpDraft): boolean {
   const record = value.performanceEvidence.registryRecord;
   return Boolean(record && (value.performanceEvidence.kind !== 'controlled_quality_declaration'
     || !record.registrationNumber.trim() || !record.productName.trim()
-    || !record.manufacturer.trim() || !/^https:\/\/[^/\s]+/.test(record.sourceUrl)
+    || !record.manufacturer.trim() || !/^https:\/\/[^/?#\s]+/.test(record.sourceUrl)
     || /\s/.test(record.sourceUrl)));
 }
 

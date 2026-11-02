@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { useEnergy } from '../context/EnergyContext';
 import { HeatPumpInventoryPanel } from '../components/HeatPumpInventoryPanel/HeatPumpInventoryPanel';
+import { defaultHeatPumpDraft, hasIncompleteRegistryRecord } from '../components/dialogs/HeatPumpMetadataFields/HeatPumpMetadataFields';
 import { PreviewPanel } from '../components/PreviewPanel/PreviewPanel';
 import { renderWithProviders, userEvent } from './test-utils';
 import type { NtaCalculationInput } from '../core/nta/KernelClient';
@@ -45,6 +46,18 @@ function InventoryWithState() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('standalone NTA heat pump inventory', () => {
+  it('requires a host in a quality-declaration registry URL', () => {
+    const draft = defaultHeatPumpDraft('outdoor_air', 'hydronic');
+    draft.performanceEvidence = { kind: 'controlled_quality_declaration', reference: 'declaration',
+      registryRecord: { registrationNumber: '20260214GK', productName: 'Model A',
+        manufacturer: 'Supplier', sourceUrl: 'https://bcrg.nl/declaration/example' } };
+    expect(hasIncompleteRegistryRecord(draft)).toBe(false);
+    for (const sourceUrl of ['https://?query', 'https://#fragment']) {
+      draft.performanceEvidence.registryRecord!.sourceUrl = sourceUrl;
+      expect(hasIncompleteRegistryRecord(draft)).toBe(true);
+    }
+  });
+
   it('closes an unsaved metadata edit when switching projects with the same pump ID', async () => {
     const user = userEvent.setup();
     renderWithProviders(<InventoryWithState />);

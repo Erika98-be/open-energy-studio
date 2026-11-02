@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De Rust-audit en de warmtepompeditor wijzen een hostloze HTTPS-bron van een kwaliteitsverklaring af wanneer de URL met een query of fragment begint. Rust- en UI-regressies faalden vóór de correctie; de gerichte kernproef, 18 inventarisproeven, rustfmt en TypeScript slagen lokaal. Dit versterkt de syntactische *Invoer* en *Audit* van het verklaringregister; authenticiteit, toepasselijkheid, onafhankelijke *Referentie* en *Attest* blijven open.
+
 Bij projectvervanging wist de gedeelde editor nu ook de vorige selectie. De dialoogregressie toont dat een oppervlakte-ID na de wissel niet geselecteerd blijft, zelfs als het nieuwe project dezelfde ID gebruikt; zij faalde vóór de correctie. De negen oppervlakeditorproeven en TypeScript slagen lokaal. [CI op `b6d0b168`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41404418039) bevestigt de volledige NTA-gate en drie desktopplatforms. Dit versterkt projectgebonden *Invoer* en *Weergave*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Bij projectvervanging sluit de gedeelde editor nu een open dialoog, zodat een oppervlakconcept niet aan een ander project gekoppeld blijft. De regressie faalde vóór de correctie; de negen oppervlakeditorproeven en TypeScript slagen lokaal. [CI op `2934d355`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41397947948) bevestigt de volledige NTA-gate en drie desktopplatforms. Dit versterkt projectgebonden *Invoer* van de NTA-schil; onafhankelijke *Referentie* en *Attest* blijven open.
