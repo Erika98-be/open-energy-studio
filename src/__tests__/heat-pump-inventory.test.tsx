@@ -29,6 +29,8 @@ function InventoryWithState() {
       payload: { ...state.project.ntaCalculation, normVersion: '2024' } as NtaCalculationInput })}>
       Change NTA edition
     </button>
+    <button type="button" onClick={() => dispatch({ type: 'SET_PROJECT',
+      payload: { ...state.project, id: 'another-project' } })}>Switch project</button>
     <output data-testid="assets">{state.project.ntaHeatPumps?.map((pump) => `${pump.source}:${pump.servedZoneIds?.join(',')}`).join('|') ?? ''}</output>
     <output data-testid="points">{JSON.stringify(state.project.ntaHeatPumps?.[0]?.performancePoints ?? [])}</output>
     <output data-testid="dhw-test-points">{JSON.stringify(state.project.ntaHeatPumps?.[0]?.dhwTestPoints ?? [])}</output>
@@ -43,6 +45,18 @@ function InventoryWithState() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('standalone NTA heat pump inventory', () => {
+  it('clears a COP table draft when another project reuses the same pump ID', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<InventoryWithState />);
+    await user.click(screen.getByRole('button', { name: 'Add heat pump' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'COP table lookup' }));
+    fireEvent.change(screen.getByLabelText('Design supply temperature (°C)'), { target: { value: '35' } });
+    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('35');
+    await user.click(screen.getByRole('button', { name: 'Switch project' }));
+    expect(screen.getByLabelText('Design supply temperature (°C)')).toHaveValue('');
+  });
+
   it('opens the hybrid draft and clears its input after saved operating limits change', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ({ json: async () =>

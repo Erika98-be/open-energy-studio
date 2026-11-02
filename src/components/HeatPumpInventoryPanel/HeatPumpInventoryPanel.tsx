@@ -170,22 +170,22 @@ export function HeatPumpInventoryPanel() {
         </div>
       </li>)}
     </ul>}
-    {diagnosticPump && <HeatPumpAuxDiagnosticPanel key={`${editionKey}:${JSON.stringify({ ...diagnosticPump, heatingAuxMeasuredDraft: undefined })}`} pump={diagnosticPump}
+    {diagnosticPump && <HeatPumpAuxDiagnosticPanel key={`${project.id}:${editionKey}:${JSON.stringify({ ...diagnosticPump, heatingAuxMeasuredDraft: undefined })}`} pump={diagnosticPump}
       onSave={(input) => dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...diagnosticPump, heatingAuxMeasuredDraft: input } })} />}
-    {forfaitPump && <HeatPumpForfaitDiagnosticPanel key={`${editionKey}:${project.buildingFunction}:${JSON.stringify({ ...forfaitPump, forfaitHeatPumpDraft: undefined })}`} pump={forfaitPump}
+    {forfaitPump && <HeatPumpForfaitDiagnosticPanel key={`${project.id}:${editionKey}:${project.buildingFunction}:${JSON.stringify({ ...forfaitPump, forfaitHeatPumpDraft: undefined })}`} pump={forfaitPump}
       buildingFunction={project.buildingFunction}
       onSave={(input) => dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...forfaitPump, forfaitHeatPumpDraft: input } })} />}
-    {monthlyPump && <HeatPumpForfaitMonthlyPanel key={`${editionKey}:${JSON.stringify(monthlyPump)}`} pump={monthlyPump} />}
+    {monthlyPump && <HeatPumpForfaitMonthlyPanel key={`${project.id}:${editionKey}:${JSON.stringify(monthlyPump)}`} pump={monthlyPump} />}
     {hybridPump && <HybridHeatPumpMonthlyPanel
-      key={`${editionKey}:${JSON.stringify(hybridPump)}`}
+      key={`${project.id}:${editionKey}:${JSON.stringify(hybridPump)}`}
       pump={hybridPump} />}
-    {gasPump && <GasHeatPumpForfaitPanel key={`${editionKey}:${project.buildingFunction}:${JSON.stringify({ ...gasPump, gasHeatPumpForfaitDraft: undefined })}`} pump={gasPump} buildingFunction={project.buildingFunction}
+    {gasPump && <GasHeatPumpForfaitPanel key={`${project.id}:${editionKey}:${project.buildingFunction}:${JSON.stringify({ ...gasPump, gasHeatPumpForfaitDraft: undefined })}`} pump={gasPump} buildingFunction={project.buildingFunction}
       onSave={(input) => dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...gasPump, gasHeatPumpForfaitDraft: input,
         gasHeatPumpAuxDraft: gasPump.gasHeatPumpAuxDraft?.nominalThermalCapacityKw === input.thermalCapacityKw
           ? gasPump.gasHeatPumpAuxDraft : undefined } })} />}
-    {gasAuxPump && <GasHeatPumpAuxPanel key={`${editionKey}:${JSON.stringify({ ...gasAuxPump, gasHeatPumpAuxDraft: undefined })}`} pump={gasAuxPump}
+    {gasAuxPump && <GasHeatPumpAuxPanel key={`${project.id}:${editionKey}:${JSON.stringify({ ...gasAuxPump, gasHeatPumpAuxDraft: undefined })}`} pump={gasAuxPump}
       onSave={(input) => dispatch({ type: 'UPDATE_NTA_HEAT_PUMP', payload: { ...gasAuxPump, gasHeatPumpAuxDraft: input } })} />}
-    {gasMonthlyPump && <GasHeatPumpMonthlyPanel key={`${editionKey}:${JSON.stringify(gasMonthlyPump)}`} pump={gasMonthlyPump} />}
+    {gasMonthlyPump && <GasHeatPumpMonthlyPanel key={`${project.id}:${editionKey}:${JSON.stringify(gasMonthlyPump)}`} pump={gasMonthlyPump} />}
     {draft && <div className="heat-pump-inventory-editor">
       <HeatPumpMetadataFields value={draft} onChange={setDraft} selfId={editingId} />
       <fieldset>
