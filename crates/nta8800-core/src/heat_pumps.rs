@@ -425,7 +425,7 @@ impl HeatPumpInput {
                 .source_url
                 .strip_prefix("https://")
                 .map_or(true, |rest| {
-                    rest.split(|c| matches!(c, '/' | '?' | '#'))
+                    rest.split(['/', '?', '#'])
                         .next()
                         .map_or(true, str::is_empty)
                 })
