@@ -17,6 +17,8 @@ function Harness({ properties = false }: { properties?: boolean }) {
   const { dialog, project } = state;
   return <>
     <button type="button">Trigger</button>
+    <button type="button" onClick={() => dispatch({ type: 'SET_PROJECT',
+      payload: { ...project, id: 'another-project' } })}>Switch project</button>
     <EnvelopeView />
     {properties && <PropertiesPanel embedded />}
     {dialog.type === 'window-editor' && <WindowEditorDialog editId={dialog.editId} onClose={close} />}
@@ -32,6 +34,15 @@ function Harness({ properties = false }: { properties?: boolean }) {
 const windowsOnSouth = () => JSON.parse(screen.getByTestId('windows-s').textContent ?? '[]') as Array<{ id: string; name: string; uValue: number }>;
 
 describe('editing existing envelope elements', () => {
+  it('closes the surface editor when the active project changes', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<Harness />);
+    await user.dblClick(screen.getByRole('row', { name: /^Gevel Oost/ }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Switch project' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('edits an existing window from the envelope view and keeps its id and position', async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness />);

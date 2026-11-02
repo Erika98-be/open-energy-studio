@@ -425,7 +425,7 @@ function applyEnergyAction(state: EnergyState, action: EnergyAction): EnergyStat
     // ----------------------------------------------------------
 
     case 'SET_PROJECT':
-      return { ...state, project: action.payload, isDirty: false, result: null };
+      return { ...state, project: action.payload, dialog: { type: null, editId: null }, isDirty: false, result: null };
 
     case 'UPDATE_PROJECT_INFO':
       return {
