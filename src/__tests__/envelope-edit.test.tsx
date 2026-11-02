@@ -19,6 +19,8 @@ function Harness({ properties = false }: { properties?: boolean }) {
     <button type="button">Trigger</button>
     <button type="button" onClick={() => dispatch({ type: 'SET_PROJECT',
       payload: { ...project, id: 'another-project' } })}>Switch project</button>
+    <button type="button" onClick={() => dispatch({ type: 'SELECT_ITEM',
+      payload: { id: 'surf-wall-n', itemType: 'surface' } })}>Select old surface</button>
     <EnvelopeView />
     {properties && <PropertiesPanel embedded />}
     {dialog.type === 'window-editor' && <WindowEditorDialog editId={dialog.editId} onClose={close} />}
@@ -28,6 +30,7 @@ function Harness({ properties = false }: { properties?: boolean }) {
     <output data-testid="windows-s">{JSON.stringify(project.zones[0]?.surfaces.find((s) => s.id === 'surf-wall-s')?.windows ?? [])}</output>
     <output data-testid="surface-ids">{JSON.stringify(project.zones[0]?.surfaces.map((s) => s.id) ?? [])}</output>
     <output data-testid="constructions">{JSON.stringify(project.constructions.map((c) => ({ id: c.id, name: c.name })))}</output>
+    <output data-testid="selected-item">{state.selectedItemId ?? ''}</output>
   </>;
 }
 
@@ -39,8 +42,11 @@ describe('editing existing envelope elements', () => {
     renderWithProviders(<Harness />);
     await user.dblClick(screen.getByRole('row', { name: /^Gevel Oost/ }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Select old surface' }));
+    expect(screen.getByTestId('selected-item')).toHaveTextContent('surf-wall-n');
     fireEvent.click(screen.getByRole('button', { name: 'Switch project' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByTestId('selected-item')).toBeEmptyDOMElement();
   });
 
   it('edits an existing window from the envelope view and keeps its id and position', async () => {
