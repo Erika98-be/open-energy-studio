@@ -14,12 +14,20 @@ export function hasElectricCarrierMismatch(value: HeatPumpDraft): boolean {
 
 export function hasIncompleteRegistryRecord(value: HeatPumpDraft): boolean {
   const record = value.performanceEvidence.registryRecord;
-  const authority = record && /^https:\/\/([^/?#\s]+)/.exec(record.sourceUrl)?.[1];
-  const host = authority?.split('@').pop();
+  let validSource = false;
+  if (record && !/\s/.test(record.sourceUrl)) {
+    try {
+      const source = new URL(record.sourceUrl);
+      const authority = /^https:\/\/([^/?#]+)/.exec(record.sourceUrl)?.[1];
+      validSource = source.protocol === 'https:' && Boolean(source.hostname)
+        && Boolean(authority && !authority.endsWith(':'));
+    } catch {
+      validSource = false;
+    }
+  }
   return Boolean(record && (value.performanceEvidence.kind !== 'controlled_quality_declaration'
     || !record.registrationNumber.trim() || !record.productName.trim()
-    || !record.manufacturer.trim() || !host || host.startsWith(':')
-    || /\s/.test(record.sourceUrl)));
+    || !record.manufacturer.trim() || !validSource));
 }
 
 export function hasDhwDeclarationMismatch(value: HeatPumpDraft): boolean {

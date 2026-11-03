@@ -11,6 +11,31 @@ use crate::gas_heat_pump_forfait_draft::{
 use crate::heating_aux_draft::{assess_heating_aux_measured_draft, HeatingAuxMeasuredDraftInput};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use std::net::Ipv6Addr;
+
+fn valid_https_source_authority(url: &str) -> bool {
+    let Some(rest) = url.strip_prefix("https://") else {
+        return false;
+    };
+    let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
+    let host = authority.rsplit('@').next().unwrap_or_default();
+    if let Some(bracketed) = host.strip_prefix('[') {
+        let Some((address, suffix)) = bracketed.split_once(']') else {
+            return false;
+        };
+        return address.parse::<Ipv6Addr>().is_ok()
+            && (suffix.is_empty()
+                || suffix
+                    .strip_prefix(':')
+                    .is_some_and(|port| !port.is_empty() && port.parse::<u16>().is_ok()));
+    }
+    let (hostname, port) = host
+        .split_once(':')
+        .map_or((host, None), |(name, port)| (name, Some(port)));
+    !hostname.is_empty()
+        && !hostname.contains(['[', ']', ':'])
+        && port.map_or(true, |port| !port.is_empty() && port.parse::<u16>().is_ok())
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -421,17 +446,7 @@ impl HeatPumpInput {
                     });
                 }
             }
-            if record
-                .source_url
-                .strip_prefix("https://")
-                .map_or(true, |rest| {
-                    rest.split(['/', '?', '#'])
-                        .next()
-                        .map_or(true, |authority| {
-                            let host = authority.rsplit('@').next().unwrap_or_default();
-                            host.is_empty() || host.starts_with(':')
-                        })
-                })
+            if !valid_https_source_authority(&record.source_url)
                 || record.source_url.chars().any(char::is_whitespace)
             {
                 issues.push(HeatPumpIssue {
@@ -1158,6 +1173,13 @@ mod tests {
         let pump: HeatPumpInput = serde_json::from_value(input.clone()).unwrap();
         assert!(pump.validate_inputs().is_empty());
         assert_eq!(serde_json::to_value(&pump).unwrap(), input);
+        for source_url in ["https://bcrg.nl:443/path", "https://[::1]:443/path"] {
+            let mut valid = input.clone();
+            valid["performanceEvidence"]["registryRecord"]["sourceUrl"] =
+                serde_json::json!(source_url);
+            let pump: HeatPumpInput = serde_json::from_value(valid).unwrap();
+            assert!(pump.validate_inputs().is_empty());
+        }
         let mut invalid = input;
         invalid["performanceEvidence"]["registryRecord"]["sourceUrl"] =
             serde_json::json!("http://example.test");
@@ -1179,11 +1201,15 @@ mod tests {
             "https://#fragment",
             "https://:443/path",
             "https://@/path",
+            "https://bcrg.nl:/path",
+            "https://bcrg.nl:bad/path",
+            "https://bcrg.nl:65536/path",
+            "https://[::1]:bad/path",
         ] {
-            let mut hostless = serde_json::to_value(&pump).unwrap();
-            hostless["performanceEvidence"]["registryRecord"]["sourceUrl"] =
+            let mut invalid_source = serde_json::to_value(&pump).unwrap();
+            invalid_source["performanceEvidence"]["registryRecord"]["sourceUrl"] =
                 serde_json::json!(source_url);
-            let pump: HeatPumpInput = serde_json::from_value(hostless).unwrap();
+            let pump: HeatPumpInput = serde_json::from_value(invalid_source).unwrap();
             assert!(pump.validate_inputs().iter().any(|item| {
                 item.code == "quality_declaration_source_url_invalid"
                     && item.field == "performanceEvidence.registryRecord.sourceUrl"
