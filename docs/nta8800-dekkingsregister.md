@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De [vaste Linux-devbouw van `1ece277f`](nta8800-build-verificatie-2026-11-03-1ece277f.md) slaagde met manifest- en bronmetadatacontrole voor pakket, API, MCP en referentiegate. Dit is technisch bouwbewijs; *Rekenroute*, onafhankelijke *Referentie* en *Attest* veranderen niet.
+De [vaste Linux-devbouw van `1ece277f`](nta8800-build-verificatie-2026-11-03-1ece277f.md) slaagde met manifest- en bronmetadatacontrole voor pakket, API, MCP en referentiegate. De gedownloade artefactbytes en bronmetadata zijn daarna lokaal opnieuw gecontroleerd. Dit is technisch bouwbewijs zonder tweede compilatie; *Rekenroute*, onafhankelijke *Referentie* en *Attest* veranderen niet.
 
 Het verklaringregister weigert nu ook een hostloze HTTPS-bron met alleen een poort of gebruikersinfo. De Rust- en UI-regressies faalden vóór de correctie en slagen erna; de inventarissuite (18/18) en TypeScript slagen lokaal. [CI op `23e14157`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41499951764) bevestigt de volledige NTA-gate en drie desktopplatforms. Dit versterkt uitsluitend de syntactische *Invoer* en *Audit*; authenticiteit, toepasselijkheid, onafhankelijke *Referentie* en *Attest* blijven open.
 
