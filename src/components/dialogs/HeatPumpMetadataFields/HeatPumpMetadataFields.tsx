@@ -20,7 +20,7 @@ export function hasIncompleteRegistryRecord(value: HeatPumpDraft): boolean {
       const source = new URL(record.sourceUrl);
       const authority = /^https:\/\/([^/?#]+)/.exec(record.sourceUrl)?.[1];
       validSource = source.protocol === 'https:' && Boolean(source.hostname)
-        && Boolean(authority && !authority.endsWith(':'));
+        && Boolean(authority && !authority.endsWith(':') && !authority.includes('@'));
     } catch {
       validSource = false;
     }

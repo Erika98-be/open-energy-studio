@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 9 november 2026
+# NTA 8800 verificatiestatus — 10 november 2026
+
+De bron-URL-audit van het warmtepompverklaringregister weigert nu gebruikersinfo in de HTTPS-authority. `https://bcrg.nl@evidence.example/declaration` kon voorheen als bewijslink worden opgeslagen, terwijl de browser `evidence.example` bezoekt. Een `@` in het pad blijft geldig. De Rust- en UI-regressies faalden vóór de correctie; de gerichte Rust-proef op 1.77.2, alle 18 UI-inventarisproeven, TypeScript, rustfmt en Clippy slagen erna lokaal. Dit is syntactische invoeraudit; het bewijst nog geen registerauthenticiteit, producttoepasselijkheid of NTA-conformiteit.
 
 De [vaste Linux-devbouw op `addb14c3`](nta8800-build-verificatie-2026-11-09-addb14c3.md) is op een GitHub-runner en onafhankelijk op de lokale ontwikkelhost uitgevoerd. Manifest, API, MCP, referentiegate en desktop-`.deb` zijn bytegelijk voor deze commit. Ook de reguliere NTA-gate en drie desktopplatforms slaagden. Dit versterkt de reproduceerbaarheid van deze Linux-debugprocedure; actuele officiële referentiegevallen, visuele acceptatie en attestering blijven open.
 

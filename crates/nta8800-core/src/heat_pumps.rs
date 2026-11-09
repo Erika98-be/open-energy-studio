@@ -18,7 +18,11 @@ fn valid_https_source_authority(url: &str) -> bool {
         return false;
     };
     let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
-    let host = authority.rsplit('@').next().unwrap_or_default();
+    // Userinfo can make an unrelated host look like the declaration registry.
+    if authority.contains('@') {
+        return false;
+    }
+    let host = authority;
     if let Some(bracketed) = host.strip_prefix('[') {
         let Some((address, suffix)) = bracketed.split_once(']') else {
             return false;
@@ -452,7 +456,7 @@ impl HeatPumpInput {
                 issues.push(HeatPumpIssue {
                     code: "quality_declaration_source_url_invalid",
                     field: "performanceEvidence.registryRecord.sourceUrl".into(),
-                    message: "Registry source URL must be an HTTPS URL without whitespace",
+                    message: "Registry source URL must use HTTPS with a host, valid port, and no userinfo or whitespace",
                 });
             }
         }
@@ -1173,7 +1177,11 @@ mod tests {
         let pump: HeatPumpInput = serde_json::from_value(input.clone()).unwrap();
         assert!(pump.validate_inputs().is_empty());
         assert_eq!(serde_json::to_value(&pump).unwrap(), input);
-        for source_url in ["https://bcrg.nl:443/path", "https://[::1]:443/path"] {
+        for source_url in [
+            "https://bcrg.nl:443/path",
+            "https://[::1]:443/path",
+            "https://bcrg.nl/declaration/@revision",
+        ] {
             let mut valid = input.clone();
             valid["performanceEvidence"]["registryRecord"]["sourceUrl"] =
                 serde_json::json!(source_url);
@@ -1201,6 +1209,7 @@ mod tests {
             "https://#fragment",
             "https://:443/path",
             "https://@/path",
+            "https://bcrg.nl@evidence.example/declaration",
             "https://bcrg.nl:/path",
             "https://bcrg.nl:bad/path",
             "https://bcrg.nl:65536/path",

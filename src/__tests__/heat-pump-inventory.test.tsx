@@ -46,17 +46,19 @@ function InventoryWithState() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('standalone NTA heat pump inventory', () => {
-  it('requires a host in a quality-declaration registry URL', () => {
+  it('requires an unambiguous host in a quality-declaration registry URL', () => {
     const draft = defaultHeatPumpDraft('outdoor_air', 'hydronic');
     draft.performanceEvidence = { kind: 'controlled_quality_declaration', reference: 'declaration',
       registryRecord: { registrationNumber: '20260214GK', productName: 'Model A',
         manufacturer: 'Supplier', sourceUrl: 'https://bcrg.nl/declaration/example' } };
     expect(hasIncompleteRegistryRecord(draft)).toBe(false);
-    for (const sourceUrl of ['https://bcrg.nl:443/path', 'https://[::1]:443/path']) {
+    for (const sourceUrl of ['https://bcrg.nl:443/path', 'https://[::1]:443/path',
+      'https://bcrg.nl/declaration/@revision']) {
       draft.performanceEvidence.registryRecord!.sourceUrl = sourceUrl;
       expect(hasIncompleteRegistryRecord(draft)).toBe(false);
     }
     for (const sourceUrl of ['https://?query', 'https://#fragment', 'https://:443/path', 'https://@/path',
+      'https://bcrg.nl@evidence.example/declaration',
       'https://bcrg.nl:/path', 'https://bcrg.nl:bad/path', 'https://bcrg.nl:65536/path',
       'https://[::1]:bad/path']) {
       draft.performanceEvidence.registryRecord!.sourceUrl = sourceUrl;

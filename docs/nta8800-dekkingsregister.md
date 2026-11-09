@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De HTTPS-bron van een gecontroleerde warmtepompverklaring weigert nu gebruikersinfo in de authority, omdat een ogenschijnlijke registerhost anders vóór `@` kan staan terwijl de URL naar een andere host leidt. Een `@` in het pad blijft geldig. Rust- en UI-regressies faalden vóór de correctie; de Rust-1.77.2-proef, 18 UI-inventarisproeven, TypeScript, rustfmt en Clippy slagen erna lokaal. Dit versterkt syntactische *Invoer* en *Audit*; authenticiteit, toepasselijkheid, onafhankelijke *Referentie* en *Attest* blijven open.
+
 De [vast ingerichte Linux-devbouw op `addb14c3`](nta8800-build-verificatie-2026-11-09-addb14c3.md) slaagde op GitHub en lokaal met bytegelijke manifests en vier artefacten. De reguliere NTA-gate en drie desktopbuilds op dezelfde commit slaagden. Dit versterkt alleen het bouwbewijs voor die commit; *Rekenroute*, onafhankelijke *Referentie* en *Attest* veranderen niet.
 
 De HTTPS-bron van een kwaliteitsverklaring mag nu geen ongeldige poort bevatten: Rust en de warmtepompeditor wijzen een tekstpoort of een poort boven 65535 af. De gerichte Rust-1.77.2-proef, 18 UI-inventarisproeven, TypeScript, rustfmt en Clippy slagen lokaal. [CI op `e3c9f5ea`](https://github.com/Erika98-be/open-energy-studio/actions/runs/41592179860) bevestigt de volledige NTA-gate en drie desktopplatforms. Dit versterkt syntactische *Invoer* en *Audit*; registerauthenticiteit, toepasselijkheid, onafhankelijke *Referentie* en *Attest* blijven open.
