@@ -2451,32 +2451,20 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                 )
             }
         };
-    // Classified heat-pump records are descriptive until their NTA route is
-    // verified, but invalid evidence must never accompany a BENG result.
-    // Reuse the project input audit so this route agrees with /validate,
-    // including duplicate IDs and invalid system or zone links.
-    let has_system_pump = project.as_ref().is_some_and(|project| {
-        project
-            .heating_systems
-            .iter()
-            .chain(&project.hot_water_systems)
-            .chain(&project.cooling_systems)
-            .chain(&project.ventilation_systems)
-            .any(|system| {
-                system
-                    .get("ntaHeatPump")
-                    .is_some_and(|value| !value.is_null())
-            })
-    });
-    let mut heat_pump_gaps: Vec<InputGap> = project
+    // Reuse project input errors that can make a linked system ambiguous.
+    // Classified heat-pump records remain descriptive until their NTA route
+    // is verified, but invalid evidence must not accompany a BENG result.
+    let mut project_audit_gaps: Vec<InputGap> = project
         .as_ref()
-        .filter(|project| !project.nta_heat_pumps.is_empty() || has_system_pump)
         .map(|project| crate::assess_project(project, fingerprint.clone()))
         .into_iter()
         .flat_map(|assessment| assessment.issues)
         .filter(|issue| {
             matches!(issue.severity, crate::Severity::Error)
-                && (issue.path.starts_with("ntaHeatPumps[")
+                && (matches!(
+                    issue.code,
+                    "system_record_invalid" | "system_id_invalid" | "system_type_required"
+                ) || issue.path.starts_with("ntaHeatPumps[")
                     || (issue.path.starts_with("heatingSystems[")
                         && issue.path.contains(".ntaHeatPump"))
                     || (issue.path.starts_with("hotWaterSystems[")
@@ -2500,7 +2488,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
             >(raw_pumps.clone())
             {
                 let path = error.path().to_string();
-                heat_pump_gaps.push(InputGap {
+                project_audit_gaps.push(InputGap {
                     code: "heat_pump_metadata_invalid",
                     path: if path == "." {
                         "ntaHeatPumps".to_string()
@@ -2588,9 +2576,9 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         warnings.extend(found);
     }
     let blocked_by_input =
-        !range_gaps.is_empty() || !heat_pump_gaps.is_empty() || project_gap.is_some();
+        !range_gaps.is_empty() || !project_audit_gaps.is_empty() || project_gap.is_some();
     gaps.extend(range_gaps);
-    gaps.extend(heat_pump_gaps);
+    gaps.extend(project_audit_gaps);
     gaps.extend(project_gap);
     let mut assessment = ProjectPerformanceAssessment {
         status,
@@ -5459,6 +5447,24 @@ mod tests {
             .gaps
             .iter()
             .any(|gap| { gap.code == "project_input_invalid" && gap.path == "name" }));
+    }
+
+    #[test]
+    fn duplicate_legacy_system_id_withholds_project_results() {
+        let mut value = project();
+        let duplicate = value["heatingSystems"][0].clone();
+        value["heatingSystems"]
+            .as_array_mut()
+            .unwrap()
+            .push(duplicate);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.label_data.is_none());
+        assert!(result
+            .gaps
+            .iter()
+            .any(|gap| { gap.code == "system_id_invalid" && gap.path == "heatingSystems[1].id" }));
     }
 
     #[test]
