@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De [vaste Linux-devbouw op `aedd0755`](nta8800-build-verificatie-2026-11-10-aedd0755.md) slaagde op GitHub en lokaal met bytegelijke manifests en vier artefacten. De reguliere NTA-gate en drie desktopplatforms op dezelfde commit slaagden. Dit versterkt het bouwbewijs voor deze broncommit; *Rekenroute*, onafhankelijke *Referentie* en *Attest* veranderen niet.
+
 De HTTPS-bron van een gecontroleerde warmtepompverklaring weigert nu gebruikersinfo in de authority, omdat een ogenschijnlijke registerhost anders vóór `@` kan staan terwijl de URL naar een andere host leidt. Een `@` in het pad blijft geldig. Rust- en UI-regressies faalden vóór de correctie; de Rust-1.77.2-proef, 18 UI-inventarisproeven, TypeScript, rustfmt en Clippy slagen erna lokaal. [CI op `8b59af8b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/42724396655) bevestigt de NTA-gate en drie desktopplatforms. Dit versterkt syntactische *Invoer* en *Audit*; authenticiteit, toepasselijkheid, onafhankelijke *Referentie* en *Attest* blijven open.
 
 [ISSO noemt voor de huidige NTA 8800-EDR-set 381 tests en 28 verplichte energieprestatie-uitvoergrootheden](https://isso.nl/projecten/actualisatie-isso-publicatie-54-energieprestatie-rekenprogrammas-2027/). Dit geeft de omvang van de externe toets aan, maar de publieke pagina bevat geen cases of referentiewaarden. *Referentie* en *Attest* blijven open; zie het [bronnenregister](nta8800-bronnenregister.md).
