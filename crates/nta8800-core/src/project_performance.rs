@@ -2437,6 +2437,41 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         _ => "invalid",
     };
     let project: Option<ProjectInput> = serde_json::from_value(project_value.clone()).ok();
+    // A standalone heat-pump inventory is descriptive until its NTA route is
+    // verified, but invalid evidence must never accompany a BENG result.
+    // Reuse the project input audit so this route agrees with /validate,
+    // including duplicate IDs and invalid system or zone links.
+    let mut heat_pump_gaps: Vec<InputGap> = project
+        .as_ref()
+        .filter(|project| !project.nta_heat_pumps.is_empty())
+        .map(|project| crate::assess_project(project, fingerprint.clone()))
+        .into_iter()
+        .flat_map(|assessment| assessment.issues)
+        .filter(|issue| {
+            matches!(issue.severity, crate::Severity::Error)
+                && issue.path.starts_with("ntaHeatPumps[")
+        })
+        .map(|issue| InputGap {
+            code: issue.code,
+            path: issue.path,
+            detail: issue.detail.or_else(|| Some(issue.message.to_string())),
+        })
+        .collect();
+    if project.is_none() {
+        if let Some(raw_pumps) = project_value.get("ntaHeatPumps") {
+            if let Err(error) = serde_path_to_error::deserialize::<
+                _,
+                Vec<crate::heat_pumps::HeatPumpInput>,
+            >(raw_pumps.clone())
+            {
+                heat_pump_gaps.push(InputGap {
+                    code: "heat_pump_metadata_invalid",
+                    path: format!("ntaHeatPumps{}", error.path()),
+                    detail: Some(error.to_string()),
+                });
+            }
+        }
+    }
     let label_data = project.as_ref().map(|project| {
         let mut data = crate::label_data::label_data(project, derived.as_ref());
         data.indicators = performance
@@ -2506,8 +2541,9 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         let found = building_warning_gaps(result, input, project_value, &warnings);
         warnings.extend(found);
     }
-    let blocked_by_range = !range_gaps.is_empty();
+    let blocked_by_input = !range_gaps.is_empty() || !heat_pump_gaps.is_empty();
     gaps.extend(range_gaps);
+    gaps.extend(heat_pump_gaps);
     let mut assessment = ProjectPerformanceAssessment {
         status,
         target_norm_version: version.label(),
@@ -2530,7 +2566,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         derived_input: derived,
         performance,
     };
-    if blocked_by_range {
+    if blocked_by_input {
         withhold_results(&mut assessment);
     }
     refuse_non_finite(assessment)
@@ -5302,6 +5338,58 @@ mod tests {
             "../../../training-data/nta8800-project-performance-synthetic.json"
         ))
         .unwrap()
+    }
+
+    #[test]
+    fn invalid_standalone_heat_pump_evidence_withholds_project_results() {
+        let mut value = project();
+        value["ntaHeatPumps"] = serde_json::json!([{
+            "id": "hp-1", "source": "outdoor_air", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {
+                "kind": "controlled_quality_declaration", "reference": "20260001GK",
+                "registryRecord": {
+                    "registrationNumber": "20260001GK", "productName": "Example",
+                    "manufacturer": "Supplier",
+                    "sourceUrl": "https://bcrg.nl@evidence.example/declaration"
+                }
+            }
+        }]);
+        let refused = assess_project_performance(&value);
+        assert_eq!(refused.status, "invalid");
+        assert!(refused.performance.is_none());
+        assert!(refused.label_data.is_none());
+        assert!(refused.gaps.iter().any(|item| {
+            item.code == "quality_declaration_source_url_invalid"
+                && item.path == "ntaHeatPumps[0].performanceEvidence.registryRecord.sourceUrl"
+        }));
+
+        value["ntaHeatPumps"][0]["performanceEvidence"]["registryRecord"]["sourceUrl"] =
+            Value::from("https://bcrg.nl/declaration");
+        let valid = assess_project_performance(&value);
+        assert_eq!(valid.status, "calculated_unverified", "{:?}", valid.gaps);
+        assert!(valid.performance.is_some());
+
+        let duplicate = value["ntaHeatPumps"][0].clone();
+        value["ntaHeatPumps"]
+            .as_array_mut()
+            .unwrap()
+            .push(duplicate);
+        let refused = assess_project_performance(&value);
+        assert_eq!(refused.status, "invalid");
+        assert!(refused.performance.is_none());
+        assert!(refused.gaps.iter().any(|item| {
+            item.code == "heat_pump_id_duplicate" && item.path == "ntaHeatPumps[1].id"
+        }));
+
+        value["ntaHeatPumps"][1]["source"] = Value::from("unrecognized_source");
+        let malformed = assess_project_performance(&value);
+        assert_eq!(malformed.status, "invalid");
+        assert!(malformed.performance.is_none());
+        assert!(malformed.gaps.iter().any(|item| {
+            item.code == "heat_pump_metadata_invalid" && item.path == "ntaHeatPumps[1].source"
+        }));
     }
 
     #[test]
