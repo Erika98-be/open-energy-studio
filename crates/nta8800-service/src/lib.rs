@@ -1003,6 +1003,30 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_points_to_invalid_registration_field() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["registration"] = json!({
+            "purpose": "existing_building",
+            "surveyDate": "2026-03-15",
+            "registrationDate": 42
+        });
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(result["registration"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "registration_block_invalid"
+                && gap["path"] == "registration.registrationDate"
+        }));
+    }
+
+    #[tokio::test]
     async fn performance_route_returns_unverified_indicators_without_label() {
         let input: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-building-performance-synthetic.json"

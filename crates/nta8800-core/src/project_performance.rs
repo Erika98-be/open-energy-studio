@@ -2552,7 +2552,13 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     Some(assessment)
                 }
                 Err(error) => {
+                    let path = error.path().to_string();
                     gaps.push(InputGap {
+                        path: if path == "." {
+                            "registration".into()
+                        } else {
+                            format!("registration.{path}")
+                        },
                         detail: Some(error.to_string()),
                         ..gap("registration_block_invalid", "registration")
                     });
@@ -6709,7 +6715,19 @@ mod tests {
         assert!(broken
             .gaps
             .iter()
-            .any(|item| item.code == "registration_block_invalid"));
+            .any(|item| item.code == "registration_block_invalid"
+                && item.path == "registration.unknownField"));
+        value["registration"] = serde_json::json!({
+            "purpose": "existing_building",
+            "surveyDate": "2026-03-15",
+            "registrationDate": 42
+        });
+        let broken = assess_project_performance(&value);
+        assert!(broken
+            .gaps
+            .iter()
+            .any(|item| item.code == "registration_block_invalid"
+                && item.path == "registration.registrationDate"));
     }
 
     #[test]
