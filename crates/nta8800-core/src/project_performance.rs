@@ -5452,6 +5452,23 @@ mod tests {
             gap.code == "heat_pump_metadata_on_other_system"
                 && gap.path == "hotWaterSystems[0].ntaHeatPump"
         }));
+
+        let mut value = project();
+        value["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+        value["heatingSystems"][0]["cop"] = Value::from(3.0);
+        value["heatingSystems"][0]["ntaHeatPump"] = serde_json::json!({
+            "id": "h1", "source": "unknown_source", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"}
+        });
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "heat_pump_metadata_invalid"
+                && gap.path == "heatingSystems[0].ntaHeatPump.source"
+        }));
     }
 
     #[test]

@@ -1063,7 +1063,7 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
             ));
             continue;
         };
-        match serde_json::from_value::<HeatPumpInput>(metadata.clone()) {
+        match serde_path_to_error::deserialize::<_, HeatPumpInput>(metadata.clone()) {
             Ok(pump) => {
                 classified_heat_pump_count += 1;
                 auxiliary_component_count += pump.auxiliary_components.len();
@@ -1158,7 +1158,7 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
             Err(error) => issues.push(issue_with_detail(
                 Severity::Error,
                 "heat_pump_metadata_invalid",
-                format!("{path}.ntaHeatPump"),
+                heat_pump_error_path(&format!("{path}.ntaHeatPump"), error.path()),
                 "Heat pump metadata is incomplete or has an unknown value",
                 error.to_string(),
             )),
@@ -1189,7 +1189,7 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
                 ));
                 continue;
             };
-            match serde_json::from_value::<HeatPumpInput>(metadata.clone()) {
+            match serde_path_to_error::deserialize::<_, HeatPumpInput>(metadata.clone()) {
                 Ok(pump) => {
                     classified_heat_pump_count += 1;
                     auxiliary_component_count += pump.auxiliary_components.len();
@@ -1270,7 +1270,7 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
                 Err(error) => issues.push(issue_with_detail(
                     Severity::Error,
                     "heat_pump_metadata_invalid",
-                    format!("{path}.ntaHeatPump"),
+                    heat_pump_error_path(&format!("{path}.ntaHeatPump"), error.path()),
                     "Heat pump metadata is incomplete or has an unknown value",
                     error.to_string(),
                 )),
@@ -2310,6 +2310,17 @@ fn issue_with_detail(
     ValidationIssue {
         detail: Some(detail),
         ..issue(severity, code, path, message)
+    }
+}
+
+fn heat_pump_error_path(base: &str, error_path: &serde_path_to_error::Path) -> String {
+    let field = error_path.to_string();
+    if field == "." {
+        base.to_string()
+    } else if field.starts_with('[') {
+        format!("{base}{field}")
+    } else {
+        format!("{base}.{field}")
     }
 }
 
@@ -3567,11 +3578,41 @@ mod tests {
             .issues
             .iter()
             .any(|item| item.code == "heat_pump_metadata_invalid"
-                && item.path == "heatingSystems[0].ntaHeatPump"
+                && item.path == "heatingSystems[0].ntaHeatPump.performancePoint"
                 && item
                     .detail
                     .as_deref()
                     .is_some_and(|text| text.contains("performancePoint"))));
+    }
+
+    #[test]
+    fn embedded_heat_pump_metadata_error_points_to_the_invalid_field() {
+        let pump = json!({
+            "id": "hp", "source": "unknown_source", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"}
+        });
+        let mut value = sample();
+        value["heatingSystems"] = json!([{
+            "id": "hp", "type": "heat_pump_air", "cop": 3.0,
+            "coverageFraction": 1.0, "ntaHeatPump": pump.clone()
+        }]);
+        let result = assess_json(value).unwrap();
+        assert!(result.issues.iter().any(|item| {
+            item.code == "heat_pump_metadata_invalid"
+                && item.path == "heatingSystems[0].ntaHeatPump.source"
+        }));
+
+        let mut value = sample();
+        value["hotWaterSystems"] = json!([{
+            "id": "hp", "type": "heat_pump", "ntaHeatPump": pump
+        }]);
+        let result = assess_json(value).unwrap();
+        assert!(result.issues.iter().any(|item| {
+            item.code == "heat_pump_metadata_invalid"
+                && item.path == "hotWaterSystems[0].ntaHeatPump.source"
+        }));
     }
 
     #[test]
