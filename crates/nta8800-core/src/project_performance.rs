@@ -2436,7 +2436,21 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         }
         _ => "invalid",
     };
-    let project: Option<ProjectInput> = serde_json::from_value(project_value.clone()).ok();
+    let (project, project_gap) =
+        match serde_path_to_error::deserialize::<_, ProjectInput>(project_value.clone()) {
+            Ok(project) => (Some(project), None),
+            Err(error) => {
+                let path = error.path().to_string();
+                (
+                    None,
+                    Some(InputGap {
+                        code: "project_input_invalid",
+                        path: if path == "." { "project".into() } else { path },
+                        detail: Some(error.to_string()),
+                    }),
+                )
+            }
+        };
     // Classified heat-pump records are descriptive until their NTA route is
     // verified, but invalid evidence must never accompany a BENG result.
     // Reuse the project input audit so this route agrees with /validate,
@@ -2561,9 +2575,11 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         let found = building_warning_gaps(result, input, project_value, &warnings);
         warnings.extend(found);
     }
-    let blocked_by_input = !range_gaps.is_empty() || !heat_pump_gaps.is_empty();
+    let blocked_by_input =
+        !range_gaps.is_empty() || !heat_pump_gaps.is_empty() || project_gap.is_some();
     gaps.extend(range_gaps);
     gaps.extend(heat_pump_gaps);
+    gaps.extend(project_gap);
     let mut assessment = ProjectPerformanceAssessment {
         status,
         target_norm_version: version.label(),
@@ -5418,6 +5434,19 @@ mod tests {
         assert!(malformed.gaps.iter().any(|item| {
             item.code == "heat_pump_metadata_invalid" && item.path == "ntaHeatPumps"
         }));
+    }
+
+    #[test]
+    fn malformed_project_field_is_reported_as_invalid() {
+        let mut value = project();
+        value["name"] = Value::Null;
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result
+            .gaps
+            .iter()
+            .any(|gap| { gap.code == "project_input_invalid" && gap.path == "name" }));
     }
 
     #[test]

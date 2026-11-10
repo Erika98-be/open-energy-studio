@@ -981,6 +981,28 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_reports_malformed_project_field() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["name"] = Value::Null;
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["gaps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|gap| { gap["code"] == "project_input_invalid" && gap["path"] == "name" }));
+    }
+
+    #[tokio::test]
     async fn performance_route_returns_unverified_indicators_without_label() {
         let input: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-building-performance-synthetic.json"
