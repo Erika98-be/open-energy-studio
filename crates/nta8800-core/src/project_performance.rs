@@ -2437,19 +2437,34 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         _ => "invalid",
     };
     let project: Option<ProjectInput> = serde_json::from_value(project_value.clone()).ok();
-    // A standalone heat-pump inventory is descriptive until its NTA route is
+    // Classified heat-pump records are descriptive until their NTA route is
     // verified, but invalid evidence must never accompany a BENG result.
     // Reuse the project input audit so this route agrees with /validate,
     // including duplicate IDs and invalid system or zone links.
+    let has_system_pump = project.as_ref().is_some_and(|project| {
+        project
+            .heating_systems
+            .iter()
+            .chain(&project.hot_water_systems)
+            .any(|system| {
+                system
+                    .get("ntaHeatPump")
+                    .is_some_and(|value| !value.is_null())
+            })
+    });
     let mut heat_pump_gaps: Vec<InputGap> = project
         .as_ref()
-        .filter(|project| !project.nta_heat_pumps.is_empty())
+        .filter(|project| !project.nta_heat_pumps.is_empty() || has_system_pump)
         .map(|project| crate::assess_project(project, fingerprint.clone()))
         .into_iter()
         .flat_map(|assessment| assessment.issues)
         .filter(|issue| {
             matches!(issue.severity, crate::Severity::Error)
-                && issue.path.starts_with("ntaHeatPumps[")
+                && (issue.path.starts_with("ntaHeatPumps[")
+                    || (issue.path.starts_with("heatingSystems[")
+                        && issue.path.contains(".ntaHeatPump"))
+                    || (issue.path.starts_with("hotWaterSystems[")
+                        && issue.path.contains(".ntaHeatPump")))
         })
         .map(|issue| InputGap {
             code: issue.code,
@@ -5389,6 +5404,40 @@ mod tests {
         assert!(malformed.performance.is_none());
         assert!(malformed.gaps.iter().any(|item| {
             item.code == "heat_pump_metadata_invalid" && item.path == "ntaHeatPumps[1].source"
+        }));
+    }
+
+    #[test]
+    fn heat_pump_metadata_on_other_system_withholds_project_results() {
+        let mut value = project();
+        let metadata = serde_json::json!({
+            "id": "h1", "source": "outdoor_air", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"}
+        });
+        value["heatingSystems"][0]["ntaHeatPump"] = metadata.clone();
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "heat_pump_metadata_on_other_system"
+                && gap.path == "heatingSystems[0].ntaHeatPump"
+        }));
+
+        value["heatingSystems"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("ntaHeatPump");
+        value["hotWaterSystems"] = serde_json::json!([{
+            "id": "h1", "type": "boiler", "ntaHeatPump": metadata
+        }]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "heat_pump_metadata_on_other_system"
+                && gap.path == "hotWaterSystems[0].ntaHeatPump"
         }));
     }
 
