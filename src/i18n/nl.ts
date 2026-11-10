@@ -765,6 +765,7 @@ export const nl: Record<string, string> = {
   'kernel.issue.heat_pump_zone_missing': 'Deze warmtepomp verwijst naar een zone die niet bestaat.',
   'kernel.issue.heat_pump_zone_duplicate': 'Deze zone is meerdere keren aan dezelfde warmtepomp gekoppeld.',
   'kernel.issue.heat_pump_metadata_on_other_system': 'Warmtepompgegevens zijn gekoppeld aan een systeem dat geen warmtepomp is.',
+  'kernel.issue.heat_pump_metadata_unsupported_collection': 'Warmtepompgegevens op een koel- of ventilatiesysteem hebben nog geen berekeningsroute; verwijder de koppeling of gebruik een ondersteund verwarmings- of tapwatersysteem.',
   'kernel.issue.heat_pump_cop_invalid': 'De bestaande warmtepomp-COP moet groter dan nul zijn.',
   'kernel.issue.heat_pump_coverage_invalid': 'De dekkingsfractie van de warmtepomp moet tussen 0 en 1 liggen.',
   'kernel.inventory.title': 'NTA-warmtepompen',

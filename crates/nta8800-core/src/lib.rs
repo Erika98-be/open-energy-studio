@@ -1010,6 +1010,26 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
     let mut system_link_count = 0;
     let mut classified_heat_pump_ids = HashSet::new();
     let mut classified_pumps: Vec<(String, HeatPumpInput)> = Vec::new();
+    // These legacy collections have no classified heat-pump calculation
+    // route. Reject supplied metadata rather than silently omitting it.
+    for (collection, systems) in [
+        ("coolingSystems", &project.cooling_systems),
+        ("ventilationSystems", &project.ventilation_systems),
+    ] {
+        for (index, system) in systems.iter().enumerate() {
+            if system
+                .get("ntaHeatPump")
+                .is_some_and(|value| !value.is_null())
+            {
+                issues.push(issue(
+                    Severity::Error,
+                    "heat_pump_metadata_unsupported_collection",
+                    format!("{collection}[{index}].ntaHeatPump"),
+                    "Classified heat pump metadata has no calculation route in this collection",
+                ));
+            }
+        }
+    }
     for (index, system) in project.heating_systems.iter().enumerate() {
         let system_type = system.get("type").and_then(Value::as_str);
         if !matches!(system_type, Some("heat_pump_air" | "heat_pump_ground")) {
@@ -3657,5 +3677,24 @@ mod tests {
                 .count(),
             2
         );
+    }
+
+    #[test]
+    fn rejects_heat_pump_metadata_in_unimplemented_system_collections() {
+        let mut value = sample();
+        value["coolingSystems"] =
+            json!([{"id": "cool", "type": "heat_pump_reversible", "ntaHeatPump": {}}]);
+        value["ventilationSystems"] =
+            json!([{"id": "vent", "type": "mechanical", "ntaHeatPump": {}}]);
+        let result = assess_json(value).unwrap();
+        assert_eq!(result.status, "invalid");
+        for path in [
+            "coolingSystems[0].ntaHeatPump",
+            "ventilationSystems[0].ntaHeatPump",
+        ] {
+            assert!(result.issues.iter().any(|item| {
+                item.code == "heat_pump_metadata_unsupported_collection" && item.path == path
+            }));
+        }
     }
 }

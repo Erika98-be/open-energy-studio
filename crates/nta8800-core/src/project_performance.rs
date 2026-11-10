@@ -2460,6 +2460,8 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
             .heating_systems
             .iter()
             .chain(&project.hot_water_systems)
+            .chain(&project.cooling_systems)
+            .chain(&project.ventilation_systems)
             .any(|system| {
                 system
                     .get("ntaHeatPump")
@@ -2478,6 +2480,10 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     || (issue.path.starts_with("heatingSystems[")
                         && issue.path.contains(".ntaHeatPump"))
                     || (issue.path.starts_with("hotWaterSystems[")
+                        && issue.path.contains(".ntaHeatPump"))
+                    || (issue.path.starts_with("coolingSystems[")
+                        && issue.path.contains(".ntaHeatPump"))
+                    || (issue.path.starts_with("ventilationSystems[")
                         && issue.path.contains(".ntaHeatPump")))
         })
         .map(|issue| InputGap {
@@ -5503,6 +5509,22 @@ mod tests {
         assert!(result.gaps.iter().any(|gap| {
             gap.code == "heat_pump_metadata_invalid"
                 && gap.path == "heatingSystems[0].ntaHeatPump.source"
+        }));
+    }
+
+    #[test]
+    fn unimplemented_cooling_heat_pump_metadata_withholds_project_results() {
+        let mut value = project();
+        value["coolingSystems"] = serde_json::json!([{
+            "id": "cool", "type": "heat_pump_reversible", "ntaHeatPump": {}
+        }]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.label_data.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "heat_pump_metadata_unsupported_collection"
+                && gap.path == "coolingSystems[0].ntaHeatPump"
         }));
     }
 

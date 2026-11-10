@@ -765,6 +765,7 @@ export const en: Record<string, string> = {
   'kernel.issue.heat_pump_zone_missing': 'This heat pump refers to a zone that does not exist.',
   'kernel.issue.heat_pump_zone_duplicate': 'This zone is assigned to the same heat pump more than once.',
   'kernel.issue.heat_pump_metadata_on_other_system': 'Heat pump details are attached to a system that is not a heat pump.',
+  'kernel.issue.heat_pump_metadata_unsupported_collection': 'Heat pump details on a cooling or ventilation system have no calculation route yet; remove the link or use a supported heating or hot water system.',
   'kernel.issue.heat_pump_cop_invalid': 'The existing heat pump COP must be greater than zero.',
   'kernel.issue.heat_pump_coverage_invalid': 'The heat pump coverage fraction must be between 0 and 1.',
   'kernel.inventory.title': 'NTA heat pump inventory',
