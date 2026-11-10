@@ -917,6 +917,41 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_withholds_invalid_heat_pump_evidence() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["ntaHeatPumps"] = json!([{
+            "id": "hp-1", "source": "outdoor_air", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {
+                "kind": "controlled_quality_declaration", "reference": "20260001GK",
+                "registryRecord": {
+                    "registrationNumber": "20260001GK", "productName": "Example",
+                    "manufacturer": "Supplier",
+                    "sourceUrl": "https://bcrg.nl@evidence.example/declaration"
+                }
+            }
+        }]);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({ "project": project }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["registration"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "quality_declaration_source_url_invalid"
+                && gap["path"] == "ntaHeatPumps[0].performanceEvidence.registryRecord.sourceUrl"
+        }));
+    }
+
+    #[tokio::test]
     async fn performance_route_returns_unverified_indicators_without_label() {
         let input: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-building-performance-synthetic.json"
