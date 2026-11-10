@@ -2479,9 +2479,14 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                 Vec<crate::heat_pumps::HeatPumpInput>,
             >(raw_pumps.clone())
             {
+                let path = error.path().to_string();
                 heat_pump_gaps.push(InputGap {
                     code: "heat_pump_metadata_invalid",
-                    path: format!("ntaHeatPumps{}", error.path()),
+                    path: if path == "." {
+                        "ntaHeatPumps".to_string()
+                    } else {
+                        format!("ntaHeatPumps{path}")
+                    },
                     detail: Some(error.to_string()),
                 });
             }
@@ -5404,6 +5409,14 @@ mod tests {
         assert!(malformed.performance.is_none());
         assert!(malformed.gaps.iter().any(|item| {
             item.code == "heat_pump_metadata_invalid" && item.path == "ntaHeatPumps[1].source"
+        }));
+
+        value["ntaHeatPumps"] = Value::Null;
+        let malformed = assess_project_performance(&value);
+        assert_eq!(malformed.status, "invalid");
+        assert!(malformed.performance.is_none());
+        assert!(malformed.gaps.iter().any(|item| {
+            item.code == "heat_pump_metadata_invalid" && item.path == "ntaHeatPumps"
         }));
     }
 
