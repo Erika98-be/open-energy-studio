@@ -2467,7 +2467,10 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "project_name_required"
                         | "construction_id_invalid"
                         | "surface_id_invalid"
+                        | "surface_construction_missing"
+                        | "surface_zone_mismatch"
                         | "window_id_invalid"
+                        | "window_surface_mismatch"
                         | "system_record_invalid"
                         | "system_id_invalid"
                         | "system_type_required"
@@ -5550,6 +5553,51 @@ mod tests {
     }
 
     #[test]
+    fn inconsistent_envelope_links_withhold_project_results() {
+        for (kind, code, path) in [
+            (
+                "construction",
+                "surface_construction_missing",
+                "zones[0].surfaces[1].constructionId",
+            ),
+            (
+                "zone",
+                "surface_zone_mismatch",
+                "zones[0].surfaces[1].zoneId",
+            ),
+            (
+                "window",
+                "window_surface_mismatch",
+                "zones[0].surfaces[0].windows[0].surfaceId",
+            ),
+        ] {
+            let mut value = project();
+            match kind {
+                "construction" => {
+                    value["zones"][0]["surfaces"][1]["constructionId"] = Value::from("missing")
+                }
+                "zone" => value["zones"][0]["surfaces"][1]["zoneId"] = Value::from("missing"),
+                "window" => {
+                    value["zones"][0]["surfaces"][0]["windows"][0]["surfaceId"] =
+                        Value::from("missing")
+                }
+                _ => unreachable!(),
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{kind}");
+            assert!(result.performance.is_none(), "{kind}");
+            assert!(result.label_data.is_none(), "{kind}");
+            assert!(
+                result
+                    .gaps
+                    .iter()
+                    .any(|gap| gap.code == code && gap.path == path),
+                "{kind}"
+            );
+        }
+    }
+
+    #[test]
     fn heat_pump_metadata_on_other_system_withholds_project_results() {
         let mut value = project();
         let metadata = serde_json::json!({
@@ -8216,6 +8264,7 @@ mod tests {
             for window in surface["windows"].as_array_mut().unwrap() {
                 let window_id = window["id"].as_str().unwrap().to_owned();
                 window["id"] = Value::from(format!("{window_id}-2"));
+                window["surfaceId"] = Value::from(format!("{id}-2"));
             }
         }
         for bridge in second["thermalBridges"].as_array_mut().unwrap() {
@@ -8396,6 +8445,7 @@ mod tests {
             for window in surface["windows"].as_array_mut().unwrap() {
                 let window_id = window["id"].as_str().unwrap().to_owned();
                 window["id"] = Value::from(format!("{window_id}-2"));
+                window["surfaceId"] = Value::from(format!("{id}-2"));
             }
         }
         for bridge in second["thermalBridges"].as_array_mut().unwrap() {
@@ -8562,6 +8612,7 @@ mod tests {
             for window in surface["windows"].as_array_mut().unwrap() {
                 let window_id = window["id"].as_str().unwrap().to_owned();
                 window["id"] = Value::from(format!("{window_id}-2"));
+                window["surfaceId"] = Value::from(format!("{id}-2"));
             }
         }
         for bridge in second["thermalBridges"].as_array_mut().unwrap() {
