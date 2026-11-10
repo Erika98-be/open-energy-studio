@@ -2465,6 +2465,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     issue.code,
                     "project_id_required"
                         | "project_name_required"
+                        | "construction_id_invalid"
                         | "system_record_invalid"
                         | "system_id_invalid"
                         | "system_type_required"
@@ -5490,6 +5491,24 @@ mod tests {
             .gaps
             .iter()
             .any(|gap| { gap.code == "system_id_invalid" && gap.path == "heatingSystems[1].id" }));
+    }
+
+    #[test]
+    fn duplicate_construction_id_withholds_project_results() {
+        let mut value = project();
+        let mut duplicate = value["constructions"][0].clone();
+        duplicate["uValue"] = Value::from(1.5);
+        value["constructions"]
+            .as_array_mut()
+            .unwrap()
+            .push(duplicate);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.label_data.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "construction_id_invalid" && gap.path == "constructions[3].id"
+        }));
     }
 
     #[test]

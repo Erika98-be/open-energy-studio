@@ -1053,6 +1053,32 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_rejects_duplicate_construction_id() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        let mut duplicate = project["constructions"][0].clone();
+        duplicate["uValue"] = Value::from(1.5);
+        project["constructions"]
+            .as_array_mut()
+            .unwrap()
+            .push(duplicate);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "construction_id_invalid" && gap["path"] == "constructions[3].id"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_reports_malformed_project_field() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"
