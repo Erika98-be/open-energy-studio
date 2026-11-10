@@ -1463,6 +1463,44 @@ fn project_performance_mcp_rejects_duplicate_legacy_system_id() {
 }
 
 #[test]
+fn project_performance_mcp_rejects_blank_project_name() {
+    let mut project: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-project-performance-synthetic.json"
+    ))
+    .unwrap();
+    project["name"] = Value::from("  ");
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "blank-name-project-test", "version": "1"}
+        }),
+    );
+    server.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name": "calculate_project_performance", "arguments": {"project": project}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["performance"].is_null());
+    assert!(assessment["labelData"].is_null());
+    assert!(assessment["gaps"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|gap| { gap["code"] == "project_name_required" && gap["path"] == "name" }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn mcp_server_speaks_the_protocol() {
     let mut server = Server::start();
     let init = server.request(

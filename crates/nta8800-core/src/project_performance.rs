@@ -2463,7 +2463,11 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
             matches!(issue.severity, crate::Severity::Error)
                 && (matches!(
                     issue.code,
-                    "system_record_invalid" | "system_id_invalid" | "system_type_required"
+                    "project_id_required"
+                        | "project_name_required"
+                        | "system_record_invalid"
+                        | "system_id_invalid"
+                        | "system_type_required"
                 ) || issue.path.starts_with("ntaHeatPumps[")
                     || (issue.path.starts_with("heatingSystems[")
                         && issue.path.contains(".ntaHeatPump"))
@@ -5447,6 +5451,27 @@ mod tests {
             .gaps
             .iter()
             .any(|gap| { gap.code == "project_input_invalid" && gap.path == "name" }));
+    }
+
+    #[test]
+    fn blank_project_identity_withholds_project_results() {
+        for field in ["id", "name"] {
+            let mut value = project();
+            value[field] = Value::from("  ");
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{field}");
+            assert!(result.performance.is_none(), "{field}");
+            assert!(result.label_data.is_none(), "{field}");
+            let code = if field == "id" {
+                "project_id_required"
+            } else {
+                "project_name_required"
+            };
+            assert!(result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == code && gap.path == field));
+        }
     }
 
     #[test]
