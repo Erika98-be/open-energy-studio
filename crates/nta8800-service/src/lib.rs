@@ -952,6 +952,35 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_points_to_invalid_linked_heat_pump_field() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+        project["heatingSystems"][0]["cop"] = Value::from(3.0);
+        project["heatingSystems"][0]["ntaHeatPump"] = json!({
+            "id": "h1", "source": "unknown_source", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"}
+        });
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "heat_pump_metadata_invalid"
+                && gap["path"] == "heatingSystems[0].ntaHeatPump.source"
+        }));
+    }
+
+    #[tokio::test]
     async fn performance_route_returns_unverified_indicators_without_label() {
         let input: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-building-performance-synthetic.json"
