@@ -2466,6 +2466,8 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     "project_id_required"
                         | "project_name_required"
                         | "construction_id_invalid"
+                        | "surface_id_invalid"
+                        | "window_id_invalid"
                         | "system_record_invalid"
                         | "system_id_invalid"
                         | "system_type_required"
@@ -5509,6 +5511,42 @@ mod tests {
         assert!(result.gaps.iter().any(|gap| {
             gap.code == "construction_id_invalid" && gap.path == "constructions[3].id"
         }));
+    }
+
+    #[test]
+    fn duplicate_envelope_ids_withhold_project_results() {
+        for (kind, code, path) in [
+            ("surface", "surface_id_invalid", "zones[0].surfaces[1].id"),
+            (
+                "window",
+                "window_id_invalid",
+                "zones[0].surfaces[2].windows[0].id",
+            ),
+        ] {
+            let mut value = project();
+            match kind {
+                "surface" => {
+                    value["zones"][0]["surfaces"][1]["id"] =
+                        value["zones"][0]["surfaces"][0]["id"].clone();
+                }
+                "window" => {
+                    value["zones"][0]["surfaces"][2]["windows"][0]["id"] =
+                        value["zones"][0]["surfaces"][0]["windows"][0]["id"].clone();
+                }
+                _ => unreachable!(),
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{kind}");
+            assert!(result.performance.is_none(), "{kind}");
+            assert!(result.label_data.is_none(), "{kind}");
+            assert!(
+                result
+                    .gaps
+                    .iter()
+                    .any(|gap| gap.code == code && gap.path == path),
+                "{kind}"
+            );
+        }
     }
 
     #[test]
