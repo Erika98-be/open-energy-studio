@@ -5972,6 +5972,10 @@ mod tests {
                 "unheated_reduction_factor_required",
                 "unheatedSpaces[0].reductionFactor",
             ),
+            (
+                "unheated_factor_declared_and_derived",
+                "unheatedSpaces[0].reductionFactor",
+            ),
         ] {
             let mut value = project();
             value["zones"][0]["surfaces"][1]["thermalBoundary"] = Value::from("unheated_space");
@@ -6001,6 +6005,12 @@ mod tests {
                 }
                 "unheated_reduction_factor_required" => {
                     value["unheatedSpaces"][0]["reductionFactor"] = Value::Null;
+                }
+                "unheated_factor_declared_and_derived" => {
+                    value["unheatedSpaces"][0]["outside"] = serde_json::json!({
+                        "transmission": {"elements": []},
+                        "ventilation": {"method": "half_of_transmission"}
+                    });
                 }
                 _ => {
                     value["zones"][0]["surfaces"][1]["unheatedSpaceId"] = Value::from("missing");
