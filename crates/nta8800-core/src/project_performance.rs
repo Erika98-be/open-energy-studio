@@ -2385,6 +2385,33 @@ fn window_source_path(
     }
 }
 
+fn unheated_space_is_referenced(project: &ProjectInput, issue_path: &str) -> bool {
+    let Some(index) = issue_path
+        .strip_prefix("unheatedSpaces[")
+        .and_then(|rest| rest.split_once(']'))
+        .and_then(|(index, _)| index.parse::<usize>().ok())
+    else {
+        return false;
+    };
+    let Some(space) = project.unheated_spaces.get(index) else {
+        return false;
+    };
+    project.zones.iter().any(|zone| {
+        [
+            Some(zone.surfaces.as_slice()),
+            zone.thermal_bridges.as_deref(),
+            zone.point_thermal_bridges.as_deref(),
+        ]
+        .into_iter()
+        .flatten()
+        .flatten()
+        .any(|record| {
+            record.get("thermalBoundary").and_then(Value::as_str) == Some("unheated_space")
+                && record.get("unheatedSpaceId").and_then(Value::as_str) == Some(space.id.as_str())
+        })
+    })
+}
+
 pub fn assess_project_performance(project_value: &Value) -> ProjectPerformanceAssessment {
     // The whole project route (derived constructions, materials, annexes)
     // runs in the chosen edition, not only the building calculation.
@@ -2472,6 +2499,8 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "volume_invalid"
                         | "airtightness_invalid"
                         | "thermal_boundary_invalid"
+                        | "unheated_surface_direction_required"
+                        | "unheated_space_link_invalid"
                         | "construction_id_invalid"
                         | "construction_exterior_resistance_invalid"
                         | "construction_thermal_value_invalid"
@@ -2503,7 +2532,18 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "system_record_invalid"
                         | "system_id_invalid"
                         | "system_type_required"
-                ) || issue.path.starts_with("ntaHeatPumps[")
+                ) || (matches!(
+                    issue.code,
+                    "unheated_space_id_invalid"
+                        | "unheated_space_name_required"
+                        | "unheated_reduction_factor_invalid"
+                        | "unheated_factor_source_required"
+                        | "unheated_factor_declared_and_derived"
+                        | "unheated_reduction_factor_required"
+                ) && project
+                    .as_ref()
+                    .is_some_and(|project| unheated_space_is_referenced(project, &issue.path)))
+                    || issue.path.starts_with("ntaHeatPumps[")
                     || (issue.path.starts_with("heatingSystems[")
                         && issue.path.contains(".ntaHeatPump"))
                     || (issue.path.starts_with("hotWaterSystems[")
@@ -5907,6 +5947,72 @@ mod tests {
                 .gaps
                 .iter()
                 .any(|gap| gap.code == "thermal_boundary_invalid" && gap.path == path));
+        }
+    }
+
+    #[test]
+    fn invalid_unheated_space_inputs_withhold_project_results() {
+        for (code, path) in [
+            (
+                "unheated_reduction_factor_invalid",
+                "unheatedSpaces[0].reductionFactor",
+            ),
+            (
+                "unheated_factor_source_required",
+                "unheatedSpaces[0].factorSourceReference",
+            ),
+            (
+                "unheated_space_link_invalid",
+                "zones[0].surfaces[1].unheatedSpaceId",
+            ),
+            ("unheated_space_id_invalid", "unheatedSpaces[1].id"),
+            ("unheated_space_name_required", "unheatedSpaces[0].name"),
+            (
+                "unheated_reduction_factor_required",
+                "unheatedSpaces[0].reductionFactor",
+            ),
+        ] {
+            let mut value = project();
+            value["zones"][0]["surfaces"][1]["thermalBoundary"] = Value::from("unheated_space");
+            value["zones"][0]["surfaces"][1]["unheatedSpaceId"] = Value::from("u1");
+            value["unheatedSpaces"] = serde_json::json!([{
+                "id": "u1",
+                "name": "Synthetische onverwarmde ruimte",
+                "reductionFactor": 0.5,
+                "factorSourceReference": "synthetic-source"
+            }]);
+            match code {
+                "unheated_reduction_factor_invalid" => {
+                    value["unheatedSpaces"][0]["reductionFactor"] = Value::from(1.5);
+                }
+                "unheated_factor_source_required" => {
+                    value["unheatedSpaces"][0]["factorSourceReference"] = Value::from(" ");
+                }
+                "unheated_space_id_invalid" => {
+                    let duplicate = value["unheatedSpaces"][0].clone();
+                    value["unheatedSpaces"]
+                        .as_array_mut()
+                        .unwrap()
+                        .push(duplicate);
+                }
+                "unheated_space_name_required" => {
+                    value["unheatedSpaces"][0]["name"] = Value::from(" ");
+                }
+                "unheated_reduction_factor_required" => {
+                    value["unheatedSpaces"][0]["reductionFactor"] = Value::Null;
+                }
+                _ => {
+                    value["zones"][0]["surfaces"][1]["unheatedSpaceId"] = Value::from("missing");
+                }
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{code}");
+            assert!(result.performance.is_none(), "{code}");
+            assert!(result.label_data.is_none(), "{code}");
+            assert!(result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == code && gap.path == path));
         }
     }
 

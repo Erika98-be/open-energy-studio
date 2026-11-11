@@ -1165,6 +1165,33 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_withholds_invalid_unheated_factor() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["zones"][0]["surfaces"][1]["thermalBoundary"] = Value::from("unheated_space");
+        project["zones"][0]["surfaces"][1]["unheatedSpaceId"] = Value::from("u1");
+        project["unheatedSpaces"] = json!([{
+            "id": "u1", "name": "Synthetische onverwarmde ruimte",
+            "reductionFactor": 1.5, "factorSourceReference": "synthetic-source"
+        }]);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "unheated_reduction_factor_invalid"
+                && gap["path"] == "unheatedSpaces[0].reductionFactor"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_rejects_unresolved_construction_link() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"
