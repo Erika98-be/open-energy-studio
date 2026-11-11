@@ -1143,6 +1143,28 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_withholds_invalid_thermal_boundary() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["zones"][0]["surfaces"][0]["thermalBoundary"] = Value::from("unknown");
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "thermal_boundary_invalid"
+                && gap["path"] == "zones[0].surfaces[0].thermalBoundary"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_rejects_unresolved_construction_link() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"

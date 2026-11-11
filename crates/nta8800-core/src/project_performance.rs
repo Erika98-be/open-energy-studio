@@ -2471,6 +2471,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "floor_area_sum_invalid"
                         | "volume_invalid"
                         | "airtightness_invalid"
+                        | "thermal_boundary_invalid"
                         | "construction_id_invalid"
                         | "construction_exterior_resistance_invalid"
                         | "construction_thermal_value_invalid"
@@ -5874,6 +5875,38 @@ mod tests {
                 .gaps
                 .iter()
                 .any(|gap| gap.code == code && gap.path == path));
+        }
+    }
+
+    #[test]
+    fn invalid_thermal_boundary_withholds_project_results() {
+        for path in [
+            "zones[0].surfaces[0].thermalBoundary",
+            "zones[0].thermalBridges[0].thermalBoundary",
+            "zones[0].pointThermalBridges[0].thermalBoundary",
+        ] {
+            let mut value = project();
+            if path.contains("pointThermalBridges") {
+                value["zones"][0]["pointThermalBridges"] = serde_json::json!([{
+                    "id": "pb1",
+                    "chiValue": 0.02,
+                    "sourceReference": "synthetic-source",
+                    "thermalBoundary": "unknown",
+                    "zoneId": "z1"
+                }]);
+            } else if path.contains("thermalBridges") {
+                value["zones"][0]["thermalBridges"][0]["thermalBoundary"] = Value::from("unknown");
+            } else {
+                value["zones"][0]["surfaces"][0]["thermalBoundary"] = Value::from("unknown");
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{path}");
+            assert!(result.performance.is_none(), "{path}");
+            assert!(result.label_data.is_none(), "{path}");
+            assert!(result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == "thermal_boundary_invalid" && gap.path == path));
         }
     }
 
