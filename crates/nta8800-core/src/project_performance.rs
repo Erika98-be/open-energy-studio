@@ -2471,6 +2471,10 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "surface_zone_mismatch"
                         | "window_id_invalid"
                         | "window_surface_mismatch"
+                        | "thermal_bridge_id_invalid"
+                        | "thermal_bridge_zone_mismatch"
+                        | "point_bridge_id_invalid"
+                        | "point_bridge_zone_mismatch"
                         | "system_record_invalid"
                         | "system_id_invalid"
                         | "system_type_required"
@@ -5580,6 +5584,79 @@ mod tests {
                 "window" => {
                     value["zones"][0]["surfaces"][0]["windows"][0]["surfaceId"] =
                         Value::from("missing")
+                }
+                _ => unreachable!(),
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{kind}");
+            assert!(result.performance.is_none(), "{kind}");
+            assert!(result.label_data.is_none(), "{kind}");
+            assert!(
+                result
+                    .gaps
+                    .iter()
+                    .any(|gap| gap.code == code && gap.path == path),
+                "{kind}"
+            );
+        }
+    }
+
+    #[test]
+    fn duplicate_thermal_bridge_id_withholds_project_results() {
+        let mut value = project();
+        let mut duplicate = value["zones"][0]["thermalBridges"][0].clone();
+        duplicate["psiValue"] = Value::from(0.2);
+        value["zones"][0]["thermalBridges"]
+            .as_array_mut()
+            .unwrap()
+            .push(duplicate);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.label_data.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "thermal_bridge_id_invalid" && gap.path == "zones[0].thermalBridges[1].id"
+        }));
+    }
+
+    #[test]
+    fn thermal_bridge_links_withhold_project_results() {
+        for (kind, code, path) in [
+            (
+                "linear-zone",
+                "thermal_bridge_zone_mismatch",
+                "zones[0].thermalBridges[0].zoneId",
+            ),
+            (
+                "point-id",
+                "point_bridge_id_invalid",
+                "zones[0].pointThermalBridges[0].id",
+            ),
+            (
+                "point-zone",
+                "point_bridge_zone_mismatch",
+                "zones[0].pointThermalBridges[0].zoneId",
+            ),
+        ] {
+            let mut value = project();
+            match kind {
+                "linear-zone" => {
+                    value["zones"][0]["thermalBridges"][0]["zoneId"] = Value::from("missing")
+                }
+                "point-id" | "point-zone" => {
+                    let id = if kind == "point-id" { "tb1" } else { "pb1" };
+                    let zone_id = if kind == "point-zone" {
+                        "missing"
+                    } else {
+                        "z1"
+                    };
+                    value["zones"][0]["pointThermalBridges"] = serde_json::json!([{
+                        "id": id,
+                        "chiValue": 0.02,
+                        "sourceReference": "synthetic point bridge",
+                        "thermalBoundary": "outdoor",
+                        "zoneId": zone_id
+                    }]);
                 }
                 _ => unreachable!(),
             }
