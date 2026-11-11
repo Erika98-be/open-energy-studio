@@ -2472,8 +2472,11 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "window_id_invalid"
                         | "window_surface_mismatch"
                         | "thermal_bridge_id_invalid"
+                        | "thermal_bridge_length_invalid"
+                        | "thermal_bridge_psi_invalid"
                         | "thermal_bridge_zone_mismatch"
                         | "point_bridge_id_invalid"
+                        | "point_bridge_chi_invalid"
                         | "point_bridge_zone_mismatch"
                         | "point_bridge_source_required"
                         | "system_record_invalid"
@@ -5693,6 +5696,51 @@ mod tests {
             gap.code == "point_bridge_source_required"
                 && gap.path == "zones[0].pointThermalBridges[0].sourceReference"
         }));
+    }
+
+    #[test]
+    fn invalid_bridge_transmittance_inputs_withhold_project_results() {
+        for (code, path) in [
+            (
+                "thermal_bridge_length_invalid",
+                "zones[0].thermalBridges[0].length",
+            ),
+            (
+                "thermal_bridge_psi_invalid",
+                "zones[0].thermalBridges[0].psiValue",
+            ),
+            (
+                "point_bridge_chi_invalid",
+                "zones[0].pointThermalBridges[0].chiValue",
+            ),
+        ] {
+            let mut value = project();
+            match code {
+                "thermal_bridge_length_invalid" => {
+                    value["zones"][0]["thermalBridges"][0]["length"] = Value::from(0.0);
+                }
+                "thermal_bridge_psi_invalid" => {
+                    value["zones"][0]["thermalBridges"][0]["psiValue"] = Value::Null;
+                }
+                _ => {
+                    value["zones"][0]["pointThermalBridges"] = serde_json::json!([{
+                        "id": "pb1",
+                        "chiValue": null,
+                        "sourceReference": "synthetic-source",
+                        "thermalBoundary": "outdoor",
+                        "zoneId": "z1"
+                    }]);
+                }
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{code}");
+            assert!(result.performance.is_none(), "{code}");
+            assert!(result.label_data.is_none(), "{code}");
+            assert!(result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == code && gap.path == path));
+        }
     }
 
     #[test]

@@ -1177,6 +1177,28 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_withholds_zero_length_thermal_bridge() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["zones"][0]["thermalBridges"][0]["length"] = Value::from(0.0);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "thermal_bridge_length_invalid"
+                && gap["path"] == "zones[0].thermalBridges[0].length"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_reports_malformed_project_field() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"
