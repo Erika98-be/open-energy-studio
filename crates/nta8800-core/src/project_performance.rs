@@ -2471,10 +2471,20 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "construction_layer_invalid"
                         | "construction_layers_invalid"
                         | "surface_id_invalid"
+                        | "surface_area_invalid"
+                        | "surface_area_sum_invalid"
                         | "surface_construction_missing"
                         | "surface_zone_mismatch"
                         | "window_id_invalid"
+                        | "window_area_invalid"
+                        | "window_area_sum_invalid"
+                        | "window_u_invalid"
+                        | "window_g_invalid"
+                        | "window_area_exceeds_surface"
+                        | "windows_invalid"
                         | "window_surface_mismatch"
+                        | "zone_window_area_sum_invalid"
+                        | "project_envelope_area_sum_invalid"
                         | "thermal_bridge_id_invalid"
                         | "thermal_bridge_length_invalid"
                         | "thermal_bridge_psi_invalid"
@@ -5779,6 +5789,52 @@ mod tests {
                 _ => {
                     value["constructions"][0]["layers"] = Value::from("bad");
                 }
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{code}");
+            assert!(result.performance.is_none(), "{code}");
+            assert!(result.label_data.is_none(), "{code}");
+            assert!(result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == code && gap.path == path));
+        }
+    }
+
+    #[test]
+    fn invalid_envelope_values_withhold_project_results() {
+        for (code, path) in [
+            ("surface_area_invalid", "zones[0].surfaces[0].area"),
+            (
+                "window_area_invalid",
+                "zones[0].surfaces[0].windows[0].area",
+            ),
+            ("window_u_invalid", "zones[0].surfaces[0].windows[0].uValue"),
+            ("window_g_invalid", "zones[0].surfaces[0].windows[0].gValue"),
+            (
+                "window_area_exceeds_surface",
+                "zones[0].surfaces[0].windows",
+            ),
+            ("windows_invalid", "zones[0].surfaces[0].windows"),
+        ] {
+            let mut value = project();
+            match code {
+                "surface_area_invalid" => {
+                    value["zones"][0]["surfaces"][0]["area"] = Value::from(0.0);
+                }
+                "window_area_invalid" => {
+                    value["zones"][0]["surfaces"][0]["windows"][0]["area"] = Value::from(0.0);
+                }
+                "window_u_invalid" => {
+                    value["zones"][0]["surfaces"][0]["windows"][0]["uValue"] = Value::from(0.0);
+                }
+                "window_g_invalid" => {
+                    value["zones"][0]["surfaces"][0]["windows"][0]["gValue"] = Value::from(2.0);
+                }
+                "window_area_exceeds_surface" => {
+                    value["zones"][0]["surfaces"][0]["windows"][0]["area"] = Value::from(31.0);
+                }
+                _ => value["zones"][0]["surfaces"][0]["windows"] = Value::from("bad"),
             }
             let result = assess_project_performance(&value);
             assert_eq!(result.status, "invalid", "{code}");
