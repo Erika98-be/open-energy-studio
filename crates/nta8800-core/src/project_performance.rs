@@ -2536,6 +2536,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     issue.code,
                     "unheated_space_id_invalid"
                         | "unheated_space_name_required"
+                        | "unheated_space_surface_required"
                         | "unheated_reduction_factor_invalid"
                         | "unheated_factor_source_required"
                         | "unheated_factor_declared_and_derived"
@@ -6014,6 +6015,27 @@ mod tests {
                 .iter()
                 .any(|gap| gap.code == code && gap.path == path));
         }
+    }
+
+    #[test]
+    fn unheated_space_referenced_only_by_bridge_withholds_project_results() {
+        let mut value = project();
+        value["zones"][0]["thermalBridges"][0]["thermalBoundary"] = Value::from("unheated_space");
+        value["zones"][0]["thermalBridges"][0]["unheatedSpaceId"] = Value::from("u1");
+        value["unheatedSpaces"] = serde_json::json!([{
+            "id": "u1",
+            "name": "Synthetische onverwarmde ruimte",
+            "reductionFactor": 0.5,
+            "factorSourceReference": "synthetic-source"
+        }]);
+
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.label_data.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "unheated_space_surface_required" && gap.path == "unheatedSpaces[0].id"
+        }));
     }
 
     #[test]
