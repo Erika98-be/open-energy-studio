@@ -2475,6 +2475,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "thermal_bridge_zone_mismatch"
                         | "point_bridge_id_invalid"
                         | "point_bridge_zone_mismatch"
+                        | "point_bridge_source_required"
                         | "system_record_invalid"
                         | "system_id_invalid"
                         | "system_type_required"
@@ -5672,6 +5673,26 @@ mod tests {
                 "{kind}"
             );
         }
+    }
+
+    #[test]
+    fn point_bridge_without_source_withholds_project_results() {
+        let mut value = project();
+        value["zones"][0]["pointThermalBridges"] = serde_json::json!([{
+            "id": "pb1",
+            "chiValue": 0.02,
+            "sourceReference": " ",
+            "thermalBoundary": "outdoor",
+            "zoneId": "z1"
+        }]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "invalid");
+        assert!(result.performance.is_none());
+        assert!(result.label_data.is_none());
+        assert!(result.gaps.iter().any(|gap| {
+            gap.code == "point_bridge_source_required"
+                && gap.path == "zones[0].pointThermalBridges[0].sourceReference"
+        }));
     }
 
     #[test]

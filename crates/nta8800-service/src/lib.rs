@@ -1149,6 +1149,34 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_withholds_point_bridge_without_source() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["zones"][0]["pointThermalBridges"] = json!([{
+            "id": "pb1",
+            "chiValue": 0.02,
+            "sourceReference": " ",
+            "thermalBoundary": "outdoor",
+            "zoneId": "z1"
+        }]);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "point_bridge_source_required"
+                && gap["path"] == "zones[0].pointThermalBridges[0].sourceReference"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_reports_malformed_project_field() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"
