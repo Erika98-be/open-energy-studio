@@ -6019,23 +6019,34 @@ mod tests {
 
     #[test]
     fn unheated_space_referenced_only_by_bridge_withholds_project_results() {
-        let mut value = project();
-        value["zones"][0]["thermalBridges"][0]["thermalBoundary"] = Value::from("unheated_space");
-        value["zones"][0]["thermalBridges"][0]["unheatedSpaceId"] = Value::from("u1");
-        value["unheatedSpaces"] = serde_json::json!([{
-            "id": "u1",
-            "name": "Synthetische onverwarmde ruimte",
-            "reductionFactor": 0.5,
-            "factorSourceReference": "synthetic-source"
-        }]);
+        for point_bridge in [false, true] {
+            let mut value = project();
+            if point_bridge {
+                value["zones"][0]["pointThermalBridges"] = serde_json::json!([{
+                    "id": "pb1", "chiValue": 0.02, "zoneId": "z1",
+                    "sourceReference": "synthetic-source",
+                    "thermalBoundary": "unheated_space", "unheatedSpaceId": "u1"
+                }]);
+            } else {
+                value["zones"][0]["thermalBridges"][0]["thermalBoundary"] =
+                    Value::from("unheated_space");
+                value["zones"][0]["thermalBridges"][0]["unheatedSpaceId"] = Value::from("u1");
+            }
+            value["unheatedSpaces"] = serde_json::json!([{
+                "id": "u1",
+                "name": "Synthetische onverwarmde ruimte",
+                "reductionFactor": 0.5,
+                "factorSourceReference": "synthetic-source"
+            }]);
 
-        let result = assess_project_performance(&value);
-        assert_eq!(result.status, "invalid");
-        assert!(result.performance.is_none());
-        assert!(result.label_data.is_none());
-        assert!(result.gaps.iter().any(|gap| {
-            gap.code == "unheated_space_surface_required" && gap.path == "unheatedSpaces[0].id"
-        }));
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "point bridge: {point_bridge}");
+            assert!(result.performance.is_none(), "point bridge: {point_bridge}");
+            assert!(result.label_data.is_none(), "point bridge: {point_bridge}");
+            assert!(result.gaps.iter().any(|gap| {
+                gap.code == "unheated_space_surface_required" && gap.path == "unheatedSpaces[0].id"
+            }));
+        }
     }
 
     #[test]
