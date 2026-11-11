@@ -32,6 +32,7 @@ pub fn shared_sunroom() -> Value {
         for window in surface["windows"].as_array_mut().unwrap() {
             let window_id = window["id"].as_str().unwrap().to_owned();
             window["id"] = Value::from(format!("{window_id}-2"));
+            window["surfaceId"] = Value::from(format!("{id}-2"));
         }
     }
     for bridge in second["thermalBridges"].as_array_mut().unwrap() {
