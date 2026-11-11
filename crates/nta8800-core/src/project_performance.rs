@@ -2465,6 +2465,12 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     issue.code,
                     "project_id_required"
                         | "project_name_required"
+                        | "zone_required"
+                        | "zone_id_invalid"
+                        | "floor_area_invalid"
+                        | "floor_area_sum_invalid"
+                        | "volume_invalid"
+                        | "airtightness_invalid"
                         | "construction_id_invalid"
                         | "construction_exterior_resistance_invalid"
                         | "construction_thermal_value_invalid"
@@ -5835,6 +5841,30 @@ mod tests {
                     value["zones"][0]["surfaces"][0]["windows"][0]["area"] = Value::from(31.0);
                 }
                 _ => value["zones"][0]["surfaces"][0]["windows"] = Value::from("bad"),
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{code}");
+            assert!(result.performance.is_none(), "{code}");
+            assert!(result.label_data.is_none(), "{code}");
+            assert!(result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == code && gap.path == path));
+        }
+    }
+
+    #[test]
+    fn invalid_zone_quantities_withhold_project_results() {
+        for (code, path) in [
+            ("floor_area_invalid", "zones[0].floorArea"),
+            ("volume_invalid", "zones[0].volume"),
+            ("airtightness_invalid", "zones[0].airTightness.qv10"),
+        ] {
+            let mut value = project();
+            match code {
+                "floor_area_invalid" => value["zones"][0]["floorArea"] = Value::from(0.0),
+                "volume_invalid" => value["zones"][0]["volume"] = Value::from(0.0),
+                _ => value["zones"][0]["airTightness"] = serde_json::json!({"qv10": -1.0}),
             }
             let result = assess_project_performance(&value);
             assert_eq!(result.status, "invalid", "{code}");
