@@ -60,8 +60,9 @@ jobs:
           restore-keys: ${{ runner.os }}-gate-
 
       - name: Install system dependencies (Tauri check)
+        timeout-minutes: 20
         run: |
-          sudo apt-get update
+          sudo apt-get update --error-on=any
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
@@ -128,8 +129,9 @@ jobs:
 
       - name: Install dependencies (Ubuntu only)
         if: matrix.platform == 'ubuntu-22.04'
+        timeout-minutes: 20
         run: |
-          sudo apt-get update
+          sudo apt-get update --error-on=any
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
@@ -261,8 +263,9 @@ jobs:
           toolchain: 1.99.0
 
       - name: Install Linux desktop dependencies
+        timeout-minutes: 20
         run: |
-          sudo apt-get update
+          sudo apt-get update --error-on=any
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Check build evidence code
