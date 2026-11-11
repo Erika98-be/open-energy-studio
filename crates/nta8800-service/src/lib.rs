@@ -1122,6 +1122,28 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_withholds_invalid_construction_resistance() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["constructions"][0]["exteriorSurfaceResistance"] = Value::from(5.0);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "construction_exterior_resistance_invalid"
+                && gap["path"] == "constructions[0].exteriorSurfaceResistance"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_withholds_duplicate_thermal_bridge_id() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"

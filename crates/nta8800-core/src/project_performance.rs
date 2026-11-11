@@ -2466,6 +2466,10 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     "project_id_required"
                         | "project_name_required"
                         | "construction_id_invalid"
+                        | "construction_exterior_resistance_invalid"
+                        | "construction_thermal_value_invalid"
+                        | "construction_layer_invalid"
+                        | "construction_layers_invalid"
                         | "surface_id_invalid"
                         | "surface_construction_missing"
                         | "surface_zone_mismatch"
@@ -5730,6 +5734,50 @@ mod tests {
                         "thermalBoundary": "outdoor",
                         "zoneId": "z1"
                     }]);
+                }
+            }
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{code}");
+            assert!(result.performance.is_none(), "{code}");
+            assert!(result.label_data.is_none(), "{code}");
+            assert!(result
+                .gaps
+                .iter()
+                .any(|gap| gap.code == code && gap.path == path));
+        }
+    }
+
+    #[test]
+    fn invalid_construction_values_withhold_project_results() {
+        for (code, path) in [
+            (
+                "construction_exterior_resistance_invalid",
+                "constructions[0].exteriorSurfaceResistance",
+            ),
+            (
+                "construction_thermal_value_invalid",
+                "constructions[0].uValue",
+            ),
+            (
+                "construction_layer_invalid",
+                "constructions[0].layers[0].lambda",
+            ),
+            ("construction_layers_invalid", "constructions[0].layers"),
+        ] {
+            let mut value = project();
+            match code {
+                "construction_exterior_resistance_invalid" => {
+                    value["constructions"][0]["exteriorSurfaceResistance"] = Value::from(5.0);
+                }
+                "construction_thermal_value_invalid" => {
+                    value["constructions"][0]["uValue"] = Value::from(0.0);
+                }
+                "construction_layer_invalid" => {
+                    value["constructions"][0]["layers"] =
+                        serde_json::json!([{"thickness": 0.1, "lambda": 0.0}]);
+                }
+                _ => {
+                    value["constructions"][0]["layers"] = Value::from("bad");
                 }
             }
             let result = assess_project_performance(&value);
