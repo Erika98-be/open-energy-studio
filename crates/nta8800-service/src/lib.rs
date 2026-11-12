@@ -1219,6 +1219,29 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_rejects_invalid_legacy_heat_pump_cop() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+        project["heatingSystems"][0]["cop"] = Value::from(0.0);
+        project["heatingSystems"][0]["coverageFraction"] = Value::from(1.0);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({"project": project}),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+        assert_eq!(result["status"], "invalid");
+        assert!(result["performance"].is_null());
+        assert!(result["labelData"].is_null());
+        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "heat_pump_cop_invalid" && gap["path"] == "heatingSystems[0].cop"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_rejects_unresolved_construction_link() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"

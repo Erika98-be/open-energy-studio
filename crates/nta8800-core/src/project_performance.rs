@@ -2532,6 +2532,8 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "system_record_invalid"
                         | "system_id_invalid"
                         | "system_type_required"
+                        | "heat_pump_cop_invalid"
+                        | "heat_pump_coverage_invalid"
                 ) || (matches!(
                     issue.code,
                     "unheated_space_id_invalid"
@@ -6108,6 +6110,28 @@ mod tests {
             gap.code == "heat_pump_metadata_invalid"
                 && gap.path == "heatingSystems[0].ntaHeatPump.source"
         }));
+    }
+
+    #[test]
+    fn invalid_legacy_heat_pump_inputs_withhold_project_results() {
+        for (field, invalid, code) in [
+            ("cop", 0.0, "heat_pump_cop_invalid"),
+            ("coverageFraction", 1.5, "heat_pump_coverage_invalid"),
+        ] {
+            let mut value = project();
+            value["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+            value["heatingSystems"][0]["cop"] = Value::from(3.0);
+            value["heatingSystems"][0]["coverageFraction"] = Value::from(1.0);
+            value["heatingSystems"][0][field] = Value::from(invalid);
+
+            let result = assess_project_performance(&value);
+            assert_eq!(result.status, "invalid", "{field}");
+            assert!(result.performance.is_none(), "{field}");
+            assert!(result.label_data.is_none(), "{field}");
+            assert!(result.gaps.iter().any(|gap| {
+                gap.code == code && gap.path == format!("heatingSystems[0].{field}")
+            }));
+        }
     }
 
     #[test]
