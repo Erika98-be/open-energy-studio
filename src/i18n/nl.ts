@@ -1436,7 +1436,7 @@ export const nl: Record<string, string> = {
   'nta.gap.sunroom_id_duplicate': 'Dezelfde serre staat twee keer in deze lijst (7.30b, 7.38)',
   'nta.gap.thermal_bridge_methods_mixed': 'Forfaitaire en gedetailleerde koudebruggen gemengd (8.2.1)',
   'nta.gap.ground_floor_edge_insulation_slab_only': 'Randisolatie geldt alleen voor een vloer op de grond (D.7/D.8, tabel D.1)',
-  'nta.performance.warnings': 'Plausibiliteit (de berekening loopt door):',
+  'nta.performance.warnings': 'Waarschuwingen bij projectinvoer en resultaat:',
   'nta.warning.declared_hot_water_efficiency_above_one': 'Opgegeven tapwatergebruik impliceert rendement boven 1',
   'nta.warning.declared_ventilation_below_required_flow': 'Opgegeven H_ve lager dan het mechanische ventilatiedebiet',
   'nta.warning.bacs_factor_without_capacity_evidence': 'f_BACS 1,0 zonder onderbouwing van systeemvermogens (§5.5.8)',

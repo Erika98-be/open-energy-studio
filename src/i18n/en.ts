@@ -1436,7 +1436,7 @@ export const en: Record<string, string> = {
   'nta.gap.sunroom_id_duplicate': 'The same sunroom is listed twice in this list (7.30b, 7.38)',
   'nta.gap.thermal_bridge_methods_mixed': 'Forfait and detailed thermal bridges mixed (8.2.1)',
   'nta.gap.ground_floor_edge_insulation_slab_only': 'Edge insulation applies to a slab on ground only (D.7/D.8, table D.1)',
-  'nta.performance.warnings': 'Plausibility (the calculation continues):',
+  'nta.performance.warnings': 'Project input and result warnings:',
   'nta.warning.declared_hot_water_efficiency_above_one': 'Declared hot-water use implies an efficiency above 1',
   'nta.warning.declared_ventilation_below_required_flow': 'Declared H_ve below the mechanical ventilation flow',
   'nta.warning.bacs_factor_without_capacity_evidence': 'f_BACS 1.0 without system power evidence (§5.5.8)',

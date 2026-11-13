@@ -261,22 +261,26 @@ describe('NTA performance panel', () => {
     expect(block.thermalMass.sourceReference).toBe('');
   });
 
-  it('states the vertical pipes and lists plausibility warnings', async () => {
+  it('states the vertical pipes and labels both plausibility and route warnings', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: false, status: 422,
       json: async () => ({ status: 'incomplete', inputFingerprint: 'sha256:x', attestStatus: 'unattested',
         geometry: null, gaps: [{ code: 'vertical_pipes_unknown', path: 'ntaCalculation.verticalPipes' }],
         warnings: [{ code: 'declared_hot_water_efficiency_above_one', path: 'ntaCalculation.declaredUses[0].monthlyKwh',
-          detail: 'η_W ≈ 1.08 > 1' }],
+          detail: 'η_W ≈ 1.08 > 1' },
+        { code: 'heat_pump_route_unimplemented', path: 'ntaHeatPumps[0]' }],
         derivedInput: null, performance: null }),
     }));
     renderWithProviders(<Harness />);
     const panel = within(await screen.findByRole('region', { name: 'NTA 8800 calculation (Rust kernel)' }));
     expect(await panel.findByText('Vertical pipes unknown: list them, or none (7.3.3)')).toBeInTheDocument();
     const warnings = within(panel.getByTestId('nta-plausibility-warnings'));
+    expect(warnings.getByText('Project input and result warnings:')).toBeInTheDocument();
     expect(warnings.getByText('Declared hot-water use implies an efficiency above 1')).toBeInTheDocument();
     expect(warnings.getByText('η_W ≈ 1.08 > 1')).toBeInTheDocument();
+    expect(warnings.getByText('This heat pump is classified, but a verified NTA calculation route is not available yet.')).toBeInTheDocument();
+    expect(warnings.getByText('ntaHeatPumps[0]')).toBeInTheDocument();
 
     await user.click(panel.getByRole('button', { name: 'Start NTA input' }));
     const form = within(panel.getByRole('form', { name: 'NTA input' }));
