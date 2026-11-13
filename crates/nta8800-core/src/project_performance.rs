@@ -2489,7 +2489,6 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         .collect::<Vec<_>>();
     let mut project_audit_gaps: Vec<InputGap> = project_issues
         .iter()
-        .cloned()
         .filter(|issue| {
             matches!(issue.severity, crate::Severity::Error)
                 && (matches!(
@@ -2560,6 +2559,7 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                     || (issue.path.starts_with("ventilationSystems[")
                         && issue.path.contains(".ntaHeatPump")))
         })
+        .cloned()
         .map(|issue| InputGap {
             code: issue.code,
             path: issue.path,
