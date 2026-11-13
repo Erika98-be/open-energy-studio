@@ -2481,11 +2481,15 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
     // Reuse project input errors that can make a linked system ambiguous.
     // Classified heat-pump records remain descriptive until their NTA route
     // is verified, but invalid evidence must not accompany a BENG result.
-    let mut project_audit_gaps: Vec<InputGap> = project
+    let project_issues = project
         .as_ref()
         .map(|project| crate::assess_project(project, fingerprint.clone()))
         .into_iter()
         .flat_map(|assessment| assessment.issues)
+        .collect::<Vec<_>>();
+    let mut project_audit_gaps: Vec<InputGap> = project_issues
+        .iter()
+        .cloned()
         .filter(|issue| {
             matches!(issue.severity, crate::Severity::Error)
                 && (matches!(
@@ -2653,6 +2657,16 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
     let (range_gaps, range_warnings) = input_range_findings(project_value);
     let mut warnings = plausibility_warnings(project_value);
     warnings.extend(range_warnings);
+    warnings.extend(
+        project_issues
+            .into_iter()
+            .filter(|issue| issue.code == "heat_pump_route_unimplemented")
+            .map(|issue| InputGap {
+                code: issue.code,
+                path: issue.path,
+                detail: Some(issue.message.to_string()),
+            }),
+    );
     if let (Some(input), Some(result)) = (&derived, &performance) {
         let found = building_warning_gaps(result, input, project_value, &warnings);
         warnings.extend(found);
@@ -5488,6 +5502,9 @@ mod tests {
         let valid = assess_project_performance(&value);
         assert_eq!(valid.status, "calculated_unverified", "{:?}", valid.gaps);
         assert!(valid.performance.is_some());
+        assert!(valid.warnings.iter().any(|item| {
+            item.code == "heat_pump_route_unimplemented" && item.path == "ntaHeatPumps[0]"
+        }));
 
         let duplicate = value["ntaHeatPumps"][0].clone();
         value["ntaHeatPumps"]

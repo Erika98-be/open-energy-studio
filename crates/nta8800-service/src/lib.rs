@@ -952,6 +952,42 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_warns_when_classified_pump_is_not_calculated() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["ntaHeatPumps"] = json!([{
+            "id": "hp-1", "source": "outdoor_air", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {
+                "kind": "controlled_quality_declaration", "reference": "20260001GK",
+                "registryRecord": {
+                    "registrationNumber": "20260001GK", "productName": "Example",
+                    "manufacturer": "Supplier", "sourceUrl": "https://bcrg.nl/declaration"
+                }
+            }
+        }]);
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({ "project": project }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(result["status"], "calculated_unverified");
+        assert!(result["performance"].is_object());
+        assert!(result["warnings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|warning| {
+                warning["code"] == "heat_pump_route_unimplemented"
+                    && warning["path"] == "ntaHeatPumps[0]"
+            }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_points_to_invalid_linked_heat_pump_field() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"
