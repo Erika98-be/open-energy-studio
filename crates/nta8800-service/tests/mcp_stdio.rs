@@ -1352,7 +1352,7 @@ fn project_performance_mcp_preserves_unimplemented_heat_pump_warnings() {
         "id": "h1", "source": "outdoor_air", "sink": "hydronic",
         "drive": "electric_compression", "reversible": false,
         "hybrid": false, "booster": false,
-        "performanceEvidence": {"kind": "normative_default"}
+        "performanceEvidence": {"kind": "controlled_quality_declaration", "reference": "20260001GK"}
     });
     let mut server = Server::start();
     server.request(
@@ -1379,6 +1379,10 @@ fn project_performance_mcp_preserves_unimplemented_heat_pump_warnings() {
         (
             "heat_pump_metadata_route_unimplemented",
             "heatingSystems[0].ntaHeatPump",
+        ),
+        (
+            "quality_declaration_registry_record_missing",
+            "heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord",
         ),
     ] {
         assert!(

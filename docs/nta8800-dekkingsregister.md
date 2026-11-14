@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De MCP-stdio-integratieproef bewaakt nu ook `quality_declaration_registry_record_missing` met het exacte pad van gekoppelde warmtepompmetadata en inhoudelijke gelijkheid tussen tekst en `structuredContent`. Alle 21 MCP-stdio-proeven en service-Clippy slagen lokaal; CI moet nog volgen. Dit versterkt *MCP*, *Audit* en *Test* van de resultaatprovenance, zonder normatieve *Rekenroute*, onafhankelijke *Referentie* of *Attest*.
+
 De [CI op `16ab36fa`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43595226167) heeft de volledige NTA-gate, inclusief de UI-regressie voor de registerwaarschuwing, en desktopbuilds voor Linux, Windows en macOS doorlopen. Dit versterkt *Weergave*, *Test* en *Bouwbewijs*; normatieve *Referentie* en *Attest* blijven open.
 
 De [CI op `38d11434`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43585078222) heeft de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS doorlopen. Dit versterkt *Test* en *Bouwbewijs* voor de verbrede auditwaarschuwingsroute; normatieve *Referentie* en *Attest* blijven open.
