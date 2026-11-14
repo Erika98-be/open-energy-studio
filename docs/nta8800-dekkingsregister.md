@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De [CI op `38d11434`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43585078222) heeft de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS doorlopen. Dit versterkt *Test* en *Bouwbewijs* voor de verbrede auditwaarschuwingsroute; normatieve *Referentie* en *Attest* blijven open.
+
 Een UI-regressie bewaakt nu de vertaalde waarschuwing `quality_declaration_registry_record_missing` en het veldpad van gekoppelde warmtepompmetadata in de prestatieweergave. Lokaal ontbreekt Node; de UI-proef wacht op de CI-gate. Dit versterkt *Weergave* en *Test* na CI, zonder normatieve *Rekenroute*, onafhankelijke *Referentie* of *Attest*.
 
 De projectprestatie geeft nu alle `.oes`-auditwaarschuwingen met een los of gekoppeld warmtepomppad door, inclusief een ontbrekende kwaliteitsverklaringsregistratie, in plaats van een vaste codelijst. Een vooraf falende Rust-regressie en een HTTP-200-proef bewaken `quality_declaration_registry_record_missing` op `heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord`. Alle 1043 kernunittests op Rust 1.77.2, 94 service-unittests op Rust 1.99.0, rustfmt en Clippy voor kern en service slagen lokaal. Dit versterkt *Audit*, *Weergave*, *HTTP* en *Test*, zonder normatieve *Rekenroute*, onafhankelijke *Referentie* of *Attest*.
