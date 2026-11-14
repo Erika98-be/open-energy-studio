@@ -1,8 +1,10 @@
 # NTA 8800 verificatiestatus — 14 november 2026
 
+De [CI op `16ab36fa`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43595226167) heeft de volledige NTA-gate, inclusief de UI-regressie voor de registerwaarschuwing, en desktopbuilds voor Linux, Windows en macOS afgerond. Dit is software- en bouwverificatie, geen controle van de kwaliteitsverklaring of normatieve warmtepompprestatie.
+
 De [CI op `38d11434`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43585078222) heeft de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS afgerond. Daarmee is de verbrede auditwaarschuwingsroute als software gecontroleerd; dit levert geen normatieve referentie of attest.
 
-De prestatie-UI-regressie bewaakt nu ook de vertaalde melding en het exacte veldpad van een ontbrekende kwaliteitsverklaringsregistratie in de resultaatwaarschuwingen. `git diff --check` slaagt; lokale UI-tests zijn niet uitgevoerd omdat op deze host geen Node-binary beschikbaar is. De UI-proef moet nog door de CI-gate; zij toetst de weergave van auditprovenance, niet de geldigheid van de verklaring.
+De prestatie-UI-regressie bewaakt nu ook de vertaalde melding en het exacte veldpad van een ontbrekende kwaliteitsverklaringsregistratie in de resultaatwaarschuwingen. `git diff --check` slaagt; lokale UI-tests zijn niet uitgevoerd omdat op deze host geen Node-binary beschikbaar is. De CI-gate slaagt; zij toetst de weergave van auditprovenance, niet de geldigheid van de verklaring.
 
 De projectprestatie nam slechts een vaste lijst warmtepompwaarschuwingen uit de `.oes`-audit over. Daardoor ontbrak bijvoorbeeld `quality_declaration_registry_record_missing` op een gekoppelde pomp bij een `calculated_unverified`-resultaat. Een vooraf falende Rust-regressie laat dit zien; de projectroute neemt nu alle auditwaarschuwingen op paden van losse of gekoppelde warmtepompen over, plus de twee legacywaarschuwingen voor ongeclassificeerde systemen. De HTTP-200-proef bewaakt de ontbrekende registervermelding. Alle 1043 kernunittests op Rust 1.77.2, 94 service-unittests op Rust 1.99.0, rustfmt en Clippy voor kern en service slagen lokaal. Dit maakt de relatie tussen opgeslagen bewijs en berekend resultaat controleerbaarder; de registervermelding is daarmee niet onafhankelijk geverifieerd en de warmtepomp levert nog geen normatieve prestatie.
 
