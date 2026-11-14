@@ -898,7 +898,7 @@ mod tests {
         .unwrap();
         let (status, result) = post_json(
             "/v1/nta8800/project/performance",
-            json!({ "project": project.clone() }),
+            json!({ "project": project }),
         )
         .await;
         assert_eq!(status, StatusCode::OK);
@@ -937,7 +937,7 @@ mod tests {
         }]);
         let (status, result) = post_json(
             "/v1/nta8800/project/performance",
-            json!({ "project": project }),
+            json!({ "project": project.clone() }),
         )
         .await;
         assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
@@ -1009,7 +1009,7 @@ mod tests {
         });
         let (status, result) = post_json(
             "/v1/nta8800/project/performance",
-            json!({ "project": project }),
+            json!({ "project": project.clone() }),
         )
         .await;
         assert_eq!(status, StatusCode::OK);
@@ -1029,6 +1029,25 @@ mod tests {
             .any(|warning| {
                 warning["code"] == "heat_pump_performance_points_unimplemented"
                     && warning["path"] == "heatingSystems[0].ntaHeatPump.performancePoints"
+            }));
+
+        project["heatingSystems"][0]["ntaHeatPump"]["performanceEvidence"] = json!({
+            "kind": "controlled_quality_declaration", "reference": "20260001GK"
+        });
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({ "project": project }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert!(result["warnings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|warning| {
+                warning["code"] == "quality_declaration_registry_record_missing"
+                    && warning["path"]
+                        == "heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord"
             }));
     }
 

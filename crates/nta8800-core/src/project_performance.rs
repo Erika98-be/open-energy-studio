@@ -2661,17 +2661,14 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
         project_issues
             .into_iter()
             .filter(|issue| {
-                matches!(
-                    issue.code,
-                    "heat_pump_route_unimplemented"
-                        | "heat_pump_metadata_route_unimplemented"
-                        | "heat_pump_route_unclassified"
-                        | "hot_water_heat_pump_route_unclassified"
-                        | "heat_pump_performance_points_unimplemented"
-                        | "heat_pump_dhw_test_route_unimplemented"
-                        | "heat_pump_auxiliaries_unimplemented"
-                        | "heat_pump_system_links_unimplemented"
-                )
+                matches!(issue.severity, crate::Severity::Warning)
+                    && (issue.path.starts_with("ntaHeatPumps[")
+                        || (issue.path.starts_with("heatingSystems[")
+                            && (issue.path.contains(".ntaHeatPump")
+                                || issue.code == "heat_pump_route_unclassified"))
+                        || (issue.path.starts_with("hotWaterSystems[")
+                            && (issue.path.contains(".ntaHeatPump")
+                                || issue.code == "hot_water_heat_pump_route_unclassified")))
             })
             .map(|issue| InputGap {
                 code: issue.code,
@@ -5590,6 +5587,21 @@ mod tests {
         assert!(result.warnings.iter().any(|warning| {
             warning.code == "heat_pump_performance_points_unimplemented"
                 && warning.path == "heatingSystems[0].ntaHeatPump.performancePoints"
+        }));
+
+        value["heatingSystems"][0]["ntaHeatPump"]["performanceEvidence"] = serde_json::json!({
+            "kind": "controlled_quality_declaration", "reference": "20260001GK"
+        });
+        let without_registry = assess_project_performance(&value);
+        assert_eq!(
+            without_registry.status, "calculated_unverified",
+            "{:?}",
+            without_registry.gaps
+        );
+        assert!(without_registry.warnings.iter().any(|warning| {
+            warning.code == "quality_declaration_registry_record_missing"
+                && warning.path
+                    == "heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord"
         }));
     }
 

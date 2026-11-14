@@ -1,5 +1,9 @@
 # NTA 8800 dekkingsregister
 
+De projectprestatie geeft nu alle `.oes`-auditwaarschuwingen met een los of gekoppeld warmtepomppad door, inclusief een ontbrekende kwaliteitsverklaringsregistratie, in plaats van een vaste codelijst. Een vooraf falende Rust-regressie en een HTTP-200-proef bewaken `quality_declaration_registry_record_missing` op `heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord`. Alle 1043 kernunittests op Rust 1.77.2, 94 service-unittests op Rust 1.99.0, rustfmt en Clippy voor kern en service slagen lokaal. Dit versterkt *Audit*, *Weergave*, *HTTP* en *Test*, zonder normatieve *Rekenroute*, onafhankelijke *Referentie* of *Attest*.
+
+De [CI op `731a4ecb`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43574968319) voor de voorafgaande waarschuwingsuitbreiding loopt nog; volledige *Bouwbewijs*-status wordt na alle desktopplatforms vastgesteld.
+
 De projectprestatie toont nu ook de bestaande specifieke auditwaarschuwingen voor niet-gebruikte prestatiepunten, tapwater-testpunten, hulpcomponenten en systeemkoppelingen van gekoppelde geclassificeerde warmtepompen. Een vooraf falende Rust-regressie en een HTTP-200-proef bewaken het prestatiepuntenpad. Alle 1043 kernunittests op Rust 1.77.2, 94 service-unittests op Rust 1.99.0, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Audit*, *Weergave*, *HTTP* en *Test*; normatieve *Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De [CI op `36b65a1a`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43565719789) heeft de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS doorlopen. Dit versterkt *Test* en *Bouwbewijs* voor de tapwaterregressie; normatieve *Referentie* en *Attest* blijven open.
