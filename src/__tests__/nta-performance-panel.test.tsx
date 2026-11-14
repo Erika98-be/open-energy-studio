@@ -269,7 +269,8 @@ describe('NTA performance panel', () => {
         geometry: null, gaps: [{ code: 'vertical_pipes_unknown', path: 'ntaCalculation.verticalPipes' }],
         warnings: [{ code: 'declared_hot_water_efficiency_above_one', path: 'ntaCalculation.declaredUses[0].monthlyKwh',
           detail: 'η_W ≈ 1.08 > 1' },
-        { code: 'heat_pump_route_unimplemented', path: 'ntaHeatPumps[0]' }],
+        { code: 'heat_pump_route_unimplemented', path: 'ntaHeatPumps[0]' },
+        { code: 'quality_declaration_registry_record_missing', path: 'heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord' }],
         derivedInput: null, performance: null }),
     }));
     renderWithProviders(<Harness />);
@@ -281,6 +282,8 @@ describe('NTA performance panel', () => {
     expect(warnings.getByText('η_W ≈ 1.08 > 1')).toBeInTheDocument();
     expect(warnings.getByText('This heat pump is classified, but a verified NTA calculation route is not available yet.')).toBeInTheDocument();
     expect(warnings.getByText('ntaHeatPumps[0]')).toBeInTheDocument();
+    expect(warnings.getByText('The declaration registration and exact product are not yet recorded.')).toBeInTheDocument();
+    expect(warnings.getByText('heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord')).toBeInTheDocument();
 
     await user.click(panel.getByRole('button', { name: 'Start NTA input' }));
     const form = within(panel.getByRole('form', { name: 'NTA input' }));
