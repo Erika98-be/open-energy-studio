@@ -2663,7 +2663,10 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
             .filter(|issue| {
                 matches!(
                     issue.code,
-                    "heat_pump_route_unimplemented" | "heat_pump_metadata_route_unimplemented"
+                    "heat_pump_route_unimplemented"
+                        | "heat_pump_metadata_route_unimplemented"
+                        | "heat_pump_route_unclassified"
+                        | "hot_water_heat_pump_route_unclassified"
                 )
             })
             .map(|issue| InputGap {
@@ -5557,6 +5560,19 @@ mod tests {
         assert!(result.warnings.iter().any(|warning| {
             warning.code == "heat_pump_metadata_route_unimplemented"
                 && warning.path == "heatingSystems[0].ntaHeatPump"
+        }));
+    }
+
+    #[test]
+    fn legacy_heat_pump_without_classification_warns_in_project_result() {
+        let mut value = project();
+        value["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+        value["heatingSystems"][0]["cop"] = Value::from(3.0);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        assert!(result.performance.is_some());
+        assert!(result.warnings.iter().any(|warning| {
+            warning.code == "heat_pump_route_unclassified" && warning.path == "heatingSystems[0]"
         }));
     }
 
