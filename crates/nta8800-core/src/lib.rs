@@ -1330,6 +1330,14 @@ fn assess_project(project: &ProjectInput, input_fingerprint: String) -> InputAss
     }
 
     for (path, pump) in &classified_pumps {
+        if path.starts_with("heatingSystems[") || path.starts_with("hotWaterSystems[") {
+            issues.push(issue(
+                Severity::Warning,
+                "heat_pump_metadata_route_unimplemented",
+                path.clone(),
+                "Classified heat pump metadata is stored but is not used by the project performance route",
+            ));
+        }
         if let Some(input) = &pump.forfait_heat_pump_draft {
             issues.push(issue(
                 Severity::Warning,
@@ -3009,7 +3017,19 @@ mod tests {
             "manufacturer":"Supplier", "sourceUrl":"https://bcrg.nl/declaration/example"
         });
         let with_registry = assess_json(value.clone()).unwrap();
-        assert!(with_registry.issues.is_empty());
+        assert_eq!(with_registry.issues.len(), 1);
+        assert_eq!(
+            with_registry.issues[0].code,
+            "heat_pump_metadata_route_unimplemented"
+        );
+        assert_eq!(
+            with_registry.issues[0].path,
+            "heatingSystems[0].ntaHeatPump"
+        );
+        assert!(matches!(
+            with_registry.issues[0].severity,
+            Severity::Warning
+        ));
 
         value["heatingSystems"][0]["ntaHeatPump"]["source"] = json!("groundwater");
         value["heatingSystems"][0]["ntaHeatPump"]["performanceEvidence"]["reference"] = json!("");

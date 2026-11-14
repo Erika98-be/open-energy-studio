@@ -988,6 +988,37 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_performance_route_warns_when_linked_pump_metadata_is_not_used() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-project-performance-synthetic.json"
+        ))
+        .unwrap();
+        project["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+        project["heatingSystems"][0]["cop"] = Value::from(3.0);
+        project["heatingSystems"][0]["ntaHeatPump"] = json!({
+            "id": "h1", "source": "outdoor_air", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"}
+        });
+        let (status, result) = post_json(
+            "/v1/nta8800/project/performance",
+            json!({ "project": project }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(result["status"], "calculated_unverified");
+        assert!(result["warnings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|warning| {
+                warning["code"] == "heat_pump_metadata_route_unimplemented"
+                    && warning["path"] == "heatingSystems[0].ntaHeatPump"
+            }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_points_to_invalid_linked_heat_pump_field() {
         let mut project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"

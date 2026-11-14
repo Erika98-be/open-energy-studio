@@ -760,6 +760,7 @@ export const en: Record<string, string> = {
   'kernel.issue.hot_water_heat_pump_sink_mismatch': 'The sink must include domestic hot water.',
   'kernel.issue.heating_heat_pump_sink_mismatch': 'A heating heat pump must include space heating.',
   'kernel.issue.heat_pump_route_unimplemented': 'This heat pump is classified, but a verified NTA calculation route is not available yet.',
+  'kernel.issue.heat_pump_metadata_route_unimplemented': 'The classified heat pump data is stored but is not used in the project calculation.',
   'kernel.issue.heat_pump_id_duplicate': 'This heat pump ID occurs more than once.',
   'kernel.issue.heat_pump_zones_missing': 'Assign the zones served by this heat pump.',
   'kernel.issue.heat_pump_zone_missing': 'This heat pump refers to a zone that does not exist.',

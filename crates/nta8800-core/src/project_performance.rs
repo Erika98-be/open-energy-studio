@@ -2660,7 +2660,12 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
     warnings.extend(
         project_issues
             .into_iter()
-            .filter(|issue| issue.code == "heat_pump_route_unimplemented")
+            .filter(|issue| {
+                matches!(
+                    issue.code,
+                    "heat_pump_route_unimplemented" | "heat_pump_metadata_route_unimplemented"
+                )
+            })
             .map(|issue| InputGap {
                 code: issue.code,
                 path: issue.path,
@@ -5532,6 +5537,26 @@ mod tests {
         assert!(malformed.performance.is_none());
         assert!(malformed.gaps.iter().any(|item| {
             item.code == "heat_pump_metadata_invalid" && item.path == "ntaHeatPumps"
+        }));
+    }
+
+    #[test]
+    fn linked_classified_heat_pump_warns_that_metadata_is_not_calculated() {
+        let mut value = project();
+        value["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+        value["heatingSystems"][0]["cop"] = Value::from(3.0);
+        value["heatingSystems"][0]["ntaHeatPump"] = serde_json::json!({
+            "id": "h1", "source": "outdoor_air", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"}
+        });
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        assert!(result.performance.is_some());
+        assert!(result.warnings.iter().any(|warning| {
+            warning.code == "heat_pump_metadata_route_unimplemented"
+                && warning.path == "heatingSystems[0].ntaHeatPump"
         }));
     }
 

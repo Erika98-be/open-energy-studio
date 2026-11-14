@@ -760,6 +760,7 @@ export const nl: Record<string, string> = {
   'kernel.issue.hot_water_heat_pump_sink_mismatch': 'De afgifte moet warm tapwater omvatten.',
   'kernel.issue.heating_heat_pump_sink_mismatch': 'Een verwarmingswarmtepomp moet ruimteverwarming leveren.',
   'kernel.issue.heat_pump_route_unimplemented': 'Deze warmtepomp is geclassificeerd, maar er is nog geen geverifieerde NTA-rekenroute.',
+  'kernel.issue.heat_pump_metadata_route_unimplemented': 'De geclassificeerde warmtepompgegevens zijn opgeslagen, maar worden niet gebruikt in de projectberekening.',
   'kernel.issue.heat_pump_id_duplicate': 'Dit warmtepomp-ID komt meerdere keren voor.',
   'kernel.issue.heat_pump_zones_missing': 'Geef aan welke zones deze warmtepomp bedient.',
   'kernel.issue.heat_pump_zone_missing': 'Deze warmtepomp verwijst naar een zone die niet bestaat.',
