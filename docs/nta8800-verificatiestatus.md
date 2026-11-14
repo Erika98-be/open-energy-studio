@@ -1,6 +1,8 @@
 # NTA 8800 verificatiestatus — 14 november 2026
 
-De MCP-stdio-integratieproef bewaakt nu ook dat een ontbrekende registervermelding bij een gekoppelde warmtepomp als `quality_declaration_registry_record_missing` op `heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord` in het projectresultaat verschijnt. De proef controleert bovendien tekstuele JSON-gelijkheid met `structuredContent`. Alle 21 MCP-stdio-proeven en service-Clippy slagen lokaal; de CI-gate voor deze uitbreiding moet nog lopen. Dit is adapterverificatie van de waarschuwing, geen controle van de verklaring of normatieve warmtepompprestatie.
+De [CI op `3c7c04f5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43633029214) heeft de volledige NTA-gate, inclusief de uitgebreide MCP-stdio-proef, en desktopbuilds voor Linux, Windows en macOS afgerond. Dit bevestigt de softwareoverdracht van de registerwaarschuwing; geen normatieve referentie of attest.
+
+De MCP-stdio-integratieproef bewaakt nu ook dat een ontbrekende registervermelding bij een gekoppelde warmtepomp als `quality_declaration_registry_record_missing` op `heatingSystems[0].ntaHeatPump.performanceEvidence.registryRecord` in het projectresultaat verschijnt. De proef controleert bovendien tekstuele JSON-gelijkheid met `structuredContent`. Alle 21 MCP-stdio-proeven en service-Clippy slagen lokaal; ook de CI-gate slaagt. Dit is adapterverificatie van de waarschuwing, geen controle van de verklaring of normatieve warmtepompprestatie.
 
 De [CI op `16ab36fa`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43595226167) heeft de volledige NTA-gate, inclusief de UI-regressie voor de registerwaarschuwing, en desktopbuilds voor Linux, Windows en macOS afgerond. Dit is software- en bouwverificatie, geen controle van de kwaliteitsverklaring of normatieve warmtepompprestatie.
 
