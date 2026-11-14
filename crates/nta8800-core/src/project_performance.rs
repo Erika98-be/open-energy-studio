@@ -2667,6 +2667,10 @@ fn assess_project_in_edition(project_value: &Value) -> ProjectPerformanceAssessm
                         | "heat_pump_metadata_route_unimplemented"
                         | "heat_pump_route_unclassified"
                         | "hot_water_heat_pump_route_unclassified"
+                        | "heat_pump_performance_points_unimplemented"
+                        | "heat_pump_dhw_test_route_unimplemented"
+                        | "heat_pump_auxiliaries_unimplemented"
+                        | "heat_pump_system_links_unimplemented"
                 )
             })
             .map(|issue| InputGap {
@@ -5560,6 +5564,32 @@ mod tests {
         assert!(result.warnings.iter().any(|warning| {
             warning.code == "heat_pump_metadata_route_unimplemented"
                 && warning.path == "heatingSystems[0].ntaHeatPump"
+        }));
+    }
+
+    #[test]
+    fn linked_heat_pump_performance_points_warn_in_project_result() {
+        let mut value = project();
+        value["heatingSystems"][0]["type"] = Value::from("heat_pump_air");
+        value["heatingSystems"][0]["cop"] = Value::from(3.0);
+        value["heatingSystems"][0]["ntaHeatPump"] = serde_json::json!({
+            "id": "h1", "source": "outdoor_air", "sink": "hydronic",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"},
+            "performancePoints": [{
+                "id": "p1", "service": "space_heating",
+                "sourceTemperatureC": 7.0, "sinkTemperatureC": 35.0,
+                "usefulCapacityKw": 5.0, "inputPowerKw": 1.5,
+                "inputEnergyCarrier": "electricity", "testReference": "lab-1"
+            }]
+        });
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        assert!(result.performance.is_some());
+        assert!(result.warnings.iter().any(|warning| {
+            warning.code == "heat_pump_performance_points_unimplemented"
+                && warning.path == "heatingSystems[0].ntaHeatPump.performancePoints"
         }));
     }
 

@@ -1,5 +1,9 @@
 # NTA 8800 dekkingsregister
 
+De projectprestatie toont nu ook de bestaande specifieke auditwaarschuwingen voor niet-gebruikte prestatiepunten, tapwater-testpunten, hulpcomponenten en systeemkoppelingen van gekoppelde geclassificeerde warmtepompen. Een vooraf falende Rust-regressie en een HTTP-200-proef bewaken het prestatiepuntenpad. Alle 1043 kernunittests op Rust 1.77.2, 94 service-unittests op Rust 1.99.0, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Audit*, *Weergave*, *HTTP* en *Test*; normatieve *Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
+
+De [CI op `36b65a1a`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43565719789) heeft de NTA-gate en Linux- en Windows-desktopbuilds doorlopen; macOS loopt nog. De volledige *Bouwbewijs*-status voor de tapwaterregressie blijft in afwachting.
+
 Voor legacy tapwaterwarmtepompen bewaakt een gerichte Rust-regressie nu zowel de waarschuwing voor ontbrekende classificatie op `hotWaterSystems[0]` als de waarschuwing voor niet-gebruikte geclassificeerde metadata op `hotWaterSystems[0].ntaHeatPump`. Alle 1042 kernunittests slagen op Rust 1.77.2; dit versterkt *Audit* en *Test*, zonder normatieve *Rekenroute* of onafhankelijke *Referentie*.
 
 De [CI op MCP-commit `5fee9b76`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43556109146) heeft de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS doorlopen. Dit versterkt *Test* en *Bouwbewijs* voor de adapterwijziging; normatieve *Referentie* en *Attest* blijven open.

@@ -999,7 +999,13 @@ mod tests {
             "id": "h1", "source": "outdoor_air", "sink": "hydronic",
             "drive": "electric_compression", "reversible": false,
             "hybrid": false, "booster": false,
-            "performanceEvidence": {"kind": "normative_default"}
+            "performanceEvidence": {"kind": "normative_default"},
+            "performancePoints": [{
+                "id": "p1", "service": "space_heating",
+                "sourceTemperatureC": 7.0, "sinkTemperatureC": 35.0,
+                "usefulCapacityKw": 5.0, "inputPowerKw": 1.5,
+                "inputEnergyCarrier": "electricity", "testReference": "lab-1"
+            }]
         });
         let (status, result) = post_json(
             "/v1/nta8800/project/performance",
@@ -1015,6 +1021,14 @@ mod tests {
             .any(|warning| {
                 warning["code"] == "heat_pump_metadata_route_unimplemented"
                     && warning["path"] == "heatingSystems[0].ntaHeatPump"
+            }));
+        assert!(result["warnings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|warning| {
+                warning["code"] == "heat_pump_performance_points_unimplemented"
+                    && warning["path"] == "heatingSystems[0].ntaHeatPump.performancePoints"
             }));
     }
 
