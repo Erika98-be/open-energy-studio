@@ -1,5 +1,9 @@
 # NTA 8800 dekkingsregister
 
+Voor legacy tapwaterwarmtepompen bewaakt een gerichte Rust-regressie nu zowel de waarschuwing voor ontbrekende classificatie op `hotWaterSystems[0]` als de waarschuwing voor niet-gebruikte geclassificeerde metadata op `hotWaterSystems[0].ntaHeatPump`. Alle 1042 kernunittests slagen op Rust 1.77.2; dit versterkt *Audit* en *Test*, zonder normatieve *Rekenroute* of onafhankelijke *Referentie*.
+
+De [CI op MCP-commit `5fee9b76`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43556109146) heeft de volledige NTA-gate en desktopbuilds voor Linux en Windows doorlopen; macOS loopt nog. De volledige *Bouwbewijs*-status blijft daarom in afwachting.
+
 De MCP-stdio-route bewaart de bestaande waarschuwingen voor een losse en een gekoppelde geclassificeerde warmtepomp in zowel `structuredContent` als de tekstuele JSON-inhoud. De integratietest controleert beide codes en invoerpaden bij `calculated_unverified`; 21 MCP-stdio-tests en Clippy voor dit target slagen lokaal. Dit versterkt *Audit*, *MCP* en *Test* van de resultaatprovenance, zonder normatieve *Rekenroute*, onafhankelijke *Referentie* of *Attest*.
 
 De projectprestatie neemt nu ook de bestaande auditwaarschuwingen voor ongeclassificeerde legacy verwarmings- en tapwaterwarmtepompen over. Een vooraf falende Rust-regressie bewaakt `heat_pump_route_unclassified` op `heatingSystems[0]`; 1041 kernunittests op Rust 1.77.2, rustfmt en Clippy slagen lokaal. [CI op `9c9da8e7`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43544548924) bevestigt de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS. Dit versterkt *Audit*, *Weergave* en *Test* van de legacy-grens, zonder normatieve *Rekenroute*, onafhankelijke *Referentie* of *Attest*.

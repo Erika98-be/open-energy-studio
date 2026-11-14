@@ -5577,6 +5577,35 @@ mod tests {
     }
 
     #[test]
+    fn legacy_hot_water_heat_pump_without_classification_warns_in_project_result() {
+        let mut value = project();
+        value["hotWaterSystems"] = serde_json::json!([{
+            "id": "dhw-1", "type": "heat_pump", "efficiency": 2.8
+        }]);
+        let result = assess_project_performance(&value);
+        assert_eq!(result.status, "calculated_unverified", "{:?}", result.gaps);
+        assert!(result.performance.is_some());
+        assert!(result.warnings.iter().any(|warning| {
+            warning.code == "hot_water_heat_pump_route_unclassified"
+                && warning.path == "hotWaterSystems[0]"
+        }));
+
+        value["hotWaterSystems"][0]["ntaHeatPump"] = serde_json::json!({
+            "id": "dhw-1", "source": "outdoor_air", "sink": "domestic_hot_water",
+            "drive": "electric_compression", "reversible": false,
+            "hybrid": false, "booster": false,
+            "performanceEvidence": {"kind": "normative_default"}
+        });
+        let linked = assess_project_performance(&value);
+        assert_eq!(linked.status, "calculated_unverified", "{:?}", linked.gaps);
+        assert!(linked.performance.is_some());
+        assert!(linked.warnings.iter().any(|warning| {
+            warning.code == "heat_pump_metadata_route_unimplemented"
+                && warning.path == "hotWaterSystems[0].ntaHeatPump"
+        }));
+    }
+
+    #[test]
     fn malformed_project_field_is_reported_as_invalid() {
         let mut value = project();
         value["name"] = Value::Null;
