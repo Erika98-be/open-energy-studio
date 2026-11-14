@@ -1335,6 +1335,66 @@ fn collective_gas_source_mcp_requires_a_declared_evidence_kind() {
 }
 
 #[test]
+fn project_performance_mcp_preserves_unimplemented_heat_pump_warnings() {
+    let mut project: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-project-performance-synthetic.json"
+    ))
+    .unwrap();
+    project["ntaHeatPumps"] = json!([{
+        "id": "loose-hp", "source": "outdoor_air", "sink": "hydronic",
+        "drive": "electric_compression", "reversible": false,
+        "hybrid": false, "booster": false,
+        "performanceEvidence": {"kind": "normative_default"}
+    }]);
+    project["heatingSystems"][0]["type"] = json!("heat_pump_air");
+    project["heatingSystems"][0]["cop"] = json!(3.0);
+    project["heatingSystems"][0]["ntaHeatPump"] = json!({
+        "id": "h1", "source": "outdoor_air", "sink": "hydronic",
+        "drive": "electric_compression", "reversible": false,
+        "hybrid": false, "booster": false,
+        "performanceEvidence": {"kind": "normative_default"}
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "heat-pump-warning-project-test", "version": "1"}
+        }),
+    );
+    server.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name": "calculate_project_performance", "arguments": {"project": project}}),
+    );
+    assert_eq!(response["isError"], false, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "calculated_unverified");
+    assert!(assessment["performance"].is_object());
+    let warnings = assessment["warnings"].as_array().unwrap();
+    for (code, path) in [
+        ("heat_pump_route_unimplemented", "ntaHeatPumps[0]"),
+        (
+            "heat_pump_metadata_route_unimplemented",
+            "heatingSystems[0].ntaHeatPump",
+        ),
+    ] {
+        assert!(
+            warnings
+                .iter()
+                .any(|warning| { warning["code"] == code && warning["path"] == path }),
+            "missing {code} at {path}: {assessment}"
+        );
+    }
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn project_performance_mcp_withholds_invalid_heat_pump_evidence() {
     let mut project: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-project-performance-synthetic.json"
