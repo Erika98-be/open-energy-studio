@@ -351,8 +351,9 @@ describe('draft COP table UI', () => {
 
   it('sends the declared doublet source type with the 1.04 groundwater factor', async () => {
     const onSave = vi.fn();
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
-      status: 'input_valid', table: '9.27', correctedCop: 4.5, issues: [],
+    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 422, json: async () => ({
+      status: 'invalid', table: '9.27', correctedCop: null,
+      issues: [{ code: 'collective_groundwater_source_type_required', path: 'collectiveGroundwaterSourceType' }],
     }) });
     vi.stubGlobal('fetch', fetchMock);
     const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
@@ -365,13 +366,22 @@ describe('draft COP table UI', () => {
     };
     renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'groundwater', forfaitHeatPumpDraft: saved }}
       buildingFunction="residential" onSave={onSave} />);
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input.collectiveGroundwaterSourceType)
+      .toBeNull();
+    expect(await screen.findByRole('alert')).toHaveTextContent('collectiveGroundwaterSourceType');
+    expect(onSave).not.toHaveBeenCalled();
+    fetchMock.mockResolvedValue({ ok: true, json: async () => ({
+      status: 'input_valid', table: '9.27', correctedCop: 4.5, issues: [],
+    }) });
     await userEvent.setup().selectOptions(
       screen.getByLabelText('Collective groundwater source system (table V.3)'), 'doublet');
     await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
       sourceCorrectionFactor: 1.04, collectiveGroundwaterSourceType: 'doublet',
     })));
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input.collectiveGroundwaterSourceType)
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).input.collectiveGroundwaterSourceType)
       .toBe('doublet');
   });
 
