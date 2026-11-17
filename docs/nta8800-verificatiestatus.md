@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 17 november 2026
 
+De [CI op `e3d638af`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44038550130) heeft de volledige NTA-gate met MCP-stdio-regressie en desktopbuilds voor Linux, Windows en macOS afgerond. Dit bevestigt de adapteroverdracht van de bronfactorfout en de drie builds; het levert geen onafhankelijke bronclassificatie of jaarprestatie.
+
 Het invoerformulier toont nu bij de forfaitaire broncorrectie de in de Rust-diagnose toegestane waarden voor bodem of grondwater en vraagt om onderbouwing van regeneratiegraad respectievelijk brontype. Dit maakt de bijlage-V-grens uit de Rust-diagnose begrijpelijker vóór opslag. `git diff --check` slaagt; lokale UI-tests zijn niet uitgevoerd omdat Node op deze host ontbreekt. De getoonde onderbouwing wordt nog niet onafhankelijk gecontroleerd.
 
 De MCP-stdio-route bewaakt nu ook dat grondwater met `csource=1,02` als toolfout en `invalid` terugkomt, met `source_correction_invalid` op `sourceCorrectionFactor`, lege `correctedCop` en gelijke JSON in tekst en `structuredContent`. Alle 22 MCP-stdio-proeven, Clippy voor dit target en rustfmt slagen lokaal. Dit is adapterverificatie van de bestaande normtabelgrens; bronsysteem, jaarprestatie en attest blijven ongeverifieerd.
