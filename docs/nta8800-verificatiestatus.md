@@ -1,5 +1,9 @@
 # NTA 8800 verificatiestatus — 17 november 2026
 
+De [CI op `c096961e`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44020341063) heeft de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS afgerond. Dit bevestigt de bronfactorcorrectie als software- en bouwresultaat; het verifieert de werkelijke bronclassificatie en jaarprestatie niet onafhankelijk.
+
+Een aanvullende HTTP-regressie bewaakt dat de diagnose bij grondwater met `csource=1,02` status 422, `source_correction_invalid` op `sourceCorrectionFactor` en geen gecorrigeerde COP geeft. Alle 95 service-unittests slagen lokaal op Rust 1.99.0; service-Clippy en rustfmt slagen ook. Dit toetst de adaptergrens van de bestaande Rust-correctie, niet de feitelijke broninstallatie.
+
 De begrensde forfaitaire warmtepompdiagnose accepteerde `csource=1,02` voor grondwater, hoewel bijlage V, tabel V.3 (NTA 8800:2025+C1:2026, p. 1117) daar alleen 1,00 voor recirculatie en 1,04 voor een doublet noemt. De Rust-validatie weigert 1,02 nu voor grondwater; de gerichte regressie en alle 1044 kernunittests slagen op Rust 1.77.2. Rustfmt, kern-Clippy en `git diff --check` slagen eveneens. De diagnose stelt het werkelijke bronsysteem en daarmee de toepasselijkheid van 1,04 nog niet onafhankelijk vast. Dit is een correctie van een begrensde tabeldiagnose, geen geverifieerde jaarprestatie, BENG-uitkomst of attest.
 
 De [CI op `3c7c04f5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43633029214) heeft de volledige NTA-gate, inclusief de uitgebreide MCP-stdio-proef, en desktopbuilds voor Linux, Windows en macOS afgerond. Dit bevestigt de softwareoverdracht van de registerwaarschuwing; geen normatieve referentie of attest.

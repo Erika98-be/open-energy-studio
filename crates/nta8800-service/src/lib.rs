@@ -1714,6 +1714,41 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn forfait_groundwater_rejects_source_factor_without_table_v3_basis() {
+        let input = json!({
+            "generatorId":"hp-groundwater",
+            "classificationSourceReference":"source design",
+            "scope":"residential_at_most25_kw",
+            "source":"groundwater_below15_c", "sink":"hydronic",
+            "designSupplyTemperatureC":35.0,
+            "sourceTemperatureC":10.0,
+            "sourceTemperatureEvidenceReference":"source design",
+            "sourceCorrectionFactor":1.02,
+            "sourceCorrectionReference":"source design",
+            "thermalCapacityKw":10.0,
+            "capacitySourceReference":"device plate",
+            "collectiveBuildingInstallation":false
+        });
+        let response = app()
+            .oneshot(
+                Request::post("/v1/nta8800/heat-pumps/forfait-cop-draft/diagnose")
+                    .header("content-type", "application/json")
+                    .body(Body::from(json!({"input":input}).to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(result["correctedCop"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "source_correction_invalid" && item["path"] == "sourceCorrectionFactor"
+        }));
+    }
+
+    #[tokio::test]
     async fn forfait_cop_draft_uses_explicit_table_scope_without_annual_result() {
         let mut input = json!({
             "generatorId":"hp-air", "classificationSourceReference":"design sheet",
