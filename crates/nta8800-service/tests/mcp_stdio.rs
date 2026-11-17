@@ -158,8 +158,8 @@ fn gas_pump_mcp_preserves_non_applicable_source_reference_path() {
 }
 
 #[test]
-fn electric_pump_mcp_rejects_groundwater_source_factor_102() {
-    let input = json!({
+fn electric_pump_mcp_checks_groundwater_source_factor_and_type() {
+    let mut input = json!({
         "generatorId":"hp-groundwater", "classificationSourceReference":"source design",
         "scope":"residential_at_most25_kw", "source":"groundwater_below15_c",
         "sink":"hydronic", "designSupplyTemperatureC":35.0,
@@ -200,6 +200,62 @@ fn electric_pump_mcp_rejects_groundwater_source_factor_102() {
             issue["code"] == "source_correction_invalid"
                 && issue["path"] == "sourceCorrectionFactor"
         }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+
+    input["sourceCorrectionFactor"] = json!(1.04);
+    let response = server.request(
+        3,
+        "tools/call",
+        json!({"name":"diagnose_forfait_heat_pump_draft", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["correctedCop"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "collective_groundwater_source_type_required"
+                && issue["path"] == "collectiveGroundwaterSourceType"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+
+    input["collectiveGroundwaterSourceType"] = json!("recirculation");
+    let response = server.request(
+        4,
+        "tools/call",
+        json!({"name":"diagnose_forfait_heat_pump_draft", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert!(assessment["correctedCop"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "collective_groundwater_source_factor_mismatch"
+                && issue["path"] == "collectiveGroundwaterSourceType"
+        }));
+
+    input["collectiveGroundwaterSourceType"] = json!("doublet");
+    let response = server.request(
+        5,
+        "tools/call",
+        json!({"name":"diagnose_forfait_heat_pump_draft", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], false, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "input_valid");
+    assert!(assessment["correctedCop"].as_f64().is_some());
     assert_eq!(
         serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
         *assessment

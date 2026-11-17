@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De MCP-stdio-regressie controleert voor grondwaterfactor 1,04 een ontbrekend brontype, een tegenstrijdig recirculatietype en een geldig doublet, inclusief toolfout, veldpad, lege COP en tekst/`structuredContent`-gelijkheid voor de fout. Alle 22 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. Dit versterkt *MCP* en *Test* van de bestaande bijlage-V-invoergrens; de werkelijke installatie, onafhankelijke *Referentie* en *Attest* blijven open.
+
 De nieuwe invoeroptie `collectiveGroundwaterSourceType` is opgenomen in de uit Rust gegenereerde catalogus. De eerste CI op `e0a70c3e` faalde op de ontbrekende catalogusregel; beide `option_coverage`-proeven slagen na herstel lokaal op Rust 1.77.2. De bestaande formulierbouwer dekt het veld. De CI op `2edf1cfe` werd na een documentatiepush geannuleerd; de [CI op `df936db5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44142316283) heeft de NTA-gate en desktopbuilds voor Linux, Windows en macOS afgerond. Dit herstelt *Test*-, formulierdekkings- en *Bouwbewijs*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De [CI op `439faf36`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44094624269) bevestigt de technische gate en drie desktopbuilds na vastlegging van het verificatiebewijs. *Referentie* en *Attest* blijven open.
