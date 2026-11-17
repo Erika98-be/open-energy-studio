@@ -944,6 +944,8 @@ export const nl: Record<string, string> = {
   'kernel.forfait.individual': 'Individuele installatie',
   'kernel.forfait.collectiveYes': 'Collectieve gebouwinstallatie',
   'kernel.forfait.factor': 'Opgegeven broncorrectie csource',
+  'kernel.forfait.groundFactorValues': 'Bodem: 1,00, 1,02 of 1,04 volgens bijlage V. De regeneratiegraad moet de gekozen waarde onderbouwen.',
+  'kernel.forfait.groundwaterFactorValues': 'Tabel V.3 voor collectief grondwater: 1,00 (recirculatie) of 1,04 (doublet). Onderbouw het werkelijke brontype.',
   'kernel.forfait.factorReference': 'Bron voor broncorrectie',
   'kernel.forfait.calculate': 'Tabel-COP opzoeken',
   'kernel.forfait.save': 'Tabelinvoer opslaan',

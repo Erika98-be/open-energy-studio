@@ -300,6 +300,8 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       {correctionRequired && <>
         <label><span>{t('kernel.forfait.factor')}</span><DecimalInput min="0" step="any" value={factor}
           onChange={(event) => { invalidate(); setFactor(event.target.value); }} /></label>
+        <p className="heat-pump-forfait-draft-note">{t(source === 'groundwater_below15_c' || fallbackToGroundwater
+          ? 'kernel.forfait.groundwaterFactorValues' : 'kernel.forfait.groundFactorValues')}</p>
         <label><span>{t('kernel.forfait.factorReference')}</span><input type="text" value={factorReference}
           onChange={(event) => { invalidate(); setFactorReference(event.target.value); }} /></label>
       </>}

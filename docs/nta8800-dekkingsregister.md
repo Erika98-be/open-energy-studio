@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Het forfaitaire warmtepompformulier toont nu de toegestane bijlage-V-factorwaarden en het vereiste type onderbouwing voor bodem en grondwater. Dit versterkt *Weergave* van de bestaande *Invoer*-grens; onafhankelijke brontoets en normatieve jaar-*Rekenroute* blijven open. De UI-proef kan op deze host zonder Node niet lokaal worden uitgevoerd.
+
 Een MCP-stdio-regressie bewaakt de ongeldige grondwaterfactor 1,02 inclusief toolfout, auditpad, lege COP en gelijkheid tussen tekst en `structuredContent`. Alle 22 MCP-stdio-proeven en Clippy voor dit target slagen lokaal. Dit versterkt *MCP* en *Test* van de tabelgrens; bronclassificatie, normatieve jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De [CI op `c096961e`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44020341063) heeft de NTA-gate en desktopbuilds voor drie platforms afgerond. Dit versterkt *Test* en *Bouwbewijs* voor de bronfactorcorrectie; normatieve jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.

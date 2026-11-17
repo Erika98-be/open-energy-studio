@@ -944,6 +944,8 @@ export const en: Record<string, string> = {
   'kernel.forfait.individual': 'Individual installation',
   'kernel.forfait.collectiveYes': 'Collective building installation',
   'kernel.forfait.factor': 'Supplied source correction csource',
+  'kernel.forfait.groundFactorValues': 'Ground loop: 1.00, 1.02 or 1.04 under Annex V. Support the selected value with the degree of regeneration.',
+  'kernel.forfait.groundwaterFactorValues': 'Table V.3 for collective groundwater: 1.00 (recirculation) or 1.04 (doublet). Provide evidence for the actual source type.',
   'kernel.forfait.factorReference': 'Source correction evidence',
   'kernel.forfait.calculate': 'Look up table COP',
   'kernel.forfait.save': 'Save table input',
