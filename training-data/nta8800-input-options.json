@@ -1992,6 +1992,7 @@
       "designSupplyTemperatureC",
       "sourceCorrectionFactor",
       "sourceCorrectionReference",
+      "collectiveGroundwaterSourceType",
       "thermalCapacityKw",
       "capacitySourceReference",
       "collectiveBuildingInstallation",
