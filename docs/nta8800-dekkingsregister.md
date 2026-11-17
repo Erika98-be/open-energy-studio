@@ -2,7 +2,7 @@
 
 De [CI op `439faf36`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44094624269) bevestigt de technische gate en drie desktopbuilds na vastlegging van het verificatiebewijs. *Referentie* en *Attest* blijven open.
 
-Open invoerauditpunt: tabel V.3 (p. 1117) onderscheidt recirculatie (1,00) en doublet (1,04), maar de elektrische COP-tabeldiagnose bewaart nog geen gestructureerd brontype. De vrije bronverwijzing is niet voldoende om de gekozen waarde automatisch aan dit type te toetsen. *Invoer*, *Audit* en onafhankelijke *Referentie* blijven hier onvolledig.
+Tabel V.3 (p. 1117) onderscheidt recirculatie (1,00) en doublet (1,04). De elektrische COP-tabeldiagnose bewaart nu optioneel het collectieve grondwaterbrontype, eist `doublet` bij 1,04 en weigert een factor die niet bij een opgegeven type past. De opnameadapter en het formulier geven het type door. Een bestaande conservatieve 1,00 zonder type blijft mogelijk; de werkelijke installatie en de bronverwijzing zijn niet onafhankelijk gecontroleerd. De 1045 kerntests en de gerichte HTTP-proef slagen lokaal; UI en volledige CI wachten nog. Dit versterkt *Invoer*, *Audit*, *HTTP* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De [CI op `d041f2de`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44074759753) bevestigt de gerichte grondwaterformulierproef in de volledige NTA-gate en desktopbuilds voor drie platforms. Dit versterkt *Weergave*, *Test* en *Bouwbewijs*; de werkelijke bronclassificatie, jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 

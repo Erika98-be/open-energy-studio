@@ -5548,6 +5548,7 @@ mod tests {
             design_supply_temperature_c: Some(35.0),
             source_correction_factor: None,
             source_correction_reference: None,
+            collective_groundwater_source_type: None,
             thermal_capacity_kw: Some(8.0),
             capacity_source_reference: Some("rated capacity".into()),
             collective_building_installation: Some(false),

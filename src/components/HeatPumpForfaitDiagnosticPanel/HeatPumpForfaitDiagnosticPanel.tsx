@@ -63,6 +63,8 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   const [temperature, setTemperature] = useState(saved?.designSupplyTemperatureC == null ? '' : String(saved.designSupplyTemperatureC));
   const [factor, setFactor] = useState(saved?.sourceCorrectionFactor == null ? '' : String(saved.sourceCorrectionFactor));
   const [factorReference, setFactorReference] = useState(saved?.sourceCorrectionReference ?? '');
+  const [collectiveGroundwaterSourceType, setCollectiveGroundwaterSourceType] = useState(
+    saved?.collectiveGroundwaterSourceType ?? '');
   const [classificationReference, setClassificationReference] = useState(saved?.classificationSourceReference ?? pump.performanceEvidence.reference ?? '');
   const [capacity, setCapacity] = useState(saved?.thermalCapacityKw == null ? '' : String(saved.thermalCapacityKw));
   const [capacityReference, setCapacityReference] = useState(saved?.capacitySourceReference ?? '');
@@ -103,6 +105,7 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
   const fallbackToGround = source === 'ground_or_groundwater_unknown';
   const correctionRequired = scope === 'residential_at_most25_kw'
     && (source === 'ground' || source === 'groundwater_below15_c' || fallbackToGroundwater || fallbackToGround);
+  const groundwaterCorrection = correctionRequired && (source === 'groundwater_below15_c' || fallbackToGroundwater);
   const conditions = highConditions(source);
   const highRow = rowVariant === 'table_9_28_high_efficiency';
   const highRowAvailable = scope === 'residential_at_most25_kw' && pump.sink === 'hydronic' && conditions.length > 0;
@@ -177,6 +180,8 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
       designSupplyTemperatureC: supply,
       sourceCorrectionFactor: correction,
       sourceCorrectionReference: correctionRequired ? factorReference.trim() : null,
+      collectiveGroundwaterSourceType: groundwaterCorrection && collectiveGroundwaterSourceType
+        ? collectiveGroundwaterSourceType as 'recirculation' | 'doublet' : null,
       thermalCapacityKw: thermalCapacity,
       capacitySourceReference: capacityReference.trim(),
       collectiveBuildingInstallation: collective === 'true',
@@ -302,6 +307,13 @@ export function HeatPumpForfaitDiagnosticPanel({ pump, buildingFunction, onSave 
           onChange={(event) => { invalidate(); setFactor(event.target.value); }} /></label>
         <p className="heat-pump-forfait-draft-note">{t(source === 'groundwater_below15_c' || fallbackToGroundwater
           ? 'kernel.forfait.groundwaterFactorValues' : 'kernel.forfait.groundFactorValues')}</p>
+        {groundwaterCorrection && <label><span>{t('kernel.forfait.collectiveGroundwaterSourceType')}</span>
+          <select value={collectiveGroundwaterSourceType} onChange={(event) => {
+            invalidate(); setCollectiveGroundwaterSourceType(event.target.value);
+          }}><option value="">{t('kernel.forfait.choose')}</option>
+            <option value="recirculation">{t('kernel.forfait.sourceType.recirculation')}</option>
+            <option value="doublet">{t('kernel.forfait.sourceType.doublet')}</option>
+          </select></label>}
         <label><span>{t('kernel.forfait.factorReference')}</span><input type="text" value={factorReference}
           onChange={(event) => { invalidate(); setFactorReference(event.target.value); }} /></label>
       </>}

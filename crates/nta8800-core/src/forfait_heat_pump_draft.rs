@@ -104,6 +104,10 @@ pub struct ForfaitHeatPumpDraftInput {
     /// has no 1.02 class in table V.3.
     pub source_correction_factor: Option<f64>,
     pub source_correction_reference: Option<String>,
+    /// Declared Annex-V table V.3 source system. A 1.04 groundwater factor
+    /// requires a doublet; this declaration does not verify the installation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub collective_groundwater_source_type: Option<crate::annex_v::CollectiveSourceType>,
     /// Declared thermal generator capacity for choosing the 25 kW table boundary.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub thermal_capacity_kw: Option<f64>,
@@ -632,6 +636,12 @@ pub fn assess_forfait_heat_pump_draft(
                 "sourceCorrectionReference",
             ));
         }
+        if input.collective_groundwater_source_type.is_some() {
+            issues.push(issue(
+                "collective_groundwater_source_type_not_applicable",
+                "collectiveGroundwaterSourceType",
+            ));
+        }
         if issues.is_empty() {
             // A valid declaration replaces the forfait 2,8, rounded down to a
             // multiple of 0,05 (§9.1, p. 285); an invalid one is an issue
@@ -693,6 +703,36 @@ pub fn assess_forfait_heat_pump_draft(
             {
                 issues.push(issue("source_required", "sourceCorrectionReference"));
             }
+            if selected_source == TableSource::GroundwaterBelow15C {
+                match input.collective_groundwater_source_type {
+                    Some(kind)
+                        if input.source_correction_factor.is_some_and(|value| {
+                            (value - crate::annex_v::collective_source_correction(kind)).abs()
+                                > 1e-9
+                        }) =>
+                    {
+                        issues.push(issue(
+                            "collective_groundwater_source_factor_mismatch",
+                            "collectiveGroundwaterSourceType",
+                        ));
+                    }
+                    None if input
+                        .source_correction_factor
+                        .is_some_and(|value| (value - 1.04).abs() < 1e-9) =>
+                    {
+                        issues.push(issue(
+                            "collective_groundwater_source_type_required",
+                            "collectiveGroundwaterSourceType",
+                        ));
+                    }
+                    _ => {}
+                }
+            } else if input.collective_groundwater_source_type.is_some() {
+                issues.push(issue(
+                    "collective_groundwater_source_type_not_applicable",
+                    "collectiveGroundwaterSourceType",
+                ));
+            }
         } else {
             if input.source_correction_factor.is_some() {
                 issues.push(issue(
@@ -704,6 +744,12 @@ pub fn assess_forfait_heat_pump_draft(
                 issues.push(issue(
                     "source_correction_not_applicable",
                     "sourceCorrectionReference",
+                ));
+            }
+            if input.collective_groundwater_source_type.is_some() {
+                issues.push(issue(
+                    "collective_groundwater_source_type_not_applicable",
+                    "collectiveGroundwaterSourceType",
                 ));
             }
         }
@@ -783,6 +829,7 @@ mod tests {
             design_supply_temperature_c: Some(temp),
             source_correction_factor: None,
             source_correction_reference: None,
+            collective_groundwater_source_type: None,
             thermal_capacity_kw: None,
             capacity_source_reference: None,
             collective_building_installation: None,
@@ -1317,6 +1364,43 @@ mod tests {
         assert!(assess_forfait_heat_pump_draft(&input)
             .corrected_cop
             .is_some());
+    }
+
+    #[test]
+    fn groundwater_doublet_factor_requires_matching_declared_source_type() {
+        use crate::annex_v::CollectiveSourceType;
+        let mut input = example(
+            TableScope::ResidentialAtMost25Kw,
+            TableSource::GroundwaterBelow15C,
+            35.0,
+        );
+        input.source_temperature_c = Some(10.0);
+        input.source_temperature_evidence_reference = Some("source design".into());
+        input.source_correction_reference = Some("doublet design".into());
+        input.source_correction_factor = Some(1.04);
+
+        let missing = assess_forfait_heat_pump_draft(&input);
+        assert!(missing.corrected_cop.is_none());
+        assert!(missing.issues.iter().any(|item| item.code
+            == "collective_groundwater_source_type_required"
+            && item.path == "collectiveGroundwaterSourceType"));
+
+        input.collective_groundwater_source_type = Some(CollectiveSourceType::Recirculation);
+        let mismatch = assess_forfait_heat_pump_draft(&input);
+        assert!(mismatch.corrected_cop.is_none());
+        assert!(mismatch.issues.iter().any(|item| item.code
+            == "collective_groundwater_source_factor_mismatch"
+            && item.path == "collectiveGroundwaterSourceType"));
+
+        input.collective_groundwater_source_type = Some(CollectiveSourceType::Doublet);
+        assert!(assess_forfait_heat_pump_draft(&input)
+            .corrected_cop
+            .is_some());
+        input.source_correction_factor = Some(1.0);
+        assert!(assess_forfait_heat_pump_draft(&input)
+            .issues
+            .iter()
+            .any(|item| item.code == "collective_groundwater_source_factor_mismatch"));
     }
 
     /// §9.1 (p. 285) rounds a declared value down to 0,05: a value under one

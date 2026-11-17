@@ -349,6 +349,32 @@ describe('draft COP table UI', () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
+  it('sends the declared doublet source type with the 1.04 groundwater factor', async () => {
+    const onSave = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+      status: 'input_valid', table: '9.27', correctedCop: 4.5, issues: [],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'source design',
+      scope: 'residential_at_most25_kw', source: 'groundwater_below15_c', sink: 'hydronic',
+      designSupplyTemperatureC: 35, thermalCapacityKw: 10,
+      capacitySourceReference: 'plate', collectiveBuildingInstallation: false,
+      sourceCorrectionFactor: 1.04, sourceCorrectionReference: 'doublet design',
+      sourceTemperatureC: 10, sourceTemperatureEvidenceReference: 'meter record',
+    };
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'groundwater', forfaitHeatPumpDraft: saved }}
+      buildingFunction="residential" onSave={onSave} />);
+    await userEvent.setup().selectOptions(
+      screen.getByLabelText('Collective groundwater source system (table V.3)'), 'doublet');
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      sourceCorrectionFactor: 1.04, collectiveGroundwaterSourceType: 'doublet',
+    })));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input.collectiveGroundwaterSourceType)
+      .toBe('doublet');
+  });
+
   it('requires all three strictly passing outdoor-air tests for the higher row', async () => {
     const user = userEvent.setup();
     const onSave = vi.fn();

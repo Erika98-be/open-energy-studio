@@ -1888,6 +1888,10 @@ mod tests {
         // Table V.3: doublet 1,04; 9.62 with f_cor.bron.col 0,022.
         assert_eq!(generator["forfait"]["sourceCorrectionFactor"], 1.04);
         assert_eq!(
+            generator["forfait"]["collectiveGroundwaterSourceType"],
+            "doublet"
+        );
+        assert_eq!(
             generator["sourceSystem"],
             "collective_groundwater_surface_or_at_least15_c"
         );

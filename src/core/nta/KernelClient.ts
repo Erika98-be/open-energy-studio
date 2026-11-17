@@ -967,6 +967,7 @@ export interface ForfaitHeatPumpDraftInput {
   designSupplyTemperatureC: number | null;
   sourceCorrectionFactor: number | null;
   sourceCorrectionReference: string | null;
+  collectiveGroundwaterSourceType?: 'recirculation' | 'doublet' | null;
   thermalCapacityKw?: number | null;
   capacitySourceReference?: string | null;
   collectiveBuildingInstallation?: boolean | null;

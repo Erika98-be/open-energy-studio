@@ -1715,7 +1715,7 @@ mod tests {
 
     #[tokio::test]
     async fn forfait_groundwater_rejects_source_factor_without_table_v3_basis() {
-        let input = json!({
+        let mut input = json!({
             "generatorId":"hp-groundwater",
             "classificationSourceReference":"source design",
             "scope":"residential_at_most25_kw",
@@ -1746,6 +1746,28 @@ mod tests {
         assert!(result["issues"].as_array().unwrap().iter().any(|item| {
             item["code"] == "source_correction_invalid" && item["path"] == "sourceCorrectionFactor"
         }));
+
+        input["sourceCorrectionFactor"] = json!(1.04);
+        let request = |input: &Value| {
+            Request::post("/v1/nta8800/heat-pumps/forfait-cop-draft/diagnose")
+                .header("content-type", "application/json")
+                .body(Body::from(json!({"input":input}).to_string()))
+                .unwrap()
+        };
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(result["correctedCop"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "collective_groundwater_source_type_required"
+                && item["path"] == "collectiveGroundwaterSourceType"
+        }));
+
+        input["collectiveGroundwaterSourceType"] = json!("doublet");
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
     }
 
     #[tokio::test]
