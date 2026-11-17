@@ -1,8 +1,10 @@
 # NTA 8800 dekkingsregister
 
+De [CI op `d041f2de`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44074759753) bevestigt de gerichte grondwaterformulierproef in de volledige NTA-gate en desktopbuilds voor drie platforms. Dit versterkt *Weergave*, *Test* en *Bouwbewijs*; de werkelijke bronclassificatie, jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
+
 De [CI op `a922dfa5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44056061117) bevestigt de NTA-gate en desktopbuilds voor drie platforms na de broncorrectieformulierhulp. Dit versterkt *Weergave*, *Test* en *Bouwbewijs*; normatieve jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 
-Een nieuwe formulierproef bewaakt de grondwaterwaarden 1,00 en 1,04 uit tabel V.3 en de blokkade van een door Rust geweigerde 1,02 bij opslaan. De proef wacht op CI omdat Node lokaal ontbreekt. Dit versterkt *Weergave* en *Test* van de bestaande *Invoer*-grens; bronclassificatie, jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
+Een formulierproef bewaakt de grondwaterwaarden 1,00 en 1,04 uit tabel V.3 en de blokkade van een door Rust geweigerde 1,02 bij opslaan. De proef slaagt in CI; Node ontbreekt lokaal. Dit versterkt *Weergave* en *Test* van de bestaande *Invoer*-grens; bronclassificatie, jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De [CI op `e3d638af`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44038550130) heeft de NTA-gate en drie desktopbuilds afgerond, inclusief de MCP-stdio-regressie voor de grondwaterfactor. Dit versterkt *MCP*, *Test* en *Bouwbewijs*; jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 

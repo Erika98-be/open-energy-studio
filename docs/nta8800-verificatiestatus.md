@@ -1,8 +1,10 @@
 # NTA 8800 verificatiestatus — 17 november 2026
 
-De [CI op `a922dfa5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44056061117) heeft de NTA-gate en desktopbuilds voor Linux, Windows en macOS afgerond, inclusief de formulierhulp voor broncorrectie. Dit is software- en bouwverificatie; de daaropvolgende gerichte UI-regressie wacht nog op CI.
+De [CI op `d041f2de`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44074759753) heeft de volledige NTA-gate, inclusief de gerichte grondwaterformulierproef, en desktopbuilds voor Linux, Windows en macOS afgerond. Dit verifieert de getoonde factorgrens en de blokkade bij een Rust-fout in de software; het werkelijke brontype en de jaarprestatie zijn niet onafhankelijk getoetst.
 
-Een gerichte UI-regressie controleert nu dat het grondwaterformulier de klassen 1,00 en 1,04 uit tabel V.3 toont, de bodemtekst niet toont en een door Rust afgewezen factor 1,02 met veldpad `sourceCorrectionFactor` niet opslaat. `git diff --check` slaagt; de UI-proef moet nog in CI draaien omdat Node lokaal ontbreekt. Dit verifieert de weergave en adaptergrens, niet het werkelijke brontype.
+De gerichte UI-regressie controleert dat het grondwaterformulier de klassen 1,00 en 1,04 uit tabel V.3 toont, de bodemtekst niet toont en een door Rust afgewezen factor 1,02 met veldpad `sourceCorrectionFactor` niet opslaat. De proef slaagt in CI; Node ontbreekt lokaal. Dit verifieert de weergave en adaptergrens, niet het werkelijke brontype.
+
+De [CI op `a922dfa5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44056061117) heeft de NTA-gate en desktopbuilds voor Linux, Windows en macOS afgerond, inclusief de formulierhulp voor broncorrectie. Dit is software- en bouwverificatie.
 
 De [CI op `e3d638af`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44038550130) heeft de volledige NTA-gate met MCP-stdio-regressie en desktopbuilds voor Linux, Windows en macOS afgerond. Dit bevestigt de adapteroverdracht van de bronfactorfout en de drie builds; het levert geen onafhankelijke bronclassificatie of jaarprestatie.
 
