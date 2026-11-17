@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 17 november 2026
 
+De MCP-stdio-route bewaakt nu ook dat grondwater met `csource=1,02` als toolfout en `invalid` terugkomt, met `source_correction_invalid` op `sourceCorrectionFactor`, lege `correctedCop` en gelijke JSON in tekst en `structuredContent`. Alle 22 MCP-stdio-proeven, Clippy voor dit target en rustfmt slagen lokaal. Dit is adapterverificatie van de bestaande normtabelgrens; bronsysteem, jaarprestatie en attest blijven ongeverifieerd.
+
 De [CI op `c096961e`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44020341063) heeft de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS afgerond. Dit bevestigt de bronfactorcorrectie als software- en bouwresultaat; het verifieert de werkelijke bronclassificatie en jaarprestatie niet onafhankelijk.
 
 Een aanvullende HTTP-regressie bewaakt dat de diagnose bij grondwater met `csource=1,02` status 422, `source_correction_invalid` op `sourceCorrectionFactor` en geen gecorrigeerde COP geeft. Alle 95 service-unittests slagen lokaal op Rust 1.99.0; service-Clippy en rustfmt slagen ook. Dit toetst de adaptergrens van de bestaande Rust-correctie, niet de feitelijke broninstallatie.

@@ -158,6 +158,55 @@ fn gas_pump_mcp_preserves_non_applicable_source_reference_path() {
 }
 
 #[test]
+fn electric_pump_mcp_rejects_groundwater_source_factor_102() {
+    let input = json!({
+        "generatorId":"hp-groundwater", "classificationSourceReference":"source design",
+        "scope":"residential_at_most25_kw", "source":"groundwater_below15_c",
+        "sink":"hydronic", "designSupplyTemperatureC":35.0,
+        "sourceTemperatureC":10.0,
+        "sourceTemperatureEvidenceReference":"source design",
+        "sourceCorrectionFactor":1.02,
+        "sourceCorrectionReference":"source design",
+        "thermalCapacityKw":10.0,
+        "capacitySourceReference":"device plate",
+        "collectiveBuildingInstallation":false
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"groundwater-factor-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({
+            "name":"diagnose_forfait_heat_pump_draft", "arguments":{"input":input}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["correctedCop"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "source_correction_invalid"
+                && issue["path"] == "sourceCorrectionFactor"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn electric_pump_mcp_preserves_non_applicable_source_reference_paths() {
     let input = json!({
         "generatorId":"hp-1", "classificationSourceReference":"system design",
