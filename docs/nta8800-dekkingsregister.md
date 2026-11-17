@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De Rust-diagnose voor forfaitaire warmtepomp-COP weigert nu `csource=1,02` bij grondwater: bijlage V, tabel V.3 (NTA 8800:2025+C1:2026, p. 1117), kent daar 1,00 voor recirculatie en 1,04 voor een doublet. Een gerichte regressie dekt deze invoergrens. Dit versterkt *Invoer*, *Audit* en *Test* van de begrensde tabeldiagnose; de feitelijke doubletclassificatie, normatieve jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
+
 De [CI op `3c7c04f5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/43633029214) heeft de volledige NTA-gate, inclusief de uitgebreide MCP-stdio-proef, en desktopbuilds voor Linux, Windows en macOS doorlopen. Dit versterkt *MCP*, *Test* en *Bouwbewijs*; normatieve *Referentie* en *Attest* blijven open.
 
 De MCP-stdio-integratieproef bewaakt nu ook `quality_declaration_registry_record_missing` met het exacte pad van gekoppelde warmtepompmetadata en inhoudelijke gelijkheid tussen tekst en `structuredContent`. Alle 21 MCP-stdio-proeven en service-Clippy slagen lokaal en in CI. Dit versterkt *MCP*, *Audit* en *Test* van de resultaatprovenance, zonder normatieve *Rekenroute*, onafhankelijke *Referentie* of *Attest*.

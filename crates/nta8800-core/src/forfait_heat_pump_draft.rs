@@ -100,7 +100,8 @@ pub struct ForfaitHeatPumpDraftInput {
     /// Required for hydronic delivery; table classes end at 70 °C.
     pub design_supply_temperature_c: Option<f64>,
     /// Supplied Annex-V correction for residential ground/groundwater, including
-    /// an explicit 1.0 when source regeneration is inapplicable.
+    /// an explicit 1.0 when source regeneration is inapplicable. Groundwater
+    /// has no 1.02 class in table V.3.
     pub source_correction_factor: Option<f64>,
     pub source_correction_reference: Option<String>,
     /// Declared thermal generator capacity for choosing the 25 kW table boundary.
@@ -670,12 +671,18 @@ pub fn assess_forfait_heat_pump_draft(
                 TableSource::Ground | TableSource::GroundwaterBelow15C
             );
         if correction_required {
-            // Bijlage V (tables V.1/V.3, 2025+C1 p. 1114): c_source is 1,00,
-            // 1,02 or 1,04; any other value is no annex V outcome.
+            // Bijlage V (tables V.1/V.3, 2025+C1 pp. 1114–1117): 1,02 is
+            // only a ground heat-exchanger regeneration class (V.1). The
+            // collective groundwater classes (V.3) are 1,00 and 1,04.
+            let allowed: &[f64] = if selected_source == TableSource::Ground {
+                &[1.00, 1.02, 1.04]
+            } else {
+                &[1.00, 1.04]
+            };
             if input.source_correction_factor.map_or(true, |value| {
-                ![1.00, 1.02, 1.04]
+                !allowed
                     .iter()
-                    .any(|allowed| (value - allowed).abs() < 1e-9)
+                    .any(|candidate| (value - candidate).abs() < 1e-9)
             }) {
                 issues.push(issue("source_correction_invalid", "sourceCorrectionFactor"));
             }
@@ -1288,6 +1295,28 @@ mod tests {
                 .abs()
                 < 1e-9
         );
+    }
+
+    #[test]
+    fn groundwater_has_no_annex_v_source_correction_102() {
+        let mut input = example(
+            TableScope::ResidentialAtMost25Kw,
+            TableSource::GroundwaterBelow15C,
+            35.0,
+        );
+        input.source_temperature_c = Some(10.0);
+        input.source_temperature_evidence_reference = Some("source design".into());
+        input.source_correction_reference = Some("collector design".into());
+        input.source_correction_factor = Some(1.02);
+        let invalid = assess_forfait_heat_pump_draft(&input);
+        assert!(invalid.corrected_cop.is_none());
+        assert!(invalid.issues.iter().any(|item| {
+            item.code == "source_correction_invalid" && item.path == "sourceCorrectionFactor"
+        }));
+        input.source_correction_factor = Some(1.0);
+        assert!(assess_forfait_heat_pump_draft(&input)
+            .corrected_cop
+            .is_some());
     }
 
     /// §9.1 (p. 285) rounds a declared value down to 0,05: a value under one
