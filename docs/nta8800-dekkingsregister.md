@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De nieuwe invoeroptie `collectiveGroundwaterSourceType` is opgenomen in de uit Rust gegenereerde catalogus. De eerste CI op `e0a70c3e` faalde op de ontbrekende catalogusregel; beide `option_coverage`-proeven slagen na herstel lokaal op Rust 1.77.2. De bestaande formulierbouwer dekt het veld; [CI op `2edf1cfe`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44140233149) loopt nog. Dit herstelt *Test*- en formulierdekkingsbewijs; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De [CI op `439faf36`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44094624269) bevestigt de technische gate en drie desktopbuilds na vastlegging van het verificatiebewijs. *Referentie* en *Attest* blijven open.
 
 Tabel V.3 (p. 1117) onderscheidt recirculatie (1,00) en doublet (1,04). De elektrische COP-tabeldiagnose bewaart nu optioneel het collectieve grondwaterbrontype, eist `doublet` bij 1,04 en weigert een factor die niet bij een opgegeven type past. De opnameadapter en het formulier geven het type door. Een bestaande conservatieve 1,00 zonder type blijft mogelijk; de werkelijke installatie en de bronverwijzing zijn niet onafhankelijk gecontroleerd. De 1045 kerntests en de gerichte HTTP-proef slagen lokaal; UI en volledige CI wachten nog. Dit versterkt *Invoer*, *Audit*, *HTTP* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
