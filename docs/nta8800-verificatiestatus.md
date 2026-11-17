@@ -1,5 +1,9 @@
 # NTA 8800 verificatiestatus — 17 november 2026
 
+De [CI op `a922dfa5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44056061117) heeft de NTA-gate en desktopbuilds voor Linux, Windows en macOS afgerond, inclusief de formulierhulp voor broncorrectie. Dit is software- en bouwverificatie; de daaropvolgende gerichte UI-regressie wacht nog op CI.
+
+Een gerichte UI-regressie controleert nu dat het grondwaterformulier de klassen 1,00 en 1,04 uit tabel V.3 toont, de bodemtekst niet toont en een door Rust afgewezen factor 1,02 met veldpad `sourceCorrectionFactor` niet opslaat. `git diff --check` slaagt; de UI-proef moet nog in CI draaien omdat Node lokaal ontbreekt. Dit verifieert de weergave en adaptergrens, niet het werkelijke brontype.
+
 De [CI op `e3d638af`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44038550130) heeft de volledige NTA-gate met MCP-stdio-regressie en desktopbuilds voor Linux, Windows en macOS afgerond. Dit bevestigt de adapteroverdracht van de bronfactorfout en de drie builds; het levert geen onafhankelijke bronclassificatie of jaarprestatie.
 
 Het invoerformulier toont nu bij de forfaitaire broncorrectie de in de Rust-diagnose toegestane waarden voor bodem of grondwater en vraagt om onderbouwing van regeneratiegraad respectievelijk brontype. Dit maakt de bijlage-V-grens uit de Rust-diagnose begrijpelijker vóór opslag. `git diff --check` slaagt; lokale UI-tests zijn niet uitgevoerd omdat Node op deze host ontbreekt. De getoonde onderbouwing wordt nog niet onafhankelijk gecontroleerd.

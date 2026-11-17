@@ -320,6 +320,35 @@ describe('draft COP table UI', () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
+  it('shows the groundwater factor classes and preserves a Rust rejection of 1.02', async () => {
+    const onSave = vi.fn();
+    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 422, json: async () => ({
+      status: 'invalid', table: '9.27', correctedCop: null,
+      issues: [{ code: 'source_correction_invalid', path: 'sourceCorrectionFactor' }],
+    }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const saved: NonNullable<INtaHeatPumpInput['forfaitHeatPumpDraft']> = {
+      generatorId: 'hp-forfait', classificationSourceReference: 'source design',
+      scope: 'residential_at_most25_kw', source: 'groundwater_below15_c', sink: 'hydronic',
+      designSupplyTemperatureC: 35, thermalCapacityKw: 10,
+      capacitySourceReference: 'plate', collectiveBuildingInstallation: false,
+      sourceCorrectionFactor: 1.02, sourceCorrectionReference: 'collector design',
+      sourceTemperatureC: 10, sourceTemperatureEvidenceReference: 'meter record',
+    };
+    renderWithProviders(<HeatPumpForfaitDiagnosticPanel pump={{ ...pump, source: 'groundwater', forfaitHeatPumpDraft: saved }}
+      buildingFunction="residential" onSave={onSave} />);
+    expect(screen.getByText(/Table V\.3 for collective groundwater: 1\.00 \(recirculation\) or 1\.04 \(doublet\)/))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/Ground loop: 1\.00, 1\.02 or 1\.04/)).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Save table input' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).input).toMatchObject({
+      source: 'groundwater_below15_c', sourceCorrectionFactor: 1.02,
+    });
+    expect(screen.getByRole('alert')).toHaveTextContent('sourceCorrectionFactor');
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it('requires all three strictly passing outdoor-air tests for the higher row', async () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
