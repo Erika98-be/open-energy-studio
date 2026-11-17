@@ -1,5 +1,9 @@
 # NTA 8800 verificatiestatus — 17 november 2026
 
+De [CI op documentatiecommit `439faf36`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44094624269) heeft opnieuw de NTA-gate en de Linux-, Windows- en macOS-desktopbuild afgerond. Dit bevestigt de vastgelegde technische toestand; onafhankelijke normreferentie en attestering ontbreken nog.
+
+Bijlage V, tabel V.3 (p. 1117) koppelt 1,00 aan een collectief recirculatiebronsysteem en 1,04 aan een collectief doubletbronsysteem. De huidige COP-tabeldiagnose controleert de twee getallen maar bewaart het bronsysteem alleen als vrije bewijsverwijzing; zij kan 1,04 daarom nog niet aan een gestructureerd gekozen doublettype toetsen. Dit blijft een open invoerauditpunt vóór externe verificatie.
+
 De [CI op `d041f2de`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44074759753) heeft de volledige NTA-gate, inclusief de gerichte grondwaterformulierproef, en desktopbuilds voor Linux, Windows en macOS afgerond. Dit verifieert de getoonde factorgrens en de blokkade bij een Rust-fout in de software; het werkelijke brontype en de jaarprestatie zijn niet onafhankelijk getoetst.
 
 De gerichte UI-regressie controleert dat het grondwaterformulier de klassen 1,00 en 1,04 uit tabel V.3 toont, de bodemtekst niet toont en een door Rust afgewezen factor 1,02 met veldpad `sourceCorrectionFactor` niet opslaat. De proef slaagt in CI; Node ontbreekt lokaal. Dit verifieert de weergave en adaptergrens, niet het werkelijke brontype.

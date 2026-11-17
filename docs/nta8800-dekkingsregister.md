@@ -1,5 +1,9 @@
 # NTA 8800 dekkingsregister
 
+De [CI op `439faf36`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44094624269) bevestigt de technische gate en drie desktopbuilds na vastlegging van het verificatiebewijs. *Referentie* en *Attest* blijven open.
+
+Open invoerauditpunt: tabel V.3 (p. 1117) onderscheidt recirculatie (1,00) en doublet (1,04), maar de elektrische COP-tabeldiagnose bewaart nog geen gestructureerd brontype. De vrije bronverwijzing is niet voldoende om de gekozen waarde automatisch aan dit type te toetsen. *Invoer*, *Audit* en onafhankelijke *Referentie* blijven hier onvolledig.
+
 De [CI op `d041f2de`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44074759753) bevestigt de gerichte grondwaterformulierproef in de volledige NTA-gate en desktopbuilds voor drie platforms. Dit versterkt *Weergave*, *Test* en *Bouwbewijs*; de werkelijke bronclassificatie, jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De [CI op `a922dfa5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44056061117) bevestigt de NTA-gate en desktopbuilds voor drie platforms na de broncorrectieformulierhulp. Dit versterkt *Weergave*, *Test* en *Bouwbewijs*; normatieve jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
