@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Tabel V.1-regeneratie is in de forfaitaire warmtepompketen nu beperkt tot een expliciete individuele bodemwarmtewisselaar. Een grondwaterbron, onbekend bodem/grondwatertype of collectieve bodembron levert `regeneration_requires_ground_source` zonder deeluitkomsten; een gerichte Rust-regressie bewaakt alle drie. Alle 1048 kernunittests, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test* van de toepasselijkheidsgrens. Onafhankelijke *Referentie* en *Attest* blijven open.
+
 De forfaitaire grondwarmtepompketen berekent bij ongeldige bijlage-V-collectorinvoer geen regeneratie meer. Een lege belemmeringsfactorenlijst leidde eerder na de audit tot een paniek; de nieuwe regressie bewaakt `regeneration_obstruction_invalid` met volledig veldpad en zonder deeluitkomsten. Alle 1047 kernunittests en rustfmt slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Bijlage-V-validatie wijst een niet-eindige zonnecollectorazimuth nu aan met `azimuthDeg` en voorkomt de daaropvolgende misleidende tabel-V.2-oriëntatiemelding; een ongeldige hellingshoek blijft bij `tiltDeg`. De gerichte regressie en 1046 kernunittests slagen lokaal op Rust 1.77.2. Dit versterkt *Invoer*, *Audit* en *Test*. Onafhankelijke *Referentie* en *Attest* blijven open.

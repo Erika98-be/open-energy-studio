@@ -33,7 +33,7 @@ use crate::boiler_forfait_draft::{
 };
 use crate::climate::{MONTH_HOURS, OUTDOOR_TEMPERATURE_C};
 use crate::final_energy_draft::MonthlyEnergy;
-use crate::forfait_heat_pump_draft::ForfaitHeatPumpDraftInput;
+use crate::forfait_heat_pump_draft::{ForfaitHeatPumpDraftInput, TableSource};
 use crate::forfait_heat_pump_monthly_draft::{
     assess_forfait_heat_pump_monthly_draft, ForfaitHeatPumpMonthlyDraftInput, SourceSystem,
 };
@@ -1308,7 +1308,6 @@ pub fn system_heat_pump(
     generator: &Generator,
     assessment: &SpaceHeatingChainAssessment,
 ) -> Option<SystemHeatPump> {
-    use crate::forfait_heat_pump_draft::TableSource;
     let gas_ground = |gas: &GasHeatPumpGenerator| {
         matches!(
             gas.source,
@@ -4786,12 +4785,20 @@ fn generate(
             if let Some(regeneration) = &generator.regeneration {
                 let regeneration_issues =
                     validate_regeneration(regeneration, "generator.regeneration");
-                let regeneration_valid = regeneration_issues.is_empty();
+                let applicable = forfait.source == TableSource::Ground
+                    && generator.source_system == SourceSystem::Individual;
+                let regeneration_valid = regeneration_issues.is_empty() && applicable;
                 issues.extend(
                     regeneration_issues
                         .into_iter()
                         .map(|item| issue(item.code, item.path)),
                 );
+                if !applicable {
+                    issues.push(issue(
+                        "regeneration_requires_ground_source",
+                        "generator.regeneration",
+                    ));
+                }
                 if forfait.source_correction_factor.is_some() {
                     issues.push(issue(
                         "regeneration_and_declared_source_correction",
@@ -5703,6 +5710,42 @@ mod tests {
             item.code == "regeneration_obstruction_invalid"
                 && item.path == "generator.regeneration.solar[0].obstructionFactors"
         }));
+    }
+
+    #[test]
+    fn forfait_regeneration_requires_an_individual_ground_exchanger() {
+        for (source, system) in [
+            (TableSource::GroundwaterBelow15C, SourceSystem::Individual),
+            (
+                TableSource::GroundOrGroundwaterUnknown,
+                SourceSystem::Individual,
+            ),
+            (TableSource::Ground, SourceSystem::CollectiveGround),
+        ] {
+            let mut forfait = heat_pump();
+            forfait.source = source;
+            let mut input = boiler_chain();
+            input.generator = Generator::HeatPumpForfait(HeatPumpGenerator {
+                forfait,
+                source_system: system,
+                source_system_reference: "source survey".into(),
+                regeneration: Some(RegenerationInput {
+                    free_cooling_from_source: false,
+                    solar: Vec::new(),
+                    source_reference: "design".into(),
+                }),
+                auxiliary_measurements: None,
+                auxiliary: None,
+            });
+            let result = assess_space_heating_chain(&input);
+            assert_eq!(result.status, "invalid", "{source:?}, {system:?}");
+            assert!(result.monthly.is_empty());
+            assert!(result.generation_efficiency.is_none());
+            assert!(result.issues.iter().any(|item| {
+                item.code == "regeneration_requires_ground_source"
+                    && item.path == "generator.regeneration"
+            }));
+        }
     }
 
     #[test]
