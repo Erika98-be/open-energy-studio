@@ -1910,6 +1910,26 @@ mod tests {
             efficiency(&result)
         );
 
+        // The conservative 1,00 default is not evidence of an observed
+        // recirculation system: retain the unknown classification in the audit.
+        survey.heating.generator =
+            collective(heating::HeatPumpSource::Groundwater, Some(12.0), None);
+        let (result, input) = calculated(&survey);
+        let forfait = &input["spaceHeating"]["generator"]["forfait"];
+        assert_eq!(forfait["sourceCorrectionFactor"], 1.0);
+        assert!(forfait.get("collectiveGroundwaterSourceType").is_none());
+        assert!(rules(&result).contains(&"groundwater_system_unknown_recirculation"));
+
+        survey.heating.generator = collective(
+            heating::HeatPumpSource::Groundwater,
+            Some(12.0),
+            Some(heating::GroundwaterSystem::Recirculation),
+        );
+        let (_, input) = calculated(&survey);
+        let forfait = &input["spaceHeating"]["generator"]["forfait"];
+        assert_eq!(forfait["sourceCorrectionFactor"], 1.0);
+        assert_eq!(forfait["collectiveGroundwaterSourceType"], "recirculation");
+
         // A source of 25 °C with a quality declaration: the 20–40 °C row.
         survey.heating.generator =
             collective(heating::HeatPumpSource::HighTemperature, Some(25.0), None);

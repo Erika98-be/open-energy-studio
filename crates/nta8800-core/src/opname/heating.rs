@@ -1763,10 +1763,12 @@ fn convert_heat_pump(
         "sourceCorrectionReference": correction_reference,
     });
     if table_source == "groundwater_below15_c" && collective_source.is_some() && !utility_table {
-        forfait["collectiveGroundwaterSourceType"] = json!(match groundwater_system {
-            Some(GroundwaterSystem::Doublet) => "doublet",
-            _ => "recirculation",
-        });
+        if let Some(system) = groundwater_system {
+            forfait["collectiveGroundwaterSourceType"] = json!(match system {
+                GroundwaterSystem::Doublet => "doublet",
+                GroundwaterSystem::Recirculation => "recirculation",
+            });
+        }
     }
     // 9.85 of 2020+A1 (p. 334–336) takes A 13,0 kWh for a device from 2015;
     // the year follows the boiler rule (manufacture, installation,
