@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Een aanvullende formulierregressie bewaakt bij grondwaterfactor 1,04 de afgewezen opslag zonder brontype, het veldpad uit HTTP 422 en de doorgifte van een daarna gekozen `doublet`. De proef wacht op CI; Node ontbreekt lokaal. Dit versterkt *Weergave* en *Test* van de bestaande *Invoer*-grens. Werkelijke bronclassificatie, jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
+Een aanvullende formulierregressie bewaakt bij grondwaterfactor 1,04 de afgewezen opslag zonder brontype, het veldpad uit HTTP 422 en de doorgifte van een daarna gekozen `doublet`. De [CI op `1eab7bd5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44202032824) bevestigt de volledige NTA-gate en desktopbuilds voor Linux, Windows en macOS; Node ontbreekt lokaal. Dit versterkt *Weergave*, *Test* en *Bouwbewijs* van de bestaande *Invoer*-grens. Werkelijke bronclassificatie, jaar-*Rekenroute*, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De MCP-stdio-regressie controleert voor grondwaterfactor 1,04 een ontbrekend brontype, een tegenstrijdig recirculatietype en een geldig doublet, inclusief toolfout, veldpad, lege COP en tekst/`structuredContent`-gelijkheid voor de fout. Alle 22 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. Dit versterkt *MCP* en *Test* van de bestaande bijlage-V-invoergrens; de werkelijke installatie, onafhankelijke *Referentie* en *Attest* blijven open.
 

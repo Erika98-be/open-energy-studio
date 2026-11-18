@@ -1,6 +1,6 @@
-# NTA 8800 verificatiestatus — 17 november 2026
+# NTA 8800 verificatiestatus — 18 november 2026
 
-Een aanvullende formulierregressie controleert dat grondwaterfactor 1,04 zonder gekozen brontype via de Rust-diagnoseroute status 422 en het veldpad `collectiveGroundwaterSourceType` toont zonder de invoer op te slaan. Na keuze van `doublet` controleert dezelfde proef de doorgifte en opslag. De proef wacht op CI; Node ontbreekt lokaal. Dit bewaakt de softwaregrens, niet de feitelijke broninstallatie of normatieve jaarprestatie.
+Een aanvullende formulierregressie controleert dat grondwaterfactor 1,04 zonder gekozen brontype via de Rust-diagnoseroute status 422 en het veldpad `collectiveGroundwaterSourceType` toont zonder de invoer op te slaan. Na keuze van `doublet` controleert dezelfde proef de doorgifte en opslag. De [CI op `1eab7bd5`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44202032824) heeft de volledige NTA-gate, inclusief alle 16 proeven in dit formulierbestand, en desktopbuilds voor Linux, Windows en macOS afgerond. Node ontbreekt lokaal. Dit bewaakt de softwaregrens, niet de feitelijke broninstallatie of normatieve jaarprestatie.
 
 De echte MCP-stdio-proef voor de elektrische forfaitaire warmtepomp bewaakt nu ook grondwaterfactor 1,04 zonder brontype, met een tegenstrijdige recirculatiekeuze en met een passend doublet. De eerste twee geven een toolfout, een concreet veldpad en geen gecorrigeerde COP; de laatste geeft een geldige tabeldiagnose. De volledige MCP-stdio-suite (22 proeven), rustfmt en service-Clippy slagen lokaal. Dit verifieert de protocoloverdracht van de tabelgrens, niet het werkelijke bronsysteem of de jaarprestatie.
 
