@@ -891,6 +891,54 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn space_heating_chain_route_refuses_invalid_regeneration_without_panicking() {
+        let mut input: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-space-heating-chain-synthetic.json"
+        ))
+        .unwrap();
+        input["generator"] = json!({
+            "kind": "heat_pump_forfait",
+            "forfait": {
+                "generatorId": "hp",
+                "classificationSourceReference": "system design",
+                "scope": "residential_at_most25_kw",
+                "source": "ground",
+                "sink": "hydronic",
+                "designSupplyTemperatureC": 35.0,
+                "thermalCapacityKw": 8.0,
+                "capacitySourceReference": "rated capacity",
+                "collectiveBuildingInstallation": false
+            },
+            "sourceSystem": "individual",
+            "sourceSystemReference": "own borehole",
+            "regeneration": {
+                "freeCoolingFromSource": false,
+                "solar": [{
+                    "collectorAreaM2": 10.0,
+                    "azimuthDeg": 180.0,
+                    "tiltDeg": 45.0,
+                    "obstructionFactors": [],
+                    "sourceReference": "datasheet"
+                }],
+                "sourceReference": "design"
+            }
+        });
+        let (status, result) = post_json(
+            "/v1/nta8800/heating/space-heating-chain/calculate",
+            json!({ "input": input }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["monthly"].as_array().is_some_and(Vec::is_empty));
+        assert!(result["generationEfficiency"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "regeneration_obstruction_invalid"
+                && issue["path"] == "generator.regeneration.solar[0].obstructionFactors"
+        }));
+    }
+
+    #[tokio::test]
     async fn project_performance_route_reports_gaps_or_results() {
         let project: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-project-performance-synthetic.json"
