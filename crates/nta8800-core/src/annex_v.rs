@@ -139,15 +139,23 @@ pub fn validate_regeneration(input: &RegenerationInput, path: &str) -> Vec<Regen
                 format!("{base}.collectorAreaM2"),
             );
         }
-        if !(0.0..=90.0).contains(&solar.tilt_deg) || !solar.azimuth_deg.is_finite() {
+        if !(0.0..=90.0).contains(&solar.tilt_deg) {
             push(
                 "regeneration_collector_orientation_invalid",
                 format!("{base}.tiltDeg"),
             );
         }
+        if !solar.azimuth_deg.is_finite() {
+            push(
+                "regeneration_collector_orientation_invalid",
+                format!("{base}.azimuthDeg"),
+            );
+        }
         // Table V.2 note a: south-east to south-west.
-        let azimuth = solar.azimuth_deg.rem_euclid(360.0);
-        if !(135.0..=225.0).contains(&azimuth) && solar.declared_efficiency.is_none() {
+        if solar.azimuth_deg.is_finite()
+            && !(135.0..=225.0).contains(&solar.azimuth_deg.rem_euclid(360.0))
+            && solar.declared_efficiency.is_none()
+        {
             push(
                 "regeneration_collector_outside_table_v2",
                 format!("{base}.azimuthDeg"),
@@ -329,5 +337,31 @@ mod tests {
         assert!((result.solar_kwh - efficiency * received).abs() < 1e-9);
         assert_eq!(interpolate(&SOLAR_REGENERATION, 0.7), 0.495);
         assert_eq!(interpolate(&SOLAR_REGENERATION, 9.0), 0.35);
+    }
+
+    #[test]
+    fn invalid_solar_orientation_reports_the_actual_field() {
+        let mut input = RegenerationInput {
+            free_cooling_from_source: false,
+            solar: vec![SolarRegeneration {
+                collector_area_m2: 10.0,
+                azimuth_deg: f64::INFINITY,
+                tilt_deg: 45.0,
+                obstruction_factors: vec![1.0],
+                declared_efficiency: None,
+                source_reference: "datasheet".into(),
+            }],
+            source_reference: "design".into(),
+        };
+        let issues = validate_regeneration(&input, "regeneration");
+        assert_eq!(issues.len(), 1);
+        assert_eq!(issues[0].code, "regeneration_collector_orientation_invalid");
+        assert_eq!(issues[0].path, "regeneration.solar[0].azimuthDeg");
+
+        input.solar[0].azimuth_deg = 180.0;
+        input.solar[0].tilt_deg = f64::NAN;
+        let issues = validate_regeneration(&input, "regeneration");
+        assert_eq!(issues.len(), 1);
+        assert_eq!(issues[0].path, "regeneration.solar[0].tiltDeg");
     }
 }

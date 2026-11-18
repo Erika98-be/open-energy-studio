@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Bijlage-V-validatie wijst een niet-eindige zonnecollectorazimuth nu aan met `azimuthDeg` en voorkomt de daaropvolgende misleidende tabel-V.2-oriëntatiemelding; een ongeldige hellingshoek blijft bij `tiltDeg`. De gerichte regressie en 1046 kernunittests slagen lokaal op Rust 1.77.2. Dit versterkt *Invoer*, *Audit* en *Test*. Onafhankelijke *Referentie* en *Attest* blijven open.
+
 Twee [Linux-devbouwbewijsruns op `5354cb0`](nta8800-build-verificatie-2026-11-18-5354cb0.md) leverden bytegelijke manifesten en vier bytegelijke artefacten op; bronmetadata en bestanden zijn lokaal geverifieerd. De reguliere NTA-gate en Linux-, Windows- en macOS-desktopbuilds slaagden op dezelfde commit. Dit versterkt *Test* en *Bouwbewijs* binnen één GitHub-runnerklasse. Cross-host-bouwbewijs, onafhankelijke *Referentie*, volledige jaar-*Rekenroute* en *Attest* blijven open.
 
 Bij een onbekend collectief grondwatersysteem behoudt de opnameadapter nu het verschil tussen de conservatieve factor 1,00 en een werkelijk opgegeven recirculatiebrontype: het typeveld blijft afwezig en de bestaande auditregel benoemt de standaardaanname. De gerichte proef en alle 1045 kernunittests slagen lokaal; de [CI op `01823ac8`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44281900217) bevestigt de NTA-gate en desktopbuilds voor drie platforms. Dit versterkt *Invoer*, *Audit*, *Test* en *Bouwbewijs* zonder een nieuwe jaar-*Rekenroute*, onafhankelijke *Referentie* of *Attest*.
