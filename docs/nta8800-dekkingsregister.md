@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De forfaitaire grondwarmtepompketen berekent bij ongeldige bijlage-V-collectorinvoer geen regeneratie meer. Een lege belemmeringsfactorenlijst leidde eerder na de audit tot een paniek; de nieuwe regressie bewaakt `regeneration_obstruction_invalid` met volledig veldpad en zonder deeluitkomsten. Alle 1047 kernunittests en rustfmt slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
+
 Bijlage-V-validatie wijst een niet-eindige zonnecollectorazimuth nu aan met `azimuthDeg` en voorkomt de daaropvolgende misleidende tabel-V.2-oriëntatiemelding; een ongeldige hellingshoek blijft bij `tiltDeg`. De gerichte regressie en 1046 kernunittests slagen lokaal op Rust 1.77.2. Dit versterkt *Invoer*, *Audit* en *Test*. Onafhankelijke *Referentie* en *Attest* blijven open.
 
 Twee [Linux-devbouwbewijsruns op `5354cb0`](nta8800-build-verificatie-2026-11-18-5354cb0.md) leverden bytegelijke manifesten en vier bytegelijke artefacten op; bronmetadata en bestanden zijn lokaal geverifieerd. De reguliere NTA-gate en Linux-, Windows- en macOS-desktopbuilds slaagden op dezelfde commit. Dit versterkt *Test* en *Bouwbewijs* binnen één GitHub-runnerklasse. Cross-host-bouwbewijs, onafhankelijke *Referentie*, volledige jaar-*Rekenroute* en *Attest* blijven open.

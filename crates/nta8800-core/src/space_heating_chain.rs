@@ -4784,8 +4784,11 @@ fn generate(
             // `generate_multiple`.
             let mut forfait = generator.forfait.clone();
             if let Some(regeneration) = &generator.regeneration {
+                let regeneration_issues =
+                    validate_regeneration(regeneration, "generator.regeneration");
+                let regeneration_valid = regeneration_issues.is_empty();
                 issues.extend(
-                    validate_regeneration(regeneration, "generator.regeneration")
+                    regeneration_issues
                         .into_iter()
                         .map(|item| issue(item.code, item.path)),
                 );
@@ -4802,7 +4805,7 @@ fn generate(
                 let table_cop =
                     crate::forfait_heat_pump_draft::assess_forfait_heat_pump_draft(&probe)
                         .table_cop;
-                if let Some(cop) = table_cop {
+                if let (true, Some(cop)) = (regeneration_valid, table_cop) {
                     let annual: f64 = outputs.iter().map(|item| item.energy_kwh).sum();
                     let result = calculate_regeneration(
                         regeneration,
@@ -5666,6 +5669,40 @@ mod tests {
             generator.forfait.source_correction_reference = Some("declared".into());
         }
         assert!(codes(&input).contains(&"regeneration_and_declared_source_correction"));
+    }
+
+    #[test]
+    fn invalid_regeneration_obstruction_refuses_forfait_without_panicking() {
+        let mut forfait = heat_pump();
+        forfait.source = TableSource::Ground;
+        let mut input = boiler_chain();
+        input.generator = Generator::HeatPumpForfait(HeatPumpGenerator {
+            forfait,
+            source_system: SourceSystem::Individual,
+            source_system_reference: "own borehole".into(),
+            regeneration: Some(RegenerationInput {
+                free_cooling_from_source: false,
+                solar: vec![crate::annex_v::SolarRegeneration {
+                    collector_area_m2: 10.0,
+                    azimuth_deg: 180.0,
+                    tilt_deg: 45.0,
+                    obstruction_factors: Vec::new(),
+                    declared_efficiency: None,
+                    source_reference: "datasheet".into(),
+                }],
+                source_reference: "design".into(),
+            }),
+            auxiliary_measurements: None,
+            auxiliary: None,
+        });
+        let result = assess_space_heating_chain(&input);
+        assert_eq!(result.status, "invalid");
+        assert!(result.monthly.is_empty());
+        assert!(result.generation_efficiency.is_none());
+        assert!(result.issues.iter().any(|item| {
+            item.code == "regeneration_obstruction_invalid"
+                && item.path == "generator.regeneration.solar[0].obstructionFactors"
+        }));
     }
 
     #[test]
