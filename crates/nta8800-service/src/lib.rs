@@ -1765,6 +1765,18 @@ mod tests {
                 && item["path"] == "collectiveGroundwaterSourceType"
         }));
 
+        input["collectiveGroundwaterSourceType"] = json!("recirculation");
+        let response = app().oneshot(request(&input)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+        let result: Value =
+            serde_json::from_slice(&to_bytes(response.into_body(), usize::MAX).await.unwrap())
+                .unwrap();
+        assert!(result["correctedCop"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|item| {
+            item["code"] == "collective_groundwater_source_factor_mismatch"
+                && item["path"] == "collectiveGroundwaterSourceType"
+        }));
+
         input["collectiveGroundwaterSourceType"] = json!("doublet");
         let response = app().oneshot(request(&input)).await.unwrap();
         assert_eq!(response.status(), StatusCode::OK);
