@@ -1733,6 +1733,8 @@ export interface SpaceHeatingChainInput {
         /** Required when F_H;gen < 1. */
         backup?: { kind: 'electric_resistance' } | { kind: 'gas_boiler'; boiler: BoilerForfaitDraftInput } | null;
         regeneration?: NtaRegenerationInput | null;
+        sourceSystem?: 'individual' | 'collective_ground' | 'collective_groundwater_surface_or_at_least15_c' | null;
+        sourceSystemReference?: string | null;
         equipmentReference: string;
       }
     | {

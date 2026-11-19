@@ -205,6 +205,8 @@
       "solar": [],
       "sourceReference": "synthetic: no regeneration"
     },
+    "sourceSystem": "individual",
+    "sourceSystemReference": "synthetic individual ground exchanger",
     "equipmentReference": "synthetic ground-source heat pump"
   }
 }

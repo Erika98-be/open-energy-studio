@@ -40,7 +40,7 @@ export function spaceGeneratorTemplate(kind: string, project?: IProject): Block 
         sourceCorrectionFactor: null, auxiliary: OTHER_AUX(), equipmentReference: '' };
     case 'heat_pump_annex_q':
       return { kind, heatPump: annexQHeatPumpTemplate(), designSupplyTemperatureC: null, backup: null, regeneration: null,
-        equipmentReference: '' };
+        sourceSystem: null, sourceSystemReference: '', equipmentReference: '' };
     case 'product_boiler':
       return { kind, boiler: productBoilerTemplate(), designTemperatureClass: null };
     case 'local_heater':

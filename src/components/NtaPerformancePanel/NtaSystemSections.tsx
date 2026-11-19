@@ -134,8 +134,13 @@ export function SpaceGeneratorFields({ draft, change, base, project, allowMultip
     </>}
     {kind === 'heat_pump_annex_q' && <>
       <AnnexQHeatPumpFields draft={draft} change={change} base={base} />
-      {read(draft, at('heatPump', 'source')) === 'brine_water' &&
-        <RegenerationFields draft={draft} change={change} base={at('regeneration')} />}
+      {read(draft, at('heatPump', 'source')) === 'brine_water' && <>
+        <SelectField {...field} path={at('sourceSystem')} label={t('nta.form.hpSourceSystem')} options={[
+          ['individual', t('nta.form.hpSourceSystem.individual')], ['collective_ground', t('nta.form.hpSourceSystem.collective_ground')],
+          ['collective_groundwater_surface_or_at_least15_c', t('nta.form.hpSourceSystem.collective_groundwater_surface_or_at_least15_c')]]} />
+        <TextField {...field} path={at('sourceSystemReference')} label={t('nta.form.hpSourceSystem.source')} />
+        <RegenerationFields draft={draft} change={change} base={at('regeneration')} />
+      </>}
     </>}
     {kind === 'product_boiler' && <ProductBoilerFields draft={draft} change={change} base={base} />}
     {kind === 'local_heater' && <LocalHeaterFields draft={draft} change={change} base={base} />}

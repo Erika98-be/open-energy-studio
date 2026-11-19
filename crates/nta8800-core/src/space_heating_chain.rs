@@ -919,6 +919,12 @@ pub struct AnnexQGenerator {
     /// Annex V regeneration of an individual ground heat exchanger.
     #[serde(default)]
     pub regeneration: Option<RegenerationInput>,
+    /// Annex V table V.1 applies only to an individual ground exchanger.
+    /// Required with `regeneration`; absent for older annex Q inputs without it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_system: Option<SourceSystem>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_system_reference: Option<String>,
     pub equipment_reference: String,
 }
 
@@ -3512,11 +3518,23 @@ fn generate_annex_q_share(
         ));
     }
     if let Some(regeneration) = &generator.regeneration {
-        if generator.heat_pump.source != AnnexQSource::BrineWater {
+        if generator.heat_pump.source != AnnexQSource::BrineWater
+            || generator.source_system != Some(SourceSystem::Individual)
+        {
             // Table V.1 covers individual ground heat exchangers only.
             issues.push(issue(
                 "regeneration_requires_ground_source",
                 "generator.regeneration",
+            ));
+        }
+        if generator
+            .source_system_reference
+            .as_deref()
+            .map_or(true, |reference| reference.trim().is_empty())
+        {
+            issues.push(issue(
+                "source_reference_required",
+                "generator.sourceSystemReference",
             ));
         }
         issues.extend(
@@ -6364,6 +6382,41 @@ mod tests {
             (details.annex_q.delivered_kwh - details.annex_q.energy_fraction * annual).abs()
                 < 1e-6 * annual.max(1.0)
         );
+    }
+
+    #[test]
+    fn annex_q_regeneration_requires_an_evidenced_individual_ground_exchanger() {
+        let mut input = annex_q_chain();
+        assert_eq!(
+            assess_space_heating_chain(&input).status,
+            "calculated_unverified"
+        );
+        let Generator::HeatPumpAnnexQ(generator) = &mut input.generator else {
+            panic!("expected annex Q heat pump")
+        };
+        generator.source_system = None;
+        let missing = assess_space_heating_chain(&input);
+        assert_eq!(missing.status, "invalid");
+        assert!(missing.monthly.is_empty());
+        assert!(missing.issues.iter().any(|item| {
+            item.code == "regeneration_requires_ground_source"
+                && item.path == "generator.regeneration"
+        }));
+        let Generator::HeatPumpAnnexQ(generator) = &mut input.generator else {
+            unreachable!()
+        };
+        generator.source_system = Some(SourceSystem::CollectiveGround);
+        assert!(codes(&input).contains(&"regeneration_requires_ground_source"));
+        let Generator::HeatPumpAnnexQ(generator) = &mut input.generator else {
+            unreachable!()
+        };
+        generator.source_system = Some(SourceSystem::Individual);
+        generator.source_system_reference = None;
+        let missing_reference = assess_space_heating_chain(&input);
+        assert!(missing_reference.issues.iter().any(|item| {
+            item.code == "source_reference_required"
+                && item.path == "generator.sourceSystemReference"
+        }));
     }
 
     #[test]

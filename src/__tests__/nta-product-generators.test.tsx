@@ -35,6 +35,8 @@ describe('NTA generators with product data', () => {
     renderWithProviders(<Harness initial={{ generator: { kind: 'gas_boiler' } }} body={generatorFields} />);
     await user.selectOptions(screen.getByLabelText('Generator type'), 'heat_pump_annex_q');
     await user.selectOptions(screen.getByLabelText('Source / delivery (annex Q)'), 'brine_water');
+    await user.selectOptions(screen.getByLabelText('Source system of the heat pump (9.62)'), 'individual');
+    await user.type(screen.getByLabelText('Evidence for the source system'), 'own borehole');
     await user.type(screen.getByLabelText('Design supply temperature θ_sup, °C (≤ 75)'), '35');
     await user.type(screen.getAllByLabelText('Evaporator in, °C')[0], '0');
     await user.type(screen.getAllByLabelText('Condenser out, °C')[0], '35');
@@ -56,6 +58,7 @@ describe('NTA generators with product data', () => {
     const generator = current().generator;
     expect(generator).toMatchObject({
       kind: 'heat_pump_annex_q', designSupplyTemperatureC: 35,
+      sourceSystem: 'individual', sourceSystemReference: 'own borehole',
       backup: { kind: 'gas_boiler', boiler: { generatorId: 'backup', kind: 'hr107', fuel: 'natural_gas' } },
       heatPump: {
         source: 'brine_water', testReportReference: 'TR-1',
