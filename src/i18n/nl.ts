@@ -3684,6 +3684,7 @@ export const nl: Record<string, string> = {
   'nta.form.gasHp.supplyTemperature': "Ontwerpaanvoertemperatuur (°C)",
   'nta.form.gasHp.sourceCorrection': "Broncorrectiefactor (1,00/1,02/1,04)",
   'nta.form.regeneration': "Regeneratie bodembron (bijlage V)",
+  'nta.form.regeneration.individualSourceOnly': "Regeneratie volgens bijlage V vereist een individuele bodemwarmtewisselaar en onderbouwing van dit bronsysteem.",
   'nta.form.regeneration.freeCooling': "Vrije koeling uit dezelfde bron",
   'nta.form.regeneration.solar': "Zonnecollectorveld",
   'nta.form.regeneration.area': "Collectoroppervlak (m²)",

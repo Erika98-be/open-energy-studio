@@ -3684,6 +3684,7 @@ export const en: Record<string, string> = {
   'nta.form.gasHp.supplyTemperature': "Design supply temperature (°C)",
   'nta.form.gasHp.sourceCorrection': "Source correction factor (1.00/1.02/1.04)",
   'nta.form.regeneration': "Ground-source regeneration (annex V)",
+  'nta.form.regeneration.individualSourceOnly': "Annex V regeneration requires an individual ground heat exchanger and evidence for that source system.",
   'nta.form.regeneration.freeCooling': "Free cooling from the same source",
   'nta.form.regeneration.solar': "Solar collector field",
   'nta.form.regeneration.area': "Collector area (m²)",

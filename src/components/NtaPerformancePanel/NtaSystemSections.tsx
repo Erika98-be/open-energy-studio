@@ -139,6 +139,7 @@ export function SpaceGeneratorFields({ draft, change, base, project, allowMultip
           ['individual', t('nta.form.hpSourceSystem.individual')], ['collective_ground', t('nta.form.hpSourceSystem.collective_ground')],
           ['collective_groundwater_surface_or_at_least15_c', t('nta.form.hpSourceSystem.collective_groundwater_surface_or_at_least15_c')]]} />
         <TextField {...field} path={at('sourceSystemReference')} label={t('nta.form.hpSourceSystem.source')} />
+        <p className="nta-form-note">{t('nta.form.regeneration.individualSourceOnly')}</p>
         <RegenerationFields draft={draft} change={change} base={at('regeneration')} />
       </>}
     </>}

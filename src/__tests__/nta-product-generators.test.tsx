@@ -35,6 +35,7 @@ describe('NTA generators with product data', () => {
     renderWithProviders(<Harness initial={{ generator: { kind: 'gas_boiler' } }} body={generatorFields} />);
     await user.selectOptions(screen.getByLabelText('Generator type'), 'heat_pump_annex_q');
     await user.selectOptions(screen.getByLabelText('Source / delivery (annex Q)'), 'brine_water');
+    expect(screen.getByText('Annex V regeneration requires an individual ground heat exchanger and evidence for that source system.')).toBeTruthy();
     await user.selectOptions(screen.getByLabelText('Source system of the heat pump (9.62)'), 'individual');
     await user.type(screen.getByLabelText('Evidence for the source system'), 'own borehole');
     await user.type(screen.getByLabelText('Design supply temperature θ_sup, °C (≤ 75)'), '35');
