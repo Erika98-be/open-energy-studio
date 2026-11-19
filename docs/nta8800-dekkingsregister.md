@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De MCP-stdio-route bewaakt nu dat numeriek overlopende bijlage-V-regeneratie een toolfout met `invalid`, volledig regeneratiepad en zonder maand- of rendementuitkomst geeft. De tekst- en structuurrespons zijn gelijk. Alle 25 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal; CI moet nog lopen. Dit versterkt *MCP*, *Audit* en *Test* van de bestaande Rust-grens; onafhankelijke *Referentie* en *Attest* blijven open.
+De MCP-stdio-route bewaakt nu dat numeriek overlopende bijlage-V-regeneratie een toolfout met `invalid`, volledig regeneratiepad en zonder maand- of rendementuitkomst geeft. De tekst- en structuurrespons zijn gelijk. Alle 25 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal; de [CI op `4b7c9706`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44556752294) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *MCP*, *Audit*, *Test* en *Bouwbewijs* van de bestaande Rust-grens; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De HTTP-route bewaakt nu ook dat numeriek overlopende bijlage-V-regeneratie als 422 met volledig regeneratiepad en zonder maand- of rendementuitkomst terugkomt. De gerichte proef, alle 96 service-unittests, rustfmt en service-Clippy slagen lokaal; de [CI op `a0574e0c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44535376391) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *HTTP*, *Audit*, *Test* en *Bouwbewijs* van de bestaande Rust-grens; onafhankelijke *Referentie* en *Attest* blijven open.
 
