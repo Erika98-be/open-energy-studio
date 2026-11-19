@@ -180,6 +180,51 @@ fn space_heating_mcp_refuses_invalid_regeneration_without_panicking() {
 }
 
 #[test]
+fn annex_q_mcp_requires_individual_ground_source_for_regeneration() {
+    let mut input: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-space-heating-chain-annex-q-synthetic.json"
+    ))
+    .unwrap();
+    input["generator"]
+        .as_object_mut()
+        .unwrap()
+        .remove("sourceSystem");
+
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"annex-q-source-audit-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name":"calculate_space_heating_chain", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["monthly"].as_array().is_some_and(Vec::is_empty));
+    assert!(assessment["generationEfficiency"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "regeneration_requires_ground_source"
+                && issue["path"] == "generator.regeneration"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn gas_pump_mcp_preserves_non_applicable_source_reference_path() {
     let input = json!({
         "generatorId":"gwp-1", "drive":"gas_engine", "application":"utility",
