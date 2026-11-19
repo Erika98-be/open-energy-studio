@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De MCP-stdio-route bewaakt nu dat een overlopende som van gebouwgebonden opslagcapaciteiten een toolfout met `invalid`, het opslagpad en zonder primaire-energie- of opslagcorrectie-uitkomst geeft. De tekst- en structuurrespons zijn gelijk; alle 26 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. CI moet nog lopen. Dit versterkt *MCP*, *Audit* en *Test* voor §5.14a; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De HTTP-prestatieroute bewaakt nu dat een overlopende som van gebouwgebonden opslagcapaciteiten 422, `invalid`, het opslagpad en geen primaire-energie- of opslagcorrectie-uitkomst geeft. De gerichte proef, alle 97 service-unittests, rustfmt en service-Clippy slagen lokaal; CI moet nog lopen. Dit versterkt *HTTP*, *Audit* en *Test* voor §5.14a; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De gebouwgebonden elektrische en thermische opslagcapaciteiten worden nu ook als som op eindigheid gecontroleerd. Twee afzonderlijk eindige extreme waarden gaven voorheen nog een prestatie en opslagcorrectie; een vooraf falende regressie legt dit vast. De gerichte proef, alle 1051 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal; CI moet nog lopen. Dit versterkt *Invoer*, *Audit* en *Test* van §5.14a; normatieve *Referentie* en *Attest* blijven open.

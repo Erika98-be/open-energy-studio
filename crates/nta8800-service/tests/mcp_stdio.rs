@@ -246,6 +246,52 @@ fn space_heating_mcp_refuses_overflowing_regeneration() {
 }
 
 #[test]
+fn building_performance_mcp_refuses_overflowing_storage_capacity_sum() {
+    let mut input: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-building-performance-synthetic.json"
+    ))
+    .unwrap();
+    input["batteryStoragePresent"] = json!(true);
+    input["storage"] = json!({
+        "buildingBoundElectricalKwh": f64::MAX,
+        "buildingBoundThermalKwh": f64::MAX,
+        "sourceReference": "installation"
+    });
+
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"storage-overflow-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name":"calculate_building_performance", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["annualStorageCorrectionKwh"].is_null());
+    assert!(assessment["annualPrimaryFossilKwh"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "storage_capacity_invalid" && issue["path"] == "storage"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn annex_q_mcp_requires_individual_ground_source_for_regeneration() {
     let mut input: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-space-heating-chain-annex-q-synthetic.json"
