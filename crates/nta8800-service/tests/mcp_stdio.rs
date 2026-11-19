@@ -180,6 +180,72 @@ fn space_heating_mcp_refuses_invalid_regeneration_without_panicking() {
 }
 
 #[test]
+fn space_heating_mcp_refuses_overflowing_regeneration() {
+    let mut input: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-space-heating-chain-synthetic.json"
+    ))
+    .unwrap();
+    input["generator"] = json!({
+        "kind": "heat_pump_forfait",
+        "forfait": {
+            "generatorId": "hp",
+            "classificationSourceReference": "system design",
+            "scope": "residential_at_most25_kw",
+            "source": "ground",
+            "sink": "hydronic",
+            "designSupplyTemperatureC": 35.0,
+            "thermalCapacityKw": 8.0,
+            "capacitySourceReference": "rated capacity",
+            "collectiveBuildingInstallation": false
+        },
+        "sourceSystem": "individual",
+        "sourceSystemReference": "own borehole",
+        "regeneration": {
+            "solar": [{
+                "collectorAreaM2": f64::MAX,
+                "azimuthDeg": 180.0,
+                "tiltDeg": 45.0,
+                "obstructionFactors": [1.0],
+                "sourceReference": "datasheet"
+            }],
+            "sourceReference": "design"
+        }
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"regeneration-overflow-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name":"calculate_space_heating_chain", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["monthly"].as_array().is_some_and(Vec::is_empty));
+    assert!(assessment["generationEfficiency"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "regeneration_arithmetic_overflow"
+                && issue["path"] == "generator.regeneration"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn annex_q_mcp_requires_individual_ground_source_for_regeneration() {
     let mut input: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-space-heating-chain-annex-q-synthetic.json"
