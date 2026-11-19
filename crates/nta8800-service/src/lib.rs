@@ -887,6 +887,24 @@ mod tests {
             issue["code"] == "regeneration_requires_ground_source"
                 && issue["path"] == "generator.regeneration"
         }));
+
+        input["generator"]["sourceSystem"] = json!("individual");
+        input["generator"]
+            .as_object_mut()
+            .unwrap()
+            .remove("sourceSystemReference");
+        let (status, result) = post_json(
+            "/v1/nta8800/heating/space-heating-chain/calculate",
+            json!({ "input": input }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["monthly"].as_array().is_some_and(Vec::is_empty));
+        assert!(result["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "source_reference_required"
+                && issue["path"] == "generator.sourceSystemReference"
+        }));
     }
 
     #[tokio::test]
