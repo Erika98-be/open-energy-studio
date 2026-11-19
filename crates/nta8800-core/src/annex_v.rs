@@ -120,6 +120,16 @@ pub struct RegenerationResult {
     pub correction: f64,
 }
 
+impl RegenerationResult {
+    pub fn is_finite(&self) -> bool {
+        self.source_extraction_kwh.is_finite()
+            && self.free_cooling_kwh.is_finite()
+            && self.solar_kwh.is_finite()
+            && self.degree.is_finite()
+            && self.correction.is_finite()
+    }
+}
+
 pub fn validate_regeneration(input: &RegenerationInput, path: &str) -> Vec<RegenerationIssue> {
     let mut issues = Vec::new();
     let mut push = |code, field: String| {

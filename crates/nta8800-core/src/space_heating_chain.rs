@@ -3585,6 +3585,16 @@ fn generate_annex_q_share(
             },
         )
     });
+    if regeneration
+        .as_ref()
+        .is_some_and(|result| !result.is_finite())
+    {
+        issues.push(issue(
+            "regeneration_arithmetic_overflow",
+            "generator.regeneration",
+        ));
+        return None;
+    }
     // 9.63: E = Q_out / (COP · f_prac); no c_source for method 1.
     let correction = 1.0;
     let corrected = efficiency * ANNEX_Q_PRACTICE_FACTOR;
@@ -4847,9 +4857,16 @@ fn generate(
                             electricity_efficiency: ELECTRICITY_EFFICIENCY,
                         },
                     );
-                    forfait.source_correction_factor = Some(result.correction);
-                    forfait.source_correction_reference =
-                        Some(format!("annex V: R = {:.3}", result.degree));
+                    if result.is_finite() {
+                        forfait.source_correction_factor = Some(result.correction);
+                        forfait.source_correction_reference =
+                            Some(format!("annex V: R = {:.3}", result.degree));
+                    } else {
+                        issues.push(issue(
+                            "regeneration_arithmetic_overflow",
+                            "generator.regeneration",
+                        ));
+                    }
                 }
             }
             let collective = generator.forfait.collective_building_installation == Some(true);
@@ -5728,6 +5745,55 @@ mod tests {
             item.code == "regeneration_obstruction_invalid"
                 && item.path == "generator.regeneration.solar[0].obstructionFactors"
         }));
+    }
+
+    #[test]
+    fn regeneration_overflow_withholds_forfait_and_annex_q_results() {
+        let mut forfait = heat_pump();
+        forfait.source = TableSource::Ground;
+        let mut input = boiler_chain();
+        input.generator = Generator::HeatPumpForfait(HeatPumpGenerator {
+            forfait,
+            source_system: SourceSystem::Individual,
+            source_system_reference: "own borehole".into(),
+            regeneration: Some(RegenerationInput {
+                free_cooling_from_source: false,
+                solar: vec![crate::annex_v::SolarRegeneration {
+                    collector_area_m2: f64::MAX,
+                    azimuth_deg: 180.0,
+                    tilt_deg: 45.0,
+                    obstruction_factors: vec![1.0],
+                    declared_efficiency: None,
+                    source_reference: "datasheet".into(),
+                }],
+                source_reference: "design".into(),
+            }),
+            auxiliary_measurements: None,
+            auxiliary: None,
+        });
+        let solar = match &input.generator {
+            Generator::HeatPumpForfait(generator) => {
+                generator.regeneration.as_ref().unwrap().solar[0].clone()
+            }
+            _ => unreachable!(),
+        };
+        for input in [input, {
+            let mut annex_q = annex_q_chain();
+            let Generator::HeatPumpAnnexQ(generator) = &mut annex_q.generator else {
+                unreachable!()
+            };
+            generator.regeneration.as_mut().unwrap().solar = vec![solar];
+            annex_q
+        }] {
+            let result = assess_space_heating_chain(&input);
+            assert_eq!(result.status, "invalid");
+            assert!(result.monthly.is_empty());
+            assert!(result.generation_efficiency.is_none());
+            assert!(result.issues.iter().any(|item| {
+                item.code == "regeneration_arithmetic_overflow"
+                    && item.path == "generator.regeneration"
+            }));
+        }
     }
 
     #[test]
