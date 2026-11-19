@@ -852,7 +852,7 @@ mod tests {
 
     #[tokio::test]
     async fn space_heating_chain_route_calculates_annex_q_heat_pump() {
-        let input: Value = serde_json::from_str(include_str!(
+        let mut input: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-space-heating-chain-annex-q-synthetic.json"
         ))
         .unwrap();
@@ -870,6 +870,23 @@ mod tests {
                 > 1.0
         );
         assert!(result["annualGeneratorElectricityKwh"].as_f64().unwrap() > 0.0);
+
+        input["generator"]
+            .as_object_mut()
+            .unwrap()
+            .remove("sourceSystem");
+        let (status, result) = post_json(
+            "/v1/nta8800/heating/space-heating-chain/calculate",
+            json!({ "input": input }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["monthly"].as_array().is_some_and(Vec::is_empty));
+        assert!(result["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "regeneration_requires_ground_source"
+                && issue["path"] == "generator.regeneration"
+        }));
     }
 
     #[tokio::test]
