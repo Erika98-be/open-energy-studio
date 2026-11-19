@@ -2354,6 +2354,13 @@ fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>
                     issues.push(issue("storage_capacity_invalid", field));
                 }
             }
+            if storage.building_bound_electrical_kwh.is_finite()
+                && storage.building_bound_thermal_kwh.is_finite()
+                && !(storage.building_bound_electrical_kwh + storage.building_bound_thermal_kwh)
+                    .is_finite()
+            {
+                issues.push(issue("storage_capacity_invalid", "storage"));
+            }
             if storage.source_reference.trim().is_empty() {
                 issues.push(issue(
                     "source_reference_required",
@@ -8478,6 +8485,25 @@ mod tests {
             small.annual_primary_fossil_kwh,
             base.annual_primary_fossil_kwh
         );
+    }
+
+    #[test]
+    fn overflowing_storage_capacity_sum_withholds_performance() {
+        let mut sample = input();
+        sample.battery_storage_present = true;
+        sample.storage = Some(EnergyStorage {
+            building_bound_electrical_kwh: f64::MAX,
+            building_bound_thermal_kwh: f64::MAX,
+            source_reference: "installation".into(),
+        });
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result.annual_storage_correction_kwh.is_none());
+        assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| { item.code == "storage_capacity_invalid" && item.path == "storage" }));
     }
 
     #[test]
