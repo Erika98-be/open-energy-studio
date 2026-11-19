@@ -1,6 +1,8 @@
 # NTA 8800 dekkingsregister
 
-De HTTP-route voor de ruimteverwarmingsketen bewaakt de lege bijlage-V-belemmeringslijst nu met 422, volledig veldpad en zonder deeluitkomsten; de gerichte proef, alle 96 service-unittests en service-Clippy slagen lokaal. Dit versterkt *HTTP*, *Audit* en *Test* voor een eerder paniekgevoelig invoerpad. Onafhankelijke *Referentie* en *Attest* blijven open.
+De MCP-stdio-route voor de ruimteverwarmingsketen bewaakt de lege bijlage-V-belemmeringslijst nu met toolfout, volledig veldpad, lege deeluitkomsten en gelijke tekst- en structuurrespons. Alle 23 MCP-stdio-proeven slagen lokaal. Dit versterkt *MCP*, *Audit* en *Test* aan de protocolgrens; onafhankelijke *Referentie* en *Attest* blijven open.
+
+De HTTP-route voor de ruimteverwarmingsketen bewaakt de lege bijlage-V-belemmeringslijst nu met 422, volledig veldpad en zonder deeluitkomsten; de gerichte proef, alle 96 service-unittests en service-Clippy slagen lokaal. De [CI op `8148d6bc`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44428089885) bevestigt de NTA-gate en drie desktopbuilds. Dit versterkt *HTTP*, *Audit*, *Test* en *Bouwbewijs* voor een eerder paniekgevoelig invoerpad. Onafhankelijke *Referentie* en *Attest* blijven open.
 
 Tabel V.1-regeneratie is in de forfaitaire warmtepompketen nu beperkt tot een expliciete individuele bodemwarmtewisselaar. Een grondwaterbron, onbekend bodem/grondwatertype of collectieve bodembron levert `regeneration_requires_ground_source` zonder deeluitkomsten; een gerichte Rust-regressie bewaakt alle drie. Alle 1048 kernunittests, rustfmt en kern-Clippy slagen lokaal. De [CI op `25a1339a`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44411026962) bevestigt de NTA-gate en drie desktopbuilds. Dit versterkt *Invoer*, *Audit*, *Test* en *Bouwbewijs* van de toepasselijkheidsgrens. Onafhankelijke *Referentie* en *Attest* blijven open.
 
