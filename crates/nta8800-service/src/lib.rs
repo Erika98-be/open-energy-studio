@@ -971,6 +971,22 @@ mod tests {
             issue["code"] == "regeneration_obstruction_invalid"
                 && issue["path"] == "generator.regeneration.solar[0].obstructionFactors"
         }));
+
+        input["generator"]["regeneration"]["solar"][0]["obstructionFactors"] = json!([1.0]);
+        input["generator"]["regeneration"]["solar"][0]["collectorAreaM2"] = json!(f64::MAX);
+        let (status, result) = post_json(
+            "/v1/nta8800/heating/space-heating-chain/calculate",
+            json!({ "input": input }),
+        )
+        .await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["monthly"].as_array().is_some_and(Vec::is_empty));
+        assert!(result["generationEfficiency"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "regeneration_arithmetic_overflow"
+                && issue["path"] == "generator.regeneration"
+        }));
     }
 
     #[tokio::test]
