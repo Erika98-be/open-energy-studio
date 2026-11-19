@@ -8477,6 +8477,15 @@ mod tests {
         );
         // The correction is not part of the CO2 emission.
         assert_eq!(result.annual_co2_kg, base.annual_co2_kg);
+        // Exactly 5 kWh is included in the §5.14a threshold.
+        sample.storage.as_mut().unwrap().building_bound_thermal_kwh = 2.0;
+        let threshold = assess_building_performance(&sample);
+        assert_eq!(
+            threshold.status, "calculated_unverified",
+            "{:?}",
+            threshold.issues
+        );
+        assert!((threshold.annual_storage_correction_kwh.unwrap() - expected).abs() < 1e-9);
         // Below 5 kWh in total: f_BAT;cor = 0, no error.
         sample.storage.as_mut().unwrap().building_bound_thermal_kwh = 1.0;
         let small = assess_building_performance(&sample);

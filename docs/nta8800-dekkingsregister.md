@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De §5.14a-regressie bewaakt nu ook de exacte 5 kWh-opslaggrens naast het geval onder de grens. De gerichte proef, alle 1051 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Test* voor de bestaande opslag-*Rekenroute*; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De MCP-stdio-route bewaakt nu dat een overlopende som van gebouwgebonden opslagcapaciteiten een toolfout met `invalid`, het opslagpad en zonder primaire-energie- of opslagcorrectie-uitkomst geeft. De tekst- en structuurrespons zijn gelijk; alle 26 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. De [CI op `89124158`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44623012970) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *MCP*, *Audit*, *Test* en *Bouwbewijs* voor §5.14a; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De HTTP-prestatieroute bewaakt nu dat een overlopende som van gebouwgebonden opslagcapaciteiten 422, `invalid`, het opslagpad en geen primaire-energie- of opslagcorrectie-uitkomst geeft. De gerichte proef, alle 97 service-unittests, rustfmt en service-Clippy slagen lokaal; de [CI op `89124158`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44623012970) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *HTTP*, *Audit*, *Test* en *Bouwbewijs* voor §5.14a; onafhankelijke *Referentie* en *Attest* blijven open.

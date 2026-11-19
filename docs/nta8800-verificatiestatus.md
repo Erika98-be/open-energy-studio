@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 19 november 2026
+# NTA 8800 verificatiestatus — 20 november 2026
+
+De bestaande §5.14a-opslagproef bewaakt nu ook de exacte grens van 5 kWh: bij 3 kWh elektrische en 2 kWh thermische gebouwgebonden opslag blijft de correctie actief, terwijl 4 kWh geen correctie geeft. De gerichte proef en alle 1051 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal. Dit bevestigt de grenslogica van de bestaande implementatie; een onafhankelijke referentiecase voor de volledige jaarprestatie ontbreekt nog.
 
 De MCP-stdio-route voor de hoofdstuk-5-prestatie bewaakt nu eveneens de overlopende som van gebouwgebonden opslagcapaciteiten. De protocolproef controleert toolfout, `invalid`, `storage_capacity_invalid` op `storage`, lege primaire-energie- en opslagcorrectie-uitkomsten en gelijke tekst- en `structuredContent`-respons. Alle 26 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal; de [CI op `89124158`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44623012970) heeft de volledige NTA-gate en drie desktopbuilds afgerond. Dit controleert de Rust-invoergrens via MCP, zonder onafhankelijke normreferentie.
 
