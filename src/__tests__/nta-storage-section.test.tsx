@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { createDefaultProject } from '../context/EnergyContext';
 import { read, write, type Draft, type Path } from '../components/NtaPerformancePanel/NtaFormFields';
@@ -35,5 +35,16 @@ describe('NTA building-bound storage form', () => {
     expect(read(draft, ['batteryStoragePresent'])).toBe(false);
     expect(read(draft, ['storage'])).toBeNull();
     expect(screen.queryByLabelText('Building-bound electrical storage, kWh')).toBeNull();
+
+    await user.click(storage);
+    expect(JSON.parse(screen.getByTestId('draft').textContent ?? '{}').storage).toBeNull();
+    fireEvent.change(screen.getByLabelText('Building-bound electrical storage, kWh'), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText('Building-bound thermal storage, kWh'), { target: { value: '0' } });
+    fireEvent.change(screen.getByLabelText('Source'), { target: { value: 'replacement record' } });
+    expect(JSON.parse(screen.getByTestId('draft').textContent ?? '{}').storage).toEqual({
+      buildingBoundElectricalKwh: 5,
+      buildingBoundThermalKwh: 0,
+      sourceReference: 'replacement record',
+    });
   });
 });
