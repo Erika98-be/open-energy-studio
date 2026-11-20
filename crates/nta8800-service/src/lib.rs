@@ -1669,6 +1669,23 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn performance_route_refuses_invalid_bbl_function_area() {
+        let mut input: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-building-performance-synthetic.json"
+        ))
+        .unwrap();
+        input["bblFunctions"] = json!([{"function":"other_residential", "areaM2":0.0}]);
+        let (status, result) =
+            post_json("/v1/nta8800/performance/calculate", json!({"input": input})).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["annualPrimaryFossilKwh"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "bbl_function_areas_invalid" && issue["path"] == "bblFunctions"
+        }));
+    }
+
+    #[tokio::test]
     async fn monthly_demand_route_rejects_unsupported_tilt_without_numbers() {
         let mut input = monthly_demand_sample();
         input["windows"][0]["tiltDeg"] = json!(200.0);
