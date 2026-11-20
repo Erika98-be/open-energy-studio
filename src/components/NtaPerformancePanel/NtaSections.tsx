@@ -768,6 +768,7 @@ function StorageSection(props: NtaSectionProps) {
   const { t } = useI18n();
   const f = fieldOf(props);
   return <>
+    <p className="nta-form-note">{t('nta.form.storageEligibilityNote')}</p>
     <CheckField {...f} path={['batteryStoragePresent']} label={t('nta.form.battery')}
       onChange={(_, present) => props.update((current) => {
         const next = write(current, ['batteryStoragePresent'], present);

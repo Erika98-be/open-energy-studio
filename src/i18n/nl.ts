@@ -1846,6 +1846,7 @@ export const nl: Record<string, string> = {
   'nta.form.productionInventory': 'Alle eigen opwekking is opgenomen',
   'nta.form.c1': 'Ventilatie-invoer is het vaste C1-systeem (BENG 1)',
   'nta.form.battery': 'Elektrische of thermische opslag aanwezig',
+  'nta.form.storageEligibilityNote': 'Tel alleen gebouwgebonden opslag op het eigen perceel mee. Een stekkerbatterij via een wandcontactdoos telt niet mee. De gezamenlijke elektrische en thermische capaciteit moet minstens 5 kWh zijn voor de opslagcorrectie (§5.14a).',
   'nta.form.generatorKind': 'Type opwekker',
   'nta.form.generator.boiler': 'Gasketel',
   'nta.form.generator.external': 'Externe warmtelevering (stadsverwarming)',

@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Het opslagformulier vermeldt nu de §5.14a-grens voor gebouwgebonden opslag op eigen perceel, de uitsluiting van een stekkerbatterij en de gezamenlijke grens van 5 kWh (gelicentieerde NTA 8800:2025+C1:2026, p. 87). De gerichte UI-proef en TypeScript-controle slagen lokaal. Dit versterkt *Weergave* en *Invoer*; de werkelijke installatie vraagt bewijs, *Referentie* en *Attest* blijven open.
+
 Twee [Linux-devbouwbewijsruns op `7c189e6`](nta8800-build-verificatie-2026-11-20-7c189e6.md) slagen, inclusief de bouwbewijstests. De afzonderlijk opgehaalde API-, MCP-, referentiegate- en desktopartefacten en hun manifest zijn bytegelijk; beide manifesten zijn tegen de broncommit gecontroleerd. Dit versterkt *Bouwbewijs* voor dezelfde GitHub-runnerklasse. *Referentie* en *Attest* blijven open.
 
 Het opslagformulier wist verborgen capaciteit en bronreferentie bij uitschakelen van gebouwgebonden opslag; de formulierproef bewaakt ook dat opnieuw inschakelen oude waarden niet terugzet en nieuwe invoer accepteert. De gerichte UI-proef en TypeScript-controle slagen lokaal. De [CI op `fdcb4412`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44664062391) bevestigt de uitgebreide proef, volledige NTA-gate en drie desktopbuilds. Dit versterkt *Weergave*, *Invoer*, *Test* en *Bouwbewijs* bij §5.14a; *Referentie* en *Attest* blijven open.

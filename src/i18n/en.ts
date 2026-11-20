@@ -1846,6 +1846,7 @@ export const en: Record<string, string> = {
   'nta.form.productionInventory': 'All on-site production is included',
   'nta.form.c1': 'Ventilation input represents the fixed C1 system (BENG 1)',
   'nta.form.battery': 'Electrical or thermal storage present',
+  'nta.form.storageEligibilityNote': 'Include only building-bound storage on the property. A plug-in battery connected through a wall socket does not count. The combined electrical and thermal capacity must be at least 5 kWh for the storage correction (§5.14a).',
   'nta.form.generatorKind': 'Generator type',
   'nta.form.generator.boiler': 'Gas boiler',
   'nta.form.generator.external': 'External heat supply (district heating)',
