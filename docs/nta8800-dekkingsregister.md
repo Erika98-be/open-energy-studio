@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De hoofdstuk-5-audit controleert nu ook de eindigheid van de jaarsom van elk opgegeven maandprofiel voor gebruik, hernieuwbare warmte en eigen opwekking. Overloop bij twaalf afzonderlijk geldige waarden geeft `annual_energy_overflow` op het bronveld en houdt de primaire jaaruitkomst tegen. De vooraf falende regressie, 1052 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen na herstel lokaal. Dit versterkt *Audit* en *Test*; *Referentie* en *Attest* blijven open.
+
 Het opslagformulier vermeldt nu de §5.14a-grens voor gebouwgebonden opslag op eigen perceel, de uitsluiting van een stekkerbatterij en de gezamenlijke grens van 5 kWh (gelicentieerde NTA 8800:2025+C1:2026, p. 87). De gerichte UI-proef en TypeScript-controle slagen lokaal; de [CI op `a4bb8070`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44716947446) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *Weergave*, *Invoer* en *Bouwbewijs*; de werkelijke installatie vraagt bewijs, *Referentie* en *Attest* blijven open.
 
 Twee [Linux-devbouwbewijsruns op `7c189e6`](nta8800-build-verificatie-2026-11-20-7c189e6.md) slagen, inclusief de bouwbewijstests. De afzonderlijk opgehaalde API-, MCP-, referentiegate- en desktopartefacten en hun manifest zijn bytegelijk; beide manifesten zijn tegen de broncommit gecontroleerd. Dit versterkt *Bouwbewijs* voor dezelfde GitHub-runnerklasse. *Referentie* en *Attest* blijven open.

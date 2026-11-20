@@ -2381,6 +2381,11 @@ fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>
                 "monthly_values_invalid",
                 format!("{path}.monthlyKwh"),
             ));
+        } else if !item.monthly_kwh.iter().sum::<f64>().is_finite() {
+            issues.push(issue(
+                "annual_energy_overflow",
+                format!("{path}.monthlyKwh"),
+            ));
         }
         if item.service.electric_only() && item.carrier != Carrier::El {
             issues.push(issue(
@@ -2412,6 +2417,11 @@ fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>
         if !twelve_nonnegative(&item.monthly_kwh) {
             issues.push(issue(
                 "monthly_values_invalid",
+                format!("{path}.monthlyKwh"),
+            ));
+        } else if !item.monthly_kwh.iter().sum::<f64>().is_finite() {
+            issues.push(issue(
+                "annual_energy_overflow",
                 format!("{path}.monthlyKwh"),
             ));
         }
@@ -2641,6 +2651,11 @@ fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>
         if !twelve_nonnegative(&item.monthly_kwh) {
             issues.push(issue(
                 "monthly_values_invalid",
+                format!("{path}.monthlyKwh"),
+            ));
+        } else if !item.monthly_kwh.iter().sum::<f64>().is_finite() {
+            issues.push(issue(
+                "annual_energy_overflow",
                 format!("{path}.monthlyKwh"),
             ));
         }
@@ -8513,6 +8528,44 @@ mod tests {
             .issues
             .iter()
             .any(|item| { item.code == "storage_capacity_invalid" && item.path == "storage" }));
+    }
+
+    #[test]
+    fn overflowing_annual_declared_streams_are_refused_at_the_input_path() {
+        let mut sample = input();
+        sample.declared_uses[0].monthly_kwh = vec![f64::MAX; 12];
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "annual_energy_overflow"
+                && item.path == "declaredUses[0].monthlyKwh"));
+
+        let mut sample = input();
+        sample.declared_renewable_heat.push(DeclaredRenewableHeat {
+            id: "ambient".into(),
+            monthly_kwh: vec![f64::MAX; 12],
+            source_reference: "synthetic".into(),
+        });
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "annual_energy_overflow"
+                && item.path == "declaredRenewableHeat[0].monthlyKwh"));
+
+        let mut sample = input();
+        sample.on_site_production[0].monthly_kwh = vec![f64::MAX; 12];
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "annual_energy_overflow"
+                && item.path == "onSiteProduction[0].monthlyKwh"));
     }
 
     #[test]
