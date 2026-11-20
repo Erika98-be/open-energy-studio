@@ -768,7 +768,11 @@ function StorageSection(props: NtaSectionProps) {
   const { t } = useI18n();
   const f = fieldOf(props);
   return <>
-    <CheckField {...f} path={['batteryStoragePresent']} label={t('nta.form.battery')} />
+    <CheckField {...f} path={['batteryStoragePresent']} label={t('nta.form.battery')}
+      onChange={(_, present) => props.update((current) => {
+        const next = write(current, ['batteryStoragePresent'], present);
+        return present ? next : write(next, ['storage'], null);
+      })} />
     {read(props.draft, ['batteryStoragePresent']) === true && <>
       <NumberField {...f} path={['storage', 'buildingBoundElectricalKwh']} label={t('nta.form.storageElectrical')} />
       <NumberField {...f} path={['storage', 'buildingBoundThermalKwh']} label={t('nta.form.storageThermal')} />
