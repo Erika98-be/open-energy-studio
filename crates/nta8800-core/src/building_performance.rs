@@ -2154,6 +2154,15 @@ fn function_area_sum_matches(sum: f64, total: f64) -> bool {
 fn validate_function_lists(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>) {
     let residential_scope = matches!(input.calculation_scope, CalculationScope::Residential);
     if !input.bbl_functions.is_empty() {
+        let area_sum: f64 = input.bbl_functions.iter().map(|part| part.area_m2).sum();
+        if !area_sum.is_finite()
+            || input
+                .bbl_functions
+                .iter()
+                .any(|part| !part.area_m2.is_finite() || part.area_m2 <= 0.0)
+        {
+            issues.push(issue("bbl_function_areas_invalid", "bblFunctions"));
+        }
         let dwelling = input
             .bbl_functions
             .iter()
@@ -2187,6 +2196,17 @@ fn validate_function_lists(input: &BuildingPerformanceInput, issues: &mut Vec<Pe
                 "label_functions_residential_in_utility",
                 "labelFunctions",
             ));
+        }
+    }
+    if !input.label_functions.is_empty() {
+        let area_sum: f64 = input.label_functions.iter().map(|part| part.area_m2).sum();
+        if !area_sum.is_finite()
+            || input
+                .label_functions
+                .iter()
+                .any(|part| !part.area_m2.is_finite() || part.area_m2 <= 0.0)
+        {
+            issues.push(issue("label_function_areas_invalid", "labelFunctions"));
         }
     }
 }
@@ -5157,6 +5177,63 @@ mod tests {
             .iter()
             .any(|code| code.starts_with("label_function")));
         assert!(!warning_codes(&utility).contains(&"label_function_areas_sum_mismatch"));
+    }
+
+    #[test]
+    fn invalid_function_areas_withhold_chapter_five_outputs() {
+        let mut sample = input();
+        sample.bbl_functions = vec![BblFunctionArea {
+            function: BblFunction::OtherResidential,
+            area_m2: 0.0,
+        }];
+        let result = assess_building_performance(&sample);
+        assert!(result.issues.iter().any(|item| {
+            item.code == "bbl_function_areas_invalid" && item.path == "bblFunctions"
+        }));
+        assert!(result.annual_primary_fossil_kwh.is_none());
+
+        sample.bbl_functions = vec![
+            BblFunctionArea {
+                function: BblFunction::OtherResidential,
+                area_m2: f64::MAX,
+            },
+            BblFunctionArea {
+                function: BblFunction::OtherResidential,
+                area_m2: f64::MAX,
+            },
+        ];
+        let result = assess_building_performance(&sample);
+        assert!(result.issues.iter().any(|item| {
+            item.code == "bbl_function_areas_invalid" && item.path == "bblFunctions"
+        }));
+        assert!(result.annual_primary_fossil_kwh.is_none());
+
+        sample.bbl_functions.clear();
+        sample.label_functions = vec![LabelFunctionArea {
+            function: LabelFunction::Residential,
+            area_m2: 0.0,
+        }];
+        let result = assess_building_performance(&sample);
+        assert!(result.issues.iter().any(|item| {
+            item.code == "label_function_areas_invalid" && item.path == "labelFunctions"
+        }));
+        assert!(result.annual_primary_fossil_kwh.is_none());
+
+        sample.label_functions = vec![
+            LabelFunctionArea {
+                function: LabelFunction::Residential,
+                area_m2: f64::MAX,
+            },
+            LabelFunctionArea {
+                function: LabelFunction::Residential,
+                area_m2: f64::MAX,
+            },
+        ];
+        let result = assess_building_performance(&sample);
+        assert!(result.issues.iter().any(|item| {
+            item.code == "label_function_areas_invalid" && item.path == "labelFunctions"
+        }));
+        assert!(result.annual_primary_fossil_kwh.is_none());
     }
 
     #[test]
