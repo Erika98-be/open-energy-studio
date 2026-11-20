@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 20 november 2026
+# NTA 8800 verificatiestatus — 21 november 2026
+
+Drie [vaste Linux-devbuilds op `211e6c87`](nta8800-build-verificatie-2026-11-21-211e6c8.md) zijn geslaagd: twee afzonderlijke GitHub Actions-runs en een build op een afzonderlijke lokale host. De API, MCP, referentiegate en desktop-`.deb` zijn voor deze broncommit op alle drie de hosts bytegelijk; alle drie de manifesten slagen bij hercontrole tegen de bron. De twee GitHub-manifesten zijn bytegelijk. Het lokale manifest registreert een andere Node-patchversie, terwijl de artefactbytes gelijk blijven. Dit versterkt het cross-host-*Bouwbewijs* voor de vaste Linux-procedure; Windows/macOS-reproduceerbaarheid, onafhankelijke normreferentie en *Attest* blijven open.
 
 De hoofdstuk-5-prestatie meldt bij ongeldige Bbl- of labelfunctieoppervlakten geen aanvullende somafwijkingswaarschuwing meer. De auditfout op de functielijst blijft bepalend; voor afzonderlijk geldige oppervlakten met een afwijkende som blijft de waarschuwing bestaan. De uitgebreide regressie, alle 1053 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal. De [CI op `42473bc1`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44828270839) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit voorkomt tegenstrijdige diagnose zonder een normatieve rekenroute te veranderen.
 
