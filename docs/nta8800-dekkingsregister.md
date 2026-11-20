@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Twee [Linux-devbouwbewijsruns op `7c189e6`](nta8800-build-verificatie-2026-11-20-7c189e6.md) slagen, inclusief de bouwbewijstests. De afzonderlijk opgehaalde API-, MCP-, referentiegate- en desktopartefacten en hun manifest zijn bytegelijk; beide manifesten zijn tegen de broncommit gecontroleerd. Dit versterkt *Bouwbewijs* voor dezelfde GitHub-runnerklasse. *Referentie* en *Attest* blijven open.
+
 Het opslagformulier wist verborgen capaciteit en bronreferentie bij uitschakelen van gebouwgebonden opslag; de formulierproef bewaakt ook dat opnieuw inschakelen oude waarden niet terugzet en nieuwe invoer accepteert. De gerichte UI-proef en TypeScript-controle slagen lokaal. De [CI op `fdcb4412`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44664062391) bevestigt de uitgebreide proef, volledige NTA-gate en drie desktopbuilds. Dit versterkt *Weergave*, *Invoer*, *Test* en *Bouwbewijs* bij §5.14a; *Referentie* en *Attest* blijven open.
 
 De §5.14a-regressie bewaakt nu ook de exacte 5 kWh-opslaggrens naast het geval onder de grens. De gerichte proef, alle 1051 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal; de [CI op `eb6f1e92`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44642117356) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *Test* en *Bouwbewijs* voor de bestaande opslag-*Rekenroute*; onafhankelijke *Referentie* en *Attest* blijven open.
