@@ -2222,13 +2222,25 @@ fn function_area_warnings(input: &BuildingPerformanceInput) -> Vec<PerformanceIs
     }
     if !input.bbl_functions.is_empty() {
         let sum: f64 = input.bbl_functions.iter().map(|part| part.area_m2).sum();
-        if !function_area_sum_matches(sum, total) {
+        if sum.is_finite()
+            && input
+                .bbl_functions
+                .iter()
+                .all(|part| part.area_m2.is_finite() && part.area_m2 > 0.0)
+            && !function_area_sum_matches(sum, total)
+        {
             warnings.push(issue("bbl_function_areas_sum_mismatch", "bblFunctions"));
         }
     }
     if !input.label_functions.is_empty() {
         let sum: f64 = input.label_functions.iter().map(|part| part.area_m2).sum();
-        if !function_area_sum_matches(sum, total) {
+        if sum.is_finite()
+            && input
+                .label_functions
+                .iter()
+                .all(|part| part.area_m2.is_finite() && part.area_m2 > 0.0)
+            && !function_area_sum_matches(sum, total)
+        {
             warnings.push(issue("label_function_areas_sum_mismatch", "labelFunctions"));
         }
     }
@@ -5191,6 +5203,10 @@ mod tests {
             item.code == "bbl_function_areas_invalid" && item.path == "bblFunctions"
         }));
         assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|item| item.code == "bbl_function_areas_sum_mismatch"));
 
         sample.bbl_functions = vec![
             BblFunctionArea {
@@ -5207,6 +5223,10 @@ mod tests {
             item.code == "bbl_function_areas_invalid" && item.path == "bblFunctions"
         }));
         assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|item| item.code == "bbl_function_areas_sum_mismatch"));
 
         sample.bbl_functions.clear();
         sample.label_functions = vec![LabelFunctionArea {
@@ -5218,6 +5238,10 @@ mod tests {
             item.code == "label_function_areas_invalid" && item.path == "labelFunctions"
         }));
         assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|item| item.code == "label_function_areas_sum_mismatch"));
 
         sample.label_functions = vec![
             LabelFunctionArea {
@@ -5234,6 +5258,10 @@ mod tests {
             item.code == "label_function_areas_invalid" && item.path == "labelFunctions"
         }));
         assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(!result
+            .warnings
+            .iter()
+            .any(|item| item.code == "label_function_areas_sum_mismatch"));
     }
 
     #[test]
