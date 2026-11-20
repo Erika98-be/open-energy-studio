@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De HTTP- en MCP-grenzen van de hoofdstuk-5-prestatie testen nu `annual_energy_overflow` bij opgegeven gebruik: 422 respectievelijk toolfout, `invalid`, het exacte `monthlyKwh`-pad en geen primaire jaaruitkomst. MCP bewaakt ook tekst/`structuredContent`-gelijkheid. Alle 98 service-unittests en 27 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. Dit versterkt *HTTP*, *MCP*, *Audit* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De hoofdstuk-5-audit controleert nu ook de eindigheid van de jaarsom van elk opgegeven maandprofiel voor gebruik, hernieuwbare warmte en eigen opwekking. Overloop bij twaalf afzonderlijk geldige waarden geeft `annual_energy_overflow` op het bronveld en houdt de primaire jaaruitkomst tegen. De vooraf falende regressie, 1052 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen na herstel lokaal. Dit versterkt *Audit* en *Test*; *Referentie* en *Attest* blijven open.
 
 Het opslagformulier vermeldt nu de §5.14a-grens voor gebouwgebonden opslag op eigen perceel, de uitsluiting van een stekkerbatterij en de gezamenlijke grens van 5 kWh (gelicentieerde NTA 8800:2025+C1:2026, p. 87). De gerichte UI-proef en TypeScript-controle slagen lokaal; de [CI op `a4bb8070`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44716947446) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *Weergave*, *Invoer* en *Bouwbewijs*; de werkelijke installatie vraagt bewijs, *Referentie* en *Attest* blijven open.
