@@ -2181,7 +2181,15 @@ fn validate_function_lists(input: &BuildingPerformanceInput, issues: &mut Vec<Pe
             issues.push(issue("bbl_functions_scope_mismatch", "bblFunction"));
         }
     }
-    if !residential_scope {
+    if residential_scope {
+        if input
+            .label_functions
+            .iter()
+            .any(|part| part.function != LabelFunction::Residential)
+        {
+            issues.push(issue("label_function_scope_mismatch", "labelFunctions"));
+        }
+    } else {
         let functions = input
             .label_functions
             .iter()
@@ -5297,6 +5305,24 @@ mod tests {
             .warnings
             .iter()
             .any(|item| item.code == "label_function_areas_sum_mismatch"));
+    }
+
+    #[test]
+    fn residential_label_function_list_refuses_utility_function() {
+        let mut sample = input();
+        sample.label_functions = vec![LabelFunctionArea {
+            function: LabelFunction::Office,
+            area_m2: sample.total_usable_floor_area_m2,
+        }];
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(result.indicative_label_class.is_none());
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "label_function_scope_mismatch"
+                && item.path == "labelFunctions"));
     }
 
     #[test]
