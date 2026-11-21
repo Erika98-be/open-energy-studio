@@ -1706,6 +1706,24 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn performance_route_refuses_utility_label_function_on_residential_scope() {
+        let mut input: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-building-performance-synthetic.json"
+        ))
+        .unwrap();
+        input["labelFunctions"] = json!([{"function":"office", "areaM2":100.0}]);
+        let (status, result) =
+            post_json("/v1/nta8800/performance/calculate", json!({"input": input})).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["annualPrimaryFossilKwh"].is_null());
+        assert!(result["indicativeLabelClass"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "label_function_scope_mismatch" && issue["path"] == "labelFunctions"
+        }));
+    }
+
+    #[tokio::test]
     async fn monthly_demand_route_rejects_unsupported_tilt_without_numbers() {
         let mut input = monthly_demand_sample();
         input["windows"][0]["tiltDeg"] = json!(200.0);
