@@ -2190,13 +2190,10 @@ fn validate_function_lists(input: &BuildingPerformanceInput, issues: &mut Vec<Pe
             issues.push(issue("label_function_scope_mismatch", "labelFunctions"));
         }
     } else {
-        let functions = input
+        if input
             .label_functions
             .iter()
             .map(|part| part.function)
-            .chain(input.label_function);
-        if functions
-            .into_iter()
             .any(|function| function == LabelFunction::Residential)
         {
             // Omgevingsregeling bijlage X has no woonfunctie column.
@@ -5323,6 +5320,25 @@ mod tests {
             .iter()
             .any(|item| item.code == "label_function_scope_mismatch"
                 && item.path == "labelFunctions"));
+    }
+
+    #[test]
+    fn utility_single_label_function_reports_only_its_own_path() {
+        let mut sample = input();
+        sample.calculation_scope = CalculationScope::Utility;
+        sample.label_function = Some(LabelFunction::Residential);
+        sample.label_functions.clear();
+
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(result.issues.iter().any(|item| {
+            item.code == "label_function_scope_mismatch" && item.path == "labelFunction"
+        }));
+        assert!(!result
+            .issues
+            .iter()
+            .any(|item| item.code == "label_functions_residential_in_utility"));
     }
 
     #[test]

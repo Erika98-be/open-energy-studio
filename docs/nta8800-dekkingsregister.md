@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Bij utiliteit verwijst de fout voor een afzonderlijke woon-`labelFunction` alleen naar `labelFunction`; een lege `labelFunctions`-lijst geeft geen afgeleide lijstfout meer. De gerichte Rust-regressie, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test*; *Referentie* en *Attest* blijven open.
+
 De HTTP- en MCP-ingangen rapporteren een onbekende labelfunctie als `invalid_request_shape` met exact pad `input.labelFunctions[0].function`; MCP-tekst en `structuredContent` komen overeen. Alle 102 service-unittests, 31 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. De [CI op `af663eac`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44906419146) bevestigt de volledige NTA-gate en de Linux-, Windows- en macOS-desktopbuilds. Dit versterkt *HTTP*, *MCP*, *Invoer*, *Test* en *Bouwbewijs*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Een ingelezen, onbekende labelfunctiewaarde blijft in de NTA-keuze zichtbaar als ruwe tekst en verdwijnt na correctie. De 13 gerichte formulierproeven en TypeScript-controle slagen lokaal. De [CI op `1167dd30`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44901261969) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *UI*, *Invoer*, *Test* en *Bouwbewijs* bij parserfouten; onafhankelijke *Referentie* en *Attest* blijven open.
