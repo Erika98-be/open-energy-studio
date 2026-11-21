@@ -307,7 +307,7 @@ function GeneralSection(props: NtaSectionProps) {
         ['apartment_building', t('nta.form.dwellingType.apartment')], ['other', t('nta.form.dwellingType.other')]]} />}
     <SelectField {...f} path={['labelFunction']} label={t('nta.form.labelFunction')}
       options={labelFunctionsForScope(read(draft, ['calculationScope']), read(draft, ['labelFunction']))
-        .map((key) => [key, t(`nta.form.labelFn.${key}`)])} />
+        .map((key) => [key, LABEL_FUNCTIONS.some((known) => known === key) ? t(`nta.form.labelFn.${key}`) : key])} />
     <SelectField {...f} path={['bblFunction']} label={t('nta.form.bblFunction')} options={[
       ['other_residential', t('nta.form.bbl.other_residential')], ['residential_building', t('nta.form.bbl.residential_building')],
       ['office', t('nta.form.bbl.office')], ['education', t('nta.form.bbl.education')], ['retail', t('nta.form.bbl.retail')],

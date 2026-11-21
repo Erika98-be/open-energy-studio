@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 21 november 2026
 
+Ook een onbekende, ingelezen labelfunctiewaarde blijft nu zichtbaar in de NTA-keuze, met de ruwe waarde als tekst, totdat zij wordt gecorrigeerd. Daarmee verbergt de formulierweergave een parserfout niet achter de lege keuze. De 13 gerichte formulierproeven en TypeScript-controle slagen lokaal; de Rust-parser en audit bepalen nog steeds of de invoer geldig is.
+
 De projectstap heeft nu een gerichte regressie voor een ingelezen, bij de woonrekenberekening afwijkende labelfunctie. De functie blijft zichtbaar totdat de scope wordt hersteld; daarna verdwijnen woonfuncties uit de utiliteitskeuze. Alle 15 projectstapproeven en de TypeScript-controle slagen lokaal. Dit toetst de daadwerkelijke formulierkoppeling, niet de normuitkomst.
 
 De NTA-invoer toont in de labelfunctiekeuze nu alleen functies die bij de gekozen woon- of utiliteitsscope horen. Een eerder ingelezen afwijkende functie blijft zichtbaar en kan worden gecorrigeerd; nieuwe lijstregels beginnen met een passende functie. De gerichte UI-proef (12 tests) en TypeScript-controle slagen lokaal. De [CI op `54c24874`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44872423334) bevestigt de volledige NTA-gate en drie desktopbuilds; de [CI op `95379296`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44881859227) bevestigt ook de scopewisselregressie en drie desktopbuilds. De Rust-audit blijft de beslissende invoergrens; onafhankelijke normreferentie en *Attest* blijven open.

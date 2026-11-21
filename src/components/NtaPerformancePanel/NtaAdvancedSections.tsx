@@ -19,7 +19,7 @@ export const LABEL_FUNCTIONS = ['residential', 'office', 'assembly_without_day_c
 export function labelFunctionsForScope(scope: unknown, selected?: unknown): string[] {
   const allowed = scope === 'residential' ? ['residential'] : scope === 'utility'
     ? LABEL_FUNCTIONS.filter((key) => key !== 'residential') : [...LABEL_FUNCTIONS];
-  return typeof selected === 'string' && LABEL_FUNCTIONS.some((key) => key === selected) && !allowed.includes(selected)
+  return typeof selected === 'string' && selected.length > 0 && !allowed.includes(selected)
     ? [...allowed, selected] : allowed;
 }
 export const BBL_FUNCTIONS = ['residential_building', 'caravan', 'floating_building_after2018_berth',
@@ -45,7 +45,8 @@ export function FunctionAreasFields({ draft, change, base, functions, prefix }: 
       <SelectField {...field} path={[base, index, 'function']} label={t(`nta.form.${base}`)}
         options={(base === 'labelFunctions'
           ? labelFunctionsForScope(read(draft, ['calculationScope']), read(draft, [base, index, 'function']))
-          : functions).map((key) => [key, t(`${prefix}.${key}`)])} />
+          : functions).map((key) => [key, base === 'labelFunctions' && !LABEL_FUNCTIONS.some((known) => known === key)
+          ? key : t(`${prefix}.${key}`)])} />
       <NumberField {...field} path={[base, index, 'areaM2']} label={t('nta.form.functionArea')} />
       <button type="button" className="nta-form-remove"
         onClick={() => change([base], rows.filter((_, item) => item !== index))}>{t('nta.form.remove')}</button>

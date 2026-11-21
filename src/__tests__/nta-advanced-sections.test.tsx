@@ -225,6 +225,20 @@ describe('advanced NTA calculation fields', () => {
       (option) => option.value)).not.toContain('residential');
   });
 
+  it('shows an unknown imported label function so it can be corrected', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<Harness initial={{ calculationScope: 'residential',
+      labelFunctions: [{ function: 'unrecognised_function', areaM2: 80 }] }}
+      body={(draft, change) => <FunctionAreasFields draft={draft} change={change}
+        base="labelFunctions" functions={LABEL_FUNCTIONS} prefix="nta.form.labelFn" />} />);
+    const select = screen.getByLabelText('Label function (§5.3.1)') as HTMLSelectElement;
+    expect(select.value).toBe('unrecognised_function');
+    expect(screen.getByRole('option', { name: 'unrecognised_function' })).toBeInTheDocument();
+    await user.selectOptions(select, 'residential');
+    expect(current().labelFunctions[0].function).toBe('residential');
+    expect(Array.from(select.options, (option) => option.value)).not.toContain('unrecognised_function');
+  });
+
   it('edits BACS systems and evidence, and annex P external supply as JSON', { timeout: 60000 }, async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness initial={{}}

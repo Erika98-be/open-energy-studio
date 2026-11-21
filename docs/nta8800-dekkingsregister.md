@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Een ingelezen, onbekende labelfunctiewaarde blijft in de NTA-keuze zichtbaar als ruwe tekst en verdwijnt na correctie. De 13 gerichte formulierproeven en TypeScript-controle slagen lokaal. Dit versterkt *UI*, *Invoer* en *Test* bij parserfouten; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De projectstap bewaakt het behoud van een ingelezen afwijkende labelfunctie en het wisselen naar passende keuzemogelijkheden na scopewijziging. De 15 projectstapproeven en TypeScript-controle slagen lokaal. Dit versterkt *UI* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De labelfunctiekeuze in de NTA-UI volgt de woon- of utiliteitsscope, behoudt ingelezen afwijkingen voor herstel en gebruikt bij nieuwe regels een passende standaardfunctie. De gerichte UI-proef (12 tests) en TypeScript-controle slagen lokaal. De [CI op `54c24874`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44872423334) bevestigt de volledige NTA-gate en drie desktopbuilds; de [CI op `95379296`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44881859227) bevestigt ook de scopewisselregressie en drie desktopbuilds. Dit versterkt *UI*, *Invoer*, *Test* en *Bouwbewijs*; de Rust-audit, onafhankelijke *Referentie* en *Attest* blijven afzonderlijke grenzen.
