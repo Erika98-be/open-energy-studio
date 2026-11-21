@@ -1724,6 +1724,29 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn performance_route_points_utility_single_label_error_to_its_field() {
+        let mut input: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-building-performance-synthetic.json"
+        ))
+        .unwrap();
+        input["calculationScope"] = json!("utility");
+        input["labelFunction"] = json!("residential");
+        input["labelFunctions"] = json!([]);
+        let (status, result) =
+            post_json("/v1/nta8800/performance/calculate", json!({"input": input})).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["annualPrimaryFossilKwh"].is_null());
+        let issues = result["issues"].as_array().unwrap();
+        assert!(issues.iter().any(|issue| {
+            issue["code"] == "label_function_scope_mismatch" && issue["path"] == "labelFunction"
+        }));
+        assert!(!issues
+            .iter()
+            .any(|issue| issue["code"] == "label_functions_residential_in_utility"));
+    }
+
+    #[tokio::test]
     async fn performance_route_reports_unknown_label_function_at_its_input_path() {
         let mut input: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-building-performance-synthetic.json"
