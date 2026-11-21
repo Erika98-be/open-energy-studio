@@ -2247,6 +2247,21 @@ fn function_area_warnings(input: &BuildingPerformanceInput) -> Vec<PerformanceIs
     warnings
 }
 
+fn aggregate_declared_energy_overflows<'a>(profiles: impl Iterator<Item = &'a Vec<f64>>) -> bool {
+    let mut total = 0.0;
+    for monthly in profiles {
+        if !twelve_nonnegative(monthly) {
+            return false;
+        }
+        let annual: f64 = monthly.iter().sum();
+        if !annual.is_finite() {
+            return false; // The individual stream already has its own audit issue.
+        }
+        total += annual;
+    }
+    !total.is_finite()
+}
+
 fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>) {
     // 13.156a: E_W;gen;in;PFHRD needs the heating gas of the same combi.
     for (system, path) in hot_water_system_list(input) {
@@ -2463,6 +2478,18 @@ fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>
                 format!("{path}.sourceReference"),
             ));
         }
+    }
+    if aggregate_declared_energy_overflows(input.declared_uses.iter().map(|item| &item.monthly_kwh))
+    {
+        issues.push(issue("annual_energy_overflow", "declaredUses"));
+    }
+    if aggregate_declared_energy_overflows(
+        input
+            .declared_renewable_heat
+            .iter()
+            .map(|item| &item.monthly_kwh),
+    ) {
+        issues.push(issue("annual_energy_overflow", "declaredRenewableHeat"));
     }
     if input.cooling.is_some() && !input.cooling_systems.is_empty() {
         issues.push(issue(
@@ -2697,6 +2724,14 @@ fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>
                 format!("{path}.sourceReference"),
             ));
         }
+    }
+    if aggregate_declared_energy_overflows(
+        input
+            .on_site_production
+            .iter()
+            .map(|item| &item.monthly_kwh),
+    ) {
+        issues.push(issue("annual_energy_overflow", "onSiteProduction"));
     }
     match (
         heat_pump_generator(input).heat_pump(),
@@ -8671,6 +8706,50 @@ mod tests {
             .iter()
             .any(|item| item.code == "annual_energy_overflow"
                 && item.path == "onSiteProduction[0].monthlyKwh"));
+    }
+
+    #[test]
+    fn overflowing_aggregate_declared_streams_are_refused_at_the_collection_path() {
+        let mut sample = input();
+        sample.declared_uses[0].monthly_kwh = vec![1.0e307; 12];
+        let mut second = sample.declared_uses[0].clone();
+        second.id = "second-use".into();
+        sample.declared_uses.push(second);
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result.annual_primary_fossil_kwh.is_none());
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "annual_energy_overflow" && item.path == "declaredUses"));
+
+        let mut sample = input();
+        for id in ["first-heat", "second-heat"] {
+            sample.declared_renewable_heat.push(DeclaredRenewableHeat {
+                id: id.into(),
+                monthly_kwh: vec![1.0e307; 12],
+                source_reference: "synthetic".into(),
+            });
+        }
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "annual_energy_overflow"
+                && item.path == "declaredRenewableHeat"));
+
+        let mut sample = input();
+        sample.on_site_production[0].monthly_kwh = vec![1.0e307; 12];
+        let mut second = sample.on_site_production[0].clone();
+        second.id = "second-production".into();
+        sample.on_site_production.push(second);
+        let result = assess_building_performance(&sample);
+        assert_eq!(result.status, "invalid");
+        assert!(result
+            .issues
+            .iter()
+            .any(|item| item.code == "annual_energy_overflow" && item.path == "onSiteProduction"));
     }
 
     #[test]
