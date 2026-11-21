@@ -21,7 +21,7 @@ import {
 } from './NtaFormFields';
 import { PvSystemFields } from './NtaPvFields';
 import {
-  AirHeatersFields, BacsFields, BBL_FUNCTIONS, FunctionAreasFields, LABEL_FUNCTIONS,
+  AirHeatersFields, BacsFields, BBL_FUNCTIONS, FunctionAreasFields, LABEL_FUNCTIONS, labelFunctionsForScope,
 } from './NtaAdvancedSections';
 import { NtaVentilationSection } from './NtaVentilationSection';
 import { DynamicWindowsFields } from './NtaDynamicWindows';
@@ -306,7 +306,8 @@ function GeneralSection(props: NtaSectionProps) {
       label={t('nta.form.dwellingType')} options={[
         ['apartment_building', t('nta.form.dwellingType.apartment')], ['other', t('nta.form.dwellingType.other')]]} />}
     <SelectField {...f} path={['labelFunction']} label={t('nta.form.labelFunction')}
-      options={LABEL_FUNCTIONS.map((key) => [key, t(`nta.form.labelFn.${key}`)])} />
+      options={labelFunctionsForScope(read(draft, ['calculationScope']), read(draft, ['labelFunction']))
+        .map((key) => [key, t(`nta.form.labelFn.${key}`)])} />
     <SelectField {...f} path={['bblFunction']} label={t('nta.form.bblFunction')} options={[
       ['other_residential', t('nta.form.bbl.other_residential')], ['residential_building', t('nta.form.bbl.residential_building')],
       ['office', t('nta.form.bbl.office')], ['education', t('nta.form.bbl.education')], ['retail', t('nta.form.bbl.retail')],

@@ -16,6 +16,12 @@ interface SectionProps {
 
 export const LABEL_FUNCTIONS = ['residential', 'office', 'assembly_without_day_care', 'assembly_with_day_care', 'education',
   'healthcare_without_beds', 'healthcare_with_beds', 'retail', 'sport', 'lodging', 'cell'] as const;
+export function labelFunctionsForScope(scope: unknown, selected?: unknown): string[] {
+  const allowed = scope === 'residential' ? ['residential'] : scope === 'utility'
+    ? LABEL_FUNCTIONS.filter((key) => key !== 'residential') : [...LABEL_FUNCTIONS];
+  return typeof selected === 'string' && LABEL_FUNCTIONS.some((key) => key === selected) && !allowed.includes(selected)
+    ? [...allowed, selected] : allowed;
+}
 export const BBL_FUNCTIONS = ['residential_building', 'caravan', 'floating_building_after2018_berth',
   'floating_building_other_berth', 'other_residential', 'assembly_child_care', 'other_assembly', 'cell',
   'healthcare_with_beds', 'other_healthcare', 'office', 'lodging_in_lodging_building', 'other_lodging', 'education',
@@ -37,12 +43,16 @@ export function FunctionAreasFields({ draft, change, base, functions, prefix }: 
     {rows.map((_, index) => <div key={index} className="nta-form-row" role="group"
       aria-label={`${t(`nta.form.${base}`)} ${index + 1}`}>
       <SelectField {...field} path={[base, index, 'function']} label={t(`nta.form.${base}`)}
-        options={functions.map((key) => [key, t(`${prefix}.${key}`)])} />
+        options={(base === 'labelFunctions'
+          ? labelFunctionsForScope(read(draft, ['calculationScope']), read(draft, [base, index, 'function']))
+          : functions).map((key) => [key, t(`${prefix}.${key}`)])} />
       <NumberField {...field} path={[base, index, 'areaM2']} label={t('nta.form.functionArea')} />
       <button type="button" className="nta-form-remove"
         onClick={() => change([base], rows.filter((_, item) => item !== index))}>{t('nta.form.remove')}</button>
     </div>)}
-    <button type="button" className="btn" onClick={() => change([base], [...rows, { function: functions[0], areaM2: null }])}>
+    <button type="button" className="btn" onClick={() => change([base], [...rows, {
+      function: base === 'labelFunctions' ? labelFunctionsForScope(read(draft, ['calculationScope']))[0] : functions[0], areaM2: null,
+    }])}>
       {t(`nta.form.${base}.add`)}
     </button>
   </>;

@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De labelfunctiekeuze in de NTA-UI volgt de woon- of utiliteitsscope, behoudt ingelezen afwijkingen voor herstel en gebruikt bij nieuwe regels een passende standaardfunctie. De gerichte UI-proef (12 tests) en TypeScript-controle slagen lokaal. Dit versterkt *UI*, *Invoer* en *Test*; de Rust-audit, onafhankelijke *Referentie* en *Attest* blijven afzonderlijke grenzen.
+
 HTTP en MCP weigeren een utiliteitsfunctie in `labelFunctions` bij een woonrekenberekening met respectievelijk 422/toolfout, exact collectiepad en lege primaire jaar- en labeluitkomst. MCP bewaakt tekst/`structuredContent`-gelijkheid; 101 service-unittests, 30 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. De [CI op `f7ad8907`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44867347573) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *HTTP*, *MCP*, *Audit*, *Test* en *Bouwbewijs*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 Een woonrekenberekening met een utiliteitsfunctie in `labelFunctions` wordt nu geweigerd met `label_function_scope_mismatch` op de lijst en zonder primaire jaar- of labeluitkomst. De regressie, 1055 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal. De [CI op `6dbe108b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44862394970) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *Invoer*, *Audit*, *Test* en *Bouwbewijs* voor labelgegevens; onafhankelijke *Referentie* en *Attest* blijven open.

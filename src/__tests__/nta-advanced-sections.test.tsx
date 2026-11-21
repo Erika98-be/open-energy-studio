@@ -201,6 +201,21 @@ describe('advanced NTA calculation fields', () => {
     expect(current().labelFunctions).toEqual([{ function: 'office', areaM2: 80 }]);
   });
 
+  it('offers label functions for the calculation scope while preserving an imported mismatch for correction', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<Harness initial={{ calculationScope: 'residential', labelFunctions: [{ function: 'office', areaM2: 80 }] }}
+      body={(draft, change) => <FunctionAreasFields draft={draft} change={change}
+        base="labelFunctions" functions={LABEL_FUNCTIONS} prefix="nta.form.labelFn" />} />);
+    const existing = screen.getByLabelText('Label function (§5.3.1)') as HTMLSelectElement;
+    expect(existing.value).toBe('office');
+    expect(Array.from(existing.options, (option) => option.value)).toEqual(['', 'residential', 'office']);
+    await user.selectOptions(existing, 'residential');
+    expect(current().labelFunctions).toEqual([{ function: 'residential', areaM2: 80 }]);
+    await user.click(screen.getByRole('button', { name: 'Add label function' }));
+    expect(Array.from((screen.getAllByLabelText('Label function (§5.3.1)')[1] as HTMLSelectElement).options,
+      (option) => option.value)).toEqual(['', 'residential']);
+  });
+
   it('edits BACS systems and evidence, and annex P external supply as JSON', { timeout: 60000 }, async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness initial={{}}
