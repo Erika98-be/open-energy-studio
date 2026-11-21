@@ -239,6 +239,19 @@ describe('advanced NTA calculation fields', () => {
     expect(Array.from(select.options, (option) => option.value)).not.toContain('unrecognised_function');
   });
 
+  it('shows an unknown imported Bbl function so it can be corrected', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<Harness initial={{ bblFunctions: [{ function: 'unrecognised_bbl_function', areaM2: 80 }] }}
+      body={(draft, change) => <FunctionAreasFields draft={draft} change={change}
+        base="bblFunctions" functions={BBL_FUNCTIONS} prefix="nta.form.bblFn" />} />);
+    const select = screen.getByLabelText('Bbl use function (art. 4.149(2))') as HTMLSelectElement;
+    expect(select.value).toBe('unrecognised_bbl_function');
+    expect(screen.getByRole('option', { name: 'unrecognised_bbl_function' })).toBeInTheDocument();
+    await user.selectOptions(select, 'other_residential');
+    expect(current().bblFunctions[0].function).toBe('other_residential');
+    expect(Array.from(select.options, (option) => option.value)).not.toContain('unrecognised_bbl_function');
+  });
+
   it('edits BACS systems and evidence, and annex P external supply as JSON', { timeout: 60000 }, async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness initial={{}}

@@ -40,17 +40,22 @@ export function FunctionAreasFields({ draft, change, base, functions, prefix }: 
   const field = { draft, onChange: change };
   const rows = list(draft, [base]);
   return <>
-    {rows.map((_, index) => <div key={index} className="nta-form-row" role="group"
-      aria-label={`${t(`nta.form.${base}`)} ${index + 1}`}>
+    {rows.map((_, index) => {
+      const selected = read(draft, [base, index, 'function']);
+      const options = base === 'labelFunctions'
+        ? labelFunctionsForScope(read(draft, ['calculationScope']), selected)
+        : typeof selected === 'string' && selected.length > 0 && !functions.includes(selected)
+          ? [...functions, selected] : functions;
+      const known = base === 'labelFunctions' ? LABEL_FUNCTIONS : BBL_FUNCTIONS;
+      return <div key={index} className="nta-form-row" role="group"
+        aria-label={`${t(`nta.form.${base}`)} ${index + 1}`}>
       <SelectField {...field} path={[base, index, 'function']} label={t(`nta.form.${base}`)}
-        options={(base === 'labelFunctions'
-          ? labelFunctionsForScope(read(draft, ['calculationScope']), read(draft, [base, index, 'function']))
-          : functions).map((key) => [key, base === 'labelFunctions' && !LABEL_FUNCTIONS.some((known) => known === key)
-          ? key : t(`${prefix}.${key}`)])} />
+        options={options.map((key) => [key, known.some((item) => item === key)
+          ? t(`${prefix}.${key}`) : key])} />
       <NumberField {...field} path={[base, index, 'areaM2']} label={t('nta.form.functionArea')} />
       <button type="button" className="nta-form-remove"
         onClick={() => change([base], rows.filter((_, item) => item !== index))}>{t('nta.form.remove')}</button>
-    </div>)}
+    </div>})}
     <button type="button" className="btn" onClick={() => change([base], [...rows, {
       function: base === 'labelFunctions' ? labelFunctionsForScope(read(draft, ['calculationScope']))[0] : functions[0], areaM2: null,
     }])}>
