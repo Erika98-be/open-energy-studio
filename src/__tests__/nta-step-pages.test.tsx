@@ -68,6 +68,20 @@ describe('NTA sections on the workflow steps', () => {
     expect(await page.findByLabelText('All energy uses are included')).toBeInTheDocument();
   });
 
+  it('keeps an imported label function visible while the project scope is corrected', async () => {
+    const user = userEvent.setup();
+    const block = { ...buildNtaCalculationTemplate(createDefaultProject()),
+      calculationScope: 'residential', labelFunction: 'office' };
+    renderWithProviders(<Harness initial={{ step: 'project' }} block={block} />);
+    const page = within(await screen.findByTestId('page'));
+    const label = await page.findByLabelText('Label function of the building (§5.3.1)') as HTMLSelectElement;
+    expect(label.value).toBe('office');
+    expect(Array.from(label.options, (option) => option.value)).toEqual(['', 'residential', 'office']);
+    await user.selectOptions(page.getByLabelText('Calculation scope'), 'utility');
+    expect(Array.from(label.options, (option) => option.value)).not.toContain('residential');
+    expect(label.value).toBe('office');
+  });
+
   it('steps through the parts of the heating page', async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness initial={{ step: 'installations', sub: 'heating' }} />);
