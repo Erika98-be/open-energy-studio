@@ -26,6 +26,10 @@ export const BBL_FUNCTIONS = ['residential_building', 'caravan', 'floating_build
   'floating_building_other_berth', 'other_residential', 'assembly_child_care', 'other_assembly', 'cell',
   'healthcare_with_beds', 'other_healthcare', 'office', 'lodging_in_lodging_building', 'other_lodging', 'education',
   'sport', 'retail'] as const;
+export function functionsWithSelected(functions: readonly string[], selected: unknown): string[] {
+  return typeof selected === 'string' && selected.length > 0 && !functions.includes(selected)
+    ? [...functions, selected] : [...functions];
+}
 
 function list(draft: Draft, path: Path): Draft[] {
   const value = read(draft, path);
@@ -44,8 +48,7 @@ export function FunctionAreasFields({ draft, change, base, functions, prefix }: 
       const selected = read(draft, [base, index, 'function']);
       const options = base === 'labelFunctions'
         ? labelFunctionsForScope(read(draft, ['calculationScope']), selected)
-        : typeof selected === 'string' && selected.length > 0 && !functions.includes(selected)
-          ? [...functions, selected] : functions;
+        : functionsWithSelected(functions, selected);
       const known = base === 'labelFunctions' ? LABEL_FUNCTIONS : BBL_FUNCTIONS;
       return <div key={index} className="nta-form-row" role="group"
         aria-label={`${t(`nta.form.${base}`)} ${index + 1}`}>

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { write, type Draft, type Path } from '../components/NtaPerformancePanel/NtaFormFields';
 import { NTA_SECTIONS } from '../components/NtaPerformancePanel/NtaSections';
+import { BBL_FUNCTIONS } from '../components/NtaPerformancePanel/NtaAdvancedSections';
 import { calculateProjectPerformanceWithRust } from '../core/nta/KernelClient';
 import { nullPaths } from '../core/nta/KernelInput';
 import { declaredUseTemplate, hotWaterGeneratorTemplate } from '../core/nta/NtaSystemTemplates';
@@ -61,6 +62,18 @@ describe('project-form guard findings', () => {
     fireEvent.change(screen.getByLabelText(/Zone usage function/), { target: { value: 'office' } });
     expect(draft().usageFunction).toBe('office');
     expect(draft()).not.toHaveProperty('dwellingType');
+  });
+
+  it('offers every Bbl function and keeps an unknown imported choice visible until correction', () => {
+    const initial = { ...dwelling.ntaCalculation as unknown as Draft,
+      bblFunction: 'unrecognised_bbl_function' };
+    renderWithProviders(<Section id="general" project={dwelling} initial={initial} />);
+    const select = screen.getByLabelText(/Bbl use function/) as HTMLSelectElement;
+    expect(select.value).toBe('unrecognised_bbl_function');
+    expect(optionsOf(/Bbl use function/)).toEqual(['', ...BBL_FUNCTIONS, 'unrecognised_bbl_function']);
+    fireEvent.change(select, { target: { value: 'cell' } });
+    expect(draft().bblFunction).toBe('cell');
+    expect(optionsOf(/Bbl use function/)).not.toContain('unrecognised_bbl_function');
   });
 
   it('keeps hydronic balancing consistent with the emission system (table 9.3 footnote a)', () => {

@@ -21,7 +21,7 @@ import {
 } from './NtaFormFields';
 import { PvSystemFields } from './NtaPvFields';
 import {
-  AirHeatersFields, BacsFields, BBL_FUNCTIONS, FunctionAreasFields, LABEL_FUNCTIONS, labelFunctionsForScope,
+  AirHeatersFields, BacsFields, BBL_FUNCTIONS, FunctionAreasFields, LABEL_FUNCTIONS, functionsWithSelected, labelFunctionsForScope,
 } from './NtaAdvancedSections';
 import { NtaVentilationSection } from './NtaVentilationSection';
 import { DynamicWindowsFields } from './NtaDynamicWindows';
@@ -308,15 +308,10 @@ function GeneralSection(props: NtaSectionProps) {
     <SelectField {...f} path={['labelFunction']} label={t('nta.form.labelFunction')}
       options={labelFunctionsForScope(read(draft, ['calculationScope']), read(draft, ['labelFunction']))
         .map((key) => [key, LABEL_FUNCTIONS.some((known) => known === key) ? t(`nta.form.labelFn.${key}`) : key])} />
-    <SelectField {...f} path={['bblFunction']} label={t('nta.form.bblFunction')} options={[
-      ['other_residential', t('nta.form.bbl.other_residential')], ['residential_building', t('nta.form.bbl.residential_building')],
-      ['office', t('nta.form.bbl.office')], ['education', t('nta.form.bbl.education')], ['retail', t('nta.form.bbl.retail')],
-      ['other_assembly', t('nta.form.bbl.other_assembly')], ['other_healthcare', t('nta.form.bbl.other_healthcare')],
-      ['sport', t('nta.form.bbl.sport')], ['other_lodging', t('nta.form.bbl.other_lodging')],
-      ['caravan', t('nta.form.bbl.caravan')], ['floating_building_after2018_berth', t('nta.form.bbl.floating_building_after2018_berth')],
-      ['floating_building_other_berth', t('nta.form.bbl.floating_building_other_berth')],
-      ['lodging_in_lodging_building', t('nta.form.bbl.lodging_in_lodging_building')],
-    ]} />
+    <SelectField {...f} path={['bblFunction']} label={t('nta.form.bblFunction')}
+      options={functionsWithSelected(BBL_FUNCTIONS, read(draft, ['bblFunction']))
+        .map((key) => [key, BBL_FUNCTIONS.some((known) => known === key)
+          ? t(`nta.form.bblFn.${key}`) : key])} />
     <SelectField {...f} path={['zebHeatDeliveryTemperature']}
       label={locale === 'nl' ? 'Aflevertemperatuur externe warmte voor ZEB (bijlage AB)' : 'External heat delivery temperature for ZEB (Annex AB)'}
       options={[
