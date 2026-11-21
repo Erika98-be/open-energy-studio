@@ -204,8 +204,11 @@ describe('advanced NTA calculation fields', () => {
   it('offers label functions for the calculation scope while preserving an imported mismatch for correction', async () => {
     const user = userEvent.setup();
     renderWithProviders(<Harness initial={{ calculationScope: 'residential', labelFunctions: [{ function: 'office', areaM2: 80 }] }}
-      body={(draft, change) => <FunctionAreasFields draft={draft} change={change}
-        base="labelFunctions" functions={LABEL_FUNCTIONS} prefix="nta.form.labelFn" />} />);
+      body={(draft, change) => <>
+        <FunctionAreasFields draft={draft} change={change}
+          base="labelFunctions" functions={LABEL_FUNCTIONS} prefix="nta.form.labelFn" />
+        <button type="button" onClick={() => change(['calculationScope'], 'utility')}>Utility scope</button>
+      </>} />);
     const existing = screen.getByLabelText('Label function (§5.3.1)') as HTMLSelectElement;
     expect(existing.value).toBe('office');
     expect(Array.from(existing.options, (option) => option.value)).toEqual(['', 'residential', 'office']);
@@ -214,6 +217,12 @@ describe('advanced NTA calculation fields', () => {
     await user.click(screen.getByRole('button', { name: 'Add label function' }));
     expect(Array.from((screen.getAllByLabelText('Label function (§5.3.1)')[1] as HTMLSelectElement).options,
       (option) => option.value)).toEqual(['', 'residential']);
+    await user.click(screen.getByRole('button', { name: 'Utility scope' }));
+    expect((screen.getAllByLabelText('Label function (§5.3.1)')[0] as HTMLSelectElement).value).toBe('residential');
+    await user.click(screen.getByRole('button', { name: 'Add label function' }));
+    expect(current().labelFunctions[2].function).toBe('office');
+    expect(Array.from((screen.getAllByLabelText('Label function (§5.3.1)')[2] as HTMLSelectElement).options,
+      (option) => option.value)).not.toContain('residential');
   });
 
   it('edits BACS systems and evidence, and annex P external supply as JSON', { timeout: 60000 }, async () => {
