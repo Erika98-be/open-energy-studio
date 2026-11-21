@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 21 november 2026
 
+HTTP en MCP melden een onbekende ingelezen labelfunctie nu aantoonbaar als `invalid_request_shape` op `input.labelFunctions[0].function`, zonder berekeningsresultaat; MCP bewaakt tekst- en `structuredContent`-gelijkheid. Alle 102 service-unittests en 31 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. Dit is protocolbewijs voor de bestaande parsergrens, geen normatieve referentie-uitkomst.
+
 Ook een onbekende, ingelezen labelfunctiewaarde blijft nu zichtbaar in de NTA-keuze, met de ruwe waarde als tekst, totdat zij wordt gecorrigeerd. Daarmee verbergt de formulierweergave een parserfout niet achter de lege keuze. De 13 gerichte formulierproeven en TypeScript-controle slagen lokaal. De [CI op `1167dd30`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44901261969) bevestigt de volledige NTA-gate en drie desktopbuilds; de Rust-parser en audit bepalen nog steeds of de invoer geldig is.
 
 De projectstap heeft nu een gerichte regressie voor een ingelezen, bij de woonrekenberekening afwijkende labelfunctie. De functie blijft zichtbaar totdat de scope wordt hersteld; daarna verdwijnen woonfuncties uit de utiliteitskeuze. Alle 15 projectstapproeven en de TypeScript-controle slagen lokaal. De [CI op `f5d3e7fd`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44891544346) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit toetst de daadwerkelijke formulierkoppeling, niet de normuitkomst.

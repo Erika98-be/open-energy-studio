@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De HTTP- en MCP-ingangen rapporteren een onbekende labelfunctie als `invalid_request_shape` met exact pad `input.labelFunctions[0].function`; MCP-tekst en `structuredContent` komen overeen. Alle 102 service-unittests, 31 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. Dit versterkt *HTTP*, *MCP*, *Invoer* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
+
 Een ingelezen, onbekende labelfunctiewaarde blijft in de NTA-keuze zichtbaar als ruwe tekst en verdwijnt na correctie. De 13 gerichte formulierproeven en TypeScript-controle slagen lokaal. De [CI op `1167dd30`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44901261969) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *UI*, *Invoer*, *Test* en *Bouwbewijs* bij parserfouten; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De projectstap bewaakt het behoud van een ingelezen afwijkende labelfunctie en het wisselen naar passende keuzemogelijkheden na scopewijziging. De 15 projectstapproeven en TypeScript-controle slagen lokaal. De [CI op `f5d3e7fd`](https://github.com/Erika98-be/open-energy-studio/actions/runs/44891544346) bevestigt de volledige NTA-gate en drie desktopbuilds. Dit versterkt *UI*, *Test* en *Bouwbewijs*; onafhankelijke *Referentie* en *Attest* blijven open.

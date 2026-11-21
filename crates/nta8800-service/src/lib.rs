@@ -1724,6 +1724,21 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn performance_route_reports_unknown_label_function_at_its_input_path() {
+        let mut input: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-building-performance-synthetic.json"
+        ))
+        .unwrap();
+        input["labelFunctions"] = json!([{"function":"unrecognised_function", "areaM2":100.0}]);
+        let (status, result) =
+            post_json("/v1/nta8800/performance/calculate", json!({"input": input})).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST, "{result}");
+        assert_eq!(result["code"], "invalid_request_shape");
+        assert_eq!(result["path"], "input.labelFunctions[0].function");
+        assert!(result.get("annualPrimaryFossilKwh").is_none());
+    }
+
+    #[tokio::test]
     async fn monthly_demand_route_rejects_unsupported_tilt_without_numbers() {
         let mut input = monthly_demand_sample();
         input["windows"][0]["tiltDeg"] = json!(200.0);

@@ -460,6 +460,40 @@ fn building_performance_mcp_refuses_utility_label_function_on_residential_scope(
 }
 
 #[test]
+fn building_performance_mcp_reports_unknown_label_function_at_its_input_path() {
+    let mut input: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-building-performance-synthetic.json"
+    ))
+    .unwrap();
+    input["labelFunctions"] = json!([{"function":"unrecognised_function", "areaM2":100.0}]);
+
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"unknown-label-function-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name":"calculate_building_performance", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let error = &response["structuredContent"];
+    assert_eq!(error["code"], "invalid_request_shape");
+    assert_eq!(error["path"], "input.labelFunctions[0].function");
+    assert!(error.get("annualPrimaryFossilKwh").is_none());
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *error
+    );
+}
+
+#[test]
 fn annex_q_mcp_requires_individual_ground_source_for_regeneration() {
     let mut input: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-space-heating-chain-annex-q-synthetic.json"
