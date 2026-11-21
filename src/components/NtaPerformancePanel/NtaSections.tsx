@@ -309,7 +309,12 @@ function GeneralSection(props: NtaSectionProps) {
       options={labelFunctionsForScope(read(draft, ['calculationScope']), read(draft, ['labelFunction']))
         .map((key) => [key, LABEL_FUNCTIONS.some((known) => known === key) ? t(`nta.form.labelFn.${key}`) : key])} />
     <SelectField {...f} path={['bblFunction']} label={t('nta.form.bblFunction')}
-      options={functionsWithSelected(BBL_FUNCTIONS, read(draft, ['bblFunction']))
+      options={functionsWithSelected([
+        'residential_building', 'caravan', 'floating_building_after2018_berth',
+        'floating_building_other_berth', 'other_residential', 'assembly_child_care',
+        'other_assembly', 'cell', 'healthcare_with_beds', 'other_healthcare', 'office',
+        'lodging_in_lodging_building', 'other_lodging', 'education', 'sport', 'retail',
+      ], read(draft, ['bblFunction']))
         .map((key) => [key, BBL_FUNCTIONS.some((known) => known === key)
           ? t(`nta.form.bblFn.${key}`) : key])} />
     <SelectField {...f} path={['zebHeatDeliveryTemperature']}
