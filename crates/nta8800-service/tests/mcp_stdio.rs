@@ -333,6 +333,52 @@ fn building_performance_mcp_refuses_overflowing_annual_declared_use() {
 }
 
 #[test]
+fn building_performance_mcp_refuses_overflowing_aggregate_production() {
+    let mut input: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-building-performance-synthetic.json"
+    ))
+    .unwrap();
+    input["onSiteProduction"][0]["monthlyKwh"] = json!(vec![1.0e307; 12]);
+    let mut second = input["onSiteProduction"][0].clone();
+    second["id"] = json!("second-production");
+    input["onSiteProduction"]
+        .as_array_mut()
+        .unwrap()
+        .push(second);
+
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion":"2025-06-18", "capabilities":{},
+            "clientInfo":{"name":"aggregate-production-overflow-test", "version":"1"}
+        }),
+    );
+    server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name":"calculate_building_performance", "arguments":{"input":input}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["annualPrimaryFossilKwh"].is_null());
+    assert!(assessment["issues"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|issue| {
+            issue["code"] == "annual_energy_overflow" && issue["path"] == "onSiteProduction"
+        }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn building_performance_mcp_refuses_invalid_label_function_area() {
     let mut input: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-building-performance-synthetic.json"

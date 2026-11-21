@@ -1669,6 +1669,26 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn performance_route_refuses_overflowing_aggregate_declared_uses() {
+        let mut input: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-building-performance-synthetic.json"
+        ))
+        .unwrap();
+        input["declaredUses"][0]["monthlyKwh"] = json!(vec![1.0e307; 12]);
+        let mut second = input["declaredUses"][0].clone();
+        second["id"] = json!("second-use");
+        input["declaredUses"].as_array_mut().unwrap().push(second);
+        let (status, result) =
+            post_json("/v1/nta8800/performance/calculate", json!({"input": input})).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{result}");
+        assert_eq!(result["status"], "invalid");
+        assert!(result["annualPrimaryFossilKwh"].is_null());
+        assert!(result["issues"].as_array().unwrap().iter().any(|issue| {
+            issue["code"] == "annual_energy_overflow" && issue["path"] == "declaredUses"
+        }));
+    }
+
+    #[tokio::test]
     async fn performance_route_refuses_invalid_bbl_function_area() {
         let mut input: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-building-performance-synthetic.json"
