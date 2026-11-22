@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De bewijs-URL-audit weigert nu ook ongeldige ASCII-hostnamen en procentcodering in het hostdeel; punycode, een afsluitende DNS-punt en de bestaande IPv6-route blijven bruikbaar. De gerichte Rust-regressie op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test* van de bronverwijzing; *Referentie* en *Attest* blijven open.
+De bewijs-URL-audit weigert nu ook ongeldige ASCII-hostnamen en procentcodering in het hostdeel; punycode, een afsluitende DNS-punt en de bestaande IPv6-route blijven bruikbaar. De gerichte Rust-regressie op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal. De [CI op `8f43642e`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45044151231) bevestigt de volledige NTA-gate en Linux-, Windows- en macOS-desktopbuilds. Dit versterkt *Invoer*, *Audit*, *Test* en *Bouwbewijs* van de bronverwijzing; *Referentie* en *Attest* blijven open.
 
 HTTP en MCP controleren nu ook de doorgifte van de Rust-weigering voor een bron-URL met backslash vóór `@`: `invalid` met exact verklaringspad, zonder prestatie- of labeluitkomst; MCP-tekst en `structuredContent` blijven gelijk. De twee gerichte protocolproeven, rustfmt en service-Clippy slagen lokaal; de [CI op `65f902bb`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45022587016) bevestigt de volledige NTA-gate en Linux-, Windows- en macOS-desktopbuilds. Dit versterkt *HTTP*, *MCP*, *Invoer*, *Test* en *Bouwbewijs* van de bestaande bewijsgrens, zonder onafhankelijke *Referentie* of *Attest*.
 
