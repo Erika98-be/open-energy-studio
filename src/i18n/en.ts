@@ -1109,7 +1109,7 @@ export const en: Record<string, string> = {
   'kernel.issue.label_class_calculation_unavailable': 'No indicative label class is available for this project.',
   'kernel.issue.quality_declaration_registry_record_missing': 'The declaration registration and exact product are not yet recorded.',
   'kernel.issue.quality_declaration_registry_field_required': 'Complete the declaration registration, product, and manufacturer.',
-  'kernel.issue.quality_declaration_source_url_invalid': 'Enter an HTTPS link to the declaration source.',
+  'kernel.issue.quality_declaration_source_url_invalid': 'Use a valid HTTPS link to the declaration source, with a valid host address and no user credentials or spaces.',
   'kernel.issue.quality_declaration_record_without_declaration': 'Registry details require a controlled quality declaration.',
   'kernel.issue.heat_pump_metadata_invalid': 'Heat pump metadata is incomplete or contains an unknown value.',
   'kernel.issue.heat_pump_id_mismatch': 'The heat pump metadata ID differs from the system ID.',

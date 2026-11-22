@@ -1109,7 +1109,7 @@ export const nl: Record<string, string> = {
   'kernel.issue.label_class_calculation_unavailable': 'Voor dit project is geen indicatieve labelklasse beschikbaar.',
   'kernel.issue.quality_declaration_registry_record_missing': 'De registratie en het exacte product zijn nog niet vastgelegd.',
   'kernel.issue.quality_declaration_registry_field_required': 'Vul registratie, product en fabrikant van de verklaring in.',
-  'kernel.issue.quality_declaration_source_url_invalid': 'Vul een HTTPS-link naar de bronverklaring in.',
+  'kernel.issue.quality_declaration_source_url_invalid': 'Gebruik een geldige HTTPS-link naar de bronverklaring, met een geldig hostadres en zonder gebruikersgegevens of spaties.',
   'kernel.issue.quality_declaration_record_without_declaration': 'Registergegevens horen bij een gecontroleerde kwaliteitsverklaring.',
   'kernel.issue.heat_pump_metadata_invalid': 'De warmtepompgegevens zijn onvolledig of bevatten een onbekende waarde.',
   'kernel.issue.heat_pump_id_mismatch': 'Het ID van de warmtepompgegevens wijkt af van het systeem-ID.',
