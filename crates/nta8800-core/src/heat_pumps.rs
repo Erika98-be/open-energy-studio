@@ -17,6 +17,14 @@ fn valid_https_source_authority(url: &str) -> bool {
     let Some(rest) = url.strip_prefix("https://") else {
         return false;
     };
+    // A declaration source is stored as a URL, not as browser-tolerated input.
+    // Whitespace and backslashes can change how a client interprets its host.
+    if url
+        .chars()
+        .any(|ch| ch.is_whitespace() || ch.is_control() || ch == '\\')
+    {
+        return false;
+    }
     let authority = rest.split(['/', '?', '#']).next().unwrap_or_default();
     // Userinfo can make an unrelated host look like the declaration registry.
     if authority.contains('@') {
@@ -1214,6 +1222,10 @@ mod tests {
             "https://bcrg.nl:bad/path",
             "https://bcrg.nl:65536/path",
             "https://[::1]:bad/path",
+            "https://bcrg.nl /declaration",
+            "https://bcrg.nl\\@evidence.example/declaration",
+            "https://bcrg.nl/declaration\nother",
+            "https://bcrg.nl/ongedekte waarde",
         ] {
             let mut invalid_source = serde_json::to_value(&pump).unwrap();
             invalid_source["performanceEvidence"]["registryRecord"]["sourceUrl"] =
