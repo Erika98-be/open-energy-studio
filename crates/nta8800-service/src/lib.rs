@@ -1037,6 +1037,8 @@ mod tests {
         for source_url in [
             "https://bcrg.nl@evidence.example/declaration",
             "https://bcrg.nl\\@evidence.example/declaration",
+            "https://bcrg..nl/declaration",
+            "https://bcrg.nl%2eevidence.example/declaration",
         ] {
             project["ntaHeatPumps"][0]["performanceEvidence"]["registryRecord"]["sourceUrl"] =
                 json!(source_url);

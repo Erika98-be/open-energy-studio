@@ -2037,6 +2037,8 @@ fn project_performance_mcp_withholds_invalid_heat_pump_evidence() {
     for (request_id, source_url) in [
         "https://bcrg.nl@evidence.example/declaration",
         "https://bcrg.nl\\@evidence.example/declaration",
+        "https://bcrg..nl/declaration",
+        "https://bcrg.nl%2eevidence.example/declaration",
     ]
     .into_iter()
     .enumerate()
