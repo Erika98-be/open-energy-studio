@@ -13,6 +13,22 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::net::Ipv6Addr;
 
+fn valid_ascii_hostname(hostname: &str) -> bool {
+    let name = hostname.strip_suffix('.').unwrap_or(hostname);
+    !name.is_empty()
+        && name.len() <= 253
+        && name.split('.').all(|label| {
+            let bytes = label.as_bytes();
+            !bytes.is_empty()
+                && bytes.len() <= 63
+                && bytes[0].is_ascii_alphanumeric()
+                && bytes[bytes.len() - 1].is_ascii_alphanumeric()
+                && bytes
+                    .iter()
+                    .all(|byte| byte.is_ascii_alphanumeric() || *byte == b'-')
+        })
+}
+
 fn valid_https_source_authority(url: &str) -> bool {
     let Some(rest) = url.strip_prefix("https://") else {
         return false;
@@ -44,8 +60,7 @@ fn valid_https_source_authority(url: &str) -> bool {
     let (hostname, port) = host
         .split_once(':')
         .map_or((host, None), |(name, port)| (name, Some(port)));
-    !hostname.is_empty()
-        && !hostname.contains(['[', ']', ':'])
+    valid_ascii_hostname(hostname)
         && port.map_or(true, |port| !port.is_empty() && port.parse::<u16>().is_ok())
 }
 
@@ -1189,6 +1204,8 @@ mod tests {
             "https://bcrg.nl:443/path",
             "https://[::1]:443/path",
             "https://bcrg.nl/declaration/@revision",
+            "https://xn--bcher-kva.example/declaration",
+            "https://bcrg.nl./declaration",
         ] {
             let mut valid = input.clone();
             valid["performanceEvidence"]["registryRecord"]["sourceUrl"] =
@@ -1226,6 +1243,11 @@ mod tests {
             "https://bcrg.nl\\@evidence.example/declaration",
             "https://bcrg.nl/declaration\nother",
             "https://bcrg.nl/ongedekte waarde",
+            "https://bcrg..nl/declaration",
+            "https://-bcrg.nl/declaration",
+            "https://bcrg-.nl/declaration",
+            "https://bcrg.nl%2eevidence.example/declaration",
+            "https://bcrg_nl/declaration",
         ] {
             let mut invalid_source = serde_json::to_value(&pump).unwrap();
             invalid_source["performanceEvidence"]["registryRecord"]["sourceUrl"] =
