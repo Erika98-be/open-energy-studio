@@ -502,12 +502,11 @@ fn building_performance_mcp_points_utility_single_label_error_to_its_field() {
 }
 
 #[test]
-fn building_performance_mcp_reports_unknown_label_function_at_its_input_path() {
-    let mut input: Value = serde_json::from_str(include_str!(
+fn building_performance_mcp_reports_unknown_functions_at_their_input_paths() {
+    let base: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-building-performance-synthetic.json"
     ))
     .unwrap();
-    input["labelFunctions"] = json!([{"function":"unrecognised_function", "areaM2":100.0}]);
 
     let mut server = Server::start();
     server.request(
@@ -519,20 +518,50 @@ fn building_performance_mcp_reports_unknown_label_function_at_its_input_path() {
         }),
     );
     server.send(json!({"jsonrpc":"2.0", "method":"notifications/initialized"}));
-    let response = server.request(
-        2,
-        "tools/call",
-        json!({"name":"calculate_building_performance", "arguments":{"input":input}}),
-    );
-    assert_eq!(response["isError"], true, "{response}");
-    let error = &response["structuredContent"];
-    assert_eq!(error["code"], "invalid_request_shape");
-    assert_eq!(error["path"], "input.labelFunctions[0].function");
-    assert!(error.get("annualPrimaryFossilKwh").is_none());
-    assert_eq!(
-        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
-        *error
-    );
+    for (id, field, path, value) in [
+        (
+            2,
+            "labelFunctions",
+            "input.labelFunctions[0].function",
+            json!([{"function":"unrecognised_function", "areaM2":100.0}]),
+        ),
+        (
+            3,
+            "bblFunctions",
+            "input.bblFunctions[0].function",
+            json!([{"function":"unrecognised_function", "areaM2":100.0}]),
+        ),
+        (
+            4,
+            "bblFunction",
+            "input.bblFunction",
+            json!("unrecognised_function"),
+        ),
+    ] {
+        let mut input = base.clone();
+        input[field] = value;
+        let response = server.request(
+            id,
+            "tools/call",
+            json!({"name":"calculate_building_performance", "arguments":{"input":input}}),
+        );
+        assert_eq!(response["isError"], true, "{field}: {response}");
+        let error = &response["structuredContent"];
+        assert_eq!(
+            error["code"], "invalid_request_shape",
+            "{field}: {response}"
+        );
+        assert_eq!(error["path"], path, "{field}: {response}");
+        assert!(
+            error.get("annualPrimaryFossilKwh").is_none(),
+            "{field}: {response}"
+        );
+        assert_eq!(
+            serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap())
+                .unwrap(),
+            *error
+        );
+    }
 }
 
 #[test]

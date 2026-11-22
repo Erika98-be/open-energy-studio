@@ -1747,18 +1747,40 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn performance_route_reports_unknown_label_function_at_its_input_path() {
-        let mut input: Value = serde_json::from_str(include_str!(
+    async fn performance_route_reports_unknown_functions_at_their_input_paths() {
+        let base: Value = serde_json::from_str(include_str!(
             "../../../training-data/nta8800-building-performance-synthetic.json"
         ))
         .unwrap();
-        input["labelFunctions"] = json!([{"function":"unrecognised_function", "areaM2":100.0}]);
-        let (status, result) =
-            post_json("/v1/nta8800/performance/calculate", json!({"input": input})).await;
-        assert_eq!(status, StatusCode::BAD_REQUEST, "{result}");
-        assert_eq!(result["code"], "invalid_request_shape");
-        assert_eq!(result["path"], "input.labelFunctions[0].function");
-        assert!(result.get("annualPrimaryFossilKwh").is_none());
+        for (field, path, value) in [
+            (
+                "labelFunctions",
+                "input.labelFunctions[0].function",
+                json!([{"function":"unrecognised_function", "areaM2":100.0}]),
+            ),
+            (
+                "bblFunctions",
+                "input.bblFunctions[0].function",
+                json!([{"function":"unrecognised_function", "areaM2":100.0}]),
+            ),
+            (
+                "bblFunction",
+                "input.bblFunction",
+                json!("unrecognised_function"),
+            ),
+        ] {
+            let mut input = base.clone();
+            input[field] = value;
+            let (status, result) =
+                post_json("/v1/nta8800/performance/calculate", json!({"input": input})).await;
+            assert_eq!(status, StatusCode::BAD_REQUEST, "{field}: {result}");
+            assert_eq!(result["code"], "invalid_request_shape", "{field}: {result}");
+            assert_eq!(result["path"], path, "{field}: {result}");
+            assert!(
+                result.get("annualPrimaryFossilKwh").is_none(),
+                "{field}: {result}"
+            );
+        }
     }
 
     #[tokio::test]
