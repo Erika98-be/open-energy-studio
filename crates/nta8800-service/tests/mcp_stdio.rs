@@ -2034,24 +2034,35 @@ fn project_performance_mcp_withholds_invalid_heat_pump_evidence() {
         }),
     );
     server.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
-    let response = server.request(
-        2,
-        "tools/call",
-        json!({"name": "calculate_project_performance", "arguments": {"project": project}}),
-    );
-    assert_eq!(response["isError"], true, "{response}");
-    let assessment = &response["structuredContent"];
-    assert_eq!(assessment["status"], "invalid");
-    assert!(assessment["performance"].is_null());
-    assert!(assessment["labelData"].is_null());
-    assert!(assessment["gaps"].as_array().unwrap().iter().any(|gap| {
-        gap["code"] == "quality_declaration_source_url_invalid"
-            && gap["path"] == "ntaHeatPumps[0].performanceEvidence.registryRecord.sourceUrl"
-    }));
-    assert_eq!(
-        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
-        *assessment
-    );
+    for (request_id, source_url) in [
+        "https://bcrg.nl@evidence.example/declaration",
+        "https://bcrg.nl\\@evidence.example/declaration",
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        project["ntaHeatPumps"][0]["performanceEvidence"]["registryRecord"]["sourceUrl"] =
+            json!(source_url);
+        let response = server.request(
+            request_id as u64 + 2,
+            "tools/call",
+            json!({"name": "calculate_project_performance", "arguments": {"project": project.clone()}}),
+        );
+        assert_eq!(response["isError"], true, "{response}");
+        let assessment = &response["structuredContent"];
+        assert_eq!(assessment["status"], "invalid");
+        assert!(assessment["performance"].is_null());
+        assert!(assessment["labelData"].is_null());
+        assert!(assessment["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "quality_declaration_source_url_invalid"
+                && gap["path"] == "ntaHeatPumps[0].performanceEvidence.registryRecord.sourceUrl"
+        }));
+        assert_eq!(
+            serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap())
+                .unwrap(),
+            *assessment
+        );
+    }
 }
 
 #[test]

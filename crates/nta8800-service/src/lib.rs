@@ -1034,20 +1034,27 @@ mod tests {
                 }
             }
         }]);
-        let (status, result) = post_json(
-            "/v1/nta8800/project/performance",
-            json!({ "project": project.clone() }),
-        )
-        .await;
-        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
-        assert_eq!(result["status"], "invalid");
-        assert!(result["performance"].is_null());
-        assert!(result["labelData"].is_null());
-        assert!(result["registration"].is_null());
-        assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
-            gap["code"] == "quality_declaration_source_url_invalid"
-                && gap["path"] == "ntaHeatPumps[0].performanceEvidence.registryRecord.sourceUrl"
-        }));
+        for source_url in [
+            "https://bcrg.nl@evidence.example/declaration",
+            "https://bcrg.nl\\@evidence.example/declaration",
+        ] {
+            project["ntaHeatPumps"][0]["performanceEvidence"]["registryRecord"]["sourceUrl"] =
+                json!(source_url);
+            let (status, result) = post_json(
+                "/v1/nta8800/project/performance",
+                json!({ "project": project.clone() }),
+            )
+            .await;
+            assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+            assert_eq!(result["status"], "invalid");
+            assert!(result["performance"].is_null());
+            assert!(result["labelData"].is_null());
+            assert!(result["registration"].is_null());
+            assert!(result["gaps"].as_array().unwrap().iter().any(|gap| {
+                gap["code"] == "quality_declaration_source_url_invalid"
+                    && gap["path"] == "ntaHeatPumps[0].performanceEvidence.registryRecord.sourceUrl"
+            }));
+        }
     }
 
     #[tokio::test]
