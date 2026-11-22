@@ -30,9 +30,13 @@ fn valid_ascii_hostname(hostname: &str) -> bool {
 }
 
 fn valid_https_source_authority(url: &str) -> bool {
-    let Some(rest) = url.strip_prefix("https://") else {
+    if !url
+        .get(..8)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case("https://"))
+    {
         return false;
-    };
+    }
+    let rest = &url[8..];
     // A declaration source is stored as a URL, not as browser-tolerated input.
     // Whitespace and backslashes can change how a client interprets its host.
     if url
@@ -1202,6 +1206,8 @@ mod tests {
         assert_eq!(serde_json::to_value(&pump).unwrap(), input);
         for source_url in [
             "https://bcrg.nl:443/path",
+            "HTTPS://bcrg.nl/declaration",
+            "HtTpS://bcrg.nl/declaration",
             "https://[::1]:443/path",
             "https://bcrg.nl/declaration/@revision",
             "https://xn--bcher-kva.example/declaration",
