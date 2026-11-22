@@ -1768,6 +1768,11 @@ mod tests {
                 "input.bblFunction",
                 json!("unrecognised_function"),
             ),
+            (
+                "labelFunction",
+                "input.labelFunction",
+                json!("unrecognised_function"),
+            ),
         ] {
             let mut input = base.clone();
             input[field] = value;

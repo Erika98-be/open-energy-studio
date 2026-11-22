@@ -537,6 +537,12 @@ fn building_performance_mcp_reports_unknown_functions_at_their_input_paths() {
             "input.bblFunction",
             json!("unrecognised_function"),
         ),
+        (
+            5,
+            "labelFunction",
+            "input.labelFunction",
+            json!("unrecognised_function"),
+        ),
     ] {
         let mut input = base.clone();
         input[field] = value;
