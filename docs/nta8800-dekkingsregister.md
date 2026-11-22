@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De Nederlandse en Engelse auditmelding voor een ongeldige verklaringsbron-URL beschrijft nu ook de host- en gebruikersgegevensgrens. De TypeScript-controle slaagt lokaal. Dit versterkt *UI* en *Weergave* van de bestaande Rust-invoeraudit; onafhankelijke *Referentie* en *Attest* blijven open.
+De Nederlandse en Engelse auditmelding voor een ongeldige verklaringsbron-URL beschrijft nu ook de host- en gebruikersgegevensgrens. De TypeScript-controle slaagt lokaal. De [CI op `5415ed0c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45067238448) bevestigt de volledige NTA-gate en Linux-, Windows- en macOS-desktopbuilds. Dit versterkt *UI*, *Weergave* en *Bouwbewijs* van de bestaande Rust-invoeraudit; onafhankelijke *Referentie* en *Attest* blijven open.
 
 HTTP en MCP bewaken nu ook de Rust-weigering voor een leeg DNS-label en een procentgecodeerde punt in de host van een verklaringsbron: exact bronveldpad, geen prestatie- of labeluitkomst en gelijke MCP-tekst en `structuredContent`. De twee gerichte protocolproeven, rustfmt en service-Clippy slagen lokaal. De [CI op `4f05a67c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45056029709) bevestigt de volledige NTA-gate en Linux-, Windows- en macOS-desktopbuilds. Dit versterkt *HTTP*, *MCP*, *Invoer*, *Test* en *Bouwbewijs*; onafhankelijke *Referentie* en *Attest* blijven open.
 
