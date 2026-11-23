@@ -1,0 +1,11 @@
+# Onderzoek AppImage-herbouw — 23 november 2026
+
+Broncommit: `d4721304`; twee geslaagde pogingen van [CI-run 45152661072](https://github.com/Erika98-be/open-energy-studio/actions/runs/45152661072). De manifesthashes van beide gedownloade Linux-installers zijn afzonderlijk gecontroleerd in [het releasebouwbewijs](nta8800-linux-deb-herbouw-2026-11-23-d4721304.md).
+
+De AppImages zijn even groot (86.862.328 bytes), maar niet bytegelijk. Na uitpakken van het SquashFS-deel zijn 361 paden in beide bomen gelijk. Alle 305 gewone bestanden hebben gelijke inhoud; bestandstypen en modi zijn gelijk. De wijziging zit onder meer in de tijdstempels van 284 paden. De SquashFS-aanmaaktijd is in beide pakketten al 1 januari 1970.
+
+Als afzonderlijke lokale proef zijn de twee uitgepakte bomen met dezelfde `mksquashfs`-opties, `-comp zstd -b 131072 -all-root -noappend -all-time 1795428238 -mkfs-time 1795428238 -processors 2`, opnieuw ingepakt. De twee resulterende SquashFS-bestanden zijn bytegelijk: 85.917.696 bytes en SHA-256 `4e92dd2f3dcd2be2e292b152adeb83af9f501e05a78ead29504f48d268be0d33`. Dit is een onderzoeksproef op uitgepakte inhoud, geen gecontroleerde CI-installernormalisatie.
+
+De AppImage bevat vóór SquashFS een ELF-runtime. De runtimeprefix van de twee CI-pogingen verschilt uitsluitend in de 16 bytes van sectie `.digest_md5`. [AppImageKit schrijft die digest na het maken van de AppImage](https://github.com/AppImage/AppImageKit/blob/master/src/appimagetool.c); [libappimage berekent haar over het pakket met uitgesloten digest- en handtekeningsecties](https://github.com/AppImage/libappimage/blob/master/src/libappimage_shared/digest.c). Een nieuw SquashFS-deel aan de bestaande runtime plakken zonder de digest volgens de gebruikte runtimeversie opnieuw te berekenen zou een ongeldig of misleidend pakket opleveren. Daarom is geen AppImage in CI herschreven en is bytegelijke AppImage-herbouw nog **niet** aangetoond. Een vervolgproef moet de digest tegen het oorspronkelijke pakket valideren, een herbouwd pakket functioneel uitpakken en uitvoeren, en daarna twee volledige CI-AppImages vergelijken.
+
+Dit bouwonderzoek verandert niets aan de normatieve NTA 8800-status: onafhankelijke referentiegevallen, de volledige warmtepompberekening en formele externe toetsing blijven open.

@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Het [AppImage-herbouwonderzoek](nta8800-appimage-herbouwonderzoek-2026-11-23-d4721304.md) toont gelijke uitgepakte inhoud en een bytegelijke lokale SquashFS-herpakking met vaste tijd. Dit vult *Bouwbewijs* aan, maar de volledige AppImage is wegens de ingebedde digest nog niet reproduceerbaar aangetoond. *Referentie* en *Attest* veranderen niet.
+
 De [herbouw op `d4721304`](nta8800-linux-deb-herbouw-2026-11-23-d4721304.md) bevestigt bytegelijke Linux-release-`.deb`-bestanden op twee CI-pogingen met dezelfde broncommit en toolchainversies; NTA-gate en drie desktopbuilds slagen in beide pogingen. De AppImage blijft ongelijk. Dit vult *Bouwbewijs* voor die specifieke `.deb`-procedure in; Windows, macOS, AppImage, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De Linux-release-CI past nu vóór het hashen dezelfde `.deb`-normalisatie toe als de vaste debugbouw. Een lokale herverpakking van de twee eerder afwijkende releasepakketten levert bytegelijke bestanden op; alle negen Python-bouwbewijstests slagen. De bevestigende CI-herbouw staat hierboven. AppImage, Windows, macOS, *Referentie* en *Attest* blijven open.
