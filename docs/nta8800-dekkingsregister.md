@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De [twee CI-pogingen op `12f7824b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45236520375) slaagden voor de NTA-gate en drie desktopplatforms. De afzonderlijk gedownloade Linux-`.deb` en AppImage zijn elk bytegelijk over beide pogingen, komen overeen met hun manifesten en hebben in de AppImage een draagbare `.DirIcon`-link. Dit vult *Bouwbewijs* voor deze Linux-releaseprocedure in; bytegelijke Windows- en macOS-installers, onafhankelijke *Referentie* en *Attest* blijven open.
+
 De [CI op `a915f6dc`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45214720819) bevestigde de Linux-normalisatie en manifesthash, maar de gedownloade AppImage bevatte nog een absolute `.DirIcon`-link. De normalisatie maakt die nu expliciet relatief en bewaakt dat na herpakking. *Bouwbewijs* voor bytegelijke volledige CI-AppImages vereist nog twee bevestigde pogingen.
 
 De eerste [CI-poging met AppImage-normalisatie op `70bf938c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45203140809) faalde alleen in de Linux-nacontrole van `.DirIcon`; NTA-gate, Windows en macOS slaagden. De linkcontrole is hersteld en lokaal opnieuw getest. *Bouwbewijs* voor de genormaliseerde CI-AppImage blijft open.
