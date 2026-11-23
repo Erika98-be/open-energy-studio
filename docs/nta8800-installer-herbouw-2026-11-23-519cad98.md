@@ -1,0 +1,14 @@
+# NTA 8800 installerherbouw — 23 november 2026
+
+Broncommit: `519cad98c6c1410e5cf375cd1ae333df4cc8a98c`. [CI-run 45119818915](https://github.com/Erika98-be/open-energy-studio/actions/runs/45119818915) is tweemaal uitgevoerd (poging 1 en 2). Beide pogingen slaagden met de NTA-gate en de Linux-, Windows- en macOS-desktopbuilds. De gedownloade installers zijn voor beide pogingen opnieuw lokaal gehasht; hun byteaantallen en SHA-256 komen overeen met de bijgeleverde manifesten. Beide pogingen gebruikten Rust `1.100.0` en op elk platform dezelfde Node-versie (Linux/Windows `v22.23.5`, macOS `v22.23.2`).
+
+| Platform en installer | Poging 1: bytes, SHA-256 | Poging 2: bytes, SHA-256 | Bytegelijk |
+| --- | --- | --- | --- |
+| Windows NSIS `.exe` | 7.670.935; `8c88f31c8e3caf56ff7aeb051ccaad086e48da0d60c93065bd0caf1c8399c41e` | 7.668.151; `fcf538d04cb4b76e068c914f0d5bb3b17d20b8c76c119aca3bd7c8a3e1600a4d` | nee |
+| Linux `.deb` | 9.203.696; `08315fc145d67a35e0d040f3c4cfc139ba715328bd4db3d2814e197034233ede` | 9.203.688; `b38bf588b506c5270c989b9174e012665372fa408b306fddf0bbeced9fb4b627` | nee |
+| Linux AppImage | 86.862.328; `007e66a5805f534fb0056b050677a74e58f9f532b578c9d98a75cb0d54aa3006` | 86.862.328; `80a44354342792f5b4565961e4d660e5a8d844e8a74bdf41b5d1ff9d60b7e144` | nee |
+| macOS universele `.dmg` | 18.049.601; `36baa02f1e5d7eadd6e74b6c81203c92bb9e0cd8dea84bb1b15f52f663ac5573` | 18.049.621; `f5964a8936c303b9cd5e0601c697d73acd30f3ec2bd50482dbe385edb083150d` | nee |
+
+Nader lokaal onderzoek: de vijf uitgepakte `.deb`-payloadbestanden hebben in beide pogingen dezelfde inhoudelijke SHA-256. In de AppImage zijn alle 305 met `unsquashfs` uitgepakte gewone bestanden inhoudelijk gelijk. De vier uit de DMG met `7z` uitgepakte gewone bestanden zijn inhoudelijk gelijk; `7z` sloeg de absolute `/Applications`-symlink over, zodat dit geen volledige DMG-vergelijking is. In de Windows-NSIS-installer verschillen de bytes van de ingesloten `open-energy-studio.exe` ondanks gelijke bestandsgrootte (SHA-256 `173fefda8715f0e81e8b466f9df3c6c71a465c403c33e508dec7fb2d7657ff37` tegenover `2dfd7a44e9512e6df4dacac79269f76a514dfd7c0806cd98494bedb7a4d10f50`). De PE-header bevat verschillende bouwtijdstempels; daarmee is de overige oorzaak van het verschil nog niet vastgesteld.
+
+Conclusie: de installer-manifesten zijn controleerbaar na artefactoverdracht, maar de CI-installers zijn bij deze twee herbouwpogingen op geen van de drie platforms bytegelijk. Inhoudelijke gelijkheid van uitgepakte bestanden op Linux en macOS is smaller bewijs dan bytegelijke pakketten. De eerdere vaste Linux-debugbouw in [het afzonderlijke bouwbewijs](nta8800-build-verificatie-2026-11-21-211e6c8.md) blijft een andere procedure en broncommit. Deze proef zegt niets over normatieve rekenjuistheid, officiële referentiegevallen of externe attestering.
