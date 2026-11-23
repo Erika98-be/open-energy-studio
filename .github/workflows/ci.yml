@@ -63,7 +63,7 @@ jobs:
         timeout-minutes: 20
         run: |
           sudo apt-get update --error-on=any
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf squashfs-tools
 
       - name: Install frontend dependencies
         run: npm ci
@@ -196,6 +196,21 @@ jobs:
           debs=(src-tauri/target/release/bundle/deb/*.deb)
           [[ ${#debs[@]} == 1 ]]
           python3 scripts/nta_deb.py "${debs[0]}" "${{ github.sha }}"
+
+      - name: Normalize Linux AppImage
+        if: matrix.platform == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          appimages=(src-tauri/target/release/bundle/appimage/*.AppImage)
+          [[ ${#appimages[@]} == 1 ]]
+          curl --fail --location --silent --show-error \
+            https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage \
+            --output /tmp/oes-appimagetool-x86_64.AppImage
+          echo 'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0  /tmp/oes-appimagetool-x86_64.AppImage' | sha256sum --check
+          chmod +x /tmp/oes-appimagetool-x86_64.AppImage
+          python3 scripts/nta_appimage.py "${appimages[0]}" /tmp/oes-appimagetool-x86_64.AppImage "${{ github.sha }}"
 
       - name: Record NTA installer byte hashes
         run: node scripts/nta-installer-manifest.mjs ${{ matrix.platform }} ${{ github.sha }} nta-evidence/installer-build.json
