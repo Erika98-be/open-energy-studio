@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De Linux-release-CI past nu vóór het hashen dezelfde `.deb`-normalisatie toe als de vaste debugbouw. Een lokale herverpakking van de twee eerder afwijkende releasepakketten levert bytegelijke bestanden op; alle negen Python-bouwbewijstests slagen. Dit is een gerichte verbetering van *Bouwbewijs* en *Test*, nog zonder bevestigende nieuwe CI-herbouw. AppImage, Windows, macOS, *Referentie* en *Attest* blijven open.
+
 De [tweede CI-bouw van dezelfde broncommit `519cad98`](nta8800-installer-herbouw-2026-11-23-519cad98.md) slaagde op drie platforms. De lokaal nagehashte installers komen overeen met hun manifesten, maar geen van de Windows-, Linux- of macOS-installers is bytegelijk aan de eerste CI-poging. De *Bouwbewijs*-kolom bevat hiermee een geslaagde integriteitscontrole en een open reproduceerbaarheidsverschil; *Referentie* en *Attest* blijven open.
 
 De desktop-CI legt voortaan voor Linux-, Windows- en macOS-installers broncommit, toolchainversies, byteaantal en SHA-256 in een bijgeleverd manifest vast. Twee gerichte scriptproeven, `bash -n` en `git diff --check` slagen lokaal. De [CI op `519cad98`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45119818915) bevestigt de volledige NTA-gate en Linux-, Windows- en macOS-desktopbuilds met manifeststap. Dit versterkt *Bouwbewijs* en *Test*; alleen voor de eerdere vaste Linux-debugbouw is bytegelijkheid over meerdere hosts aangetoond. Onafhankelijke *Referentie* en *Attest* blijven open.

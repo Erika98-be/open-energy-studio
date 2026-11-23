@@ -14,9 +14,10 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 import tomllib
 from pathlib import Path
+
+from nta_deb import normalize_deb
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -78,40 +79,6 @@ def clean_commit() -> str:
 
 def package_field(path: Path, field: str) -> str:
     return command("dpkg-deb", "--field", str(path), field)
-
-
-def normalize_deb(path: Path, source_date_epoch: int) -> None:
-    """Repack the Tauri bundle with stable ownership, timestamps and compression."""
-    with tempfile.TemporaryDirectory(prefix="oes-nta-deb-", dir=path.parent) as temporary:
-        staging = Path(temporary)
-        tree = staging / "tree"
-        normalized = staging / "normalized.deb"
-        env = {**os.environ, "SOURCE_DATE_EPOCH": str(source_date_epoch)}
-        run("dpkg-deb", "-R", str(path), str(tree))
-        # Tauri may enumerate files in a different order when writing this
-        # control file, even when every packaged payload byte is identical.
-        md5sums = tree / "DEBIAN/md5sums"
-        if md5sums.exists():
-            lines = md5sums.read_text(encoding="utf-8").splitlines()
-            if any("  " not in line for line in lines):
-                raise ValueError("Malformed deb md5sums")
-            paths = [line.split("  ", 1)[1] for line in lines]
-            if len(paths) != len(set(paths)):
-                raise ValueError("Duplicate path in deb md5sums")
-            md5sums.write_text(
-                "\n".join(line for _, line in sorted(zip(paths, lines))) + "\n",
-                encoding="utf-8",
-            )
-        # SOURCE_DATE_EPOCH only caps newer mtimes; normalize older inputs too.
-        entries = list(tree.rglob("*"))
-        for entry in entries:
-            os.utime(entry, (source_date_epoch, source_date_epoch), follow_symlinks=False)
-        os.utime(tree, (source_date_epoch, source_date_epoch))
-        run(
-            "dpkg-deb", "--build", "--root-owner-group", "-Zgzip", "-z1",
-            str(tree), str(normalized), env=env,
-        )
-        normalized.replace(path)
 
 
 def main() -> int:

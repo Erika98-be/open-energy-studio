@@ -187,6 +187,16 @@ jobs:
           files-folder-depth: 4
           cache-dependencies: false
 
+      - name: Normalize Linux deb package
+        if: matrix.platform == 'ubuntu-22.04'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          debs=(src-tauri/target/release/bundle/deb/*.deb)
+          [[ ${#debs[@]} == 1 ]]
+          python3 scripts/nta_deb.py "${debs[0]}" "${{ github.sha }}"
+
       - name: Record NTA installer byte hashes
         run: node scripts/nta-installer-manifest.mjs ${{ matrix.platform }} ${{ github.sha }} nta-evidence/installer-build.json
 
