@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+HTTP en MCP accepteren nu aantoonbaar de via Rust toegelaten `HTTPS://`-schrijfwijze in de bron-URL van een gecontroleerde warmtepompverklaring. De niet-berekende losse warmtepomp blijft een waarschuwing; MCP-tekst en `structuredContent` zijn gelijk. De twee gerichte protocolproeven, rustfmt en service-Clippy slagen lokaal. Dit versterkt *HTTP*, *MCP*, *Invoer* en *Test*; een onafhankelijke *Referentie* en *Attest* ontbreken nog.
+
 De bewijs-URL-audit accepteert nu `https://` met hoofdletters of gemengde lettergrootte; de overige host- en autoriteitsgrenzen blijven gelden. Een vooraf falende regressie, alle 1056 kernunittests op Rust 1.77.2, rustfmt en kern-Clippy slagen lokaal. De [CI op `051c68b3`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45078811868) bevestigt de volledige NTA-gate en Linux-, Windows- en macOS-desktopbuilds. Dit versterkt *Invoer*, *Audit*, *Test* en *Bouwbewijs* van de bronverwijzing; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De Nederlandse en Engelse auditmelding voor een ongeldige verklaringsbron-URL beschrijft nu ook de host- en gebruikersgegevensgrens. De TypeScript-controle slaagt lokaal. De [CI op `5415ed0c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45067238448) bevestigt de volledige NTA-gate en Linux-, Windows- en macOS-desktopbuilds. Dit versterkt *UI*, *Weergave* en *Bouwbewijs* van de bestaande Rust-invoeraudit; onafhankelijke *Referentie* en *Attest* blijven open.

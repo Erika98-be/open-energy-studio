@@ -2068,6 +2068,61 @@ fn project_performance_mcp_withholds_invalid_heat_pump_evidence() {
 }
 
 #[test]
+fn project_performance_mcp_accepts_uppercase_https_declaration_source() {
+    let mut project: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-project-performance-synthetic.json"
+    ))
+    .unwrap();
+    project["ntaHeatPumps"] = json!([{
+        "id": "hp-1", "source": "outdoor_air", "sink": "hydronic",
+        "drive": "electric_compression", "reversible": false,
+        "hybrid": false, "booster": false,
+        "performanceEvidence": {
+            "kind": "controlled_quality_declaration", "reference": "20260001GK",
+            "registryRecord": {
+                "registrationNumber": "20260001GK", "productName": "Example",
+                "manufacturer": "Supplier", "sourceUrl": "HTTPS://bcrg.nl/declaration"
+            }
+        }
+    }]);
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "heat-pump-source-test", "version": "1"}
+        }),
+    );
+    server.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name": "calculate_project_performance", "arguments": {"project": project}}),
+    );
+    assert_eq!(response["isError"], false, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "calculated_unverified");
+    assert!(assessment["warnings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|warning| {
+            warning["code"] == "heat_pump_route_unimplemented"
+                && warning["path"] == "ntaHeatPumps[0]"
+        }));
+    assert!(!assessment["gaps"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|gap| { gap["code"] == "quality_declaration_source_url_invalid" }));
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn project_performance_mcp_rejects_unimplemented_cooling_heat_pump_link() {
     let mut project: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-project-performance-synthetic.json"

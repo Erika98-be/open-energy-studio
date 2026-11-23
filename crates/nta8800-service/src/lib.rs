@@ -1073,7 +1073,7 @@ mod tests {
                 "kind": "controlled_quality_declaration", "reference": "20260001GK",
                 "registryRecord": {
                     "registrationNumber": "20260001GK", "productName": "Example",
-                    "manufacturer": "Supplier", "sourceUrl": "https://bcrg.nl/declaration"
+                    "manufacturer": "Supplier", "sourceUrl": "HTTPS://bcrg.nl/declaration"
                 }
             }
         }]);
