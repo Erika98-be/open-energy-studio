@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De eerste [CI-poging met AppImage-normalisatie op `70bf938c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45203140809) faalde alleen in de Linux-nacontrole van `.DirIcon`; NTA-gate, Windows en macOS slaagden. De linkcontrole is hersteld en lokaal opnieuw getest. *Bouwbewijs* voor de genormaliseerde CI-AppImage blijft open.
+
 De [lokale volledige AppImage-herpakking](nta8800-appimage-herbouwonderzoek-2026-11-23-d4721304.md) van twee eerdere CI-pakketten is bytegelijk en uitpakbaar; de CI-normalisatie is toegevoegd maar nog niet op twee nieuwe pogingen bevestigd. Dit versterkt voorlopig *Bouwbewijs* zonder wijziging in *Referentie* of *Attest*.
 
 Het [AppImage-herbouwonderzoek](nta8800-appimage-herbouwonderzoek-2026-11-23-d4721304.md) toont gelijke uitgepakte inhoud en een bytegelijke lokale SquashFS-herpakking met vaste tijd. Dit vult *Bouwbewijs* aan, maar de volledige AppImage is wegens de ingebedde digest nog niet reproduceerbaar aangetoond. *Referentie* en *Attest* veranderen niet.

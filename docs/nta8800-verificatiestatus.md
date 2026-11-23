@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 23 november 2026
 
+De eerste [CI-poging met AppImage-normalisatie op `70bf938c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45203140809) bevestigde de NTA-gate, Windows en macOS, maar de Linux-stap stopte op een te strikte `.DirIcon`-controle na succesvolle herpakking. Die controle is aangescherpt op behoud of de verwachte linkomzetting en opnieuw lokaal op beide eerdere AppImages getest. Nieuwe CI-bevestiging staat open.
+
 Een [lokale volledige AppImage-herpakking](nta8800-appimage-herbouwonderzoek-2026-11-23-d4721304.md) van de twee eerdere CI-pakketten levert nu bytegelijke, uitpakbare AppImages met behouden payload en vernieuwde digest. De Linux-desktop-CI bevat dezelfde normalisatiestap met een gehashte `appimagetool`-versie. Twee onafhankelijke CI-pogingen met de nieuwe stap moeten nog slagen voordat reproduceerbare CI-AppImages worden geclaimd.
 
 Het [AppImage-herbouwonderzoek op `d4721304`](nta8800-appimage-herbouwonderzoek-2026-11-23-d4721304.md) lokaliseert de nog verschillende Linux-AppImages: 284 van 361 uitgepakte paden hebben verschillende tijdstempels, terwijl inhoud en modi gelijk zijn. De twee lokaal met vaste tijd opnieuw gemaakte SquashFS-delen zijn bytegelijk. De ELF-runtime bevat daarnaast een pakketdigest die voor een volledig herbouwde AppImage opnieuw berekend en gevalideerd moet worden; er is nog geen bytegelijke of functioneel getoetste genormaliseerde AppImage.

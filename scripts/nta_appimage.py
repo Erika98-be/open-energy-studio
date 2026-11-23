@@ -55,7 +55,7 @@ def normalize_appimage(path: Path, appimagetool: Path, source_date_epoch: int) -
         before = _tree_entries(original)
         # Older Tauri bundles may contain an absolute .DirIcon link to the CI
         # staging path; appimagetool replaces it with a usable relative link.
-        before.pop(".DirIcon", None)
+        original_icon = before.pop(".DirIcon", None)
         env = {**os.environ, "SOURCE_DATE_EPOCH": str(source_date_epoch),
                "ARCH": "x86_64", "APPIMAGE_EXTRACT_AND_RUN": "1"}
         subprocess.run([str(appimagetool), "-n", "--runtime-file", str(runtime),
@@ -68,11 +68,16 @@ def normalize_appimage(path: Path, appimagetool: Path, source_date_epoch: int) -
         subprocess.run(["unsquashfs", "-d", str(verified), "-offset", str(offset),
                         str(repacked)], check=True, stdout=subprocess.DEVNULL)
         after = _tree_entries(verified)
-        icon = verified / ".DirIcon"
-        if (not icon.is_symlink() or os.path.isabs(os.readlink(icon))
-                or not icon.resolve().is_file()):
-            raise ValueError("Repacked AppImage has no usable icon link")
-        after.pop(".DirIcon", None)
+        new_icon = after.pop(".DirIcon", None)
+        if original_icon is None or new_icon is None:
+            raise ValueError("Repacked AppImage lost its icon entry")
+        if new_icon != original_icon and not (
+            stat.S_ISLNK(original_icon[0])
+            and stat.S_ISLNK(new_icon[0])
+            and os.path.isabs(original_icon[1])
+            and not os.path.isabs(new_icon[1])
+        ):
+            raise ValueError("Repacked AppImage changed its icon entry unexpectedly")
         if after != before:
             raise ValueError("Repacked AppImage changed payload contents, links or modes")
         os.chmod(repacked, path.stat().st_mode & 0o777)
