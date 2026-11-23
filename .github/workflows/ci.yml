@@ -141,6 +141,7 @@ jobs:
         if: matrix.platform != 'macos-15-intel'
         env:
           APPIMAGE_EXTRACT_AND_RUN: '1'
+          RUSTFLAGS: ${{ matrix.platform == 'windows-latest' && '-C link-arg=/Brepro' || '' }}
         run: npm run tauri:build
 
       # Match the release workflow: one DMG must contain both Mac architectures.
