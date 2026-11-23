@@ -1,6 +1,8 @@
 # NTA 8800 dekkingsregister
 
-De Linux-release-CI past nu vóór het hashen dezelfde `.deb`-normalisatie toe als de vaste debugbouw. Een lokale herverpakking van de twee eerder afwijkende releasepakketten levert bytegelijke bestanden op; alle negen Python-bouwbewijstests slagen. Dit is een gerichte verbetering van *Bouwbewijs* en *Test*, nog zonder bevestigende nieuwe CI-herbouw. AppImage, Windows, macOS, *Referentie* en *Attest* blijven open.
+De [herbouw op `d4721304`](nta8800-linux-deb-herbouw-2026-11-23-d4721304.md) bevestigt bytegelijke Linux-release-`.deb`-bestanden op twee CI-pogingen met dezelfde broncommit en toolchainversies; NTA-gate en drie desktopbuilds slagen in beide pogingen. De AppImage blijft ongelijk. Dit vult *Bouwbewijs* voor die specifieke `.deb`-procedure in; Windows, macOS, AppImage, onafhankelijke *Referentie* en *Attest* blijven open.
+
+De Linux-release-CI past nu vóór het hashen dezelfde `.deb`-normalisatie toe als de vaste debugbouw. Een lokale herverpakking van de twee eerder afwijkende releasepakketten levert bytegelijke bestanden op; alle negen Python-bouwbewijstests slagen. De bevestigende CI-herbouw staat hierboven. AppImage, Windows, macOS, *Referentie* en *Attest* blijven open.
 
 De [tweede CI-bouw van dezelfde broncommit `519cad98`](nta8800-installer-herbouw-2026-11-23-519cad98.md) slaagde op drie platforms. De lokaal nagehashte installers komen overeen met hun manifesten, maar geen van de Windows-, Linux- of macOS-installers is bytegelijk aan de eerste CI-poging. De *Bouwbewijs*-kolom bevat hiermee een geslaagde integriteitscontrole en een open reproduceerbaarheidsverschil; *Referentie* en *Attest* blijven open.
 
