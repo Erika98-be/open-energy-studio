@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 23 november 2026
 
+De [CI op `a915f6dc`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45214720819) bevestigde inmiddels de Linux-AppImage-normalisatiestap en manifesthash, naast NTA-gate en Windows. Inspectie van het gedownloade pakket vond nog een absolute `.DirIcon`-link naar de tijdelijke runner. De normalisatie zet die nu expliciet om naar de aanwezige relatieve icoonlink; twee oude pakketten blijven lokaal bytegelijk. Een nieuwe CI-bouw en tweede poging zijn vereist voor een reproduceerbaarheidsclaim.
+
 De eerste [CI-poging met AppImage-normalisatie op `70bf938c`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45203140809) bevestigde de NTA-gate, Windows en macOS, maar de Linux-stap stopte op een te strikte `.DirIcon`-controle na succesvolle herpakking. Die controle is aangescherpt op behoud of de verwachte linkomzetting en opnieuw lokaal op beide eerdere AppImages getest. Nieuwe CI-bevestiging staat open.
 
 Een [lokale volledige AppImage-herpakking](nta8800-appimage-herbouwonderzoek-2026-11-23-d4721304.md) van de twee eerdere CI-pakketten levert nu bytegelijke, uitpakbare AppImages met behouden payload en vernieuwde digest. De Linux-desktop-CI bevat dezelfde normalisatiestap met een gehashte `appimagetool`-versie. Twee onafhankelijke CI-pogingen met de nieuwe stap moeten nog slagen voordat reproduceerbare CI-AppImages worden geclaimd.
