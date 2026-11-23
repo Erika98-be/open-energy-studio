@@ -158,6 +158,7 @@ node scripts/nta-manual.mjs check
 
 step "NTA build evidence tests"
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py'
+node --test scripts/nta-installer-manifest.test.mjs
 
 if [[ -n "${NTA_REFERENCE_PLAN:-}" || -n "${NTA_REFERENCE_CASE_DIR:-}" ]]; then
   if [[ -z "${NTA_REFERENCE_PLAN:-}" || -z "${NTA_REFERENCE_CASE_DIR:-}" ]]; then
