@@ -23,6 +23,9 @@ test('verifies both Linux installers and rejects changed bytes and source commit
     await assert.rejects(verifyInstallerManifest(root, manifestPath, 'b'.repeat(40)), /source commit mismatch/);
     await writeFile(appimage, 'changed bytes');
     await assert.rejects(verifyInstallerManifest(root, manifestPath, commit), /bytes differ/);
+    await writeFile(appimage, 'appimage bytes');
+    await writeFile(join(root, 'src-tauri/target/release/bundle/appimage/extra.AppImage'), 'extra installer');
+    await assert.rejects(verifyInstallerManifest(root, manifestPath, commit), /Installer set differs/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

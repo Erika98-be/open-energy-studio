@@ -2,6 +2,8 @@
 
 Twee [CI-pogingen op `6ea7d998`](nta8800-installer-verificatie-2026-11-24-6ea7d998.md) slagen met NTA-gate en drie desktopplatforms. De [release-installerlezer](nta8800-build-procedure.md#release-installers-controleren) toetst pakketpad, byteaantal en SHA-256 tegen het CI-manifest en weigert een geclaimde normverificatie of attestering; ook de afzonderlijk gedownloade vier pakketten zijn per poging gecontroleerd. De Linux-`.deb`, AppImage en Windows-NSIS-installer en hun manifesten zijn bytegelijk; de macOS-DMG verschilt ondanks identieke inhoud van de vier uitgepakte gewone bestanden. Dit versterkt *Bouwbewijs* en *Test* voor drie pakketformaten; *Referentie* en *Attest* veranderen niet.
 
+De manifestlezer weigert nu ook een extra installer van het verwachte formaat die niet in het manifest staat. De gerichte regressie en hercontrole van de drie eerder gedownloade artefactsets slagen lokaal; CI-bevestiging staat open. Dit scherpt *Bouwbewijs* aan zonder *Referentie* of *Attest* te wijzigen.
+
 Het [BRL 9501-gereedheidsdossier](nta8800-brl9501-gereedheid.md) verwijst nu per route naar dit register in plaats van volledigheid van de hele keten te suggereren. De open routes en deelwaarden hieronder blijven open; de correctie wijzigt geen *Referentie*- of *Attest*-kolom.
 
 De [CI op `16188e09`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45358142390) slaagt met NTA-gate, drie desktopplatforms en de nieuwe macOS-DMG-proef. Deze koppelt de DMG alleen-lezen, controleert de ingesloten app op x86_64 en arm64 en verifieert de `/Applications`-link. Dit versterkt *Bouwbewijs* voor een bruikbaar mountpad; bytegelijke DMG-pakketbytes, GUI-gedrag, *Referentie* en *Attest* blijven open.

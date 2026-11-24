@@ -3,7 +3,7 @@
 
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { lstat, readFile, realpath } from 'node:fs/promises';
+import { lstat, readFile, readdir, realpath } from 'node:fs/promises';
 import { isAbsolute, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,6 +49,10 @@ export async function verifyInstallerManifest(root, manifestPath, expectedCommit
     if (!Number.isSafeInteger(entry.bytes) || entry.bytes <= 0 ||
         !/^[0-9a-f]{64}$/.test(entry.sha256)) {
       throw new Error(`Invalid installer digest at index ${index}`);
+    }
+    const installerNames = (await readdir(join(root, directory))).filter((name) => name.endsWith(extension));
+    if (installerNames.length !== 1 || installerNames[0] !== posix.basename(entry.file)) {
+      throw new Error(`Installer set differs from manifest in ${directory}`);
     }
     const path = join(root, entry.file);
     const resolved = await realpath(path);
