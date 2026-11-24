@@ -1,4 +1,4 @@
-# Release-installercontrole op `6ea7d998`
+# Release-installercontrole en herbouw op `6ea7d998`
 
 De [CI-run 45419023153](https://github.com/Erika98-be/open-energy-studio/actions/runs/45419023153) slaagde op 24 november 2026: NTA-gate, Linux-, Windows- en macOS-desktopbuild en de nieuwe manifestcontrole vóór upload. De `nta-build-evidence`-job was volgens zijn afzonderlijke branchvoorwaarde overgeslagen.
 
@@ -13,4 +13,12 @@ De drie installer-artefactsets zijn daarna afzonderlijk van GitHub Actions gedow
 
 De lokale vier gerichte Node-tests, `node --check`, `bash -n` en `git diff --check` slaagden vóór deze CI-run. De NTA-gate draaide de nieuwe tests ook in CI; alle drie de desktopjobs voerden de manifestcontrole uit. De Windows-installatieproef en macOS-koppelproef slaagden eveneens.
 
-Dit is integriteitsbewijs voor de gedownloade pakketbytes van één CI-run, geen bytegelijk herbouwbewijs voor deze commit. Eerdere afzonderlijke runs tonen bytegelijkheid van Linux- en Windows-pakketten op hun eigen commits. Een tweede poging op `6ea7d998` is nodig voor een nieuwe herbouwvergelijking. De technische controle bewijst geen normatieve juistheid, onafhankelijke ISSO 54-uitkomst of attest.
+## Tweede CI-poging
+
+De tweede poging van [dezelfde CI-run](https://github.com/Erika98-be/open-energy-studio/actions/runs/45419023153/attempts/2) slaagde opnieuw met NTA-gate en drie desktopplatforms, inclusief de manifestcontrole vóór upload. Alle drie de artefactsets zijn opnieuw afzonderlijk gedownload en met de lokale manifestlezer tegen dezelfde broncommit nagehasht.
+
+De twee Linux-manifesten zijn bytegelijk en hun `.deb`- en AppImage-pakketten hebben dezelfde grootte en SHA-256 als in de tabel. De twee Windows-manifesten en NSIS-installers zijn eveneens bytegelijk. Dit toont bytegelijke herbouw van deze drie pakketbestanden op de gebruikte CI-runnerklassen voor deze broncommit.
+
+De macOS-manifesten en DMG's verschillen: poging 1 telt 18.049.605 bytes met SHA-256 `eb3b6b09cfe993159a1344cf9ed7569ba8431e323f492eb21ff0e3bae2d5a55a`; poging 2 telt 18.049.612 bytes met SHA-256 `a84aa152e8c8e77603f33e99e1c850fcbaa266650c46665f2d54aee74d288c4d`. `7z` pakte uit beide DMG's vier gewone bestanden uit; hun inhoudshashes zijn gelijk. De app-binary heeft in beide pakketten SHA-256 `8df4a9625cb88c3da6e92d564f64a3687ed130ac4710414275c61dacb26543a9`. `7z` sloeg de absolute `/Applications`-link als gevaarlijk over; de CI-koppelproef controleerde die link in beide pogingen. De volledige DMG is dus niet bytegelijk reproduceerbaar aangetoond.
+
+De manifestclaim bewijst op zichzelf niet dat de pakketten werkelijk uit de genoemde bron zijn gebouwd; de tweede herbouw en de CI-bronkoppeling versterken alleen het technische bouwbewijs. Normatieve juistheid, onafhankelijke ISSO 54-uitkomsten en attestering blijven open.
