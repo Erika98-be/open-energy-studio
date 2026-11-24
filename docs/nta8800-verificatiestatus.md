@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 23 november 2026
+# NTA 8800 verificatiestatus — 24 november 2026
+
+De [twee CI-pogingen op `37fdeba0`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45258056256) zijn volledig geslaagd met NTA-gate en drie desktopplatforms. Beide gedownloade NSIS-installers kloppen met hun manifest. De daaruit uitgepakte 28.048.384-byte EXE is na `-C link-arg=/Brepro` bytegelijk (SHA-256 `7eaca8969aca1d74ccd2cfc5278f48ca6d36c4fa97d1c8dfe4775e06877bbe41`) en bevat een `Repro`-vermelding. De volledige NSIS-installers verschillen nog; de verpakte bestanden hebben gelijke inhoud, maar NSIS bewaart de afwijkende bouwtijd als bestandstijdstempel. Een kleine `SetDateSave off`-hook staat klaar voor een nieuwe CI-proef; bytegelijke Windows-installers zijn nog open.
 
 De [twee CI-pogingen op `12f7824b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45236520375) zijn volledig geslaagd: NTA-gate en Linux-, Windows- en macOS-desktopbuilds. Beide afzonderlijk gedownloade Linux-AppImages en `.deb`-bestanden zijn tegen hun manifest nagehasht en binnen elk pakkettype bytegelijk. De AppImage heeft in beide pogingen een draagbare relatieve `.DirIcon`-link. Daarmee is de Linux-releaseherbouw voor deze broncommit en runnerklasse aangetoond; Windows en macOS blijven op bytegelijkheid ongeverifieerd. Onafhankelijke normreferenties en externe toetsing blijven open.
 

@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De [twee volledige CI-pogingen op `37fdeba0`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45258056256) leveren een bytegelijke uitgepakte Windows-EXE met `Repro`-vermelding op. De NSIS-installers verschillen nog, hoewel alle zeven uitgepakte gewone bestanden inhoudelijk gelijk zijn; hun bewaartijdstempels verschillen. Een `SetDateSave off`-proef staat klaar. Dit versterkt *Bouwbewijs* voor de Rust-binary, terwijl bytegelijke Windows-installers, onafhankelijke *Referentie* en *Attest* open blijven.
+
 De [twee CI-pogingen op `12f7824b`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45236520375) slaagden voor de NTA-gate en drie desktopplatforms. De afzonderlijk gedownloade Linux-`.deb` en AppImage zijn elk bytegelijk over beide pogingen, komen overeen met hun manifesten en hebben in de AppImage een draagbare `.DirIcon`-link. Dit vult *Bouwbewijs* voor deze Linux-releaseprocedure in; bytegelijke Windows- en macOS-installers, onafhankelijke *Referentie* en *Attest* blijven open.
 
 De [CI op `a915f6dc`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45214720819) bevestigde de Linux-normalisatie en manifesthash, maar de gedownloade AppImage bevatte nog een absolute `.DirIcon`-link. De normalisatie maakt die nu expliciet relatief en bewaakt dat na herpakking. *Bouwbewijs* voor bytegelijke volledige CI-AppImages vereist nog twee bevestigde pogingen.
