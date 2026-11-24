@@ -1,5 +1,7 @@
 # NTA 8800 verificatiestatus — 24 november 2026
 
+Voor de desktop-installers is een afzonderlijke [manifestlezer](nta8800-build-procedure.md#release-installers-controleren) toegevoegd. Hij controleert na download de exacte pakketbytes, het platform, de bronclaim en de expliciet ongetoetste normstatus; de CI controleert het manifest vóór upload. Vier gerichte Node-proeven slagen lokaal, evenals de shell-syntaxiscontrole. De volledige CI-bevestiging van de nieuwe lezer staat nog open; de controle is geen onafhankelijke rekenreferentie of attest.
+
 Het [BRL 9501-gereedheidsdossier](nta8800-brl9501-gereedheid.md) maakt nu expliciet onderscheid tussen de onderzochte gecodeerde routes, de nog ontbrekende routes en de onafhankelijke ISSO 54-toets. De eerdere formulering dat de volledige keten aanwezig en elke route onafhankelijk herberekend was, was te ruim. Dit is een correctie van de bewijsomschrijving; rekenuitkomsten, dekkingsstatus en atteststatus veranderen niet.
 
 De [CI op `16188e09`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45358142390) is volledig geslaagd met NTA-gate en drie desktopplatforms. De nieuwe macOS-DMG-proef koppelt het pakket alleen-lezen, vindt een uitvoerbare app voor x86_64 en arm64, controleert de `/Applications`-link en ontkoppelt het pakket. De proef start de GUI niet en verhelpt de verschillende DMG-pakketbytes niet.

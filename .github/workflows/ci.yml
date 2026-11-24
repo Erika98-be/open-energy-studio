@@ -255,6 +255,9 @@ jobs:
       - name: Record NTA installer byte hashes
         run: node scripts/nta-installer-manifest.mjs ${{ matrix.platform }} ${{ github.sha }} nta-evidence/installer-build.json
 
+      - name: Verify NTA installer byte hashes
+        run: node scripts/verify-nta-installer.mjs . nta-evidence/installer-build.json ${{ github.sha }}
+
       - name: Upload artifacts (Windows)
         if: matrix.platform == 'windows-latest'
         uses: actions/upload-artifact@v7
