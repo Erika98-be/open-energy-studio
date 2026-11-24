@@ -173,6 +173,26 @@ jobs:
           echo "Desktop binary architectures: $archs"
           [[ " $archs " == *" x86_64 "* && " $archs " == *" arm64 "* ]]
 
+      - name: Smoke-test macOS DMG mount
+        if: matrix.platform == 'macos-15-intel'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          dmgs=(src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg)
+          [[ ${#dmgs[@]} == 1 ]]
+          mountpoint="$RUNNER_TEMP/oes-nta-dmg-smoke"
+          mkdir -p "$mountpoint"
+          hdiutil attach -readonly -nobrowse -mountpoint "$mountpoint" "${dmgs[0]}"
+          trap 'hdiutil detach "$mountpoint"' EXIT
+          binary="$mountpoint/Open Energy Studio.app/Contents/MacOS/open-energy-studio"
+          [[ -f "$binary" && -x "$binary" ]]
+          archs="$(lipo -archs "$binary")"
+          echo "Mounted DMG binary architectures: $archs"
+          [[ " $archs " == *" x86_64 "* && " $archs " == *" arm64 "* ]]
+          [[ -L "$mountpoint/Applications" ]]
+          [[ "$(readlink "$mountpoint/Applications")" == /Applications ]]
+
       - name: Sign Windows exe and installer with Azure Trusted Signing
         if: matrix.platform == 'windows-latest' && env.AZURE_CLIENT_ID != ''
         uses: azure/trusted-signing-action@v1

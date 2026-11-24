@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Een macOS-CI-proef koppelt de DMG alleen-lezen, controleert de ingesloten app op x86_64 en arm64 en verifieert de `/Applications`-link. De bevestigende CI-run staat open; bytegelijke DMG-pakketbytes, GUI-gedrag, *Referentie* en *Attest* blijven open.
+
 De [CI op `4cb26a14`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45341921430) slaagt met NTA-gate, drie desktopplatforms en de nieuwe Windows-NSIS-installatieproef. De proef voert de installer stil uit, vindt app en deïnstallatieprogramma en bevestigt verwijdering. Dit versterkt *Bouwbewijs* voor installatiegedrag; de proef start de GUI niet en verandert *Referentie* of *Attest* niet.
 
 De twee volledige CI-pogingen op [broncommit `9d4f5aa7`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45296714795) leveren bytegelijke NSIS-installers op, beide met SHA-256 `f10f3cb616e7477803f84a2c9034e2f37997297dbefb5cc230a737b87936e2d7` en elk bevestigd tegen het manifest. De zeven payloadbestanden zijn uitpakbaar en de app-EXE is bytegelijk. Dit vult *Bouwbewijs* voor Windows-pakketbytes in deze CI-procedure in; installatiegedrag, onafhankelijke *Referentie* en *Attest* blijven open. De macOS-DMG's zijn niet bytegelijk; hun vier met `7z` uitgepakte gewone bestanden zijn wel inhoudelijk gelijk, maar de HFS+-metadata heeft verschillende bouwtijden.
