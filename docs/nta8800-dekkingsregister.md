@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-De [release-installerlezer](nta8800-build-procedure.md#release-installers-controleren) toetst pakketpad, byteaantal en SHA-256 tegen het CI-manifest en weigert een geclaimde normverificatie of attestering. Vier gerichte Node-proeven slagen lokaal; CI-bevestiging is nog open. Dit vult *Bouwbewijs* en *Test* aan, zonder wijziging in *Referentie* of *Attest*.
+De [CI op `6ea7d998`](nta8800-installer-verificatie-2026-11-24-6ea7d998.md) slaagt met NTA-gate en drie desktopplatforms. De [release-installerlezer](nta8800-build-procedure.md#release-installers-controleren) toetst pakketpad, byteaantal en SHA-256 tegen het CI-manifest, weigert een geclaimde normverificatie of attestering en controleert ook de afzonderlijk gedownloade vier pakketten. Vier gerichte Node-proeven slagen lokaal en in CI. Dit vult *Bouwbewijs* en *Test* aan voor één run; *Referentie* en *Attest* veranderen niet.
 
 Het [BRL 9501-gereedheidsdossier](nta8800-brl9501-gereedheid.md) verwijst nu per route naar dit register in plaats van volledigheid van de hele keten te suggereren. De open routes en deelwaarden hieronder blijven open; de correctie wijzigt geen *Referentie*- of *Attest*-kolom.
 
