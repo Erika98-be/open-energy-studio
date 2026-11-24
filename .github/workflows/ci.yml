@@ -188,6 +188,25 @@ jobs:
           files-folder-depth: 4
           cache-dependencies: false
 
+      - name: Smoke-test Windows NSIS installation
+        if: matrix.platform == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $installers = @(Get-ChildItem 'src-tauri/target/release/bundle/nsis' -Filter '*.exe' -File)
+          if ($installers.Count -ne 1) { throw "Expected one NSIS installer, found $($installers.Count)" }
+          $installDir = Join-Path $env:LOCALAPPDATA 'Open Energy Studio'
+          $app = Join-Path $installDir 'open-energy-studio.exe'
+          $uninstaller = Join-Path $installDir 'uninstall.exe'
+          if (Test-Path $installDir) { throw "Installation directory already exists: $installDir" }
+          $install = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S' -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "NSIS installation failed: $($install.ExitCode)" }
+          if (!(Test-Path $app -PathType Leaf)) { throw "Installed app is missing: $app" }
+          if (!(Test-Path $uninstaller -PathType Leaf)) { throw "Uninstaller is missing: $uninstaller" }
+          $remove = Start-Process -FilePath $uninstaller -ArgumentList '/S' -Wait -PassThru
+          if ($remove.ExitCode -ne 0) { throw "NSIS uninstallation failed: $($remove.ExitCode)" }
+          if (Test-Path $app) { throw "App remains after uninstallation: $app" }
+
       - name: Normalize Linux deb package
         if: matrix.platform == 'ubuntu-22.04'
         shell: bash

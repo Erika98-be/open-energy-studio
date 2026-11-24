@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+Een Windows-CI-installatieproef voert de gebouwde NSIS-installer nu stil uit en controleert de app, het deïnstallatieprogramma en verwijdering. De bevestigende CI-run staat open; de proef start de GUI niet en verandert *Referentie* of *Attest* niet.
+
 De twee volledige CI-pogingen op [broncommit `9d4f5aa7`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45296714795) leveren bytegelijke NSIS-installers op, beide met SHA-256 `f10f3cb616e7477803f84a2c9034e2f37997297dbefb5cc230a737b87936e2d7` en elk bevestigd tegen het manifest. De zeven payloadbestanden zijn uitpakbaar en de app-EXE is bytegelijk. Dit vult *Bouwbewijs* voor Windows-pakketbytes in deze CI-procedure in; installatiegedrag, onafhankelijke *Referentie* en *Attest* blijven open. De macOS-DMG's zijn niet bytegelijk; hun vier met `7z` uitgepakte gewone bestanden zijn wel inhoudelijk gelijk, maar de HFS+-metadata heeft verschillende bouwtijden.
 
 De [twee volledige CI-pogingen op `37fdeba0`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45258056256) leveren een bytegelijke uitgepakte Windows-EXE met `Repro`-vermelding op. De NSIS-installers verschillen nog, hoewel alle zeven uitgepakte gewone bestanden inhoudelijk gelijk zijn; hun bewaartijdstempels verschillen. Een `SetDateSave off`-proef staat klaar. Dit versterkt *Bouwbewijs* voor de Rust-binary, terwijl bytegelijke Windows-installers, onafhankelijke *Referentie* en *Attest* open blijven.
