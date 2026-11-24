@@ -1,6 +1,6 @@
 # NTA 8800 dekkingsregister
 
-Een macOS-CI-proef koppelt de DMG alleen-lezen, controleert de ingesloten app op x86_64 en arm64 en verifieert de `/Applications`-link. De bevestigende CI-run staat open; bytegelijke DMG-pakketbytes, GUI-gedrag, *Referentie* en *Attest* blijven open.
+De [CI op `16188e09`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45358142390) slaagt met NTA-gate, drie desktopplatforms en de nieuwe macOS-DMG-proef. Deze koppelt de DMG alleen-lezen, controleert de ingesloten app op x86_64 en arm64 en verifieert de `/Applications`-link. Dit versterkt *Bouwbewijs* voor een bruikbaar mountpad; bytegelijke DMG-pakketbytes, GUI-gedrag, *Referentie* en *Attest* blijven open.
 
 De [CI op `4cb26a14`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45341921430) slaagt met NTA-gate, drie desktopplatforms en de nieuwe Windows-NSIS-installatieproef. De proef voert de installer stil uit, vindt app en deïnstallatieprogramma en bevestigt verwijdering. Dit versterkt *Bouwbewijs* voor installatiegedrag; de proef start de GUI niet en verandert *Referentie* of *Attest* niet.
 

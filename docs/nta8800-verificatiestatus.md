@@ -1,6 +1,6 @@
 # NTA 8800 verificatiestatus — 24 november 2026
 
-De macOS-desktop-CI bevat nu een gerichte DMG-proef: het pakket wordt alleen-lezen gekoppeld, de ingesloten uitvoerbare app wordt op beide architecturen gecontroleerd en de `/Applications`-link wordt nagezien. De CI-bevestiging staat nog open. De proef start de GUI niet en verhelpt de verschillende DMG-pakketbytes niet.
+De [CI op `16188e09`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45358142390) is volledig geslaagd met NTA-gate en drie desktopplatforms. De nieuwe macOS-DMG-proef koppelt het pakket alleen-lezen, vindt een uitvoerbare app voor x86_64 en arm64, controleert de `/Applications`-link en ontkoppelt het pakket. De proef start de GUI niet en verhelpt de verschillende DMG-pakketbytes niet.
 
 De [CI op `4cb26a14`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45341921430) is volledig geslaagd met NTA-gate en drie desktopplatforms. De nieuwe Windows-NSIS-proef installeert het gebouwde pakket stil voor de huidige gebruiker, vindt app en deïnstallatieprogramma, verwijdert het pakket stil en controleert dat de app weg is. De twee bytegelijke installers zijn op de eerdere broncommit `9d4f5aa7` aangetoond. Deze proef toetst geen GUI-start of gebruikersworkflow.
 
