@@ -778,7 +778,18 @@ pub fn audit_reference_case(case: ReferenceCase) -> ReferenceAudit {
             match serde_json::from_value::<crate::building_performance::BuildingPerformanceInput>(
                 case.project.clone(),
             ) {
-                Ok(_) => Some(input_fingerprint(&case.project)),
+                Ok(input) => {
+                    if crate::building_performance::assess_building_performance(&input).status
+                        == "invalid"
+                    {
+                        issues.push(issue(
+                            "project_input_invalid",
+                            "project",
+                            "Reference building performance input fails validation",
+                        ));
+                    }
+                    Some(input_fingerprint(&case.project))
+                }
                 Err(_) => {
                     issues.push(issue(
                         "project_shape_invalid",
@@ -857,6 +868,28 @@ mod tests {
             expected_label_class: None,
             pending: None,
         }
+    }
+
+    #[test]
+    fn building_performance_case_audits_semantically_invalid_input() {
+        let mut project: Value = serde_json::from_str(include_str!(
+            "../../../training-data/nta8800-building-performance-synthetic.json"
+        ))
+        .unwrap();
+        let mut case = comparison_case(project.clone(), "beng2", 0.0, "kWh/m2.year");
+        case.input_kind = Some(ReferenceInputKind::BuildingPerformance);
+        let valid = audit_reference_case(case.clone());
+        assert!(valid.manifest_complete, "{:?}", valid.issues);
+
+        project["totalUsableFloorAreaM2"] = serde_json::json!(0.0);
+        case.project = project;
+        let invalid = audit_reference_case(case.clone());
+        assert!(!invalid.manifest_complete);
+        assert!(invalid
+            .issues
+            .iter()
+            .any(|issue| issue.code == "project_input_invalid" && issue.path == "project"));
+        assert_eq!(compare_reference_case(case).status, "invalid_case");
     }
 
     #[test]

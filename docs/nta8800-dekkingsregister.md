@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De audit toetst `buildingPerformance`-referentieinvoer nu ook semantisch via Rust: een parseerbare ongeldige invoer maakt `manifestComplete=false` en levert `project_input_invalid` op. De geldige/ongeldige regressie, 33 referentietests, 1058 kernunittests, rustfmt en kern-Clippy slagen lokaal. Dit scherpt *Test* en bewijsintegriteit aan; *Referentie* en *Attest* veranderen niet.
+
 De audit van een referentiecasus wijst een onbekend uitvoerpad, verkeerde eenheid of ontbrekende eenheid in `pending.metrics` nu af met `manifestComplete=false`; de vergelijkingsstap gebruikt dezelfde audit. Gerichte regressie, 32 referentietests, 1057 kernunittests, rustfmt en kern-Clippy slagen lokaal. De [CI op `4ef6b576`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45601932722) slaagt met NTA-gate en drie desktopplatforms; de optionele `nta-build-evidence`-job is overgeslagen. Dit scherpt *Test* en bewijsintegriteit aan, zonder *Referentie* of *Attest* te wijzigen.
 
 De [tweede CI-poging op `bb3f594f`](nta8800-installer-herbouw-2026-11-25-bb3f594f.md) bevestigt opnieuw NTA-gate en drie desktopplatforms. Alle acht afzonderlijk gedownloade pakketten slagen in de manifestcontrole; Linux-`.deb`, AppImage en Windows-NSIS zijn bytegelijk tussen de pogingen. De macOS-DMG verschilt één byte, met gelijke inhoud van de vier uitgepakte gewone bestanden. Dit versterkt *Bouwbewijs* voor de drie bytegelijke formaten binnen dezelfde runnerklassen; macOS-pakketbytes, *Referentie* en *Attest* blijven open.
