@@ -681,6 +681,13 @@ pub fn audit_reference_case(case: ReferenceCase) -> ReferenceAudit {
                     ));
                 }
                 audit_metric_output(&metric.path, &metric.unit, &path, &mut issues);
+                if metric.unit.trim().is_empty() {
+                    issues.push(issue(
+                        "metric_unit_required",
+                        format!("{path}.unit"),
+                        "Metric unit is required",
+                    ));
+                }
                 if metric.norm_reference.trim().is_empty() {
                     issues.push(issue(
                         "metric_norm_reference_required",
@@ -1067,6 +1074,14 @@ mod tests {
         assert!(!audit.manifest_complete);
         assert!(audit.issues.iter().any(|issue| {
             issue.code == "metric_unit_mismatch" && issue.path == "pending.metrics[0].unit"
+        }));
+
+        let mut blank_unit = pending_case(project());
+        blank_unit.pending.as_mut().unwrap().metrics[0].unit.clear();
+        let audit = audit_reference_case(blank_unit);
+        assert!(!audit.manifest_complete);
+        assert!(audit.issues.iter().any(|issue| {
+            issue.code == "metric_unit_required" && issue.path == "pending.metrics[0].unit"
         }));
     }
 
