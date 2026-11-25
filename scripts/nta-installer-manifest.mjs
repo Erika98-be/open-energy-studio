@@ -29,8 +29,10 @@ export async function createInstallerManifest(root, platform, sourceCommit) {
   const artifacts = [];
   for (const [directory, extension] of formats[platform]) {
     const fullDirectory = join(root, directory);
-    const files = (await readdir(fullDirectory)).filter((name) => name.endsWith(extension));
+    const files = (await readdir(fullDirectory)).filter((name) =>
+      name.toLowerCase().endsWith(extension.toLowerCase()));
     if (files.length !== 1) throw new Error(`Expected one ${extension} installer in ${directory}, found ${files.length}`);
+    if (!files[0].endsWith(extension)) throw new Error(`Installer extension must be ${extension} in ${directory}`);
     const path = join(fullDirectory, files[0]);
     const info = await lstat(path);
     if (!info.isFile() || info.isSymbolicLink() || info.size === 0) {

@@ -47,8 +47,17 @@ test('requires exactly one installer for each Windows and macOS package', async 
       assert.equal(manifest.platform, platform);
       assert.equal(manifest.artifacts.length, 1);
       assert.equal(manifest.artifacts[0].file, `${directory}/${name}`);
-      await writeFile(join(path, `extra${name.slice(name.lastIndexOf('.'))}`), 'extra');
+      const extra = join(path, `extra${name.slice(name.lastIndexOf('.'))}`);
+      await writeFile(extra, 'extra');
       await assert.rejects(createInstallerManifest(root, platform, 'b'.repeat(40)), /Expected one/);
+      await rm(extra);
+      await writeFile(join(path, `extra${name.slice(name.lastIndexOf('.')).toUpperCase()}`), 'extra');
+      await assert.rejects(createInstallerManifest(root, platform, 'b'.repeat(40)), /Expected one/);
+      await rm(join(path, name));
+      const onlyUppercase = join(path, `only${name.slice(name.lastIndexOf('.')).toUpperCase()}`);
+      await rm(join(path, `extra${name.slice(name.lastIndexOf('.')).toUpperCase()}`));
+      await writeFile(onlyUppercase, 'installer bytes');
+      await assert.rejects(createInstallerManifest(root, platform, 'b'.repeat(40)), /Installer extension must be/);
     }
   } finally {
     await rm(root, { recursive: true, force: true });

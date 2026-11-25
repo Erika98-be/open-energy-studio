@@ -50,7 +50,8 @@ export async function verifyInstallerManifest(root, manifestPath, expectedCommit
         !/^[0-9a-f]{64}$/.test(entry.sha256)) {
       throw new Error(`Invalid installer digest at index ${index}`);
     }
-    const installerNames = (await readdir(join(root, directory))).filter((name) => name.endsWith(extension));
+    const installerNames = (await readdir(join(root, directory))).filter((name) =>
+      name.toLowerCase().endsWith(extension.toLowerCase()));
     if (installerNames.length !== 1 || installerNames[0] !== posix.basename(entry.file)) {
       throw new Error(`Installer set differs from manifest in ${directory}`);
     }

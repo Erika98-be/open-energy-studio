@@ -1,4 +1,6 @@
-# NTA 8800 verificatiestatus — 24 november 2026
+# NTA 8800 verificatiestatus — 25 november 2026
+
+De installer-manifestmaker en -lezer tellen pakketbestanden nu hoofdletterongevoelig bij de controle op exact één installer per formaat. Daardoor kan bijvoorbeeld een extra `.EXE`, `.DMG` of `.APPIMAGE` niet ongemerkt naast het gemanifesteerde bestand blijven staan. De twee bestaande gerichte Node-testbestanden (vier proeven, uitgebreid met varianten in de extensie), script-syntaxis en `git diff --check` slagen lokaal. Een nieuwe CI-bevestiging staat open. Dit versterkt alleen de integriteitscontrole van het bouwbewijs; het levert geen onafhankelijke rekenreferentie of attest op.
 
 Twee [CI-pogingen op `6ea7d998`](nta8800-installer-verificatie-2026-11-24-6ea7d998.md) slagen met volledige NTA-gate en drie desktopplatforms. De nieuwe [manifestlezer](nta8800-build-procedure.md#release-installers-controleren) slaagt in elke desktopjob vóór upload; na afzonderlijke download kloppen alle vier de pakketbestanden per poging met hun manifest en de verwachte broncommit. De Linux-`.deb`, AppImage en Windows-NSIS-installer zijn tussen de pogingen bytegelijk, inclusief hun manifesten. De macOS-DMG verschilt zeven bytes in lengte en heeft een andere SHA-256; vier met `7z` uitgepakte gewone bestanden, waaronder de universele app-binary, zijn inhoudelijk gelijk. Onafhankelijke rekenreferentie en attest blijven open.
 
