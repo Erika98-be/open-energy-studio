@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De audit van een referentiecasus wijst een onbekend uitvoerpad of verkeerde eenheid nu ook bij `expected` en `pending.metrics` af met `manifestComplete=false`; de vergelijkingsstap gebruikt dezelfde audit. Gerichte regressie, 32 referentietests, 1057 kernunittests, rustfmt en kern-Clippy slagen lokaal. Dit scherpt *Test* en bewijsintegriteit aan, zonder *Referentie* of *Attest* te wijzigen.
+
 De [tweede CI-poging op `bb3f594f`](nta8800-installer-herbouw-2026-11-25-bb3f594f.md) bevestigt opnieuw NTA-gate en drie desktopplatforms. Alle acht afzonderlijk gedownloade pakketten slagen in de manifestcontrole; Linux-`.deb`, AppImage en Windows-NSIS zijn bytegelijk tussen de pogingen. De macOS-DMG verschilt één byte, met gelijke inhoud van de vier uitgepakte gewone bestanden. Dit versterkt *Bouwbewijs* voor de drie bytegelijke formaten binnen dezelfde runnerklassen; macOS-pakketbytes, *Referentie* en *Attest* blijven open.
 
 De installer-manifestmaker en -lezer tellen nu ook extra pakketbestanden met een anders geschreven extensie mee, zoals `.EXE`, `.DMG` of `.APPIMAGE`. De vier gerichte Node-proeven, script-syntaxis en `git diff --check` slagen lokaal. De [CI op `bb3f594f`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45522044465) bevestigt de NTA-gate en drie desktopplatforms; alle vier afzonderlijk gedownloade pakketten slagen in de aangescherpte manifestcontrole. Dit versterkt *Bouwbewijs* en *Test*, zonder *Referentie* of *Attest* te wijzigen.

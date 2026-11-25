@@ -282,6 +282,25 @@ fn metric_unit(path: &str) -> Option<&'static str> {
     }
 }
 
+fn audit_metric_output(path: &str, unit: &str, at: &str, issues: &mut Vec<ReferenceIssue>) {
+    if path.trim().is_empty() || unit.trim().is_empty() {
+        return;
+    }
+    match metric_unit(path) {
+        None => issues.push(issue(
+            "metric_path_unsupported",
+            format!("{at}.path"),
+            "Only allowlisted numeric performance output paths can be compared",
+        )),
+        Some(expected_unit) if unit != expected_unit => issues.push(issue(
+            "metric_unit_mismatch",
+            format!("{at}.unit"),
+            "Metric unit does not match the kernel output unit",
+        )),
+        Some(_) => {}
+    }
+}
+
 fn actual_metric(
     result: &crate::building_performance::BuildingPerformanceAssessment,
     path: &str,
@@ -415,37 +434,6 @@ pub fn compare_reference_case(case: ReferenceCase) -> ReferenceComparison {
         return result;
     }
     let pending_metrics = case.pending.as_ref().map_or(&[][..], |item| &item.metrics);
-    let named = case
-        .expected
-        .iter()
-        .enumerate()
-        .map(|(index, metric)| (format!("expected[{index}]"), &metric.path, &metric.unit))
-        .chain(pending_metrics.iter().enumerate().map(|(index, metric)| {
-            (
-                format!("pending.metrics[{index}]"),
-                &metric.path,
-                &metric.unit,
-            )
-        }));
-    for (at, path, unit_given) in named {
-        let unit = metric_unit(path);
-        if unit.is_none() {
-            result.issues.push(issue(
-                "metric_path_unsupported",
-                format!("{at}.path"),
-                "Only allowlisted numeric performance output paths can be compared",
-            ));
-        } else if unit != Some(unit_given.as_str()) {
-            result.issues.push(issue(
-                "metric_unit_mismatch",
-                format!("{at}.unit"),
-                "Metric unit does not match the kernel output unit",
-            ));
-        }
-    }
-    if !result.issues.is_empty() {
-        return result;
-    }
     let calculated = match case.input_kind.unwrap_or(ReferenceInputKind::Project) {
         ReferenceInputKind::Project => {
             let assessment = crate::project_performance::assess_project_performance(&case.project);
@@ -692,6 +680,7 @@ pub fn audit_reference_case(case: ReferenceCase) -> ReferenceAudit {
                         "Metric paths must be nonempty and unique",
                     ));
                 }
+                audit_metric_output(&metric.path, &metric.unit, &path, &mut issues);
                 if metric.norm_reference.trim().is_empty() {
                     issues.push(issue(
                         "metric_norm_reference_required",
@@ -737,6 +726,7 @@ pub fn audit_reference_case(case: ReferenceCase) -> ReferenceAudit {
                 "Metric paths must be nonempty and unique",
             ));
         }
+        audit_metric_output(&metric.path, &metric.unit, &path, &mut issues);
         if !metric.value.is_finite() {
             issues.push(issue(
                 "expected_value_invalid",
@@ -1048,6 +1038,36 @@ mod tests {
             compare_reference_case(comparison_case(project(), "beng2", 1.0, "kWh/m2.year"));
         assert_eq!(incomplete.status, "calculation_unavailable");
         assert!(!incomplete.calculation_available);
+    }
+
+    #[test]
+    fn manifest_audit_rejects_unsupported_outputs_and_wrong_units() {
+        let mut expected = comparison_case(project(), "derivedInput/floorArea", 100.0, "m2");
+        let audit = audit_reference_case(expected.clone());
+        assert!(!audit.manifest_complete);
+        assert!(audit.issues.iter().any(|issue| {
+            issue.code == "metric_path_unsupported" && issue.path == "expected[0].path"
+        }));
+        expected.expected[0].path = "beng2".into();
+        let audit = audit_reference_case(expected);
+        assert!(!audit.manifest_complete);
+        assert!(audit.issues.iter().any(|issue| {
+            issue.code == "metric_unit_mismatch" && issue.path == "expected[0].unit"
+        }));
+
+        let mut pending = pending_case(project());
+        pending.pending.as_mut().unwrap().metrics[0].path = "name".into();
+        let audit = audit_reference_case(pending.clone());
+        assert!(!audit.manifest_complete);
+        assert!(audit.issues.iter().any(|issue| {
+            issue.code == "metric_path_unsupported" && issue.path == "pending.metrics[0].path"
+        }));
+        pending.pending.as_mut().unwrap().metrics[0].path = "beng2".into();
+        let audit = audit_reference_case(pending);
+        assert!(!audit.manifest_complete);
+        assert!(audit.issues.iter().any(|issue| {
+            issue.code == "metric_unit_mismatch" && issue.path == "pending.metrics[0].unit"
+        }));
     }
 
     #[test]
