@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De invoeraudit voor HTTPS-bronverwijzingen van warmtepompverklaringen weigert nu `+443` als expliciete poort bij zowel DNS-host als IPv6-host. De gedeelde poortcontrole verlangt ASCII-cijfers en een bereik van 1 tot en met 65535; een gerichte Rust-regressie, alle 1058 kernunittests, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test* van de bewijsverwijzing; onafhankelijke *Referentie* en *Attest* blijven open.
+
 De kwaliteitsverklaring-audit weigert nu ook HTTPS-bronverwijzingen met poort 0 bij hostnaam en IPv6. De gerichte regressie, 1058 kernunittests, rustfmt en kern-Clippy slagen lokaal. De [CI op `6fe89291`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45793699323) bevestigt NTA-gate en drie desktopplatforms; de optionele `nta-build-evidence`-job is overgeslagen. Dit scherpt *Invoer*, *Audit* en *Test* aan; authenticiteit, *Referentie* en *Attest* blijven open.
 
 De audit toetst `buildingPerformance`-referentieinvoer nu ook semantisch via Rust: een parseerbare ongeldige invoer maakt `manifestComplete=false` en levert `project_input_invalid` op. De geldige/ongeldige regressie, 33 referentietests, 1058 kernunittests, rustfmt en kern-Clippy slagen lokaal. De [CI op `ec51cbdb`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45643338291) bevestigt NTA-gate en drie desktopplatforms; de optionele `nta-build-evidence`-job is overgeslagen. Dit scherpt *Test* en bewijsintegriteit aan; *Referentie* en *Attest* veranderen niet.

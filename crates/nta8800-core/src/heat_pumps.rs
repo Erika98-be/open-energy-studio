@@ -56,18 +56,18 @@ fn valid_https_source_authority(url: &str) -> bool {
             return false;
         };
         return address.parse::<Ipv6Addr>().is_ok()
-            && (suffix.is_empty()
-                || suffix
-                    .strip_prefix(':')
-                    .is_some_and(|port| port.parse::<u16>().is_ok_and(|value| value != 0)));
+            && (suffix.is_empty() || suffix.strip_prefix(':').is_some_and(valid_https_port));
     }
     let (hostname, port) = host
         .split_once(':')
         .map_or((host, None), |(name, port)| (name, Some(port)));
-    valid_ascii_hostname(hostname)
-        && port.map_or(true, |port| {
-            port.parse::<u16>().is_ok_and(|value| value != 0)
-        })
+    valid_ascii_hostname(hostname) && port.map_or(true, valid_https_port)
+}
+
+fn valid_https_port(port: &str) -> bool {
+    !port.is_empty()
+        && port.bytes().all(|byte| byte.is_ascii_digit())
+        && port.parse::<u16>().is_ok_and(|value| value != 0)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -1247,7 +1247,9 @@ mod tests {
             "https://bcrg.nl:bad/path",
             "https://bcrg.nl:65536/path",
             "https://bcrg.nl:0/path",
+            "https://bcrg.nl:+443/path",
             "https://[::1]:0/path",
+            "https://[::1]:+443/path",
             "https://[::1]:bad/path",
             "https://bcrg.nl /declaration",
             "https://bcrg.nl\\@evidence.example/declaration",
