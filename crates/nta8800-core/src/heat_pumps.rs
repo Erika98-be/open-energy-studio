@@ -59,13 +59,15 @@ fn valid_https_source_authority(url: &str) -> bool {
             && (suffix.is_empty()
                 || suffix
                     .strip_prefix(':')
-                    .is_some_and(|port| !port.is_empty() && port.parse::<u16>().is_ok()));
+                    .is_some_and(|port| port.parse::<u16>().is_ok_and(|value| value != 0)));
     }
     let (hostname, port) = host
         .split_once(':')
         .map_or((host, None), |(name, port)| (name, Some(port)));
     valid_ascii_hostname(hostname)
-        && port.map_or(true, |port| !port.is_empty() && port.parse::<u16>().is_ok())
+        && port.map_or(true, |port| {
+            port.parse::<u16>().is_ok_and(|value| value != 0)
+        })
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -1244,6 +1246,8 @@ mod tests {
             "https://bcrg.nl:/path",
             "https://bcrg.nl:bad/path",
             "https://bcrg.nl:65536/path",
+            "https://bcrg.nl:0/path",
+            "https://[::1]:0/path",
             "https://[::1]:bad/path",
             "https://bcrg.nl /declaration",
             "https://bcrg.nl\\@evidence.example/declaration",
