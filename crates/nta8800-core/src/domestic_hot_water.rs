@@ -784,6 +784,9 @@ pub enum HotWaterGenerator {
     /// notional device over the whole rise (f_pref;serie = 1), with table
     /// 9.29 at 65 °C < θ_sup ≤ 70 °C for the source of the last heat pump.
     HeatPumpSeries {
+        /// §13.8.4.10 applies only to two or more electric heat pumps in series.
+        #[serde(default, rename = "heatPumpCount")]
+        heat_pump_count: Option<u32>,
         #[serde(rename = "lastSource")]
         last_source: crate::forfait_heat_pump_draft::TableSource,
         #[serde(default, rename = "lastSourceTemperatureC")]
@@ -2538,11 +2541,18 @@ fn generator_issues(generator: &HotWaterGenerator, prefix: &str) -> Vec<(&'stati
         issues.push(("route_not_in_edition", format!("{prefix}.kind")));
     }
     if let HotWaterGenerator::HeatPumpSeries {
+        heat_pump_count,
         last_source,
         last_source_temperature_c,
         last_source_temperature_evidence_reference,
     } = generator
     {
+        if heat_pump_count.unwrap_or(0) < 2 {
+            issues.push((
+                "hot_water_series_heat_pump_count_invalid",
+                format!("{prefix}.heatPumpCount"),
+            ));
+        }
         if crate::forfait_heat_pump_draft::utility_cop_65_to_70(*last_source).is_none() {
             issues.push((
                 "hot_water_heat_pump_series_source_invalid",
@@ -5502,6 +5512,7 @@ mod tests {
         use crate::forfait_heat_pump_draft::TableSource;
         // §13.8.4.10: outdoor air, 65–70 °C column of table 9.29: 2,0.
         let input = system(HotWaterGenerator::HeatPumpSeries {
+            heat_pump_count: Some(2),
             last_source: TableSource::OutdoorAir,
             last_source_temperature_c: None,
             last_source_temperature_evidence_reference: None,
@@ -5512,6 +5523,7 @@ mod tests {
         assert!((jan.ambient_heat_kwh - jan.generator_output_kwh * (1.0 - 1.0 / 2.0)).abs() < 1e-9);
 
         let unknown = system(HotWaterGenerator::HeatPumpSeries {
+            heat_pump_count: Some(2),
             last_source: TableSource::GroundOrGroundwaterUnknown,
             last_source_temperature_c: None,
             last_source_temperature_evidence_reference: None,
@@ -5535,6 +5547,7 @@ mod tests {
         ] {
             let make = |temperature, evidence: Option<&str>| {
                 system(HotWaterGenerator::HeatPumpSeries {
+                    heat_pump_count: Some(2),
                     last_source: source,
                     last_source_temperature_c: temperature,
                     last_source_temperature_evidence_reference: evidence.map(str::to_owned),
@@ -5557,6 +5570,7 @@ mod tests {
                 .any(|issue| issue.code == "source_temperature_class_mismatch"));
         }
         let air = system(HotWaterGenerator::HeatPumpSeries {
+            heat_pump_count: Some(2),
             last_source: TableSource::OutdoorAir,
             last_source_temperature_c: Some(15.0),
             last_source_temperature_evidence_reference: Some("bronrapport".to_owned()),
@@ -5568,6 +5582,31 @@ mod tests {
                 .count(),
             2
         );
+    }
+
+    #[test]
+    fn heat_pump_series_requires_at_least_two_electric_pumps() {
+        use crate::forfait_heat_pump_draft::TableSource;
+        for (count, rejected) in [
+            (None, true),
+            (Some(1), true),
+            (Some(2), false),
+            (Some(3), false),
+        ] {
+            let input = system(HotWaterGenerator::HeatPumpSeries {
+                heat_pump_count: count,
+                last_source: TableSource::OutdoorAir,
+                last_source_temperature_c: None,
+                last_source_temperature_evidence_reference: None,
+            });
+            let issue = validate_hot_water(&input, context(), "dhw")
+                .iter()
+                .any(|issue| {
+                    issue.code == "hot_water_series_heat_pump_count_invalid"
+                        && issue.path == "dhw.generator.heatPumpCount"
+                });
+            assert_eq!(issue, rejected, "count {count:?}");
+        }
     }
 
     fn combi() -> HotWaterGenerator {

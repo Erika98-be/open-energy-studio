@@ -694,6 +694,7 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
       <CheckField {...field} path={[...base, 'insideBoundary']} label={t('nta.form.dhwBiomass.insideBoundary')} />
     </>}
     {kind === 'heat_pump_series' && <>
+      <NumberField {...field} path={[...base, 'heatPumpCount']} label={t('nta.form.dhwSeriesHp.heatPumpCount')} step="1" />
       <SelectField {...field} path={[...base, 'lastSource']} label={t('nta.form.dhwSeriesHp.lastSource')}
         onChange={(_path, source) => change(base, {
           ...(read(draft, base) as Draft), lastSource: source,

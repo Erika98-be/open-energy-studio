@@ -584,6 +584,7 @@ async fn hot_water_series_without_table_source_is_rejected_at_input_path() {
     let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
         "kind": "heat_pump_series",
+        "heatPumpCount": 2,
         "lastSource": "ground_or_groundwater_unknown"
     });
     let (status, body) = post(
@@ -609,6 +610,7 @@ async fn hot_water_series_without_source_temperature_evidence_is_rejected() {
     let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
         "kind": "heat_pump_series",
+        "heatPumpCount": 2,
         "lastSource": "collective20_to40_c"
     });
     let (status, body) = post(

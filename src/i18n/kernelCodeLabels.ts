@@ -979,6 +979,7 @@ export const kernelCodeLabelsNl: Record<string, string> = {
   'kernel.issue.zone_data_without_zone': "Deze NTA-zonegegevens horen bij een zone die niet (meer) bestaat; verwijder ze of kies de zone.",
   'kernel.issue.hot_water_heat_pump_class_exceeded': "Tapwaterwarmtepomp: de vraag valt boven het beproefde tapprofiel; een warmtepomp mag niet in een hogere klasse rekenen dan beproefd (tabel 13.18).",
   'kernel.issue.hot_water_heat_pump_series_source_invalid': "Tapwaterwarmtepompen in serie: voor deze bron van de laatste warmtepomp geeft de norm geen COP voor 65–70 °C; kies een andere bron.",
+  'kernel.issue.hot_water_series_heat_pump_count_invalid': "Tapwaterwarmtepompen in serie: geef minstens twee elektrische warmtepompen op (§13.8.4.10).",
 };
 
 /** English labels. */
@@ -1956,4 +1957,5 @@ export const kernelCodeLabelsEn: Record<string, string> = {
   'kernel.issue.zone_data_without_zone': "This NTA zone data belongs to a zone that does not exist (any more); remove it or choose the zone.",
   'kernel.issue.hot_water_heat_pump_class_exceeded': "Hot-water heat pump: the demand is above the tested tapping profile; a heat pump may not count in a higher class than tested (table 13.18).",
   'kernel.issue.hot_water_heat_pump_series_source_invalid': "Hot-water heat pumps in series: the norm gives no COP for 65–70 °C for this source of the last heat pump; choose another source.",
+  'kernel.issue.hot_water_series_heat_pump_count_invalid': "Hot-water heat pumps in series: enter at least two electric heat pumps (§13.8.4.10).",
 };

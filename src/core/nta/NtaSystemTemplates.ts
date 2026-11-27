@@ -215,7 +215,7 @@ export function hotWaterGeneratorTemplate(kind: string): Block {
   // §13.8.4.6 table 13.22 solid-biomass combi appliance.
   if (kind === 'biomass_combi') return { kind, insulation: 'at_least20_mm', insideBoundary: true };
   // §13.8.4.10 heat pumps in series: the source of the last one.
-  if (kind === 'heat_pump_series') return { kind, lastSource: 'outdoor_air' };
+  if (kind === 'heat_pump_series') return { kind, heatPumpCount: null, lastSource: 'outdoor_air' };
   // §13.8.4.7.4 heat pump with an indirectly heated vessel.
   if (kind === 'indirect_heat_pump') return { kind, alsoSpaceHeating: true };
   // Annex W booster heat pump with the tests at 24 (or 16) and 40 °C.

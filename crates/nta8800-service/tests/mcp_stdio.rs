@@ -1949,6 +1949,7 @@ fn project_performance_mcp_rejects_heat_pump_series_without_table_source() {
     .unwrap();
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
         "kind": "heat_pump_series",
+        "heatPumpCount": 2,
         "lastSource": "ground_or_groundwater_unknown"
     });
     let mut server = Server::start();
@@ -1992,6 +1993,7 @@ fn project_performance_mcp_rejects_series_without_source_temperature_evidence() 
     .unwrap();
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
         "kind": "heat_pump_series",
+        "heatPumpCount": 2,
         "lastSource": "collective20_to40_c"
     });
     let mut server = Server::start();

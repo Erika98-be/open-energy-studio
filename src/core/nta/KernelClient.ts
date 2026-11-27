@@ -4086,7 +4086,7 @@ export type NtaHotWaterGenerator =
     /** §13.8.4.6 table 13.22 solid-biomass combi appliance with an annex R vessel. */
     | { kind: 'biomass_combi'; insulation: 'at_least20_mm' | 'at_least10_mm' | 'none'; insideBoundary: boolean }
     /** §13.8.4.10 electric heat pumps in series as one notional device (table 9.29, 65–70 °C). */
-    | { kind: 'heat_pump_series'; lastSource: ForfaitHeatPumpDraftInput['source']; lastSourceTemperatureC?: number | null; lastSourceTemperatureEvidenceReference?: string | null }
+    | { kind: 'heat_pump_series'; heatPumpCount?: number | null; lastSource: ForfaitHeatPumpDraftInput['source']; lastSourceTemperatureC?: number | null; lastSourceTemperatureEvidenceReference?: string | null }
     | { kind: 'indirect_heat_pump'; alsoSpaceHeating: boolean }
     | { kind: 'external_heat' }
     | ({ kind: 'booster_heat_pump' } & NtaBoosterHeatPump)
