@@ -580,6 +580,37 @@ async fn option_sweep_keeps_the_http_error_model() {
 }
 
 #[tokio::test]
+async fn nested_hot_water_heat_pump_series_is_rejected_at_series_path() {
+    let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
+    let hot_water = &mut project["ntaCalculation"]["hotWater"];
+    hot_water["generator"] = json!({
+        "kind": "heat_pump_series",
+        "heatPumpCount": 2,
+        "lastSource": "outdoor_air"
+    });
+    hot_water["series"] = json!({ "kind": "hotfill_electric_boiler" });
+    hot_water["additionalGenerators"] = json!([{
+        "generator": { "kind": "electric_boiler" },
+        "equipmentReference": "electric boiler"
+    }]);
+    let (status, body) = post(
+        "/v1/nta8800/project/performance",
+        json!({ "project": project }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{body}");
+    assert_eq!(body["performance"]["status"], "invalid");
+    assert!(body["performance"]["annualPrimaryFossilKwh"].is_null());
+    assert!(
+        body["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "hot_water_heat_pump_series_arrangement_conflict"
+                && gap["path"] == "ntaCalculation.hotWater.series"
+        }),
+        "{body}"
+    );
+}
+
+#[tokio::test]
 async fn hot_water_series_with_one_pump_is_rejected_at_count_path() {
     let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
