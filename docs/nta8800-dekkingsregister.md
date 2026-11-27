@@ -1,6 +1,8 @@
 # NTA 8800 dekkingsregister
 
-HTTP en MCP weigeren nu ook de dubbele tapwaterserieschakeling met exact veldpad `ntaCalculation.hotWater.series`, zonder primaire jaarwaarde en met gelijke MCP-tekst en `structuredContent`. De 29 HTTP- en 37 MCP-stdio-proeven, service-Clippy en rustfmt slagen lokaal. Dit versterkt *HTTP*, *MCP*, *Audit* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
+De UI biedt geen nieuwe afzonderlijke `series`-schakeling aan als een fictieve warmtepompserie is gekozen, maar toont een ingelezen tegenstrijdige keuze nog voor herstel. De gerichte proef, 18 projectformulierproeven en TypeScript-controle slagen lokaal. Dit versterkt *UI*, *Invoer* en *Test*; de Rust-audit blijft beslissend en onafhankelijke *Referentie* en *Attest* blijven open.
+
+HTTP en MCP weigeren nu ook de dubbele tapwaterserieschakeling met exact veldpad `ntaCalculation.hotWater.series`, zonder primaire jaarwaarde en met gelijke MCP-tekst en `structuredContent`. De 29 HTTP- en 37 MCP-stdio-proeven, service-Clippy en rustfmt slagen lokaal. De [CI op `750e1294`](https://github.com/Erika98-be/open-energy-studio/actions/runs/46069472270) bevestigt de NTA-gate en drie desktopplatforms; de optionele `nta-build-evidence`-job is overgeslagen. Dit versterkt *HTTP*, *MCP*, *Audit*, *Test* en *Bouwbewijs*; onafhankelijke *Referentie* en *Attest* blijven open.
 
 De Rust-audit weigert nu een `HeatPumpSeries` als hoofd- of extraopwekker tegelijk met de afzonderlijke `series`-schakeling van het tapwatersysteem. §13.8.4.10 levert voor zo'n aanvullende toestelcombinatie geen rekenregel. De gerichte grensproef, 1062 kernunittests, rustfmt, kern-Clippy en TypeScript-controle slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test*; onafhankelijke *Referentie* en *Attest* blijven open.
 

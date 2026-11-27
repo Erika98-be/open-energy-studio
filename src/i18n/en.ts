@@ -1775,6 +1775,7 @@ export const en: Record<string, string> = {
   'nta.form.dhwBiomass.insideBoundary': "Inside the thermal envelope",
   'nta.form.dhwSeriesHp.lastSource': "Source of the last heat pump in the series (table 9.29)",
   'nta.form.dhwSeriesHp.heatPumpCount': "Number of electric heat pumps in series (at least 2)",
+  'nta.form.dhwSeries.fictiveHeatPumpNote': "The fictive heat pump series already covers the full stepped generation. Do not select another series arrangement (§13.8.4.10).",
   'nta.form.dhwSeriesHp.sourceTemperature': "Source temperature of the last heat pump",
   'nta.form.dhwSeriesHp.sourceTemperatureEvidence': "Evidence reference for this source temperature",
   'nta.form.dhwIndirectHp.alsoHeating': "The heat pump also heats the rooms",

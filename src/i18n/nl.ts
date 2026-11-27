@@ -1775,6 +1775,7 @@ export const nl: Record<string, string> = {
   'nta.form.dhwBiomass.insideBoundary': "Binnen de thermische schil",
   'nta.form.dhwSeriesHp.lastSource': "Bron van de laatste warmtepomp in de serie (tabel 9.29)",
   'nta.form.dhwSeriesHp.heatPumpCount': "Aantal elektrische warmtepompen in serie (minstens 2)",
+  'nta.form.dhwSeries.fictiveHeatPumpNote': "De fictieve reeks warmtepompen omvat al de volledige getrapte opwekking. Kies geen extra serieschakeling (§13.8.4.10).",
   'nta.form.dhwSeriesHp.sourceTemperature': "Temperatuur van de bron van de laatste warmtepomp",
   'nta.form.dhwSeriesHp.sourceTemperatureEvidence': "Bronvermelding voor deze brontemperatuur",
   'nta.form.dhwIndirectHp.alsoHeating': "De warmtepomp verwarmt ook de ruimten",

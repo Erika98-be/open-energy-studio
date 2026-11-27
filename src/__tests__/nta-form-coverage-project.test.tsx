@@ -211,6 +211,26 @@ describe('project forms that had no form', () => {
     expect(draft().hotWater.series).toBeNull();
   });
 
+  it('keeps an imported conflicting heat-pump series visible for correction without offering a new conflict', () => {
+    renderWithProviders(<Harness initial={{ hotWater: {
+      generator: { kind: 'heat_pump_series', heatPumpCount: 2, lastSource: 'outdoor_air' },
+      additionalGenerators: [{ generator: { kind: 'electric_boiler' }, equipmentReference: 'boiler' }],
+      series: { kind: 'hotfill_electric_boiler' },
+    } }}>
+      {(d, change) => <HotWaterExtraGeneratorsFields draft={d} change={change} base={['hotWater']} />}</Harness>);
+    const series = screen.getByLabelText('Series arrangement (13.141a–d)') as HTMLSelectElement;
+    expect(series.value).toBe('hotfill_electric_boiler');
+    expect(screen.getByText(/fictive heat pump series already covers/)).toBeTruthy();
+    const hotfill = screen.getByRole('option', { name: /Hotfill: electric boiler/ }) as HTMLOptionElement;
+    const collective = screen.getByRole('option', { name: /Collective first appliance/ }) as HTMLOptionElement;
+    expect(hotfill.disabled).toBe(false);
+    expect(collective.disabled).toBe(true);
+    select('Series arrangement (13.141a–d)', '');
+    expect(draft().hotWater.series).toBeNull();
+    expect(hotfill.disabled).toBe(true);
+    expect(collective.disabled).toBe(true);
+  });
+
   it('shows the collective share per cooling system', () => {
     renderWithProviders(<Harness initial={{ coolingSystems: [{ zoneIds: ['z1'], system: { generators: [] } },
       { zoneIds: ['z2'], system: { generators: [] } }] }}>

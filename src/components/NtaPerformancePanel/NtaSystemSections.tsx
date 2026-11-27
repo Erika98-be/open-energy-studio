@@ -735,6 +735,8 @@ export function HotWaterExtraGeneratorsFields({ draft, change, base }: SectionPr
   const field = { draft, onChange: change };
   const extra = list(draft, [...base, 'additionalGenerators']);
   const series = read(draft, [...base, 'series', 'kind']);
+  const fictiveHeatPumpSeries = read(draft, [...base, 'generator', 'kind']) === 'heat_pump_series'
+    || extra.some((unit) => read(unit, ['generator', 'kind']) === 'heat_pump_series');
   return <>
     {extra.map((_, index) => <fieldset key={index} className="nta-form-row">
       <legend>{t('nta.form.dhwExtra')} {index + 1}</legend>
@@ -762,10 +764,11 @@ export function HotWaterExtraGeneratorsFields({ draft, change, base }: SectionPr
           : event.target.value === 'collective_first_also_heating'
             ? { kind: 'collective_first_also_heating', maximumSupplyC: Array(12).fill(null) } : null)}>
         <option value="">{t('nta.form.dhwSeries.none')}</option>
-        <option value="hotfill_electric_boiler">{t('nta.form.dhwSeries.hotfill')}</option>
-        <option value="collective_first_also_heating">{t('nta.form.dhwSeries.collective')}</option>
+        <option value="hotfill_electric_boiler" disabled={fictiveHeatPumpSeries && series !== 'hotfill_electric_boiler'}>{t('nta.form.dhwSeries.hotfill')}</option>
+        <option value="collective_first_also_heating" disabled={fictiveHeatPumpSeries && series !== 'collective_first_also_heating'}>{t('nta.form.dhwSeries.collective')}</option>
       </select>
     </label>}
+    {extra.length === 1 && fictiveHeatPumpSeries && <p className="nta-form-note">{t('nta.form.dhwSeries.fictiveHeatPumpNote')}</p>}
     {series === 'collective_first_also_heating' && <MonthlyValues draft={draft} change={change}
       path={[...base, 'series', 'maximumSupplyC']} label={t('nta.form.dhwSeries.maxSupply')} />}
   </>;
