@@ -80,6 +80,18 @@ describe('hot-water generators without a form before', () => {
     expect(draft().hotWater.generator).toEqual({ kind: 'large_direct_storage', gasFired: false });
   });
 
+  it('keeps an imported unsupported series source visible until correction', () => {
+    renderWithProviders(<Harness initial={{ hotWater: { generator: {
+      kind: 'heat_pump_series', lastSource: 'ground_or_groundwater_unknown',
+    } } }}>{(d, change) =>
+      <HotWaterGeneratorFields draft={d} change={change} base={['hotWater', 'generator']} />}</Harness>);
+    const source = screen.getByLabelText(/Source of the last heat pump/) as HTMLSelectElement;
+    expect(source.value).toBe('ground_or_groundwater_unknown');
+    expect(screen.getByRole('option', { name: 'Ground or groundwater: type/temperature unknown' })).toBeTruthy();
+    select(/Source of the last heat pump/, 'outdoor_air');
+    expect(draft().hotWater.generator).toEqual({ kind: 'heat_pump_series', lastSource: 'outdoor_air' });
+  });
+
   it('enters delivery sets and the b_U of a hot-water system', () => {
     renderWithProviders(<Harness initial={{ hotWater: {} }}>{(d, change) =>
       <HotWaterSystemExtrasFields draft={d} change={change} base={['hotWater']} />}</Harness>);

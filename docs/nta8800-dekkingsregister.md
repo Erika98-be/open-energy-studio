@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De NTA-UI toont een ingelezen ongespecificeerde bodem-/grondwaterbron van een tapwaterwarmtepompserie nog in de keuze totdat zij wordt hersteld, terwijl nieuwe selectie van deze afgewezen bron niet wordt aangeboden. De 15 formulierproeven en TypeScript-controle slagen lokaal. Dit versterkt *UI*, *Invoer* en *Test*; *Referentie* en *Attest* blijven open.
+
 De ontbrekende brontemperatuur en bronvermelding van een collectieve warmtepompserie worden ook via HTTP (422) en MCP (toolfout) met de exacte veldpaden geweigerd, zonder primaire jaarwaarde; MCP-tekst en `structuredContent` zijn gelijk. De gerichte proeven, 27 HTTP- en 35 MCP-stdio-proeven, rustfmt en service-Clippy slagen lokaal. Dit versterkt *HTTP*, *MCP*, *Audit* en *Test*; de broninhoud, onafhankelijke *Referentie* en *Attest* blijven open.
 
 `HeatPumpSeries` bewaart nu de brontemperatuur van de laatste warmtepomp en een bewijsverwijzing voor de temperatuurgebonden rijen van tabel 9.29. Rust toetst de klassegrenzen, ontbrekende bronvermelding en niet-toepasselijke velden; de UI biedt en wist deze velden bij bronwissel. De gerichte regressie, 1060 kernunittests, kern-Clippy, 14 formulierproeven en TypeScript-controle slagen lokaal. Dit versterkt *Invoer*, *Audit*, *UI* en *Test*. Feitelijke verificatie van het rapport, de mogelijke kwaliteitsverklaring voor een bron ≥ 20 °C, onafhankelijke *Referentie* en *Attest* blijven open.

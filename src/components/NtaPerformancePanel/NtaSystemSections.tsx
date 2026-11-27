@@ -649,6 +649,13 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
   const { t } = useI18n();
   const field = { draft, onChange: change };
   const kind = read(draft, [...base, 'kind']);
+  const seriesSource = read(draft, [...base, 'lastSource']);
+  const seriesSourceValue = typeof seriesSource === 'string' ? seriesSource : '';
+  const seriesSourceOptions: Array<[string, string]> = SERIES_HEAT_PUMP_SOURCES.map((source) => [source, t(`kernel.forfait.source.${source}`)]);
+  if (kind === 'heat_pump_series' && seriesSourceValue && !seriesSourceOptions.some(([source]) => source === seriesSourceValue)) {
+    seriesSourceOptions.unshift([seriesSourceValue, seriesSourceValue === 'ground_or_groundwater_unknown'
+      ? t(`kernel.forfait.source.${seriesSourceValue}`) : seriesSourceValue]);
+  }
   const classes: Array<[string, string]> = [['class1', '1 (CW-1+)'], ['class2', '2 (CW-2)'], ['class3', '3 (CW-3)'], ['class4', '4 (CW-4/5/6)']];
   return <>
     <SelectField {...field} path={[...base, 'kind']} label={t('nta.form.hotWaterGenerator')} options={hotWaterGeneratorOptions(t)}
@@ -692,8 +699,8 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
           ...(read(draft, base) as Draft), lastSource: source,
           lastSourceTemperatureC: undefined, lastSourceTemperatureEvidenceReference: undefined,
         })}
-        options={SERIES_HEAT_PUMP_SOURCES.map((source) => [source, t(`kernel.forfait.source.${source}`)])} />
-      {SERIES_TEMPERATURE_SOURCES.includes(String(read(draft, [...base, 'lastSource']))) && <>
+        options={seriesSourceOptions} />
+      {SERIES_TEMPERATURE_SOURCES.includes(seriesSourceValue) && <>
         <NumberField {...field} path={[...base, 'lastSourceTemperatureC']} label={t('nta.form.dhwSeriesHp.sourceTemperature')} unit="°C" />
         <TextField {...field} path={[...base, 'lastSourceTemperatureEvidenceReference']} label={t('nta.form.dhwSeriesHp.sourceTemperatureEvidence')} />
       </>}
