@@ -5650,6 +5650,13 @@ mod tests {
                         && issue.path == "dhw.series"
                 }));
         }
+        // A separate parallel generator does not extend the stepped series.
+        input.series = None;
+        input.nominal_power_kw = Some(8.0);
+        input.additional_generators[0].nominal_power_kw = Some(8.0);
+        assert!(!validate_hot_water(&input, context(), "dhw")
+            .iter()
+            .any(|issue| issue.code == "hot_water_heat_pump_series_arrangement_conflict"));
     }
 
     fn combi() -> HotWaterGenerator {

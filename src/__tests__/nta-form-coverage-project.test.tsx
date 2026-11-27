@@ -231,6 +231,17 @@ describe('project forms that had no form', () => {
     expect(collective.disabled).toBe(true);
   });
 
+  it('does not offer a series arrangement when the further generator is a fictive heat-pump series', () => {
+    renderWithProviders(<Harness initial={{ hotWater: {
+      generator: { kind: 'electric_boiler' },
+      additionalGenerators: [{ generator: { kind: 'heat_pump_series', heatPumpCount: 2, lastSource: 'outdoor_air' } }],
+    } }}>
+      {(d, change) => <HotWaterExtraGeneratorsFields draft={d} change={change} base={['hotWater']} />}</Harness>);
+    expect((screen.getByRole('option', { name: /Hotfill: electric boiler/ }) as HTMLOptionElement).disabled).toBe(true);
+    expect((screen.getByRole('option', { name: /Collective first appliance/ }) as HTMLOptionElement).disabled).toBe(true);
+    expect(screen.getByText(/fictive heat pump series already covers/)).toBeTruthy();
+  });
+
   it('shows the collective share per cooling system', () => {
     renderWithProviders(<Harness initial={{ coolingSystems: [{ zoneIds: ['z1'], system: { generators: [] } },
       { zoneIds: ['z2'], system: { generators: [] } }] }}>
