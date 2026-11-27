@@ -1985,6 +1985,56 @@ fn project_performance_mcp_rejects_heat_pump_series_without_table_source() {
 }
 
 #[test]
+fn project_performance_mcp_rejects_series_without_source_temperature_evidence() {
+    let mut project: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-example-terraced-dwelling.json"
+    ))
+    .unwrap();
+    project["ntaCalculation"]["hotWater"]["generator"] = json!({
+        "kind": "heat_pump_series",
+        "lastSource": "collective20_to40_c"
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "series-temperature-test", "version": "1"}
+        }),
+    );
+    server.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name": "calculate_project_performance", "arguments": {"project": project}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["performance"]["annualPrimaryFossilKwh"].is_null());
+    for (code, field) in [
+        (
+            "source_temperature_class_mismatch",
+            "lastSourceTemperatureC",
+        ),
+        ("source_required", "lastSourceTemperatureEvidenceReference"),
+    ] {
+        assert!(
+            assessment["gaps"].as_array().unwrap().iter().any(|gap| {
+                gap["code"] == code
+                    && gap["path"] == format!("ntaCalculation.hotWater.generator.{field}")
+            }),
+            "{assessment}"
+        );
+    }
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn project_performance_mcp_preserves_unimplemented_heat_pump_warnings() {
     let mut project: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-project-performance-synthetic.json"

@@ -604,6 +604,38 @@ async fn hot_water_series_without_table_source_is_rejected_at_input_path() {
     );
 }
 
+#[tokio::test]
+async fn hot_water_series_without_source_temperature_evidence_is_rejected() {
+    let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
+    project["ntaCalculation"]["hotWater"]["generator"] = json!({
+        "kind": "heat_pump_series",
+        "lastSource": "collective20_to40_c"
+    });
+    let (status, body) = post(
+        "/v1/nta8800/project/performance",
+        json!({ "project": project }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{body}");
+    assert_eq!(body["performance"]["status"], "invalid");
+    assert!(body["performance"]["annualPrimaryFossilKwh"].is_null());
+    for (code, field) in [
+        (
+            "source_temperature_class_mismatch",
+            "lastSourceTemperatureC",
+        ),
+        ("source_required", "lastSourceTemperatureEvidenceReference"),
+    ] {
+        assert!(
+            body["gaps"].as_array().unwrap().iter().any(|gap| {
+                gap["code"] == code
+                    && gap["path"] == format!("ntaCalculation.hotWater.generator.{field}")
+            }),
+            "{body}"
+        );
+    }
+}
+
 fn project_request(project: &Value) -> Request<Body> {
     Request::post("/v1/nta8800/project/performance")
         .header("content-type", "application/json")
