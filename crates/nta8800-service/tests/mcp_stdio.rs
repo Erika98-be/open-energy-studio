@@ -1942,6 +1942,49 @@ fn collective_gas_source_mcp_requires_a_declared_evidence_kind() {
 }
 
 #[test]
+fn project_performance_mcp_rejects_heat_pump_series_without_table_source() {
+    let mut project: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-example-terraced-dwelling.json"
+    ))
+    .unwrap();
+    project["ntaCalculation"]["hotWater"]["generator"] = json!({
+        "kind": "heat_pump_series",
+        "lastSource": "ground_or_groundwater_unknown"
+    });
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "series-source-test", "version": "1"}
+        }),
+    );
+    server.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({"name": "calculate_project_performance", "arguments": {"project": project}}),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["performance"]["annualPrimaryFossilKwh"].is_null());
+    assert!(
+        assessment["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "hot_water_heat_pump_series_source_invalid"
+                && gap["path"] == "ntaCalculation.hotWater.generator.lastSource"
+        }),
+        "{}",
+        assessment["gaps"]
+    );
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn project_performance_mcp_preserves_unimplemented_heat_pump_warnings() {
     let mut project: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-project-performance-synthetic.json"

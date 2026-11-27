@@ -579,6 +579,31 @@ async fn option_sweep_keeps_the_http_error_model() {
     }
 }
 
+#[tokio::test]
+async fn hot_water_series_without_table_source_is_rejected_at_input_path() {
+    let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
+    project["ntaCalculation"]["hotWater"]["generator"] = json!({
+        "kind": "heat_pump_series",
+        "lastSource": "ground_or_groundwater_unknown"
+    });
+    let (status, body) = post(
+        "/v1/nta8800/project/performance",
+        json!({ "project": project }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{body}");
+    assert_eq!(body["performance"]["status"], "invalid");
+    assert!(body["performance"]["annualPrimaryFossilKwh"].is_null());
+    assert!(
+        body["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "hot_water_heat_pump_series_source_invalid"
+                && gap["path"] == "ntaCalculation.hotWater.generator.lastSource"
+        }),
+        "{}",
+        body["gaps"]
+    );
+}
+
 fn project_request(project: &Value) -> Request<Body> {
     Request::post("/v1/nta8800/project/performance")
         .header("content-type", "application/json")
