@@ -1774,6 +1774,8 @@ export const en: Record<string, string> = {
   'nta.form.dhwBiomass.insulation.none': "none",
   'nta.form.dhwBiomass.insideBoundary': "Inside the thermal envelope",
   'nta.form.dhwSeriesHp.lastSource': "Source of the last heat pump in the series (table 9.29)",
+  'nta.form.dhwSeriesHp.sourceTemperature': "Source temperature of the last heat pump",
+  'nta.form.dhwSeriesHp.sourceTemperatureEvidence': "Evidence reference for this source temperature",
   'nta.form.dhwIndirectHp.alsoHeating': "The heat pump also heats the rooms",
   'nta.form.twoProfile.standard': "Test standard",
   'nta.form.twoProfile.gas': "Gas appliance (NEN-EN 13203-2)",

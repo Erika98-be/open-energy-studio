@@ -786,6 +786,10 @@ pub enum HotWaterGenerator {
     HeatPumpSeries {
         #[serde(rename = "lastSource")]
         last_source: crate::forfait_heat_pump_draft::TableSource,
+        #[serde(default, rename = "lastSourceTemperatureC")]
+        last_source_temperature_c: Option<f64>,
+        #[serde(default, rename = "lastSourceTemperatureEvidenceReference")]
+        last_source_temperature_evidence_reference: Option<String>,
     },
     /// §13.8.4.7.4 heat pump with an indirectly heated vessel, 1,4.
     IndirectHeatPump {
@@ -2533,12 +2537,57 @@ fn generator_issues(generator: &HotWaterGenerator, prefix: &str) -> Vec<(&'stati
     {
         issues.push(("route_not_in_edition", format!("{prefix}.kind")));
     }
-    if let HotWaterGenerator::HeatPumpSeries { last_source } = generator {
+    if let HotWaterGenerator::HeatPumpSeries {
+        last_source,
+        last_source_temperature_c,
+        last_source_temperature_evidence_reference,
+    } = generator
+    {
         if crate::forfait_heat_pump_draft::utility_cop_65_to_70(*last_source).is_none() {
             issues.push((
                 "hot_water_heat_pump_series_source_invalid",
                 format!("{prefix}.lastSource"),
             ));
+        }
+        use crate::forfait_heat_pump_draft::TableSource;
+        let bounds = match last_source {
+            TableSource::GroundwaterBelow15C => Some((f64::NEG_INFINITY, 15.0)),
+            TableSource::Collective15To20C => Some((15.0, 20.0)),
+            TableSource::Collective20To40C => Some((20.0, 40.0)),
+            TableSource::CollectiveAtLeast40C => Some((40.0, f64::INFINITY)),
+            _ => None,
+        };
+        if let Some((lower, upper)) = bounds {
+            if last_source_temperature_c.map_or(true, |value| {
+                !value.is_finite() || value < lower || value >= upper
+            }) {
+                issues.push((
+                    "source_temperature_class_mismatch",
+                    format!("{prefix}.lastSourceTemperatureC"),
+                ));
+            }
+            if last_source_temperature_evidence_reference
+                .as_deref()
+                .map_or(true, |value| value.trim().is_empty())
+            {
+                issues.push((
+                    "source_required",
+                    format!("{prefix}.lastSourceTemperatureEvidenceReference"),
+                ));
+            }
+        } else {
+            if last_source_temperature_c.is_some() {
+                issues.push((
+                    "source_temperature_not_applicable",
+                    format!("{prefix}.lastSourceTemperatureC"),
+                ));
+            }
+            if last_source_temperature_evidence_reference.is_some() {
+                issues.push((
+                    "source_temperature_not_applicable",
+                    format!("{prefix}.lastSourceTemperatureEvidenceReference"),
+                ));
+            }
         }
     }
     if let HotWaterGenerator::Chp(chp) = generator {
@@ -3100,7 +3149,7 @@ fn generation_values(
             })
         }
         HotWaterGenerator::IndirectHeatPump { .. } => Ok((1.4, 1.0)),
-        HotWaterGenerator::HeatPumpSeries { last_source } => {
+        HotWaterGenerator::HeatPumpSeries { last_source, .. } => {
             crate::forfait_heat_pump_draft::utility_cop_65_to_70(*last_source)
                 .map(|cop| (cop, 1.0))
                 .ok_or("hot_water_heat_pump_series_source_invalid")
@@ -3461,7 +3510,7 @@ fn book_generator(
                 }
             }
             HotWaterGenerator::IndirectHeatPump { .. } => 1.0,
-            HotWaterGenerator::HeatPumpSeries { last_source } => {
+            HotWaterGenerator::HeatPumpSeries { last_source, .. } => {
                 if *last_source == crate::forfait_heat_pump_draft::TableSource::ExhaustAir {
                     0.0
                 } else {
@@ -5454,6 +5503,8 @@ mod tests {
         // §13.8.4.10: outdoor air, 65–70 °C column of table 9.29: 2,0.
         let input = system(HotWaterGenerator::HeatPumpSeries {
             last_source: TableSource::OutdoorAir,
+            last_source_temperature_c: None,
+            last_source_temperature_evidence_reference: None,
         });
         let result = assess_hot_water(&input, context()).unwrap();
         let jan = &result.months[0];
@@ -5462,6 +5513,8 @@ mod tests {
 
         let unknown = system(HotWaterGenerator::HeatPumpSeries {
             last_source: TableSource::GroundOrGroundwaterUnknown,
+            last_source_temperature_c: None,
+            last_source_temperature_evidence_reference: None,
         });
         assert!(validate_hot_water(&unknown, context(), "dhw")
             .iter()
@@ -5469,6 +5522,52 @@ mod tests {
                 |issue| issue.code == "hot_water_heat_pump_series_source_invalid"
                     && issue.path == "dhw.generator.lastSource"
             ));
+    }
+
+    #[test]
+    fn heat_pump_series_temperature_class_requires_matching_evidence() {
+        use crate::forfait_heat_pump_draft::TableSource;
+        for (source, valid, invalid) in [
+            (TableSource::GroundwaterBelow15C, 14.9, 15.0),
+            (TableSource::Collective15To20C, 15.0, 20.0),
+            (TableSource::Collective20To40C, 20.0, 40.0),
+            (TableSource::CollectiveAtLeast40C, 40.0, 39.9),
+        ] {
+            let make = |temperature, evidence: Option<&str>| {
+                system(HotWaterGenerator::HeatPumpSeries {
+                    last_source: source,
+                    last_source_temperature_c: temperature,
+                    last_source_temperature_evidence_reference: evidence.map(str::to_owned),
+                })
+            };
+            let valid_input = make(Some(valid), Some("bronrapport"));
+            assert!(validate_hot_water(&valid_input, context(), "dhw").is_empty());
+            assert!(assess_hot_water(&valid_input, context()).is_ok());
+            let missing = make(None, None);
+            let issues = validate_hot_water(&missing, context(), "dhw");
+            assert!(issues
+                .iter()
+                .any(|issue| issue.code == "source_temperature_class_mismatch"
+                    && issue.path == "dhw.generator.lastSourceTemperatureC"));
+            assert!(issues.iter().any(|issue| issue.code == "source_required"
+                && issue.path == "dhw.generator.lastSourceTemperatureEvidenceReference"));
+            let mismatch = make(Some(invalid), Some("bronrapport"));
+            assert!(validate_hot_water(&mismatch, context(), "dhw")
+                .iter()
+                .any(|issue| issue.code == "source_temperature_class_mismatch"));
+        }
+        let air = system(HotWaterGenerator::HeatPumpSeries {
+            last_source: TableSource::OutdoorAir,
+            last_source_temperature_c: Some(15.0),
+            last_source_temperature_evidence_reference: Some("bronrapport".to_owned()),
+        });
+        assert_eq!(
+            validate_hot_water(&air, context(), "dhw")
+                .iter()
+                .filter(|issue| issue.code == "source_temperature_not_applicable")
+                .count(),
+            2
+        );
     }
 
     fn combi() -> HotWaterGenerator {

@@ -1774,6 +1774,8 @@ export const nl: Record<string, string> = {
   'nta.form.dhwBiomass.insulation.none': "geen",
   'nta.form.dhwBiomass.insideBoundary': "Binnen de thermische schil",
   'nta.form.dhwSeriesHp.lastSource': "Bron van de laatste warmtepomp in de serie (tabel 9.29)",
+  'nta.form.dhwSeriesHp.sourceTemperature': "Temperatuur van de bron van de laatste warmtepomp",
+  'nta.form.dhwSeriesHp.sourceTemperatureEvidence': "Bronvermelding voor deze brontemperatuur",
   'nta.form.dhwIndirectHp.alsoHeating': "De warmtepomp verwarmt ook de ruimten",
   'nta.form.twoProfile.standard': "Beproevingsnorm",
   'nta.form.twoProfile.gas': "Gastoestel (NEN-EN 13203-2)",

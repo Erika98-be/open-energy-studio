@@ -61,7 +61,15 @@ describe('hot-water generators without a form before', () => {
       <HotWaterGeneratorFields draft={d} change={change} base={['hotWater', 'generator']} />}</Harness>);
     select('Hot-water generator', 'heat_pump_series');
     select(/Source of the last heat pump/, 'groundwater_below15_c');
-    expect(draft().hotWater.generator).toEqual({ kind: 'heat_pump_series', lastSource: 'groundwater_below15_c' });
+    setNumber(/Source temperature of the last heat pump/, '14.5');
+    fireEvent.change(screen.getByLabelText('Evidence reference for this source temperature'), { target: { value: 'source report' } });
+    expect(draft().hotWater.generator).toEqual({
+      kind: 'heat_pump_series', lastSource: 'groundwater_below15_c',
+      lastSourceTemperatureC: 14.5, lastSourceTemperatureEvidenceReference: 'source report',
+    });
+    select(/Source of the last heat pump/, 'outdoor_air');
+    expect(draft().hotWater.generator).toEqual({ kind: 'heat_pump_series', lastSource: 'outdoor_air' });
+    expect(screen.queryByLabelText(/Source temperature of the last heat pump/)).toBeNull();
     select('Hot-water generator', 'biomass_combi');
     select('Vessel insulation (annex R)', 'at_least10_mm');
     expect(draft().hotWater.generator).toEqual({ kind: 'biomass_combi', insulation: 'at_least10_mm', insideBoundary: true });

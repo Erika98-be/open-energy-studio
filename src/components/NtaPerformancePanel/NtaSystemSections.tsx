@@ -365,6 +365,7 @@ const HEAT_PUMP_TABLE_SOURCES = ['outdoor_air', 'exhaust_air', 'ground', 'ground
   'surface_water', 'collective15_to20_c', 'collective20_to40_c', 'collective_at_least40_c'] as const;
 /** Table 9.29 has no 65–70 °C value for an unknown ground source, so heat pumps in series can't use it. */
 const SERIES_HEAT_PUMP_SOURCES = HEAT_PUMP_TABLE_SOURCES.filter((source) => source !== 'ground_or_groundwater_unknown');
+const SERIES_TEMPERATURE_SOURCES = ['groundwater_below15_c', 'collective15_to20_c', 'collective20_to40_c', 'collective_at_least40_c'];
 
 /**
  * Annex W booster heat pump: the two test points (W.11–W.13), the measured class, the standing
@@ -685,8 +686,18 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
         ['none', t('nta.form.dhwBiomass.insulation.none')]]} />
       <CheckField {...field} path={[...base, 'insideBoundary']} label={t('nta.form.dhwBiomass.insideBoundary')} />
     </>}
-    {kind === 'heat_pump_series' && <SelectField {...field} path={[...base, 'lastSource']} label={t('nta.form.dhwSeriesHp.lastSource')}
-      options={SERIES_HEAT_PUMP_SOURCES.map((source) => [source, t(`kernel.forfait.source.${source}`)])} />}
+    {kind === 'heat_pump_series' && <>
+      <SelectField {...field} path={[...base, 'lastSource']} label={t('nta.form.dhwSeriesHp.lastSource')}
+        onChange={(_path, source) => change(base, {
+          ...(read(draft, base) as Draft), lastSource: source,
+          lastSourceTemperatureC: undefined, lastSourceTemperatureEvidenceReference: undefined,
+        })}
+        options={SERIES_HEAT_PUMP_SOURCES.map((source) => [source, t(`kernel.forfait.source.${source}`)])} />
+      {SERIES_TEMPERATURE_SOURCES.includes(String(read(draft, [...base, 'lastSource']))) && <>
+        <NumberField {...field} path={[...base, 'lastSourceTemperatureC']} label={t('nta.form.dhwSeriesHp.sourceTemperature')} unit="°C" />
+        <TextField {...field} path={[...base, 'lastSourceTemperatureEvidenceReference']} label={t('nta.form.dhwSeriesHp.sourceTemperatureEvidence')} />
+      </>}
+    </>}
     {kind === 'indirect_heat_pump' && <CheckField {...field} path={[...base, 'alsoSpaceHeating']} label={t('nta.form.dhwIndirectHp.alsoHeating')} />}
     {kind === 'chp' && <>
       <ChpClassFields draft={draft} change={change} base={base} declared />
