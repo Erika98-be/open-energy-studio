@@ -907,7 +907,7 @@ In de projectroute komen de systemen uit `ntaCalculation.coolingSystems`, met de
 **Tapwater.**
 - Biomassa-combitoestel volgens tabel 13.22 (`biomass_combi`).
 - Waakvlam van een indirect gestookte ketel (§13.8.4.7.4, `pilotFlame`): 695 kWh/jaar gas, alleen als de ketel niet ook verwarmt.
-- Elektrische warmtepompen in serie als één fictief toestel (§13.8.4.10, `heat_pump_series`): COP uit tabel 9.29, kolom 65–70 °C, voor de bron van de laatste warmtepomp.
+- Minstens twee elektrische warmtepompen in serie als één fictief toestel (§13.8.4.10, `heat_pump_series`): COP uit tabel 9.29, kolom 65–70 °C, voor de bron van de laatste warmtepomp. Deze fictieve reeks mag niet tegelijk in de afzonderlijke `series`-schakeling staan.
 
 **PVT (16.10, tabel 16.4).** `pvt` op een PV-systeem vermenigvuldigt de opbrengst met f_PVT;PV:
 - onafgedekt: 1,00;

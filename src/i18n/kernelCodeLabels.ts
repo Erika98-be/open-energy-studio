@@ -980,6 +980,7 @@ export const kernelCodeLabelsNl: Record<string, string> = {
   'kernel.issue.hot_water_heat_pump_class_exceeded': "Tapwaterwarmtepomp: de vraag valt boven het beproefde tapprofiel; een warmtepomp mag niet in een hogere klasse rekenen dan beproefd (tabel 13.18).",
   'kernel.issue.hot_water_heat_pump_series_source_invalid': "Tapwaterwarmtepompen in serie: voor deze bron van de laatste warmtepomp geeft de norm geen COP voor 65–70 °C; kies een andere bron.",
   'kernel.issue.hot_water_series_heat_pump_count_invalid': "Tapwaterwarmtepompen in serie: geef minstens twee elektrische warmtepompen op (§13.8.4.10).",
+  'kernel.issue.hot_water_heat_pump_series_arrangement_conflict': "De fictieve reeks elektrische tapwaterwarmtepompen kan niet ook in een andere serieschakeling staan (§13.8.4.10).",
 };
 
 /** English labels. */
@@ -1958,4 +1959,5 @@ export const kernelCodeLabelsEn: Record<string, string> = {
   'kernel.issue.hot_water_heat_pump_class_exceeded': "Hot-water heat pump: the demand is above the tested tapping profile; a heat pump may not count in a higher class than tested (table 13.18).",
   'kernel.issue.hot_water_heat_pump_series_source_invalid': "Hot-water heat pumps in series: the norm gives no COP for 65–70 °C for this source of the last heat pump; choose another source.",
   'kernel.issue.hot_water_series_heat_pump_count_invalid': "Hot-water heat pumps in series: enter at least two electric heat pumps (§13.8.4.10).",
+  'kernel.issue.hot_water_heat_pump_series_arrangement_conflict': "The fictive series of electric hot-water heat pumps cannot also be part of another series arrangement (§13.8.4.10).",
 };

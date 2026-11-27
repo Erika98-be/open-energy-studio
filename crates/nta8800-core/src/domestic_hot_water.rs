@@ -2464,6 +2464,17 @@ pub fn validate_hot_water(
         if !crate::norm_versions::profile().hot_water_series_routes {
             push("route_not_in_edition", "series");
         }
+        // The fictive device of §13.8.4.10 already represents the complete
+        // series of electric heat pumps. A second series arrangement would
+        // combine it with another appliance, for which no rule is supplied.
+        if matches!(system.generator, HotWaterGenerator::HeatPumpSeries { .. })
+            || system
+                .additional_generators
+                .iter()
+                .any(|unit| matches!(unit.generator, HotWaterGenerator::HeatPumpSeries { .. }))
+        {
+            push("hot_water_heat_pump_series_arrangement_conflict", "series");
+        }
         if system.additional_generators.len() != 1 {
             push("hot_water_series_requires_two_generators", "series");
         }
@@ -5606,6 +5617,38 @@ mod tests {
                         && issue.path == "dhw.generator.heatPumpCount"
                 });
             assert_eq!(issue, rejected, "count {count:?}");
+        }
+    }
+
+    #[test]
+    fn fictive_heat_pump_series_cannot_be_nested_in_another_series_arrangement() {
+        use crate::forfait_heat_pump_draft::TableSource;
+        let fictive = HotWaterGenerator::HeatPumpSeries {
+            heat_pump_count: Some(2),
+            last_source: TableSource::OutdoorAir,
+            last_source_temperature_c: None,
+            last_source_temperature_evidence_reference: None,
+        };
+        let mut input = system(fictive.clone());
+        input.series = Some(SeriesArrangement::HotfillElectricBoiler);
+        input.additional_generators = vec![AdditionalHotWaterGenerator {
+            generator: HotWaterGenerator::ElectricBoiler,
+            nominal_power_kw: None,
+            exhaust_air: None,
+            declared_share: None,
+            equipment_reference: "electric boiler".into(),
+        }];
+        for main in [true, false] {
+            if !main {
+                input.generator = HotWaterGenerator::ElectricBoiler;
+                input.additional_generators[0].generator = fictive.clone();
+            }
+            assert!(validate_hot_water(&input, context(), "dhw")
+                .iter()
+                .any(|issue| {
+                    issue.code == "hot_water_heat_pump_series_arrangement_conflict"
+                        && issue.path == "dhw.series"
+                }));
         }
     }
 
