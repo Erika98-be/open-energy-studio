@@ -1207,6 +1207,29 @@ mod tests {
     }
 
     #[test]
+    fn hot_water_series_lookup_covers_published_table_9_29_last_column() {
+        // Independently transcribed from NTA 8800:2025+C1:2026, table 9.29,
+        // 65 °C < θ_sup ≤ 70 °C (p. 337). §13.8.4.10 uses this column.
+        let published = [
+            (TableSource::Ground, 2.0),
+            (TableSource::GroundwaterBelow15C, 2.5),
+            (TableSource::OutdoorAir, 2.0),
+            (TableSource::ExhaustAir, 2.7),
+            (TableSource::SurfaceWater, 2.3),
+            (TableSource::Collective15To20C, 2.6),
+            (TableSource::Collective20To40C, 2.7),
+            (TableSource::CollectiveAtLeast40C, 4.1),
+        ];
+        for (source, cop) in published {
+            assert_eq!(utility_cop_65_to_70(source), Some(cop), "{source:?}");
+        }
+        assert_eq!(
+            utility_cop_65_to_70(TableSource::GroundOrGroundwaterUnknown),
+            None
+        );
+    }
+
+    #[test]
     fn collective_source_temperature_and_declaration_boundaries_are_explicit() {
         let mut input = example(
             TableScope::ResidentialAtMost25Kw,
