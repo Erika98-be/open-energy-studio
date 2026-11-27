@@ -1,5 +1,7 @@
 # NTA 8800 dekkingsregister
 
+De invoeraudit van `HeatPumpSeries` controleert nu vóór de berekening of `lastSource` een COP in de 65–70 °C-kolom van tabel 9.29 heeft. Een ongespecificeerde bodem-/grondwaterbron wordt met exact veldpad geweigerd. De gerichte regressie, 1059 kernunittests, rustfmt en kern-Clippy slagen lokaal. Dit versterkt *Invoer*, *Audit* en *Test*; de bronbewijsaudit voor collectieve bronnen en onafhankelijke *Referentie* blijven open.
+
 De serie-warmtepomp voor warmtapwater krijgt een gerichte regressie op alle acht gepubliceerde bronwaarden in de 65–70 °C-kolom van tabel 9.29 (NTA 8800:2025+C1:2026, p. 337). Een ongespecificeerde bodem-/grondwaterbron blijft zonder tabelwaarde. Alle 1059 kernunittests, rustfmt en kern-Clippy slagen lokaal. De [CI op `45f39019`](https://github.com/Erika98-be/open-energy-studio/actions/runs/45936603409) bevestigt NTA-gate en drie desktopplatforms; de optionele `nta-build-evidence`-job is overgeslagen. Dit scherpt *Test* en *Bouwbewijs* voor de forfaitaire §13.8.4.10-opzoeking aan; een onafhankelijke volledige *Referentie* en *Attest* ontbreken nog.
 
 De `HeatPumpSeries`-invoer voor tapwater bevat alleen `lastSource`. Voor een collectieve bronrij zijn geen brontemperatuur of bronverklaring in deze invoer vast te leggen of te toetsen. De tabelwaarde is daarmee afgedekt, maar de toepasselijkheid van de geselecteerde bronrij blijft open onder *Invoer*, *Audit* en *Referentie*.

@@ -2533,6 +2533,14 @@ fn generator_issues(generator: &HotWaterGenerator, prefix: &str) -> Vec<(&'stati
     {
         issues.push(("route_not_in_edition", format!("{prefix}.kind")));
     }
+    if let HotWaterGenerator::HeatPumpSeries { last_source } = generator {
+        if crate::forfait_heat_pump_draft::utility_cop_65_to_70(*last_source).is_none() {
+            issues.push((
+                "hot_water_heat_pump_series_source_invalid",
+                format!("{prefix}.lastSource"),
+            ));
+        }
+    }
     if let HotWaterGenerator::Chp(chp) = generator {
         if chp.equipment_reference.trim().is_empty() {
             issues.push((
@@ -5451,6 +5459,16 @@ mod tests {
         let jan = &result.months[0];
         assert!((jan.electricity_kwh - jan.generator_output_kwh / 2.0).abs() < 1e-9);
         assert!((jan.ambient_heat_kwh - jan.generator_output_kwh * (1.0 - 1.0 / 2.0)).abs() < 1e-9);
+
+        let unknown = system(HotWaterGenerator::HeatPumpSeries {
+            last_source: TableSource::GroundOrGroundwaterUnknown,
+        });
+        assert!(validate_hot_water(&unknown, context(), "dhw")
+            .iter()
+            .any(
+                |issue| issue.code == "hot_water_heat_pump_series_source_invalid"
+                    && issue.path == "dhw.generator.lastSource"
+            ));
     }
 
     fn combi() -> HotWaterGenerator {
