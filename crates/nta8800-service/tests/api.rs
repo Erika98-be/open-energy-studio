@@ -611,6 +611,31 @@ async fn nested_hot_water_heat_pump_series_is_rejected_at_series_path() {
 }
 
 #[tokio::test]
+async fn exhaust_air_hot_water_series_without_ventilation_use_is_rejected() {
+    let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
+    project["ntaCalculation"]["hotWater"]["generator"] = json!({
+        "kind": "heat_pump_series",
+        "heatPumpCount": 2,
+        "lastSource": "exhaust_air"
+    });
+    let (status, body) = post(
+        "/v1/nta8800/project/performance",
+        json!({ "project": project }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{body}");
+    assert_eq!(body["performance"]["status"], "invalid");
+    assert!(body["performance"]["annualPrimaryFossilKwh"].is_null());
+    assert!(
+        body["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "hot_water_exhaust_air_use_required"
+                && gap["path"] == "ntaCalculation.hotWater.exhaustAir"
+        }),
+        "{body}"
+    );
+}
+
+#[tokio::test]
 async fn hot_water_series_with_one_pump_is_rejected_at_count_path() {
     let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
