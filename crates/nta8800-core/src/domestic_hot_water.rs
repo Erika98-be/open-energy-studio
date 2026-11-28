@@ -5599,6 +5599,49 @@ mod tests {
     }
 
     #[test]
+    fn exhaust_air_heat_pump_series_precedes_parallel_electric_heater() {
+        use crate::forfait_heat_pump_draft::TableSource;
+        let mut input = system(HotWaterGenerator::ElectricInstantaneous);
+        input.nominal_power_kw = Some(8.0);
+        input.additional_generators = vec![AdditionalHotWaterGenerator {
+            generator: HotWaterGenerator::HeatPumpSeries {
+                heat_pump_count: Some(2),
+                last_source: TableSource::ExhaustAir,
+                last_source_temperature_c: None,
+                last_source_temperature_evidence_reference: None,
+            },
+            nominal_power_kw: None,
+            exhaust_air: Some(ExhaustAirUse {
+                ventilation_suitable: true,
+                heating_time_fraction: Vec::new(),
+                declared_flow_m3_per_h: None,
+            }),
+            declared_share: None,
+            equipment_reference: "fictive pump series".into(),
+        }];
+        let issues = validate_hot_water(&input, context(), "dhw");
+        assert!(issues.is_empty(), "{issues:?}");
+        let result = assess_hot_water(&input, context()).unwrap();
+        assert!(result.generators[1].monthly_output_kwh[0] > 0.0);
+        assert_eq!(result.generators[0].monthly_output_kwh[0], 0.0);
+        input.additional_generators[0]
+            .exhaust_air
+            .as_mut()
+            .unwrap()
+            .heating_time_fraction = vec![1.0; 12];
+        let heating_uses_all_return_air = assess_hot_water(&input, context()).unwrap();
+        assert_eq!(
+            heating_uses_all_return_air.generators[1].monthly_output_kwh[0],
+            0.0
+        );
+        assert!(heating_uses_all_return_air.generators[0].monthly_output_kwh[0] > 0.0);
+        assert_eq!(
+            heating_uses_all_return_air.months[0].extra_electric_output_kwh,
+            0.0
+        );
+    }
+
+    #[test]
     fn heat_pump_series_temperature_class_requires_matching_evidence() {
         use crate::forfait_heat_pump_draft::TableSource;
         for (source, valid, invalid) in [
