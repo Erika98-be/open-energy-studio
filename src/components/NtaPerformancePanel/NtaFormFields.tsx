@@ -53,14 +53,14 @@ export interface FieldProps {
  * its path), or with `optional` drops the member so the kernel default applies.
  * It keeps the spinbutton role of the former `type="number"` input.
  */
-export function NumberField({ draft, path, label, onChange, step = 'any', optional = false, disabled = false, unit }:
-  FieldProps & { step?: string; optional?: boolean; disabled?: boolean; unit?: ReactNode }) {
+export function NumberField({ draft, path, label, onChange, step = 'any', optional = false, disabled = false, min, unit }:
+  FieldProps & { step?: string; optional?: boolean; disabled?: boolean; min?: number; unit?: ReactNode }) {
   const value = read(draft, path);
   const kernelPath = useFieldPath(path);
   const numeric = typeof value === 'number' ? value : null;
   const stepValue = step === 'any' ? 1 : Number(step) || 1;
   return <label data-path={kernelPath ?? undefined}>{label}
-    <NumberInput value={numeric} step={stepValue} optional={optional} disabled={disabled} unit={unit}
+    <NumberInput value={numeric} step={stepValue} optional={optional} disabled={disabled} min={min} unit={unit}
       role="spinbutton" aria-valuenow={numeric ?? undefined}
       onChange={(next) => onChange(path, next)} />
   </label>;

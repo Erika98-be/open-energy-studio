@@ -60,7 +60,11 @@ describe('hot-water generators without a form before', () => {
     renderWithProviders(<Harness initial={{ hotWater: { generator: { kind: 'electric_boiler' } } }}>{(d, change) =>
       <HotWaterGeneratorFields draft={d} change={change} base={['hotWater', 'generator']} />}</Harness>);
     select('Hot-water generator', 'heat_pump_series');
-    setNumber('Number of electric heat pumps in series (at least 2)', '2');
+    const count = screen.getByLabelText('Number of electric heat pumps in series (at least 2)');
+    fireEvent.keyDown(count, { key: 'ArrowUp' });
+    expect(draft().hotWater.generator.heatPumpCount).toBe(2);
+    fireEvent.keyDown(count, { key: 'ArrowDown' });
+    expect(draft().hotWater.generator.heatPumpCount).toBe(2);
     select(/Source of the last heat pump/, 'groundwater_below15_c');
     setNumber(/Source temperature of the last heat pump/, '14.5');
     fireEvent.change(screen.getByLabelText('Evidence reference for this source temperature'), { target: { value: 'source report' } });
