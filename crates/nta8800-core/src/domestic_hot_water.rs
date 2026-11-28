@@ -5585,6 +5585,17 @@ mod tests {
         assert!(
             assess_hot_water(&input, context()).unwrap().generators[0].monthly_output_kwh[0] > 0.0
         );
+        input.exhaust_air.as_mut().unwrap().heating_time_fraction = vec![1.0; 12];
+        assert!(validate_hot_water(&input, context(), "dhw").is_empty());
+        let no_remaining_ventilation = assess_hot_water(&input, context()).unwrap();
+        assert_eq!(
+            no_remaining_ventilation.generators[0].monthly_output_kwh[0],
+            0.0
+        );
+        assert_eq!(
+            no_remaining_ventilation.months[0].extra_electric_output_kwh,
+            no_remaining_ventilation.months[0].generator_output_kwh
+        );
     }
 
     #[test]
