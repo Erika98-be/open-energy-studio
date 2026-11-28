@@ -7429,6 +7429,7 @@ mod tests {
                 .heating
                 .required_outdoor_air_m3_per_h;
             let q_w = ((44.0_f64).max(0.44 * area) * 3.6).max(base);
+            assert!(q_w < 250.0, "declared flow must differ from forfait flow");
             // 11.23: (1 − f_H − f_W)·q + f_W·q_W with f_H = 0.
             let expected = (1.0 - f_w) * base + f_w * q_w;
             let actual = result
@@ -7441,6 +7442,45 @@ mod tests {
                 .heating
                 .required_outdoor_air_m3_per_h;
             assert!((actual - expected).abs() < 1e-9, "{actual} vs {expected}");
+
+            // 13.148a: a declared minimum flow replaces the forfait value.
+            sample
+                .hot_water
+                .as_mut()
+                .unwrap()
+                .exhaust_air
+                .as_mut()
+                .unwrap()
+                .declared_flow_m3_per_h = Some(250.0);
+            let declared = assess_building_performance(&sample);
+            assert_eq!(
+                declared.status, "calculated_unverified",
+                "{:?}",
+                declared.issues
+            );
+            let declared_f_w = declared
+                .hot_water
+                .as_ref()
+                .unwrap()
+                .exhaust_air
+                .as_ref()
+                .unwrap()
+                .time_fraction[0];
+            let declared_actual = declared
+                .space_heating
+                .demand
+                .ventilation
+                .as_ref()
+                .unwrap()
+                .months[0]
+                .heating
+                .required_outdoor_air_m3_per_h;
+            let declared_expected =
+                (1.0 - declared_f_w) * base + declared_f_w * 250.0_f64.max(base);
+            assert!(
+                (declared_actual - declared_expected).abs() < 1e-9,
+                "{declared_actual} vs {declared_expected}"
+            );
         }
     }
 
