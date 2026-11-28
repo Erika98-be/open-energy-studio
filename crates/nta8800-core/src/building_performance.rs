@@ -2659,6 +2659,19 @@ fn validate(input: &BuildingPerformanceInput, issues: &mut Vec<PerformanceIssue>
             "additionalHotWaterSystems",
         ));
     }
+    // 11.23 has one return-air hot-water flow/time pair in the current
+    // building coupling; merging separate systems keeps only the first.
+    if hot_water_system_list(input)
+        .into_iter()
+        .filter(|(system, _)| crate::domestic_hot_water::exhaust_air_heat_pump_count(system) > 0)
+        .count()
+        > 1
+    {
+        issues.push(issue(
+            "hot_water_multiple_exhaust_air_pumps_unsupported",
+            "additionalHotWaterSystems",
+        ));
+    }
     for (system, path) in hot_water_system_list(input).into_iter().skip(1) {
         issues.extend(
             validate_hot_water(system, hot_water_context(input), &path)
@@ -7482,6 +7495,52 @@ mod tests {
                 "{declared_actual} vs {declared_expected}"
             );
         }
+    }
+
+    #[test]
+    fn separate_exhaust_air_hot_water_systems_need_distinct_flow_model() {
+        use crate::domestic_hot_water::{ConnectedTaps, ExhaustAirUse, HotWaterGenerator};
+        use crate::forfait_heat_pump_draft::TableSource;
+        let mut sample = input();
+        sample
+            .declared_uses
+            .retain(|item| item.service != Service::DomesticHotWater);
+        let mut bathroom = hot_water_system(HotWaterGenerator::HeatPump {
+            declared: None,
+            same_ground_source: false,
+            exhaust_air_source: true,
+            source_correction: None,
+            measured_class: None,
+            outdoor_air_fraction: None,
+        });
+        bathroom.connected_taps = Some(ConnectedTaps {
+            bathrooms: 1,
+            kitchens: 0,
+        });
+        bathroom.exhaust_air = Some(ExhaustAirUse {
+            ventilation_suitable: true,
+            heating_time_fraction: Vec::new(),
+            declared_flow_m3_per_h: None,
+        });
+        let mut kitchen = hot_water_system(HotWaterGenerator::HeatPumpSeries {
+            heat_pump_count: Some(2),
+            last_source: TableSource::ExhaustAir,
+            last_source_temperature_c: None,
+            last_source_temperature_evidence_reference: None,
+        });
+        kitchen.connected_taps = Some(ConnectedTaps {
+            bathrooms: 0,
+            kitchens: 1,
+        });
+        kitchen.exhaust_air = bathroom.exhaust_air.clone();
+        sample.hot_water = Some(bathroom);
+        sample.additional_hot_water_systems = vec![kitchen];
+        let result = assess_building_performance(&sample);
+        assert!(result.issues.iter().any(|issue| {
+            issue.code == "hot_water_multiple_exhaust_air_pumps_unsupported"
+                && issue.path == "additionalHotWaterSystems"
+        }));
+        assert!(result.annual_primary_fossil_kwh.is_none());
     }
 
     #[test]

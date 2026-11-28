@@ -2317,6 +2317,15 @@ pub fn validate_hot_water(
     }
     let several = !system.additional_generators.is_empty();
     let collective = system.collective.is_some();
+    // The chapter-11 coupling currently carries one return-air hot-water
+    // pump's 13.149 time fraction and 13.148/13.148a flow. More than one
+    // cannot be represented by that single pair without losing a flow.
+    if exhaust_air_heat_pump_count(system) > 1 {
+        push(
+            "hot_water_multiple_exhaust_air_pumps_unsupported",
+            "additionalGenerators",
+        );
+    }
     let units = std::iter::once((
         &system.generator,
         system.nominal_power_kw,
@@ -2908,6 +2917,15 @@ fn exhaust_air_heat_pump(generator: &HotWaterGenerator) -> bool {
         HotWaterGenerator::MeasuredTwoProfiles(test) => test.electric() && test.exhaust_air_source,
         _ => false,
     }
+}
+
+pub(crate) fn exhaust_air_heat_pump_count(system: &HotWaterSystem) -> usize {
+    usize::from(exhaust_air_heat_pump(&system.generator))
+        + system
+            .additional_generators
+            .iter()
+            .filter(|unit| exhaust_air_heat_pump(&unit.generator))
+            .count()
 }
 
 /// ϑ_ztu of the unheated space of month `index` for pipes and vessels:
@@ -5639,6 +5657,38 @@ mod tests {
             heating_uses_all_return_air.months[0].extra_electric_output_kwh,
             0.0
         );
+    }
+
+    #[test]
+    fn multiple_exhaust_air_pumps_are_not_silently_reduced_to_one_flow() {
+        use crate::forfait_heat_pump_draft::TableSource;
+        let generator = HotWaterGenerator::HeatPumpSeries {
+            heat_pump_count: Some(2),
+            last_source: TableSource::ExhaustAir,
+            last_source_temperature_c: None,
+            last_source_temperature_evidence_reference: None,
+        };
+        let exhaust = ExhaustAirUse {
+            ventilation_suitable: true,
+            heating_time_fraction: Vec::new(),
+            declared_flow_m3_per_h: None,
+        };
+        let mut input = system(generator.clone());
+        input.exhaust_air = Some(exhaust.clone());
+        input.additional_generators = vec![AdditionalHotWaterGenerator {
+            generator,
+            nominal_power_kw: None,
+            exhaust_air: Some(exhaust),
+            declared_share: None,
+            equipment_reference: "second return-air series".into(),
+        }];
+        assert_eq!(exhaust_air_heat_pump_count(&input), 2);
+        assert!(validate_hot_water(&input, context(), "dhw")
+            .iter()
+            .any(
+                |issue| issue.code == "hot_water_multiple_exhaust_air_pumps_unsupported"
+                    && issue.path == "dhw.additionalGenerators"
+            ));
     }
 
     #[test]
