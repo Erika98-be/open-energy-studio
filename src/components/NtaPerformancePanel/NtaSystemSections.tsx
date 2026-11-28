@@ -608,7 +608,8 @@ export function HotWaterUnitFields({ draft, change, unit }: SectionProps & { uni
   const { t } = useI18n();
   const field = { draft, onChange: change };
   const generator = read(draft, [...unit, 'generator']) as Draft | undefined;
-  const exhaustSource = generator != null && (generator.exhaustAirSource === true);
+  const exhaustSource = generator != null && (generator.exhaustAirSource === true
+    || (generator.kind === 'heat_pump_series' && generator.lastSource === 'exhaust_air'));
   const exhaust = read(draft, [...unit, 'exhaustAir']);
   const share = read(draft, [...unit, 'declaredShare']);
   const points = list(draft, [...unit, 'declaredShare', 'points']);
@@ -696,10 +697,15 @@ export function HotWaterGeneratorFields({ draft, change, base }: SectionProps & 
     {kind === 'heat_pump_series' && <>
       <NumberField {...field} path={[...base, 'heatPumpCount']} label={t('nta.form.dhwSeriesHp.heatPumpCount')} step="1" min={2} />
       <SelectField {...field} path={[...base, 'lastSource']} label={t('nta.form.dhwSeriesHp.lastSource')}
-        onChange={(_path, source) => change(base, {
-          ...(read(draft, base) as Draft), lastSource: source,
-          lastSourceTemperatureC: undefined, lastSourceTemperatureEvidenceReference: undefined,
-        })}
+        onChange={(_path, source) => {
+          change(base, {
+            ...(read(draft, base) as Draft), lastSource: source,
+            lastSourceTemperatureC: undefined, lastSourceTemperatureEvidenceReference: undefined,
+          });
+          if (seriesSourceValue === 'exhaust_air' && source !== 'exhaust_air') {
+            change([...base.slice(0, -1), 'exhaustAir'], null);
+          }
+        }}
         options={seriesSourceOptions} />
       {SERIES_TEMPERATURE_SOURCES.includes(seriesSourceValue) && <>
         <NumberField {...field} path={[...base, 'lastSourceTemperatureC']} label={t('nta.form.dhwSeriesHp.sourceTemperature')} unit="°C" />

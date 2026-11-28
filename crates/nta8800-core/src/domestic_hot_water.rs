@@ -2895,6 +2895,10 @@ fn generator_issues(generator: &HotWaterGenerator, prefix: &str) -> Vec<(&'stati
 /// 13.8.2.1: a heat pump on exhaust (return) air.
 fn exhaust_air_heat_pump(generator: &HotWaterGenerator) -> bool {
     match generator {
+        // §13.8.4.10 assigns the last pump's source to the fictive device.
+        HotWaterGenerator::HeatPumpSeries { last_source, .. } => {
+            *last_source == crate::forfait_heat_pump_draft::TableSource::ExhaustAir
+        }
         HotWaterGenerator::HeatPump {
             exhaust_air_source, ..
         }
@@ -3286,6 +3290,10 @@ fn units(system: &HotWaterSystem) -> Vec<Unit<'_>> {
 /// (b) heat pumps and CHP (biomass boilers do not occur here), (c) others.
 fn category(generator: &HotWaterGenerator) -> u8 {
     match generator {
+        HotWaterGenerator::HeatPumpSeries {
+            last_source: crate::forfait_heat_pump_draft::TableSource::ExhaustAir,
+            ..
+        } => 0,
         HotWaterGenerator::HeatPump {
             exhaust_air_source: true,
             outdoor_air_fraction,
@@ -5545,6 +5553,38 @@ mod tests {
                 |issue| issue.code == "hot_water_heat_pump_series_source_invalid"
                     && issue.path == "dhw.generator.lastSource"
             ));
+    }
+
+    #[test]
+    fn exhaust_air_heat_pump_series_needs_ventilation_and_obeys_its_output_limit() {
+        use crate::forfait_heat_pump_draft::TableSource;
+        let mut input = system(HotWaterGenerator::HeatPumpSeries {
+            heat_pump_count: Some(2),
+            last_source: TableSource::ExhaustAir,
+            last_source_temperature_c: None,
+            last_source_temperature_evidence_reference: None,
+        });
+        assert!(validate_hot_water(&input, context(), "dhw")
+            .iter()
+            .any(|issue| {
+                issue.code == "hot_water_exhaust_air_use_required" && issue.path == "dhw.exhaustAir"
+            }));
+        input.exhaust_air = Some(ExhaustAirUse {
+            ventilation_suitable: false,
+            heating_time_fraction: Vec::new(),
+            declared_flow_m3_per_h: None,
+        });
+        assert!(validate_hot_water(&input, context(), "dhw").is_empty());
+        let unavailable = assess_hot_water(&input, context()).unwrap();
+        assert_eq!(unavailable.generators[0].monthly_output_kwh[0], 0.0);
+        assert_eq!(
+            unavailable.months[0].extra_electric_output_kwh,
+            unavailable.months[0].generator_output_kwh
+        );
+        input.exhaust_air.as_mut().unwrap().ventilation_suitable = true;
+        assert!(
+            assess_hot_water(&input, context()).unwrap().generators[0].monthly_output_kwh[0] > 0.0
+        );
     }
 
     #[test]

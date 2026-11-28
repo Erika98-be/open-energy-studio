@@ -2,7 +2,7 @@ import { useState, type ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { write, type Draft, type Path } from '../components/NtaPerformancePanel/NtaFormFields';
-import { HotWaterGeneratorFields, HotWaterSystemExtrasFields, SpaceGeneratorFields } from '../components/NtaPerformancePanel/NtaSystemSections';
+import { HotWaterGeneratorFields, HotWaterSystemExtrasFields, HotWaterUnitFields, SpaceGeneratorFields } from '../components/NtaPerformancePanel/NtaSystemSections';
 import { NtaDistributionFields } from '../components/NtaPerformancePanel/NtaExtraSections';
 import { CoolingSystemFields } from '../components/NtaPerformancePanel/NtaProjectExtras';
 import {
@@ -35,6 +35,24 @@ const setNumber = (label: RegExp | string, value: string) => fireEvent.change(sc
 const select = (label: RegExp | string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
 
 describe('hot-water generators without a form before', () => {
+  it('offers the ventilation data needed by a fictive series with an exhaust-air last source', () => {
+    renderWithProviders(<Harness initial={{ hotWater: {
+      generator: { kind: 'heat_pump_series', heatPumpCount: 2, lastSource: 'exhaust_air' },
+    } }}>{(d, change) => <>
+      <HotWaterGeneratorFields draft={d} change={change} base={['hotWater', 'generator']} />
+      <HotWaterUnitFields draft={d} change={change} unit={['hotWater']} />
+    </>}</Harness>);
+    fireEvent.click(screen.getByLabelText('Uses ventilation return air (13.144a/13.148)'));
+    expect(draft().hotWater.exhaustAir).toEqual({
+      ventilationSuitable: true, heatingTimeFraction: [], declaredFlowM3PerH: null,
+    });
+    fireEvent.click(screen.getByLabelText('Ventilation system C or D without heat recovery'));
+    expect(draft().hotWater.exhaustAir.ventilationSuitable).toBe(false);
+    select(/Source of the last heat pump/, 'outdoor_air');
+    expect(draft().hotWater.exhaustAir).toBeNull();
+    expect(screen.queryByLabelText('Uses ventilation return air (13.144a/13.148)')).toBeNull();
+  });
+
   it('builds the annex W booster heat pump with its tests and monthly source temperatures', () => {
     renderWithProviders(<Harness initial={{ hotWater: { generator: { kind: 'electric_boiler' } } }}>{(d, change) =>
       <HotWaterGeneratorFields draft={d} change={change} base={['hotWater', 'generator']} />}</Harness>);
