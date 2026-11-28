@@ -2077,6 +2077,60 @@ fn project_performance_mcp_rejects_exhaust_air_series_without_ventilation_use() 
 }
 
 #[test]
+fn project_performance_mcp_rejects_multiple_exhaust_air_hot_water_pumps() {
+    let mut project: Value = serde_json::from_str(include_str!(
+        "../../../training-data/nta8800-example-terraced-dwelling.json"
+    ))
+    .unwrap();
+    let hot_water = &mut project["ntaCalculation"]["hotWater"];
+    hot_water["generator"] = json!({
+        "kind": "heat_pump_series", "heatPumpCount": 2, "lastSource": "exhaust_air"
+    });
+    hot_water["exhaustAir"] = json!({
+        "ventilationSuitable": true, "heatingTimeFraction": []
+    });
+    hot_water["additionalGenerators"] = json!([{
+        "generator": {
+            "kind": "heat_pump_series", "heatPumpCount": 2, "lastSource": "exhaust_air"
+        },
+        "exhaustAir": {"ventilationSuitable": true, "heatingTimeFraction": []},
+        "equipmentReference": "second return-air series"
+    }]);
+    let mut server = Server::start();
+    server.request(
+        1,
+        "initialize",
+        json!({
+            "protocolVersion": "2025-06-18", "capabilities": {},
+            "clientInfo": {"name": "multiple-exhaust-test", "version": "1"}
+        }),
+    );
+    server.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    let response = server.request(
+        2,
+        "tools/call",
+        json!({
+            "name": "calculate_project_performance", "arguments": {"project": project}
+        }),
+    );
+    assert_eq!(response["isError"], true, "{response}");
+    let assessment = &response["structuredContent"];
+    assert_eq!(assessment["status"], "invalid");
+    assert!(assessment["performance"]["annualPrimaryFossilKwh"].is_null());
+    assert!(
+        assessment["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "hot_water_multiple_exhaust_air_pumps_unsupported"
+                && gap["path"] == "ntaCalculation.hotWater.additionalGenerators"
+        }),
+        "{assessment}"
+    );
+    assert_eq!(
+        serde_json::from_str::<Value>(response["content"][0]["text"].as_str().unwrap()).unwrap(),
+        *assessment
+    );
+}
+
+#[test]
 fn project_performance_mcp_rejects_series_with_one_pump() {
     let mut project: Value = serde_json::from_str(include_str!(
         "../../../training-data/nta8800-example-terraced-dwelling.json"

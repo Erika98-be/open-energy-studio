@@ -661,6 +661,40 @@ async fn exhaust_air_hot_water_series_without_ventilation_use_is_rejected() {
 }
 
 #[tokio::test]
+async fn multiple_exhaust_air_hot_water_pumps_are_rejected_before_annual_result() {
+    let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
+    let hot_water = &mut project["ntaCalculation"]["hotWater"];
+    hot_water["generator"] = json!({
+        "kind": "heat_pump_series", "heatPumpCount": 2, "lastSource": "exhaust_air"
+    });
+    hot_water["exhaustAir"] = json!({
+        "ventilationSuitable": true, "heatingTimeFraction": []
+    });
+    hot_water["additionalGenerators"] = json!([{
+        "generator": {
+            "kind": "heat_pump_series", "heatPumpCount": 2, "lastSource": "exhaust_air"
+        },
+        "exhaustAir": {"ventilationSuitable": true, "heatingTimeFraction": []},
+        "equipmentReference": "second return-air series"
+    }]);
+    let (status, body) = post(
+        "/v1/nta8800/project/performance",
+        json!({ "project": project }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{body}");
+    assert_eq!(body["performance"]["status"], "invalid");
+    assert!(body["performance"]["annualPrimaryFossilKwh"].is_null());
+    assert!(
+        body["gaps"].as_array().unwrap().iter().any(|gap| {
+            gap["code"] == "hot_water_multiple_exhaust_air_pumps_unsupported"
+                && gap["path"] == "ntaCalculation.hotWater.additionalGenerators"
+        }),
+        "{body}"
+    );
+}
+
+#[tokio::test]
 async fn hot_water_series_with_one_pump_is_rejected_at_count_path() {
     let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
