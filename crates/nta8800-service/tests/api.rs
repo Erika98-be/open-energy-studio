@@ -611,6 +611,31 @@ async fn nested_hot_water_heat_pump_series_is_rejected_at_series_path() {
 }
 
 #[tokio::test]
+async fn exhaust_air_hot_water_series_with_ventilation_use_calculates_unverified() {
+    let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
+    let hot_water = &mut project["ntaCalculation"]["hotWater"];
+    hot_water["generator"] = json!({
+        "kind": "heat_pump_series",
+        "heatPumpCount": 2,
+        "lastSource": "exhaust_air"
+    });
+    hot_water["exhaustAir"] = json!({
+        "ventilationSuitable": true,
+        "heatingTimeFraction": []
+    });
+    let (status, body) = post(
+        "/v1/nta8800/project/performance",
+        json!({ "project": project }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    assert_eq!(body["status"], "calculated_unverified");
+    assert!(body["performance"]["annualPrimaryFossilKwh"]
+        .as_f64()
+        .is_some_and(|v| v > 0.0));
+}
+
+#[tokio::test]
 async fn exhaust_air_hot_water_series_without_ventilation_use_is_rejected() {
     let mut project = without_nulls(fixture("nta8800-example-terraced-dwelling.json"));
     project["ntaCalculation"]["hotWater"]["generator"] = json!({
