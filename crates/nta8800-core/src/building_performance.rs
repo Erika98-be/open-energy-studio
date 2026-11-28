@@ -7361,6 +7361,7 @@ mod tests {
     #[test]
     fn exhaust_air_hot_water_heat_pump_feeds_13_148_and_13_149_into_chapter_11() {
         use crate::domestic_hot_water::{ExhaustAirUse, HotWaterGenerator};
+        use crate::forfait_heat_pump_draft::TableSource;
         let mut sample = input();
         sample.declared_uses.retain(|item| {
             !matches!(
@@ -7389,48 +7390,58 @@ mod tests {
         demand.ventilation_flows.clear();
         demand.ventilation = Some(ventilation.clone());
         let area = demand.usable_floor_area_m2;
-        let mut system = hot_water_system(HotWaterGenerator::HeatPump {
-            declared: None,
-            same_ground_source: false,
-            exhaust_air_source: true,
-            source_correction: None,
-            measured_class: None,
-            outdoor_air_fraction: None,
-        });
-        system.exhaust_air = Some(ExhaustAirUse {
-            ventilation_suitable: true,
-            heating_time_fraction: Vec::new(),
-            declared_flow_m3_per_h: None,
-        });
-        sample.hot_water = Some(system);
-        let result = assess_building_performance(&sample);
-        assert_eq!(
-            result.status, "calculated_unverified",
-            "{:?}",
-            result.issues
-        );
-        let hot_water = result.hot_water.as_ref().unwrap();
-        let f_w = hot_water.exhaust_air.as_ref().unwrap().time_fraction[0];
-        assert!(f_w > 0.0 && f_w < 1.0);
-        // 13.148 forfait (one zone): MAX(MAX(44; 0,44·A)·3,6; q_ODA;req).
-        let base = crate::ventilation::calculate_ventilation(&ventilation)
-            .unwrap()
-            .months[0]
-            .heating
-            .required_outdoor_air_m3_per_h;
-        let q_w = ((44.0_f64).max(0.44 * area) * 3.6).max(base);
-        // 11.23: (1 − f_H − f_W)·q + f_W·q_W with f_H = 0.
-        let expected = (1.0 - f_w) * base + f_w * q_w;
-        let actual = result
-            .space_heating
-            .demand
-            .ventilation
-            .as_ref()
-            .unwrap()
-            .months[0]
-            .heating
-            .required_outdoor_air_m3_per_h;
-        assert!((actual - expected).abs() < 1e-9, "{actual} vs {expected}");
+        for generator in [
+            HotWaterGenerator::HeatPump {
+                declared: None,
+                same_ground_source: false,
+                exhaust_air_source: true,
+                source_correction: None,
+                measured_class: None,
+                outdoor_air_fraction: None,
+            },
+            HotWaterGenerator::HeatPumpSeries {
+                heat_pump_count: Some(2),
+                last_source: TableSource::ExhaustAir,
+                last_source_temperature_c: None,
+                last_source_temperature_evidence_reference: None,
+            },
+        ] {
+            let mut system = hot_water_system(generator);
+            system.exhaust_air = Some(ExhaustAirUse {
+                ventilation_suitable: true,
+                heating_time_fraction: Vec::new(),
+                declared_flow_m3_per_h: None,
+            });
+            sample.hot_water = Some(system);
+            let result = assess_building_performance(&sample);
+            assert_eq!(
+                result.status, "calculated_unverified",
+                "{:?}",
+                result.issues
+            );
+            let hot_water = result.hot_water.as_ref().unwrap();
+            let f_w = hot_water.exhaust_air.as_ref().unwrap().time_fraction[0];
+            assert!(f_w > 0.0 && f_w < 1.0);
+            // 13.148 forfait (one zone): MAX(MAX(44; 0,44·A)·3,6; q_ODA;req).
+            let base = crate::ventilation::calculate_ventilation(&ventilation)
+                .unwrap()
+                .months[0]
+                .heating
+                .required_outdoor_air_m3_per_h;
+            let q_w = ((44.0_f64).max(0.44 * area) * 3.6).max(base);
+            // 11.23: (1 − f_H − f_W)·q + f_W·q_W with f_H = 0.
+            let expected = (1.0 - f_w) * base + f_w * q_w;
+            let actual = result
+                .space_heating
+                .demand
+                .ventilation
+                .as_ref()
+                .unwrap()
+                .months[0]
+                .heating
+                .required_outdoor_air_m3_per_h;
+            assert!((actual - expected).abs() < 1e-9, "{actual} vs {expected}");
+        }
     }
 
     #[test]
